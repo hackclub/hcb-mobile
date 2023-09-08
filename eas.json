@@ -1,0 +1,24 @@
+{
+  "cli": {
+    "version": ">= 5.2.0",
+    "promptToConfigurePushNotifications": false
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_BASE": "https://hcb.hackclub.com/api/v4",
+        "EXPO_PUBLIC_CLIENT_ID": "yt8JHmPDmmYYLUmoEiGtocYwg5fSOGCrcIY3G-vkMRs"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
