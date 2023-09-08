@@ -1,21 +1,22 @@
 {
   "expo": {
-    "name": "hcb-mobile",
+    "name": "HCB",
     "slug": "hcb-mobile",
-    "version": "1.0.0",
+    "owner": "hackclub",
+    "version": "1.0.1",
+    "scheme": "hcb",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hackclub.hcb"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +25,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dfc97c77-31b1-4267-896f-9472c87f166c"
+      }
     }
   }
 }
