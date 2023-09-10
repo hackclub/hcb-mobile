@@ -1,12 +1,9 @@
-import { StatusBar } from "expo-status-bar";
 import {
   FlatList,
   Text,
   View,
-  PlatformColor,
   ActivityIndicator,
   TouchableHighlight,
-  SafeAreaView,
 } from "react-native";
 import { Image } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
@@ -14,7 +11,6 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 
 function Event({ event, navigation }) {
   const { data } = useSWR(`/organizations/${event.id}`);
