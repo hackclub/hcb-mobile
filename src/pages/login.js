@@ -1,19 +1,5 @@
-import {
-  useAuthRequest,
-  makeRedirectUri,
-  exchangeCodeAsync,
-} from "expo-auth-session";
-import {
-  Text,
-  View,
-  Button,
-  Pressable,
-  PlatformColor,
-  Image,
-  Alert,
-  Animated,
-  Easing,
-} from "react-native";
+import { useAuthRequest, makeRedirectUri } from "expo-auth-session";
+import { Text, View, Pressable, Animated } from "react-native";
 import { StyleSheet, SafeAreaView } from "react-native";
 import { useContext, useEffect, useRef } from "react";
 import AuthContext from "../auth";
@@ -39,7 +25,7 @@ export default function Login() {
     discovery
   );
 
-  const { token, setToken } = useContext(AuthContext);
+  const { setToken } = useContext(AuthContext);
 
   useEffect(() => {
     if (response?.type == "success") {

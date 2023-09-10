@@ -4,18 +4,10 @@ import {
   FlatList,
   ActivityIndicator,
   PlatformColor,
-  Image,
-  SafeAreaView,
-  Button,
-  StyleSheet,
 } from "react-native";
 import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { palette } from "../../theme";
 import { renderMoney } from "../../util";
 import Transaction from "../../components/Transaction";
-import { useEffect } from "react";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useTransactions from "../../lib/organization/useTransactions";
 
@@ -23,7 +15,6 @@ export default function Organization({
   route: {
     params: { id: orgId },
   },
-  navigation,
 }) {
   const { data: organization } = useSWR(`/organizations/${orgId}`);
   const { transactions, isLoadingMore, loadMore, isLoading } =
@@ -87,7 +78,7 @@ export default function Organization({
               </View>
             </View>
           )}
-          ItemSeparatorComponent={({ highlighted }) => (
+          ItemSeparatorComponent={() => (
             <View
               style={{
                 height: 1,

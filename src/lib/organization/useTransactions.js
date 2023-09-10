@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import useSWRInfinite from "swr/infinite";
 
 const PAGE_SIZE = 25;

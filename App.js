@@ -1,13 +1,6 @@
-import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  Text,
-  View,
-  Image,
-  Button,
-  PlatformColor,
-  StyleSheet,
-} from "react-native";
+import { Text, View, Image, Button, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState, useEffect } from "react";
 import * as SecureStorage from "expo-secure-store";
@@ -146,7 +139,7 @@ export default function App() {
             </Tab.Screen>
             <Tab.Screen name="Cards" component={CardsPage} />
             <Tab.Screen name="Receipts">
-              {(props) => <Text>receipts!</Text>}
+              {() => <Text>receipts!</Text>}
             </Tab.Screen>
             <Tab.Screen name="Settings">
               {() => {
