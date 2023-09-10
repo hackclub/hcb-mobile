@@ -35,18 +35,19 @@ export default function Transaction({ transaction, top, bottom }) {
           }[transaction.code]
         }
         color={PlatformColor("systemGray2")}
-        size={24}
+        size={20}
         style={{ marginRight: 10 }}
       />
       <Text
         numberOfLines={1}
         style={{
           fontSize: 14,
-          color: "#fff",
+          color: transaction.pending ? palette.muted : palette.smoke,
           overflow: "hidden",
           flex: 1,
         }}
       >
+        {transaction.pending && "Pending: "}
         {transaction.memo}
       </Text>
       <Text

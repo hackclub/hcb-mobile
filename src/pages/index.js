@@ -12,6 +12,9 @@ import { Image } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 
 function Event({ event, navigation }) {
   const { data } = useSWR(`/organizations/${event.id}`);
@@ -57,7 +60,7 @@ function Event({ event, navigation }) {
             source={{ uri: event.icon }}
             width={40}
             height={40}
-            style={{ borderRadius: 8, marginRight: 10 }}
+            style={{ borderRadius: 8, marginRight: 16 }}
           />
         ) : (
           <View
@@ -66,7 +69,7 @@ function Event({ event, navigation }) {
               width: 40,
               height: 40,
               backgroundColor: color,
-              marginRight: 10,
+              marginRight: 16,
             }}
           ></View>
         )}
@@ -87,12 +90,15 @@ function Event({ event, navigation }) {
           >
             {event.name}
           </Text>
-          {data && (
-            <Text style={{ color: palette.muted, fontSize: 16 }}>
-              {renderMoney(data.balance_cents)}
-            </Text>
-          )}
+          <Text style={{ color: palette.muted, fontSize: 16 }}>
+            {data ? renderMoney(data.balance_cents) : "$ ..."}
+          </Text>
         </View>
+        <Ionicons
+          name="chevron-forward-outline"
+          size={24}
+          color={palette.muted}
+        />
       </View>
     </TouchableHighlight>
   );
@@ -108,6 +114,7 @@ export default function App({ navigation }) {
   } = useSWR("/user/organizations");
 
   const { mutate } = useSWRConfig();
+  const tabBarHeight = useBottomTabBarHeight();
 
   if (error) {
     return (
@@ -129,9 +136,10 @@ export default function App({ navigation }) {
     <View>
       {organizations && (
         <FlatList
+          scrollIndicatorInsets={{ bottom: tabBarHeight }}
+          contentContainerStyle={{ paddingBottom: tabBarHeight }}
           contentInsetAdjustmentBehavior="automatic"
           data={organizations}
-          keyExtractor={(item) => item.id}
           refreshing={isLoading}
           onRefresh={() => {
             mutate(

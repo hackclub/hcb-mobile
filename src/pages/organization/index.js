@@ -16,25 +16,24 @@ import { palette } from "../../theme";
 import { renderMoney } from "../../util";
 import Transaction from "../../components/Transaction";
 import { useEffect } from "react";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import useTransactions from "../../lib/organization/useTransactions";
 
-export default function Organization({ route, navigation }) {
-  const slug = route.params.id;
+export default function Organization({
+  route: {
+    params: { id: orgId },
+  },
+  navigation,
+}) {
+  const { data: organization } = useSWR(`/organizations/${orgId}`);
+  const { transactions, isLoadingMore, loadMore, isLoading } =
+    useTransactions(orgId);
 
-  const { data: organization } = useSWR(`/organizations/${slug}`);
+  const tabBarSize = useBottomTabBarHeight();
 
-  const { data, setSize, isValidating } = useSWRInfinite(
-    (index, previousPageData) => {
-      if (previousPageData?.has_more === false) return null;
-
-      if (index === 0) return `/organizations/${slug}/transactions`;
-
-      return `/organizations/${slug}/transactions?after=${
-        previousPageData.data[previousPageData.data.length - 1].id
-      }`;
-    }
-  );
-
-  const transactions = data?.flatMap((d) => d.data);
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <View
@@ -47,9 +46,13 @@ export default function Organization({ route, navigation }) {
     >
       {transactions ? (
         <FlatList
-          ListFooterComponent={() => isValidating && <ActivityIndicator />}
+          ListFooterComponent={() =>
+            isLoadingMore && (
+              <ActivityIndicator style={{ marginVertical: 20 }} />
+            )
+          }
           onEndReachedThreshold={0.5}
-          onEndReached={() => setSize((s) => s + 1)}
+          onEndReached={() => loadMore()}
           ListHeaderComponent={() => (
             <View
               style={{
@@ -95,7 +98,8 @@ export default function Organization({ route, navigation }) {
           )}
           data={transactions}
           style={{ flexGrow: 1 }}
-          contentContainerStyle={{ paddingVertical: 20 }}
+          contentContainerStyle={{ paddingTop: 20, paddingBottom: tabBarSize }}
+          scrollIndicatorInsets={{ bottom: tabBarSize }}
           renderItem={({ item, index }) => (
             <Transaction
               transaction={item}
