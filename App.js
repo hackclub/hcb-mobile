@@ -80,14 +80,14 @@ export default function App() {
                 return <Ionicons name={iconName} size={size} color={color} />;
               },
               headerStyle: { backgroundColor: palette.background },
-              // tabBarStyle: { position: "absolute" },
-              // tabBarBackground: () => (
-              //   <BlurView
-              //     tint="dark"
-              //     intensity={100}
-              //     style={StyleSheet.absoluteFill}
-              //   />
-              // ),
+              tabBarStyle: { position: "absolute" },
+              tabBarBackground: () => (
+                <BlurView
+                  tint="dark"
+                  intensity={100}
+                  style={StyleSheet.absoluteFill}
+                />
+              ),
             })}
           >
             <Tab.Screen
