@@ -2,16 +2,39 @@ import { View, PlatformColor, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
+import TransactionType from "../lib/types/Transaction";
 
-export default function Transaction({ transaction, top, bottom }) {
+function transactionIcon(
+  code: TransactionType["code"]
+): React.ComponentProps<typeof Ionicons>["name"] {
+  switch (code) {
+    case "000":
+      return "cash-outline";
+    case "200":
+      return "heart";
+    case "500":
+      return "arrow-redo";
+    case "600":
+      return "card";
+    case "700":
+      return "remove-circle";
+    default:
+      return "cash-outline";
+  }
+}
+
+export default function Transaction({
+  transaction,
+  top,
+  bottom,
+}: {
+  transaction: TransactionType;
+  top: boolean;
+  bottom: boolean;
+}) {
   return (
     <View
       style={{
-        // borderLeftColor:
-        //   item.amount_cents < 0
-        //     ? PlatformColor("systemRed")
-        //     : PlatformColor("systemGreen"),
-        // borderLeftWidth: 3,
         paddingHorizontal: 10,
         paddingVertical: 10,
         flexDirection: "row",
@@ -25,15 +48,7 @@ export default function Transaction({ transaction, top, bottom }) {
       }}
     >
       <Ionicons
-        name={
-          {
-            "000": "cash-outline",
-            200: "heart",
-            500: "arrow-redo",
-            600: "card",
-            700: "remove-circle",
-          }[transaction.code]
-        }
+        name={transactionIcon(transaction.code)}
         color={PlatformColor("systemGray2")}
         size={20}
         style={{ marginRight: 10 }}

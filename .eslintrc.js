@@ -6,16 +6,16 @@ module.exports = {
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
+    "plugin:@typescript-eslint/recommended",
   ],
   overrides: [],
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react"],
-  rules: {
-    "react/prop-types": "off",
-  },
+  plugins: ["react", "@typescript-eslint"],
+  rules: {},
   globals: {
     fetch: "readonly",
     process: "readonly",
@@ -26,4 +26,5 @@ module.exports = {
       version: "detect",
     },
   },
+  ignorePatterns: [".eslintrc.js"], // lol
 };

@@ -3,7 +3,7 @@ import useSWRInfinite from "swr/infinite";
 
 const PAGE_SIZE = 25;
 
-export default function useTransactions(orgId) {
+export default function useTransactions(orgId: string) {
   const { data, size, setSize, isLoading } = useSWRInfinite(
     (index, previousPageData) => {
       if (previousPageData?.has_more === false) return null;

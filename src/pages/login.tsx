@@ -19,7 +19,7 @@ export default function Login() {
       redirectUri,
       scopes: ["read", "write"],
       extraParams: {
-        no_app_shell: true,
+        no_app_shell: "true",
       },
     },
     discovery

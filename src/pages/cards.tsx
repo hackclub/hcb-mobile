@@ -1,5 +1,5 @@
 import { FlatList } from "react-native";
-import PaymentCard from "../components/paymentCard";
+import PaymentCard from "../components/PaymentCard";
 import useSWR from "swr";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
