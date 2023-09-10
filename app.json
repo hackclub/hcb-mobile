@@ -6,24 +6,24 @@
     "version": "1.0.1",
     "scheme": "hcb",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#EC3750"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hackclub.hcb"
     },
     "android": {
+      "icon": "./assets/app-icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/app-icon-foreground.png",
+        "monochromeImage": "./assets/app-icon-monochrome.png",
+        "backgroundColor": "#EC3750"
       },
       "package": "com.hackclub.hcb"
     },
