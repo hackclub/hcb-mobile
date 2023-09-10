@@ -11,8 +11,20 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import { StackParamList } from "../lib/NavigatorParamList";
+import Organization from "../lib/types/Organization";
 
-function Event({ event, navigation }) {
+function Event({
+  event,
+  navigation,
+}: {
+  event: Organization;
+  navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
+}) {
   const { data } = useSWR(`/organizations/${event.id}`);
 
   const colors = [
@@ -100,7 +112,9 @@ function Event({ event, navigation }) {
   );
 }
 
-export default function App({ navigation }) {
+type Props = NativeStackScreenProps<StackParamList, "Organizations">;
+
+export default function App({ navigation }: Props) {
   const { data: user } = useSWR("/user");
 
   const {
@@ -139,7 +153,7 @@ export default function App({ navigation }) {
           refreshing={isLoading}
           onRefresh={() => {
             mutate(
-              (key) =>
+              (key: string) =>
                 key.startsWith("/organizations/") ||
                 key == "/user/organizations"
             );

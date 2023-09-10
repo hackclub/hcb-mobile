@@ -14,13 +14,14 @@ import { palette, theme } from "./src/theme";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Organization from "./src/pages/organization";
 import CardsPage from "./src/pages/cards";
+import { StackParamList, TabParamList } from "./src/lib/NavigatorParamList";
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator<StackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function App() {
-  const [isSignedIn, setIsSignedIn] = useState(null);
-  const [token, setToken] = useState(null);
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -58,7 +59,7 @@ export default function App() {
           <Tab.Navigator
             screenOptions={({ route }) => ({
               tabBarIcon: ({ focused, color, size }) => {
-                let iconName;
+                let iconName: React.ComponentProps<typeof Ionicons>["name"];
 
                 if (route.name === "Home") {
                   iconName = focused ? "home" : "home-outline";
@@ -121,7 +122,7 @@ export default function App() {
                           <Text
                             style={{
                               color: palette.smoke,
-                              fontWeight: 600,
+                              fontWeight: "600",
                               fontSize: 17,
                             }}
                           >

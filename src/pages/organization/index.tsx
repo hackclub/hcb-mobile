@@ -10,12 +10,16 @@ import { renderMoney } from "../../util";
 import Transaction from "../../components/Transaction";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useTransactions from "../../lib/organization/useTransactions";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StackParamList } from "../../lib/NavigatorParamList";
+
+type Props = NativeStackScreenProps<StackParamList, "Event">;
 
 export default function Organization({
   route: {
     params: { id: orgId },
   },
-}) {
+}: Props) {
   const { data: organization } = useSWR(`/organizations/${orgId}`);
   const { transactions, isLoadingMore, loadMore, isLoading } =
     useTransactions(orgId);

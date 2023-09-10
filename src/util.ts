@@ -1,4 +1,4 @@
-export function renderMoney(cents) {
+export function renderMoney(cents: number) {
   return (
     (cents < 0 ? "-" : "") +
     "$" +

@@ -1,7 +1,11 @@
-import { Text, View } from "react-native";
+import { Text, View, ViewProps } from "react-native";
 import { palette } from "../theme";
+import Card from "../lib/types/Card";
 
-export default function PaymentCard({ card, ...props }) {
+export default function PaymentCard({
+  card,
+  ...props
+}: ViewProps & { card: Card }) {
   return (
     <View
       style={{
@@ -9,7 +13,7 @@ export default function PaymentCard({ card, ...props }) {
         padding: 30,
         height: 200,
         borderRadius: 16,
-        ...props.style,
+        ...(props.style as object),
       }}
     >
       <Text
