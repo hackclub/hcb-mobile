@@ -1,4 +1,4 @@
-import { View, PlatformColor, Text } from "react-native";
+import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
@@ -41,15 +41,15 @@ export default function Transaction({
         alignItems: "center",
         marginHorizontal: 20,
         backgroundColor: palette.darkless,
-        borderTopLeftRadius: top == true && 8,
-        borderTopRightRadius: top == true && 8,
-        borderBottomLeftRadius: bottom == true && 8,
-        borderBottomRightRadius: bottom == true && 8,
+        borderTopLeftRadius: top ? 8 : 0,
+        borderTopRightRadius: top ? 8 : 0,
+        borderBottomLeftRadius: bottom ? 8 : 0,
+        borderBottomRightRadius: bottom ? 8 : 0,
       }}
     >
       <Ionicons
         name={transactionIcon(transaction.code)}
-        color={PlatformColor("systemGray2")}
+        color={palette.muted}
         size={20}
         style={{ marginRight: 10 }}
       />
