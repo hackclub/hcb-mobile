@@ -69,6 +69,8 @@ export default function App() {
                   iconName = focused ? "receipt" : "receipt-outline";
                 } else if (route.name === "Settings") {
                   iconName = focused ? "settings" : "settings-outline";
+                } else {
+                  throw new Error("unknown route name");
                 }
 
                 return <Ionicons name={iconName} size={size} color={color} />;

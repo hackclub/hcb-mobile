@@ -7,5 +7,5 @@ export default interface Card {
   type: "virtual" | "physical";
   status: "inactive" | "frozen" | "active" | "canceled";
   name?: string;
-  organization?: Organization;
+  organization: Organization;
 }

@@ -15,7 +15,7 @@ const redirectUri = makeRedirectUri({ scheme: "hcb" });
 export default function Login() {
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: process.env.EXPO_PUBLIC_CLIENT_ID,
+      clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
       redirectUri,
       scopes: ["read", "write"],
       extraParams: {
