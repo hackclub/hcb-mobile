@@ -14,12 +14,12 @@ export default function useTransactions(orgId: string) {
       return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}&after=${
         previousPageData.data[previousPageData.data.length - 1].id
       }`;
-    }
+    },
   );
 
   const transactions = useMemo(
     () => data?.flatMap((d) => d.data) || [],
-    [data]
+    [data],
   );
   const isLoadingMore =
     isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");

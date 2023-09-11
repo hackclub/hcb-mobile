@@ -1,6 +1,7 @@
 import { Text, View, ViewProps } from "react-native";
-import { palette } from "../theme";
+
 import Card from "../lib/types/Card";
+import { palette } from "../theme";
 
 export default function PaymentCard({
   card,

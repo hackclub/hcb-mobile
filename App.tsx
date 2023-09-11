@@ -1,20 +1,20 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Text, View, Image, Button, StyleSheet } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState, useEffect } from "react";
-import * as SecureStorage from "expo-secure-store";
-import AuthContext from "./src/auth";
-import { SWRConfig, useSWRConfig } from "swr";
 import { BlurView } from "expo-blur";
+import * as SecureStorage from "expo-secure-store";
+import { useState, useEffect } from "react";
+import { Text, View, Image, Button, StyleSheet } from "react-native";
+import { SWRConfig, useSWRConfig } from "swr";
 
-import Login from "./src/pages/login";
-import Home from "./src/pages/index";
-import { palette, theme } from "./src/theme";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Organization from "./src/pages/organization";
-import CardsPage from "./src/pages/cards";
+import AuthContext from "./src/auth";
 import { StackParamList, TabParamList } from "./src/lib/NavigatorParamList";
+import CardsPage from "./src/pages/cards";
+import Home from "./src/pages/index";
+import Login from "./src/pages/login";
+import Organization from "./src/pages/organization";
+import { palette, theme } from "./src/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();

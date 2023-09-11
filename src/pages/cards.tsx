@@ -1,7 +1,8 @@
-import { FlatList } from "react-native";
-import PaymentCard from "../components/PaymentCard";
-import useSWR from "swr";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { FlatList } from "react-native";
+import useSWR from "swr";
+
+import PaymentCard from "../components/PaymentCard";
 
 export default function CardsPage() {
   const { data: cards } = useSWR("/user/cards");

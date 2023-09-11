@@ -1,22 +1,23 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import {
   FlatList,
   Text,
   View,
   ActivityIndicator,
   TouchableHighlight,
+  Image,
 } from "react-native";
-import { Image } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
+
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
+import { palette } from "../theme";
+import { renderMoney } from "../util";
 
 function Event({
   event,
@@ -155,7 +156,7 @@ export default function App({ navigation }: Props) {
             mutate(
               (key: string) =>
                 key.startsWith("/organizations/") ||
-                key == "/user/organizations"
+                key == "/user/organizations",
             );
           }}
           renderItem={({ item }) => (

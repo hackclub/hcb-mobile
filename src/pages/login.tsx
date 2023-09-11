@@ -1,7 +1,14 @@
 import { useAuthRequest, makeRedirectUri } from "expo-auth-session";
-import { Text, View, Pressable, Animated } from "react-native";
-import { StyleSheet, SafeAreaView } from "react-native";
 import { useContext, useEffect, useRef } from "react";
+import {
+  Text,
+  View,
+  Pressable,
+  Animated,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
+
 import AuthContext from "../auth";
 import { palette } from "../theme";
 
@@ -22,7 +29,7 @@ export default function Login() {
         no_app_shell: "true",
       },
     },
-    discovery
+    discovery,
   );
 
   const { setToken } = useContext(AuthContext);
