@@ -1,11 +1,12 @@
-import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { View, Text } from "react-native";
+
+import TransactionType from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
-import TransactionType from "../lib/types/Transaction";
 
 function transactionIcon(
-  code: TransactionType["code"]
+  code: TransactionType["code"],
 ): React.ComponentProps<typeof Ionicons>["name"] {
   switch (code) {
     case "000":
