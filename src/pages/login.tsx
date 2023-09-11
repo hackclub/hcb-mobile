@@ -35,7 +35,7 @@ export default function Login() {
         no_app_shell: "true",
       },
     },
-    discovery
+    discovery,
   );
 
   const { setToken } = useContext(AuthContext);
@@ -49,7 +49,7 @@ export default function Login() {
           code: response.params.code,
           extraParams: { code_verifier: request!.codeVerifier! },
         },
-        discovery
+        discovery,
       ).then((r) => setToken(r.accessToken));
     }
   }, [response]);
