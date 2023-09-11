@@ -1,4 +1,9 @@
-import { useAuthRequest, makeRedirectUri } from "expo-auth-session";
+import {
+  useAuthRequest,
+  makeRedirectUri,
+  exchangeCodeAsync,
+  DiscoveryDocument,
+} from "expo-auth-session";
 import { useContext, useEffect, useRef } from "react";
 import {
   Text,
@@ -12,47 +17,40 @@ import {
 import AuthContext from "../auth";
 import { palette } from "../theme";
 
-const discovery = {
+const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
   tokenEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
 };
+const clientId = process.env.EXPO_PUBLIC_CLIENT_ID!;
 
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
 export default function Login() {
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+      clientId,
       redirectUri,
       scopes: ["read", "write"],
       extraParams: {
         no_app_shell: "true",
       },
     },
-    discovery,
+    discovery
   );
 
   const { setToken } = useContext(AuthContext);
 
   useEffect(() => {
     if (response?.type == "success") {
-      fetch(`${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: process.env.EXPO_PUBLIC_CLIENT_ID,
+      exchangeCodeAsync(
+        {
+          clientId,
+          redirectUri,
           code: response.params.code,
-          grant_type: "authorization_code",
-          code_verifier: request?.codeVerifier,
-          redirect_uri: redirectUri,
-        }),
-      })
-        .then((r) => r.json())
-        .then((r) => {
-          setToken(r.access_token);
-        });
+          extraParams: { code_verifier: request!.codeVerifier! },
+        },
+        discovery
+      ).then((r) => setToken(r.accessToken));
     }
   }, [response]);
 
