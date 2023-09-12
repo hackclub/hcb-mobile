@@ -1,24 +1,33 @@
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text } from "react-native";
 
-import TransactionType from "../lib/types/Transaction";
+import ITransaction, { TransactionType } from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 function transactionIcon(
-  code: TransactionType["code"],
+  code: TransactionType
 ): React.ComponentProps<typeof Ionicons>["name"] {
   switch (code) {
-    case "000":
-      return "cash-outline";
-    case "200":
-      return "heart";
-    case "500":
-      return "arrow-redo";
-    case "600":
-      return "card";
-    case "700":
-      return "remove-circle";
+    case TransactionType.Donation:
+    case TransactionType.PartnerDonation:
+      return "heart-outline";
+    case TransactionType.Check:
+    case TransactionType.IncreaseCheck:
+      return "mail-outline";
+    case TransactionType.CheckDeposit:
+      return "receipt-outline";
+    case TransactionType.Disbursement:
+      return "arrow-redo-outline";
+    case TransactionType.StripeCard:
+    case TransactionType.StripeForceCapture:
+      return "card-outline";
+    case TransactionType.BankFee:
+      return "remove-circle-outline";
+    case TransactionType.FeeRevenue:
+      return "add-circle-outline";
+    case TransactionType.Invoice:
+      return "receipt-outline";
     default:
       return "cash-outline";
   }
@@ -29,7 +38,7 @@ export default function Transaction({
   top,
   bottom,
 }: {
-  transaction: TransactionType;
+  transaction: ITransaction;
   top: boolean;
   bottom: boolean;
 }) {
@@ -64,7 +73,7 @@ export default function Transaction({
         }}
       >
         {transaction.pending && "Pending: "}
-        {transaction.memo}
+        {transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
       <Text
         style={{
