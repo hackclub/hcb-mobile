@@ -37,6 +37,12 @@ module.exports = {
         },
       },
     ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+      },
+    ],
   },
   globals: {
     fetch: "readonly",

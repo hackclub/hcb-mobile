@@ -3,9 +3,10 @@ import { FlatList } from "react-native";
 import useSWR from "swr";
 
 import PaymentCard from "../components/PaymentCard";
+import Card from "../lib/types/Card";
 
 export default function CardsPage() {
-  const { data: cards } = useSWR("/user/cards");
+  const { data: cards } = useSWR<Card[]>("/user/cards");
   const tabBarHeight = useBottomTabBarHeight();
 
   if (cards) {

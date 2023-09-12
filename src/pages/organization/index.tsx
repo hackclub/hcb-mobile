@@ -9,19 +9,23 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
+import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
+import Organization from "../../lib/types/Organization";
 import { renderMoney } from "../../util";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
-export default function Organization({
+export default function OrganizationPage({
   route: {
     params: { id: orgId },
   },
 }: Props) {
-  const { data: organization } = useSWR(`/organizations/${orgId}`);
+  const { data: organization } = useSWR<Organization>(
+    `/organizations/${orgId}`,
+  );
   const { transactions, isLoadingMore, loadMore, isLoading } =
     useTransactions(orgId);
 
@@ -40,7 +44,7 @@ export default function Organization({
         justifyContent: "center",
       }}
     >
-      {transactions ? (
+      {organization && transactions ? (
         <FlatList
           ListFooterComponent={() =>
             isLoadingMore && (
@@ -55,6 +59,9 @@ export default function Organization({
                 paddingHorizontal: 20,
               }}
             >
+              {organization?.playground_mode && (
+                <PlaygroundBanner organization={organization} />
+              )}
               <View style={{ marginBottom: 20 }}>
                 <Text
                   style={{
@@ -66,7 +73,7 @@ export default function Organization({
                   Balance
                 </Text>
                 <Text style={{ color: "#fff", fontSize: 30 }}>
-                  {renderMoney(organization.balance_cents)}
+                  {renderMoney(organization.balance_cents!)}
                 </Text>
               </View>
               <View style={{ display: "flex" }}>
