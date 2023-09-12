@@ -6,7 +6,7 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 function transactionIcon(
-  code: TransactionType
+  code: TransactionType,
 ): React.ComponentProps<typeof Ionicons>["name"] {
   switch (code) {
     case TransactionType.Donation:
