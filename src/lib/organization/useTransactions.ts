@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import useSWRInfinite from "swr/infinite";
 
+import Transaction from "../types/Transaction";
+
 const PAGE_SIZE = 25;
 
 export default function useTransactions(orgId: string) {
@@ -17,7 +19,7 @@ export default function useTransactions(orgId: string) {
     },
   );
 
-  const transactions = useMemo(
+  const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d.data) || [],
     [data],
   );

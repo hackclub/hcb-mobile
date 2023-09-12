@@ -13,7 +13,7 @@ import { StackParamList, TabParamList } from "./src/lib/NavigatorParamList";
 import CardsPage from "./src/pages/cards";
 import Home from "./src/pages/index";
 import Login from "./src/pages/login";
-import Organization from "./src/pages/organization";
+import OrganizationPage from "./src/pages/organization";
 import { palette, theme } from "./src/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
@@ -135,7 +135,7 @@ export default function App() {
                       title: route.params.title,
                       headerBackTitle: "Back",
                     })}
-                    component={Organization}
+                    component={OrganizationPage}
                   />
                 </Stack.Navigator>
               )}
