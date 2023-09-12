@@ -3,6 +3,8 @@ import { Text, View, ViewProps } from "react-native";
 import Card from "../lib/types/Card";
 import { palette } from "../theme";
 
+import CardChip from "./cards/CardChip";
+
 export default function PaymentCard({
   card,
   ...props
@@ -21,6 +23,7 @@ export default function PaymentCard({
         ...(props.style as object),
       }}
     >
+      {card.type == "physical" && <CardChip />}
       <Text
         style={{
           color: palette.smoke,
