@@ -14,7 +14,7 @@ export const theme: Theme = {
   colors: {
     ...DarkTheme.colors,
     background: palette.background,
-
+    card: palette.background,
     text: palette.smoke,
     primary: palette.primary,
   },

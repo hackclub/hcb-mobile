@@ -20,6 +20,8 @@ export default function PaymentCard({
         justifyContent: "flex-end",
         opacity: card.status != "active" ? 0.5 : 1,
         position: "relative",
+        borderWidth: 1,
+        borderColor: palette.slate,
         ...(props.style as object),
       }}
     >
@@ -31,7 +33,7 @@ export default function PaymentCard({
           marginBottom: 4,
         }}
       >
-        ···· ···· ···· {card.last4 || "····"}
+        {card.status == "frozen" && "❄️ "}···· ···· ···· {card.last4 || "····"}
       </Text>
       <Text
         style={{

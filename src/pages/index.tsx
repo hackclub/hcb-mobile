@@ -121,7 +121,7 @@ export default function App({ navigation }: Props) {
   const {
     data: organizations,
     error,
-    isLoading,
+    isValidating,
   } = useSWR("/user/organizations");
 
   const { mutate } = useSWRConfig();
@@ -151,7 +151,7 @@ export default function App({ navigation }: Props) {
           contentContainerStyle={{ paddingBottom: tabBarHeight }}
           contentInsetAdjustmentBehavior="automatic"
           data={organizations}
-          refreshing={isLoading}
+          refreshing={isValidating}
           onRefresh={() => {
             mutate(
               (key: string) =>
