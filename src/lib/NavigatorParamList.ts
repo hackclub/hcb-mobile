@@ -3,6 +3,11 @@ export type StackParamList = {
   Event: { id: string; image?: string; title: string };
 };
 
+export type CardsStackParamList = {
+  Cards: undefined;
+  Card: { cardId: string };
+};
+
 export type TabParamList = {
   Home: undefined;
   Cards: undefined;

@@ -5,11 +5,17 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect } from "react";
-import { Text, View, Image, Button, StyleSheet } from "react-native";
+import { Text, View, Button, StyleSheet } from "react-native";
 import { SWRConfig, useSWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
-import { StackParamList, TabParamList } from "./src/lib/NavigatorParamList";
+import OrganizationTitle from "./src/components/organizations/OrganizationTitle";
+import {
+  CardsStackParamList,
+  StackParamList,
+  TabParamList,
+} from "./src/lib/NavigatorParamList";
+import CardPage from "./src/pages/card";
 import CardsPage from "./src/pages/cards";
 import Home from "./src/pages/index";
 import Login from "./src/pages/login";
@@ -17,6 +23,8 @@ import OrganizationPage from "./src/pages/organization";
 import { palette, theme } from "./src/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
+const CardsStack = createNativeStackNavigator<CardsStackParamList>();
+
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function App() {
@@ -95,7 +103,6 @@ export default function App() {
               {() => (
                 <Stack.Navigator
                   screenOptions={{
-                    headerStyle: { backgroundColor: palette.background },
                     headerLargeTitleShadowVisible: false,
                   }}
                 >
@@ -109,28 +116,8 @@ export default function App() {
                   <Stack.Screen
                     name="Event"
                     options={({ route }) => ({
-                      headerTitle: ({ children }) => (
-                        <View
-                          style={{ flexDirection: "row", alignItems: "center" }}
-                        >
-                          {route.params.image && (
-                            <Image
-                              source={{ uri: route.params.image }}
-                              style={{ marginRight: 10, borderRadius: 4 }}
-                              width={25}
-                              height={25}
-                            />
-                          )}
-                          <Text
-                            style={{
-                              color: palette.smoke,
-                              fontWeight: "600",
-                              fontSize: 17,
-                            }}
-                          >
-                            {children}
-                          </Text>
-                        </View>
+                      headerTitle: () => (
+                        <OrganizationTitle {...route.params} />
                       ),
                       title: route.params.title,
                       headerBackTitle: "Back",
@@ -140,7 +127,14 @@ export default function App() {
                 </Stack.Navigator>
               )}
             </Tab.Screen>
-            <Tab.Screen name="Cards" component={CardsPage} />
+            <Tab.Screen name="Cards" options={{ headerShown: false }}>
+              {() => (
+                <CardsStack.Navigator>
+                  <CardsStack.Screen name="Cards" component={CardsPage} />
+                  <CardsStack.Screen name="Card" component={CardPage} />
+                </CardsStack.Navigator>
+              )}
+            </Tab.Screen>
             <Tab.Screen name="Receipts">
               {() => <Text>receipts!</Text>}
             </Tab.Screen>

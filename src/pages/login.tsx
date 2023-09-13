@@ -4,17 +4,11 @@ import {
   exchangeCodeAsync,
   DiscoveryDocument,
 } from "expo-auth-session";
-import { useContext, useEffect, useRef } from "react";
-import {
-  Text,
-  View,
-  Pressable,
-  Animated,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Text, View, Animated, StyleSheet, SafeAreaView } from "react-native";
 
 import AuthContext from "../auth";
+import Button from "../components/Button";
 import { palette } from "../theme";
 
 const discovery: DiscoveryDocument = {
@@ -38,10 +32,13 @@ export default function Login() {
     discovery,
   );
 
+  const [loading, setLoading] = useState(false);
+
   const { setToken } = useContext(AuthContext);
 
   useEffect(() => {
     if (response?.type == "success") {
+      setLoading(true);
       exchangeCodeAsync(
         {
           clientId,
@@ -50,7 +47,9 @@ export default function Login() {
           extraParams: { code_verifier: request!.codeVerifier! },
         },
         discovery,
-      ).then((r) => setToken(r.accessToken));
+      )
+        .then((r) => setToken(r.accessToken))
+        .catch(() => setLoading(false));
     }
   }, [response]);
 
@@ -92,9 +91,16 @@ export default function Login() {
           Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
         </Text>
       </View>
-      <Pressable style={styles.button} onPress={() => promptAsync()}>
-        <Text style={styles.buttonText}>Login</Text>
-      </Pressable>
+
+      <View style={{ marginBottom: 30 }}>
+        <Button
+          onPress={() => promptAsync()}
+          loading={loading}
+          style={{ marginHorizontal: 20 }}
+        >
+          Log in
+        </Button>
+      </View>
     </SafeAreaView>
   );
 }
@@ -104,19 +110,5 @@ const styles = StyleSheet.create({
     backgroundColor: palette.background,
     flex: 1,
     flexDirection: "column",
-  },
-  button: {
-    backgroundColor: palette.primary,
-    color: "white",
-    marginHorizontal: 20,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 30,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 20,
-    textAlign: "center",
-    fontWeight: "400",
   },
 });
