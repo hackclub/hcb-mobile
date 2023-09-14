@@ -130,13 +130,30 @@ export default function App() {
             <Tab.Screen name="Cards" options={{ headerShown: false }}>
               {() => (
                 <CardsStack.Navigator>
-                  <CardsStack.Screen name="Cards" component={CardsPage} />
-                  <CardsStack.Screen name="Card" component={CardPage} />
+                  <CardsStack.Screen name="CardList" component={CardsPage} />
+                  <CardsStack.Screen
+                    name="Card"
+                    component={CardPage}
+                    options={({ route }) => ({
+                      title: `Card ····${route.params.last4}`,
+                    })}
+                  />
                 </CardsStack.Navigator>
               )}
             </Tab.Screen>
             <Tab.Screen name="Receipts">
-              {() => <Text>receipts!</Text>}
+              {() => (
+                <Text
+                  style={{
+                    color: palette.smoke,
+                    textAlign: "center",
+                    marginTop: 20,
+                    fontSize: 20,
+                  }}
+                >
+                  🚧 receipts coming soon
+                </Text>
+              )}
             </Tab.Screen>
             <Tab.Screen name="Settings">
               {() => {

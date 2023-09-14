@@ -4,8 +4,8 @@ export type StackParamList = {
 };
 
 export type CardsStackParamList = {
-  Cards: undefined;
-  Card: { cardId: string };
+  CardList: undefined;
+  Card: { cardId: string; last4: string };
 };
 
 export type TabParamList = {

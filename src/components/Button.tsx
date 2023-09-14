@@ -11,6 +11,7 @@ import { palette } from "../theme";
 
 export interface ButtonProps {
   onPress?: () => void;
+  color?: string;
   loading?: boolean;
 }
 
@@ -41,9 +42,16 @@ export default function Button(
       disabled={props.loading}
     >
       {props.loading ? (
-        <ActivityIndicator color={palette.smoke} />
+        <ActivityIndicator color={props.color || "white"} />
       ) : (
-        <Text style={styles.buttonText}>{props.children}</Text>
+        <Text
+          style={{
+            ...styles.buttonText,
+            color: props.color || styles.buttonText.color,
+          }}
+        >
+          {props.children}
+        </Text>
       )}
     </Pressable>
   );
