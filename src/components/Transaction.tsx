@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { memo } from "react";
 import { View, Text } from "react-native";
 
 import ITransaction, { TransactionType } from "../lib/types/Transaction";
@@ -33,7 +34,7 @@ function transactionIcon(
   }
 }
 
-export default function Transaction({
+const Transaction = memo(function Transaction({
   transaction,
   top,
   bottom,
@@ -49,7 +50,6 @@ export default function Transaction({
         paddingVertical: 10,
         flexDirection: "row",
         alignItems: "center",
-        marginHorizontal: 20,
         backgroundColor: palette.darkless,
         borderTopLeftRadius: top ? 8 : 0,
         borderTopRightRadius: top ? 8 : 0,
@@ -72,18 +72,24 @@ export default function Transaction({
           flex: 1,
         }}
       >
-        {transaction.pending && "Pending: "}
+        {transaction.declined
+          ? "Declined: "
+          : transaction.pending
+          ? "Pending: "
+          : ""}
         {transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
       <Text
         style={{
           marginLeft: "auto",
           paddingLeft: 10,
-          color: transaction.amount_cents > 0 ? "#33d6a6" : palette.primary,
+          color: transaction.amount_cents < 0 ? palette.primary : "#33d6a6",
         }}
       >
         {renderMoney(transaction.amount_cents)}
       </Text>
     </View>
   );
-}
+});
+
+export default Transaction;

@@ -4,6 +4,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { useEffect } from "react";
 import {
   FlatList,
   Text,
@@ -12,7 +13,7 @@ import {
   TouchableHighlight,
   Image,
 } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR, { preload, useSWRConfig } from "swr";
 
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
@@ -116,16 +117,18 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
-  const { data: user } = useSWR("/user");
-
   const {
     data: organizations,
     error,
     isValidating,
   } = useSWR("/user/organizations");
 
-  const { mutate } = useSWRConfig();
+  const { mutate, fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
+
+  useEffect(() => {
+    preload("/user/cards", fetcher!);
+  }, []);
 
   if (error) {
     return (
@@ -135,7 +138,7 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (!user || !organizations) {
+  if (organizations === undefined) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
@@ -155,7 +158,7 @@ export default function App({ navigation }: Props) {
           onRefresh={() => {
             mutate(
               (key: string) =>
-                key.startsWith("/organizations/") ||
+                key?.startsWith("/organizations/") ||
                 key == "/user/organizations",
             );
           }}

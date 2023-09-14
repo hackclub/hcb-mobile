@@ -22,5 +22,6 @@ export default interface Transaction {
   amount_cents: number;
   memo: string;
   pending: boolean;
+  declined: boolean;
   code: TransactionType;
 }

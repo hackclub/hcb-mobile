@@ -3,7 +3,7 @@ import useSWRInfinite from "swr/infinite";
 
 import Transaction from "../types/Transaction";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 35;
 
 export default function useTransactions(orgId: string) {
   const { data, size, setSize, isLoading } = useSWRInfinite(

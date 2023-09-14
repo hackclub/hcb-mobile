@@ -1,12 +1,6 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  Text,
-  View,
-  FlatList,
-  ActivityIndicator,
-  PlatformColor,
-} from "react-native";
+import { Text, View, FlatList, ActivityIndicator } from "react-native";
 import useSWR from "swr";
 
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
@@ -14,6 +8,7 @@ import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
 import Organization from "../../lib/types/Organization";
+import { palette } from "../../theme";
 import { renderMoney } from "../../util";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
@@ -23,15 +18,14 @@ export default function OrganizationPage({
     params: { id: orgId },
   },
 }: Props) {
-  const { data: organization } = useSWR<Organization>(
-    `/organizations/${orgId}`,
-  );
+  const { data: organization, isLoading: organizationLoading } =
+    useSWR<Organization>(`/organizations/${orgId}`);
   const { transactions, isLoadingMore, loadMore, isLoading } =
     useTransactions(orgId);
 
   const tabBarSize = useBottomTabBarHeight();
 
-  if (isLoading) {
+  if (organizationLoading) {
     return <ActivityIndicator />;
   }
 
@@ -44,28 +38,24 @@ export default function OrganizationPage({
         justifyContent: "center",
       }}
     >
-      {organization && transactions ? (
+      {organization !== undefined ? (
         <FlatList
+          initialNumToRender={20}
           ListFooterComponent={() =>
-            isLoadingMore && (
-              <ActivityIndicator style={{ marginVertical: 20 }} />
-            )
+            isLoadingMore &&
+            !isLoading && <ActivityIndicator style={{ marginTop: 20 }} />
           }
           onEndReachedThreshold={0.5}
           onEndReached={() => loadMore()}
           ListHeaderComponent={() => (
-            <View
-              style={{
-                paddingHorizontal: 20,
-              }}
-            >
+            <View>
               {organization?.playground_mode && (
                 <PlaygroundBanner organization={organization} />
               )}
               <View style={{ marginBottom: 20 }}>
                 <Text
                   style={{
-                    color: PlatformColor("systemGray"),
+                    color: palette.muted,
                     fontSize: 12,
                     textTransform: "uppercase",
                   }}
@@ -79,7 +69,7 @@ export default function OrganizationPage({
               <View style={{ display: "flex" }}>
                 <Text
                   style={{
-                    color: PlatformColor("systemGray"),
+                    color: palette.muted,
                     fontSize: 12,
                     textTransform: "uppercase",
                     marginBottom: 8,
@@ -88,20 +78,15 @@ export default function OrganizationPage({
                   Transactions
                 </Text>
               </View>
+              {isLoading && <ActivityIndicator />}
             </View>
-          )}
-          ItemSeparatorComponent={() => (
-            <View
-              style={{
-                height: 1,
-                backgroundColor: PlatformColor("systemGray5"),
-                marginHorizontal: 20,
-              }}
-            />
           )}
           data={transactions}
           style={{ flexGrow: 1 }}
-          contentContainerStyle={{ paddingTop: 20, paddingBottom: tabBarSize }}
+          contentContainerStyle={{
+            padding: 20,
+            paddingBottom: tabBarSize + 20,
+          }}
           scrollIndicatorInsets={{ bottom: tabBarSize }}
           renderItem={({ item, index }) => (
             <Transaction
