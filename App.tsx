@@ -130,7 +130,11 @@ export default function App() {
             <Tab.Screen name="Cards" options={{ headerShown: false }}>
               {() => (
                 <CardsStack.Navigator>
-                  <CardsStack.Screen name="CardList" component={CardsPage} />
+                  <CardsStack.Screen
+                    name="CardList"
+                    component={CardsPage}
+                    options={{ title: "Cards" }}
+                  />
                   <CardsStack.Screen
                     name="Card"
                     component={CardPage}
