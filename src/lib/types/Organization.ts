@@ -20,5 +20,8 @@ export default interface Organization {
     | "outernet_guild"
     | "grant_recipient"
     | "salary";
-  balance_cents?: number;
+}
+
+export interface OrganizationExpanded extends Organization {
+  balance_cents: number;
 }

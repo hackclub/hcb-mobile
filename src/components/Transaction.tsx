@@ -83,7 +83,7 @@ const Transaction = memo(function Transaction({
         style={{
           marginLeft: "auto",
           paddingLeft: 10,
-          color: transaction.amount_cents < 0 ? palette.primary : "#33d6a6",
+          color: transaction.amount_cents < 0 ? palette.muted : "#33d6a6",
         }}
       >
         {renderMoney(transaction.amount_cents)}
