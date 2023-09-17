@@ -16,7 +16,7 @@ import {
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import { StackParamList } from "../lib/NavigatorParamList";
-import Organization from "../lib/types/Organization";
+import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
@@ -27,7 +27,7 @@ function Event({
   event: Organization;
   navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
 }) {
-  const { data } = useSWR(`/organizations/${event.id}`);
+  const { data } = useSWR<OrganizationExpanded>(`/organizations/${event.id}`);
 
   const colors = [
     "#ec3750",

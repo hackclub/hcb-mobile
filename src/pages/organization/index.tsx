@@ -7,7 +7,7 @@ import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
-import Organization from "../../lib/types/Organization";
+import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
 import { renderMoney } from "../../util";
 
@@ -19,7 +19,7 @@ export default function OrganizationPage({
   },
 }: Props) {
   const { data: organization, isLoading: organizationLoading } =
-    useSWR<Organization>(`/organizations/${orgId}`);
+    useSWR<OrganizationExpanded>(`/organizations/${orgId}`);
   const { transactions, isLoadingMore, loadMore, isLoading } =
     useTransactions(orgId);
 
@@ -63,7 +63,7 @@ export default function OrganizationPage({
                   Balance
                 </Text>
                 <Text style={{ color: "#fff", fontSize: 30 }}>
-                  {renderMoney(organization.balance_cents!)}
+                  {renderMoney(organization.balance_cents)}
                 </Text>
               </View>
               <View style={{ display: "flex" }}>

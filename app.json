@@ -3,7 +3,7 @@
     "name": "HCB",
     "slug": "hcb-mobile",
     "owner": "hackclub",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "scheme": "hcb",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
@@ -16,7 +16,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hackclub.hcb"
+      "bundleIdentifier": "com.hackclub.hcb",
+      "buildNumber": "1.0.0.1"
     },
     "android": {
       "icon": "./assets/app-icon.png",
