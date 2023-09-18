@@ -1,3 +1,4 @@
+import capitalize from "lodash/capitalize";
 import { Text, View, ViewProps } from "react-native";
 // import Animated, {
 //   SharedTransition,
@@ -39,7 +40,7 @@ export default function PaymentCard({
       // sharedTransitionTag={card.id}
       // sharedTransitionStyle={transition}
     >
-      {card.status == "frozen" && (
+      {card.status != "active" && (
         <View
           style={{
             marginBottom: "auto",
@@ -57,7 +58,7 @@ export default function PaymentCard({
               fontWeight: "600",
             }}
           >
-            Frozen
+            {capitalize(card.status)}
           </Text>
         </View>
       )}

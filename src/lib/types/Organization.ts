@@ -1,6 +1,6 @@
-export default interface Organization {
-  created_at: string;
-  id: string;
+import HcbApiObject from "./HcbApiObject";
+
+export default interface Organization extends HcbApiObject<"org"> {
   name: string;
   country: string;
   slug: string;
