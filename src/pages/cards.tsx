@@ -1,5 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
+import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useEffect, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import useSWR from "swr";
 
@@ -7,6 +10,7 @@ import PaymentCard from "../components/PaymentCard";
 import listPreloader from "../lib/listPreloader";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
+import { palette } from "../theme";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
@@ -20,10 +24,43 @@ export default function CardsPage({ navigation }: Props) {
   });
   const tabBarHeight = useBottomTabBarHeight();
 
+  const [frozenCardsShown, setFrozenCardsShown] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <MenuView
+          actions={[
+            {
+              id: "showFrozenCards",
+              title: "Show inactive cards",
+              state: frozenCardsShown ? "on" : "off",
+            },
+          ]}
+          onPressAction={({ nativeEvent: { event } }) => {
+            if (event == "showFrozenCards") {
+              setFrozenCardsShown((x) => !x);
+            }
+          }}
+          themeVariant="dark"
+        >
+          <Ionicons.Button
+            name="ellipsis-horizontal-circle"
+            backgroundColor="transparent"
+            size={24}
+            color={palette.primary}
+          />
+        </MenuView>
+      ),
+    });
+  }, [navigation, frozenCardsShown]);
+
   if (cards) {
     return (
       <FlatList
-        data={cards}
+        data={
+          frozenCardsShown ? cards : cards.filter((c) => c.status == "active")
+        }
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,
           paddingTop: 20,

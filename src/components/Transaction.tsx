@@ -34,14 +34,14 @@ function transactionIcon(
   }
 }
 
-const Transaction = memo(function Transaction({
+function Transaction({
   transaction,
-  top,
-  bottom,
+  top = false,
+  bottom = false,
 }: {
   transaction: ITransaction;
-  top: boolean;
-  bottom: boolean;
+  top?: boolean;
+  bottom?: boolean;
 }) {
   return (
     <View
@@ -83,13 +83,13 @@ const Transaction = memo(function Transaction({
         style={{
           marginLeft: "auto",
           paddingLeft: 10,
-          color: transaction.amount_cents < 0 ? palette.muted : "#33d6a6",
+          color: transaction.amount_cents > 0 ? "#33d6a6" : palette.muted,
         }}
       >
         {renderMoney(transaction.amount_cents)}
       </Text>
     </View>
   );
-});
+}
 
-export default Transaction;
+export default memo(Transaction);

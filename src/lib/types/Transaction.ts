@@ -1,3 +1,5 @@
+import HcbApiObject from "./HcbApiObject";
+
 export enum TransactionType {
   Unknown = "000",
   Invoice = "100",
@@ -16,8 +18,7 @@ export enum TransactionType {
   AchPayment = "800",
 }
 
-export default interface Transaction {
-  id: string;
+export default interface Transaction extends HcbApiObject<"txn"> {
   date: string;
   amount_cents: number;
   memo: string;
