@@ -43,6 +43,7 @@ module.exports = {
         argsIgnorePattern: "^_",
       },
     ],
+    "@typescript-eslint/no-non-null-assertion": "warn",
   },
   globals: {
     fetch: "readonly",

@@ -3,7 +3,9 @@ import { Button, Text, View } from "react-native";
 import Organization from "../../lib/types/Organization";
 import { palette } from "../../theme";
 
-export default function PlaygroundBanner(_props: {
+export default function PlaygroundBanner({
+  organization,
+}: {
   organization: Organization;
 }) {
   return (
@@ -25,7 +27,10 @@ export default function PlaygroundBanner(_props: {
         <Text style={{ color: palette.smoke, flex: 1 }}>
           To raise & spend money, activate your organization&apos;s account.
         </Text>
-        <Button title="Activate" />
+        <Button
+          title="Activate"
+          disabled={organization.playground_mode_meeting_requested}
+        />
       </View>
     </View>
   );

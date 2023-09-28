@@ -1,4 +1,5 @@
-import { View, Image, Text } from "react-native";
+import { Image } from "expo-image";
+import { View, Text } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { palette } from "../../theme";
@@ -9,9 +10,8 @@ export default function OrganizationTitle(props: StackParamList["Event"]) {
       {props.image && (
         <Image
           source={{ uri: props.image }}
-          style={{ marginRight: 10, borderRadius: 4 }}
-          width={25}
-          height={25}
+          cachePolicy="disk"
+          style={{ width: 25, height: 25, marginRight: 10, borderRadius: 4 }}
         />
       )}
       <Text

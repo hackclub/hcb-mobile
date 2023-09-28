@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hackclub.hcb",
-      "buildNumber": "1.0.0.1"
+      "buildNumber": "1.0.0.2"
     },
     "android": {
       "icon": "./assets/app-icon.png",
@@ -35,6 +35,14 @@
       "eas": {
         "projectId": "dfc97c77-31b1-4267-896f-9472c87f166c"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow HCB to take photos of receipts"
+        }
+      ]
+    ]
   }
 }

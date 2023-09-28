@@ -139,6 +139,7 @@ export default function CardPage({
               key={transaction.id}
               top={index == 0}
               bottom={index == transactions.data.length - 1}
+              hideAvatar
             />
           ))}
         </>
