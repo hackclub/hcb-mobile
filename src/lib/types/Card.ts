@@ -7,4 +7,5 @@ export default interface Card extends HcbApiObject<"crd"> {
   status: "inactive" | "frozen" | "active" | "canceled";
   name?: string;
   organization: Organization;
+  total_spent_cents?: number;
 }

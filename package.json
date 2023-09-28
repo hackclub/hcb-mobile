@@ -39,7 +39,9 @@
     "react-native-svg": "13.9.0",
     "react-native-web": "^0.19.8",
     "swr": "^2.2.1",
-    "expo-splash-screen": "~0.20.5"
+    "expo-splash-screen": "~0.20.5",
+    "expo-dev-client": "~2.4.10",
+    "expo-image-picker": "~14.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.22.11",

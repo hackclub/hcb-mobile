@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { memo } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ViewProps, StyleSheet } from "react-native";
 
-import ITransaction, { TransactionType } from "../lib/types/Transaction";
+import ITransaction, {
+  TransactionCardCharge,
+  TransactionType,
+} from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
@@ -34,35 +38,69 @@ function transactionIcon(
   }
 }
 
-function Transaction({
+function TransactionIcon({
   transaction,
-  top = false,
-  bottom = false,
+  hideAvatar,
 }: {
   transaction: ITransaction;
-  top?: boolean;
-  bottom?: boolean;
+  hideAvatar?: boolean;
 }) {
-  return (
-    <View
-      style={{
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: palette.darkless,
-        borderTopLeftRadius: top ? 8 : 0,
-        borderTopRightRadius: top ? 8 : 0,
-        borderBottomLeftRadius: bottom ? 8 : 0,
-        borderBottomRightRadius: bottom ? 8 : 0,
-      }}
-    >
+  if (
+    !hideAvatar &&
+    transaction.code == TransactionType.StripeCard &&
+    (transaction as TransactionCardCharge).card_charge.card.user.avatar != null
+  ) {
+    return (
+      <Image
+        source={
+          (transaction as TransactionCardCharge).card_charge.card.user.avatar
+        }
+        placeholder={require("../../assets/placeholder.png")}
+        cachePolicy="disk"
+        style={{ width: 20, height: 20, marginRight: 10, borderRadius: 400 }}
+      />
+    );
+  } else {
+    return (
       <Ionicons
         name={transactionIcon(transaction.code)}
         color={palette.muted}
         size={20}
         style={{ marginRight: 10 }}
       />
+    );
+  }
+}
+
+function Transaction({
+  transaction,
+  top = false,
+  bottom = false,
+  hideAvatar,
+  style,
+}: ViewProps & {
+  transaction: ITransaction;
+  top?: boolean;
+  bottom?: boolean;
+  hideAvatar?: boolean;
+}) {
+  return (
+    <View
+      style={StyleSheet.compose(
+        {
+          padding: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          backgroundColor: palette.darkless,
+          borderTopLeftRadius: top ? 8 : 0,
+          borderTopRightRadius: top ? 8 : 0,
+          borderBottomLeftRadius: bottom ? 8 : 0,
+          borderBottomRightRadius: bottom ? 8 : 0,
+        },
+        style,
+      )}
+    >
+      <TransactionIcon transaction={transaction} hideAvatar={hideAvatar} />
       <Text
         numberOfLines={1}
         style={{

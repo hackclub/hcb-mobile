@@ -2,7 +2,13 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
 import { useMemo } from "react";
-import { Text, View, ActivityIndicator, SectionList } from "react-native";
+import {
+  Text,
+  View,
+  ActivityIndicator,
+  SectionList,
+  TouchableHighlight,
+} from "react-native";
 import useSWR from "swr";
 
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
@@ -12,7 +18,7 @@ import useTransactions from "../../lib/organization/useTransactions";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import ITransaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
-import { renderMoney } from "../../util";
+import { renderDate, renderMoney } from "../../util";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
@@ -20,6 +26,7 @@ export default function OrganizationPage({
   route: {
     params: { id: orgId },
   },
+  navigation,
 }: Props) {
   const { data: organization, isLoading: organizationLoading } =
     useSWR<OrganizationExpanded>(`/organizations/${orgId}`);
@@ -30,7 +37,11 @@ export default function OrganizationPage({
 
   const sections: { title: string; data: ITransaction[] }[] = useMemo(
     () =>
-      Object.entries(groupBy(transactions, "date")).map(([title, data]) => ({
+      Object.entries(
+        groupBy(transactions, (t) =>
+          t.pending ? "Pending" : renderDate(t.date),
+        ),
+      ).map(([title, data]) => ({
         title,
         data,
       })),
@@ -52,7 +63,7 @@ export default function OrganizationPage({
     >
       {organization !== undefined ? (
         <SectionList
-          initialNumToRender={20}
+          initialNumToRender={30}
           ListFooterComponent={() =>
             isLoadingMore &&
             !isLoading && <ActivityIndicator style={{ marginTop: 20 }} />
@@ -110,23 +121,29 @@ export default function OrganizationPage({
                 paddingBottom: 5,
                 paddingHorizontal: 10,
                 fontSize: 10,
+                textTransform: "uppercase",
               }}
             >
-              {new Date(title).toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                timeZone: "UTC", // Prevent JS from doing timezone conversion
-              })}
+              {title}
             </Text>
           )}
           renderItem={({ item, index, section: { data } }) => (
-            <Transaction
-              transaction={item}
-              top={index == 0}
-              bottom={index == data.length - 1}
-            />
+            <TouchableHighlight
+              onPress={() => {
+                navigation.navigate("Transaction", {
+                  orgId,
+                  transactionId: item.id,
+                });
+              }}
+              underlayColor={palette.background}
+              activeOpacity={0.7}
+            >
+              <Transaction
+                transaction={item}
+                top={index == 0}
+                bottom={index == data.length - 1}
+              />
+            </TouchableHighlight>
           )}
         />
       ) : (

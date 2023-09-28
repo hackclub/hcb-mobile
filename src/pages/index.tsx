@@ -4,6 +4,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { Image } from "expo-image";
 import { useEffect } from "react";
 import {
   FlatList,
@@ -11,7 +12,6 @@ import {
   View,
   ActivityIndicator,
   TouchableHighlight,
-  Image,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
@@ -52,6 +52,7 @@ function Event({
         })
       }
       underlayColor={palette.background}
+      activeOpacity={0.7}
     >
       <View
         style={{
@@ -68,9 +69,8 @@ function Event({
         {event.icon ? (
           <Image
             source={{ uri: event.icon }}
-            width={40}
-            height={40}
-            style={{ borderRadius: 8, marginRight: 16 }}
+            cachePolicy="disk"
+            style={{ width: 40, height: 40, borderRadius: 8, marginRight: 16 }}
           />
         ) : (
           <View
@@ -117,13 +117,9 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
-  const {
-    data: organizations,
-    error,
-    isValidating,
-  } = useSWR("/user/organizations");
+  const { data: organizations, error } = useSWR("/user/organizations");
 
-  const { mutate, fetcher } = useSWRConfig();
+  const { fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
@@ -154,14 +150,14 @@ export default function App({ navigation }: Props) {
           contentContainerStyle={{ paddingBottom: tabBarHeight }}
           contentInsetAdjustmentBehavior="automatic"
           data={organizations}
-          refreshing={isValidating}
-          onRefresh={() => {
-            mutate(
-              (key: string) =>
-                key?.startsWith("/organizations/") ||
-                key == "/user/organizations",
-            );
-          }}
+          // refreshing={isValidating}
+          // onRefresh={() => {
+          //   mutate(
+          //     (key: string) =>
+          //       key?.startsWith("/organizations/") ||
+          //       key == "/user/organizations",
+          //   );
+          // }}
           renderItem={({ item }) => (
             <Event event={item} navigation={navigation} />
           )}

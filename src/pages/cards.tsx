@@ -15,13 +15,12 @@ import { palette } from "../theme";
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
 export default function CardsPage({ navigation }: Props) {
-  const {
-    data: cards,
-    mutate: refresh,
-    isValidating,
-  } = useSWR<Card[]>("/user/cards", {
-    use: [listPreloader<Card>((c) => `/cards/${c.id}`)],
-  });
+  const { data: cards } = useSWR<(Card & Required<Pick<Card, "last4">>)[]>(
+    "/user/cards",
+    {
+      use: [listPreloader<Card>((c) => `/cards/${c.id}`)],
+    },
+  );
   const tabBarHeight = useBottomTabBarHeight();
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(false);
@@ -66,14 +65,14 @@ export default function CardsPage({ navigation }: Props) {
           paddingTop: 20,
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        onRefresh={() => refresh()}
-        refreshing={isValidating}
+        // onRefresh={() => refresh()}
+        // refreshing={isValidating}
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
               navigation.navigate("Card", {
                 cardId: item.id,
-                last4: item.last4!,
+                last4: item.last4,
               })
             }
           >

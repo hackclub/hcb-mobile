@@ -7,3 +7,13 @@ export function renderMoney(cents: number) {
     })
   );
 }
+
+export function renderDate(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC", // Prevent JS from doing timezone conversion
+  });
+}
