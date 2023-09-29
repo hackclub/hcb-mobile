@@ -174,11 +174,10 @@ export default function OrganizationPage({
               onPress={
                 item.id
                   ? () => {
-                      item.id &&
-                        navigation.navigate("Transaction", {
-                          orgId: _organization.id,
-                          transactionId: item.id,
-                        });
+                      navigation.navigate("Transaction", {
+                        orgId: _organization.id,
+                        transaction: item as ITransaction,
+                      });
                     }
                   : undefined
               }
