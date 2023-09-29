@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as ImagePicker from "expo-image-picker";
 import { FlatList, View } from "react-native";
@@ -8,7 +9,6 @@ import Transaction from "../components/Transaction";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
-import { palette } from "../theme";
 
 type Props = NativeStackScreenProps<
   ReceiptsStackParamList,
@@ -19,6 +19,8 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
   const { data } = useSWR<{
     data: (ITransaction & { organization: Organization })[];
   }>("/user/transactions/missing_receipt");
+
+  const { colors: themeColors } = useTheme();
 
   return (
     <FlatList
@@ -34,7 +36,8 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
               })
             }
             style={{ justifyContent: "center" }}
-            backgroundColor={palette.darkless}
+            backgroundColor={themeColors.card}
+            color={themeColors.text}
             borderRadius={0}
           >
             Upload receipt

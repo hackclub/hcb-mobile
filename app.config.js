@@ -9,7 +9,7 @@ export default {
     scheme: "hcb",
     orientation: "portrait",
     icon: "./assets/app-icon.png",
-    userInterfaceStyle: "dark",
+    userInterfaceStyle: "automatic",
     splash: {
       image: "./assets/splash.png",
       resizeMode: "contain",

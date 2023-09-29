@@ -1,4 +1,5 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
 import { useMemo } from "react";
@@ -70,6 +71,7 @@ export default function OrganizationPage({
   } = useTransactions(_organization.id);
 
   const tabBarSize = useBottomTabBarHeight();
+  const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
     () => addPendingFeeToTransactions(_transactions, organization),
@@ -126,7 +128,7 @@ export default function OrganizationPage({
                 >
                   Balance
                 </Text>
-                <Text style={{ color: "#fff", fontSize: 30 }}>
+                <Text style={{ color: themeColors.text, fontSize: 30 }}>
                   {"balance_cents" in organization &&
                     renderMoney(organization.balance_cents)}
                 </Text>
@@ -158,7 +160,7 @@ export default function OrganizationPage({
             <Text
               style={{
                 color: palette.muted,
-                backgroundColor: palette.background,
+                backgroundColor: themeColors.background,
                 paddingTop: 10,
                 paddingBottom: 5,
                 paddingHorizontal: 10,
@@ -181,7 +183,7 @@ export default function OrganizationPage({
                     }
                   : undefined
               }
-              underlayColor={palette.background}
+              underlayColor={themeColors.background}
               activeOpacity={0.7}
             >
               <Transaction

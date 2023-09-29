@@ -1,3 +1,4 @@
+import { useTheme } from "@react-navigation/native";
 import { PropsWithChildren } from "react";
 import { Text } from "react-native";
 
@@ -10,10 +11,12 @@ export function Muted({ children }: PropsWithChildren) {
 }
 
 export default function TransactionTitle({ children }: PropsWithChildren) {
+  const { colors: themeColors } = useTheme();
+
   return (
     <Text
       style={{
-        color: palette.smoke,
+        color: themeColors.text,
         textAlign: "center",
         fontSize: 30,
         fontWeight: "700",

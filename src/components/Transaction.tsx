@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
@@ -85,6 +86,8 @@ function Transaction({
   bottom?: boolean;
   hideAvatar?: boolean;
 }) {
+  const { colors: themeColors } = useTheme();
+
   return (
     <View
       style={StyleSheet.compose(
@@ -92,7 +95,7 @@ function Transaction({
           padding: 10,
           flexDirection: "row",
           alignItems: "center",
-          backgroundColor: palette.darkless,
+          backgroundColor: themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
           borderBottomLeftRadius: bottom ? 8 : 0,
@@ -106,7 +109,7 @@ function Transaction({
         numberOfLines={1}
         style={{
           fontSize: 14,
-          color: transaction.pending ? palette.muted : palette.smoke,
+          color: transaction.pending ? palette.muted : themeColors.text,
           overflow: "hidden",
           flex: 1,
         }}

@@ -3,7 +3,7 @@ import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { FlatList, Pressable, useColorScheme } from "react-native";
 import useSWR from "swr";
 
 import PaymentCard from "../components/PaymentCard";
@@ -22,6 +22,7 @@ export default function CardsPage({ navigation }: Props) {
     },
   );
   const tabBarHeight = useBottomTabBarHeight();
+  const scheme = useColorScheme();
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(false);
 
@@ -41,7 +42,7 @@ export default function CardsPage({ navigation }: Props) {
               setFrozenCardsShown((x) => !x);
             }
           }}
-          themeVariant="dark"
+          themeVariant={scheme || undefined}
         >
           <Ionicons.Button
             name="ellipsis-horizontal-circle"

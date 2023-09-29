@@ -3,18 +3,20 @@ import "expo-dev-client";
 import { NavigationContainer } from "@react-navigation/native";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect } from "react";
-import { StatusBar } from "react-native";
+import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
-import { palette, theme } from "./src/theme";
+import { lightTheme, palette, theme } from "./src/theme";
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
   const [token, setToken] = useState<string | null>(null);
+
+  const scheme = useColorScheme();
 
   useEffect(() => {
     (async () => {
@@ -41,7 +43,7 @@ export default function App() {
   return (
     <AuthContext.Provider value={{ token, setToken }}>
       <StatusBar
-        barStyle="light-content"
+        barStyle={scheme == "dark" ? "light-content" : "dark-content"}
         backgroundColor={palette.background}
       />
 
@@ -54,7 +56,7 @@ export default function App() {
         }}
       >
         <SafeAreaProvider>
-          <NavigationContainer theme={theme}>
+          <NavigationContainer theme={scheme == "dark" ? theme : lightTheme}>
             <Navigator />
           </NavigationContainer>
         </SafeAreaProvider>

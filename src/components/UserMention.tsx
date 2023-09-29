@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
 
 import User from "../lib/types/User";
-import { palette } from "../theme";
 
 export default function UserMention({ user }: { user: User }) {
+  const { colors: themeColors } = useTheme();
+
   return (
     <View
       style={{
@@ -21,7 +23,7 @@ export default function UserMention({ user }: { user: User }) {
         style={{ width: 25, height: 25, borderRadius: 400 }}
       />
       {user.admin && <Ionicons name="flash" color="#f1c40f" size={15} />}
-      <Text style={{ color: palette.smoke }}>{user.name}</Text>
+      <Text style={{ color: themeColors.text }}>{user.name}</Text>
     </View>
   );
 }

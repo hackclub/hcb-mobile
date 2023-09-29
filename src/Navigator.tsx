@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import { useContext } from "react";
-import { View, Button, StyleSheet } from "react-native";
+import { View, Button, StyleSheet, useColorScheme } from "react-native";
 import useSWR from "swr";
 
 import AuthContext from "./auth";
@@ -23,7 +23,6 @@ import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
 import TransactionPage from "./pages/Transaction";
-import { palette } from "./theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -38,10 +37,11 @@ export default function Navigator() {
   );
   const { data: invitations } = useSWR<Invitation[]>(`/user/invitations`);
 
+  const scheme = useColorScheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarBadgeStyle: { backgroundColor: palette.primary },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: React.ComponentProps<typeof Ionicons>["name"];
 
@@ -59,12 +59,12 @@ export default function Navigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        headerStyle: { backgroundColor: palette.background },
+        // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         tabBarStyle: { position: "absolute" },
         tabBarBackground: () => (
           <BlurView
-            tint="dark"
+            tint={scheme == "dark" ? "dark" : "light"}
             intensity={100}
             style={StyleSheet.absoluteFill}
           />
