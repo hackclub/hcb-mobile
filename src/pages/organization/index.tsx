@@ -15,7 +15,9 @@ import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
-import { OrganizationExpanded } from "../../lib/types/Organization";
+import Organization, {
+  OrganizationExpanded,
+} from "../../lib/types/Organization";
 import ITransaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
 import { renderDate, renderMoney } from "../../util";
@@ -24,14 +26,16 @@ type Props = NativeStackScreenProps<StackParamList, "Event">;
 
 export default function OrganizationPage({
   route: {
-    params: { id: orgId },
+    params: { organization: _organization },
   },
   navigation,
 }: Props) {
-  const { data: organization, isLoading: organizationLoading } =
-    useSWR<OrganizationExpanded>(`/organizations/${orgId}`);
-  const { transactions, isLoadingMore, loadMore, isLoading } =
-    useTransactions(orgId);
+  const { data: organization, isLoading: organizationLoading } = useSWR<
+    Organization | OrganizationExpanded
+  >(`/organizations/${_organization.id}`, { fallbackData: _organization });
+  const { transactions, isLoadingMore, loadMore, isLoading } = useTransactions(
+    _organization.id,
+  );
 
   const tabBarSize = useBottomTabBarHeight();
 
@@ -86,7 +90,8 @@ export default function OrganizationPage({
                   Balance
                 </Text>
                 <Text style={{ color: "#fff", fontSize: 30 }}>
-                  {renderMoney(organization.balance_cents)}
+                  {"balance_cents" in organization &&
+                    renderMoney(organization.balance_cents)}
                 </Text>
               </View>
               {/* <View style={{ display: "flex" }}>
@@ -131,7 +136,7 @@ export default function OrganizationPage({
             <TouchableHighlight
               onPress={() => {
                 navigation.navigate("Transaction", {
-                  orgId,
+                  orgId: _organization.id,
                   transactionId: item.id,
                 });
               }}

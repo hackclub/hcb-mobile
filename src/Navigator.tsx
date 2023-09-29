@@ -15,9 +15,11 @@ import {
   TabParamList,
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
+import Invitation from "./lib/types/Invitation";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
+import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
 import TransactionPage from "./pages/Transaction";
@@ -28,11 +30,13 @@ const CardsStack = createNativeStackNavigator<CardsStackParamList>();
 const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 
 const Tab = createBottomTabNavigator<TabParamList>();
+
 export default function Navigator() {
   const { setToken } = useContext(AuthContext);
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     `/user/transactions/missing_receipt`,
   );
+  const { data: invitations } = useSWR<Invitation[]>(`/user/invitations`);
 
   return (
     <Tab.Navigator
@@ -67,7 +71,10 @@ export default function Navigator() {
         ),
       })}
     >
-      <Tab.Screen name="Home">
+      <Tab.Screen
+        name="Home"
+        options={{ tabBarBadge: invitations?.length || undefined }}
+      >
         {() => (
           <Stack.Navigator
             screenOptions={{
@@ -82,10 +89,18 @@ export default function Navigator() {
               }}
             />
             <Stack.Screen
+              name="Invitation"
+              component={InvitationPage}
+              options={{
+                presentation: "modal",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
               name="Event"
               options={({ route }) => ({
                 headerTitle: () => <OrganizationTitle {...route.params} />,
-                title: route.params.title,
+                title: route.params.organization.name,
                 headerBackTitle: "Back",
               })}
               component={OrganizationPage}
@@ -119,7 +134,7 @@ export default function Navigator() {
       <Tab.Screen
         name="Receipts"
         options={{
-          tabBarBadge: missingReceiptData?.total_count,
+          tabBarBadge: missingReceiptData?.total_count || undefined,
         }}
       >
         {() => (

@@ -47,7 +47,7 @@ export default function CardPage({
         },
       }).then((r) => r.json()),
     {
-      populateCache: (result) => result,
+      populateCache: true,
       onSuccess: () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         mutate(`/user/cards`);
