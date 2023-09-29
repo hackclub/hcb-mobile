@@ -1,6 +1,10 @@
+import Invitation from "./types/Invitation";
+import Organization from "./types/Organization";
+
 export type StackParamList = {
   Organizations: undefined;
-  Event: { id: string; image?: string; title: string };
+  Invitation: { invitation: Invitation };
+  Event: { organization: Organization };
   Transaction: { orgId: string; transactionId: string };
 };
 

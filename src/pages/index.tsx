@@ -1,9 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useEffect } from "react";
 import {
@@ -12,22 +9,32 @@ import {
   View,
   ActivityIndicator,
   TouchableHighlight,
+  ViewProps,
+  StyleSheet,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import { StackParamList } from "../lib/NavigatorParamList";
+import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 function Event({
   event,
-  navigation,
-}: {
+  hideBalance = false,
+  onPress,
+  style,
+  invitation,
+}: ViewProps & {
   event: Organization;
-  navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
+  hideBalance?: boolean;
+  invitation?: Invitation;
+  onPress?: () => void;
 }) {
-  const { data } = useSWR<OrganizationExpanded>(`/organizations/${event.id}`);
+  const { data } = useSWR<OrganizationExpanded>(
+    hideBalance ? null : `/organizations/${event.id}`,
+  );
 
   const colors = [
     "#ec3750",
@@ -44,27 +51,23 @@ function Event({
 
   return (
     <TouchableHighlight
-      onPress={() =>
-        navigation.navigate("Event", {
-          id: event.id,
-          title: event.name,
-          image: event.icon,
-        })
-      }
+      onPress={onPress}
       underlayColor={palette.background}
       activeOpacity={0.7}
     >
       <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: palette.darkless,
-          marginHorizontal: 20,
-          marginVertical: 8,
-          padding: 16,
-          borderRadius: 10,
-          overflow: "hidden",
-        }}
+        style={StyleSheet.compose(
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: palette.darkless,
+            marginVertical: 8,
+            padding: 16,
+            borderRadius: 10,
+            overflow: "hidden",
+          },
+          style,
+        )}
       >
         {event.icon ? (
           <Image
@@ -89,20 +92,29 @@ function Event({
             flex: 1,
           }}
         >
+          {invitation && invitation.sender && (
+            <Text style={{ color: palette.muted, marginBottom: 3 }}>
+              <Text style={{ fontWeight: "600" }}>
+                {invitation.sender.name}
+              </Text>{" "}
+              invited you to
+            </Text>
+          )}
           <Text
             numberOfLines={2}
             style={{
               color: "#fff",
               fontSize: 20,
-              marginBottom: 5,
               fontWeight: "600",
             }}
           >
             {event.name}
           </Text>
-          <Text style={{ color: palette.muted, fontSize: 16 }}>
-            {data ? renderMoney(data.balance_cents) : "$ ..."}
-          </Text>
+          {!hideBalance && (
+            <Text style={{ color: palette.muted, fontSize: 16, marginTop: 5 }}>
+              {data ? renderMoney(data.balance_cents) : "$ ..."}
+            </Text>
+          )}
         </View>
         <Ionicons
           name="chevron-forward-outline"
@@ -117,12 +129,16 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
-  const { data: organizations, error } = useSWR("/user/organizations");
+  const { data: organizations, error } = useSWR<Organization[]>(
+    "/user/organizations",
+  );
+  const { data: invitations } = useSWR<Invitation[]>("/user/invitations");
 
   const { fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("/user/cards", fetcher!);
   }, []);
 
@@ -147,7 +163,10 @@ export default function App({ navigation }: Props) {
       {organizations && (
         <FlatList
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
-          contentContainerStyle={{ paddingBottom: tabBarHeight }}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingBottom: tabBarHeight,
+          }}
           contentInsetAdjustmentBehavior="automatic"
           data={organizations}
           // refreshing={isValidating}
@@ -158,8 +177,61 @@ export default function App({ navigation }: Props) {
           //       key == "/user/organizations",
           //   );
           // }}
-          renderItem={({ item }) => (
-            <Event event={item} navigation={navigation} />
+          ListHeaderComponent={() =>
+            invitations &&
+            invitations.length > 0 && (
+              <View
+                style={{
+                  marginVertical: 20,
+                  borderRadius: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Pending invitations
+                </Text>
+                {invitations.map((invitation) => (
+                  <Event
+                    key={invitation.id}
+                    invitation={invitation}
+                    style={{ borderWidth: 2, borderColor: palette.primary }}
+                    event={invitation.organization}
+                    onPress={() =>
+                      navigation.navigate("Invitation", { invitation })
+                    }
+                    hideBalance
+                  />
+                  // <TouchableHighlight key={invitation.id}>
+                  //   <Text
+                  //     style={{
+                  //       color: palette.smoke,
+                  //       backgroundColor: palette.darkless,
+                  //       padding: 10,
+                  //       borderRadius: 10,
+                  //       overflow: "hidden",
+                  //     }}
+                  //   >
+                  //     {invitation.organization.name}
+                  //   </Text>
+                  // </TouchableHighlight>
+                ))}
+              </View>
+            )
+          }
+          renderItem={({ item: organization }) => (
+            <Event
+              event={organization}
+              onPress={() =>
+                navigation.navigate("Event", {
+                  organization,
+                })
+              }
+            />
           )}
         />
       )}

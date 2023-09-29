@@ -44,6 +44,7 @@ module.exports = {
       },
     ],
     "@typescript-eslint/no-non-null-assertion": "warn",
+    "react/no-unescaped-entities": "off",
   },
   globals: {
     fetch: "readonly",
