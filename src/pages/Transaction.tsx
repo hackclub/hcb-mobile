@@ -4,13 +4,10 @@ import useSWR from "swr";
 
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
 import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
+import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
-import Transaction, {
-  TransactionCardCharge,
-  TransactionDonation,
-  TransactionType,
-} from "../lib/types/Transaction";
+import Transaction, { TransactionType } from "../lib/types/Transaction";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
@@ -32,21 +29,30 @@ export default function TransactionPage({
   let transactionView: React.ReactElement;
 
   if (
-    transaction.code == TransactionType.StripeCard ||
-    transaction.code == TransactionType.StripeForceCapture
+    (transaction.code == TransactionType.StripeCard ||
+      transaction.code == TransactionType.StripeForceCapture) &&
+    "card_charge" in transaction
   ) {
     transactionView = (
       <CardChargeTransaction
-        transaction={transaction as TransactionCardCharge}
+        transaction={transaction}
         navigation={navigation}
       />
     );
-  } else if (transaction.code == TransactionType.Donation) {
+  } else if (
+    transaction.code == TransactionType.Donation &&
+    "donation" in transaction
+  ) {
     transactionView = (
-      <DonationTransaction
-        transaction={transaction as TransactionDonation}
-        navigation={navigation}
-      />
+      <DonationTransaction transaction={transaction} navigation={navigation} />
+    );
+  } else if (
+    (transaction.code == TransactionType.Check ||
+      transaction.code == TransactionType.IncreaseCheck) &&
+    "check" in transaction
+  ) {
+    transactionView = (
+      <CheckTransaction transaction={transaction} navigation={navigation} />
     );
   } else {
     transactionView = (
