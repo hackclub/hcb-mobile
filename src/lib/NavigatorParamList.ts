@@ -1,11 +1,12 @@
 import Invitation from "./types/Invitation";
 import Organization from "./types/Organization";
+import Transaction from "./types/Transaction";
 
 export type StackParamList = {
   Organizations: undefined;
   Invitation: { invitation: Invitation };
   Event: { organization: Organization };
-  Transaction: { orgId: string; transactionId: string };
+  Transaction: { orgId: string; transaction: Transaction };
 };
 
 export type CardsStackParamList = {
