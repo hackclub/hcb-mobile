@@ -60,7 +60,34 @@ export interface TransactionDonation extends TransactionBase {
   donation: Donation;
 }
 
+export interface Check {
+  recipient_name: string;
+  memo: string;
+  payment_for: string;
+  status?:
+    | "pending_approval"
+    | "rejected"
+    | "processing"
+    | "on_the_way"
+    | "deposited"
+    | "canceled"
+    | "returned";
+  sender?: User;
+}
+
+export interface TransactionCheck extends TransactionBase {
+  code: TransactionType.Check | TransactionType.IncreaseCheck;
+  check: Check;
+}
+
+// |
+// |
+// v this is cool, i should finish this
+//
+// type SpecificTransaction<Code extends TransactionType, Key extends string, Obj> = TransactionBase & {code: Code; } & {[k in Key]: Obj}
+
 type Transaction =
+  | TransactionCheck
   | TransactionDonation
   | TransactionCardCharge
   | TransactionBase;
