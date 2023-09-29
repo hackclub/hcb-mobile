@@ -1,6 +1,7 @@
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useContext } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, StatusBar } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -22,6 +23,8 @@ export default function InvitationPage({
   const { token } = useContext(AuthContext);
 
   const { mutate } = useSWRConfig();
+
+  const { colors: themeColors } = useTheme();
 
   const { trigger: accept, isMutating: acceptIsLoading } = useSWRMutation<
     unknown,
@@ -89,6 +92,8 @@ export default function InvitationPage({
         flex: 1,
       }}
     >
+      <StatusBar barStyle="light-content" />
+
       <Text
         style={{
           color: p.muted,
@@ -101,7 +106,7 @@ export default function InvitationPage({
       </Text>
       <Text
         style={{
-          color: p.smoke,
+          color: themeColors.text,
           textAlign: "center",
           fontSize: 36,
           fontWeight: "700",

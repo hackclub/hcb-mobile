@@ -1,3 +1,4 @@
+import { useTheme } from "@react-navigation/native";
 import capitalize from "lodash/capitalize";
 import { Text, View, ViewProps } from "react-native";
 // import Animated, {
@@ -22,10 +23,12 @@ export default function PaymentCard({
   card,
   ...props
 }: ViewProps & { card: Card }) {
+  const { colors: themeColors, dark } = useTheme();
+
   return (
     <View
       style={{
-        backgroundColor: palette.darkless,
+        backgroundColor: themeColors.card,
         padding: 30,
         height: 200,
         borderRadius: 16,
@@ -34,7 +37,7 @@ export default function PaymentCard({
         alignItems: "flex-start",
         position: "relative",
         borderWidth: 1,
-        borderColor: palette.slate,
+        borderColor: dark ? palette.slate : palette.muted,
         ...(props.style as object),
       }}
       // sharedTransitionTag={card.id}
@@ -44,7 +47,7 @@ export default function PaymentCard({
         <View
           style={{
             marginBottom: "auto",
-            backgroundColor: "rgb(35, 44, 52)",
+            backgroundColor: dark ? "rgb(35, 44, 52)" : "transparent",
             borderRadius: 30,
             paddingHorizontal: 16,
             paddingVertical: 6,
@@ -66,7 +69,7 @@ export default function PaymentCard({
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: palette.smoke,
+          color: themeColors.text,
           fontSize: 24,
           marginBottom: 4,
         }}

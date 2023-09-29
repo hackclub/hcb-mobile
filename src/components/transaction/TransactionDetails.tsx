@@ -1,3 +1,4 @@
+import { useTheme } from "@react-navigation/native";
 import { ReactElement } from "react";
 import { View, Text } from "react-native";
 
@@ -8,11 +9,13 @@ export default function TransactionDetails({
 }: {
   details: { label: string; value: ReactElement | string }[];
 }) {
+  const { colors: themeColors } = useTheme();
+
   return details.map(({ label, value }, index) => (
     <View
       key={label}
       style={{
-        backgroundColor: palette.darkless,
+        backgroundColor: themeColors.card,
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
@@ -31,7 +34,7 @@ export default function TransactionDetails({
         <Text
           numberOfLines={1}
           style={{
-            color: palette.smoke,
+            color: themeColors.text,
             overflow: "hidden",
             flex: 1,
             textAlign: "right",

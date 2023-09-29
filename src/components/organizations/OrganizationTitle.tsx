@@ -1,12 +1,14 @@
+import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { View, Text } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { palette } from "../../theme";
 
 export default function OrganizationTitle({
   organization,
 }: StackParamList["Event"]) {
+  const { colors: themeColors } = useTheme();
+
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       {organization.icon && (
@@ -18,7 +20,7 @@ export default function OrganizationTitle({
       )}
       <Text
         style={{
-          color: palette.smoke,
+          color: themeColors.text,
           fontWeight: "600",
           fontSize: 17,
         }}

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useEffect } from "react";
@@ -11,6 +12,7 @@ import {
   TouchableHighlight,
   ViewProps,
   StyleSheet,
+  useColorScheme,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
@@ -36,6 +38,8 @@ function Event({
     hideBalance ? null : `/organizations/${event.id}`,
   );
 
+  const { colors: themeColors } = useTheme();
+
   const colors = [
     "#ec3750",
     "#ff8c37",
@@ -52,7 +56,7 @@ function Event({
   return (
     <TouchableHighlight
       onPress={onPress}
-      underlayColor={palette.background}
+      underlayColor={themeColors.background}
       activeOpacity={0.7}
     >
       <View
@@ -60,8 +64,8 @@ function Event({
           {
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: palette.darkless,
-            marginVertical: 8,
+            backgroundColor: themeColors.card,
+            marginBottom: 16,
             padding: 16,
             borderRadius: 10,
             overflow: "hidden",
@@ -103,7 +107,7 @@ function Event({
           <Text
             numberOfLines={2}
             style={{
-              color: "#fff",
+              color: themeColors.text,
               fontSize: 20,
               fontWeight: "600",
             }}
@@ -136,6 +140,7 @@ export default function App({ navigation }: Props) {
 
   const { fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
+  const scheme = useColorScheme();
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -164,7 +169,7 @@ export default function App({ navigation }: Props) {
         <FlatList
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
-            paddingHorizontal: 20,
+            padding: 20,
             paddingBottom: tabBarHeight,
           }}
           contentInsetAdjustmentBehavior="automatic"
@@ -191,6 +196,7 @@ export default function App({ navigation }: Props) {
                     color: palette.muted,
                     fontSize: 12,
                     textTransform: "uppercase",
+                    marginBottom: 10,
                   }}
                 >
                   Pending invitations
@@ -199,7 +205,11 @@ export default function App({ navigation }: Props) {
                   <Event
                     key={invitation.id}
                     invitation={invitation}
-                    style={{ borderWidth: 2, borderColor: palette.primary }}
+                    style={{
+                      borderWidth: 2,
+                      borderColor:
+                        scheme == "dark" ? palette.primary : palette.muted,
+                    }}
                     event={invitation.organization}
                     onPress={() =>
                       navigation.navigate("Invitation", { invitation })
