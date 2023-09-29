@@ -3,9 +3,10 @@ import { Image } from "expo-image";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
-import ITransaction, {
+import {
   TransactionCardCharge,
   TransactionType,
+  TransactionWithoutId,
 } from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
@@ -42,7 +43,7 @@ function TransactionIcon({
   transaction,
   hideAvatar,
 }: {
-  transaction: ITransaction;
+  transaction: TransactionWithoutId;
   hideAvatar?: boolean;
 }) {
   if (
@@ -79,7 +80,7 @@ function Transaction({
   hideAvatar,
   style,
 }: ViewProps & {
-  transaction: ITransaction;
+  transaction: TransactionWithoutId;
   top?: boolean;
   bottom?: boolean;
   hideAvatar?: boolean;

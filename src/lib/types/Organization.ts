@@ -25,4 +25,5 @@ export default interface Organization extends HcbApiObject<"org"> {
 
 export interface OrganizationExpanded extends Organization {
   balance_cents: number;
+  fee_balance_cents: number;
 }

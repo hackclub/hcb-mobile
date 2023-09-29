@@ -20,7 +20,7 @@ export enum TransactionType {
   AchPayment = "800",
 }
 
-interface TransactionBase extends HcbApiObject<"txn"> {
+interface TransactionBase extends Omit<HcbApiObject<"txn">, "created_at"> {
   date: string;
   amount_cents: number;
   memo: string;
@@ -64,5 +64,9 @@ type Transaction =
   | TransactionDonation
   | TransactionCardCharge
   | TransactionBase;
+
+export type TransactionWithoutId = Omit<Transaction, "id"> & {
+  id?: Transaction["id"];
+};
 
 export default Transaction;
