@@ -7,6 +7,7 @@ export type StackParamList = {
   Invitation: { invitation: Invitation };
   Event: { organization: Organization };
   Transaction: { orgId: string; transaction: Transaction };
+  RenameTransaction: { orgId: string; transaction: Transaction };
 };
 
 export type CardsStackParamList = {

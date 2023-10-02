@@ -1,19 +1,18 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCardCharge } from "../../../lib/types/Transaction";
 import { renderDate, renderMoney } from "../../../util";
 import UserMention from "../../UserMention";
-import TransactionDetails from "../TransactionDetails";
+import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
+
+import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CardChargeTransaction({
   transaction,
-}: {
-  transaction: TransactionCardCharge;
-  navigation: NativeStackNavigationProp<StackParamList, "Transaction">;
-}) {
+  orgId,
+  navigation,
+}: TransactionViewProps<TransactionCardCharge>) {
   return (
     <View>
       <TransactionTitle>
@@ -22,7 +21,7 @@ export default function CardChargeTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          { label: "Description", value: transaction.memo },
+          descriptionDetail(orgId, transaction, navigation),
           { label: "Spent on", value: renderDate(transaction.date) },
           {
             label: "Spent by",

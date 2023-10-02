@@ -1,23 +1,29 @@
 import { useMemo } from "react";
 import useSWRInfinite from "swr/infinite";
 
+import { PaginatedResponse } from "../types/HcbApiObject";
 import Transaction from "../types/Transaction";
 
 const PAGE_SIZE = 35;
 
+export function getKey(orgId: string) {
+  return (
+    index: number,
+    previousPageData?: PaginatedResponse<Transaction> | undefined,
+  ) => {
+    if (previousPageData?.has_more === false) return null;
+
+    if (index === 0)
+      return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}`;
+
+    return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}&after=${
+      previousPageData!.data[previousPageData!.data.length - 1].id
+    }`;
+  };
+}
+
 export default function useTransactions(orgId: string) {
-  const { data, size, setSize, isLoading } = useSWRInfinite(
-    (index, previousPageData) => {
-      if (previousPageData?.has_more === false) return null;
-
-      if (index === 0)
-        return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}`;
-
-      return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}&after=${
-        previousPageData.data[previousPageData.data.length - 1].id
-      }`;
-    },
-  );
+  const { data, size, setSize, isLoading } = useSWRInfinite(getKey(orgId));
 
   const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d.data) || [],

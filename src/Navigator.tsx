@@ -22,6 +22,7 @@ import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
+import RenameTransactionPage from "./pages/RenameTransaction";
 import TransactionPage from "./pages/Transaction";
 
 const Stack = createNativeStackNavigator<StackParamList>();
@@ -109,6 +110,14 @@ export default function Navigator() {
               options={{ headerBackTitle: "Back" }}
               name="Transaction"
               component={TransactionPage}
+            />
+            <Stack.Screen
+              name="RenameTransaction"
+              component={RenameTransactionPage}
+              options={{
+                presentation: "modal",
+                title: "Edit Transaction Description",
+              }}
             />
           </Stack.Navigator>
         )}

@@ -1,19 +1,17 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCheck } from "../../../lib/types/Transaction";
 import { renderMoney } from "../../../util";
 import UserMention from "../../UserMention";
-import TransactionDetails from "../TransactionDetails";
+import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
+
+import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },
-}: {
-  transaction: TransactionCheck;
-  navigation: NativeStackNavigationProp<StackParamList, "Transaction">;
-}) {
+  ...props
+}: TransactionViewProps<TransactionCheck>) {
   return (
     <View>
       <TransactionTitle>
@@ -22,7 +20,7 @@ export default function CheckTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          { label: "Description", value: transaction.memo },
+          descriptionDetail(props.orgId, transaction, props.navigation),
           ...(check.sender
             ? [{ label: "Sent by", value: <UserMention user={check.sender} /> }]
             : []),
