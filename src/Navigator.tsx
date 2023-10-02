@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import { useContext } from "react";
-import { View, Button, StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import useSWR from "swr";
 
 import AuthContext from "./auth";
@@ -19,6 +19,7 @@ import Invitation from "./lib/types/Invitation";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
+import SettingsPage from "./pages/Settings";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
@@ -149,9 +150,7 @@ export default function Navigator() {
       </Tab.Screen>
       <Tab.Screen name="Settings" options={{ headerShown: true }}>
         {() => (
-          <View>
-            <Button title="log out" onPress={() => setToken("")} />
-          </View>
+          <SettingsPage />
         )}
       </Tab.Screen>
     </Tab.Navigator>
