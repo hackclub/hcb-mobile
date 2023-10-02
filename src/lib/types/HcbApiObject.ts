@@ -3,7 +3,7 @@ export default interface HcbApiObject<T extends string> {
   created_at: string;
 }
 
-export interface PaginatedResponse<T extends HcbApiObject<string>> {
+export interface PaginatedResponse<T> {
   data: T[];
   has_more: boolean;
   total_count: number;

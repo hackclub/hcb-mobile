@@ -45,6 +45,7 @@ function addPendingFeeToTransactions(
         date: "",
         pending: true,
         memo: "FISCAL SPONSORSHIP",
+        has_custom_memo: false,
         declined: false,
       },
       ...transactions,
@@ -128,7 +129,7 @@ export default function OrganizationPage({
                 >
                   Balance
                 </Text>
-                <Text style={{ color: themeColors.text, fontSize: 30 }}>
+                <Text style={{ color: themeColors.text, fontSize: 36 }}>
                   {"balance_cents" in organization &&
                     renderMoney(organization.balance_cents)}
                 </Text>

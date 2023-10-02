@@ -36,6 +36,7 @@ export default function TransactionPage({
     transactionView = (
       <CardChargeTransaction
         transaction={transaction}
+        orgId={params.orgId}
         navigation={navigation}
       />
     );
@@ -44,7 +45,11 @@ export default function TransactionPage({
     "donation" in transaction
   ) {
     transactionView = (
-      <DonationTransaction transaction={transaction} navigation={navigation} />
+      <DonationTransaction
+        transaction={transaction}
+        orgId={params.orgId}
+        navigation={navigation}
+      />
     );
   } else if (
     (transaction.code == TransactionType.Check ||
@@ -52,12 +57,17 @@ export default function TransactionPage({
     "check" in transaction
   ) {
     transactionView = (
-      <CheckTransaction transaction={transaction} navigation={navigation} />
+      <CheckTransaction
+        transaction={transaction}
+        orgId={params.orgId}
+        navigation={navigation}
+      />
     );
   } else {
     transactionView = (
       <BankAccountTransaction
         transaction={transaction}
+        orgId={params.orgId}
         navigation={navigation}
       />
     );
