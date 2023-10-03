@@ -8,8 +8,8 @@ import {
 } from "react-native";
 import AppIcon from "react-native-dynamic-app-icon";
 
-import Button from "../components/Button";
 import AuthContext from "../auth";
+import Button from "../components/Button";
 import IconPreloader, { IconNames } from "../lib/iconPreloader";
 import { palette } from "../theme";
 
@@ -17,7 +17,7 @@ type IconSwitcherProps = {
   iconName: IconNames;
   activeIcon: IconNames;
   iconIndex: string;
-  setActiveIcon: Function;
+  setActiveIcon: (icon: IconNames) => void;
   customName?: string;
 };
 
@@ -64,8 +64,9 @@ const IconSwitcher = () => {
   const [activeIcon, setActiveIcon] = useState<IconNames>("default");
 
   useEffect(() => {
-    AppIcon.getIconName((icon: any) => {
-      setActiveIcon(icon.iconName);
+    AppIcon.getIconName(({iconName}: {iconName: IconNames}) => {
+
+      setActiveIcon(iconName);
     });
   }, []);
 

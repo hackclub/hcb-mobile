@@ -2,11 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
-import { useContext } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 import useSWR from "swr";
 
-import AuthContext from "./auth";
 import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
   StackParamList,
@@ -19,10 +17,10 @@ import Invitation from "./lib/types/Invitation";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
-import SettingsPage from "./pages/Settings";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
+import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
 
 const Stack = createNativeStackNavigator<StackParamList>();
@@ -32,7 +30,6 @@ const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
-  const { setToken } = useContext(AuthContext);
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     `/user/transactions/missing_receipt`,
   );
