@@ -64,7 +64,7 @@ export default {
           "./assets/icons/logo-hack-night.png",
           "./assets/icons/logo-418.png",
         ],
-      ]
+      ],
     ],
   },
 };

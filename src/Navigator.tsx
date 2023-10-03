@@ -149,9 +149,7 @@ export default function Navigator() {
         )}
       </Tab.Screen>
       <Tab.Screen name="Settings" options={{ headerShown: true }}>
-        {() => (
-          <SettingsPage />
-        )}
+        {() => <SettingsPage />}
       </Tab.Screen>
     </Tab.Navigator>
   );
