@@ -52,7 +52,6 @@ export default {
         "@config-plugins/react-native-dynamic-app-icon",
         [
           "./assets/icon.png",
-          "./assets/icons/logo-alt-1-neon.png",
           "./assets/icons/logo-alt-2-neon.png",
           "./assets/icons/logo-neon.png"
         ],

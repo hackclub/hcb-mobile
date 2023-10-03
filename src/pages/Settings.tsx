@@ -1,22 +1,29 @@
 
-import { ScrollView, Image, Text } from "react-native";
 import { useContext, useEffect, useState } from "react";
+import { ScrollView, Image, Text, View, TouchableHighlight } from "react-native";
+import AppIcon from "react-native-dynamic-app-icon";
+
 import Button from "../components/Button";
 import AuthContext from "../auth";
 import IconPreloader, { IconNames } from "../lib/iconPreloader"
-import AppIcon from "react-native-dynamic-app-icon";
+import { palette } from "../theme";
 
-type IconSwitcherProps = { iconName: IconNames, activeIcon: IconNames, iconIndex: string, setActiveIcon: Function };
+type IconSwitcherProps = {
+  iconName: IconNames,
+  activeIcon: IconNames,
+  iconIndex: string,
+  setActiveIcon: Function,
+  customName?: string
+};
 
-function IconSwitcherButton({iconName, activeIcon, iconIndex, setActiveIcon}: IconSwitcherProps) {
+function IconSwitcherButton({iconName, activeIcon, iconIndex, customName, setActiveIcon}: IconSwitcherProps) {
+
   const handlePress = () => {
     AppIcon.setAppIcon(iconIndex)
-    setActiveIcon(iconIndex.toString())
-    console.log({iconIndex, activeIcon})
+    setActiveIcon(iconIndex)
   }
 
   const isActiveIcon = () => {
-    // console.log({activeIcon, iconIndex})
     return activeIcon === iconIndex
   }
 
@@ -24,16 +31,21 @@ function IconSwitcherButton({iconName, activeIcon, iconIndex, setActiveIcon}: Ic
 
   return(
     <>
-      <Button onPress={handlePress} loading={isActiveIcon()}>
-        <Image
-          source={preloadedImage} 
-          style={{ width: 96, height: 96 }}
-          />
+      <TouchableHighlight
+              underlayColor={palette.smoke}
+              activeOpacity={0.7}
+              onPress={handlePress}>
+        <View>
+          <Image
+            source={preloadedImage} 
+            style={{ width: 48, height: 48 }}
+            />
           <Text>
-            {iconName}
-            {isActiveIcon() && <Text>(Active)</Text>}
+            {customName || iconName}
+            {isActiveIcon() && <Text style={{ color: palette.muted }}>(Active)</Text>}
           </Text>
-      </Button>
+        </View>
+      </TouchableHighlight>
     </>
   )
 }
@@ -42,18 +54,16 @@ const IconSwitcher = () => {
   const [activeIcon, setActiveIcon] = useState<IconNames>('default')
 
   useEffect(() => {
-    AppIcon.getIconName((icon: IconNames) => {
-      console.log("Current icon is " + icon)
-      setActiveIcon(icon)
+    AppIcon.getIconName((icon: any) => {
+      setActiveIcon(icon.iconName)
     })
-  })
+  }, [])
 
   return(
     <>
-      <IconSwitcherButton setActiveIcon={setActiveIcon} iconName="default" iconIndex="0" activeIcon={activeIcon} />
-      <IconSwitcherButton setActiveIcon={setActiveIcon} iconName="dark-red" iconIndex="1" activeIcon={activeIcon} />
-      <IconSwitcherButton setActiveIcon={setActiveIcon} iconName="dark-green" iconIndex="2" activeIcon={activeIcon} />
-      <IconSwitcherButton setActiveIcon={setActiveIcon} iconName="dark-purple" iconIndex="3" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="HCB Primary" iconName="default" iconIndex="-1" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Neon Green" iconName="dark-green" iconIndex="0" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Grape flavor?" iconName="dark-purple" iconIndex="1" activeIcon={activeIcon} />
     </>
   )
 }
