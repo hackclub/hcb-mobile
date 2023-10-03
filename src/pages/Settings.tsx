@@ -61,9 +61,18 @@ const IconSwitcher = () => {
 
   return(
     <>
-      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="HCB Primary" iconName="default" iconIndex="-1" activeIcon={activeIcon} />
-      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Neon Green" iconName="dark-green" iconIndex="0" activeIcon={activeIcon} />
-      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Grape flavor?" iconName="dark-purple" iconIndex="1" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="HCB Primary" iconName="default" iconIndex="0" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Dark Mode" iconName="dark-mode" iconIndex="1" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Neon Green" iconName="dark-green" iconIndex="2" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Grape flavor?" iconName="dark-purple" iconIndex="3" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Outernet" iconName="logo-outernet" iconIndex="4" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Sinerider" iconName="logo-sinerider" iconIndex="5" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Slash-Z" iconName="logo-slash-z" iconIndex="6" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Sprig Village" iconName="logo-sprig-village" iconIndex="7" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Flagship" iconName="logo-flagship" iconIndex="8" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Hack Night" iconName="logo-hack-night-2" iconIndex="9" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Hack Night Alt" iconName="logo-hack-night" iconIndex="10" activeIcon={activeIcon} />
+      <IconSwitcherButton setActiveIcon={setActiveIcon} customName="Error: 418" iconName="logo-418" iconIndex="11" activeIcon={activeIcon} />
     </>
   )
 }

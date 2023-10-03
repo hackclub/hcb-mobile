@@ -51,9 +51,18 @@ export default {
       [
         "@config-plugins/react-native-dynamic-app-icon",
         [
-          "./assets/icon.png",
+          "./assets/icons/logo-ios.png",
+          "./assets/icons/logo-dark-mode.png",
+          "./assets/icons/logo-alt-1-neon.png",
           "./assets/icons/logo-alt-2-neon.png",
-          "./assets/icons/logo-neon.png"
+          "./assets/icons/logo-outernet.png",
+          "./assets/icons/logo-sinerider.png",
+          "./assets/icons/logo-slash-z.png",
+          "./assets/icons/logo-sprig-village.png",
+          "./assets/icons/logo-flagship.png",
+          "./assets/icons/logo-hack-night-2.png",
+          "./assets/icons/logo-hack-night.png",
+          "./assets/icons/logo-418.png",
         ],
       ]
     ],
