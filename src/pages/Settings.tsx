@@ -15,9 +15,9 @@ import { palette } from "../theme";
 
 type IconSwitcherProps = {
   iconName: IconNames;
-  activeIcon: IconNames;
+  activeIcon: string;
   iconIndex: string;
-  setActiveIcon: (icon: IconNames) => void;
+  setActiveIcon: (icon: string) => void;
   customName?: string;
 };
 
@@ -61,11 +61,10 @@ function IconSwitcherButton({
 }
 
 const IconSwitcher = () => {
-  const [activeIcon, setActiveIcon] = useState<IconNames>("default");
+  const [activeIcon, setActiveIcon] = useState("0");
 
   useEffect(() => {
-    AppIcon.getIconName(({iconName}: {iconName: IconNames}) => {
-
+    AppIcon.getIconName(({ iconName }: { iconName: string }) => {
       setActiveIcon(iconName);
     });
   }, []);
