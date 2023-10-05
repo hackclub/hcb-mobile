@@ -5,11 +5,17 @@ import {
   DiscoveryDocument,
 } from "expo-auth-session";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Text, View, Animated, StyleSheet, SafeAreaView } from "react-native";
+import {
+  Text,
+  View,
+  Animated,
+  SafeAreaView,
+  useColorScheme,
+} from "react-native";
 
 import AuthContext from "../auth";
 import Button from "../components/Button";
-import { palette } from "../theme";
+import { lightTheme, palette, theme as darkTheme } from "../theme";
 
 const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -63,8 +69,17 @@ export default function Login() {
     }).start();
   }, [animation]);
 
+  const scheme = useColorScheme();
+  const theme = scheme == "dark" ? darkTheme : lightTheme;
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={{
+        backgroundColor: theme.colors.background,
+        flex: 1,
+        flexDirection: "column",
+      }}
+    >
       <View
         style={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}
       >
@@ -104,11 +119,3 @@ export default function Login() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: palette.background,
-    flex: 1,
-    flexDirection: "column",
-  },
-});
