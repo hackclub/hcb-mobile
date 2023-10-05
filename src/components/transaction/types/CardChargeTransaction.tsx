@@ -6,6 +6,7 @@ import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCardCharge } from "../../../lib/types/Transaction";
 import { renderDate, renderMoney } from "../../../util";
 import UserMention from "../../UserMention";
+import ReceiptList from "../ReceiptList";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 
@@ -34,6 +35,7 @@ export default function CardChargeTransaction({
           },
         ]}
       />
+      <ReceiptList transaction={transaction} />
     </View>
   );
 }

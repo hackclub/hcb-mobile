@@ -73,12 +73,14 @@ function Transaction({
   top = false,
   bottom = false,
   hideAvatar,
+  hidePendingLabel,
   style,
 }: ViewProps & {
   transaction: TransactionWithoutId;
   top?: boolean;
   bottom?: boolean;
   hideAvatar?: boolean;
+  hidePendingLabel?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
 
@@ -108,11 +110,12 @@ function Transaction({
           flex: 1,
         }}
       >
-        {transaction.declined
-          ? "Declined: "
-          : transaction.pending
-          ? "Pending: "
-          : ""}
+        {!hidePendingLabel &&
+          (transaction.declined
+            ? "Declined: "
+            : transaction.pending
+            ? "Pending: "
+            : "")}
         {transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
       <Text

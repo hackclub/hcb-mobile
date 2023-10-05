@@ -1,5 +1,6 @@
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, ScrollView } from "react-native";
 import useSWR from "swr";
 
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
@@ -23,6 +24,8 @@ export default function TransactionPage({
     { fallbackData: _transaction },
   );
 
+  const tabBarHeight = useBottomTabBarHeight();
+
   if (!transaction) {
     return <ActivityIndicator />;
   }
@@ -42,8 +45,11 @@ export default function TransactionPage({
   }
 
   return (
-    <View style={{ padding: 20 }}>
+    <ScrollView
+      contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
+      scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
+    >
       <TransactionComponent transaction={transaction} orgId={params.orgId} />
-    </View>
+    </ScrollView>
   );
 }
