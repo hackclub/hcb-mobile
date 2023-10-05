@@ -1,5 +1,8 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
+import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCardCharge } from "../../../lib/types/Transaction";
 import { renderDate, renderMoney } from "../../../util";
 import UserMention from "../../UserMention";
@@ -11,8 +14,10 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function CardChargeTransaction({
   transaction,
   orgId,
-  navigation,
 }: TransactionViewProps<TransactionCardCharge>) {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
+
   return (
     <View>
       <TransactionTitle>

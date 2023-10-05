@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { Image } from "expo-image";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
@@ -11,6 +10,8 @@ import {
 } from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
+
+import UserAvatar from "./UserAvatar";
 
 function transactionIcon(
   code: TransactionType,
@@ -47,19 +48,12 @@ function TransactionIcon({
   transaction: TransactionWithoutId;
   hideAvatar?: boolean;
 }) {
-  if (
-    !hideAvatar &&
-    transaction.code == TransactionType.StripeCard &&
-    (transaction as TransactionCardCharge).card_charge.card.user.avatar != null
-  ) {
+  if (!hideAvatar && transaction.code == TransactionType.StripeCard) {
     return (
-      <Image
-        source={
-          (transaction as TransactionCardCharge).card_charge.card.user.avatar
-        }
-        placeholder={require("../../assets/placeholder.png")}
-        cachePolicy="disk"
-        style={{ width: 20, height: 20, marginRight: 10, borderRadius: 400 }}
+      <UserAvatar
+        user={(transaction as TransactionCardCharge).card_charge.card.user}
+        size={20}
+        style={{ marginRight: 10 }}
       />
     );
   } else {
