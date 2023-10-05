@@ -1,5 +1,6 @@
 import Card from "./Card";
 import HcbApiObject from "./HcbApiObject";
+import Organization from "./Organization";
 import User from "./User";
 
 export enum TransactionType {
@@ -82,6 +83,18 @@ export interface TransactionCheck extends TransactionBase {
   check: Check;
 }
 
+export interface Transfer {
+  from: Organization;
+  to: Organization;
+  sender?: User;
+  memo: string;
+}
+
+export interface TransactionTransfer extends TransactionBase {
+  code: TransactionType.Disbursement;
+  transfer: Transfer;
+}
+
 // |
 // |
 // v this is cool, i should finish this
@@ -89,6 +102,7 @@ export interface TransactionCheck extends TransactionBase {
 // type SpecificTransaction<Code extends TransactionType, Key extends string, Obj> = TransactionBase & {code: Code; } & {[k in Key]: Obj}
 
 type Transaction =
+  | TransactionTransfer
   | TransactionCheck
   | TransactionDonation
   | TransactionCardCharge

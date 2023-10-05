@@ -1,5 +1,8 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
+import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCheck } from "../../../lib/types/Transaction";
 import { renderMoney } from "../../../util";
 import UserMention from "../../UserMention";
@@ -12,6 +15,9 @@ export default function CheckTransaction({
   transaction: { check, ...transaction },
   ...props
 }: TransactionViewProps<TransactionCheck>) {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
+
   return (
     <View>
       <TransactionTitle>
@@ -20,7 +26,7 @@ export default function CheckTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, props.navigation),
+          descriptionDetail(props.orgId, transaction, navigation),
           ...(check.sender
             ? [{ label: "Sent by", value: <UserMention user={check.sender} /> }]
             : []),

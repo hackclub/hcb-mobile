@@ -6,8 +6,10 @@ import BankAccountTransaction from "../components/transaction/types/BankAccountT
 import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
+import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
+import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
-import Transaction, { TransactionType } from "../lib/types/Transaction";
+import Transaction from "../lib/types/Transaction";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
@@ -15,7 +17,6 @@ export default function TransactionPage({
   route: {
     params: { transaction: _transaction, ...params },
   },
-  navigation,
 }: Props) {
   const { data: transaction } = useSWR<Transaction>(
     `/organizations/${params.orgId}/transactions/${_transaction.id}`,
@@ -26,52 +27,23 @@ export default function TransactionPage({
     return <ActivityIndicator />;
   }
 
-  let transactionView: React.ReactElement;
+  let TransactionComponent: (props: TransactionViewProps) => React.ReactElement;
 
-  if (
-    (transaction.code == TransactionType.StripeCard ||
-      transaction.code == TransactionType.StripeForceCapture) &&
-    "card_charge" in transaction
-  ) {
-    transactionView = (
-      <CardChargeTransaction
-        transaction={transaction}
-        orgId={params.orgId}
-        navigation={navigation}
-      />
-    );
-  } else if (
-    transaction.code == TransactionType.Donation &&
-    "donation" in transaction
-  ) {
-    transactionView = (
-      <DonationTransaction
-        transaction={transaction}
-        orgId={params.orgId}
-        navigation={navigation}
-      />
-    );
-  } else if (
-    (transaction.code == TransactionType.Check ||
-      transaction.code == TransactionType.IncreaseCheck) &&
-    "check" in transaction
-  ) {
-    transactionView = (
-      <CheckTransaction
-        transaction={transaction}
-        orgId={params.orgId}
-        navigation={navigation}
-      />
-    );
+  if ("card_charge" in transaction) {
+    TransactionComponent = CardChargeTransaction;
+  } else if ("donation" in transaction) {
+    TransactionComponent = DonationTransaction;
+  } else if ("check" in transaction) {
+    TransactionComponent = CheckTransaction;
+  } else if ("transfer" in transaction) {
+    TransactionComponent = TransferTransaction;
   } else {
-    transactionView = (
-      <BankAccountTransaction
-        transaction={transaction}
-        orgId={params.orgId}
-        navigation={navigation}
-      />
-    );
+    TransactionComponent = BankAccountTransaction;
   }
 
-  return <View style={{ padding: 20 }}>{transactionView}</View>;
+  return (
+    <View style={{ padding: 20 }}>
+      <TransactionComponent transaction={transaction} orgId={params.orgId} />
+    </View>
+  );
 }
