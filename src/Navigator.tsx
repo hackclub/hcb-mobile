@@ -5,7 +5,7 @@ import { revokeAsync } from "expo-auth-session";
 import { BlurView } from "expo-blur";
 import { useContext } from "react";
 import { View, Button, StyleSheet, useColorScheme } from "react-native";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 import AuthContext from "./auth";
 import OrganizationTitle from "./components/organizations/OrganizationTitle";
@@ -172,6 +172,8 @@ export default function Navigator() {
                   },
                   discovery,
                 );
+
+                mutate((k) => k, undefined, { revalidate: false });
 
                 setToken("");
               }}
