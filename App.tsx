@@ -52,7 +52,16 @@ export default function App() {
           fetcher: (url) =>
             fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
               headers: { Authorization: `Bearer ${token}` },
-            }).then((res) => res.json()),
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                if (res.error === "invalid_auth") {
+                  // OAuth token either expired or was revoked
+                  setToken("");
+                  return;
+                }
+                return res;
+              }),
         }}
       >
         <SafeAreaProvider>

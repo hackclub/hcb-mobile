@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { revokeAsync } from "expo-auth-session";
 import { BlurView } from "expo-blur";
 import { useContext } from "react";
 import { View, Button, StyleSheet, useColorScheme } from "react-native";
@@ -20,6 +21,7 @@ import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
+import { discovery } from "./pages/login";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
@@ -32,7 +34,7 @@ const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
-  const { setToken } = useContext(AuthContext);
+  const { token, setToken } = useContext(AuthContext);
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     `/user/transactions/missing_receipt`,
   );
@@ -159,7 +161,21 @@ export default function Navigator() {
       <Tab.Screen name="Settings" options={{ headerShown: true }}>
         {() => (
           <View>
-            <Button title="log out" onPress={() => setToken("")} />
+            <Button
+              title="log out"
+              onPress={() => {
+                // intentionally not `await`ed
+                revokeAsync(
+                  {
+                    token: token!,
+                    clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+                  },
+                  discovery,
+                );
+
+                setToken("");
+              }}
+            />
           </View>
         )}
       </Tab.Screen>
