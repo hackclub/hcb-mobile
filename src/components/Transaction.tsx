@@ -44,10 +44,14 @@ function transactionIcon(
 function TransactionIcon({
   transaction,
   hideAvatar,
+  hideIcon,
 }: {
   transaction: TransactionWithoutId;
   hideAvatar?: boolean;
+  hideIcon?: boolean;
 }) {
+  if (hideIcon) return null;
+
   if (!hideAvatar && transaction.code == TransactionType.StripeCard) {
     return (
       <UserAvatar
@@ -73,6 +77,7 @@ function Transaction({
   top = false,
   bottom = false,
   hideAvatar,
+  hideIcon,
   hidePendingLabel,
   style,
 }: ViewProps & {
@@ -80,6 +85,7 @@ function Transaction({
   top?: boolean;
   bottom?: boolean;
   hideAvatar?: boolean;
+  hideIcon?: boolean;
   hidePendingLabel?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
@@ -100,7 +106,11 @@ function Transaction({
         style,
       )}
     >
-      <TransactionIcon transaction={transaction} hideAvatar={hideAvatar} />
+      <TransactionIcon
+        transaction={transaction}
+        hideAvatar={hideAvatar}
+        hideIcon={hideIcon}
+      />
       <Text
         numberOfLines={1}
         style={{

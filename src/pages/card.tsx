@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { useContext } from "react";
 import { ScrollView, View, Text, ActivityIndicator } from "react-native";
-import useSWR, { mutate } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import AuthContext from "../auth";
@@ -19,15 +19,19 @@ type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
 export default function CardPage({
   route: {
-    params: { cardId },
+    params: { card: _card },
   },
 }: Props) {
   const { token } = useContext(AuthContext);
 
-  const { data: card } = useSWR<Card>(`/cards/${cardId}`);
+  const { data: card } = useSWR<Card>(`/cards/${_card.id}`, {
+    fallbackData: _card,
+  });
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];
-  }>(`/cards/${cardId}/transactions`);
+  }>(`/cards/${_card.id}/transactions`);
+
+  const { mutate } = useSWRConfig();
 
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
@@ -36,7 +40,7 @@ export default function CardPage({
     "frozen" | "active",
     Card
   >(
-    `/cards/${cardId}`,
+    `/cards/${_card.id}`,
     (url, { arg }) =>
       fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
         body: JSON.stringify({ status: arg }),

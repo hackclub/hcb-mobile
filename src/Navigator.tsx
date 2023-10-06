@@ -5,7 +5,7 @@ import { revokeAsync } from "expo-auth-session";
 import { BlurView } from "expo-blur";
 import { useContext } from "react";
 import { View, Button, StyleSheet, useColorScheme } from "react-native";
-import useSWR, { mutate } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 import AuthContext from "./auth";
 import OrganizationTitle from "./components/organizations/OrganizationTitle";
@@ -41,6 +41,8 @@ export default function Navigator() {
   const { data: invitations } = useSWR<Invitation[]>(`/user/invitations`);
 
   const scheme = useColorScheme();
+
+  const { mutate } = useSWRConfig();
 
   return (
     <Tab.Navigator
@@ -136,7 +138,7 @@ export default function Navigator() {
               name="Card"
               component={CardPage}
               options={({ route }) => ({
-                title: `Card ····${route.params.last4}`,
+                title: `Card ····${route.params.card.last4}`,
               })}
             />
           </CardsStack.Navigator>
