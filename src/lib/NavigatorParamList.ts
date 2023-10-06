@@ -1,3 +1,4 @@
+import Card from "./types/Card";
 import Invitation from "./types/Invitation";
 import Organization from "./types/Organization";
 import Transaction from "./types/Transaction";
@@ -12,7 +13,7 @@ export type StackParamList = {
 
 export type CardsStackParamList = {
   CardList: undefined;
-  Card: { cardId: string; last4: string };
+  Card: { card: Card };
 };
 
 export type ReceiptsStackParamList = {

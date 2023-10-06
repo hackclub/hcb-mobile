@@ -7,7 +7,6 @@ import { FlatList, Pressable, useColorScheme } from "react-native";
 import useSWR from "swr";
 
 import PaymentCard from "../components/PaymentCard";
-import listPreloader from "../lib/listPreloader";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import { palette } from "../theme";
@@ -15,12 +14,8 @@ import { palette } from "../theme";
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
 export default function CardsPage({ navigation }: Props) {
-  const { data: cards } = useSWR<(Card & Required<Pick<Card, "last4">>)[]>(
-    "/user/cards",
-    {
-      use: [listPreloader<Card>((c) => `/cards/${c.id}`)],
-    },
-  );
+  const { data: cards } =
+    useSWR<(Card & Required<Pick<Card, "last4">>)[]>("/user/cards");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
@@ -72,8 +67,7 @@ export default function CardsPage({ navigation }: Props) {
           <Pressable
             onPress={() =>
               navigation.navigate("Card", {
-                cardId: item.id,
-                last4: item.last4,
+                card: item,
               })
             }
           >
