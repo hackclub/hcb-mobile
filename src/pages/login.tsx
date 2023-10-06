@@ -17,9 +17,10 @@ import AuthContext from "../auth";
 import Button from "../components/Button";
 import { lightTheme, palette, theme as darkTheme } from "../theme";
 
-const discovery: DiscoveryDocument = {
+export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
   tokenEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
+  revocationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/revoke`,
 };
 const clientId = process.env.EXPO_PUBLIC_CLIENT_ID!;
 
