@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useEffect } from "react";
@@ -133,12 +133,15 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
-  const { data: organizations, error } = useSWR<Organization[]>(
-    "/user/organizations",
-  );
-  const { data: invitations } = useSWR<Invitation[]>("/user/invitations");
+  const {
+    data: organizations,
+    error,
+    mutate: reloadOrganizations,
+  } = useSWR<Organization[]>("/user/organizations");
+  const { data: invitations, mutate: reloadInvitations } =
+    useSWR<Invitation[]>("/user/invitations");
 
-  const { fetcher } = useSWRConfig();
+  const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
@@ -146,6 +149,12 @@ export default function App({ navigation }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("/user/cards", fetcher!);
   }, []);
+
+  useFocusEffect(() => {
+    reloadOrganizations();
+    reloadInvitations();
+    mutate((k) => typeof k === "string" && k.startsWith("/organizations"));
+  });
 
   if (error) {
     return (
