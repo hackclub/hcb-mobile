@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { formatDistanceToNow } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
@@ -51,6 +51,10 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
   const { token } = useContext(AuthContext);
 
   const { colors: themeColors } = useTheme();
+
+  useFocusEffect(() => {
+    mutate();
+  });
 
   return (
     <FlatList

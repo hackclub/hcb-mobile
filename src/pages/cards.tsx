@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, useColorScheme } from "react-native";
@@ -14,10 +15,14 @@ import { palette } from "../theme";
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
 export default function CardsPage({ navigation }: Props) {
-  const { data: cards } =
+  const { data: cards, mutate: reloadCards } =
     useSWR<(Card & Required<Pick<Card, "last4">>)[]>("/user/cards");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+
+  useFocusEffect(() => {
+    reloadCards();
+  });
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(false);
 
