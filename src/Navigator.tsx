@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { revokeAsync } from "expo-auth-session";
 import { BlurView } from "expo-blur";
+import * as WebBrowser from "expo-web-browser";
 import { useContext } from "react";
 import { View, Button, StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
@@ -26,6 +28,7 @@ import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import TransactionPage from "./pages/Transaction";
+import { palette } from "./theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -41,6 +44,7 @@ export default function Navigator() {
   const { data: invitations } = useSWR<Invitation[]>(`/user/invitations`);
 
   const scheme = useColorScheme();
+  const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
 
@@ -91,6 +95,26 @@ export default function Navigator() {
               component={Home}
               options={{
                 headerLargeTitle: true,
+                headerRight: () => (
+                  <Ionicons.Button
+                    name="add-circle-outline"
+                    backgroundColor="transparent"
+                    size={24}
+                    underlayColor={themeColors.card}
+                    color={palette.primary}
+                    onPress={() =>
+                      WebBrowser.openBrowserAsync(
+                        "https://hackclub.com/hcb/apply",
+                        {
+                          presentationStyle:
+                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                          controlsColor: palette.primary,
+                          dismissButtonStyle: "cancel",
+                        },
+                      )
+                    }
+                  />
+                ),
               }}
             />
             <Stack.Screen

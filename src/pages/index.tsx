@@ -22,6 +22,33 @@ import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
+function EventBalance({ balance_cents }: { balance_cents?: number }) {
+  return balance_cents !== undefined ? (
+    <Text style={{ color: palette.muted, fontSize: 16, marginTop: 5 }}>
+      {renderMoney(balance_cents)}
+    </Text>
+  ) : (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 5,
+        gap: 1,
+      }}
+    >
+      <Text style={{ color: palette.muted, fontSize: 16 }}>$</Text>
+      <View
+        style={{
+          backgroundColor: palette.slate,
+          width: 100,
+          height: 12,
+          borderRadius: 4,
+        }}
+      />
+    </View>
+  );
+}
+
 function Event({
   event,
   hideBalance = false,
@@ -114,11 +141,7 @@ function Event({
           >
             {event.name}
           </Text>
-          {!hideBalance && (
-            <Text style={{ color: palette.muted, fontSize: 16, marginTop: 5 }}>
-              {data ? renderMoney(data.balance_cents) : "$ ..."}
-            </Text>
-          )}
+          {!hideBalance && <EventBalance balance_cents={data?.balance_cents} />}
         </View>
         <Ionicons
           name="chevron-forward-outline"
@@ -168,6 +191,15 @@ export default function App({ navigation }: Props) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (organizations?.length == 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Ionicons name="people-outline" color={palette.muted} size={60} />
+        <Text style={{ color: palette.muted }}>Nothing here, yet.</Text>
       </View>
     );
   }
