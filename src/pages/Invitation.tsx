@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useContext } from "react";
-import { View, Text, Alert, StatusBar } from "react-native";
+import { View, Text, Alert, StatusBar, TouchableHighlight } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -93,6 +94,13 @@ export default function InvitationPage({
       }}
     >
       <StatusBar barStyle="light-content" />
+
+      <TouchableHighlight
+        onPress={() => navigation.goBack()}
+        style={{ position: "absolute", top: 16, right: 16 }}
+      >
+        <Ionicons name="close-circle" color={p.muted} size={30} />
+      </TouchableHighlight>
 
       <Text
         style={{
