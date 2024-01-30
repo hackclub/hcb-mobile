@@ -228,7 +228,8 @@ export default function App({ navigation }: Props) {
             invitations.length > 0 && (
               <View
                 style={{
-                  marginVertical: 20,
+                  marginTop: 10,
+                  marginBottom: 20,
                   borderRadius: 10,
                 }}
               >
