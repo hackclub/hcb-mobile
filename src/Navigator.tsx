@@ -111,7 +111,10 @@ export default function Navigator() {
                           controlsColor: palette.primary,
                           dismissButtonStyle: "cancel",
                         },
-                      )
+                      ).then(() => {
+                        mutate("/user/organizations");
+                        mutate("/user/invitations");
+                      })
                     }
                   />
                 ),
