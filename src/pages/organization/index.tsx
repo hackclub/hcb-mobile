@@ -48,6 +48,7 @@ function addPendingFeeToTransactions(
         memo: "FISCAL SPONSORSHIP",
         has_custom_memo: false,
         declined: false,
+        missing_receipt: false,
       },
       ...transactions,
     ];
