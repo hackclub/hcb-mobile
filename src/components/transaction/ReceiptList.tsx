@@ -2,12 +2,37 @@ import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { View, Text, ActivityIndicator } from "react-native";
+import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR from "swr";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
+
+function ZoomAndFadeIn() {
+  "worklet";
+  const animations = {
+    opacity: withTiming(1, { duration: 300 }),
+    transform: [
+      {
+        scale: withTiming(1, {
+          duration: 500,
+          easing: Easing.out(Easing.back(2)),
+        }),
+      },
+    ],
+  };
+  const initialValues = {
+    opacity: 0,
+    transform: [{ scale: 0.5 }],
+  };
+  return {
+    initialValues,
+    animations,
+  };
+}
+const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
 export default function ReceiptList({
   transaction,
@@ -42,19 +67,20 @@ export default function ReceiptList({
         }}
       >
         {receipts?.map((receipt) => (
-          <Image
-            key={receipt.id}
-            source={receipt.preview_url}
-            style={{
-              width: 150,
-              height: 200,
-              backgroundColor: themeColors.card,
-              borderRadius: 8,
-            }}
-            contentFit="contain"
-          />
+          <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
+            <Image
+              source={receipt.preview_url}
+              style={{
+                width: 150,
+                height: 200,
+                backgroundColor: themeColors.card,
+                borderRadius: 8,
+              }}
+              contentFit="contain"
+            />
+          </Animated.View>
         ))}
-        <View
+        <Animated.View
           style={{
             width: 150,
             height: 200,
@@ -64,6 +90,7 @@ export default function ReceiptList({
             alignItems: "center",
             justifyContent: "center",
           }}
+          layout={transition}
         >
           {isLoading ? (
             <ActivityIndicator color={palette.muted} />
@@ -79,7 +106,7 @@ export default function ReceiptList({
               </Text>
             </>
           )}
-        </View>
+        </Animated.View>
       </View>
     </View>
   );
