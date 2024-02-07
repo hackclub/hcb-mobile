@@ -7,6 +7,7 @@ import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionDonation } from "../../../lib/types/Transaction";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
+import Badge from "../../Badge";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 
@@ -21,7 +22,7 @@ export default function DonationTransaction({
 
   return (
     <View>
-      <TransactionTitle>
+      <TransactionTitle badge={<Badge color={palette.warning}>Refunded</Badge>}>
         {renderMoney(transaction.amount_cents)} <Muted>donation from</Muted>{" "}
         {donation.donor.name}
       </TransactionTitle>

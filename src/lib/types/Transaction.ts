@@ -56,6 +56,7 @@ export interface Donation {
     recurring_donor_id?: string;
   };
   donated_at: string;
+  refunded: boolean;
 }
 
 export interface TransactionDonation extends TransactionBase {
