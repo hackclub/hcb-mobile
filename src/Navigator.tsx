@@ -182,6 +182,14 @@ export default function Navigator() {
               name="Transaction"
               component={TransactionPage}
             />
+            <Stack.Screen
+              name="RenameTransaction"
+              component={RenameTransactionPage}
+              options={{
+                presentation: "modal",
+                title: "Edit Transaction Description",
+              }}
+            />
           </CardsStack.Navigator>
         )}
       </Tab.Screen>
