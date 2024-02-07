@@ -9,6 +9,7 @@ export const palette = {
   smoke: "#e0e6ed",
   info: "#338eda",
   success: "#33d6a6",
+  warning: "#ff8c37",
 };
 
 export const theme: Theme = {
