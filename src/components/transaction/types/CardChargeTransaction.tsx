@@ -4,7 +4,9 @@ import { View } from "react-native";
 
 import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCardCharge } from "../../../lib/types/Transaction";
+import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
+import Badge from "../../Badge";
 import UserMention from "../../UserMention";
 import ReceiptList from "../ReceiptList";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
@@ -21,10 +23,20 @@ export default function CardChargeTransaction({
 
   return (
     <View>
-      <TransactionTitle>
-        {renderMoney(Math.abs(transaction.amount_cents))}{" "}
-        <Muted>charge at</Muted> {transaction.card_charge.merchant.name}
-      </TransactionTitle>
+      <View style={{ flexDirection: "column", alignItems: "center" }}>
+        <TransactionTitle
+          badge={
+            transaction.pending && (
+              <Badge icon="information-circle-outline" color={palette.info}>
+                Pending
+              </Badge>
+            )
+          }
+        >
+          {renderMoney(Math.abs(transaction.amount_cents))}{" "}
+          <Muted>charge at</Muted> {transaction.card_charge.merchant.name}
+        </TransactionTitle>
+      </View>
       <TransactionDetails
         details={[
           descriptionDetail(orgId, transaction, navigation),

@@ -7,6 +7,8 @@ export const palette = {
   slate: "#3c4858",
   darkless: "#252429",
   smoke: "#e0e6ed",
+  info: "#338eda",
+  success: "#33d6a6",
 };
 
 export const theme: Theme = {
