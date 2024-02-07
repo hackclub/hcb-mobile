@@ -68,11 +68,16 @@ export default function ReceiptList({
           {isLoading ? (
             <ActivityIndicator color={palette.muted} />
           ) : (
-            <Ionicons
-              name="add-circle-outline"
-              color={palette.muted}
-              size={36}
-            />
+            <>
+              <Ionicons
+                name="add-circle-outline"
+                color={palette.muted}
+                size={36}
+              />
+              <Text style={{ color: palette.muted, marginTop: 10 }}>
+                Add Receipt
+              </Text>
+            </>
           )}
         </View>
       </View>

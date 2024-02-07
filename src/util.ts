@@ -1,3 +1,5 @@
+import { palette } from "./theme";
+
 export function renderMoney(cents: number) {
   return (
     (cents < 0 ? "-" : "") +
@@ -16,4 +18,15 @@ export function renderDate(date: string) {
     year: "numeric",
     timeZone: "UTC", // Prevent JS from doing timezone conversion
   });
+}
+
+export function statusColor(status: string) {
+  if (status == "deposited") {
+    return palette.success;
+  }
+  if (status == "in_transit" || status == "issued") {
+    return palette.info;
+  } else {
+    return palette.muted;
+  }
 }
