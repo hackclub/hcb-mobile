@@ -30,6 +30,7 @@ export interface TransactionBase
   pending: boolean;
   declined: boolean;
   code: TransactionType;
+  missing_receipt: boolean;
 }
 
 export interface CardCharge {
