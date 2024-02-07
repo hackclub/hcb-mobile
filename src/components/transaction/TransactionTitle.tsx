@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
-import { PropsWithChildren } from "react";
-import { Text } from "react-native";
+import { PropsWithChildren, ReactNode } from "react";
+import { Text, View } from "react-native";
 
 import { palette } from "../../theme";
 
@@ -10,20 +10,26 @@ export function Muted({ children }: PropsWithChildren) {
   );
 }
 
-export default function TransactionTitle({ children }: PropsWithChildren) {
+export default function TransactionTitle({
+  children,
+  badge,
+}: PropsWithChildren<{ badge?: ReactNode }>) {
   const { colors: themeColors } = useTheme();
 
   return (
-    <Text
-      style={{
-        color: themeColors.text,
-        textAlign: "center",
-        fontSize: 30,
-        fontWeight: "700",
-        marginBottom: 30,
-      }}
-    >
-      {children}
-    </Text>
+    <View style={{ alignItems: "center" }}>
+      {badge && <View style={{ marginBottom: 5 }}>{badge}</View>}
+      <Text
+        style={{
+          color: themeColors.text,
+          textAlign: "center",
+          fontSize: 30,
+          fontWeight: "700",
+          marginBottom: 30,
+        }}
+      >
+        {children}
+      </Text>
+    </View>
   );
 }
