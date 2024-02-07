@@ -113,7 +113,8 @@ export default function RenameTransactionPage({
             </Text>
           </View>
         ) : (
-          Array.isArray(memoSuggestions) && (
+          Array.isArray(memoSuggestions) &&
+          memoSuggestions.length > 0 && (
             <View>
               <Text
                 style={{
