@@ -153,7 +153,7 @@ export default function Navigator() {
           </Stack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Cards">
+      <Tab.Screen name="Cards" options={{ tabBarLabel: "Wallet" }}>
         {() => (
           <CardsStack.Navigator>
             <CardsStack.Screen
@@ -167,6 +167,11 @@ export default function Navigator() {
               options={({ route }) => ({
                 title: `Card ····${route.params.card.last4}`,
               })}
+            />
+            <Stack.Screen
+              options={{ headerBackTitle: "Back" }}
+              name="Transaction"
+              component={TransactionPage}
             />
           </CardsStack.Navigator>
         )}

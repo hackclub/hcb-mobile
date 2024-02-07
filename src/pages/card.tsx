@@ -1,8 +1,15 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { useContext } from "react";
-import { ScrollView, View, Text, ActivityIndicator } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableHighlight,
+} from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -21,7 +28,9 @@ export default function CardPage({
   route: {
     params: { card: _card },
   },
+  navigation,
 }: Props) {
+  const { colors: themeColors } = useTheme();
   const { token } = useContext(AuthContext);
 
   const { data: card } = useSWR<Card>(`/cards/${_card.id}`, {
@@ -81,14 +90,21 @@ export default function CardPage({
       <PaymentCard card={card} style={{ marginBottom: 20 }} />
 
       {card.status != "canceled" && (
-        <View style={{ flexDirection: "row", marginBottom: 20 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            marginBottom: 20,
+            justifyContent: "center",
+          }}
+        >
           <Button
             style={{
-              flexBasis: 0,
-              flexGrow: 1,
-              marginHorizontal: 10,
+              // flexBasis: 0,
+              // flexGrow: 1,
+              // marginHorizontal: 10,
               backgroundColor: "#5bc0de",
               borderTopWidth: 0,
+              minWidth: 150,
             }}
             color="#186177"
             onPress={() => toggleCardFrozen()}
@@ -96,7 +112,7 @@ export default function CardPage({
           >
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
-          {card.type == "virtual" && (
+          {/* {card.type == "virtual" && (
             <Button
               style={{
                 flexBasis: 0,
@@ -107,7 +123,7 @@ export default function CardPage({
             >
               Reveal details
             </Button>
-          )}
+          )} */}
         </View>
       )}
 
@@ -138,13 +154,24 @@ export default function CardPage({
             Transactions
           </Text>
           {transactions.data.map((transaction, index) => (
-            <Transaction
-              transaction={transaction}
+            <TouchableHighlight
               key={transaction.id}
-              top={index == 0}
-              bottom={index == transactions.data.length - 1}
-              hideAvatar
-            />
+              onPress={() => {
+                navigation.navigate("Transaction", {
+                  orgId: card.organization.id,
+                  transaction,
+                });
+              }}
+              underlayColor={themeColors.background}
+              activeOpacity={0.7}
+            >
+              <Transaction
+                transaction={transaction}
+                top={index == 0}
+                bottom={index == transactions.data.length - 1}
+                hideAvatar
+              />
+            </TouchableHighlight>
           ))}
         </>
       )}

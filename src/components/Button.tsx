@@ -4,6 +4,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   ViewProps,
 } from "react-native";
 
@@ -41,17 +42,30 @@ export default function Button(
       onPress={() => props.onPress && props.onPress()}
       disabled={props.loading}
     >
-      {props.loading ? (
-        <ActivityIndicator color={props.color || "white"} />
-      ) : (
-        <Text
+      <Text
+        style={{
+          ...styles.buttonText,
+          color: props.color || styles.buttonText.color,
+          opacity: props.loading ? 0 : 1,
+        }}
+      >
+        {props.children}
+      </Text>
+      {props.loading && (
+        <View
           style={{
-            ...styles.buttonText,
-            color: props.color || styles.buttonText.color,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {props.children}
-        </Text>
+          <ActivityIndicator color={props.color || "white"} />
+        </View>
       )}
     </Pressable>
   );
