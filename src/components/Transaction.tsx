@@ -57,7 +57,6 @@ function TransactionIcon({
       <UserAvatar
         user={(transaction as TransactionCardCharge).card_charge.card.user}
         size={20}
-        style={{ marginRight: 10 }}
       />
     );
   } else {
@@ -66,7 +65,6 @@ function TransactionIcon({
         name={transactionIcon(transaction.code)}
         color={palette.muted}
         size={20}
-        style={{ marginRight: 10 }}
       />
     );
   }
@@ -97,6 +95,7 @@ function Transaction({
           padding: 10,
           flexDirection: "row",
           alignItems: "center",
+          gap: 10,
           backgroundColor: themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
@@ -128,10 +127,19 @@ function Transaction({
             : "")}
         {transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
+      {transaction.missing_receipt && (
+        <View>
+          <Ionicons name="receipt-outline" color={palette.muted} size={18} />
+          <Ionicons
+            name="alert"
+            color={palette.warning}
+            style={{ position: "absolute", top: -8, left: -10 }}
+            size={18}
+          />
+        </View>
+      )}
       <Text
         style={{
-          marginLeft: "auto",
-          paddingLeft: 10,
           color: transaction.amount_cents > 0 ? "#33d6a6" : palette.muted,
         }}
       >
