@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
+import Button from "../../components/Button";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -119,20 +120,45 @@ export default function OrganizationPage({
               {organization?.playground_mode && (
                 <PlaygroundBanner organization={organization} />
               )}
-              <View style={{ marginBottom: 20 }}>
-                <Text
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  marginBottom: 32,
+                  gap: 10,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Balance
+                  </Text>
+                  <Text style={{ color: themeColors.text, fontSize: 36 }}>
+                    {"balance_cents" in organization &&
+                      renderMoney(organization.balance_cents)}
+                  </Text>
+                </View>
+                <Button
                   style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
+                    backgroundColor: "#5bc0de",
+                    borderTopWidth: 0,
                   }}
+                  color="#186177"
+                  disabled={organization.playground_mode}
+                  onPress={() =>
+                    navigation.navigate("Transfer", { organization })
+                  }
                 >
-                  Balance
-                </Text>
-                <Text style={{ color: themeColors.text, fontSize: 36 }}>
-                  {"balance_cents" in organization &&
-                    renderMoney(organization.balance_cents)}
-                </Text>
+                  Transfer Money
+                </Button>
               </View>
               {/* <View style={{ display: "flex" }}>
                 <Text

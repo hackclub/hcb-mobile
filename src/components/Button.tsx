@@ -14,6 +14,7 @@ export interface ButtonProps {
   onPress?: () => void;
   color?: string;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -38,9 +39,13 @@ export default function Button(
 ) {
   return (
     <Pressable
-      style={{ ...styles.button, ...(props.style as object) }}
+      style={{
+        ...styles.button,
+        ...(props.style as object),
+        opacity: props.disabled ? 0.6 : undefined,
+      }}
       onPress={() => props.onPress && props.onPress()}
-      disabled={props.loading}
+      disabled={props.loading || props.disabled}
     >
       <Text
         style={{
