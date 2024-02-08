@@ -21,18 +21,20 @@ export default function CardChargeTransaction({
   const navigation =
     useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
 
+  const badge = transaction.pending ? (
+    <Badge icon="information-circle-outline" color={palette.info}>
+      Pending
+    </Badge>
+  ) : transaction.declined ? (
+    <Badge icon="information-circle-outline" color={palette.primary}>
+      Declined
+    </Badge>
+  ) : null;
+
   return (
     <View>
       <View style={{ flexDirection: "column", alignItems: "center" }}>
-        <TransactionTitle
-          badge={
-            transaction.pending && (
-              <Badge icon="information-circle-outline" color={palette.info}>
-                Pending
-              </Badge>
-            )
-          }
-        >
+        <TransactionTitle badge={badge}>
           {renderMoney(Math.abs(transaction.amount_cents))}{" "}
           <Muted>charge at</Muted> {transaction.card_charge.merchant.name}
         </TransactionTitle>
