@@ -26,7 +26,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    setIsSignedIn(!!token);
+    setIsSignedIn((s) => (s === null ? !!token || null : !!token));
     if (typeof token == "string") SecureStorage.setItemAsync("token", token);
   }, [token]);
 
