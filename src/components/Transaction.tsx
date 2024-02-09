@@ -13,9 +13,10 @@ import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
 
-function transactionIcon(
-  code: TransactionType,
-): React.ComponentProps<typeof Ionicons>["name"] {
+function transactionIcon({
+  code,
+  ...transaction
+}: TransactionWithoutId): React.ComponentProps<typeof Ionicons>["name"] {
   switch (code) {
     case TransactionType.Donation:
     case TransactionType.PartnerDonation:
@@ -26,7 +27,11 @@ function transactionIcon(
     case TransactionType.CheckDeposit:
       return "receipt-outline";
     case TransactionType.Disbursement:
-      return "arrow-redo-outline";
+      if (transaction.amount_cents > 0) {
+        return "add-circle-outline";
+      } else {
+        return "remove-circle-outline";
+      }
     case TransactionType.StripeCard:
     case TransactionType.StripeForceCapture:
       return "card-outline";
@@ -62,7 +67,7 @@ function TransactionIcon({
   } else {
     return (
       <Ionicons
-        name={transactionIcon(transaction.code)}
+        name={transactionIcon(transaction)}
         color={palette.muted}
         size={20}
       />
@@ -114,7 +119,10 @@ function Transaction({
         numberOfLines={1}
         style={{
           fontSize: 14,
-          color: transaction.pending ? palette.muted : themeColors.text,
+          color:
+            transaction.pending || transaction.declined
+              ? palette.muted
+              : themeColors.text,
           overflow: "hidden",
           flex: 1,
         }}

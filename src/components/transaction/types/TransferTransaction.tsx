@@ -1,12 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
 
 import { StackParamList } from "../../../lib/NavigatorParamList";
 import Organization from "../../../lib/types/Organization";
 import { TransactionTransfer } from "../../../lib/types/Transaction";
-import { renderMoney } from "../../../util";
+import { renderMoney, statusColor } from "../../../util";
+import Badge from "../../Badge";
 import UserMention from "../../UserMention";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
@@ -27,7 +29,13 @@ export default function TransferTransaction({
 
   return (
     <View>
-      <TransactionTitle>
+      <TransactionTitle
+        badge={
+          <Badge color={statusColor(transfer.status)}>
+            {humanizeString(transfer.status)}
+          </Badge>
+        }
+      >
         {renderMoney(Math.abs(transaction.amount_cents))}{" "}
         {props.orgId == transfer.from.id ? (
           <>
@@ -58,18 +66,22 @@ export default function TransferTransaction({
           {
             label: "From",
             value: transfer.from.name,
-            onPress: userInFromOrg
-              ? () =>
-                  navigation.navigate("Event", { organization: transfer.from })
-              : undefined,
+            onPress:
+              userInFromOrg && transfer.from.id != props.orgId
+                ? () =>
+                    navigation.navigate("Event", {
+                      organization: transfer.from,
+                    })
+                : undefined,
           },
           {
             label: "To",
             value: transfer.to.name,
-            onPress: userInToOrg
-              ? () =>
-                  navigation.navigate("Event", { organization: transfer.to })
-              : undefined,
+            onPress:
+              userInToOrg && transfer.to.id != props.orgId
+                ? () =>
+                    navigation.navigate("Event", { organization: transfer.to })
+                : undefined,
           },
         ]}
       />
