@@ -22,7 +22,11 @@ export default function DonationTransaction({
 
   return (
     <View>
-      <TransactionTitle badge={<Badge color={palette.warning}>Refunded</Badge>}>
+      <TransactionTitle
+        badge={
+          donation.refunded && <Badge color={palette.warning}>Refunded</Badge>
+        }
+      >
         {renderMoney(transaction.amount_cents)} <Muted>donation from</Muted>{" "}
         {donation.donor.name}
       </TransactionTitle>
