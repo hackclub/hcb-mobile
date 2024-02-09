@@ -21,11 +21,12 @@ export function renderDate(date: string) {
 }
 
 export function statusColor(status: string) {
-  if (status == "deposited") {
+  if (status == "deposited" || status == "completed") {
     return palette.success;
-  }
-  if (status == "in_transit" || status == "issued") {
+  } else if (status == "in_transit" || status == "issued") {
     return palette.info;
+  } else if (status == "rejected") {
+    return palette.primary;
   } else {
     return palette.muted;
   }

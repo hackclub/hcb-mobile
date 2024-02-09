@@ -85,11 +85,14 @@ export interface TransactionCheck extends TransactionBase {
   check: Check;
 }
 
-export interface Transfer {
+export interface Transfer extends HcbApiObject<"xfr"> {
   from: Organization;
   to: Organization;
   sender?: User;
   memo: string;
+  status: "pending" | "completed" | "rejected";
+  amount_cents: number;
+  transaction_id: TransactionBase["id"];
 }
 
 export interface TransactionTransfer extends TransactionBase {
