@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { StackParamList } from "../../../lib/NavigatorParamList";
 import Organization from "../../../lib/types/Organization";
 import { TransactionTransfer } from "../../../lib/types/Transaction";
+import User from "../../../lib/types/User";
 import { renderMoney, statusColor } from "../../../util";
 import Badge from "../../Badge";
 import UserMention from "../../UserMention";
@@ -20,9 +21,12 @@ export default function TransferTransaction({
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`/user/organizations`);
+  const { data: user } = useSWR<User>("/user");
 
-  const userInFromOrg = userOrgs?.some((org) => org.id == transfer.from.id);
-  const userInToOrg = userOrgs?.some((org) => org.id == transfer.to.id);
+  const userInFromOrg =
+    user?.admin || userOrgs?.some((org) => org.id == transfer.from.id);
+  const userInToOrg =
+    user?.admin || userOrgs?.some((org) => org.id == transfer.to.id);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();

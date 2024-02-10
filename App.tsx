@@ -13,7 +13,7 @@ import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
 
 export default function App() {
-  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
   const scheme = useColorScheme();
@@ -22,17 +22,17 @@ export default function App() {
     (async () => {
       const token = await SecureStorage.getItemAsync("token");
       setToken(token);
+      setIsLoading(false);
     })();
   }, []);
 
   useEffect(() => {
-    setIsSignedIn((s) => (s === null ? !!token || null : !!token));
     if (typeof token == "string") SecureStorage.setItemAsync("token", token);
   }, [token]);
 
-  if (isSignedIn === null) {
+  if (isLoading) {
     return null;
-  } else if (!isSignedIn) {
+  } else if (!token) {
     return (
       <AuthContext.Provider value={{ token, setToken }}>
         <Login />
