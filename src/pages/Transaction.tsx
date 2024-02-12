@@ -16,11 +16,11 @@ type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
 export default function TransactionPage({
   route: {
-    params: { transaction: _transaction, ...params },
+    params: { transactionId, transaction: _transaction, ...params },
   },
 }: Props) {
   const { data: transaction } = useSWR<Transaction>(
-    `/organizations/${params.orgId}/transactions/${_transaction.id}`,
+    `/organizations/${params.orgId}/transactions/${transactionId}`,
     { fallbackData: _transaction },
   );
 

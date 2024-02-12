@@ -1,3 +1,5 @@
+import { NavigatorScreenParams } from "@react-navigation/native";
+
 import Card from "./types/Card";
 import Invitation from "./types/Invitation";
 import Organization from "./types/Organization";
@@ -5,9 +7,13 @@ import Transaction from "./types/Transaction";
 
 export type StackParamList = {
   Organizations: undefined;
-  Invitation: { invitation: Invitation };
-  Event: { organization: Organization };
-  Transaction: { orgId: string; transaction: Transaction };
+  Invitation: { inviteId: Invitation["id"]; invitation?: Invitation };
+  Event: { orgId: Organization["id"]; organization?: Organization };
+  Transaction: {
+    transactionId: Transaction["id"];
+    orgId: Organization["id"];
+    transaction?: Transaction;
+  };
   RenameTransaction: { orgId: string; transaction: Transaction };
 };
 
@@ -23,7 +29,7 @@ export type ReceiptsStackParamList = {
 };
 
 export type TabParamList = {
-  Home: undefined;
+  Home: NavigatorScreenParams<StackParamList>;
   Cards: undefined;
   Receipts: undefined;
   Settings: undefined;

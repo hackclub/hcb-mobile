@@ -23,6 +23,10 @@ export default {
       config: {
         usesNonExemptEncryption: false,
       },
+      associatedDomains: [
+        "applinks:hcb.hackclub.com",
+        "applinks:bank.hackclub.com",
+      ],
     },
     android: {
       icon: "./assets/app-icon.png",

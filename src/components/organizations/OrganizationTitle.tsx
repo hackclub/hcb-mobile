@@ -2,16 +2,18 @@ import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { View, Text } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
+import Organization from "../../lib/types/Organization";
 
 export default function OrganizationTitle({
   organization,
-}: StackParamList["Event"]) {
+}: {
+  organization?: Organization;
+}) {
   const { colors: themeColors } = useTheme();
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-      {organization.icon && (
+      {organization?.icon && (
         <Image
           source={{ uri: organization.icon }}
           cachePolicy="disk"
@@ -25,7 +27,7 @@ export default function OrganizationTitle({
           fontSize: 17,
         }}
       >
-        {organization.name}
+        {organization?.name || "Loading..."}
       </Text>
     </View>
   );

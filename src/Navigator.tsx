@@ -132,7 +132,7 @@ export default function Navigator() {
               name="Event"
               options={({ route }) => ({
                 headerTitle: () => <OrganizationTitle {...route.params} />,
-                title: route.params.organization.name,
+                title: route.params.organization?.name,
                 headerBackTitle: "Back",
               })}
               component={OrganizationPage}

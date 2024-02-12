@@ -2,7 +2,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Text,
   View,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
+import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -58,19 +59,28 @@ function addPendingFeeToTransactions(
 
 export default function OrganizationPage({
   route: {
-    params: { organization: _organization },
+    params: { orgId, organization: _organization },
   },
   navigation,
 }: Props) {
   const { data: organization, isLoading: organizationLoading } = useSWR<
     Organization | OrganizationExpanded
-  >(`/organizations/${_organization.id}`, { fallbackData: _organization });
+  >(`/organizations/${orgId}`, { fallbackData: _organization });
   const {
     transactions: _transactions,
     isLoadingMore,
     loadMore,
     isLoading,
-  } = useTransactions(_organization.id);
+  } = useTransactions(orgId);
+
+  useEffect(() => {
+    if (organization) {
+      navigation.setOptions({
+        title: organization.name,
+        headerTitle: () => <OrganizationTitle organization={organization} />,
+      });
+    }
+  }, [organization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -179,7 +189,8 @@ export default function OrganizationPage({
                 item.id
                   ? () => {
                       navigation.navigate("Transaction", {
-                        orgId: _organization.id,
+                        transactionId: item.id!,
+                        orgId,
                         transaction: item as ITransaction,
                       });
                     }

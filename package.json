@@ -16,7 +16,7 @@
     "@expo/vector-icons": "^13.0.0",
     "@react-native-menu/menu": "^0.9.1",
     "@react-navigation/bottom-tabs": "^6.5.8",
-    "@react-navigation/native": "^6.1.7",
+    "@react-navigation/native": "^6.1.10",
     "@react-navigation/native-stack": "^6.9.13",
     "date-fns": "^2.30.0",
     "expo": "^49.0.8",
