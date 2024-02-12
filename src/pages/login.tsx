@@ -4,6 +4,7 @@ import {
   exchangeCodeAsync,
   DiscoveryDocument,
 } from "expo-auth-session";
+import * as Haptics from "expo-haptics";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -55,7 +56,10 @@ export default function Login() {
         },
         discovery,
       )
-        .then((r) => setToken(r.accessToken))
+        .then((r) => {
+          setToken(r.accessToken);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        })
         .catch(() => setLoading(false));
     }
   }, [response]);
