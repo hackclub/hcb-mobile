@@ -1,6 +1,7 @@
 import "expo-dev-client";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
@@ -8,9 +9,35 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
+import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
+
+const linking: LinkingOptions<TabParamList> = {
+  prefixes: [
+    Linking.createURL("/"),
+    "https://bank.hackclub.com",
+    "https://hcb.hackclub.com",
+  ],
+  config: {
+    screens: {
+      Home: {
+        initialRouteName: "Organizations",
+        screens: {
+          Invitation: "invites/:inviteId",
+          Transaction: {
+            path: "hcb/:transactionId",
+            parse: {
+              transactionId: (id) => `txn_${id}`,
+            },
+          },
+          Event: ":orgId",
+        },
+      },
+    },
+  },
+};
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +92,10 @@ export default function App() {
         }}
       >
         <SafeAreaProvider>
-          <NavigationContainer theme={scheme == "dark" ? theme : lightTheme}>
+          <NavigationContainer
+            theme={scheme == "dark" ? theme : lightTheme}
+            linking={linking}
+          >
             <Navigator />
           </NavigationContainer>
         </SafeAreaProvider>

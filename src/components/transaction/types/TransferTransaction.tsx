@@ -74,6 +74,7 @@ export default function TransferTransaction({
               userInFromOrg && transfer.from.id != props.orgId
                 ? () =>
                     navigation.navigate("Event", {
+                      orgId: transfer.from.id,
                       organization: transfer.from,
                     })
                 : undefined,
@@ -84,7 +85,10 @@ export default function TransferTransaction({
             onPress:
               userInToOrg && transfer.to.id != props.orgId
                 ? () =>
-                    navigation.navigate("Event", { organization: transfer.to })
+                    navigation.navigate("Event", {
+                      orgId: transfer.to.id,
+                      organization: transfer.to,
+                    })
                 : undefined,
           },
         ]}

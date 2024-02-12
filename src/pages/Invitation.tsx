@@ -2,8 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useContext } from "react";
-import { View, Text, Alert, StatusBar, TouchableHighlight } from "react-native";
-import { useSWRConfig } from "swr";
+import {
+  View,
+  Text,
+  Alert,
+  StatusBar,
+  TouchableHighlight,
+  ActivityIndicator,
+} from "react-native";
+import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import AuthContext from "../auth";
@@ -18,10 +25,15 @@ type Props = NativeStackScreenProps<StackParamList, "Invitation">;
 export default function InvitationPage({
   navigation,
   route: {
-    params: { invitation },
+    params: { inviteId, invitation: _invitation },
   },
 }: Props) {
   const { token } = useContext(AuthContext);
+
+  const { data: invitation } = useSWR<Invitation>(
+    `/user/invitations/${inviteId}`,
+    { fallbackData: _invitation },
+  );
 
   const { mutate } = useSWRConfig();
 
@@ -38,7 +50,7 @@ export default function InvitationPage({
     () =>
       fetch(
         process.env.EXPO_PUBLIC_API_BASE +
-          `/user/invitations/${invitation.id}/accept`,
+          `/user/invitations/${inviteId}/accept`,
         {
           method: "POST",
           headers: {
@@ -48,10 +60,15 @@ export default function InvitationPage({
       ),
     {
       populateCache: (_, invitations) =>
-        invitations?.filter((i) => i.id != invitation.id) || [],
+        invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => {
         navigation.goBack(); // Close modal
-        navigation.navigate("Event", { organization: invitation.organization });
+        if (invitation) {
+          navigation.navigate("Event", {
+            orgId: invitation.organization.id,
+            organization: invitation.organization,
+          });
+        }
         mutate(`/user/organizations`);
       },
     },
@@ -68,7 +85,7 @@ export default function InvitationPage({
     () =>
       fetch(
         process.env.EXPO_PUBLIC_API_BASE +
-          `/user/invitations/${invitation.id}/reject`,
+          `/user/invitations/${inviteId}/reject`,
         {
           method: "POST",
           headers: {
@@ -78,7 +95,7 @@ export default function InvitationPage({
       ),
     {
       populateCache: (_, invitations) =>
-        invitations?.filter((i) => i.id != invitation.id) || [],
+        invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => navigation.goBack(),
     },
   );
@@ -102,62 +119,68 @@ export default function InvitationPage({
         <Ionicons name="close-circle" color={p.muted} size={30} />
       </TouchableHighlight>
 
-      <Text
-        style={{
-          color: p.muted,
-          fontSize: 12,
-          textTransform: "uppercase",
-          marginBottom: 8,
-        }}
-      >
-        You've been invited to join
-      </Text>
-      <Text
-        style={{
-          color: themeColors.text,
-          textAlign: "center",
-          fontSize: 36,
-          fontWeight: "700",
-          marginBottom: 30,
-        }}
-      >
-        {invitation.organization.name}
-      </Text>
+      {invitation ? (
+        <>
+          <Text
+            style={{
+              color: p.muted,
+              fontSize: 12,
+              textTransform: "uppercase",
+              marginBottom: 8,
+            }}
+          >
+            You've been invited to join
+          </Text>
+          <Text
+            style={{
+              color: themeColors.text,
+              textAlign: "center",
+              fontSize: 36,
+              fontWeight: "700",
+              marginBottom: 30,
+            }}
+          >
+            {invitation.organization.name}
+          </Text>
 
-      <View style={{ flexDirection: "row", gap: 20 }}>
-        <Button
-          onPress={() => accept()}
-          style={{
-            backgroundColor: palette.emerald["400"],
-            borderTopColor: palette.emerald["300"],
-            minWidth: 100,
-          }}
-          color={palette.emerald["800"]}
-          loading={acceptIsLoading}
-        >
-          Join
-        </Button>
-        <Button
-          style={{ minWidth: 100 }}
-          onPress={() =>
-            Alert.alert(
-              "Are you sure you want to decline this invitation?",
-              undefined,
-              [
-                { text: "Cancel" },
-                {
-                  text: "Decline",
-                  style: "destructive",
-                  onPress: () => reject(),
-                },
-              ],
-            )
-          }
-          loading={rejectIsLoading}
-        >
-          Decline
-        </Button>
-      </View>
+          <View style={{ flexDirection: "row", gap: 20 }}>
+            <Button
+              onPress={() => accept()}
+              style={{
+                backgroundColor: palette.emerald["400"],
+                borderTopColor: palette.emerald["300"],
+                minWidth: 100,
+              }}
+              color={palette.emerald["800"]}
+              loading={acceptIsLoading}
+            >
+              Join
+            </Button>
+            <Button
+              style={{ minWidth: 100 }}
+              onPress={() =>
+                Alert.alert(
+                  "Are you sure you want to decline this invitation?",
+                  undefined,
+                  [
+                    { text: "Cancel" },
+                    {
+                      text: "Decline",
+                      style: "destructive",
+                      onPress: () => reject(),
+                    },
+                  ],
+                )
+              }
+              loading={rejectIsLoading}
+            >
+              Decline
+            </Button>
+          </View>
+        </>
+      ) : (
+        <ActivityIndicator />
+      )}
     </View>
   );
 }

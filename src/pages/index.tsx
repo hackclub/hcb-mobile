@@ -254,7 +254,10 @@ export default function App({ navigation }: Props) {
                     }}
                     event={invitation.organization}
                     onPress={() =>
-                      navigation.navigate("Invitation", { invitation })
+                      navigation.navigate("Invitation", {
+                        inviteId: invitation.id,
+                        invitation,
+                      })
                     }
                     hideBalance
                   />
@@ -280,6 +283,7 @@ export default function App({ navigation }: Props) {
               event={organization}
               onPress={() =>
                 navigation.navigate("Event", {
+                  orgId: organization.id,
                   organization,
                 })
               }
