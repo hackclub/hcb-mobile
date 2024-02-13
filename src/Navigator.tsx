@@ -10,7 +10,7 @@ import { View, Button, StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import AuthContext from "./auth";
-import OrganizationTitle from "./components/organizations/OrganizationTitle";
+// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
   StackParamList,
   CardsStackParamList,
@@ -131,7 +131,7 @@ export default function Navigator() {
             <Stack.Screen
               name="Event"
               options={({ route }) => ({
-                headerTitle: () => <OrganizationTitle {...route.params} />,
+                // headerTitle: () => <OrganizationTitle {...route.params} />,
                 title: route.params.organization?.name,
                 headerBackTitle: "Back",
               })}

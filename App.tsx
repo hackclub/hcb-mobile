@@ -1,6 +1,10 @@
 import "expo-dev-client";
 
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import {
+  getStateFromPath,
+  LinkingOptions,
+  NavigationContainer,
+} from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect } from "react";
@@ -32,10 +36,50 @@ const linking: LinkingOptions<TabParamList> = {
               transactionId: (id) => `txn_${id}`,
             },
           },
-          Event: ":orgId",
         },
       },
     },
+  },
+  getStateFromPath(path, options) {
+    console.log(path);
+    const orgMatch = path.match(/^\/?([^/#]+)(?:#([a-zA-Z0-9]+))?$/);
+    if (orgMatch) {
+      const [, orgId, transactionId] = orgMatch;
+      if (transactionId) {
+        return {
+          routes: [
+            {
+              name: "Home",
+              state: {
+                routes: [
+                  { name: "Organizations" },
+                  { name: "Event", params: { orgId } },
+                  {
+                    name: "Transaction",
+                    params: { transactionId: `txn_${transactionId}`, orgId },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+      } else {
+        return {
+          routes: [
+            {
+              name: "Home",
+              state: {
+                routes: [
+                  { name: "Organizations" },
+                  { name: "Event", params: { orgId } },
+                ],
+              },
+            },
+          ],
+        };
+      }
+    }
+    return getStateFromPath(path, options);
   },
 };
 
