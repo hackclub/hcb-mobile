@@ -11,7 +11,7 @@ export type StackParamList = {
   Event: { orgId: Organization["id"]; organization?: Organization };
   Transaction: {
     transactionId: Transaction["id"];
-    orgId: Organization["id"];
+    orgId?: Organization["id"];
     transaction?: Transaction;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };

@@ -1,6 +1,6 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ActivityIndicator, ScrollView } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 import useSWR from "swr";
 
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
@@ -10,24 +10,31 @@ import DonationTransaction from "../components/transaction/types/DonationTransac
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
+import Organization from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
 export default function TransactionPage({
   route: {
-    params: { transactionId, transaction: _transaction, ...params },
+    params: { transactionId, transaction: _transaction, orgId },
   },
 }: Props) {
   const { data: transaction } = useSWR<Transaction>(
-    `/organizations/${params.orgId}/transactions/${transactionId}`,
+    orgId
+      ? `/organizations/${orgId}/transactions/${transactionId}`
+      : `/transactions/${transactionId}`,
     { fallbackData: _transaction },
   );
 
   const tabBarHeight = useBottomTabBarHeight();
 
   if (!transaction) {
-    return <ActivityIndicator />;
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   let TransactionComponent: (props: TransactionViewProps) => React.ReactElement;
@@ -49,7 +56,14 @@ export default function TransactionPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
     >
-      <TransactionComponent transaction={transaction} orgId={params.orgId} />
+      <TransactionComponent
+        transaction={transaction}
+        orgId={
+          orgId ||
+          (transaction as Transaction & { organization: Organization })
+            ?.organization?.id
+        }
+      />
     </ScrollView>
   );
 }

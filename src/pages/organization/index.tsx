@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,10 +11,11 @@ import {
   ActivityIndicator,
   SectionList,
   TouchableHighlight,
+  useColorScheme,
 } from "react-native";
 import useSWR from "swr";
 
-import OrganizationTitle from "../../components/organizations/OrganizationTitle";
+// import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -63,6 +66,7 @@ export default function OrganizationPage({
   },
   navigation,
 }: Props) {
+  const scheme = useColorScheme();
   const { data: organization, isLoading: organizationLoading } = useSWR<
     Organization | OrganizationExpanded
   >(`/organizations/${orgId}`, { fallbackData: _organization });
@@ -77,8 +81,34 @@ export default function OrganizationPage({
     if (organization) {
       navigation.setOptions({
         title: organization.name,
-        headerTitle: () => <OrganizationTitle organization={organization} />,
+        // headerTitle: () => <OrganizationTitle organization={organization} />,
       });
+
+      if (
+        "account_number" in organization &&
+        organization.account_number !== null
+      ) {
+        navigation.setOptions({
+          headerRight: () => (
+            <MenuView
+              actions={[
+                {
+                  id: "accountNumber",
+                  title: "View Account Number",
+                },
+              ]}
+              themeVariant={scheme || undefined}
+            >
+              <Ionicons.Button
+                name="ellipsis-horizontal-circle"
+                backgroundColor="transparent"
+                size={24}
+                color={palette.primary}
+              />
+            </MenuView>
+          ),
+        });
+      }
     }
   }, [organization]);
 
