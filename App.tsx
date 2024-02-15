@@ -1,10 +1,6 @@
 import "expo-dev-client";
 
-import {
-  getStateFromPath,
-  LinkingOptions,
-  NavigationContainer,
-} from "@react-navigation/native";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect } from "react";
@@ -13,6 +9,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
+import { getStateFromPath } from "./src/getStateFromPath";
 import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
@@ -38,49 +35,15 @@ const linking: LinkingOptions<TabParamList> = {
           },
         },
       },
+      Cards: {
+        initialRouteName: "CardList",
+        screens: {
+          CardList: "my/cards",
+        },
+      },
     },
   },
-  getStateFromPath(path, options) {
-    console.log(path);
-    const orgMatch = path.match(/^\/?([^/#]+)(?:#([a-zA-Z0-9]+))?$/);
-    if (orgMatch) {
-      const [, orgId, transactionId] = orgMatch;
-      if (transactionId) {
-        return {
-          routes: [
-            {
-              name: "Home",
-              state: {
-                routes: [
-                  { name: "Organizations" },
-                  { name: "Event", params: { orgId } },
-                  {
-                    name: "Transaction",
-                    params: { transactionId: `txn_${transactionId}`, orgId },
-                  },
-                ],
-              },
-            },
-          ],
-        };
-      } else {
-        return {
-          routes: [
-            {
-              name: "Home",
-              state: {
-                routes: [
-                  { name: "Organizations" },
-                  { name: "Event", params: { orgId } },
-                ],
-              },
-            },
-          ],
-        };
-      }
-    }
-    return getStateFromPath(path, options);
-  },
+  getStateFromPath,
 };
 
 export default function App() {
@@ -124,6 +87,12 @@ export default function App() {
             fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
               headers: { Authorization: `Bearer ${token}` },
             })
+              .then((res) => {
+                if (!res.ok) {
+                  throw res;
+                }
+                return res;
+              })
               .then((res) => res.json())
               .then((res) => {
                 if (res.error === "invalid_auth") {

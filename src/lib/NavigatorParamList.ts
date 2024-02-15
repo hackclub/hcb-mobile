@@ -30,7 +30,7 @@ export type ReceiptsStackParamList = {
 
 export type TabParamList = {
   Home: NavigatorScreenParams<StackParamList>;
-  Cards: undefined;
+  Cards: NavigatorScreenParams<CardsStackParamList>;
   Receipts: undefined;
   Settings: undefined;
 };
