@@ -95,6 +95,7 @@ export default function OrganizationPage({
                 {
                   id: "accountNumber",
                   title: "View Account Number",
+                  attributes: { disabled: true },
                 },
               ]}
               themeVariant={scheme || undefined}
