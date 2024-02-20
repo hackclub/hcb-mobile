@@ -195,7 +195,7 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizations?.length == 0) {
+  if (organizations?.length == 0 && invitations?.length == 0) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Ionicons name="people-outline" color={palette.muted} size={60} />
