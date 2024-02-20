@@ -205,7 +205,7 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       {organizations && (
         <FlatList
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
@@ -215,6 +215,7 @@ export default function App({ navigation }: Props) {
           }}
           contentInsetAdjustmentBehavior="automatic"
           data={organizations}
+          style={{ flex: 1 }}
           // refreshing={isValidating}
           // onRefresh={() => {
           //   mutate(
