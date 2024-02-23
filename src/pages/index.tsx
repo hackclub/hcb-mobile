@@ -16,9 +16,12 @@ import {
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
+import Transaction from "../components/Transaction";
 import { StackParamList } from "../lib/NavigatorParamList";
+import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
+import ITransaction from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
@@ -55,14 +58,19 @@ function Event({
   onPress,
   style,
   invitation,
+  showTransactions = false,
 }: ViewProps & {
   event: Organization;
   hideBalance?: boolean;
+  showTransactions?: boolean;
   invitation?: Invitation;
   onPress?: () => void;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `/organizations/${event.id}`,
+  );
+  const { data: transactions } = useSWR<PaginatedResponse<ITransaction>>(
+    showTransactions ? `/organizations/${event.id}/transactions?limit=5` : null,
   );
 
   const { colors: themeColors } = useTheme();
@@ -89,65 +97,97 @@ function Event({
       <View
         style={StyleSheet.compose(
           {
-            flexDirection: "row",
-            alignItems: "center",
             backgroundColor: themeColors.card,
             marginBottom: 16,
-            padding: 16,
             borderRadius: 10,
             overflow: "hidden",
           },
           style,
         )}
       >
-        {event.icon ? (
-          <Image
-            source={{ uri: event.icon }}
-            cachePolicy="disk"
-            style={{ width: 40, height: 40, borderRadius: 8, marginRight: 16 }}
-          />
-        ) : (
+        <View
+          style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
+        >
+          {event.icon ? (
+            <Image
+              source={{ uri: event.icon }}
+              cachePolicy="disk"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                marginRight: 16,
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                borderRadius: 8,
+                width: 40,
+                height: 40,
+                backgroundColor: color,
+                marginRight: 16,
+              }}
+            ></View>
+          )}
           <View
             style={{
-              borderRadius: 8,
-              width: 40,
-              height: 40,
-              backgroundColor: color,
-              marginRight: 16,
-            }}
-          ></View>
-        )}
-        <View
-          style={{
-            flexDirection: "column",
-            flex: 1,
-          }}
-        >
-          {invitation && invitation.sender && (
-            <Text style={{ color: palette.muted, marginBottom: 3 }}>
-              <Text style={{ fontWeight: "600" }}>
-                {invitation.sender.name}
-              </Text>{" "}
-              invited you to
-            </Text>
-          )}
-          <Text
-            numberOfLines={2}
-            style={{
-              color: themeColors.text,
-              fontSize: 20,
-              fontWeight: "600",
+              flexDirection: "column",
+              flex: 1,
             }}
           >
-            {event.name}
-          </Text>
-          {!hideBalance && <EventBalance balance_cents={data?.balance_cents} />}
+            {invitation && invitation.sender && (
+              <Text style={{ color: palette.muted, marginBottom: 3 }}>
+                <Text style={{ fontWeight: "600" }}>
+                  {invitation.sender.name}
+                </Text>{" "}
+                invited you to
+              </Text>
+            )}
+            <Text
+              numberOfLines={2}
+              style={{
+                color: themeColors.text,
+                fontSize: 20,
+                fontWeight: "600",
+              }}
+            >
+              {event.name}
+            </Text>
+            {!hideBalance && (
+              <EventBalance balance_cents={data?.balance_cents} />
+            )}
+          </View>
+          <Ionicons
+            name="chevron-forward-outline"
+            size={24}
+            color={palette.muted}
+          />
         </View>
-        <Ionicons
-          name="chevron-forward-outline"
-          size={24}
-          color={palette.muted}
-        />
+        {transactions?.data?.length && (
+          <>
+            {transactions.data.map((tx) => (
+              <Transaction transaction={tx} key={tx.id} />
+            ))}
+            {transactions.has_more && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: 10,
+                }}
+              >
+                <Text style={{ color: palette.info }}>See more activity</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  color={palette.info}
+                  size={18}
+                />
+              </View>
+            )}
+          </>
+        )}
       </View>
     </TouchableHighlight>
   );
@@ -282,6 +322,7 @@ export default function App({ navigation }: Props) {
           renderItem={({ item: organization }) => (
             <Event
               event={organization}
+              showTransactions={organizations.length <= 2}
               onPress={() =>
                 navigation.navigate("Event", {
                   orgId: organization.id,

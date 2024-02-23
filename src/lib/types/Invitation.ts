@@ -4,5 +4,6 @@ import User from "./User";
 
 export default interface Invitation extends HcbApiObject<"inv"> {
   sender?: User; // Field is optional for future-proofing reasons
+  accepted: boolean;
   organization: Organization;
 }

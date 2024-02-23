@@ -28,6 +28,9 @@ const clientId = process.env.EXPO_PUBLIC_CLIENT_ID!;
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
 export default function Login() {
+  const scheme = useColorScheme();
+  const theme = scheme == "dark" ? darkTheme : lightTheme;
+
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId,
@@ -35,6 +38,7 @@ export default function Login() {
       scopes: ["read", "write"],
       extraParams: {
         no_app_shell: "true",
+        theme: scheme || "",
       },
     },
     discovery,
@@ -73,9 +77,6 @@ export default function Login() {
       useNativeDriver: true,
     }).start();
   }, [animation]);
-
-  const scheme = useColorScheme();
-  const theme = scheme == "dark" ? darkTheme : lightTheme;
 
   return (
     <SafeAreaView

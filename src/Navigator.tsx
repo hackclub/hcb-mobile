@@ -2,14 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { revokeAsync } from "expo-auth-session";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { useContext } from "react";
-import { View, Button, StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
-import AuthContext from "./auth";
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
   StackParamList,
@@ -23,10 +20,10 @@ import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
-import { discovery } from "./pages/login";
 import OrganizationPage from "./pages/organization";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
+import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
 
@@ -37,7 +34,6 @@ const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
-  const { token, setToken } = useContext(AuthContext);
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     `/user/transactions/missing_receipt`,
   );
@@ -200,29 +196,11 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Settings" options={{ headerShown: true }}>
-        {() => (
-          <View>
-            <Button
-              title="log out"
-              onPress={() => {
-                // intentionally not `await`ed
-                revokeAsync(
-                  {
-                    token: token!,
-                    clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
-                  },
-                  discovery,
-                );
-
-                mutate((k) => k, undefined, { revalidate: false });
-
-                setToken("");
-              }}
-            />
-          </View>
-        )}
-      </Tab.Screen>
+      <Tab.Screen
+        name="Settings"
+        options={{ headerShown: true }}
+        component={SettingsPage}
+      />
     </Tab.Navigator>
   );
 }
