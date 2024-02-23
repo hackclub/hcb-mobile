@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -35,6 +35,16 @@ export default function InvitationPage({
     { fallbackData: _invitation },
   );
 
+  useEffect(() => {
+    if (invitation?.accepted) {
+      navigation.goBack(); // Close modal
+      navigation.navigate("Event", {
+        orgId: invitation.organization.id,
+        organization: invitation.organization,
+      });
+    }
+  }, [invitation]);
+
   const { mutate } = useSWRConfig();
 
   const { colors: themeColors } = useTheme();
@@ -63,12 +73,10 @@ export default function InvitationPage({
         invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => {
         navigation.goBack(); // Close modal
-        if (invitation) {
-          navigation.navigate("Event", {
-            orgId: invitation.organization.id,
-            organization: invitation.organization,
-          });
-        }
+        navigation.navigate("Event", {
+          orgId: invitation!.organization.id,
+          organization: invitation!.organization,
+        });
         mutate(`/user/organizations`);
       },
     },
@@ -115,6 +123,7 @@ export default function InvitationPage({
       <TouchableHighlight
         onPress={() => navigation.goBack()}
         style={{ position: "absolute", top: 16, right: 16 }}
+        underlayColor={themeColors.background}
       >
         <Ionicons name="close-circle" color={p.muted} size={30} />
       </TouchableHighlight>
