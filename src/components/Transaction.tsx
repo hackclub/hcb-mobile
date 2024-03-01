@@ -82,6 +82,7 @@ function Transaction({
   hideAvatar,
   hideIcon,
   hidePendingLabel,
+  hideMissingReceipt,
   style,
 }: ViewProps & {
   transaction: TransactionWithoutId;
@@ -90,6 +91,7 @@ function Transaction({
   hideAvatar?: boolean;
   hideIcon?: boolean;
   hidePendingLabel?: boolean;
+  hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
 
@@ -135,7 +137,7 @@ function Transaction({
             : "")}
         {transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
-      {transaction.missing_receipt && (
+      {transaction.missing_receipt && !hideMissingReceipt && (
         <View>
           <Ionicons name="receipt-outline" color={palette.muted} size={18} />
           <Ionicons

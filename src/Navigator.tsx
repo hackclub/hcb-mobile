@@ -90,6 +90,7 @@ export default function Navigator() {
               name="Organizations"
               component={Home}
               options={{
+                title: "Home",
                 headerLargeTitle: true,
                 headerRight: () => (
                   <Ionicons.Button

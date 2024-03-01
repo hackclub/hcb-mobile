@@ -3,7 +3,7 @@ import "expo-dev-client";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
@@ -52,6 +52,27 @@ export default function App() {
 
   const scheme = useColorScheme();
 
+  const fetcher = useCallback(
+    (url: string) =>
+      fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            if (res.error === "invalid_auth") {
+              // OAuth token either expired or was revoked
+              setToken("");
+              return;
+            }
+          } else {
+            throw res;
+          }
+          return res;
+        }),
+    [token],
+  );
+
   useEffect(() => {
     (async () => {
       const token = await SecureStorage.getItemAsync("token");
@@ -83,25 +104,7 @@ export default function App() {
 
       <SWRConfig
         value={{
-          fetcher: (url) =>
-            fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
-              headers: { Authorization: `Bearer ${token}` },
-            })
-              .then((res) => {
-                if (!res.ok) {
-                  throw res;
-                }
-                return res;
-              })
-              .then((res) => res.json())
-              .then((res) => {
-                if (res.error === "invalid_auth") {
-                  // OAuth token either expired or was revoked
-                  setToken("");
-                  return;
-                }
-                return res;
-              }),
+          fetcher,
         }}
       >
         <SafeAreaProvider>
