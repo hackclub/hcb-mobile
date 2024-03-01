@@ -31,3 +31,17 @@ export function statusColor(status: string) {
     return palette.muted;
   }
 }
+
+export function orgColor(orgId: string) {
+  const colors = [
+    "#ec3750",
+    "#ff8c37",
+    "#f1c40f",
+    "#33d6a6",
+    "#5bc0de",
+    "#338eda",
+    "#a633d6",
+  ];
+
+  return colors[Math.floor(orgId.charCodeAt(4) % colors.length)];
+}

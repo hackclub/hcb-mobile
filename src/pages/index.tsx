@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useEffect } from "react";
 import {
@@ -18,12 +19,13 @@ import useSWR, { preload, useSWRConfig } from "swr";
 
 import Transaction from "../components/Transaction";
 import { StackParamList } from "../lib/NavigatorParamList";
+import usePinnedOrgs from "../lib/organization/usePinnedOrgs";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { palette } from "../theme";
-import { renderMoney } from "../util";
+import { orgColor, renderMoney } from "../util";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -56,41 +58,37 @@ function Event({
   event,
   hideBalance = false,
   onPress,
+  onHold,
   style,
   invitation,
   showTransactions = false,
+  pinned = false,
 }: ViewProps & {
   event: Organization;
   hideBalance?: boolean;
   showTransactions?: boolean;
+  pinned?: boolean;
   invitation?: Invitation;
   onPress?: () => void;
+  onHold?: () => void;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `/organizations/${event.id}`,
   );
-  const { data: transactions } = useSWR<PaginatedResponse<ITransaction>>(
+  const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
+    PaginatedResponse<ITransaction>
+  >(
     showTransactions ? `/organizations/${event.id}/transactions?limit=5` : null,
   );
 
   const { colors: themeColors } = useTheme();
 
-  const colors = [
-    "#ec3750",
-    "#ff8c37",
-    "#f1c40f",
-    "#33d6a6",
-    "#5bc0de",
-    "#338eda",
-    "#a633d6",
-  ];
-
-  // Generate a deterministic color to use if the organization doesn't have an icon
-  const color = colors[Math.floor(event.id.charCodeAt(4) % colors.length)];
+  const color = orgColor(event.id);
 
   return (
     <TouchableHighlight
       onPress={onPress}
+      onLongPress={onHold}
       underlayColor={themeColors.background}
       activeOpacity={0.7}
     >
@@ -100,11 +98,22 @@ function Event({
             backgroundColor: themeColors.card,
             marginBottom: 16,
             borderRadius: 10,
-            overflow: "hidden",
           },
           style,
         )}
       >
+        {pinned && (
+          <Text
+            style={{
+              position: "absolute",
+              top: -10,
+              right: -10,
+              fontSize: 20,
+            }}
+          >
+            📌
+          </Text>
+        )}
         <View
           style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
         >
@@ -164,10 +173,15 @@ function Event({
             color={palette.muted}
           />
         </View>
-        {transactions?.data?.length && (
+        {transactions?.data && transactions.data.length >= 1 ? (
           <>
-            {transactions.data.map((tx) => (
-              <Transaction transaction={tx} key={tx.id} />
+            {transactions.data.map((tx, index) => (
+              <Transaction
+                transaction={tx}
+                key={tx.id}
+                bottom={index == transactions.data.length - 1}
+                hideMissingReceipt
+              />
             ))}
             {transactions.has_more && (
               <View
@@ -187,7 +201,9 @@ function Event({
               </View>
             )}
           </>
-        )}
+        ) : transactionsIsLoading ? (
+          <ActivityIndicator style={{ marginVertical: 20 }} />
+        ) : null}
       </View>
     </TouchableHighlight>
   );
@@ -201,6 +217,7 @@ export default function App({ navigation }: Props) {
     error,
     mutate: reloadOrganizations,
   } = useSWR<Organization[]>("/user/organizations");
+  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("/user/invitations");
 
@@ -209,6 +226,8 @@ export default function App({ navigation }: Props) {
   const scheme = useColorScheme();
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    preload("/user", fetcher!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("/user/cards", fetcher!);
   }, []);
@@ -254,7 +273,7 @@ export default function App({ navigation }: Props) {
             paddingBottom: tabBarHeight,
           }}
           contentInsetAdjustmentBehavior="automatic"
-          data={organizations}
+          data={sortedOrgs}
           style={{ flex: 1 }}
           // refreshing={isValidating}
           // onRefresh={() => {
@@ -322,15 +341,37 @@ export default function App({ navigation }: Props) {
           renderItem={({ item: organization }) => (
             <Event
               event={organization}
-              showTransactions={organizations.length <= 2}
+              showTransactions={
+                organizations.length <= 2 || organization.pinned
+              }
+              pinned={organization.pinned}
               onPress={() =>
                 navigation.navigate("Event", {
                   orgId: organization.id,
                   organization,
                 })
               }
+              onHold={() => {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+                togglePinnedOrg(organization.id);
+              }}
             />
           )}
+          ListFooterComponent={() =>
+            organizations.length > 2 && (
+              <Text
+                style={{
+                  color: palette.muted,
+                  textAlign: "center",
+                  marginTop: 10,
+                }}
+              >
+                Tap and hold to pin an organization
+              </Text>
+            )
+          }
         />
       )}
     </View>
