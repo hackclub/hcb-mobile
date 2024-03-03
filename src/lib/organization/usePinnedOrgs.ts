@@ -13,7 +13,6 @@ export default function usePinnedOrgs(
 
   useEffect(() => {
     AsyncStorage.getItem("pinnedOrgs").then((_pinnedOrgs) => {
-      console.log(_pinnedOrgs);
       if (_pinnedOrgs) {
         setPinnedOrgs(JSON.parse(_pinnedOrgs));
       }
