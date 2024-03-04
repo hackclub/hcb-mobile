@@ -160,6 +160,7 @@ export default function CardPage({
                 navigation.navigate("Transaction", {
                   orgId: card.organization.id,
                   transaction,
+                  transactionId: transaction.id,
                 });
               }}
               underlayColor={themeColors.background}
