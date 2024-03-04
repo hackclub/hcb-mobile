@@ -92,7 +92,7 @@ export default function ReceiptList({
           }}
           layout={transition}
         >
-          {isLoading ? (
+          {isLoading && !transaction.missing_receipt ? (
             <ActivityIndicator color={palette.muted} />
           ) : (
             <>
