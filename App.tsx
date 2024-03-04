@@ -56,20 +56,21 @@ export default function App() {
     (url: string) =>
       fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
         headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          if (!res.ok) {
-            if (res.error === "invalid_auth") {
-              // OAuth token either expired or was revoked
-              setToken("");
-              return;
-            }
+      }).then(async (res) => {
+        const body = await res.json();
+
+        if (!res.ok) {
+          if (body.error === "invalid_auth") {
+            // OAuth token either expired or was revoked
+            setToken("");
+            return;
           } else {
-            throw res;
+            throw body;
           }
-          return res;
-        }),
+        }
+
+        return body;
+      }),
     [token],
   );
 

@@ -20,7 +20,11 @@ export type StackParamList = {
 export type CardsStackParamList = {
   CardList: undefined;
   Card: { card: Card };
-  Transaction: { orgId: string; transaction: Transaction };
+  Transaction: {
+    transactionId: Transaction["id"];
+    orgId?: Organization["id"];
+    transaction?: Transaction;
+  };
   RenameTransaction: { orgId: string; transaction: Transaction };
 };
 
