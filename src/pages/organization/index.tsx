@@ -105,6 +105,7 @@ export default function OrganizationPage({
                 backgroundColor="transparent"
                 size={24}
                 color={palette.primary}
+                iconStyle={{ marginRight: 0 }}
               />
             </MenuView>
           ),

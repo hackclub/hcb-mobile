@@ -49,6 +49,7 @@ export default function CardsPage({ navigation }: Props) {
             backgroundColor="transparent"
             size={24}
             color={palette.primary}
+            iconStyle={{ marginRight: 0 }}
           />
         </MenuView>
       ),

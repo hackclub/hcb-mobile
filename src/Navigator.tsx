@@ -99,6 +99,7 @@ export default function Navigator() {
                     size={24}
                     underlayColor={themeColors.card}
                     color={palette.primary}
+                    iconStyle={{ marginRight: 0 }}
                     onPress={() =>
                       WebBrowser.openBrowserAsync(
                         "https://hackclub.com/hcb/apply",
