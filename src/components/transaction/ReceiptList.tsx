@@ -47,7 +47,7 @@ export default function ReceiptList({
   const { colors: themeColors } = useTheme();
 
   return (
-    <View>
+    <View style={{ marginBottom: 30 }}>
       <Text
         style={{
           color: palette.muted,

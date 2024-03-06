@@ -3,6 +3,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import useSWR from "swr";
 
+import Divider from "../components/Divider";
+import Comment from "../components/transaction/Comment";
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
 import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
@@ -10,6 +12,7 @@ import DonationTransaction from "../components/transaction/types/DonationTransac
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
+import IComment from "../lib/types/Comment";
 import Organization from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
 
@@ -20,11 +23,19 @@ export default function TransactionPage({
     params: { transactionId, transaction: _transaction, orgId },
   },
 }: Props) {
-  const { data: transaction } = useSWR<Transaction>(
+  const { data: transaction } = useSWR<
+    Transaction & { organization?: Organization }
+  >(
     orgId
       ? `/organizations/${orgId}/transactions/${transactionId}`
       : `/transactions/${transactionId}`,
     { fallbackData: _transaction },
+  );
+  const { data: comments } = useSWR<IComment[]>(
+    () =>
+      `/organizations/${
+        orgId || transaction!.organization!.id
+      }/transactions/${transactionId}/comments`,
   );
 
   const tabBarHeight = useBottomTabBarHeight();
@@ -64,6 +75,17 @@ export default function TransactionPage({
             ?.organization?.id
         }
       />
+
+      {comments && comments.length > 0 && (
+        <>
+          <Divider />
+          <View style={{ gap: 20 }}>
+            {comments.map((comment) => (
+              <Comment comment={comment} key={comment.id} />
+            ))}
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
