@@ -52,6 +52,7 @@ export default {
           cameraPermission: "Allow HCB to take photos of receipts",
         },
       ],
+      "expo-secure-store",
     ],
   },
 };
