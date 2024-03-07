@@ -4,6 +4,7 @@ const appIcons = {
   Default: "default.png",
   "Cash Money": "cash-money.png",
   "Open Late": "hack-night.png",
+  "Art Skillz": "art-skillz.png",
 };
 
 let appIconConfig = {};
