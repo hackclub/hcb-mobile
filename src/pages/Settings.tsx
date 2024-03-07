@@ -60,15 +60,25 @@ const IconComponent = ({
             borderWidth: 0.5,
           }}
         />
-        <Text style={{ fontSize: 18, marginBottom: 0, color: colors.text }}>
+        <Text
+          style={{
+            fontSize: 18,
+            marginBottom: 0,
+            color: colors.text,
+            flex: 1,
+          }}
+          numberOfLines={1}
+        >
           {displayName}
         </Text>
-        <Ionicons
-          name={selected ? "checkmark-circle" : "checkmark-circle-outline"}
-          size={24}
-          color={selected ? palette.info : palette.muted}
-          marginLeft="auto"
-        />
+        {selected && (
+          <Ionicons
+            name={selected ? "checkmark-circle" : "checkmark-circle-outline"}
+            size={24}
+            color={selected ? palette.info : palette.muted}
+            marginLeft="auto"
+          />
+        )}
       </View>
       {!last && (
         <View
