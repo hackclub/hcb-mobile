@@ -1,3 +1,5 @@
+import { appIconConfig } from "./src/lib/AppIconList";
+
 const IS_DEV = process.env.APP_VARIANT === "development";
 
 export default {
@@ -53,6 +55,7 @@ export default {
         },
       ],
       "expo-secure-store",
+      ["@config-plugins/react-native-dynamic-app-icon", appIconConfig],
     ],
   },
 };
