@@ -3,7 +3,14 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { revokeAsync } from "expo-auth-session";
 import { PropsWithChildren, useContext, useEffect, useState } from "react";
-import { Text, View, Image, Pressable, ScrollView } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  Pressable,
+  ScrollView,
+  useColorScheme,
+} from "react-native";
 import AppIcon from "react-native-dynamic-app-icon";
 import useSWR, { useSWRConfig } from "swr";
 
@@ -29,8 +36,9 @@ const IconComponent = ({
   last?: boolean;
   onPress: (name: string) => void;
 }) => {
-  const source = { uri: `${name}-Icon-60x60` };
   const selected = currentIcon === name;
+  const { colors } = useTheme();
+  const scheme = useColorScheme();
 
   return (
     <Pressable onPress={() => onPress(name)}>
@@ -43,10 +51,16 @@ const IconComponent = ({
         }}
       >
         <Image
-          source={source}
-          style={{ width: 50, height: 50, borderRadius: 10 }}
+          source={{ uri: `${name}-Icon-60x60` }}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 10,
+            borderColor: palette.muted,
+            borderWidth: 0.5,
+          }}
         />
-        <Text style={{ fontSize: 18, marginBottom: 0, color: palette.smoke }}>
+        <Text style={{ fontSize: 18, marginBottom: 0, color: colors.text }}>
           {displayName}
         </Text>
         <Ionicons
@@ -62,7 +76,7 @@ const IconComponent = ({
             height: 0.5,
             width: "100%",
             marginLeft: 60,
-            backgroundColor: palette.slate,
+            backgroundColor: scheme == "dark" ? palette.slate : palette.smoke,
           }}
         ></View>
       )}
@@ -88,13 +102,15 @@ const ListSection = ({ children }: PropsWithChildren) => {
 };
 
 const SectionHeader = ({ title }: { title: string }) => {
+  const { colors } = useTheme();
+
   return (
     <Text
       style={{
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 16,
-        color: palette.smoke,
+        color: colors.text,
       }}
     >
       {title}
@@ -103,12 +119,14 @@ const SectionHeader = ({ title }: { title: string }) => {
 };
 
 const ListHeader = ({ title }: { title: string }) => {
+  const { colors } = useTheme();
+
   return (
     <Text
       style={{
         fontSize: 18,
         marginBottom: 16,
-        color: palette.smoke,
+        color: colors.text,
         marginLeft: 5,
       }}
     >
