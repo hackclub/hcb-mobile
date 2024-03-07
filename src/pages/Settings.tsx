@@ -1,7 +1,7 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { revokeAsync } from "expo-auth-session";
-import { useContext } from "react";
-import { Text, View } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { Text, View, Image, Pressable } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import AuthContext from "../auth";
@@ -12,49 +12,123 @@ import User from "../lib/types/User";
 import { palette } from "../theme";
 
 import { discovery } from "./login";
+import { useTheme } from "@react-navigation/native";
+import { ScrollView } from "react-native";
+import AppIcon from "react-native-dynamic-app-icon";
+import { Ionicons } from "@expo/vector-icons";
+
+
+const IconComponent = ({ name='Nostalgic Pebble', currentIcon=null, onPress }) => {
+  const source = {uri:`${name}-Icon-60x60`}
+  const selected = currentIcon === name
+
+  return(
+    <Pressable onPress={()=>onPress(name)}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, gap: 10 }}>
+        <Image source={source} style={{ width: 50, height: 50, borderRadius: 10 }} />
+        <Text style={{ fontSize: 18, marginBottom: 0, color: palette.smoke }}>
+          {name}
+        </Text>
+        <Ionicons name={selected ? "checkmark-circle" : "checkmark-circle-outline"} size={24} color={selected ? palette.info : palette.muted} marginLeft="auto" />
+      </View>
+      <View style={{ height: 0.5, width: '100%', marginLeft: '15%', backgroundColor: palette.slate }}></View>
+    </Pressable>
+  )
+}
+
+const ListSection = ({ children }) => {
+  const { colors: themeColors } = useTheme();
+  return (
+    <View style={{ backgroundColor: themeColors.card, borderRadius: 8, overflow: 'hidden', paddingHorizontal: 10, marginBottom: 60 }}>
+      {children}
+    </View>
+  )
+}
+
+const SectionHeader = ({ title }) => {
+  return (
+    <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16, color: palette.smoke }}>
+      {title}
+    </Text>
+  )
+}
+
+const ListHeader = ({ title }) => {
+  return (
+    <Text style={{ fontSize: 24, fontWeight: "", marginBottom: 16, color: palette.smoke }}>
+      {title}
+    </Text>
+  )
+}
 
 export default function SettingsPage(
   _props: BottomTabScreenProps<TabParamList, "Settings">,
 ) {
   const { mutate } = useSWRConfig();
   const { token, setToken } = useContext(AuthContext);
+  const [ appIcon, setAppIcon ] = useState(null)
+  useEffect(() => {
+    AppIcon.getIconName(idObj => setAppIcon(idObj.iconName))
+  }, [])
 
   const { data: user } = useSWR<User>("/user");
 
+  const handleClick = (iconIndex) => {
+    AppIcon.setAppIcon(iconIndex.toString())
+    setAppIcon(iconIndex)
+  }
+
   return (
+    <ScrollView contentContainerStyle={{paddingBottom: 80}} scrollIndicatorInsets={{bottom:80}}>
+
     <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          marginBottom: 16,
-        }}
-      >
-        <Text style={{ textAlign: "center", color: palette.muted }}>
-          Logged in as
-        </Text>
-        {user && <UserMention user={user} />}
+      <SectionHeader title='App Icon' />
+        <View>
+          <ListSection>
+            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Primary' />
+            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Dev' />
+          </ListSection>
+          <ListHeader title="Shiny- catchem all!" />
+          <ListSection>
+            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Open Late' />
+          </ListSection>
+        </View>
+        <View style={{paddingTop: 12}}>
+        <SectionHeader title='Connected Account' />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ textAlign: "center", color: palette.muted }}>
+              Logged in as
+            </Text>
+            {user && <UserMention user={user} />}
+          </View>
+          <Button
+            onPress={() => {
+              // intentionally not `await`ed
+              revokeAsync(
+                {
+                  token: token!,
+                  clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+                },
+                discovery,
+              );
+
+              mutate((k) => k, undefined, { revalidate: false });
+
+              setToken("");
+            }}
+          >
+            Log out
+          </Button>
+        </View>
       </View>
-      <Button
-        onPress={() => {
-          // intentionally not `await`ed
-          revokeAsync(
-            {
-              token: token!,
-              clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
-            },
-            discovery,
-          );
-
-          mutate((k) => k, undefined, { revalidate: false });
-
-          setToken("");
-        }}
-      >
-        Log out
-      </Button>
-    </View>
+    </ScrollView>
   );
 }
