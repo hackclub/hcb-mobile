@@ -18,11 +18,15 @@ import { discovery } from "./login";
 
 const IconComponent = ({
   name,
+  displayName = name,
   currentIcon,
+  last,
   onPress,
 }: {
   name: string;
+  displayName?: string;
   currentIcon: string;
+  last?: boolean;
   onPress: (name: string) => void;
 }) => {
   const source = { uri: `${name}-Icon-60x60` };
@@ -43,7 +47,7 @@ const IconComponent = ({
           style={{ width: 50, height: 50, borderRadius: 10 }}
         />
         <Text style={{ fontSize: 18, marginBottom: 0, color: palette.smoke }}>
-          {name}
+          {displayName}
         </Text>
         <Ionicons
           name={selected ? "checkmark-circle" : "checkmark-circle-outline"}
@@ -52,14 +56,16 @@ const IconComponent = ({
           marginLeft="auto"
         />
       </View>
-      <View
-        style={{
-          height: 0.5,
-          width: "100%",
-          marginLeft: "15%",
-          backgroundColor: palette.slate,
-        }}
-      ></View>
+      {!last && (
+        <View
+          style={{
+            height: 0.5,
+            width: "100%",
+            marginLeft: "15%",
+            backgroundColor: palette.slate,
+          }}
+        ></View>
+      )}
     </Pressable>
   );
 };
@@ -100,7 +106,7 @@ const ListHeader = ({ title }: { title: string }) => {
   return (
     <Text
       style={{
-        fontSize: 24,
+        fontSize: 18,
         marginBottom: 16,
         color: palette.smoke,
       }}
@@ -118,7 +124,10 @@ export default function SettingsPage(
   const [appIcon, setAppIcon] = useState<string>("");
 
   useEffect(() => {
-    AppIcon.getIconName(({ iconName }) => setAppIcon(iconName));
+    AppIcon.getIconName(({ iconName }) => {
+      if (iconName == "default") iconName = "Default"; // don't hate me 'cause you ain't me
+      setAppIcon(iconName);
+    });
   }, []);
 
   const { data: user } = useSWR<User>("/user");
@@ -140,12 +149,14 @@ export default function SettingsPage(
             <IconComponent
               onPress={handleClick}
               currentIcon={appIcon}
-              name="Primary"
+              name="Default"
+              displayName="Classic"
             />
             <IconComponent
               onPress={handleClick}
               currentIcon={appIcon}
-              name="Dev"
+              name="Cash Money"
+              last
             />
           </ListSection>
           <ListHeader title="Shiny- catchem all!" />
@@ -154,6 +165,7 @@ export default function SettingsPage(
               onPress={handleClick}
               currentIcon={appIcon}
               name="Open Late"
+              last
             />
           </ListSection>
         </View>
