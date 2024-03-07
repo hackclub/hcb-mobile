@@ -1,7 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { revokeAsync } from "expo-auth-session";
-import { useContext, useEffect, useState } from "react";
-import { Text, View, Image, Pressable } from "react-native";
+import { PropsWithChildren, useContext, useEffect, useState } from "react";
+import { Text, View, Image, Pressable, ScrollView } from "react-native";
+import AppIcon from "react-native-dynamic-app-icon";
 import useSWR, { useSWRConfig } from "swr";
 
 import AuthContext from "../auth";
@@ -12,89 +15,150 @@ import User from "../lib/types/User";
 import { palette } from "../theme";
 
 import { discovery } from "./login";
-import { useTheme } from "@react-navigation/native";
-import { ScrollView } from "react-native";
-import AppIcon from "react-native-dynamic-app-icon";
-import { Ionicons } from "@expo/vector-icons";
 
+const IconComponent = ({
+  name,
+  currentIcon,
+  onPress,
+}: {
+  name: string;
+  currentIcon: string;
+  onPress: (name: string) => void;
+}) => {
+  const source = { uri: `${name}-Icon-60x60` };
+  const selected = currentIcon === name;
 
-const IconComponent = ({ name='Nostalgic Pebble', currentIcon=null, onPress }) => {
-  const source = {uri:`${name}-Icon-60x60`}
-  const selected = currentIcon === name
-
-  return(
-    <Pressable onPress={()=>onPress(name)}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, gap: 10 }}>
-        <Image source={source} style={{ width: 50, height: 50, borderRadius: 10 }} />
+  return (
+    <Pressable onPress={() => onPress(name)}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingVertical: 8,
+          gap: 10,
+        }}
+      >
+        <Image
+          source={source}
+          style={{ width: 50, height: 50, borderRadius: 10 }}
+        />
         <Text style={{ fontSize: 18, marginBottom: 0, color: palette.smoke }}>
           {name}
         </Text>
-        <Ionicons name={selected ? "checkmark-circle" : "checkmark-circle-outline"} size={24} color={selected ? palette.info : palette.muted} marginLeft="auto" />
+        <Ionicons
+          name={selected ? "checkmark-circle" : "checkmark-circle-outline"}
+          size={24}
+          color={selected ? palette.info : palette.muted}
+          marginLeft="auto"
+        />
       </View>
-      <View style={{ height: 0.5, width: '100%', marginLeft: '15%', backgroundColor: palette.slate }}></View>
+      <View
+        style={{
+          height: 0.5,
+          width: "100%",
+          marginLeft: "15%",
+          backgroundColor: palette.slate,
+        }}
+      ></View>
     </Pressable>
-  )
-}
+  );
+};
 
-const ListSection = ({ children }) => {
+const ListSection = ({ children }: PropsWithChildren) => {
   const { colors: themeColors } = useTheme();
   return (
-    <View style={{ backgroundColor: themeColors.card, borderRadius: 8, overflow: 'hidden', paddingHorizontal: 10, marginBottom: 60 }}>
+    <View
+      style={{
+        backgroundColor: themeColors.card,
+        borderRadius: 8,
+        overflow: "hidden",
+        paddingHorizontal: 10,
+        marginBottom: 60,
+      }}
+    >
       {children}
     </View>
-  )
-}
+  );
+};
 
-const SectionHeader = ({ title }) => {
+const SectionHeader = ({ title }: { title: string }) => {
   return (
-    <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16, color: palette.smoke }}>
+    <Text
+      style={{
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 16,
+        color: palette.smoke,
+      }}
+    >
       {title}
     </Text>
-  )
-}
+  );
+};
 
-const ListHeader = ({ title }) => {
+const ListHeader = ({ title }: { title: string }) => {
   return (
-    <Text style={{ fontSize: 24, fontWeight: "", marginBottom: 16, color: palette.smoke }}>
+    <Text
+      style={{
+        fontSize: 24,
+        marginBottom: 16,
+        color: palette.smoke,
+      }}
+    >
       {title}
     </Text>
-  )
-}
+  );
+};
 
 export default function SettingsPage(
   _props: BottomTabScreenProps<TabParamList, "Settings">,
 ) {
   const { mutate } = useSWRConfig();
   const { token, setToken } = useContext(AuthContext);
-  const [ appIcon, setAppIcon ] = useState(null)
+  const [appIcon, setAppIcon] = useState<string>("");
+
   useEffect(() => {
-    AppIcon.getIconName(idObj => setAppIcon(idObj.iconName))
-  }, [])
+    AppIcon.getIconName(({ iconName }) => setAppIcon(iconName));
+  }, []);
 
   const { data: user } = useSWR<User>("/user");
 
-  const handleClick = (iconIndex) => {
-    AppIcon.setAppIcon(iconIndex.toString())
-    setAppIcon(iconIndex)
-  }
+  const handleClick = (iconName: string) => {
+    AppIcon.setAppIcon(iconName.toString());
+    setAppIcon(iconName);
+  };
 
   return (
-    <ScrollView contentContainerStyle={{paddingBottom: 80}} scrollIndicatorInsets={{bottom:80}}>
-
-    <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
-      <SectionHeader title='App Icon' />
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 80 }}
+      scrollIndicatorInsets={{ bottom: 80 }}
+    >
+      <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
+        <SectionHeader title="App Icon" />
         <View>
           <ListSection>
-            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Primary' />
-            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Dev' />
+            <IconComponent
+              onPress={handleClick}
+              currentIcon={appIcon}
+              name="Primary"
+            />
+            <IconComponent
+              onPress={handleClick}
+              currentIcon={appIcon}
+              name="Dev"
+            />
           </ListSection>
           <ListHeader title="Shiny- catchem all!" />
           <ListSection>
-            <IconComponent onPress={handleClick} currentIcon={appIcon} name='Open Late' />
+            <IconComponent
+              onPress={handleClick}
+              currentIcon={appIcon}
+              name="Open Late"
+            />
           </ListSection>
         </View>
-        <View style={{paddingTop: 12}}>
-        <SectionHeader title='Connected Account' />
+        <View style={{ paddingTop: 12 }}>
+          <SectionHeader title="Connected Account" />
           <View
             style={{
               flexDirection: "row",
