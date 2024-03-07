@@ -165,6 +165,12 @@ export default function SettingsPage(
               onPress={handleClick}
               currentIcon={appIcon}
               name="Open Late"
+            />
+            <IconComponent
+              onPress={handleClick}
+              currentIcon={appIcon}
+              name="Art Skillz"
+              displayName="Graphic Design Is My Passion"
               last
             />
           </ListSection>
