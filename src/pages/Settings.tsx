@@ -79,7 +79,7 @@ const ListSection = ({ children }: PropsWithChildren) => {
         borderRadius: 8,
         overflow: "hidden",
         paddingHorizontal: 10,
-        marginBottom: 60,
+        marginBottom: 30,
       }}
     >
       {children}
@@ -109,6 +109,7 @@ const ListHeader = ({ title }: { title: string }) => {
         fontSize: 18,
         marginBottom: 16,
         color: palette.smoke,
+        marginLeft: 5,
       }}
     >
       {title}
