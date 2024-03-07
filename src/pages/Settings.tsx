@@ -61,7 +61,7 @@ const IconComponent = ({
           style={{
             height: 0.5,
             width: "100%",
-            marginLeft: "15%",
+            marginLeft: 60,
             backgroundColor: palette.slate,
           }}
         ></View>
