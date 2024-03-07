@@ -1,9 +1,9 @@
 /* eslint-env commonjs */
 
 const appIcons = {
-  Primary: "primary.png",
-  Dev: "dev.png",
-  "Open Late": "hack_night.png",
+  Default: "default.png",
+  "Cash Money": "cash-money.png",
+  "Open Late": "hack-night.png",
 };
 
 let appIconConfig = {};
