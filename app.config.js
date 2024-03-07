@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.8",
+      buildNumber: "1.0.0.9",
       config: {
         usesNonExemptEncryption: false,
       },
