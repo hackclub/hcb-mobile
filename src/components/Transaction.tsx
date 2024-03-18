@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
@@ -68,7 +69,11 @@ function TransactionIcon({
     return (
       <Ionicons
         name={transactionIcon(transaction)}
-        color={palette.muted}
+        color={
+          transaction.appearance == "hackathon_grant"
+            ? palette.black
+            : palette.muted
+        }
         size={20}
       />
     );
@@ -103,15 +108,28 @@ function Transaction({
           flexDirection: "row",
           alignItems: "center",
           gap: 10,
-          backgroundColor: themeColors.card,
+          backgroundColor:
+            transaction.appearance == "hackathon_grant"
+              ? undefined
+              : themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
           borderBottomLeftRadius: bottom ? 8 : 0,
           borderBottomRightRadius: bottom ? 8 : 0,
+          overflow: "hidden",
         },
         style,
       )}
     >
+      {transaction.appearance == "hackathon_grant" && (
+        <LinearGradient
+          colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        />
+      )}
+
       <TransactionIcon
         transaction={transaction}
         hideAvatar={hideAvatar}
@@ -122,7 +140,9 @@ function Transaction({
         style={{
           fontSize: 14,
           color:
-            transaction.pending || transaction.declined
+            transaction.appearance == "hackathon_grant"
+              ? palette.black
+              : transaction.pending || transaction.declined
               ? palette.muted
               : themeColors.text,
           overflow: "hidden",
@@ -135,7 +155,9 @@ function Transaction({
             : transaction.pending
             ? "Pending: "
             : "")}
-        {transaction.memo.replaceAll(/\s{2,}/g, " ")}
+        {transaction.appearance == "hackathon_grant"
+          ? "💰 Hackathon grant"
+          : transaction.memo.replaceAll(/\s{2,}/g, " ")}
       </Text>
       {transaction.missing_receipt && !hideMissingReceipt && (
         <View>
@@ -150,7 +172,12 @@ function Transaction({
       )}
       <Text
         style={{
-          color: transaction.amount_cents > 0 ? "#33d6a6" : palette.muted,
+          color:
+            transaction.appearance == "hackathon_grant"
+              ? palette.black
+              : transaction.amount_cents > 0
+              ? "#33d6a6"
+              : palette.muted,
         }}
       >
         {renderMoney(transaction.amount_cents)}

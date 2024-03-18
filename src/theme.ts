@@ -10,6 +10,7 @@ export const palette = {
   info: "#338eda",
   success: "#33d6a6",
   warning: "#ff8c37",
+  black: "#1f2d3d",
 };
 
 export const theme: Theme = {
