@@ -54,6 +54,12 @@ export default {
           cameraPermission: "Allow HCB to take photos of receipts",
         },
       ],
+      [
+        "expo-font",
+        {
+          fonts: ["./assets/fonts/JetBrainsMono-Regular.ttf"],
+        },
+      ],
       "expo-secure-store",
       ["@config-plugins/react-native-dynamic-app-icon", appIconConfig],
     ],

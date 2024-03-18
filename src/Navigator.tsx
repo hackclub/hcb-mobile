@@ -21,6 +21,7 @@ import CardsPage from "./pages/cards";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
+import AccountNumberPage from "./pages/organization/AccountNumber";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
@@ -130,10 +131,15 @@ export default function Navigator() {
               name="Event"
               options={({ route }) => ({
                 // headerTitle: () => <OrganizationTitle {...route.params} />,
-                title: route.params.organization?.name,
+                title: route.params.organization?.name || "Organization",
                 headerBackTitle: "Back",
               })}
               component={OrganizationPage}
+            />
+            <Stack.Screen
+              name="AccountNumber"
+              component={AccountNumberPage}
+              options={{ presentation: "modal", title: "Account Details" }}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}
