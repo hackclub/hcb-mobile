@@ -101,6 +101,19 @@ export interface TransactionTransfer extends TransactionBase {
   transfer: Transfer;
 }
 
+export interface AchTransfer {
+  recipient_name: string;
+  recipient_email?: string;
+  bank_name: string;
+  description: string;
+  sender: User;
+}
+
+export interface TransactionAchTransfer extends TransactionBase {
+  code: TransactionType.AchTransfer;
+  ach_transfer: AchTransfer;
+}
+
 // |
 // |
 // v this is cool, i should finish this
@@ -108,6 +121,7 @@ export interface TransactionTransfer extends TransactionBase {
 // type SpecificTransaction<Code extends TransactionType, Key extends string, Obj> = TransactionBase & {code: Code; } & {[k in Key]: Obj}
 
 type Transaction =
+  | TransactionAchTransfer
   | TransactionTransfer
   | TransactionCheck
   | TransactionDonation

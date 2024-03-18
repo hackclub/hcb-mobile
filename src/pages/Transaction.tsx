@@ -6,11 +6,13 @@ import { match, P } from "ts-pattern";
 
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
+import AchTransferTransaction from "../components/transaction/types/AchTransferTransaction";
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
 import BankFeeTransaction from "../components/transaction/types/BankFeeTransaction";
 import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
+import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
@@ -49,6 +51,10 @@ export default function TransactionPage({
     );
   }
 
+  const transactionViewProps: Omit<TransactionViewProps, "transaction"> = {
+    orgId: orgId || transaction.organization!.id,
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
@@ -57,12 +63,13 @@ export default function TransactionPage({
       {
         /* prettier-ignore */
         match(transaction)
-          .with({ card_charge: P.any },            (tx) => <CardChargeTransaction  transaction={tx} orgId={orgId || transaction.organization!.id} />)
-          .with({ donation: P.any },               (tx) => <DonationTransaction    transaction={tx} orgId={orgId || transaction.organization!.id} />)
-          .with({ check: P.any },                  (tx) => <CheckTransaction       transaction={tx} orgId={orgId || transaction.organization!.id} />)
-          .with({ transfer: P.any },               (tx) => <TransferTransaction    transaction={tx} orgId={orgId || transaction.organization!.id} />)
-          .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction     transaction={tx} orgId={orgId || transaction.organization!.id} />)
-          .otherwise(                              (tx) => <BankAccountTransaction transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .with({ card_charge: P.any },            (tx) => <CardChargeTransaction  transaction={tx} {...transactionViewProps} />)
+          .with({ check: P.any },                  (tx) => <CheckTransaction       transaction={tx} {...transactionViewProps} />)
+          .with({ transfer: P.any },               (tx) => <TransferTransaction    transaction={tx} {...transactionViewProps} />)
+          .with({ donation: P.any },               (tx) => <DonationTransaction    transaction={tx} {...transactionViewProps} />)
+          .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction transaction={tx} {...transactionViewProps} />)
+          .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction     transaction={tx} {...transactionViewProps} />)
+          .otherwise(                              (tx) => <BankAccountTransaction transaction={tx} {...transactionViewProps} />)
       }
 
       {comments && comments.length > 0 && (

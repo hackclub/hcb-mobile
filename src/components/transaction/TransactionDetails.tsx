@@ -78,6 +78,7 @@ export default function TransactionDetails({ details }: { details: Detail[] }) {
                     flex: 1,
                     textAlign: "right",
                   }}
+                  selectable
                 >
                   {value}
                 </Text>
