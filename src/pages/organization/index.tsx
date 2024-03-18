@@ -94,11 +94,18 @@ export default function OrganizationPage({
               actions={[
                 {
                   id: "accountNumber",
-                  title: "View Account Number",
-                  attributes: { disabled: true },
+                  title: "View Account Details",
+                  image: "creditcard.and.123",
                 },
               ]}
               themeVariant={scheme || undefined}
+              onPressAction={({ nativeEvent: { event } }) => {
+                if (event == "accountNumber") {
+                  navigation.navigate("AccountNumber", {
+                    orgId: organization.id,
+                  });
+                }
+              }}
             >
               <Ionicons.Button
                 name="ellipsis-horizontal-circle"
