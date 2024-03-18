@@ -2,19 +2,20 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import useSWR from "swr";
+import { match, P } from "ts-pattern";
 
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
+import BankFeeTransaction from "../components/transaction/types/BankFeeTransaction";
 import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
-import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization from "../lib/types/Organization";
-import Transaction from "../lib/types/Transaction";
+import Transaction, { TransactionType } from "../lib/types/Transaction";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
@@ -48,33 +49,21 @@ export default function TransactionPage({
     );
   }
 
-  let TransactionComponent: (props: TransactionViewProps) => React.ReactElement;
-
-  if ("card_charge" in transaction) {
-    TransactionComponent = CardChargeTransaction;
-  } else if ("donation" in transaction) {
-    TransactionComponent = DonationTransaction;
-  } else if ("check" in transaction) {
-    TransactionComponent = CheckTransaction;
-  } else if ("transfer" in transaction) {
-    TransactionComponent = TransferTransaction;
-  } else {
-    TransactionComponent = BankAccountTransaction;
-  }
-
   return (
     <ScrollView
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
     >
-      <TransactionComponent
-        transaction={transaction}
-        orgId={
-          orgId ||
-          (transaction as Transaction & { organization: Organization })
-            ?.organization?.id
-        }
-      />
+      {
+        /* prettier-ignore */
+        match(transaction)
+          .with({ card_charge: P.any },            (tx) => <CardChargeTransaction  transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .with({ donation: P.any },               (tx) => <DonationTransaction    transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .with({ check: P.any },                  (tx) => <CheckTransaction       transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .with({ transfer: P.any },               (tx) => <TransferTransaction    transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction     transaction={tx} orgId={orgId || transaction.organization!.id} />)
+          .otherwise(                              (tx) => <BankAccountTransaction transaction={tx} orgId={orgId || transaction.organization!.id} />)
+      }
 
       {comments && comments.length > 0 && (
         <>

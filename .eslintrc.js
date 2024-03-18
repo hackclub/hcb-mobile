@@ -43,7 +43,7 @@ module.exports = {
         argsIgnorePattern: "^_",
       },
     ],
-    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "react/no-unescaped-entities": "off",
     "no-console": "warn",
   },

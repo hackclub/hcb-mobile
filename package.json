@@ -24,6 +24,7 @@
     "expo": "^50.0.8",
     "expo-auth-session": "~5.4.0",
     "expo-blur": "~12.9.2",
+    "expo-clipboard": "~5.0.1",
     "expo-constants": "~15.4.5",
     "expo-crypto": "~12.8.1",
     "expo-dev-client": "~3.3.9",
@@ -52,7 +53,7 @@
     "react-native-svg": "14.1.0",
     "react-native-web": "^0.19.8",
     "swr": "^2.2.1",
-    "expo-clipboard": "~5.0.1"
+    "ts-pattern": "^5.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.22.11",
