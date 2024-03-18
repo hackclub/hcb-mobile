@@ -31,6 +31,7 @@ export interface TransactionBase
   declined: boolean;
   code: TransactionType;
   missing_receipt: boolean;
+  appearance: "hackathon_grant" | string;
 }
 
 export interface CardCharge {
