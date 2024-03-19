@@ -4,6 +4,7 @@ import { View, Text } from "react-native";
 
 import IComment from "../../lib/types/Comment";
 import { palette } from "../../theme";
+import { AdminToolsStyle } from "../AdminTools";
 import UserMention from "../UserMention";
 
 export default function Comment({ comment }: { comment: IComment }) {
@@ -15,12 +16,7 @@ export default function Comment({ comment }: { comment: IComment }) {
       style={
         comment.admin_only
           ? {
-              backgroundColor: "#ff8c3710",
-              borderColor: "#ff8c37",
-              borderStyle: "dashed",
-              borderWidth: 1,
-              borderRadius: 8,
-              padding: 8,
+              ...AdminToolsStyle,
               marginHorizontal: -8,
             }
           : undefined
