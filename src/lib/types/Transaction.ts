@@ -32,6 +32,9 @@ export interface TransactionBase
   code: TransactionType;
   missing_receipt: boolean;
   appearance?: "hackathon_grant" | string;
+  _debug?: {
+    hcb_code: string;
+  };
 }
 
 export interface CardCharge {

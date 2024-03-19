@@ -1,9 +1,17 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  View,
+  Text,
+  Linking,
+} from "react-native";
 import useSWR from "swr";
 import { match, P } from "ts-pattern";
 
+import AdminTools from "../components/AdminTools";
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
 import AchTransferTransaction from "../components/transaction/types/AchTransferTransaction";
@@ -18,6 +26,7 @@ import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization from "../lib/types/Organization";
 import Transaction, { TransactionType } from "../lib/types/Transaction";
+import { palette } from "../theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 
@@ -42,6 +51,7 @@ export default function TransactionPage({
   );
 
   const tabBarHeight = useBottomTabBarHeight();
+  const { colors: themeColors } = useTheme();
 
   if (!transaction) {
     return (
@@ -60,6 +70,20 @@ export default function TransactionPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
     >
+      <AdminTools
+        style={{ marginBottom: 20 }}
+        onPress={() =>
+          Linking.openURL(
+            `https://hcb.hackclub.com/hcb/${transaction.id.slice(4)}`,
+          )
+        }
+      >
+        <Text style={{ color: themeColors.text }} numberOfLines={1}>
+          <Text style={{ color: palette.muted }}>HCB code:</Text>{" "}
+          {transaction._debug?.hcb_code || `HCB-${transaction.code}`}
+        </Text>
+      </AdminTools>
+
       {
         /* prettier-ignore */
         match(transaction)
