@@ -5,6 +5,7 @@ const appIcons = {
   "Cash Money": "cash-money.png",
   "Open Late": "hack-night.png",
   "Art Skillz": "art-skillz.png",
+  "Early Adopter": "testflight.png",
 };
 
 let appIconConfig = {};

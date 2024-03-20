@@ -200,6 +200,12 @@ export default function SettingsPage(
               currentIcon={appIcon}
               name="Art Skillz"
               displayName="Graphic Design Is My Passion"
+            />
+            <IconComponent
+              onPress={handleClick}
+              currentIcon={appIcon}
+              name="Early Adopter"
+              displayName="Early Adopter"
               last
             />
           </ListSection>
