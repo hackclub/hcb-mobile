@@ -1,4 +1,5 @@
 import HcbApiObject from "./HcbApiObject";
+import { OrgUser } from "./User";
 
 export default interface Organization extends HcbApiObject<"org"> {
   name: string;
@@ -26,6 +27,7 @@ export default interface Organization extends HcbApiObject<"org"> {
 export interface OrganizationExpanded extends Organization {
   balance_cents: number;
   fee_balance_cents: number;
+  users: OrgUser[];
   account_number?: string;
   routing_number?: string;
   swift_bic_code?: string;
