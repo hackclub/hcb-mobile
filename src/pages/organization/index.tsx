@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { MenuView } from "@react-native-menu/menu";
+import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -84,40 +84,51 @@ export default function OrganizationPage({
         // headerTitle: () => <OrganizationTitle organization={organization} />,
       });
 
+      const menuActions: MenuAction[] = [];
       if (
         "account_number" in organization &&
         organization.account_number !== null
       ) {
-        navigation.setOptions({
-          headerRight: () => (
-            <MenuView
-              actions={[
-                {
-                  id: "accountNumber",
-                  title: "View Account Details",
-                  image: "creditcard.and.123",
-                },
-              ]}
-              themeVariant={scheme || undefined}
-              onPressAction={({ nativeEvent: { event } }) => {
-                if (event == "accountNumber") {
-                  navigation.navigate("AccountNumber", {
-                    orgId: organization.id,
-                  });
-                }
-              }}
-            >
-              <Ionicons.Button
-                name="ellipsis-horizontal-circle"
-                backgroundColor="transparent"
-                size={24}
-                color={palette.primary}
-                iconStyle={{ marginRight: 0 }}
-              />
-            </MenuView>
-          ),
+        menuActions.push({
+          id: "accountNumber",
+          title: "View Account Details",
+          image: "creditcard.and.123",
         });
       }
+
+      menuActions.push({
+        id: "settings",
+        title: "Manage Organization",
+        image: "gearshape",
+      });
+
+      navigation.setOptions({
+        headerRight: () => (
+          <MenuView
+            actions={menuActions}
+            themeVariant={scheme || undefined}
+            onPressAction={({ nativeEvent: { event } }) => {
+              if (event == "accountNumber") {
+                navigation.navigate("AccountNumber", {
+                  orgId: organization.id,
+                });
+              } else if (event == "settings") {
+                navigation.navigate("OrganizationSettings", {
+                  orgId: organization.id,
+                });
+              }
+            }}
+          >
+            <Ionicons.Button
+              name="ellipsis-horizontal-circle"
+              backgroundColor="transparent"
+              size={24}
+              color={palette.primary}
+              iconStyle={{ marginRight: 0 }}
+            />
+          </MenuView>
+        ),
+      });
     }
   }, [organization]);
 

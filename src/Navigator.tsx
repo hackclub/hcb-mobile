@@ -22,6 +22,7 @@ import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
+import OrganizationSettingsPage from "./pages/organization/Settings";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
@@ -140,6 +141,14 @@ export default function Navigator() {
               name="AccountNumber"
               component={AccountNumberPage}
               options={{ presentation: "modal", title: "Account Details" }}
+            />
+            <Stack.Screen
+              name="OrganizationSettings"
+              component={OrganizationSettingsPage}
+              options={{
+                headerBackTitle: "Back",
+                title: "Manage Organization",
+              }}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}

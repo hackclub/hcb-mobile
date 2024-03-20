@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +15,7 @@ export interface ButtonProps {
   onPress?: () => void;
   color?: string;
   loading?: boolean;
+  icon?: React.ComponentProps<typeof Ionicons>["name"];
 }
 
 const styles = StyleSheet.create({
@@ -22,8 +24,13 @@ const styles = StyleSheet.create({
     borderColor: "#e85d6f",
     borderTopWidth: 1,
     color: "white",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
   buttonText: {
     color: "white",
@@ -42,6 +49,12 @@ export default function Button(
       onPress={() => props.onPress && props.onPress()}
       disabled={props.loading}
     >
+      {props.icon && (
+        <Ionicons
+          name={props.icon}
+          style={{ ...styles.buttonText, opacity: props.loading ? 0 : 1 }}
+        />
+      )}
       <Text
         style={{
           ...styles.buttonText,
