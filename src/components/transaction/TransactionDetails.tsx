@@ -13,6 +13,7 @@ interface Detail {
   value: ReactElement | string;
   onPress?: () => void;
   pressIconName?: React.ComponentProps<typeof Ionicons>["name"];
+  fontFamily?: string;
 }
 
 export function descriptionDetail(
@@ -35,14 +36,40 @@ export function descriptionDetail(
   };
 }
 
-export default function TransactionDetails({ details }: { details: Detail[] }) {
+export default function TransactionDetails({
+  details,
+  title,
+}: {
+  details: Detail[];
+  title?: string;
+}) {
   const { colors: themeColors } = useTheme();
 
   return (
     <View style={{ marginBottom: 30 }}>
+      {title && (
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 12,
+            textTransform: "uppercase",
+            marginBottom: 5,
+            marginLeft: 10,
+          }}
+        >
+          {title}
+        </Text>
+      )}
+
       {details.map(
         (
-          { label, value, onPress, pressIconName = "chevron-forward-outline" },
+          {
+            label,
+            value,
+            onPress,
+            pressIconName = "chevron-forward-outline",
+            fontFamily,
+          },
           index,
         ) => (
           <TouchableHighlight
@@ -77,6 +104,7 @@ export default function TransactionDetails({ details }: { details: Detail[] }) {
                     overflow: "hidden",
                     flex: 1,
                     textAlign: "right",
+                    fontFamily,
                   }}
                   selectable
                 >
