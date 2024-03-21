@@ -3,6 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
+import { match } from "ts-pattern";
 
 import {
   TransactionCardCharge,
@@ -155,9 +156,20 @@ function Transaction({
             : transaction.pending
             ? "Pending: "
             : "")}
-        {transaction.appearance == "hackathon_grant"
-          ? "💰 Hackathon grant"
-          : transaction.memo.replaceAll(/\s{2,}/g, " ")}
+        {match(transaction)
+          .with(
+            { appearance: "hackathon_grant", has_custom_memo: false },
+            () => "💰 Hackathon grant",
+          )
+          // .with(
+          //   {
+          //     card_charge: { merchant: { smart_name: P.string } },
+          //     has_custom_memo: false,
+          //   },
+          //   (tx) => tx.card_charge.merchant.smart_name,
+          // )
+          .otherwise((tx) => tx.memo)
+          .replaceAll(/\s{2,}/g, " ")}
       </Text>
       {transaction.missing_receipt && !hideMissingReceipt && (
         <View>
