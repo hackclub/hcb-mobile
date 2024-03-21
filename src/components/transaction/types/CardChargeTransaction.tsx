@@ -24,6 +24,8 @@ export default function CardChargeTransaction({
   const navigation =
     useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
 
+  const isRefund = transaction.amount_cents > 0;
+
   const badge = transaction.pending ? (
     <Badge icon="information-circle-outline" color={palette.info}>
       Pending
@@ -39,7 +41,7 @@ export default function CardChargeTransaction({
       <View style={{ flexDirection: "column", alignItems: "center" }}>
         <TransactionTitle badge={badge}>
           {renderMoney(Math.abs(transaction.amount_cents))}{" "}
-          <Muted>charge at</Muted>
+          <Muted>{isRefund ? "refund from" : "charge at"}</Muted>
           {"\n"}
           {merchant.smart_name}
         </TransactionTitle>
@@ -51,9 +53,12 @@ export default function CardChargeTransaction({
             value: merchant.name,
           },
           descriptionDetail(orgId, transaction, navigation),
-          { label: "Spent on", value: renderDate(transaction.date) },
           {
-            label: "Spent by",
+            label: isRefund ? "Refunded on" : "Spent on",
+            value: renderDate(transaction.date),
+          },
+          {
+            label: isRefund ? "Refunded to" : "Spent by",
             value: <UserMention user={card_charge.card.user} />,
           },
         ]}
