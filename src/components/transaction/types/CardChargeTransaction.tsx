@@ -15,7 +15,10 @@ import TransactionTitle, { Muted } from "../TransactionTitle";
 import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CardChargeTransaction({
-  transaction,
+  transaction: {
+    card_charge: { merchant, ...card_charge },
+    ...transaction
+  },
   orgId,
 }: TransactionViewProps<TransactionCardCharge>) {
   const navigation =
@@ -36,16 +39,20 @@ export default function CardChargeTransaction({
       <View style={{ flexDirection: "column", alignItems: "center" }}>
         <TransactionTitle badge={badge}>
           {renderMoney(Math.abs(transaction.amount_cents))}{" "}
-          <Muted>charge at</Muted> {transaction.card_charge.merchant.name}
+          <Muted>charge at</Muted>{"\n"}{merchant.smart_name}
         </TransactionTitle>
       </View>
       <TransactionDetails
         details={[
+          {
+            label: "Memo",
+            value: merchant.name,
+          },
           descriptionDetail(orgId, transaction, navigation),
           { label: "Spent on", value: renderDate(transaction.date) },
           {
             label: "Spent by",
-            value: <UserMention user={transaction.card_charge.card.user} />,
+            value: <UserMention user={card_charge.card.user} />,
           },
         ]}
       />

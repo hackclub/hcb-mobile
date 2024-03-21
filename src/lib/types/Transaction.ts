@@ -40,6 +40,7 @@ export interface TransactionBase
 export interface CardCharge {
   merchant: {
     name: string;
+    smart_name?: string;
     country: string;
   };
   charge_method?: "keyed_in" | "swipe" | "chip" | "contactless" | "online";
