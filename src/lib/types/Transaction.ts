@@ -109,6 +109,7 @@ export interface AchTransfer {
   recipient_name: string;
   recipient_email?: string;
   bank_name: string;
+  account_number_last4: string;
   description: string;
   sender: User;
 }

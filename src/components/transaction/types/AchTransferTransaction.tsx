@@ -50,6 +50,7 @@ export default function AchTransferTransaction({
       />
 
       <TransactionDetails
+        title="ACH Transfer"
         details={[
           { label: "Name", value: ach_transfer.recipient_name },
           ...(ach_transfer.recipient_email
@@ -60,6 +61,11 @@ export default function AchTransferTransaction({
                 },
               ]
             : []),
+          {
+            label: "Account",
+            value: `••••${ach_transfer.account_number_last4}`,
+            fontFamily: "JetBrains Mono",
+          },
           { label: "Bank name", value: ach_transfer.bank_name },
         ]}
       />

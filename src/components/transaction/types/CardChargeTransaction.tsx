@@ -39,7 +39,9 @@ export default function CardChargeTransaction({
       <View style={{ flexDirection: "column", alignItems: "center" }}>
         <TransactionTitle badge={badge}>
           {renderMoney(Math.abs(transaction.amount_cents))}{" "}
-          <Muted>charge at</Muted>{"\n"}{merchant.smart_name}
+          <Muted>charge at</Muted>
+          {"\n"}
+          {merchant.smart_name}
         </TransactionTitle>
       </View>
       <TransactionDetails
