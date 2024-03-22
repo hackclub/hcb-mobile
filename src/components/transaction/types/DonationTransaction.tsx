@@ -1,9 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionDonation } from "../../../lib/types/Transaction";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
@@ -15,11 +12,9 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function DonationTransaction({
   transaction: { donation, ...transaction },
+  navigation,
   ...props
 }: TransactionViewProps<TransactionDonation>) {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
-
   return (
     <View>
       <TransactionTitle

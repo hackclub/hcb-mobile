@@ -1,8 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCardCharge } from "../../../lib/types/Transaction";
 import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
@@ -20,10 +17,8 @@ export default function CardChargeTransaction({
     ...transaction
   },
   orgId,
+  navigation,
 }: TransactionViewProps<TransactionCardCharge>) {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
-
   const isRefund = transaction.amount_cents > 0;
 
   const badge = transaction.pending ? (

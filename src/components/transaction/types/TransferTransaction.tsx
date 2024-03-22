@@ -1,10 +1,7 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import Organization from "../../../lib/types/Organization";
 import { TransactionTransfer } from "../../../lib/types/Transaction";
 import User from "../../../lib/types/User";
@@ -18,6 +15,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },
+  navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`/user/organizations`);
@@ -27,9 +25,6 @@ export default function TransferTransaction({
     user?.admin || userOrgs?.some((org) => org.id == transfer.from.id);
   const userInToOrg =
     user?.admin || userOrgs?.some((org) => org.id == transfer.to.id);
-
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
 
   return (
     <View>

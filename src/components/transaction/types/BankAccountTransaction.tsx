@@ -1,8 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
@@ -12,11 +9,9 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function BankAccountTransaction({
   transaction,
+  navigation,
   ...props
 }: TransactionViewProps) {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
-
   return (
     <View>
       <TransactionTitle>

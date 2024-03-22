@@ -1,9 +1,6 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
 import useSWR from "swr";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import Organization from "../../../lib/types/Organization";
 import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
@@ -15,12 +12,11 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function BankFeeTransaction({
   transaction,
   orgId,
+  navigation,
 }: TransactionViewProps) {
   const { data: organization } = useSWR<Organization>(
     `/organizations/${orgId}`,
   );
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
 
   return (
     <View>
