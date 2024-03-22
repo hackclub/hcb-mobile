@@ -21,6 +21,7 @@ import CardChargeTransaction from "../components/transaction/types/CardChargeTra
 import CheckDepositTransaction from "../components/transaction/types/CheckDepositTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
+import InvoiceTransaction from "../components/transaction/types/InvoiceTransaction";
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
@@ -96,6 +97,7 @@ export default function TransactionPage({
           .with({ donation: P.any },               (tx) => <DonationTransaction     transaction={tx} {...transactionViewProps} />)
           .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction  transaction={tx} {...transactionViewProps} />)
           .with({ check_deposit: P.any },          (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
+          .with({ invoice: P.any },                (tx) => <InvoiceTransaction      transaction={tx} {...transactionViewProps} />)
           .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction      transaction={tx} {...transactionViewProps} />)
           .otherwise(                              (tx) => <BankAccountTransaction  transaction={tx} {...transactionViewProps} />)
       }
