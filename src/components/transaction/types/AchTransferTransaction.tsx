@@ -1,8 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionAchTransfer } from "../../../lib/types/Transaction";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
@@ -16,10 +13,8 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function AchTransferTransaction({
   transaction: { ach_transfer, ...transaction },
   orgId,
+  navigation,
 }: TransactionViewProps<TransactionAchTransfer>) {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
-
   return (
     <View>
       <TransactionTitle

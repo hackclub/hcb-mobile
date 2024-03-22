@@ -1,9 +1,6 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 
-import { StackParamList } from "../../../lib/NavigatorParamList";
 import { TransactionCheck } from "../../../lib/types/Transaction";
 import { renderMoney, statusColor } from "../../../util";
 import Badge from "../../Badge";
@@ -15,11 +12,9 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },
+  navigation,
   ...props
 }: TransactionViewProps<TransactionCheck>) {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<StackParamList, "Transaction">>();
-
   return (
     <View>
       <TransactionTitle
