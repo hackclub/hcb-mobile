@@ -41,10 +41,10 @@ export default function OrganizationSettingsPage({
   );
   const { data: currentUser } = useSWR<User>("/user");
 
-  if (!organization) return null;
-
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
+
+  if (!organization) return null;
 
   return (
     <ScrollView

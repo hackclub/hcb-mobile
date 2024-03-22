@@ -130,14 +130,14 @@ export default function OrganizationPage({
         ),
       });
     }
-  }, [organization]);
+  }, [organization, scheme, navigation]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
     () => addPendingFeeToTransactions(_transactions, organization),
-    [_transactions],
+    [_transactions, organization],
   );
 
   const sections: { title: string; data: TransactionWithoutId[] }[] = useMemo(

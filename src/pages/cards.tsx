@@ -54,7 +54,7 @@ export default function CardsPage({ navigation }: Props) {
         </MenuView>
       ),
     });
-  }, [navigation, frozenCardsShown]);
+  }, [navigation, frozenCardsShown, scheme]);
 
   if (cards) {
     return (

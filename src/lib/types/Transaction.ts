@@ -119,6 +119,36 @@ export interface TransactionAchTransfer extends TransactionBase {
   ach_transfer: AchTransfer;
 }
 
+export interface Invoice extends HcbApiObject<"inv"> {
+  amount_cents: number;
+  send_at: string;
+  paid_at?: string;
+  description: string;
+  due_date: string;
+  sponsor: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface TransactionInvoice extends TransactionBase {
+  code: TransactionType.Invoice;
+  invoice: Invoice;
+}
+
+export interface CheckDeposit {
+  status: "pending" | "rejected" | "returned" | "deposited";
+  front_url: string;
+  back_url: string;
+  submitter: User;
+}
+
+export interface TransactionCheckDeposit extends TransactionBase {
+  code: TransactionType.CheckDeposit;
+  check_deposit: CheckDeposit;
+}
+
 // |
 // |
 // v this is cool, i should finish this
@@ -126,6 +156,8 @@ export interface TransactionAchTransfer extends TransactionBase {
 // type SpecificTransaction<Code extends TransactionType, Key extends string, Obj> = TransactionBase & {code: Code; } & {[k in Key]: Obj}
 
 type Transaction =
+  | TransactionCheckDeposit
+  | TransactionInvoice
   | TransactionAchTransfer
   | TransactionTransfer
   | TransactionCheck
