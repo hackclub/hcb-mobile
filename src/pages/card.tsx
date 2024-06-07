@@ -2,7 +2,6 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import { useContext } from "react";
 import {
   ScrollView,
   View,
@@ -13,7 +12,6 @@ import {
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
