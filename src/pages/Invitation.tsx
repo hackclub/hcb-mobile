@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import {
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
 import Button from "../components/Button";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
@@ -29,7 +28,6 @@ export default function InvitationPage({
     params: { inviteId, invitation: _invitation },
   },
 }: Props) {
-  const { token } = useContext(AuthContext);
   const hcb = useClient();
 
   const { data: invitation } = useSWR<Invitation>(

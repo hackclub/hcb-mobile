@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   StatusBar,
@@ -12,7 +12,6 @@ import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import { getKey } from "../lib/organization/useTransactions";
@@ -27,7 +26,6 @@ export default function RenameTransactionPage({
   },
   navigation,
 }: Props) {
-  const { token } = useContext(AuthContext);
   const { colors: themeColors } = useTheme();
   const { mutate } = useSWRConfig();
   const hcb = useClient();
