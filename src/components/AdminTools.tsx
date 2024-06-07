@@ -16,7 +16,7 @@ export const AdminToolsStyle: ViewStyle = {
 export default function AdminTools(
   props: PropsWithChildren<{ style?: ViewStyle; onPress?: () => void }>,
 ) {
-  const { data: user } = useSWR<User>("/user");
+  const { data: user } = useSWR<User>("user");
 
   if (!user?.admin) return null;
 

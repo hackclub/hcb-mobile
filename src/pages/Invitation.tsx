@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,8 @@ import {
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
 import Button from "../components/Button";
+import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Invitation from "../lib/types/Invitation";
 import palette from "../palette";
@@ -28,10 +28,10 @@ export default function InvitationPage({
     params: { inviteId, invitation: _invitation },
   },
 }: Props) {
-  const { token } = useContext(AuthContext);
+  const hcb = useClient();
 
   const { data: invitation } = useSWR<Invitation>(
-    `/user/invitations/${inviteId}`,
+    `user/invitations/${inviteId}`,
     { fallbackData: _invitation },
   );
 
@@ -56,18 +56,8 @@ export default function InvitationPage({
     never,
     Invitation[]
   >(
-    `/user/invitations`,
-    () =>
-      fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/user/invitations/${inviteId}/accept`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      ),
+    `user/invitations`,
+    () => hcb.post(`user/invitations/${inviteId}/accept`).json(),
     {
       populateCache: (_, invitations) =>
         invitations?.filter((i) => i.id != inviteId) || [],
@@ -77,7 +67,7 @@ export default function InvitationPage({
           orgId: invitation!.organization.id,
           organization: invitation!.organization,
         });
-        mutate(`/user/organizations`);
+        mutate(`user/organizations`);
       },
     },
   );
@@ -89,18 +79,8 @@ export default function InvitationPage({
     never,
     Invitation[]
   >(
-    `/user/invitations`,
-    () =>
-      fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/user/invitations/${inviteId}/reject`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      ),
+    `user/invitations`,
+    () => hcb.post(`user/invitations/${inviteId}/reject`).json(),
     {
       populateCache: (_, invitations) =>
         invitations?.filter((i) => i.id != inviteId) || [],

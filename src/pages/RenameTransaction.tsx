@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   StatusBar,
@@ -12,7 +12,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
+import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import { getKey } from "../lib/organization/useTransactions";
 import Transaction from "../lib/types/Transaction";
@@ -26,16 +26,16 @@ export default function RenameTransactionPage({
   },
   navigation,
 }: Props) {
-  const { token } = useContext(AuthContext);
   const { colors: themeColors } = useTheme();
   const { mutate } = useSWRConfig();
+  const hcb = useClient();
 
   const {
     data: memoSuggestions,
     isLoading,
     isValidating,
   } = useSWR<string[]>(
-    `/organizations/${orgId}/transactions/${transaction.id}/memo_suggestions`,
+    `organizations/${orgId}/transactions/${transaction.id}/memo_suggestions`,
     { revalidateOnMount: true },
   );
 
@@ -44,22 +44,13 @@ export default function RenameTransactionPage({
   );
 
   const { trigger } = useSWRMutation(
-    `/organizations/${orgId}/transactions/${transaction.id}`,
+    `organizations/${orgId}/transactions/${transaction.id}`,
     () =>
-      fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/organizations/${orgId}/transactions/${transaction.id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            memo,
-          }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      ).then((res) => res.json()),
+      hcb
+        .patch(`organizations/${orgId}/transactions/${transaction.id}`, {
+          json: { memo },
+        })
+        .json(),
     {
       optimisticData(currentData: Transaction) {
         return { ...currentData, memo };

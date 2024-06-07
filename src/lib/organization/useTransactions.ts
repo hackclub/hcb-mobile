@@ -14,9 +14,9 @@ export function getKey(orgId: string) {
     if (previousPageData?.has_more === false) return null;
 
     if (index === 0)
-      return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}`;
+      return `organizations/${orgId}/transactions?limit=${PAGE_SIZE}`;
 
-    return `/organizations/${orgId}/transactions?limit=${PAGE_SIZE}&after=${
+    return `organizations/${orgId}/transactions?limit=${PAGE_SIZE}&after=${
       previousPageData!.data[previousPageData!.data.length - 1].id
     }`;
   };
