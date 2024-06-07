@@ -3,6 +3,8 @@ import Organization from "./Organization";
 
 export default interface Card extends HcbApiObject<"crd"> {
   last4?: string;
+  exp_month?: number;
+  exp_year?: number;
   type: "virtual" | "physical";
   status: "inactive" | "frozen" | "active" | "canceled";
   name?: string;
