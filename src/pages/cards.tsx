@@ -16,7 +16,7 @@ type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
-    useSWR<(Card & Required<Pick<Card, "last4">>)[]>("/user/cards");
+    useSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 

@@ -69,7 +69,7 @@ export default function AccountNumberPage({
   },
 }: Props) {
   const { data: organization } = useSWR<OrganizationExpanded>(
-    `/organizations/${orgId}`,
+    `organizations/${orgId}`,
   );
 
   useEffect(() => {

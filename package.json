@@ -41,6 +41,7 @@
     "expo-system-ui": "~2.9.3",
     "expo-web-browser": "~12.8.2",
     "humanize-string": "^3.0.0",
+    "ky": "^1.2.3",
     "lodash": "^4.17.21",
     "react": "18.2.0",
     "react-native": "0.73.4",

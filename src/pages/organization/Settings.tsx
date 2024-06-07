@@ -36,10 +36,10 @@ export default function OrganizationSettingsPage({
 }: Props) {
   const { cache } = useSWRConfig();
   const { data: organization } = useSWR<OrganizationExpanded>(
-    `/organizations/${orgId}?avatar_size=50`,
-    { fallbackData: cache.get(`/organizations/${orgId}`)?.data },
+    `organizations/${orgId}?avatar_size=50`,
+    { fallbackData: cache.get(`organizations/${orgId}`)?.data },
   );
-  const { data: currentUser } = useSWR<User>("/user");
+  const { data: currentUser } = useSWR<User>("user");
 
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
