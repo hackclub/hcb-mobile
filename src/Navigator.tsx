@@ -37,9 +37,9 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
-    `/user/transactions/missing_receipt`,
+    `user/transactions/missing_receipt`,
   );
-  const { data: invitations } = useSWR<Invitation[]>(`/user/invitations`);
+  const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
 
   const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
@@ -112,8 +112,8 @@ export default function Navigator() {
                           dismissButtonStyle: "cancel",
                         },
                       ).then(() => {
-                        mutate("/user/organizations");
-                        mutate("/user/invitations");
+                        mutate("user/organizations");
+                        mutate("user/invitations");
                       })
                     }
                   />

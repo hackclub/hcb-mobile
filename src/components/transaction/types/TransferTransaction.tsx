@@ -18,8 +18,8 @@ export default function TransferTransaction({
   navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
-  const { data: userOrgs } = useSWR<Organization[]>(`/user/organizations`);
-  const { data: user } = useSWR<User>("/user");
+  const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);
+  const { data: user } = useSWR<User>("user");
 
   const userInFromOrg =
     user?.admin || userOrgs?.some((org) => org.id == transfer.from.id);

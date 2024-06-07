@@ -67,7 +67,7 @@ function Transaction({
         try {
           await fetch(
             process.env.EXPO_PUBLIC_API_BASE +
-              `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+              `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
             {
               method: "POST",
               headers: {
@@ -143,7 +143,7 @@ type Props = NativeStackScreenProps<
 export default function ReceiptsPage({ navigation: _navigation }: Props) {
   const { data, mutate, isLoading } = useSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
-  }>("/user/transactions/missing_receipt");
+  }>("user/transactions/missing_receipt");
 
   useFocusEffect(() => {
     mutate();

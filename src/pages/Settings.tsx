@@ -159,7 +159,7 @@ export default function SettingsPage(
     });
   }, []);
 
-  const { data: user } = useSWR<User>("/user");
+  const { data: user } = useSWR<User>("user");
 
   const handleClick = (iconName: string) => {
     AppIcon.setAppIcon(iconName.toString());
