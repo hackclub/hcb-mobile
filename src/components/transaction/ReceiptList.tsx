@@ -41,7 +41,7 @@ export default function ReceiptList({
 }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
   const { data: receipts, isLoading } = useSWR<Receipt[]>(
-    `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
+    `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
   );
 
   const { colors: themeColors } = useTheme();

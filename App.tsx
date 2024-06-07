@@ -10,6 +10,7 @@ import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
 import { getStateFromPath } from "./src/getStateFromPath";
+import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
@@ -49,29 +50,26 @@ const linking: LinkingOptions<TabParamList> = {
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const hcb = useClient(token);
 
   const scheme = useColorScheme();
 
   const fetcher = useCallback(
-    (url: string) =>
-      fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(async (res) => {
-        const body = await res.json();
-
-        if (!res.ok) {
-          if (body.error === "invalid_auth") {
-            // OAuth token either expired or was revoked
-            setToken("");
-            return;
-          } else {
-            throw body;
-          }
+    async (url: string) => {
+      try {
+        return await hcb(url).json();
+      } catch (error) {
+        if (
+          error.name === "HTTPError" &&
+          (await error.response.json()).error === "invalid_auth"
+        ) {
+          setToken("");
+        } else {
+          throw error;
         }
-
-        return body;
-      }),
-    [token],
+      }
+    },
+    [hcb],
   );
 
   useEffect(() => {

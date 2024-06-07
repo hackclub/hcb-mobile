@@ -42,13 +42,13 @@ export default function TransactionPage({
     Transaction & { organization?: Organization }
   >(
     orgId
-      ? `/organizations/${orgId}/transactions/${transactionId}`
-      : `/transactions/${transactionId}`,
+      ? `organizations/${orgId}/transactions/${transactionId}`
+      : `transactions/${transactionId}`,
     { fallbackData: _transaction },
   );
   const { data: comments } = useSWR<IComment[]>(
     () =>
-      `/organizations/${
+      `organizations/${
         orgId || transaction!.organization!.id
       }/transactions/${transactionId}/comments`,
   );

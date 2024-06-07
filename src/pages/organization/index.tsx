@@ -69,7 +69,7 @@ export default function OrganizationPage({
   const scheme = useColorScheme();
   const { data: organization, isLoading: organizationLoading } = useSWR<
     Organization | OrganizationExpanded
-  >(`/organizations/${orgId}`, { fallbackData: _organization });
+  >(`organizations/${orgId}`, { fallbackData: _organization });
   const {
     transactions: _transactions,
     isLoadingMore,

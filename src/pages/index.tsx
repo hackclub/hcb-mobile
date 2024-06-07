@@ -73,13 +73,11 @@ function Event({
   onHold?: () => void;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
-    hideBalance ? null : `/organizations/${event.id}`,
+    hideBalance ? null : `organizations/${event.id}`,
   );
   const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
     PaginatedResponse<ITransaction>
-  >(
-    showTransactions ? `/organizations/${event.id}/transactions?limit=5` : null,
-  );
+  >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
 
@@ -216,10 +214,10 @@ export default function App({ navigation }: Props) {
     data: organizations,
     error,
     mutate: reloadOrganizations,
-  } = useSWR<Organization[]>("/user/organizations");
+  } = useSWR<Organization[]>("user/organizations");
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
-    useSWR<Invitation[]>("/user/invitations");
+    useSWR<Invitation[]>("user/invitations");
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
@@ -227,15 +225,15 @@ export default function App({ navigation }: Props) {
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    preload("/user", fetcher!);
+    preload("user", fetcher!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    preload("/user/cards", fetcher!);
+    preload("user/cards", fetcher!);
   }, []);
 
   useFocusEffect(() => {
     reloadOrganizations();
     reloadInvitations();
-    mutate((k) => typeof k === "string" && k.startsWith("/organizations"));
+    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
   });
 
   if (error) {

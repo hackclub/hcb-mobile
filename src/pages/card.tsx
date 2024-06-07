@@ -2,7 +2,6 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import { useContext } from "react";
 import {
   ScrollView,
   View,
@@ -13,10 +12,10 @@ import {
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
-import AuthContext from "../auth";
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
+import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import ITransaction from "../lib/types/Transaction";
@@ -31,14 +30,14 @@ export default function CardPage({
   navigation,
 }: Props) {
   const { colors: themeColors } = useTheme();
-  const { token } = useContext(AuthContext);
+  const hcb = useClient();
 
-  const { data: card } = useSWR<Card>(`/cards/${_card.id}`, {
+  const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];
-  }>(`/cards/${_card.id}/transactions`);
+  }>(`cards/${_card.id}/transactions`);
 
   const { mutate } = useSWRConfig();
 
@@ -49,21 +48,13 @@ export default function CardPage({
     "frozen" | "active",
     Card
   >(
-    `/cards/${_card.id}`,
-    (url, { arg }) =>
-      fetch(process.env.EXPO_PUBLIC_API_BASE + url, {
-        body: JSON.stringify({ status: arg }),
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }).then((r) => r.json()),
+    `cards/${_card.id}`,
+    (url, { arg }) => hcb.patch(url, { json: { status: arg } }).json(),
     {
       populateCache: true,
       onSuccess: () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        mutate(`/user/cards`);
+        mutate(`user/cards`);
       },
     },
   );

@@ -14,9 +14,7 @@ export default function BankFeeTransaction({
   orgId,
   navigation,
 }: TransactionViewProps) {
-  const { data: organization } = useSWR<Organization>(
-    `/organizations/${orgId}`,
-  );
+  const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
 
   return (
     <View>
