@@ -62,6 +62,10 @@ export default {
       ],
       "expo-secure-store",
       ["@config-plugins/react-native-dynamic-app-icon", appIconConfig],
+      [
+        "expo-local-authentication",
+        { faceIDPermission: "Allow $(PRODUCT_NAME) to use Face ID." },
+      ],
     ],
   },
 };

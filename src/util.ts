@@ -1,3 +1,5 @@
+import words from "lodash/words";
+
 import { palette } from "./theme";
 
 export function renderMoney(cents: number) {
@@ -44,4 +46,12 @@ export function orgColor(orgId: string) {
   ];
 
   return colors[Math.floor(orgId.charCodeAt(4) % colors.length)];
+}
+
+export function redactedCardNumber(last4?: string) {
+  return `**** **** **** ${last4 || "****"}`;
+}
+
+export function renderCardNumber(number: string) {
+  return words(number, /\d{4}/g).join(" ");
 }

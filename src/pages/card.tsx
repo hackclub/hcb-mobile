@@ -19,7 +19,9 @@ import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import ITransaction from "../lib/types/Transaction";
+import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
+import { renderMoney } from "../util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -31,6 +33,13 @@ export default function CardPage({
 }: Props) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+
+  const {
+    details,
+    toggle: toggleDetailsRevealed,
+    revealed: detailsRevealed,
+    loading: detailsLoading,
+  } = useStripeCardDetails(_card.id);
 
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
@@ -78,7 +87,7 @@ export default function CardPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
     >
-      <PaymentCard card={card} style={{ marginBottom: 20 }} />
+      <PaymentCard details={details} card={card} style={{ marginBottom: 20 }} />
 
       {card.status != "canceled" && (
         <View
@@ -86,16 +95,16 @@ export default function CardPage({
             flexDirection: "row",
             marginBottom: 20,
             justifyContent: "center",
+            gap: 20,
           }}
         >
           <Button
             style={{
-              // flexBasis: 0,
-              // flexGrow: 1,
-              // marginHorizontal: 10,
+              flexBasis: 0,
+              flexGrow: 1,
+              // marginR: 10,
               backgroundColor: "#5bc0de",
               borderTopWidth: 0,
-              minWidth: 150,
             }}
             color="#186177"
             onPress={() => toggleCardFrozen()}
@@ -103,18 +112,19 @@ export default function CardPage({
           >
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
-          {/* {card.type == "virtual" && (
+          {card.type == "virtual" && (
             <Button
               style={{
                 flexBasis: 0,
                 flexGrow: 1,
-                marginHorizontal: 10,
-                opacity: 0.6,
+                // marginHorizontal: 10,
               }}
+              onPress={() => toggleDetailsRevealed()}
+              loading={detailsLoading}
             >
-              Reveal details
+              {detailsRevealed ? "Hide" : "Reveal"} details
             </Button>
-          )} */}
+          )}
         </View>
       )}
 
@@ -133,17 +143,41 @@ export default function CardPage({
         </Text>
       ) : (
         <>
-          <Text
+          <View
             style={{
-              color: palette.muted,
-              fontSize: 12,
-              textTransform: "uppercase",
-              marginBottom: 8,
-              marginTop: 10,
+              flex: 1,
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
-            Transactions
-          </Text>
+            <Text
+              style={{
+                color: palette.muted,
+                fontSize: 12,
+                textTransform: "uppercase",
+                marginBottom: 8,
+                marginTop: 10,
+              }}
+            >
+              Transactions
+            </Text>
+            {card.total_spent_cents && (
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 12,
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                  marginTop: 10,
+                }}
+              >
+                <Text style={{ color: themeColors.text }}>
+                  {renderMoney(card.total_spent_cents)}
+                </Text>{" "}
+                spent
+              </Text>
+            )}
+          </View>
           {transactions.data.map((transaction, index) => (
             <TouchableHighlight
               key={transaction.id}

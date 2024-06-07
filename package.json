@@ -54,7 +54,8 @@
     "react-native-svg": "14.1.0",
     "react-native-web": "^0.19.8",
     "swr": "^2.2.1",
-    "ts-pattern": "^5.0.8"
+    "ts-pattern": "^5.0.8",
+    "expo-local-authentication": "~13.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.11",

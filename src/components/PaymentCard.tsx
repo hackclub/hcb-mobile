@@ -7,7 +7,9 @@ import { Text, View, ViewProps } from "react-native";
 // } from "react-native-reanimated";
 
 import Card from "../lib/types/Card";
+import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
+import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
 
@@ -21,8 +23,9 @@ import CardChip from "./cards/CardChip";
 
 export default function PaymentCard({
   card,
+  details,
   ...props
-}: ViewProps & { card: Card }) {
+}: ViewProps & { card: Card; details?: CardDetails }) {
   const { colors: themeColors, dark } = useTheme();
 
   return (
@@ -34,7 +37,7 @@ export default function PaymentCard({
         borderRadius: 16,
         flexDirection: "column",
         justifyContent: "flex-end",
-        alignItems: "flex-start",
+        alignItems: "stretch",
         position: "relative",
         borderWidth: 1,
         borderColor: dark ? palette.slate : palette.muted,
@@ -53,6 +56,7 @@ export default function PaymentCard({
             paddingVertical: 6,
             borderColor: "rgb(91, 192, 222)",
             borderWidth: 1,
+            alignSelf: "flex-start",
           }}
         >
           <Text
@@ -70,20 +74,53 @@ export default function PaymentCard({
       <Text
         style={{
           color: themeColors.text,
-          fontSize: 24,
+          fontSize: 23,
           marginBottom: 4,
+          fontFamily: "JetBrains Mono",
         }}
       >
-        ···· ···· ···· {card.last4 || "····"}
+        {details
+          ? renderCardNumber(details.number)
+          : redactedCardNumber(card.last4)}
       </Text>
-      <Text
-        style={{
-          color: palette.muted,
-          fontSize: 18,
-        }}
-      >
-        {card.organization.name}
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 18,
+          }}
+        >
+          {card.organization.name}
+        </Text>
+        <View style={{ marginLeft: "auto" }}>
+          <Text style={{ color: palette.muted, fontSize: 10 }}>Exp</Text>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontFamily: "JetBrains Mono",
+              fontSize: 14,
+            }}
+          >
+            {card.exp_month?.toLocaleString("en-US", {
+              minimumIntegerDigits: 2,
+            })}
+            /{card.exp_year?.toString().slice(-2)}
+          </Text>
+        </View>
+        <View>
+          <Text style={{ color: palette.muted, fontSize: 10 }}>CVC</Text>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontFamily: "JetBrains Mono",
+              fontSize: 14,
+              fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
+            }}
+          >
+            {details?.cvc || "***"}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
