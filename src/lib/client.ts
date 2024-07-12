@@ -12,6 +12,7 @@ export default function useClient(token?: string | null | undefined) {
         prefixUrl: process.env.EXPO_PUBLIC_API_BASE,
         headers: {
           Authorization: `Bearer ${token || _token}`,
+          "User-Agent": "HCB-Mobile",
         },
       }),
     [token, _token],
