@@ -1,6 +1,13 @@
 import { useTheme } from "@react-navigation/native";
 import capitalize from "lodash/capitalize";
-import { Text, View, ViewProps } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  AppState,
+  type AppStateStatus,
+  Text,
+  View,
+  ViewProps,
+} from "react-native";
 // import Animated, {
 //   SharedTransition,
 //   withSpring,
@@ -27,6 +34,24 @@ export default function PaymentCard({
   ...props
 }: ViewProps & { card: Card; details?: CardDetails }) {
   const { colors: themeColors, dark } = useTheme();
+
+  const appState = useRef(AppState.currentState);
+  const [isAppInBackground, setisAppInBackground] = useState(appState.current);
+
+  // Add listener for whenever app goes into the background on iOS
+  // to hide the card details (e.g. in app switcher)
+  // https://reactnative.dev/docs/appstate
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      (nextAppState: AppStateStatus) => {
+        appState.current = nextAppState;
+        setisAppInBackground(appState.current);
+      },
+    );
+
+    return () => subscription.remove();
+  });
 
   return (
     <View
@@ -79,7 +104,7 @@ export default function PaymentCard({
           fontFamily: "JetBrains Mono",
         }}
       >
-        {details
+        {details && isAppInBackground === "active"
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
