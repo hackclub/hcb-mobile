@@ -133,9 +133,9 @@ function PageContent({ orgId, navigation }: any) {
 
   const { location, accessDenied } = useLocation()
 
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("$");
 
-  const value = parseFloat(amount);
+  const value = parseFloat(amount.replace("$", "0"));
 
   const [reader, setReader] = useState()
   const [payment, setPayment] = useState<PaymentIntent>()
@@ -345,36 +345,8 @@ function PageContent({ orgId, navigation }: any) {
       }}
     >
       <SectionHeader title="Capture Donation" subtitle="Collect donations for your organization right from your mobile device." />
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-        }}
-      >
-        Donation amount
-      </Text>
-      <TextInput
-        style={{
-          backgroundColor: themeColors.card,
-          borderColor: themeColors.border,
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 15,
-          width: "100%",
-          marginBottom: 16,
-          marginTop: 10
-        }}
-        placeholder="Enter the value"
-        value={amount}
-        onChangeText={(inputValue) => {
-          const stripped = inputValue.split("").filter(char => "1234567890.".includes(char)).join("");
-          const formatted = stripped.split(".").length > 2 ? stripped.slice(0, -1) : stripped;
-          const capped = formatted.indexOf(".") >= 0 ? formatted.substring(0, formatted.indexOf(".") + 3) : formatted;
 
-          setAmount(capped);
-        }}
-        keyboardType="numeric"
-      />
+      <Keyboard amount={amount} setAmount={setAmount} />
 
       {connectedReader ? (
         <Button
@@ -392,4 +364,111 @@ function PageContent({ orgId, navigation }: any) {
 
     </View>
   );
+}
+
+function Keyboard({ amount, setAmount} : any) {
+    const [error, setError] = useState(false);
+    function pressNumber(amount: string, number: number) {
+      if (
+        parseFloat(amount.replace("$", "0") + number) > 9999 ||
+        (amount == "$" && number == 0) ||
+        amount[amount.length - 3] == "."
+      ) {
+        setError(true);
+        setTimeout(() => setError(false), 200);
+      } else {
+        setAmount(amount + number);
+      }
+    }
+    
+    function pressDecimal(amount: string) {
+      if (amount.includes(".") || amount == "$") {
+        setError(true);
+        setTimeout(() => setError(false), 200);
+      } else {
+        setAmount(amount + ".");
+      }
+    }
+    
+    function pressBackspace(amount: string) {
+      if (amount == "$") {
+        setError(true);
+        setTimeout(() => setError(false), 200);
+      } else {
+        setAmount(amount.slice(0, amount.length - 1));
+      }
+    }
+    
+    const Number = ({
+      number,
+      symbol,
+      onPress,
+    }: {
+      number?: number;
+      symbol?: String;
+      onPress?: () => void;
+    }) => (
+      <Text
+        style={{
+          color: palette.black,
+          fontSize: 24,
+          textAlign: "center",
+          fontFamily: "JetBrains Mono",
+          flexGrow: 1,
+        }}
+        onPress={(e) => {
+          if (onPress) {
+            onPress();
+          } else if (typeof number != undefined) {
+            pressNumber(amount, number as number);
+          }
+        }}
+      >
+        {number}
+        {symbol}
+      </Text>
+    );
+    
+    return (
+      <View>
+        <Text
+          style={{
+            color: error ? palette.primary : palette.black,
+            paddingTop: 48,
+            paddingBottom: 24,
+            paddingHorizontal: 10,
+            fontSize: 72,
+            textTransform: "uppercase",
+            textAlign: 'center'
+          }}
+        >
+          {amount}
+          {amount == "$" && <Text>0</Text>}
+          {amount[amount.length - 1] == "." && <Text style={{color: palette.muted}}>00</Text>}
+          {amount[amount.length - 2] == "." && <Text style={{color: palette.muted}}>0</Text>}
+        </Text>
+        <View>
+          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
+            <Number number={1} />
+            <Number number={2} />
+            <Number number={3} />
+          </View>
+          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
+            <Number number={4} />
+            <Number number={5} />
+            <Number number={6} />
+          </View>
+          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
+            <Number number={7} />
+            <Number number={8} />
+            <Number number={9} />
+          </View>
+          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 16}}>
+            <Number symbol={"."} onPress={() => pressDecimal(amount)} />
+            <Number number={0} />
+            <Number symbol={"↩︎"} onPress={() => pressBackspace(amount)} />
+          </View>
+        </View>
+      </View>
+  )
 }
