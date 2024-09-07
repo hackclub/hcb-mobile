@@ -168,7 +168,7 @@ function PageContent({ orgId, navigation }: any) {
   useEffect(() => {
     discoverReaders({
       discoveryMethod: 'localMobile',
-      simulated: false
+      simulated: true
     });
   }, [discoverReaders])
 
@@ -338,7 +338,7 @@ function PageContent({ orgId, navigation }: any) {
         padding: 20,
         display: "flex",
         alignItems: "flex-start",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
         flex: 1,
         width: '100%',
         height: '100%',
@@ -353,6 +353,9 @@ function PageContent({ orgId, navigation }: any) {
           onPress={async () => {
             await paymentIntent();
           }}
+          style={{
+            width: "100%",
+          }}
         >
           Create donation
         </Button>
@@ -361,6 +364,11 @@ function PageContent({ orgId, navigation }: any) {
           Reconnect reader reader
         </Button>
       )}
+
+      <View style={{
+        height: 72,
+        width: "100%"
+      }} />
 
     </View>
   );
@@ -430,12 +438,19 @@ function Keyboard({ amount, setAmount} : any) {
     );
     
     return (
-      <View>
+      <View style={{
+        width: "100%",
+        flexGrow: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        justifyContent: "space-around"
+      }}>
         <Text
           style={{
             color: error ? palette.primary : palette.black,
-            paddingTop: 48,
-            paddingBottom: 24,
+            paddingTop: 12,
+            paddingBottom: 0,
             paddingHorizontal: 10,
             fontSize: 72,
             textTransform: "uppercase",
@@ -466,7 +481,7 @@ function Keyboard({ amount, setAmount} : any) {
           <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 16}}>
             <Number symbol={"."} onPress={() => pressDecimal(amount)} />
             <Number number={0} />
-            <Number symbol={"↩︎"} onPress={() => pressBackspace(amount)} />
+            <Number symbol={"←"} onPress={() => pressBackspace(amount)} />
           </View>
         </View>
       </View>
