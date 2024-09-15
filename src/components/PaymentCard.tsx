@@ -84,14 +84,27 @@ export default function PaymentCard({
           : redactedCardNumber(card.last4)}
       </Text>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Text
-          style={{
-            color: palette.muted,
-            fontSize: 18,
-          }}
-        >
-          {card.organization.name}
-        </Text>
+        <View>
+          {card.user && (
+          <Text
+              style={{
+                color: palette.muted,
+                fontSize: 18,
+              }}
+            >
+            {card.user.name}
+          </Text>
+          )}
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 18,
+            }}
+          >
+            {card.organization.name}
+          </Text>
+        </View>
+
         <View style={{ marginLeft: "auto" }}>
           <Text style={{ color: palette.muted, fontSize: 10 }}>Exp</Text>
           <Text
@@ -114,7 +127,8 @@ export default function PaymentCard({
               color: themeColors.text,
               fontFamily: "JetBrains Mono",
               fontSize: 14,
-              fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
+              // There is no value called "no-contextual" in the fontVariant property
+              // fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
             }}
           >
             {details?.cvc || "***"}
