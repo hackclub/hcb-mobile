@@ -5,6 +5,7 @@ import {
   DiscoveryDocument,
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
+// import { set } from "lodash";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -43,6 +44,12 @@ export default function Login() {
     },
     discovery,
   );
+
+  async function handleLogin() {
+    setLoading(true);
+    await promptAsync();
+    setLoading(false);
+  }
 
   const [loading, setLoading] = useState(false);
 
@@ -114,13 +121,13 @@ export default function Login() {
       </View>
 
       <View style={{ marginBottom: 30 }}>
-        <Button
-          onPress={() => promptAsync()}
-          loading={loading}
-          style={{ marginHorizontal: 20 }}
-        >
-          Log in
-        </Button>
+          <Button
+            onPress={() => handleLogin()}
+            loading={loading}
+            style={{ marginHorizontal: 20 }}
+          >
+            Log in
+          </Button>
       </View>
     </SafeAreaView>
   );
