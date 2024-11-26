@@ -12,6 +12,7 @@ import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
+import CardHCB from "./cards/CardHCB";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -31,7 +32,7 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor: themeColors.card,
+        backgroundColor:  card.type == "physical" ? 'black' : themeColors.card,
         padding: 30,
         height: 200,
         borderRadius: 16,
@@ -50,7 +51,7 @@ export default function PaymentCard({
         <View
           style={{
             marginBottom: "auto",
-            backgroundColor: dark ? "rgb(35, 44, 52)" : "transparent",
+            backgroundColor: dark ? "rgb(35, 44, 520)" : "transparent",
             borderRadius: 30,
             paddingHorizontal: 16,
             paddingVertical: 6,
@@ -70,10 +71,11 @@ export default function PaymentCard({
         </View>
       )}
 
+      {card.type == "physical" && <View style={{top: 5, right: 5, position: "absolute"}}><CardHCB /></View>}
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: themeColors.text,
+          color: card.type == 'physical' ? 'white' : themeColors.text,
           fontSize: 23,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
@@ -88,28 +90,29 @@ export default function PaymentCard({
           {card.user && (
           <Text
               style={{
-                color: palette.muted,
+                color: card.type == 'physical' ? 'white' : palette.muted,
                 fontSize: 18,
               }}
             >
             {card.user.name}
           </Text>
           )}
+          {!card.user && (
           <Text
             style={{
-              color: palette.muted,
+              color: card.type == 'physical' ? 'white' : palette.muted,
               fontSize: 18,
             }}
           >
             {card.organization.name}
-          </Text>
+          </Text>)}
         </View>
 
         <View style={{ marginLeft: "auto" }}>
           <Text style={{ color: palette.muted, fontSize: 10 }}>Exp</Text>
           <Text
             style={{
-              color: themeColors.text,
+              color: card.type == 'physical' ? 'white' : themeColors.text,
               fontFamily: "JetBrains Mono",
               fontSize: 14,
             }}
@@ -124,14 +127,14 @@ export default function PaymentCard({
           <Text style={{ color: palette.muted, fontSize: 10 }}>CVC</Text>
           <Text
             style={{
-              color: themeColors.text,
+              color: card.type == 'physical' ? 'white' : themeColors.text,
               fontFamily: "JetBrains Mono",
               fontSize: 14,
               // There is no value called "no-contextual" in the fontVariant property
               // fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
             }}
           >
-            {details?.cvc || "***"}
+            {details?.cvc || "●●●"}
           </Text>
         </View>
       </View>
