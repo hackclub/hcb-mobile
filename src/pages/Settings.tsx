@@ -14,13 +14,6 @@ import {
 import AppIcon from "react-native-dynamic-app-icon";
 import useSWR, { useSWRConfig } from "swr";
 
-import base from "../../assets/icons/default.png";
-import dev from "../../assets/icons/dev.png";
-import artSkillz from "../../assets/icons/art-skillz.png";
-import cashMoney from "../../assets/icons/cash-money.png";
-import hackNight from "../../assets/icons/hack-night.png";
-import testflight from "../../assets/icons/testflight.png";
-
 import AuthContext from "../auth";
 import Button from "../components/Button";
 import UserMention from "../components/UserMention";
@@ -58,7 +51,7 @@ const IconComponent = ({
         }}
       >
         <Image
-          source={currentIcon}
+          source={{ uri: `${name}-Icon-60x60` }}
           style={{
             width: 50,
             height: 50,
@@ -160,10 +153,10 @@ export default function SettingsPage(
   const [appIcon, setAppIcon] = useState<string>("");
 
   useEffect(() => {
-    // AppIcon.getIconName(({ iconName }) => {
-    //   if (iconName == "default") iconName = "Default"; // don't hate me 'cause you ain't me
-    //   setAppIcon(iconName);
-    // });
+    AppIcon.getIconName(({ iconName }) => {
+      if (iconName == "default") iconName = "Default"; // don't hate me 'cause you ain't me
+      setAppIcon(iconName);
+    });
   }, []);
 
   const { data: user } = useSWR<User>("user");
@@ -184,13 +177,13 @@ export default function SettingsPage(
           <ListSection>
             <IconComponent
               onPress={handleClick}
-              currentIcon={base}
+              currentIcon={appIcon}
               name="Default"
               displayName="Classic"
             />
             <IconComponent
               onPress={handleClick}
-              currentIcon={cashMoney}
+              currentIcon={appIcon}
               name="Cash Money"
               last
             />
@@ -199,18 +192,18 @@ export default function SettingsPage(
           <ListSection>
             <IconComponent
               onPress={handleClick}
-              currentIcon={hackNight}
+              currentIcon={appIcon}
               name="Open Late"
             />
             <IconComponent
               onPress={handleClick}
-              currentIcon={artSkillz}
+              currentIcon={appIcon}
               name="Art Skillz"
               displayName="Graphic Design Is My Passion"
             />
             <IconComponent
               onPress={handleClick}
-              currentIcon={testflight}
+              currentIcon={appIcon}
               name="Early Adopter"
               displayName="Early Adopter"
               last
