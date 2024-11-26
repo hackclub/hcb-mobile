@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import capitalize from "lodash/capitalize";
-import { Text, View, ViewProps } from "react-native";
+import { ImageBackground, Text, View, ViewProps } from "react-native";
 // import Animated, {
 //   SharedTransition,
 //   withSpring,
@@ -13,6 +13,9 @@ import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
 import CardHCB from "./cards/CardHCB";
+
+import * as Geopattern from "geopattern";
+import { SvgXml } from 'react-native-svg';
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -29,6 +32,8 @@ export default function PaymentCard({
 }: ViewProps & { card: Card; details?: CardDetails }) {
   const { colors: themeColors, dark } = useTheme();
 
+  const pattern = Geopattern.generate(card.id).toString();
+
   return (
     <View
       style={{
@@ -43,10 +48,35 @@ export default function PaymentCard({
         borderWidth: 1,
         borderColor: dark ? palette.slate : palette.muted,
         ...(props.style as object),
+        overflow: "hidden",
       }}
       // sharedTransitionTag={card.id}
       // sharedTransitionStyle={transition}
     >
+
+      {card.type == "virtual" && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+          }}
+        >
+          {Array.from({ length: 20 }).map((_, index) => (
+            <SvgXml
+              key={index}
+              xml={pattern}
+              height={200} 
+              preserveAspectRatio="xMidYMid slice"
+            />
+          ))}
+        </View>
+      )}
+
       {card.status != "active" && (
         <View
           style={{
@@ -75,7 +105,7 @@ export default function PaymentCard({
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: card.type == 'physical' ? 'white' : themeColors.text,
+          color:'white',
           fontSize: 23,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
@@ -90,7 +120,7 @@ export default function PaymentCard({
           {card.user && (
           <Text
               style={{
-                color: card.type == 'physical' ? 'white' : palette.muted,
+                color: 'white',
                 fontSize: 18,
               }}
             >
@@ -100,7 +130,7 @@ export default function PaymentCard({
           {!card.user && (
           <Text
             style={{
-              color: card.type == 'physical' ? 'white' : palette.muted,
+              color: 'white',
               fontSize: 18,
             }}
           >
@@ -109,10 +139,10 @@ export default function PaymentCard({
         </View>
 
         <View style={{ marginLeft: "auto" }}>
-          <Text style={{ color: palette.muted, fontSize: 10 }}>Exp</Text>
+          <Text style={{ color: 'white', fontSize: 10 }}>Exp</Text>
           <Text
             style={{
-              color: card.type == 'physical' ? 'white' : themeColors.text,
+              color: 'white',
               fontFamily: "JetBrains Mono",
               fontSize: 14,
             }}
@@ -124,10 +154,10 @@ export default function PaymentCard({
           </Text>
         </View>
         <View>
-          <Text style={{ color: palette.muted, fontSize: 10 }}>CVC</Text>
+          <Text style={{ color: 'white', fontSize: 10 }}>CVC</Text>
           <Text
             style={{
-              color: card.type == 'physical' ? 'white' : themeColors.text,
+              color: 'white',
               fontFamily: "JetBrains Mono",
               fontSize: 14,
               // There is no value called "no-contextual" in the fontVariant property
