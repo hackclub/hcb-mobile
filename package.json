@@ -41,6 +41,7 @@
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.3",
     "expo-web-browser": "~12.8.2",
+    "geopattern": "github:thedev132/geopattern",
     "humanize-string": "^3.0.0",
     "ky": "^1.2.3",
     "lodash": "^4.17.21",
