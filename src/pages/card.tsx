@@ -40,7 +40,6 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
-
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
