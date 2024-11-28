@@ -65,6 +65,7 @@ export default function CardsPage({ navigation }: Props) {
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,
           paddingTop: 20,
+          alignItems: "center"
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         // onRefresh={() => refresh()}
