@@ -12,7 +12,7 @@
 ## Setup
 
 HCB Mobile connects to HCB throught the v4 API.
-You can either do this on the production HCB instance, or using a local development instance.
+You can either connect to the production HCB instance, or a local development instance.
 
 ### Production HCB
 
