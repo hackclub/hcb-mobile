@@ -1,8 +1,8 @@
 name: Deploy to TestFlight
 on:
-    push:
-      tags:
-        - "v*.*.*"
+  push:
+    tags:
+      - "v*.*.*"
 permissions:
   contents: write
 jobs:
