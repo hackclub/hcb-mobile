@@ -1,0 +1,48 @@
+name: Deploy to TestFlight
+on:
+    push:
+      tags:
+        - "v*.*.*"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: 🏗 Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "15.2"
+
+      - name: 🏗 Setup NodeJS
+        uses: actions/setup-node@v4
+
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v3
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: npm i
+
+      - name: 🚀 Build app
+        run: mkdir builds; eas build -p ios --local --non-interactive --output builds/build.ipa
+
+      - name: 📦 Publish ipa to releases
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./builds/build.ipa
+          asset_name: "app.ipa"
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: 🏗 Install ios-uploader
+        run: npm install -g ios-uploader
+
+      - name: 📦 Upload ipa to TestFlight
+        run: ios-uploader upload -u ${{ secrets.APPLE_ID }} -p ${{ secrets.APPLE_PASSWORD }} -f ./builds/build.ipa
