@@ -15,6 +15,7 @@ import useSWRMutation from "swr/mutation";
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
+import UserAvatar from "../components/UserAvatar";
 import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
@@ -22,8 +23,6 @@ import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
-import UserAvatar from "../components/UserAvatar";
-import { ca } from "date-fns/locale";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -134,20 +133,14 @@ export default function CardPage({
       {!detailsLoading || details !== undefined ? (
 
       <View style={{ marginBottom: 20, backgroundColor: themeColors.card, padding: 15, borderRadius: 15 }}>
-        <View style={{ flexDirection: "row", alignContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-          {card.user ? (
-            <>
+        {card.user ? (
+           <View style={{ flexDirection: "row", alignContent: 'center', alignItems: 'center', marginBottom: 20 }}>
               <UserAvatar user={card.user} size={36} style={{marginRight: 5}}/>
               <Text style={{ color: themeColors.text, fontSize: 18 }}>
                 {card.user.name.split(' ')[0]} {card.user.name.concat(' ')[0]}'s Card
               </Text>
-            </>
-          ) : (
-            <ActivityIndicator/>
-          )}
-
-        </View>
-
+            </View>
+          ) : null}
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={{ color: themeColors.text }}>Card number</Text>
           <Text style={{ color: palette.muted }}>
@@ -171,7 +164,7 @@ export default function CardPage({
         </View>
       
       </View>
-      ) : <ActivityIndicator />}
+      ) :  <ActivityIndicator />}
 
       {transactionsLoading || transactions === undefined ? (
         <ActivityIndicator />
