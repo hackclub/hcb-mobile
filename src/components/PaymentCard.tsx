@@ -102,7 +102,7 @@ export default function PaymentCard({
       <Text
         style={{
           color:'white',
-          fontSize: 23,
+          fontSize: 18,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
         }}
@@ -111,38 +111,35 @@ export default function PaymentCard({
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+      <View style={{ flexDirection: "row", alignItems: 'center', gap: 10 }}>
         <View>
-          {card.user && (
-          <Text
-              style={{
-                color: 'white',
-                fontSize: 18,
-              }}
-            >
-            {card.user.name}
-          </Text>
-          )}
-          {!card.user && (
           <Text
             style={{
               color: 'white',
+              fontFamily: "JetBrains Mono", 
               fontSize: 18,
+              fontWeight: '100', // will not work until we add a bold font in assets
+              width: 175,
+              textTransform: 'uppercase',
             }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            {card.organization.name}
-          </Text>)}
+            {card.user ? card.user.name : card.organization.name}
+          </Text>
         </View>
-        <View style={{ marginLeft: "auto" }}>
+        <View style={{marginLeft: 'auto'}}>
           <Text
             style={{
               color: 'white',
               fontSize: 14,
               fontFamily: "JetBrains Mono",
+              textTransform: 'uppercase',
               backgroundColor: card.type == 'virtual' ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,
+              overflow: "hidden"
             }}
           >
             {card.status == "active" ? "Active" : card.status == "frozen" ? "Frozen" : card.status == "inactive" ? "Inactive" : "Cancelled"}
