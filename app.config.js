@@ -57,7 +57,10 @@ export default {
       [
         "expo-font",
         {
-          fonts: ["./assets/fonts/JetBrainsMono-Regular.ttf"],
+          fonts: [
+            "./assets/fonts/JetBrainsMono-Regular.ttf",
+            "./assets/fonts/JetBrainsMono-Bold.ttf",
+          ],
         },
       ],
       "expo-secure-store",
