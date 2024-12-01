@@ -62,18 +62,16 @@ export default function PaymentCard({
         padding: 30,
         width: width * 0.86,
         height: width * 0.86 / 1.588,
-        borderRadius: 16,
+        borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
         alignItems: "stretch",
         position: "relative",
-        borderWidth: 1,
+        borderWidth: 0,
         borderColor: dark ? palette.slate : palette.muted,
         ...(props.style as object),
         overflow: "hidden",
       }}
-      // sharedTransitionTag={card.id}
-      // sharedTransitionStyle={transition}
     >
 
       {card.type == "virtual" && (
@@ -98,7 +96,6 @@ export default function PaymentCard({
       {card.status == "frozen" && <View style={{top: 25, left: 25, position: "absolute"}}><CardFrozen /></View>}
 
       {card.type == "physical" && <CardChip />}
-
       <Text
         style={{
           color:'white',
@@ -116,10 +113,9 @@ export default function PaymentCard({
           <Text
             style={{
               color: 'white',
-              fontFamily: "JetBrains Mono", 
+              fontFamily: "JetBrains Mono Bold", 
               fontSize: 18,
-              fontWeight: '100', // will not work until we add a bold font in assets
-              width: 175,
+              width: 180,
               textTransform: 'uppercase',
             }}
             numberOfLines={1}
