@@ -1,13 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import capitalize from "lodash/capitalize";
+import { Dimensions, Text, View, ViewProps, StyleSheet, type AppStateStatus, AppState} from "react-native";
 import { useEffect, useRef, useState } from "react";
-import {
-  AppState,
-  type AppStateStatus,
-  Text,
-  View,
-  ViewProps,
-} from "react-native";
 // import Animated, {
 //   SharedTransition,
 //   withSpring,
@@ -19,6 +13,11 @@ import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
+import CardHCB from "./cards/CardHCB";
+
+import * as Geopattern from "geopattern";
+import { SvgXml } from 'react-native-svg';
+import CardFrozen from "./cards/CardFrozen";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -28,6 +27,8 @@ import CardChip from "./cards/CardChip";
 //   };
 // });
 
+const { width } = Dimensions.get("window");
+
 export default function PaymentCard({
   card,
   details,
@@ -35,6 +36,7 @@ export default function PaymentCard({
 }: ViewProps & { card: Card; details?: CardDetails }) {
   const { colors: themeColors, dark } = useTheme();
 
+  const pattern = Geopattern.generate(card.id, {scalePattern: 1.1, grayscale: card.status == 'frozen' || card.status == 'inactive' || card.status == 'canceled' ? true : false}).toString();
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
 
@@ -56,50 +58,48 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor: themeColors.card,
+        backgroundColor:  card.type == "physical" ? 'black' : themeColors.card,
         padding: 30,
-        height: 200,
-        borderRadius: 16,
+        width: width * 0.86,
+        height: width * 0.86 / 1.588,
+        borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
         alignItems: "stretch",
         position: "relative",
-        borderWidth: 1,
+        borderWidth: 0,
         borderColor: dark ? palette.slate : palette.muted,
         ...(props.style as object),
+        overflow: "hidden",
       }}
-      // sharedTransitionTag={card.id}
-      // sharedTransitionStyle={transition}
     >
-      {card.status != "active" && (
+
+      {card.type == "virtual" && (
         <View
           style={{
-            marginBottom: "auto",
-            backgroundColor: dark ? "rgb(35, 44, 52)" : "transparent",
-            borderRadius: 30,
-            paddingHorizontal: 16,
-            paddingVertical: 6,
-            borderColor: "rgb(91, 192, 222)",
-            borderWidth: 1,
-            alignSelf: "flex-start",
+            position: 'absolute',
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
           }}
         >
-          <Text
-            style={{
-              color: "rgb(91, 192, 222)",
-              fontWeight: "600",
-            }}
-          >
-            {capitalize(card.status)}
-          </Text>
+          {Array.from({ length: 20 }).map((_, index) => (
+            <SvgXml
+              key={index}
+              xml={pattern}
+              height={width * 0.86 / 1.588} 
+            />
+          ))}
         </View>
       )}
+
+      {card.type == "physical" && <View style={{top: 5, right: 5, position: "absolute"}}><CardHCB /></View>}
+      {card.status == "frozen" && <View style={{top: 25, left: 25, position: "absolute"}}><CardFrozen /></View>}
 
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: themeColors.text,
-          fontSize: 23,
+          color:'white',
+          fontSize: 18,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
         }}
@@ -108,20 +108,45 @@ export default function PaymentCard({
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Text
-          style={{
-            color: palette.muted,
-            fontSize: 18,
-          }}
-        >
-          {card.organization.name}
-        </Text>
-        <View style={{ marginLeft: "auto" }}>
-          <Text style={{ color: palette.muted, fontSize: 10 }}>Exp</Text>
+      <View style={{ flexDirection: "row", alignItems: 'center', gap: 10 }}>
+        <View>
           <Text
             style={{
-              color: themeColors.text,
+              color: 'white',
+              fontFamily: "JetBrains Mono Bold", 
+              fontSize: 18,
+              width: 180,
+              textTransform: 'uppercase',
+            }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {card.user ? card.user.name : card.organization.name}
+          </Text>
+        </View>
+        <View style={{marginLeft: 'auto'}}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 14,
+              fontFamily: "JetBrains Mono",
+              textTransform: 'uppercase',
+              backgroundColor: card.type == 'virtual' ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)",
+              borderRadius: 15,
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              overflow: "hidden"
+            }}
+          >
+            {card.status == "active" ? "Active" : card.status == "frozen" ? "Frozen" : card.status == "inactive" ? "Inactive" : "Cancelled"}
+          </Text>
+        </View>
+
+        {/* <View style={{ marginLeft: "auto" }}>
+          <Text style={{ color: 'white', fontSize: 10 }}>Exp</Text>
+          <Text
+            style={{
+              color: 'white',
               fontFamily: "JetBrains Mono",
               fontSize: 14,
             }}
@@ -133,18 +158,19 @@ export default function PaymentCard({
           </Text>
         </View>
         <View>
-          <Text style={{ color: palette.muted, fontSize: 10 }}>CVC</Text>
+          <Text style={{ color: 'white', fontSize: 10 }}>CVC</Text>
           <Text
             style={{
-              color: themeColors.text,
+              color: 'white',
               fontFamily: "JetBrains Mono",
               fontSize: 14,
-              fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
+              // There is no value called "no-contextual" in the fontVariant property
+              // fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
             }}
           >
-            {details?.cvc || "***"}
+            {details?.cvc || "●●●"}
           </Text>
-        </View>
+        </View> */}
       </View>
     </View>
   );
