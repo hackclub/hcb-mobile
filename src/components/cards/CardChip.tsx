@@ -11,6 +11,14 @@ export default function CardChip() {
         y="0"
         mask-type="alpha"
         maskUnits="userSpaceOnUse"
+      />
+      <Mask
+        id="mask0"
+        width="197"
+        height="131"
+        x="0"
+        y="0"
+        maskUnits="userSpaceOnUse"
       >
         <Rect width="197" height="131" fill="#D1CAB9" rx="26" />
       </Mask>
@@ -23,7 +31,7 @@ export default function CardChip() {
           y="26"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
         />
         <Rect
@@ -33,7 +41,7 @@ export default function CardChip() {
           y="104"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
           transform="rotate(-180 252.206 104)"
         />
@@ -44,7 +52,7 @@ export default function CardChip() {
           y="-3"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
         />
         <Rect
@@ -54,7 +62,7 @@ export default function CardChip() {
           y="133"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
           transform="rotate(-180 201.206 133)"
         />
@@ -65,7 +73,7 @@ export default function CardChip() {
           y="83"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
         />
         <Rect
@@ -75,7 +83,7 @@ export default function CardChip() {
           y="47"
           fill="#D1CAB9"
           stroke="#6F6666"
-          stroke-width="4"
+          strokeWidth="4"
           rx="24"
           transform="rotate(-180 201.206 47)"
         />
