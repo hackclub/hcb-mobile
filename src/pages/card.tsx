@@ -139,7 +139,7 @@ export default function CardPage({
             <>
               <UserAvatar user={card.user} size={36} style={{marginRight: 5}}/>
               <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                {card.user.name.split(' ')[0]} {card.user.name.concat(' ')[0]}'s Card
+                {card.name}
               </Text>
             </>
           ) : (
