@@ -88,8 +88,12 @@ export default function CardPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
     >
-      <View style={{alignItems: 'center'}}>
-        <PaymentCard details={details} card={card} style={{ marginBottom: 20 }} />
+      <View style={{ alignItems: "center" }}>
+        <PaymentCard
+          details={details}
+          card={card}
+          style={{ marginBottom: 20 }}
+        />
       </View>
 
       {card.status != "canceled" && (
@@ -132,46 +136,70 @@ export default function CardPage({
       )}
 
       {!detailsLoading || details !== undefined ? (
+        <View
+          style={{
+            marginBottom: 20,
+            backgroundColor: themeColors.card,
+            padding: 15,
+            borderRadius: 15,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            {card.user ? (
+              <>
+                <UserAvatar
+                  user={card.user}
+                  size={36}
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={{ color: themeColors.text, fontSize: 18 }}>
+                  {card.user.name.split(" ")[0]} {card.user.name.concat(" ")[0]}
+                  's Card
+                </Text>
+              </>
+            ) : (
+              <ActivityIndicator />
+            )}
+          </View>
 
-      <View style={{ marginBottom: 20, backgroundColor: themeColors.card, padding: 15, borderRadius: 15 }}>
-        <View style={{ flexDirection: "row", alignContent: 'center', alignItems: 'center', marginBottom: 20 }}>
-          {card.user ? (
-            <>
-              <UserAvatar user={card.user} size={36} style={{marginRight: 5}}/>
-              <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                {card.user.name.split(' ')[0]} {card.user.name.concat(' ')[0]}'s Card
-              </Text>
-            </>
-          ) : (
-            <ActivityIndicator/>
-          )}
-
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>Card number</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed && details
+                ? renderCardNumber(details.number)
+                : redactedCardNumber(card.last4)}
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>Expires</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed && details ? details.exp_month : "••"}/
+              {detailsRevealed && details ? details.exp_year : "••"}
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>CVC</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed ? details && details.cvc : "•••"}
+            </Text>
+          </View>
         </View>
-
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: themeColors.text }}>Card number</Text>
-          <Text style={{ color: palette.muted }}>
-            {detailsRevealed && details
-              ? renderCardNumber(details.number)
-              : redactedCardNumber(card.last4)}
-          </Text>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: themeColors.text }}>Expires</Text>
-          <Text style={{ color: palette.muted }}>
-            {detailsRevealed && details ? details.exp_month : "••"}/
-            {detailsRevealed && details ? details.exp_year : "••"}
-          </Text>
-        </View>
-         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: themeColors.text }}>CVC</Text>
-          <Text style={{ color: palette.muted }}>
-            {detailsRevealed ? details && details.cvc : "•••"}
-          </Text>
-        </View>
-      
-      </View>
-      ) : <ActivityIndicator />}
+      ) : (
+        <ActivityIndicator />
+      )}
 
       {transactionsLoading || transactions === undefined ? (
         <ActivityIndicator />
@@ -206,7 +234,7 @@ export default function CardPage({
             >
               Transactions
             </Text>
-            {card.total_spent_cents && (
+            {card.total_spent_cents != null && (
               <Text
                 style={{
                   color: palette.muted,
