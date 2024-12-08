@@ -178,7 +178,7 @@ export default function Navigator() {
               name="Card"
               component={CardPage}
               options={({ route }) => ({
-                title: `${route.params.card.user.name.split(' ')[0]} ${route.params.card.user.name.split(' ')[0].charAt(0)}'s Card`,
+                title: "Card",
               })}
             />
             <Stack.Screen
