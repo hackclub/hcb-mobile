@@ -64,7 +64,7 @@ export function PageStripe() {
   useEffect(() => {
     discoverReaders({
       discoveryMethod: 'localMobile',
-      simulated: true,
+      simulated: false,
     })
   }, [discoverReaders])
 

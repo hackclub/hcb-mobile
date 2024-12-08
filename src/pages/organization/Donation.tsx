@@ -25,6 +25,7 @@ import {
 } from 'react-native'
 import { useStripeTerminal } from '@stripe/stripe-terminal-react-native'
 import { useLocation } from "../../lib/useLocation";
+import { id } from 'date-fns/locale';
 
 interface PaymentIntent {
   id: string
@@ -47,8 +48,7 @@ export default function OrganizationDonationPage({
 
   const fetchTokenProvider = async () => {
     console.log("Fetching stripe token")
-
-    const result = await fetcher!("user");
+    const result = await fetcher!("stripe_terminal_connection_token");
 
     console.log(result);
 
@@ -68,7 +68,7 @@ export default function OrganizationDonationPage({
   );
 }
 
-function PageWrapper({ orgId, navigation }: any) {
+function PageWrapper({ orgId, orgName, navigation }: any) {
 
   const { initialize, isInitialized, connectLocalMobileReader } = useStripeTerminal({
     
@@ -92,7 +92,7 @@ function PageWrapper({ orgId, navigation }: any) {
     </View>
   );
 
-  return <PageContent orgId={orgId} navigation={navigation} />;
+  return <PageContent orgId={orgId} orgName={orgName} navigation={navigation} />;
 }
 
 const SectionHeader = ({ title, subtitle }: { title: string, subtitle?: string }) => {
@@ -117,7 +117,7 @@ const SectionHeader = ({ title, subtitle }: { title: string, subtitle?: string }
   );
 };
 
-function PageContent({ orgId, navigation }: any) {
+function PageContent({ orgId, orgName, navigation }: any) {
   const { colors } = useTheme();
 
   // const { data: organization } = useSWR<OrganizationExpanded>(
@@ -135,6 +135,8 @@ function PageContent({ orgId, navigation }: any) {
 
   const [amount, setAmount] = useState("$");
 
+  const { fetcher } = useSWRConfig();
+
   const value = parseFloat(amount.replace("$", "0"));
 
   const [reader, setReader] = useState()
@@ -144,8 +146,9 @@ function PageContent({ orgId, navigation }: any) {
   const [loadingConfirmPayment, setLoadingConfirmPayment] = useState(false)
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false)
   const [currentProgress, setCurrentProgress] = useState(null)
+  const [donation, setDonation] = useState<string>()
 
-  const locationIdStripeMock = 'tml_FrcFgksbiIZZ2V'
+  const locationIdStripeMock = 'tml_FWRkngENcVS5Pd'
 
   const {
     discoverReaders,
@@ -163,12 +166,27 @@ function PageContent({ orgId, navigation }: any) {
     }
   })
 
+  const createDonation = async () => {
+    const { id } = await fetcher!(`organizations/${orgId}/donations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount_cents: value * 100,
+      })
+    }) as { id: string };
+
+    setDonation(id);
+    return id;
+  }
+
   console.log("discovery", discoverReaders)
 
   useEffect(() => {
     discoverReaders({
       discoveryMethod: 'localMobile',
-      simulated: true
+      simulated: false
     });
   }, [discoverReaders])
 
@@ -204,7 +222,7 @@ function PageContent({ orgId, navigation }: any) {
     }
   }
 
-  async function paymentIntent() {
+  async function paymentIntent({ donation_id }: { donation_id: any }) {
     setLoadingCreatePayment(true)
     try {
       const { error, paymentIntent } = await createPaymentIntent({
@@ -212,7 +230,12 @@ function PageContent({ orgId, navigation }: any) {
         currency: 'usd',
         paymentMethodTypes: ['card_present'],
         offlineBehavior: 'prefer_online',
-        captureMethod: "automatic"
+        captureMethod: "automatic",
+        metadata: {
+          donation_id,
+          donation: "true"
+        },
+        statementDescriptor: `HCB* ${orgName || "DONATION"}`.substring(0, 22),
       })
 
       if (error) {
@@ -351,7 +374,8 @@ function PageContent({ orgId, navigation }: any) {
       {connectedReader ? (
         <Button
           onPress={async () => {
-            await paymentIntent();
+            const donation_id = await createDonation();
+            await paymentIntent({ donation_id });
           }}
           style={{
             width: "100%",

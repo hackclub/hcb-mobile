@@ -35,42 +35,6 @@ const SectionHeader = ({ title, subtitle }: { title: string, subtitle?: string }
     );
 };
 
-function Stat({
-    title,
-    value,
-}: {
-    title: string;
-    value: string | undefined;
-}) {
-    const { colors: themeColors } = useTheme();
-    const [copied, setCopied] = useState(false);
-
-    useEffect(() => {
-        if (copied) {
-            const timeout = setTimeout(() => setCopied(false), 2000);
-            return () => clearTimeout(timeout);
-        }
-    }, [copied]);
-
-    return (
-        <View>
-            <Text style={{ color: palette.muted, fontSize: 16 }}>{title}</Text>
-            <View
-                style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}
-            >
-                <Text
-                    style={{
-                        color: themeColors.text,
-                        fontFamily: "JetBrains Mono",
-                        fontSize: 30,
-                    }}
-                >
-                    {value}
-                </Text>
-            </View>
-        </View>
-    );
-}
 
 export default function ProcessDonationPage({
     navigation,
@@ -88,13 +52,13 @@ export default function ProcessDonationPage({
         navigation.setOptions({
             headerLeft: () => (
                 <Button
-                    title="Done"
+                    title={status == "ready" || status == "loading" ? "Cancel" : "Done"}
                     color={palette.primary}
                     onPress={() => navigation.goBack()}
                 />
             ),
         });
-    }, []);
+    }, [status]);
 
     return (
         <View
@@ -114,12 +78,18 @@ export default function ProcessDonationPage({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                flex: 1
+                flex: 1,
+                paddingBottom: 40
             }}>
-                <Stat
-                    title="Donation amount"
-                    value={"$" + (payment?.amount / 100).toFixed(2)}
-                />
+                <Text style={{ color: palette.muted, fontSize: 20 }}>Donation amount</Text>
+                <Text
+                    style={{
+                        fontSize: 50,
+                    }}
+                >
+                    ${(payment?.amount / 100).toFixed(2)}
+                </Text>
+
                 <StyledButton onPress={async () => {
                     setStatus("loading");
                     const status = await collectPayment();
@@ -136,7 +106,8 @@ export default function ProcessDonationPage({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                flex: 1
+                flex: 1,
+                paddingBottom: 40
             }}>
                 <Ionicons name="checkmark-circle-outline" size={100} color={palette.success} />
                 <Text style={{
@@ -159,25 +130,34 @@ export default function ProcessDonationPage({
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                flex: 1
+                flex: 1,
+                paddingBottom: 40
             }}>
+                <ActivityIndicator size="large" style={{
+                    margin: 20
+                }} />
                 <Text style={{
-                    marginBottom: 20,
                     fontSize: 20,
-                }}>Processing...</Text>
-                <ActivityIndicator size="large" />
+                    fontWeight: "600",
+                    paddingBottom: 10
+                }}>Processing</Text>
+                <Text style={{
+                    fontSize: 16
+                }}>Please wait...</Text>
+
 
             </View> : <View style={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                flex: 1
+                flex: 1,
+                marginBottom: 40
             }}>
                 <Ionicons name="close-circle-outline" size={100} color={palette.warning} />
                 <Text style={{
                     fontSize: 20,
                     fontWeight: "600",
-                    marginBottom: 10
+                    paddingBottom: 10
                 }}>Error</Text>
                 <Text style={{
                     fontSize: 16
