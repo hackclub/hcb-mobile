@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.12",
+      buildNumber: "1.0.0.13",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -30,8 +30,7 @@ export default {
         "applinks:bank.hackclub.com",
       ],
       entitlements: {
-        "com.apple.developer.proximity-reader.payment.acceptance": [],
-        // I'm not entirely sure what to do here
+        "com.apple.developer.proximity-reader.payment.acceptance": true,
       }
     },
     android: {
