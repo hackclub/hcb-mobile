@@ -52,7 +52,7 @@ export default function CardPage({
       setCardName(card.name);
     } else if (card?.user) {
       setCardName(
-        `${card.user.name.split(" ")[0]} ${card.user.name.split(" ")[0].charAt(0)}'s Card`,
+        `${card.user.name.split(" ")[0]} ${card.user.name.split(" ")[1].charAt(0)}'s Card`,
       );
     }
   }, [card]);
@@ -177,8 +177,7 @@ export default function CardPage({
                   style={{ marginRight: 5 }}
                 />
                 <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                  {card.user.name.split(" ")[0]} {card.user.name.concat(" ")[0]}
-                  's Card
+                  {cardName}
                 </Text>
               </>
             ) : (
