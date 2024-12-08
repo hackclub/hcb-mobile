@@ -402,7 +402,7 @@ function Keyboard({ amount, setAmount} : any) {
     const [error, setError] = useState(false);
     function pressNumber(amount: string, number: number) {
       if (
-        parseFloat(amount.replace("$", "0") + number) > 9999 ||
+        parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
         (amount == "$" && number == 0) ||
         amount[amount.length - 3] == "."
       ) {
