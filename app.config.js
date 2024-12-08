@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.12",
+      buildNumber: "1.0.0.11",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -29,6 +29,10 @@ export default {
         "applinks:hcb.hackclub.com",
         "applinks:bank.hackclub.com",
       ],
+      entitlements: {
+        "com.apple.developer.proximity-reader.payment.acceptance": true,
+        // I'm not entirely sure what to do here
+      }
     },
     android: {
       icon: "./assets/app-icon.png",
@@ -57,10 +61,7 @@ export default {
       [
         "expo-font",
         {
-          fonts: [
-            "./assets/fonts/JetBrainsMono-Regular.ttf",
-            "./assets/fonts/JetBrainsMono-Bold.ttf",
-          ],
+          fonts: ["./assets/fonts/JetBrainsMono-Regular.ttf"],
         },
       ],
       "expo-secure-store",
@@ -68,6 +69,23 @@ export default {
       [
         "expo-local-authentication",
         { faceIDPermission: "Allow $(PRODUCT_NAME) to use Face ID." },
+      ],
+      [
+        "@stripe/stripe-terminal-react-native",
+        {
+          "bluetoothBackgroundMode": true,
+          "locationWhenInUsePermission": "Location access is required in order to accept payments.",
+          "bluetoothPeripheralPermission": "Bluetooth access is required in order to connect to supported bluetooth card readers.",
+          "bluetoothAlwaysUsagePermission": "This app uses Bluetooth to connect to supported card readers."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 26
+          }
+        }
       ],
     ],
   },
