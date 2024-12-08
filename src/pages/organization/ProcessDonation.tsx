@@ -1,51 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
 import { View, Text, StatusBar, Button, ActivityIndicator } from "react-native";
-import useSWR from "swr";
 
 import StyledButton from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
 
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
-
-const SectionHeader = ({ title, subtitle }: { title: string, subtitle?: string }) => {
-    const { colors } = useTheme();
-
-    return (
-        <>
-            <Text
-                style={{
-                    fontSize: 24,
-                    fontWeight: "bold",
-                    marginBottom: subtitle ? 10 : 16,
-                    color: colors.text,
-                }}
-            >
-                {title}
-            </Text>
-            {subtitle && (
-                <Text style={{ color: palette.muted, fontSize: 16, marginBottom: 16 }}>{subtitle}</Text>
-            )}
-        </>
-    );
-};
 
 
 export default function ProcessDonationPage({
     navigation,
     route: {
-        params: { orgId, payment, collectPayment },
+        params: { payment, collectPayment, email, name },
     },
 }: Props) {
-    const { data: organization } = useSWR<OrganizationExpanded>(
-        `organizations/${orgId}`,
-    );
-
     const [status, setStatus] = useState<"ready" | "loading" | "success" | "error">("ready");
     const theme = useTheme();
     useEffect(() => {
@@ -81,15 +52,15 @@ export default function ProcessDonationPage({
                 flex: 1,
                 paddingBottom: 40
             }}>
-                <Text style={{ color: palette.muted, fontSize: 20 }}>Donation amount</Text>
-                <Text
-                    style={{
-                        fontSize: 50,
-                        color: theme.colors.text
-                    }}
-                >
-                    ${(payment?.amount / 100).toFixed(2)}
-                </Text>
+                    <Text style={{ color: palette.muted, fontSize: 24 }}>Donation amount</Text>
+                    <Text
+                        style={{
+                            fontSize: 50,
+                            color: theme.colors.text
+                        }}
+                    >
+                        ${(payment?.amount / 100).toFixed(2)}
+                    </Text>
 
                 <StyledButton onPress={async () => {
                     setStatus("loading");
@@ -99,7 +70,7 @@ export default function ProcessDonationPage({
                     marginBottom: 10,
                     position: 'absolute',
                     bottom: 30,
-                    width: '100%'
+                    width: '100%',
                 }}>
                     Use Tap to Pay
                 </StyledButton>
@@ -116,7 +87,7 @@ export default function ProcessDonationPage({
                     fontWeight: "600",
                     marginBottom: 10,
                     color: theme.colors.text
-                }}>Success</Text>
+                }}>Thank you, {name}!</Text>
                 <Text style={{
                     fontSize: 16,
                     color: theme.colors.text
@@ -124,11 +95,12 @@ export default function ProcessDonationPage({
                 <Text style={{
                     fontSize: 16,
                     color: theme.colors.text,
-                    position: 'absolute',
-                    bottom: 90,
-                    width: '100%'
-
-                }}>Note: Your organization is responsible for providing the donor with a receipt. If no receipt is provided, this donation may be vulnerable to chargebacks.</Text>
+                    marginTop: 10
+                }}>A receipt has been sent to the email address:</Text>
+                <Text style={{
+                    fontSize: 16,
+                    color: theme.colors.text
+                }}>{email}</Text>
 
                 <StyledButton onPress={navigation.goBack} style={{
                     position: 'absolute',

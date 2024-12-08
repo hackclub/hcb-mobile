@@ -1,33 +1,23 @@
-import * as Progress from 'react-native-progress';
+import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { formatDistanceToNowStrict, parseISO } from "date-fns";
-import { capitalize } from "lodash";
-import { ActivityIndicator, Linking, ScrollView, Text, View } from "react-native";
+import { StripeTerminalProvider , useStripeTerminal } from '@stripe/stripe-terminal-react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Linking, Text, View ,
+  Alert, TextInput
+} from "react-native";
+import * as Progress from 'react-native-progress';
 import useSWR, { useSWRConfig } from "swr";
-import { StripeTerminalProvider } from '@stripe/stripe-terminal-react-native';
-import StyledButton from "../../components/Button";
 
-import Stripe from "../../components/Stripe";
+import StyledButton from "../../components/Button";
 import Button from "../../components/Button";
-import UserAvatar from "../../components/UserAvatar";
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import User, { OrgUser } from "../../lib/types/User";
+import User from "../../lib/types/User";
+import { useLocation } from "../../lib/useLocation";
 import { palette, theme } from "../../theme";
 
-import { useEffect, useState } from 'react'
-import {
-  Alert,
-  ImageBackground,
-  SafeAreaView,
-  TextInput,
-} from 'react-native'
-import { useStripeTerminal } from '@stripe/stripe-terminal-react-native'
-import { useLocation } from "../../lib/useLocation";
-import { id } from 'date-fns/locale';
-import { Ionicons } from '@expo/vector-icons';
+
 
 interface PaymentIntent {
   id: string
@@ -72,8 +62,8 @@ export default function OrganizationDonationPage({
 
 function PageWrapper({ orgId, orgName, navigation }: any) {
 
-  const { initialize, isInitialized, connectLocalMobileReader } = useStripeTerminal({
-    
+  const { initialize, isInitialized } = useStripeTerminal({
+
   });
   useEffect(() => {
     initialize();
@@ -126,10 +116,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
   //   `organizations/${orgId}?avatar_size=50`, 
   //   { fallbackData: cache.get(`organizations/${orgId}`)?.data },
   // );
-  const { data: currentUser } = useSWR<User>("user");
 
-  const tabBarHeight = useBottomTabBarHeight();
-  const { colors: themeColors } = useTheme();
 
   // if (!organization) return null;
 
@@ -169,6 +156,11 @@ function PageContent({ orgId, orgName, navigation }: any) {
     }
   })
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const emailRef = useRef<TextInput>(null);
+
+
   const createDonation = async () => {
     const { id } = await fetcher!(`organizations/${orgId}/donations`, {
       method: "POST",
@@ -177,6 +169,8 @@ function PageContent({ orgId, orgName, navigation }: any) {
       },
       body: JSON.stringify({
         amount_cents: value * 100,
+        name,
+        email
       })
     }) as { id: string };
 
@@ -251,7 +245,9 @@ function PageContent({ orgId, orgName, navigation }: any) {
       navigation.navigate("ProcessDonation", {
         orgId,
         payment: paymentIntent,
-        collectPayment: () => collectPayment(paymentIntent)
+        collectPayment: () => collectPayment(paymentIntent),
+        name,
+        email
       });
 
       return paymentIntent
@@ -315,6 +311,8 @@ function PageContent({ orgId, orgName, navigation }: any) {
     await Linking.openSettings()
   }
 
+
+
   useEffect(() => {
     if (accessDenied) {
       Alert.alert(
@@ -335,64 +333,64 @@ function PageContent({ orgId, orgName, navigation }: any) {
     return (
 
       <View
-      style={{
+        style={{
           padding: 20,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flex: 1,
-      }}
-  >
+        }}
+      >
 
 
 
-      <View style={{
+        <View style={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           flex: 1,
 
           paddingBottom: 100
-      }}>
-                <Ionicons name="card-outline" size={100} color={palette.primary} />
-                <Text style={{
-                    fontSize: 20,
-                    fontWeight: "600",
-                    marginBottom: 10,
-                    marginTop: 10,
-                    color: colors.text
-                }}>Collect Donations</Text>
-                <Text style={{
-                    fontSize: 16,
-                    color: colors.text,
-                    marginBottom: 20
-                }}>Receive donations using Tap to Pay</Text>
-
-        {currentProgress ? <View style={{
-          marginTop: 8,
-          marginBottom: 8
         }}>
-          <Progress.Bar progress={currentProgress} width={200} height={20} />
-        </View> : loadingConnectingReader ? <ActivityIndicator size="large" /> : <View style={{ width: 36, height: 36 }} />}
+          <Ionicons name="card-outline" size={100} color={palette.primary} />
+          <Text style={{
+            fontSize: 20,
+            fontWeight: "600",
+            marginBottom: 10,
+            marginTop: 10,
+            color: colors.text
+          }}>Collect Donations</Text>
+          <Text style={{
+            fontSize: 16,
+            color: colors.text,
+            marginBottom: 20
+          }}>Receive donations using Tap to Pay</Text>
+
+          {currentProgress ? <View style={{
+            marginTop: 8,
+            marginBottom: 8
+          }}>
+            <Progress.Bar progress={currentProgress} width={200} height={20} />
+          </View> : loadingConnectingReader ? <ActivityIndicator size="large" /> : <View style={{ width: 36, height: 36 }} />}
 
 
           <StyledButton onPress={async () => {
-                      if (!connectedReader) {
-                        return await connectReader(reader)
-                      }
-            
+            if (!connectedReader) {
+              return await connectReader(reader)
+            }
+
           }} style={{
-              marginBottom: 10,
-              position: 'absolute',
-              bottom: 72,
+            marginBottom: 10,
+            position: 'absolute',
+            bottom: 72,
 
 
-              width: '100%'
+            width: '100%'
           }} loading={!reader}>
-              Collect donations
+            Collect donations
           </StyledButton>
+        </View>
       </View>
-  </View>
     )
     return (
       <View style={{
@@ -420,7 +418,6 @@ function PageContent({ orgId, orgName, navigation }: any) {
       </View>
     )
   }
-
   return (
     <View
       style={{
@@ -435,6 +432,88 @@ function PageContent({ orgId, orgName, navigation }: any) {
     >
       <SectionHeader title="Capture Donation" subtitle="Collect donations for your organization right from your mobile device." />
 
+      <View style={{
+        flexDirection: "column",
+        display: "flex",
+        alignItems: "start",
+        justifyContent: "center",
+        marginBottom: 10,
+
+      }}>
+
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 20
+        }}>
+          <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+
+          <TextInput
+            style={{
+              color: colors.text,
+              backgroundColor: colors.card,
+              padding: 12,
+              borderRadius: 8,
+              fontSize: 16,
+              flex: 1
+            }}
+            selectTextOnFocus
+            autoFocus
+
+            clearButtonMode="while-editing"
+            value={name}
+            autoCapitalize="words"
+            onChangeText={setName}
+            autoComplete="off"
+            autoCorrect={false}
+
+
+            placeholder={"Full name"}
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              emailRef.current?.focus();
+            }}
+          />
+        </View>
+
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 20,
+          marginTop: 10
+        }}>
+          <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+
+          <TextInput
+            style={{
+              color: colors.text,
+              backgroundColor: colors.card,
+              padding: 12,
+              borderRadius: 8,
+              fontSize: 16,
+              flex: 1
+            }}
+            selectTextOnFocus
+            autoFocus
+
+            clearButtonMode="while-editing"
+            autoCapitalize="none"
+
+            value={email}
+            keyboardType="email-address"
+            autoComplete="off"
+            autoCorrect={false}
+            onChangeText={setEmail}
+            ref={emailRef}
+            placeholder={"Email address"}
+            returnKeyType="done"
+
+            onSubmitEditing={() => {
+              //   navigation.goBack();
+            }}
+          />
+        </View>
+      </View>
       <Keyboard amount={amount} setAmount={setAmount} />
 
       {connectedReader ? (
@@ -446,6 +525,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
           style={{
             width: "100%",
           }}
+          disabled={value <= 0 || !name || !email}
         >
           Create donation
         </Button>
@@ -464,117 +544,117 @@ function PageContent({ orgId, orgName, navigation }: any) {
   );
 }
 
-function Keyboard({ amount, setAmount} : any) {
-    const [error, setError] = useState(false);
-    const theme = useTheme();
-    function pressNumber(amount: string, number: number) {
-      if (
-        parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
-        (amount == "$" && number == 0) ||
-        amount[amount.length - 3] == "."
-      ) {
-        setError(true);
-        setTimeout(() => setError(false), 200);
-      } else {
-        setAmount(amount + number);
-      }
+function Keyboard({ amount, setAmount }: any) {
+  const [error, setError] = useState(false);
+  const theme = useTheme();
+  function pressNumber(amount: string, number: number) {
+    if (
+      parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
+      (amount == "$" && number == 0) ||
+      amount[amount.length - 3] == "."
+    ) {
+      setError(true);
+      setTimeout(() => setError(false), 200);
+    } else {
+      setAmount(amount + number);
     }
-    
-    function pressDecimal(amount: string) {
-      if (amount.includes(".") || amount == "$") {
-        setError(true);
-        setTimeout(() => setError(false), 200);
-      } else {
-        setAmount(amount + ".");
-      }
+  }
+
+  function pressDecimal(amount: string) {
+    if (amount.includes(".") || amount == "$") {
+      setError(true);
+      setTimeout(() => setError(false), 200);
+    } else {
+      setAmount(amount + ".");
     }
-    
-    function pressBackspace(amount: string) {
-      if (amount == "$") {
-        setError(true);
-        setTimeout(() => setError(false), 200);
-      } else {
-        setAmount(amount.slice(0, amount.length - 1));
-      }
+  }
+
+  function pressBackspace(amount: string) {
+    if (amount == "$") {
+      setError(true);
+      setTimeout(() => setError(false), 200);
+    } else {
+      setAmount(amount.slice(0, amount.length - 1));
     }
-    
-    const Number = ({
-      number,
-      symbol,
-      onPress,
-    }: {
-      number?: number;
-      symbol?: String;
-      onPress?: () => void;
-    }) => (
+  }
+
+  const Number = ({
+    number,
+    symbol,
+    onPress,
+  }: {
+    number?: number;
+    symbol?: string;
+    onPress?: () => void;
+  }) => (
+    <Text
+      style={{
+        color: theme.colors.text,
+        fontSize: 24,
+        textAlign: "center",
+        fontFamily: "JetBrains Mono",
+        flexGrow: 1,
+      }}
+      onPress={(e) => {
+        if (onPress) {
+          onPress();
+        } else if (typeof number != undefined) {
+          pressNumber(amount, number as number);
+        }
+      }}
+    >
+      {number}
+      {symbol}
+    </Text>
+  );
+
+  return (
+    <View style={{
+      width: "100%",
+      flexGrow: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "stretch",
+      justifyContent: "space-around"
+    }}>
       <Text
         style={{
-          color: theme.colors.text,
-          fontSize: 24,
-          textAlign: "center",
-          fontFamily: "JetBrains Mono",
-          flexGrow: 1,
-        }}
-        onPress={(e) => {
-          if (onPress) {
-            onPress();
-          } else if (typeof number != undefined) {
-            pressNumber(amount, number as number);
-          }
+          color: error ? palette.primary : theme.colors.text,
+
+          paddingBottom: 0,
+          paddingHorizontal: 10,
+          fontSize: 72,
+          textTransform: "uppercase",
+          textAlign: 'center'
         }}
       >
-        {number}
-        {symbol}
+        {amount}
+        {amount == "$" && <Text>0</Text>}
+        {amount[amount.length - 1] == "." && <Text style={{ color: palette.muted }}>00</Text>}
+        {amount[amount.length - 2] == "." && <Text style={{ color: palette.muted }}>0</Text>}
       </Text>
-    );
-    
-    return (
-      <View style={{
-        width: "100%",
-        flexGrow: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "space-around"
-      }}>
-        <Text
-          style={{
-            color: error ? palette.primary : theme.colors.text,
-            paddingTop: 12,
-            paddingBottom: 0,
-            paddingHorizontal: 10,
-            fontSize: 72,
-            textTransform: "uppercase",
-            textAlign: 'center'
-          }}
-        >
-          {amount}
-          {amount == "$" && <Text>0</Text>}
-          {amount[amount.length - 1] == "." && <Text style={{color: palette.muted}}>00</Text>}
-          {amount[amount.length - 2] == "." && <Text style={{color: palette.muted}}>0</Text>}
-        </Text>
-        <View>
-          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
-            <Number number={1} />
-            <Number number={2} />
-            <Number number={3} />
-          </View>
-          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
-            <Number number={4} />
-            <Number number={5} />
-            <Number number={6} />
-          </View>
-          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 24}}>
-            <Number number={7} />
-            <Number number={8} />
-            <Number number={9} />
-          </View>
-          <View style={{flexDirection: 'row', paddingTop: 24, paddingBottom: 16}}>
-            <Number symbol={"."} onPress={() => pressDecimal(amount)} />
-            <Number number={0} />
-            <Number symbol={"←"} onPress={() => pressBackspace(amount)} />
-          </View>
+      <View>
+        <View style={{ flexDirection: 'row', paddingBottom: 16 }}>
+          <Number number={1} />
+          <Number number={2} />
+          <Number number={3} />
+        </View>
+        <View style={{ flexDirection: 'row', paddingTop: 24, paddingBottom: 16 }}>
+          <Number number={4} />
+          <Number number={5} />
+          <Number number={6} />
+        </View>
+        <View style={{ flexDirection: 'row', paddingTop: 24, paddingBottom: 16 }}>
+          <Number number={7} />
+          <Number number={8} />
+          <Number number={9} />
+        </View>
+        <View style={{ flexDirection: 'row', paddingTop: 24, paddingBottom: 16 }}>
+          <Number symbol={"."} onPress={() => pressDecimal(amount)} />
+          <Number number={0} />
+          <Number symbol={"←"} onPress={() => pressBackspace(amount)} />
         </View>
       </View>
+    </View>
   )
 }

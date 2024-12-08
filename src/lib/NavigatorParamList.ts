@@ -10,7 +10,7 @@ export type StackParamList = {
   Invitation: { inviteId: Invitation["id"]; invitation?: Invitation };
   Event: { orgId: Organization["id"]; organization?: Organization };
   AccountNumber: { orgId: Organization["id"] };
-  ProcessDonation: { orgId: Organization["id"], payment: any };
+  ProcessDonation: { orgId: Organization["id"], payment: any, collectPayment: () => any, name: string, email: string };
   OrganizationSettings: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
   Transaction: {
