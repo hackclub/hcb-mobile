@@ -21,7 +21,9 @@ import Card from "../lib/types/Card";
 import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
-import { renderMoney } from "../util";
+import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
+import UserAvatar from "../components/UserAvatar";
+import { ca } from "date-fns/locale";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -40,7 +42,6 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
-
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
@@ -87,7 +88,13 @@ export default function CardPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
     >
-      <PaymentCard details={details} card={card} style={{ marginBottom: 20 }} />
+      <View style={{ alignItems: "center" }}>
+        <PaymentCard
+          details={details}
+          card={card}
+          style={{ marginBottom: 20 }}
+        />
+      </View>
 
       {card.status != "canceled" && (
         <View
@@ -128,6 +135,72 @@ export default function CardPage({
         </View>
       )}
 
+      {!detailsLoading || details !== undefined ? (
+        <View
+          style={{
+            marginBottom: 20,
+            backgroundColor: themeColors.card,
+            padding: 15,
+            borderRadius: 15,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            {card.user ? (
+              <>
+                <UserAvatar
+                  user={card.user}
+                  size={36}
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={{ color: themeColors.text, fontSize: 18 }}>
+                  {card.user.name.split(" ")[0]} {card.user.name.concat(" ")[0]}
+                  's Card
+                </Text>
+              </>
+            ) : (
+              <ActivityIndicator />
+            )}
+          </View>
+
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>Card number</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed && details
+                ? renderCardNumber(details.number)
+                : redactedCardNumber(card.last4)}
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>Expires</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed && details ? details.exp_month : "••"}/
+              {detailsRevealed && details ? details.exp_year : "••"}
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>CVC</Text>
+            <Text style={{ color: palette.muted }}>
+              {detailsRevealed ? details && details.cvc : "•••"}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <ActivityIndicator />
+      )}
+
       {transactionsLoading || transactions === undefined ? (
         <ActivityIndicator />
       ) : transactions.data.length == 0 ? (
@@ -161,7 +234,7 @@ export default function CardPage({
             >
               Transactions
             </Text>
-            {card.total_spent_cents && (
+            {card.total_spent_cents != null && (
               <Text
                 style={{
                   color: palette.muted,

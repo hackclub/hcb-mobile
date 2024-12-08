@@ -49,7 +49,7 @@ export function orgColor(orgId: string) {
 }
 
 export function redactedCardNumber(last4?: string) {
-  return `**** **** **** ${last4 || "****"}`;
+  return `•••• •••• •••• ${last4 || "••••"}`;
 }
 
 export function renderCardNumber(number: string) {
