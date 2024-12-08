@@ -178,7 +178,7 @@ export default function Navigator() {
               name="Card"
               component={CardPage}
               options={({ route }) => ({
-                title: `Card ····${route.params.card.last4}`,
+                title: `Card ····${route.params.card.name}`,
               })}
             />
             <Stack.Screen
