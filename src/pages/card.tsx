@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import { useEffect, useState } from "react";
 
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
@@ -45,6 +46,22 @@ export default function CardPage({
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
+  const [cardName, setCardName] = useState(_card.name);
+  useEffect(() => {
+    if (card?.name) {
+      setCardName(card.name);
+    } else if (card?.user) {
+      setCardName(
+        `${card.user.name.split(" ")[0]} ${card.user.name.split(" ")[1].charAt(0)}'s Card`,
+      );
+    }
+  }, [card]);
+  useEffect(() => {
+    navigation.setOptions({
+      title: cardName,
+    });
+  }, [cardName]);
+
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];
   }>(`cards/${_card.id}/transactions`);
@@ -160,8 +177,7 @@ export default function CardPage({
                   style={{ marginRight: 5 }}
                 />
                 <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                  {card.user.name.split(" ")[0]} {card.user.name.concat(" ")[0]}
-                  's Card
+                  {cardName}
                 </Text>
               </>
             ) : (
