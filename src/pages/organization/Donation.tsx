@@ -7,6 +7,7 @@ import { capitalize } from "lodash";
 import { ActivityIndicator, Linking, ScrollView, Text, View } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import { StripeTerminalProvider } from '@stripe/stripe-terminal-react-native';
+import StyledButton from "../../components/Button";
 
 import Stripe from "../../components/Stripe";
 import Button from "../../components/Button";
@@ -14,7 +15,7 @@ import UserAvatar from "../../components/UserAvatar";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import User, { OrgUser } from "../../lib/types/User";
-import { palette } from "../../theme";
+import { palette, theme } from "../../theme";
 
 import { useEffect, useState } from 'react'
 import {
@@ -26,6 +27,7 @@ import {
 import { useStripeTerminal } from '@stripe/stripe-terminal-react-native'
 import { useLocation } from "../../lib/useLocation";
 import { id } from 'date-fns/locale';
+import { Ionicons } from '@expo/vector-icons';
 
 interface PaymentIntent {
   id: string
@@ -158,7 +160,8 @@ function PageContent({ orgId, orgName, navigation }: any) {
     confirmPaymentIntent,
     connectedReader,
   } = useStripeTerminal({
-    onUpdateDiscoveredReaders: (readers: any) => {
+    onUpdateDiscoveredReaders: (readers: any, ...stuff) => {
+      console.log("DISCOVERED READERSS", readers, stuff)
       setReader(readers[0])
     },
     onDidReportReaderSoftwareUpdateProgress: (progress: any) => {
@@ -208,7 +211,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
             simulated: false,
           });
         }
-        Alert.alert('Error connecting, please try again')
+        Alert.alert('There wass an error connecting, please try again')
         return
       }
 
@@ -330,6 +333,68 @@ function PageContent({ orgId, orgName, navigation }: any) {
   if (!connectedReader) {
     // centered view that says "connect reader"
     return (
+
+      <View
+      style={{
+          padding: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+      }}
+  >
+
+
+
+      <View style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flex: 1,
+
+          paddingBottom: 100
+      }}>
+                <Ionicons name="card-outline" size={100} color={palette.primary} />
+                <Text style={{
+                    fontSize: 20,
+                    fontWeight: "600",
+                    marginBottom: 10,
+                    marginTop: 10,
+                    color: theme.colors.text
+                }}>Collect Donations</Text>
+                <Text style={{
+                    fontSize: 16,
+                    color: theme.colors.text,
+                    marginBottom: 20
+                }}>Receive donations using Tap to Pay</Text>
+
+        {currentProgress ? <View style={{
+          marginTop: 8,
+          marginBottom: 8
+        }}>
+          <Progress.Bar progress={currentProgress} width={200} height={20} />
+        </View> : loadingConnectingReader ? <ActivityIndicator size="large" /> : <View style={{ width: 36, height: 36 }} />}
+
+
+          <StyledButton onPress={async () => {
+                      if (!connectedReader) {
+                        return await connectReader(reader)
+                      }
+            
+          }} style={{
+              marginBottom: 10,
+              position: 'absolute',
+              bottom: 72,
+
+
+              width: '100%'
+          }} loading={!reader}>
+              Collect donations
+          </StyledButton>
+      </View>
+  </View>
+    )
+    return (
       <View style={{
         display: 'flex',
         justifyContent: 'center',
@@ -339,6 +404,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
         <Text style={{
           marginBottom: 20,
           fontSize: 20,
+          color: theme.colors.text
         }}>Collect donations</Text>
         <Button onPress={async () => {
           if (!connectedReader) {
@@ -400,6 +466,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
 
 function Keyboard({ amount, setAmount} : any) {
     const [error, setError] = useState(false);
+    const theme = useTheme();
     function pressNumber(amount: string, number: number) {
       if (
         parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
@@ -442,7 +509,7 @@ function Keyboard({ amount, setAmount} : any) {
     }) => (
       <Text
         style={{
-          color: palette.black,
+          color: theme.colors.text,
           fontSize: 24,
           textAlign: "center",
           fontFamily: "JetBrains Mono",
@@ -472,7 +539,7 @@ function Keyboard({ amount, setAmount} : any) {
       }}>
         <Text
           style={{
-            color: error ? palette.primary : palette.black,
+            color: error ? palette.primary : theme.colors.text,
             paddingTop: 12,
             paddingBottom: 0,
             paddingHorizontal: 10,

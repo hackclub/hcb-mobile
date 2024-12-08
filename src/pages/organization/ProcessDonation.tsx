@@ -47,7 +47,7 @@ export default function ProcessDonationPage({
     );
 
     const [status, setStatus] = useState<"ready" | "loading" | "success" | "error">("ready");
-
+    const theme = useTheme();
     useEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
@@ -85,6 +85,7 @@ export default function ProcessDonationPage({
                 <Text
                     style={{
                         fontSize: 50,
+                        color: theme.colors.text
                     }}
                 >
                     ${(payment?.amount / 100).toFixed(2)}
@@ -107,17 +108,27 @@ export default function ProcessDonationPage({
                 justifyContent: 'center',
                 alignItems: 'center',
                 flex: 1,
-                paddingBottom: 40
+                paddingBottom: 100
             }}>
                 <Ionicons name="checkmark-circle-outline" size={100} color={palette.success} />
                 <Text style={{
                     fontSize: 20,
                     fontWeight: "600",
-                    marginBottom: 10
+                    marginBottom: 10,
+                    color: theme.colors.text
                 }}>Success</Text>
                 <Text style={{
-                    fontSize: 16
+                    fontSize: 16,
+                    color: theme.colors.text
                 }}>{"$" + (payment?.amount / 100).toFixed(2)} donation completed successfully</Text>
+                <Text style={{
+                    fontSize: 16,
+                    color: theme.colors.text,
+                    position: 'absolute',
+                    bottom: 90,
+                    width: '100%'
+
+                }}>Note: Your organization is responsible for providing the donor with a receipt. If no receipt is provided, this donation may be vulnerable to chargebacks.</Text>
 
                 <StyledButton onPress={navigation.goBack} style={{
                     position: 'absolute',
@@ -139,10 +150,12 @@ export default function ProcessDonationPage({
                 <Text style={{
                     fontSize: 20,
                     fontWeight: "600",
-                    paddingBottom: 10
+                    paddingBottom: 10,
+                    color: theme.colors.text
                 }}>Processing</Text>
                 <Text style={{
-                    fontSize: 16
+                    fontSize: 16,
+                    color: theme.colors.text
                 }}>Please wait...</Text>
 
 
@@ -157,10 +170,12 @@ export default function ProcessDonationPage({
                 <Text style={{
                     fontSize: 20,
                     fontWeight: "600",
-                    paddingBottom: 10
+                    paddingBottom: 10,
+                    color: theme.colors.text
                 }}>Error</Text>
                 <Text style={{
-                    fontSize: 16
+                    fontSize: 16,
+                    color: theme.colors.text
                 }}>{"$" + (payment?.amount / 100).toFixed(2)} donation encountered an error</Text>
 
                 <StyledButton onPress={navigation.goBack} style={{

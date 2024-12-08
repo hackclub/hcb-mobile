@@ -79,6 +79,14 @@ export default {
           "bluetoothAlwaysUsagePermission": "This app uses Bluetooth to connect to supported card readers."
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 26
+          }
+        }
+      ],
     ],
   },
 };
