@@ -102,6 +102,12 @@ export default function OrganizationPage({
         image: "gearshape",
       });
 
+      menuActions.push({
+        id: "donation",
+        title: "Collect Donations",
+        image: "dollarsign.circle",
+      });
+
       navigation.setOptions({
         headerRight: () => (
           <MenuView
@@ -114,6 +120,10 @@ export default function OrganizationPage({
                 });
               } else if (event == "settings") {
                 navigation.navigate("OrganizationSettings", {
+                  orgId: organization.id,
+                });
+              } else if (event == "donation") {
+                navigation.navigate("OrganizationDonation", {
                   orgId: organization.id,
                 });
               }
