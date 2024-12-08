@@ -189,7 +189,7 @@ function Transaction({
               ? palette.black
               : transaction.amount_cents > 0
               ? "#33d6a6"
-              : palette.muted,
+              : "#d63333",
         }}
       >
         {renderMoney(transaction.amount_cents)}
