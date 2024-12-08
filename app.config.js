@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.13",
+      buildNumber: "1.0.0.11",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -29,6 +29,10 @@ export default {
         "applinks:hcb.hackclub.com",
         "applinks:bank.hackclub.com",
       ],
+      entitlements: {
+        "com.apple.developer.proximity-reader.payment.acceptance": true,
+        // I'm not entirely sure what to do here
+      }
     },
     android: {
       icon: "./assets/app-icon.png",
@@ -57,10 +61,7 @@ export default {
       [
         "expo-font",
         {
-          fonts: [
-            "./assets/fonts/JetBrainsMono-Regular.ttf",
-            "./assets/fonts/JetBrainsMono-Bold.ttf",
-          ],
+          fonts: ["./assets/fonts/JetBrainsMono-Regular.ttf"],
         },
       ],
       "expo-secure-store",

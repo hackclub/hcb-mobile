@@ -360,11 +360,11 @@ function PageContent({ orgId, orgName, navigation }: any) {
                     fontWeight: "600",
                     marginBottom: 10,
                     marginTop: 10,
-                    color: theme.colors.text
+                    color: colors.text
                 }}>Collect Donations</Text>
                 <Text style={{
                     fontSize: 16,
-                    color: theme.colors.text,
+                    color: colors.text,
                     marginBottom: 20
                 }}>Receive donations using Tap to Pay</Text>
 
