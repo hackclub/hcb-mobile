@@ -1,11 +1,8 @@
 import { useTheme } from "@react-navigation/native";
-import capitalize from "lodash/capitalize";
-import { Dimensions, Text, View, ViewProps, StyleSheet, type AppStateStatus, AppState} from "react-native";
+import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
-// import Animated, {
-//   SharedTransition,
-//   withSpring,
-// } from "react-native-reanimated";
+import { Dimensions, Text, View, ViewProps, type AppStateStatus, AppState} from "react-native";
+import { SvgXml } from 'react-native-svg';
 
 import Card from "../lib/types/Card";
 import { CardDetails } from "../lib/useStripeCardDetails";
@@ -13,11 +10,9 @@ import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
+import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
 
-import * as Geopattern from "geopattern";
-import { SvgXml } from 'react-native-svg';
-import CardFrozen from "./cards/CardFrozen";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -141,36 +136,6 @@ export default function PaymentCard({
             {card.status == "active" ? "Active" : card.status == "frozen" ? "Frozen" : card.status == "inactive" ? "Inactive" : "Cancelled"}
           </Text>
         </View>
-
-        {/* <View style={{ marginLeft: "auto" }}>
-          <Text style={{ color: 'white', fontSize: 10 }}>Exp</Text>
-          <Text
-            style={{
-              color: 'white',
-              fontFamily: "JetBrains Mono",
-              fontSize: 14,
-            }}
-          >
-            {card.exp_month?.toLocaleString("en-US", {
-              minimumIntegerDigits: 2,
-            })}
-            /{card.exp_year?.toString().slice(-2)}
-          </Text>
-        </View>
-        <View>
-          <Text style={{ color: 'white', fontSize: 10 }}>CVC</Text>
-          <Text
-            style={{
-              color: 'white',
-              fontFamily: "JetBrains Mono",
-              fontSize: 14,
-              // There is no value called "no-contextual" in the fontVariant property
-              // fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
-            }}
-          >
-            {details?.cvc || "●●●"}
-          </Text>
-        </View> */}
       </View>
     </View>
   );
