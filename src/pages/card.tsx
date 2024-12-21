@@ -152,37 +152,7 @@ export default function CardPage({
       )}
 
       {!detailsLoading || details !== undefined ? (
-        <View
-          style={{
-            marginBottom: 20,
-            backgroundColor: themeColors.card,
-            padding: 15,
-            borderRadius: 15,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignContent: "center",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            {card.user ? (
-              <>
-                <UserAvatar
-                  user={card.user}
-                  size={36}
-                  style={{ marginRight: 5 }}
-                />
-                <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                  {cardName}
-                </Text>
-              </>
-            ) : (
-              <ActivityIndicator />
-            )}
-          </View>
+
 
       <View style={{ marginBottom: 20, backgroundColor: themeColors.card, padding: 15, borderRadius: 15 }}>
         {card.user ? (
@@ -216,7 +186,6 @@ export default function CardPage({
         </View>
       
       </View>
-        </View>
       ) :  <ActivityIndicator />}
 
       {transactionsLoading || transactions === undefined ? (

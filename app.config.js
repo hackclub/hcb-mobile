@@ -105,12 +105,19 @@ export default {
           },
           {
             "name": "Hacknight",
-            "ios": "./assets/icons/hack-night.png"
-
+            "ios": "./assets/icons/hack-night.png",
+            "android": {
+              "foregroundImage": "./assets/icons/hack-night.png",
+              "backgroundColor": "#FFD700",
+            }
           },
           {
             "name": "Testflight",
-            "ios": "./assets/icons/testflight.png"
+            "ios": "./assets/icons/testflight.png",
+            "android": {
+              "foregroundImage": "./assets/icons/testflight.png",
+              "backgroundColor": "#FFD700",
+            }
           },
 
         ]

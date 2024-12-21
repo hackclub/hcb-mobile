@@ -48,8 +48,8 @@ const IconComponent = ({
     artskillz: require('../../assets/icons/art-skillz.png'),
     cashmoney: require('../../assets/icons/cash-money.png'),
     dev: require('../../assets/icons/dev.png'),
-    earlyadopter: require('../../assets/icons/testflight.png'),
-    openlate: require('../../assets/icons/hack-night.png'),
+    earlyadopter: Constants.platform?.ios ? require('../../assets/icons/testflight.png') : null,
+    openlate: Constants.platform?.ios ? require('../../assets/icons/hack-night.png') : null,
   };
 
   return (
