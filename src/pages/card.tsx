@@ -2,6 +2,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   View,
@@ -11,11 +12,11 @@ import {
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
-import { useEffect, useState } from "react";
 
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
+import UserAvatar from "../components/UserAvatar";
 import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
@@ -23,8 +24,6 @@ import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
-import UserAvatar from "../components/UserAvatar";
-import { ca } from "date-fns/locale";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -50,7 +49,8 @@ export default function CardPage({
   useEffect(() => {
     if (card?.name) {
       setCardName(card.name);
-    } else if (card?.user) {
+    } 
+    else if (card?.user) {
       setCardName(
         `${card.user.name.split(" ")[0]} ${card.user.name.split(" ")[1].charAt(0)}'s Card`,
       );
@@ -141,7 +141,6 @@ export default function CardPage({
               style={{
                 flexBasis: 0,
                 flexGrow: 1,
-                // marginHorizontal: 10,
               }}
               onPress={() => toggleDetailsRevealed()}
               loading={detailsLoading}
@@ -161,6 +160,8 @@ export default function CardPage({
             borderRadius: 15,
           }}
         >
+          
+        {card.user ? (
           <View
             style={{
               flexDirection: "row",
@@ -169,7 +170,6 @@ export default function CardPage({
               marginBottom: 20,
             }}
           >
-            {card.user ? (
               <>
                 <UserAvatar
                   user={card.user}
@@ -180,10 +180,8 @@ export default function CardPage({
                   {cardName}
                 </Text>
               </>
-            ) : (
-              <ActivityIndicator />
-            )}
           </View>
+        ) : null}
 
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
