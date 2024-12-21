@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@config-plugins/react-native-dynamic-app-icon": "^2.0.0",
+    "@expo/react-native-action-sheet": "^4.1.0",
     "@expo/vector-icons": "^14.0.0",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-menu/menu": "^1.1.5",
