@@ -2,6 +2,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   View,
@@ -44,6 +45,22 @@ export default function CardPage({
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
+  const [cardName, setCardName] = useState(_card.name);
+  useEffect(() => {
+    if (card?.name) {
+      setCardName(card.name);
+    } else if (card?.user) {
+      setCardName(
+        `${card.user.name.split(" ")[0]} ${card.user.name.split(" ")[1].charAt(0)}'s Card`,
+      );
+    }
+  }, [card]);
+  useEffect(() => {
+    navigation.setOptions({
+      title: cardName,
+    });
+  }, [cardName]);
+
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];
   }>(`cards/${_card.id}/transactions`);
@@ -87,8 +104,12 @@ export default function CardPage({
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
     >
-      <View style={{alignItems: 'center'}}>
-        <PaymentCard details={details} card={card} style={{ marginBottom: 20 }} />
+      <View style={{ alignItems: "center" }}>
+        <PaymentCard
+          details={details}
+          card={card}
+          style={{ marginBottom: 20 }}
+        />
       </View>
 
       {card.status != "canceled" && (
@@ -131,6 +152,37 @@ export default function CardPage({
       )}
 
       {!detailsLoading || details !== undefined ? (
+        <View
+          style={{
+            marginBottom: 20,
+            backgroundColor: themeColors.card,
+            padding: 15,
+            borderRadius: 15,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            {card.user ? (
+              <>
+                <UserAvatar
+                  user={card.user}
+                  size={36}
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={{ color: themeColors.text, fontSize: 18 }}>
+                  {cardName}
+                </Text>
+              </>
+            ) : (
+              <ActivityIndicator />
+            )}
+          </View>
 
       <View style={{ marginBottom: 20, backgroundColor: themeColors.card, padding: 15, borderRadius: 15 }}>
         {card.user ? (
@@ -164,6 +216,7 @@ export default function CardPage({
         </View>
       
       </View>
+        </View>
       ) :  <ActivityIndicator />}
 
       {transactionsLoading || transactions === undefined ? (
@@ -199,7 +252,7 @@ export default function CardPage({
             >
               Transactions
             </Text>
-            {card.total_spent_cents && (
+            {card.total_spent_cents != null && (
               <Text
                 style={{
                   color: palette.muted,
