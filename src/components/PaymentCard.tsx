@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import capitalize from "lodash/capitalize";
-import { Dimensions, Text, View, ViewProps, StyleSheet } from "react-native";
+import { Dimensions, Text, View, ViewProps, StyleSheet, type AppStateStatus, AppState} from "react-native";
+import { useEffect, useRef, useState } from "react";
 // import Animated, {
 //   SharedTransition,
 //   withSpring,
@@ -36,6 +37,23 @@ export default function PaymentCard({
   const { colors: themeColors, dark } = useTheme();
 
   const pattern = Geopattern.generate(card.id, {scalePattern: 1.1, grayscale: card.status == 'frozen' || card.status == 'inactive' || card.status == 'canceled' ? true : false}).toString();
+  const appState = useRef(AppState.currentState);
+  const [isAppInBackground, setisAppInBackground] = useState(appState.current);
+
+  // Add listener for whenever app goes into the background on iOS
+  // to hide the card details (e.g. in app switcher)
+  // https://reactnative.dev/docs/appstate
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      (nextAppState: AppStateStatus) => {
+        appState.current = nextAppState;
+        setisAppInBackground(appState.current);
+      },
+    );
+
+    return () => subscription.remove();
+  });
 
   return (
     <View
@@ -44,18 +62,16 @@ export default function PaymentCard({
         padding: 30,
         width: width * 0.86,
         height: width * 0.86 / 1.588,
-        borderRadius: 16,
+        borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
         alignItems: "stretch",
         position: "relative",
-        borderWidth: 1,
+        borderWidth: 0,
         borderColor: dark ? palette.slate : palette.muted,
         ...(props.style as object),
         overflow: "hidden",
       }}
-      // sharedTransitionTag={card.id}
-      // sharedTransitionStyle={transition}
     >
 
       {card.type == "virtual" && (
@@ -80,51 +96,46 @@ export default function PaymentCard({
       {card.status == "frozen" && <View style={{top: 25, left: 25, position: "absolute"}}><CardFrozen /></View>}
 
       {card.type == "physical" && <CardChip />}
-
       <Text
         style={{
           color:'white',
-          fontSize: 23,
+          fontSize: 18,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
         }}
       >
-        {details
+        {details && isAppInBackground === "active"
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+      <View style={{ flexDirection: "row", alignItems: 'center', gap: 10 }}>
         <View>
-          {card.user && (
-          <Text
-              style={{
-                color: 'white',
-                fontSize: 18,
-              }}
-            >
-            {card.user.name}
-          </Text>
-          )}
-          {!card.user && (
           <Text
             style={{
               color: 'white',
+              fontFamily: "JetBrains Mono Bold", 
               fontSize: 18,
+              width: 180,
+              textTransform: 'uppercase',
             }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            {card.organization.name}
-          </Text>)}
+            {card.user ? card.user.name : card.organization.name}
+          </Text>
         </View>
-        <View style={{ marginLeft: "auto" }}>
+        <View style={{marginLeft: 'auto'}}>
           <Text
             style={{
               color: 'white',
               fontSize: 14,
               fontFamily: "JetBrains Mono",
+              textTransform: 'uppercase',
               backgroundColor: card.type == 'virtual' ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,
+              overflow: "hidden"
             }}
           >
             {card.status == "active" ? "Active" : card.status == "frozen" ? "Frozen" : card.status == "inactive" ? "Inactive" : "Cancelled"}

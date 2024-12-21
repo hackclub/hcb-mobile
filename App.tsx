@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
+import { useFonts } from 'expo-font';
 
 import AuthContext from "./src/auth";
 import { getStateFromPath } from "./src/getStateFromPath";
@@ -48,10 +49,14 @@ const linking: LinkingOptions<TabParamList> = {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
+    'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
+  });
+
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const hcb = useClient(token);
-
   const scheme = useColorScheme();
 
   const fetcher = useCallback(
@@ -84,7 +89,7 @@ export default function App() {
     if (typeof token == "string") SecureStorage.setItemAsync("token", token);
   }, [token]);
 
-  if (isLoading) {
+  if (!fontsLoaded || isLoading) {
     return null;
   } else if (!token) {
     return (
