@@ -1,10 +1,14 @@
+import { connectActionSheet, useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { View, Text, ActivityIndicator } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useContext, useState } from "react";
+import { View, Text, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR from "swr";
 
+import AuthContext from '../../auth';
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
@@ -34,7 +38,7 @@ function ZoomAndFadeIn() {
 }
 const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
-export default function ReceiptList({
+function ReceiptList({
   transaction,
 }: {
   transaction: Transaction;
@@ -45,69 +49,153 @@ export default function ReceiptList({
   );
 
   const { colors: themeColors } = useTheme();
+  const { token } = useContext(AuthContext);
+
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [selectedImage, setSelectedImage] = useState<{ uri: string; fileName?: string } | null>(null);
+
+  const uploadReceipt = async () => {
+      const body = new FormData();      
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      
+      body.append("file", {
+        uri: selectedImage?.uri,
+        name: selectedImage?.fileName || "",
+        type: "image/jpeg",
+      });
+
+    try {
+        await fetch(
+          process.env.EXPO_PUBLIC_API_BASE + `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body,
+          },
+        );
+      } catch (e) {
+        Alert.alert("Something went wrong.");
+      }
+
+      Alert.alert("Receipt uploaded!");
+    }
+
+  const handleActionSheet = () => {
+    const options = ["Camera", "Photo Library", "Cancel"];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      async (buttonIndex) => {
+        if (buttonIndex === 0) {
+          // Take a photo
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            quality: 1,
+          });
+          if (!result.canceled) {
+            setSelectedImage({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || "",
+            });
+            await uploadReceipt();
+          }
+        } 
+        
+        else if (buttonIndex === 1) {
+          // Pick from photo library
+          const result = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            quality: 1,
+          });
+          if (!result.canceled) {
+            setSelectedImage({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || "",
+            });
+            await uploadReceipt(); 
+          }
+        }
+      }
+    );
+  };
+
 
   return (
-    <View style={{ marginBottom: 30 }}>
-      <Text
-        style={{
-          color: palette.muted,
-          fontSize: 12,
-          textTransform: "uppercase",
-          marginBottom: 10,
-        }}
-      >
-        Receipts
-      </Text>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 20,
-          flexWrap: "wrap",
-        }}
-      >
-        {receipts?.map((receipt) => (
-          <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
-            <Image
-              source={receipt.preview_url}
+      <View style={{ marginBottom: 30 }}>
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 12,
+            textTransform: "uppercase",
+            marginBottom: 10,
+          }}
+        >
+          Receipts
+        </Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 20,
+            flexWrap: "wrap",
+          }}
+        >
+          {receipts?.map((receipt) => (
+            <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
+              <Image
+                source={receipt.preview_url}
+                style={{
+                  width: 150,
+                  height: 200,
+                  backgroundColor: themeColors.card,
+                  borderRadius: 8,
+                }}
+                contentFit="contain"
+              />
+            </Animated.View>
+          ))}
+          <TouchableOpacity onPress={handleActionSheet}>
+            <Animated.View
               style={{
                 width: 150,
                 height: 200,
-                backgroundColor: themeColors.card,
                 borderRadius: 8,
+                backgroundColor: themeColors.card,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-              contentFit="contain"
-            />
-          </Animated.View>
-        ))}
-        <Animated.View
-          style={{
-            width: 150,
-            height: 200,
-            borderRadius: 8,
-            backgroundColor: themeColors.card,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          layout={transition}
-        >
-          {isLoading && !transaction.missing_receipt ? (
-            <ActivityIndicator color={palette.muted} />
-          ) : (
-            <>
-              <Ionicons
-                name="add-circle-outline"
-                color={palette.muted}
-                size={36}
-              />
-              <Text style={{ color: palette.muted, marginTop: 10 }}>
-                Add Receipt
-              </Text>
-            </>
-          )}
-        </Animated.View>
+              layout={transition}
+            >
+              {isLoading && !transaction.missing_receipt ? (
+                <ActivityIndicator color={palette.muted} />
+              ) : (
+                <>
+                  <Ionicons
+                    name="add-circle-outline"
+                    color={palette.muted}
+                    size={36}
+                  />
+                  <Text style={{ color: palette.muted, marginTop: 10 }}>
+                    Add Receipt
+                  </Text>
+                </>
+              )}
+            </Animated.View>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
   );
 }
+
+const connectedApp = connectActionSheet(ReceiptList);
+export default connectedApp;  
