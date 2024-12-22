@@ -108,11 +108,11 @@ export default function OrganizationSettingsPage({
                 >
                   {user.name}
                 </Text>
-                {user.id == currentUser?.id && (
+{/*                 {user.id == currentUser?.id && (
                   <Text style={{ fontSize: 12, color: palette.success }}>
                     (that's you!)
                   </Text>
-                )}
+                )} */}
                 {user.role && <MemberRole role={user.role} />}
               </View>
               <Text style={{ color: palette.muted }}>
