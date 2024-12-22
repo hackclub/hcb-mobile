@@ -16,6 +16,7 @@ import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 const linking: LinkingOptions<TabParamList> = {
   prefixes: [
@@ -112,12 +113,14 @@ export default function App() {
         }}
       >
         <SafeAreaProvider>
-          <NavigationContainer
-            theme={scheme == "dark" ? theme : lightTheme}
-            linking={linking}
-          >
-            <Navigator />
-          </NavigationContainer>
+          <ActionSheetProvider>
+            <NavigationContainer
+              theme={scheme == "dark" ? theme : lightTheme}
+              linking={linking}
+            >
+              <Navigator />
+            </NavigationContainer>
+          </ActionSheetProvider>
         </SafeAreaProvider>
       </SWRConfig>
     </AuthContext.Provider>

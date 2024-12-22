@@ -52,6 +52,7 @@ export default {
         "expo-image-picker",
         {
           cameraPermission: "Allow HCB to take photos of receipts",
+          photosPermission: "Allow HCB to access your photos for receipts",
         },
       ],
       [
