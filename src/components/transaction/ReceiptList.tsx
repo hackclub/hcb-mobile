@@ -5,14 +5,16 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useContext, useState } from "react";
 import { View, Text, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 import AuthContext from '../../auth';
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
+import { set } from 'lodash';
 
 function ZoomAndFadeIn() {
   "worklet";
@@ -53,6 +55,8 @@ function ReceiptList({
 
   const { showActionSheetWithOptions } = useActionSheet();
   const [selectedImage, setSelectedImage] = useState<{ uri: string; fileName?: string } | null>(null);
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
+  const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
   const uploadReceipt = async () => {
       const body = new FormData();      
@@ -77,11 +81,12 @@ function ReceiptList({
             body,
           },
         );
+        mutate(`organizations/${params.orgId}/transactions/${transaction.id}/receipts`);
       } catch (e) {
+        console.error(e);
         Alert.alert("Something went wrong.");
       }
 
-      Alert.alert("Receipt uploaded!");
     }
 
   const handleActionSheet = () => {
@@ -149,20 +154,33 @@ function ReceiptList({
             flexWrap: "wrap",
           }}
         >
-          {receipts?.map((receipt) => (
-            <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
-              <Image
-                source={receipt.preview_url}
-                style={{
-                  width: 150,
-                  height: 200,
-                  backgroundColor: themeColors.card,
-                  borderRadius: 8,
-                }}
-                contentFit="contain"
-              />
-            </Animated.View>
+          {receipts?.map((receipt) => ( 
+            <TouchableOpacity key={receipt.id} onPress={() => {
+              setImageViewerIndex(receipts.indexOf(receipt));
+              setIsImageViewerVisible(true);
+            }}>
+              <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
+                <Image
+                  source={receipt.preview_url}
+                  style={{
+                    width: 150,
+                    height: 200,
+                    backgroundColor: themeColors.card,
+                    borderRadius: 8,
+                  }}
+                  contentFit="contain"
+                />
+              </Animated.View>
+           </TouchableOpacity>
           ))}
+
+          <ImageView 
+            images={receipts?.map((receipt) => ({ uri: receipt.url })) || []} 
+            imageIndex={ImageViewerIndex}
+            visible={isImageViewerVisible}
+            onRequestClose={() => setIsImageViewerVisible(false)}
+          />
+          
           <TouchableOpacity onPress={handleActionSheet}>
             <Animated.View
               style={{
