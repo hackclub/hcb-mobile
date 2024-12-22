@@ -152,40 +152,16 @@ export default function CardPage({
       )}
 
       {!detailsLoading || details !== undefined ? (
-        <View
-          style={{
-            marginBottom: 20,
-            backgroundColor: themeColors.card,
-            padding: 15,
-            borderRadius: 15,
-          }}
-        >
-          
-        {card.user ? (
-          <View
-            style={{
-              flexDirection: "row",
-              alignContent: "center",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-              <>
-                <UserAvatar
-                  user={card.user}
-                  size={36}
-                  style={{ marginRight: 5 }}
-                />
+        <View style={{ marginBottom: 20, backgroundColor: themeColors.card, padding: 15, borderRadius: 15 }}>
+          {card.user ? (
+             <View style={{ flexDirection: "row", alignContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+                <UserAvatar user={card.user} size={36} style={{marginRight: 5}}/>
                 <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                  {cardName}
+                  {card.user.name.split(' ')[0]} {card.user.name.concat(' ')[0]}'s Card
                 </Text>
-              </>
-          </View>
-        ) : null}
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+              </View>
+            ) : null}
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={{ color: themeColors.text }}>Card number</Text>
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details
@@ -193,27 +169,22 @@ export default function CardPage({
                 : redactedCardNumber(card.last4)}
             </Text>
           </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={{ color: themeColors.text }}>Expires</Text>
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details ? details.exp_month : "••"}/
               {detailsRevealed && details ? details.exp_year : "••"}
             </Text>
           </View>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
+           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
             <Text style={{ color: themeColors.text }}>CVC</Text>
             <Text style={{ color: palette.muted }}>
               {detailsRevealed ? details && details.cvc : "•••"}
             </Text>
           </View>
+
         </View>
-      ) : (
-        <ActivityIndicator />
-      )}
+      ) :  <ActivityIndicator />}
 
       {transactionsLoading || transactions === undefined ? (
         <ActivityIndicator />
