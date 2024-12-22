@@ -46,7 +46,7 @@ function Transaction({
         }
 
         const result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'],
         });
 
         if (result.canceled || result.assets.length == 0) return;
@@ -67,7 +67,7 @@ function Transaction({
         try {
           await fetch(
             process.env.EXPO_PUBLIC_API_BASE +
-              `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+              `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
             {
               method: "POST",
               headers: {
