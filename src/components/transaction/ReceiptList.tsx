@@ -60,7 +60,6 @@ function ReceiptList({
 
   const uploadReceipt = async () => {
       const body = new FormData();      
-
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       
@@ -71,7 +70,7 @@ function ReceiptList({
       });
 
     try {
-        await fetch(
+        const response = await fetch(
           process.env.EXPO_PUBLIC_API_BASE + `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
           {
             method: "POST",
@@ -101,8 +100,9 @@ function ReceiptList({
       async (buttonIndex) => {
         if (buttonIndex === 0) {
           // Take a photo
+          ImagePicker.requestCameraPermissionsAsync();
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             quality: 1,
           });
@@ -117,6 +117,7 @@ function ReceiptList({
         
         else if (buttonIndex === 1) {
           // Pick from photo library
+          ImagePicker.requestMediaLibraryPermissionsAsync();
           const result = await ImagePicker.launchImageLibraryAsync({
             allowsEditing: true,
             quality: 1,
