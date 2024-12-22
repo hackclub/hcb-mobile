@@ -13,7 +13,6 @@
     "ts:check": "tsc"
   },
   "dependencies": {
-    "@config-plugins/react-native-dynamic-app-icon": "^2.0.0",
     "@expo/react-native-action-sheet": "^4.1.0",
     "@expo/vector-icons": "^14.0.0",
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -50,7 +49,6 @@
     "react": "18.3.1",
     "react-dom": "^18.3.1",
     "react-native": "0.76.3",
-    "react-native-dynamic-app-icon": "^1.1.0",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-image-viewing": "^0.2.2",
     "react-native-pager-view": "6.5.1",
