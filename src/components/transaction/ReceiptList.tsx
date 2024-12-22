@@ -178,7 +178,12 @@ function ReceiptList({
           ))}
 
           <ImageView 
-            images={receipts?.map((receipt) => ({ uri: receipt.url })) || []} 
+            images={
+              receipts?.map((receipt) => {
+                const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(receipt.url || '');
+                return { uri: isImage ? receipt.url : receipt.preview_url };
+              }) || []
+            }
             imageIndex={ImageViewerIndex}
             visible={isImageViewerVisible}
             onRequestClose={() => setIsImageViewerVisible(false)}
