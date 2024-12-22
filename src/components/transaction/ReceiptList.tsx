@@ -1,6 +1,7 @@
 import { connectActionSheet, useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
+import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useContext, useState } from "react";
@@ -14,7 +15,6 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
-import { set } from 'lodash';
 
 function ZoomAndFadeIn() {
   "worklet";
@@ -170,6 +170,9 @@ function ReceiptList({
                   }}
                   contentFit="contain"
                 />
+                <Text style={{ color: palette.muted, fontSize: 12, marginTop: 5 }}>
+                  Added {formatDistanceToNowStrict(parseISO(receipt.created_at))} ago
+                </Text>
               </Animated.View>
            </TouchableOpacity>
           ))}
