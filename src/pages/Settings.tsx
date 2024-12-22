@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
+import { setAlternateAppIcon, getAppIconName, supportsAlternateIcons } from "expo-alternate-app-icons"
 import { revokeAsync } from "expo-auth-session";
 import Constants from 'expo-constants';
 import { PropsWithChildren, useContext, useState } from "react";
@@ -12,9 +13,6 @@ import {
   ScrollView,
   useColorScheme,
 } from "react-native";
-// import AppIcon from "react-native-dynamic-app-icon";
-import { setAlternateAppIcon, getAppIconName, supportsAlternateIcons } from "expo-alternate-app-icons"
-
 import useSWR, { useSWRConfig } from "swr";
 
 import AuthContext from "../auth";
@@ -48,8 +46,8 @@ const IconComponent = ({
     artskillz: require('../../assets/icons/art-skillz.png'),
     cashmoney: require('../../assets/icons/cash-money.png'),
     dev: require('../../assets/icons/dev.png'),
-    earlyadopter: Constants.platform?.ios ? require('../../assets/icons/testflight.png') : null,
-    openlate: Constants.platform?.ios ? require('../../assets/icons/hack-night.png') : null,
+    testflight: Constants.platform?.ios ? require('../../assets/icons/testflight.png') : null,
+    hacknight: Constants.platform?.ios ? require('../../assets/icons/hack-night.png') : null,
   };
 
   return (
@@ -189,7 +187,6 @@ export default function SettingsPage(
     // AppIcon.setAppIcon(iconName.toString());
     // setAppIcon(iconName);
     const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
-    console.log(formattedIconName);
     setAlternateAppIcon(formattedIconName.toString())
     setIcon(iconName);
   };
