@@ -10,7 +10,7 @@ import Button from "../../components/Button";
 import UserAvatar from "../../components/UserAvatar";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import User, { OrgUser } from "../../lib/types/User";
+import { OrgUser } from "../../lib/types/User";
 import { palette } from "../../theme";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationSettings">;
@@ -39,7 +39,6 @@ export default function OrganizationSettingsPage({
     `organizations/${orgId}?avatar_size=50`,
     { fallbackData: cache.get(`organizations/${orgId}`)?.data },
   );
-  const { data: currentUser } = useSWR<User>("user");
 
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -108,7 +107,7 @@ export default function OrganizationSettingsPage({
                 >
                   {user.name}
                 </Text>
-{/*                 {user.id == currentUser?.id && (
+                {/*                 {user.id == currentUser?.id && (
                   <Text style={{ fontSize: 12, color: palette.success }}>
                     (that's you!)
                   </Text>

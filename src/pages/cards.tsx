@@ -4,7 +4,13 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, useColorScheme, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  useColorScheme,
+  View,
+} from "react-native";
 import useSWR from "swr";
 
 import PaymentCard from "../components/PaymentCard";
@@ -65,7 +71,7 @@ export default function CardsPage({ navigation }: Props) {
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,
           paddingTop: 20,
-          alignItems: "center"
+          alignItems: "center",
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         // onRefresh={() => refresh()}
@@ -86,12 +92,11 @@ export default function CardsPage({ navigation }: Props) {
         )}
       />
     );
-  }
-  else {
+  } else {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={palette.primary} />
       </View>
-    )
+    );
   }
 }

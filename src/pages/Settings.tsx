@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { setAlternateAppIcon, getAppIconName, supportsAlternateIcons } from "expo-alternate-app-icons"
+import { setAlternateAppIcon } from "expo-alternate-app-icons";
 import { revokeAsync } from "expo-auth-session";
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 import { PropsWithChildren, useContext, useState } from "react";
 import {
   Text,
@@ -42,12 +42,16 @@ const IconComponent = ({
   const scheme = useColorScheme();
 
   const icons = {
-    default: require('../../assets/icons/default.png'),
-    artskillz: require('../../assets/icons/art-skillz.png'),
-    cashmoney: require('../../assets/icons/cash-money.png'),
-    dev: require('../../assets/icons/dev.png'),
-    testflight: Constants.platform?.ios ? require('../../assets/icons/testflight.png') : null,
-    hacknight: Constants.platform?.ios ? require('../../assets/icons/hack-night.png') : null,
+    default: require("../../assets/icons/default.png"),
+    artskillz: require("../../assets/icons/art-skillz.png"),
+    cashmoney: require("../../assets/icons/cash-money.png"),
+    dev: require("../../assets/icons/dev.png"),
+    testflight: Constants.platform?.ios
+      ? require("../../assets/icons/testflight.png")
+      : null,
+    hacknight: Constants.platform?.ios
+      ? require("../../assets/icons/hack-night.png")
+      : null,
   };
 
   return (
@@ -183,11 +187,11 @@ export default function SettingsPage(
   const { data: user } = useSWR<User>("user");
 
   const handleClick = (iconName: string) => {
-    
     // AppIcon.setAppIcon(iconName.toString());
     // setAppIcon(iconName);
-    const formattedIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
-    setAlternateAppIcon(formattedIconName.toString())
+    const formattedIconName =
+      iconName.charAt(0).toUpperCase() + iconName.slice(1);
+    setAlternateAppIcon(formattedIconName.toString());
     setIcon(iconName);
   };
 
@@ -222,30 +226,29 @@ export default function SettingsPage(
           </ListSection>
           <ListHeader title="Shiny- catchem all!" />
           <ListSection>
-          {Constants.platform?.ios && (
-            <>
-              <IconComponent
-                onPress={handleClick}
-                currentIcon={appIcon}
-                name="hacknight"
-                displayName="Open Late"
-              />
-              <IconComponent
-                onPress={handleClick}
-                currentIcon={appIcon}
-                name="testflight"
-                displayName="Early Adopter"
-                last
-              />
-            </>
-          )}
+            {Constants.platform?.ios && (
+              <>
+                <IconComponent
+                  onPress={handleClick}
+                  currentIcon={appIcon}
+                  name="hacknight"
+                  displayName="Open Late"
+                />
+                <IconComponent
+                  onPress={handleClick}
+                  currentIcon={appIcon}
+                  name="testflight"
+                  displayName="Early Adopter"
+                  last
+                />
+              </>
+            )}
             <IconComponent
               onPress={handleClick}
               currentIcon={appIcon}
               name="artskillz"
               displayName="Graphic Design Is My Passion"
             />
-
           </ListSection>
         </View>
         <View style={{ paddingTop: 12 }}>
