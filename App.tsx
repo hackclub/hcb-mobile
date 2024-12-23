@@ -1,7 +1,8 @@
 import "expo-dev-client";
 
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { useFonts } from 'expo-font';
+import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
@@ -16,7 +17,6 @@ import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 const linking: LinkingOptions<TabParamList> = {
   prefixes: [
@@ -51,8 +51,8 @@ const linking: LinkingOptions<TabParamList> = {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
-    'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
+    "JetBrainsMono-Regular": require("./assets/fonts/JetBrainsMono-Regular.ttf"),
+    "JetBrainsMono-Bold": require("./assets/fonts/JetBrainsMono-Bold.ttf"),
   });
 
   const [isLoading, setIsLoading] = useState(true);
