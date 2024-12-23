@@ -194,8 +194,7 @@ export default function CardPage({
           >
             <Text style={{ color: themeColors.text }}>Expires</Text>
             <Text style={{ color: palette.muted }}>
-              {detailsRevealed && details ? details.exp_month : "••"}/
-              {detailsRevealed && details ? details.exp_year : "••"}
+              {detailsRevealed && details ? `${String(details.exp_month).padStart(2, '0')}/${details.exp_year}` : "••/••"}
             </Text>
           </View>
           <View
