@@ -46,7 +46,7 @@ function Transaction({
         }
 
         const result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ['images'],
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
         });
 
         if (result.canceled || result.assets.length == 0) return;

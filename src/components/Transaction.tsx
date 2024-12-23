@@ -144,8 +144,8 @@ function Transaction({
             transaction.appearance == "hackathon_grant"
               ? palette.black
               : transaction.pending || transaction.declined
-              ? palette.muted
-              : themeColors.text,
+                ? palette.muted
+                : themeColors.text,
           overflow: "hidden",
           flex: 1,
         }}
@@ -154,8 +154,8 @@ function Transaction({
           (transaction.declined
             ? "Declined: "
             : transaction.pending
-            ? "Pending: "
-            : "")}
+              ? "Pending: "
+              : "")}
         {match(transaction)
           .with(
             { appearance: "hackathon_grant", has_custom_memo: false },
@@ -188,8 +188,8 @@ function Transaction({
             transaction.appearance == "hackathon_grant"
               ? palette.black
               : transaction.amount_cents > 0
-              ? "#33d6a6"
-              : "#d63333",
+                ? "#33d6a6"
+                : "#d63333",
         }}
       >
         {renderMoney(transaction.amount_cents)}
