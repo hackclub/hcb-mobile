@@ -74,6 +74,7 @@ export default function CardsPage({ navigation }: Props) {
           alignItems: "center",
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        overScrollMode="never"
         // onRefresh={() => refresh()}
         // refreshing={isValidating}
         renderItem={({ item }) => (
