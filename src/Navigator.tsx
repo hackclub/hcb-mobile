@@ -4,7 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme, Image, View, Text } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
@@ -66,9 +66,8 @@ export default function Navigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
-        tabBarStyle: { position: "absolute" },
+        tabBarStyle: { position: "absolute"},
         tabBarBackground: () => (
           <BlurView
             tint={scheme == "dark" ? "dark" : "light"}
@@ -88,37 +87,48 @@ export default function Navigator() {
               headerLargeTitleShadowVisible: false,
             }}
           >
-            <Stack.Screen
-              name="Organizations"
-              component={Home}
-              options={{
-                title: "Home",
-                headerLargeTitle: true,
-                headerRight: () => (
-                  <Ionicons.Button
-                    name="add-circle-outline"
-                    backgroundColor="transparent"
-                    size={24}
-                    underlayColor={themeColors.card}
-                    color={palette.primary}
-                    iconStyle={{ marginRight: 0 }}
-                    onPress={() =>
-                      WebBrowser.openBrowserAsync(
-                        "https://hackclub.com/hcb/apply",
-                        {
-                          presentationStyle:
-                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                          controlsColor: palette.primary,
-                          dismissButtonStyle: "cancel",
-                        },
-                      ).then(() => {
-                        mutate("user/organizations");
-                        mutate("user/invitations");
-                      })
-                    }
-                  />
-                ),
-              }}
+           <Stack.Screen
+            name="Organizations"
+            component={Home}
+            options={{
+              headerTitle() {
+                return (
+                  <Text style={{ color: scheme == "dark" ? "white" : palette.slate, fontSize: 34, marginTop: 10 }}>
+                    Home
+                  </Text>
+                );
+              },
+              headerBackground: () => (
+                <View style={{ flex: 1, backgroundColor: themeColors.background}} />
+              ),
+              headerLeft: () => (
+                // show dark logo if dark mode, light logo if light mode
+                scheme === "light" ? 
+                  <Image source={require("../assets/hcb-light.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 5 }} />
+                  : <Image source={require("../assets/hcb-dark.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 5 }} />
+              ),
+              headerRight: () => (
+                <Ionicons.Button
+                  name="add-circle-outline"
+                  backgroundColor="transparent"
+                  size={24}
+                  underlayColor={themeColors.card}
+                  color={palette.primary}
+                  iconStyle={{ marginRight: 0, marginTop: 10 }}
+                  onPress={() =>
+                    WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
+                      presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                      controlsColor: palette.primary,
+                      dismissButtonStyle: "cancel",
+                    }).then(() => {
+                      mutate("user/organizations");
+                      mutate("user/invitations");
+                    })
+                  }
+                />
+              ),
+            }}
+
             />
             <Stack.Screen
               name="Invitation"

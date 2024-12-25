@@ -21,3 +21,5 @@ build-*.ipa
 
 ios/
 android/
+
+package-lock.json
