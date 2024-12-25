@@ -20,6 +20,7 @@ import UserAvatar from "../components/UserAvatar";
 import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
@@ -67,6 +68,7 @@ export default function CardPage({
 
   const { mutate } = useSWRConfig();
 
+
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
     unknown,
@@ -112,7 +114,7 @@ export default function CardPage({
         />
       </View>
 
-      {card.status != "canceled" && (
+      {card.status != "canceled"  && (
         <View
           style={{
             flexDirection: "row",
@@ -121,6 +123,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
+          {!(card.status == "expired" || !(card as GrantCard).amount_cents) && (
           <Button
             style={{
               flexBasis: 0,
@@ -135,6 +138,7 @@ export default function CardPage({
           >
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
+          )}
           {card.type == "virtual" && (
             <Button
               style={{
@@ -208,6 +212,29 @@ export default function CardPage({
         </View>
       ) : (
         <ActivityIndicator />
+      )}
+
+      {(_card as GrantCard).amount_cents && (
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            padding: 15,
+            borderRadius: 15,
+            marginBottom: 20,
+          }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 18 }}>
+            Grant Card
+          </Text>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={{ color: themeColors.text }}>Amount</Text>
+            <Text style={{ color: palette.muted }}>
+              {card?.status == "expired" ? "$0" : renderMoney((_card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
+            </Text>
+          </View>
+        </View>
       )}
 
       {transactionsLoading || transactions === undefined ? (
