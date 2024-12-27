@@ -49,11 +49,7 @@ export default function PaymentCard({
   const pattern = Geopattern.generate(card.id, {
     scalePattern: 1.1,
     grayscale:
-      card.status == "frozen" ||
-      card.status == "inactive" ||
-      card.status == "canceled"
-        ? true
-        : false,
+      card.status == "active" ? false : true,
   }).toDataUri();
 
   const extractDimensions = (svg: string) => {
