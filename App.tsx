@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
+import asyncStorageProvider from "./src/cacheProvider";
 import { getStateFromPath } from "./src/getStateFromPath";
 import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
@@ -109,7 +110,7 @@ export default function App() {
 
       <SWRConfig
         value={{
-          fetcher,
+          provider: asyncStorageProvider, fetcher
         }}
       >
         <SafeAreaProvider>
