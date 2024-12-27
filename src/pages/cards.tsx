@@ -16,6 +16,7 @@ import useSWR from "swr";
 import PaymentCard from "../components/PaymentCard";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
@@ -23,14 +24,19 @@ type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
     useSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
+  const { data: grantCards, mutate: reloadGrantCards } = useSWR<GrantCard[]>(
+    "user/card_grants"
+  );
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
   useFocusEffect(() => {
     reloadCards();
+    reloadGrantCards();
   });
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(false);
+  const [allCards, setAllCards] = useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
 
   useEffect(() => {
     navigation.setOptions({
@@ -62,11 +68,45 @@ export default function CardsPage({ navigation }: Props) {
     });
   }, [navigation, frozenCardsShown, scheme]);
 
-  if (cards) {
+  useEffect(() => {
+    if (cards && grantCards) {
+      // Transform grantCards
+      const transformedGrantCards = grantCards.map((grantCard) => ({
+        ...grantCard,
+        grant_id: grantCard.id, // Move original id to grant_id
+        id: grantCard.card_id, // Replace id with card_id
+      }));
+  
+      // Filter out cards that are also grantCards
+      const filteredCards = cards.filter(
+        (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
+      );
+  
+      // Combine filtered cards and transformed grantCards
+      const combinedCards = [...filteredCards, ...transformedGrantCards];
+
+      // Sort cards by status
+      combinedCards.sort((a, b) => {
+        if (a.status == "active" && b.status != "active") {
+          return -1;
+        } else if (a.status != "active" && b.status == "active") {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+  
+      // Update state
+      setAllCards(combinedCards);
+    }
+  }, [cards, grantCards]);
+  
+
+  if (allCards) {
     return (
       <FlatList
         data={
-          frozenCardsShown ? cards : cards.filter((c) => c.status == "active")
+          frozenCardsShown ? allCards : allCards.filter((c) => c.status == "active")
         }
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,

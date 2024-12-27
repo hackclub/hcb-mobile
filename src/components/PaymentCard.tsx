@@ -19,6 +19,7 @@ import { redactedCardNumber, renderCardNumber } from "../util";
 import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
+import GrantCard from "../lib/types/GrantCard";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -42,22 +43,13 @@ export default function PaymentCard({
 
   const patternForMeasurements = Geopattern.generate(card.id, {
     scalePattern: 1.1,
-    grayscale:
-      card.status == "frozen" ||
-      card.status == "inactive" ||
-      card.status == "canceled"
-        ? true
-        : false,
+    grayscale: card.status != "active",
   }).toSvg();
 
   const pattern = Geopattern.generate(card.id, {
     scalePattern: 1.1,
     grayscale:
-      card.status == "frozen" ||
-      card.status == "inactive" ||
-      card.status == "canceled"
-        ? true
-        : false,
+      card.status == "active" ? false : true,
   }).toDataUri();
 
   const extractDimensions = (svg: string) => {
@@ -74,6 +66,11 @@ export default function PaymentCard({
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
+
+  if ((card as GrantCard).amount_cents) {
+    card.type = "virtual";
+  }
+  
 
   useEffect(() => {
     if (onCardLoad) {
@@ -182,13 +179,7 @@ export default function PaymentCard({
               overflow: "hidden",
             }}
           >
-            {card.status == "active"
-              ? "Active"
-              : card.status == "frozen"
-                ? "Frozen"
-                : card.status == "inactive"
-                  ? "Inactive"
-                  : "Cancelled"}
+            {card.status}
           </Text>
         </View>
       </View>
