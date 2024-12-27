@@ -43,6 +43,7 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
+
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
@@ -67,7 +68,6 @@ export default function CardPage({
   }>(`cards/${_card.id}/transactions`);
 
   const { mutate } = useSWRConfig();
-
 
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
@@ -109,7 +109,7 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={card}
+          card={(_card as GrantCard).amount_cents ? (_card as GrantCard) : card}
           style={{ marginBottom: 20 }}
         />
       </View>
@@ -139,7 +139,7 @@ export default function CardPage({
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
           )}
-          {card.type == "virtual" && (
+          {card.type == "virtual" && !(_card as GrantCard).amount_cents && (
             <Button
               style={{
                 flexBasis: 0,
@@ -190,7 +190,7 @@ export default function CardPage({
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details
                 ? renderCardNumber(details.number)
-                : redactedCardNumber(card.last4)}
+                : redactedCardNumber((_card as GrantCard).amount_cents ? _card.last4 : card.last4)}
             </Text>
           </View>
           <View
@@ -217,23 +217,13 @@ export default function CardPage({
       {(_card as GrantCard).amount_cents && (
         <View
           style={{
-            backgroundColor: themeColors.card,
-            padding: 15,
-            borderRadius: 15,
-            marginBottom: 20,
+            padding: 10,
+            marginBottom: 10,
           }}
         >
-          <Text style={{ color: themeColors.text, fontSize: 18 }}>
-            Grant Card
+          <Text style={{ color: themeColors.text, fontSize: 18, textAlign: "center" }}>
+            Amount: {_card?.status == "expired" || _card?.status == "canceled" ? "$0" : renderMoney((card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
           </Text>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Text style={{ color: themeColors.text }}>Amount</Text>
-            <Text style={{ color: palette.muted }}>
-              {card?.status == "expired" ? "$0" : renderMoney((_card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
-            </Text>
-          </View>
         </View>
       )}
 
