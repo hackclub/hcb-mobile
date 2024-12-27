@@ -139,7 +139,7 @@ export default function CardPage({
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
           )}
-          {card.type == "virtual" && !(_card as GrantCard).amount_cents && (
+          {card.type == "virtual" && _card.status != "canceled" && (
             <Button
               style={{
                 flexBasis: 0,
