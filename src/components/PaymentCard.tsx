@@ -9,7 +9,7 @@ import {
   AppState,
   useWindowDimensions,
 } from "react-native";
-import { SvgXml } from "react-native-svg";
+import { SvgUri } from "react-native-svg";
 
 import Card from "../lib/types/Card";
 import { CardDetails } from "../lib/useStripeCardDetails";
@@ -31,11 +31,16 @@ import CardHCB from "./cards/CardHCB";
 export default function PaymentCard({
   card,
   details,
+  onCardLoad,
   ...props
-}: ViewProps & { card: Card; details?: CardDetails }) {
+}: ViewProps & { 
+  card: Card; 
+  details?: CardDetails; 
+  onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
+}) {
   const { colors: themeColors, dark } = useTheme();
 
-  const pattern = Geopattern.generate(card.id, {
+  const patternForMeasurements = Geopattern.generate(card.id, {
     scalePattern: 1.1,
     grayscale:
       card.status == "frozen" ||
@@ -45,8 +50,17 @@ export default function PaymentCard({
         : false,
   }).toSvg();
 
+  const pattern = Geopattern.generate(card.id, {
+    scalePattern: 1.1,
+    grayscale:
+      card.status == "frozen" ||
+      card.status == "inactive" ||
+      card.status == "canceled"
+        ? true
+        : false,
+  }).toDataUri();
 
-  const extractDimensions = (svg) => {
+  const extractDimensions = (svg: string) => {
     const widthMatch = svg.match(/width="(\d+(\.\d+)?)"/);
     const heightMatch = svg.match(/height="(\d+(\.\d+)?)"/);
     return {
@@ -55,16 +69,18 @@ export default function PaymentCard({
     };
   };
 
-  const { svgWidth, svgHeight } = extractDimensions(pattern);
+  const { svgWidth, svgHeight } = extractDimensions(patternForMeasurements);
 
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
-  
 
-  // Add listener for whenever app goes into the background on iOS
-  // to hide the card details (e.g. in app switcher)
-  // https://reactnative.dev/docs/appstate
+  useEffect(() => {
+    if (onCardLoad) {
+      onCardLoad(card.id, { width: svgWidth, height: svgHeight });
+    }
+  }, []);
+
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -95,23 +111,19 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-    {card.type == "virtual" && (
-      <View
-        style={{
-          position: "absolute",
-          flexDirection: "row",
-          flexWrap: "wrap",
-          width: width * 0.86,
-          height: (width * 0.86) / 1.5, // Container dimensions
-        }}
-      >
-          <SvgXml
-            xml={pattern}
-            width={svgWidth}
-            height={svgHeight}
-          />
-      </View>
-    )}
+      {card.type == "virtual" && (
+        <View
+          style={{
+            position: "absolute",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            width: width * 0.86,
+            height: (width * 0.86) / 1.5,
+          }}
+        >
+          <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
+        </View>
+      )}
 
       {card.type == "physical" && (
         <View style={{ top: 5, right: 5, position: "absolute" }}>
