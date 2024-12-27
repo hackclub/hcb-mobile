@@ -20,6 +20,7 @@ import UserAvatar from "../components/UserAvatar";
 import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
@@ -42,6 +43,7 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
+
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
@@ -66,6 +68,7 @@ export default function CardPage({
   }>(`cards/${_card.id}/transactions`);
 
   const { mutate } = useSWRConfig();
+  const [cardLoaded, setCardLoaded] = useState(false);
 
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
@@ -87,7 +90,7 @@ export default function CardPage({
 
   const tabBarHeight = useBottomTabBarHeight();
 
-  if (!card) {
+  if (!card && !cardLoaded) {
     return <ActivityIndicator />;
   }
 
@@ -107,12 +110,13 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={card}
+          card={(_card as GrantCard).amount_cents ? (_card as GrantCard) : card}
+          onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
       </View>
 
-      {card.status != "canceled" && (
+      {card.status != "canceled"  && (
         <View
           style={{
             flexDirection: "row",
@@ -121,6 +125,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
+          {!(card.status == "expired" || !(card as GrantCard).amount_cents) && (
           <Button
             style={{
               flexBasis: 0,
@@ -135,7 +140,8 @@ export default function CardPage({
           >
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
-          {card.type == "virtual" && (
+          )}
+          {card.type == "virtual" && _card.status != "canceled" && (
             <Button
               style={{
                 flexBasis: 0,
@@ -186,7 +192,7 @@ export default function CardPage({
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details
                 ? renderCardNumber(details.number)
-                : redactedCardNumber(card.last4)}
+                : redactedCardNumber((_card as GrantCard).amount_cents ? _card.last4 : card.last4)}
             </Text>
           </View>
           <View
@@ -208,6 +214,19 @@ export default function CardPage({
         </View>
       ) : (
         <ActivityIndicator />
+      )}
+
+      {(_card as GrantCard).amount_cents && (
+        <View
+          style={{
+            padding: 10,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 18, textAlign: "center" }}>
+            Amount: {_card?.status == "expired" || _card?.status == "canceled" ? "$0" : renderMoney((card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
+          </Text>
+        </View>
       )}
 
       {transactionsLoading || transactions === undefined ? (

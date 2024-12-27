@@ -9,7 +9,7 @@ import {
   AppState,
   useWindowDimensions,
 } from "react-native";
-import { SvgXml } from "react-native-svg";
+import { SvgUri } from "react-native-svg";
 
 import Card from "../lib/types/Card";
 import { CardDetails } from "../lib/useStripeCardDetails";
@@ -19,6 +19,7 @@ import { redactedCardNumber, renderCardNumber } from "../util";
 import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
+import GrantCard from "../lib/types/GrantCard";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -31,22 +32,27 @@ import CardHCB from "./cards/CardHCB";
 export default function PaymentCard({
   card,
   details,
+  onCardLoad,
   ...props
-}: ViewProps & { card: Card; details?: CardDetails }) {
+}: ViewProps & { 
+  card: Card; 
+  details?: CardDetails; 
+  onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
+}) {
   const { colors: themeColors, dark } = useTheme();
+
+  const patternForMeasurements = Geopattern.generate(card.id, {
+    scalePattern: 1.1,
+    grayscale: card.status != "active",
+  }).toSvg();
 
   const pattern = Geopattern.generate(card.id, {
     scalePattern: 1.1,
     grayscale:
-      card.status == "frozen" ||
-      card.status == "inactive" ||
-      card.status == "canceled"
-        ? true
-        : false,
-  }).toSvg();
+      card.status == "active" ? false : true,
+  }).toDataUri();
 
-
-  const extractDimensions = (svg) => {
+  const extractDimensions = (svg: string) => {
     const widthMatch = svg.match(/width="(\d+(\.\d+)?)"/);
     const heightMatch = svg.match(/height="(\d+(\.\d+)?)"/);
     return {
@@ -55,16 +61,23 @@ export default function PaymentCard({
     };
   };
 
-  const { svgWidth, svgHeight } = extractDimensions(pattern);
+  const { svgWidth, svgHeight } = extractDimensions(patternForMeasurements);
 
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
+
+  if ((card as GrantCard).amount_cents) {
+    card.type = "virtual";
+  }
   
 
-  // Add listener for whenever app goes into the background on iOS
-  // to hide the card details (e.g. in app switcher)
-  // https://reactnative.dev/docs/appstate
+  useEffect(() => {
+    if (onCardLoad) {
+      onCardLoad(card.id, { width: svgWidth, height: svgHeight });
+    }
+  }, []);
+
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -95,23 +108,19 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-    {card.type == "virtual" && (
-      <View
-        style={{
-          position: "absolute",
-          flexDirection: "row",
-          flexWrap: "wrap",
-          width: width * 0.86,
-          height: (width * 0.86) / 1.5, // Container dimensions
-        }}
-      >
-          <SvgXml
-            xml={pattern}
-            width={svgWidth}
-            height={svgHeight}
-          />
-      </View>
-    )}
+      {card.type == "virtual" && (
+        <View
+          style={{
+            position: "absolute",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            width: width * 0.86,
+            height: (width * 0.86) / 1.5,
+          }}
+        >
+          <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
+        </View>
+      )}
 
       {card.type == "physical" && (
         <View style={{ top: 5, right: 5, position: "absolute" }}>
@@ -170,13 +179,7 @@ export default function PaymentCard({
               overflow: "hidden",
             }}
           >
-            {card.status == "active"
-              ? "Active"
-              : card.status == "frozen"
-                ? "Frozen"
-                : card.status == "inactive"
-                  ? "Inactive"
-                  : "Cancelled"}
+            {card.status}
           </Text>
         </View>
       </View>
