@@ -66,6 +66,7 @@ export default function CardPage({
   }>(`cards/${_card.id}/transactions`);
 
   const { mutate } = useSWRConfig();
+  const [cardLoaded, setCardLoaded] = useState(false);
 
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
@@ -87,7 +88,7 @@ export default function CardPage({
 
   const tabBarHeight = useBottomTabBarHeight();
 
-  if (!card) {
+  if (!card && !cardLoaded) {
     return <ActivityIndicator />;
   }
 
@@ -108,6 +109,7 @@ export default function CardPage({
         <PaymentCard
           details={details}
           card={card}
+          onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
       </View>
