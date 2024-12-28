@@ -125,7 +125,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
-          {!(card.status == "expired" || !(card as GrantCard).amount_cents) && (
+          {(!card.status == "expired" || !(card as GrantCard).amount_cents) && (
           <Button
             style={{
               flexBasis: 0,
