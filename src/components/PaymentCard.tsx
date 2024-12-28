@@ -10,7 +10,7 @@ import {
   AppState,
   useWindowDimensions,
 } from "react-native";
-import { SvgUri } from "react-native-svg";
+import { SvgUri, SvgXml } from "react-native-svg";
 
 import Card from "../lib/types/Card";
 import { CardDetails } from "../lib/useStripeCardDetails";
