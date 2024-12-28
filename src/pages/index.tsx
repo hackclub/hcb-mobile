@@ -236,6 +236,7 @@ export default function App({ navigation }: Props) {
     mutate((k) => typeof k === "string" && k.startsWith("organizations"));
   });
 
+
   if (error) {
     return (
       <View>
