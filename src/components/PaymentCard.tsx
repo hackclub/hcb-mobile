@@ -1,4 +1,5 @@
 import { useTheme } from "@react-navigation/native";
+import Constants from "expo-constants";
 import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -118,7 +119,12 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
+          { Constants.platform?.android ? (
+            <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
+          ) : (
+            <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
+          )
+          }
         </View>
       )}
 
