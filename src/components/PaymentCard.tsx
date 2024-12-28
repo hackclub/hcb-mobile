@@ -12,6 +12,7 @@ import {
 import { SvgUri } from "react-native-svg";
 
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
@@ -19,7 +20,6 @@ import { redactedCardNumber, renderCardNumber } from "../util";
 import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
-import GrantCard from "../lib/types/GrantCard";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";

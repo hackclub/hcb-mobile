@@ -93,7 +93,7 @@ export default function Navigator() {
             options={{
               headerTitle() {
                 return (
-                  <Text style={{ color: scheme == "dark" ? "white" : palette.slate, fontSize: 34, marginTop: 10 }}>
+                  <Text style={{ color: scheme == "dark" ? "white" : palette.slate, fontSize: 34, marginTop: 10, fontWeight: "semi-bold" }}>
                     Home
                   </Text>
                 );
@@ -104,8 +104,8 @@ export default function Navigator() {
               headerLeft: () => (
                 // show dark logo if dark mode, light logo if light mode
                 scheme === "light" ? 
-                  <Image source={require("../assets/hcb-light.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 5 }} />
-                  : <Image source={require("../assets/hcb-dark.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 5 }} />
+                  <Image source={require("../assets/hcb-light.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 10 }} />
+                  : <Image source={require("../assets/hcb-dark.png")} style={{ width: 50, height: 50, marginTop: 10, marginLeft: 5, marginRight: 10 }} />
               ),
               headerRight: () => (
                 <Ionicons.Button
