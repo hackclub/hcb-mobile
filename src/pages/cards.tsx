@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
@@ -51,7 +52,8 @@ export default function CardsPage({ navigation }: Props) {
           ]}
           onPressAction={({ nativeEvent: { event } }) => {
             if (event == "showFrozenCards") {
-              setFrozenCardsShown((x) => !x);
+              setFrozenCardsShown(!frozenCardsShown);
+              AsyncStorage.setItem("frozenCardsShown", (!frozenCardsShown).toString());
             }
           }}
           themeVariant={scheme || undefined}
@@ -69,37 +71,47 @@ export default function CardsPage({ navigation }: Props) {
   }, [navigation, frozenCardsShown, scheme]);
 
   useEffect(() => {
-    if (cards && grantCards) {
-      // Transform grantCards
-      const transformedGrantCards = grantCards.map((grantCard) => ({
-        ...grantCard,
-        grant_id: grantCard.id, // Move original id to grant_id
-        id: grantCard.card_id, // Replace id with card_id
-      }));
-  
-      // Filter out cards that are also grantCards
-      const filteredCards = cards.filter(
-        (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
-      );
-  
-      // Combine filtered cards and transformed grantCards
-      const combinedCards = [...filteredCards, ...transformedGrantCards];
-
-      // Sort cards by status
-      combinedCards.sort((a, b) => {
-        if (a.status == "active" && b.status != "active") {
-          return -1;
-        } else if (a.status != "active" && b.status == "active") {
-          return 1;
-        } else {
-          return 0;
+      const fetchFrozenCardsShown = async () => {
+        const isFrozenCardsShown = await AsyncStorage.getItem("frozenCardsShown");
+        if (isFrozenCardsShown) {
+          setFrozenCardsShown(isFrozenCardsShown === "true");
+          await AsyncStorage.setItem("frozenCardsShown", (isFrozenCardsShown === "true").toString());
         }
-      });
+      };
   
-      // Update state
-      setAllCards(combinedCards);
-    }
-  }, [cards, grantCards]);
+      fetchFrozenCardsShown();
+  
+      if (cards && grantCards) {
+        // Transform grantCards
+        const transformedGrantCards = grantCards.map((grantCard) => ({
+          ...grantCard,
+          grant_id: grantCard.id, // Move original id to grant_id
+          id: grantCard.card_id, // Replace id with card_id
+        }));
+    
+        // Filter out cards that are also grantCards
+        const filteredCards = cards.filter(
+          (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
+        );
+    
+        // Combine filtered cards and transformed grantCards
+        const combinedCards = [...filteredCards, ...transformedGrantCards];
+  
+        // Sort cards by status
+        combinedCards.sort((a, b) => {
+          if (a.status == "active" && b.status != "active") {
+            return -1;
+          } else if (a.status != "active" && b.status == "active") {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+    
+        // Update state
+        setAllCards(combinedCards);
+      }
+    }, [cards, grantCards]);
   
 
   if (allCards) {
