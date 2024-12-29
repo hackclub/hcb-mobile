@@ -36,6 +36,7 @@ export default function CardPage({
 }: Props) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+  const isGrantCard = (_card as GrantCard).amount_cents != null;
 
   const {
     details,
@@ -110,7 +111,7 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={(_card as GrantCard).amount_cents ? (_card as GrantCard) : card}
+          card={isGrantCard ? (_card as GrantCard) : card}
           onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
@@ -125,7 +126,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
-          {(!card.status == "expired" || !(card as GrantCard).amount_cents) && (
+          {(!card.status == "expired" || !isGrantCard) && (
           <Button
             style={{
               flexBasis: 0,
@@ -192,7 +193,7 @@ export default function CardPage({
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details
                 ? renderCardNumber(details.number)
-                : redactedCardNumber((_card as GrantCard).amount_cents ? _card.last4 : card.last4)}
+                : redactedCardNumber(isGrantCard ? _card.last4 : card?.last4)}
             </Text>
           </View>
           <View
@@ -216,7 +217,7 @@ export default function CardPage({
         <ActivityIndicator />
       )}
 
-      {(_card as GrantCard).amount_cents && (
+      {isGrantCard && (
         <View
           style={{
             padding: 10,
