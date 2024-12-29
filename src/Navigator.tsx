@@ -23,6 +23,7 @@ import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
 import OrganizationSettingsPage from "./pages/organization/Settings";
+import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
@@ -161,6 +162,14 @@ export default function Navigator() {
               options={{
                 presentation: "modal",
                 title: "Edit Transaction Description",
+              }}
+            />
+            <Stack.Screen
+              name="Transfer"
+              component={TransferPage}
+              options={{
+                presentation: "modal",
+                title: "Send Transfer",
               }}
             />
           </Stack.Navigator>
