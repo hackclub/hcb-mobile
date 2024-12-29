@@ -177,7 +177,7 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={({ route }) => ({
+              options={() => ({
                 title: "Card",
               })}
             />

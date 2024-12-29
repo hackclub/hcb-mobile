@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Constants from "expo-constants";
+// @ts-expect-error Geopattern does not have TypeScript definitions
 import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -35,10 +36,13 @@ export default function PaymentCard({
   details,
   onCardLoad,
   ...props
-}: ViewProps & { 
-  card: Card; 
-  details?: CardDetails; 
-  onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
+}: ViewProps & {
+  card: Card;
+  details?: CardDetails;
+  onCardLoad?: (
+    cardId: string,
+    dimensions: { width: number; height: number },
+  ) => void;
 }) {
   const { colors: themeColors, dark } = useTheme();
 
@@ -49,8 +53,7 @@ export default function PaymentCard({
 
   const pattern = Geopattern.generate(card.id, {
     scalePattern: 1.1,
-    grayscale:
-      card.status == "active" ? false : true,
+    grayscale: card.status == "active" ? false : true,
   }).toDataUri();
 
   const extractDimensions = (svg: string) => {
@@ -71,7 +74,6 @@ export default function PaymentCard({
   if ((card as GrantCard).amount_cents) {
     card.type = "virtual";
   }
-  
 
   useEffect(() => {
     if (onCardLoad) {
@@ -119,12 +121,15 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          { Constants.platform?.android ? (
-            <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
+          {Constants.platform?.android ? (
+            <SvgXml
+              xml={patternForMeasurements}
+              width={svgWidth}
+              height={svgHeight}
+            />
           ) : (
             <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
-          )
-          }
+          )}
         </View>
       )}
 
@@ -176,9 +181,9 @@ export default function PaymentCard({
               fontFamily: "JetBrainsMono-Regular",
               textTransform: "uppercase",
               backgroundColor:
-              card.type == "virtual"
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(255, 255, 255, 0.08)",
+                card.type == "virtual"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,

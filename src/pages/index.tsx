@@ -219,9 +219,14 @@ export default function App({ navigation }: Props) {
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
 
-  const { fetcher, mutate } = useSWRConfig();
+  const { fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+
+  useFocusEffect(() => {
+    reloadOrganizations();
+    reloadInvitations();
+  });
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

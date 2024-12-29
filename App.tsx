@@ -110,7 +110,8 @@ export default function App() {
 
       <SWRConfig
         value={{
-          provider: asyncStorageProvider, fetcher
+          provider: asyncStorageProvider,
+          fetcher,
         }}
       >
         <SafeAreaProvider>

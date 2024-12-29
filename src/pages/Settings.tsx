@@ -41,7 +41,7 @@ const IconComponent = ({
   const { colors } = useTheme();
   const scheme = useColorScheme();
 
-  const icons = {
+  const icons: { [key: string]: any } = {
     default: require("../../assets/icons/default.png"),
     artskillz: require("../../assets/icons/art-skillz.png"),
     cashmoney: require("../../assets/icons/cash-money.png"),

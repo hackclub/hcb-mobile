@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
+import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, StatusBar, Button } from "react-native";
 import useSWR from "swr";
@@ -9,7 +10,6 @@ import useSWR from "swr";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
-import Constants from "expo-constants";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 

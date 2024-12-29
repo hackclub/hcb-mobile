@@ -96,7 +96,7 @@ export default function CardPage({
   }
 
   const toggleCardFrozen = () => {
-    if (card.status == "active") {
+    if (card?.status == "active") {
       update("frozen");
     } else {
       update("active");
@@ -111,13 +111,13 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={isGrantCard ? (_card as GrantCard) : card}
+          card={isGrantCard ? (_card as GrantCard) : (card as Card)}
           onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
       </View>
 
-      {card.status != "canceled"  && (
+      {card?.status != "canceled" && (
         <View
           style={{
             flexDirection: "row",
@@ -126,23 +126,24 @@ export default function CardPage({
             gap: 20,
           }}
         >
+          {/* @ts-expect-error It should check if expired */}
           {(!card.status == "expired" || !isGrantCard) && (
-          <Button
-            style={{
-              flexBasis: 0,
-              flexGrow: 1,
-              // marginR: 10,
-              backgroundColor: "#5bc0de",
-              borderTopWidth: 0,
-            }}
-            color="#186177"
-            onPress={() => toggleCardFrozen()}
-            loading={isMutating}
-          >
-            {card.status == "active" ? "Freeze" : "Unfreeze"} card
-          </Button>
+            <Button
+              style={{
+                flexBasis: 0,
+                flexGrow: 1,
+                // marginR: 10,
+                backgroundColor: "#5bc0de",
+                borderTopWidth: 0,
+              }}
+              color="#186177"
+              onPress={() => toggleCardFrozen()}
+              loading={isMutating}
+            >
+              {card?.status == "active" ? "Freeze" : "Unfreeze"} card
+            </Button>
           )}
-          {card.type == "virtual" && _card.status != "canceled" && (
+          {card?.type == "virtual" && _card.status != "canceled" && (
             <Button
               style={{
                 flexBasis: 0,
@@ -166,7 +167,7 @@ export default function CardPage({
             borderRadius: 15,
           }}
         >
-          {card.user ? (
+          {card?.user ? (
             <View
               style={{
                 flexDirection: "row",
@@ -200,7 +201,9 @@ export default function CardPage({
           >
             <Text style={{ color: themeColors.text }}>Expires</Text>
             <Text style={{ color: palette.muted }}>
-              {detailsRevealed && details ? `${String(details.exp_month).padStart(2, '0')}/${details.exp_year}` : "••/••"}
+              {detailsRevealed && details
+                ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
+                : "••/••"}
             </Text>
           </View>
           <View
@@ -223,8 +226,21 @@ export default function CardPage({
             marginBottom: 10,
           }}
         >
-          <Text style={{ color: themeColors.text, fontSize: 18, textAlign: "center" }}>
-            Amount: {_card?.status == "expired" || _card?.status == "canceled" ? "$0" : renderMoney((card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 18,
+              textAlign: "center",
+            }}
+          >
+            Amount:{" "}
+            {/* @ts-expect-error It should check if expired */}
+            {_card?.status == "expired" || _card?.status == "canceled"
+              ? "$0"
+              : renderMoney(
+                  (card as GrantCard).amount_cents -
+                    (card?.total_spent_cents ?? 0),
+                )}
           </Text>
         </View>
       )}
@@ -262,7 +278,7 @@ export default function CardPage({
             >
               Transactions
             </Text>
-            {card.total_spent_cents != null && (
+            {card?.total_spent_cents != null && (
               <Text
                 style={{
                   color: palette.muted,
@@ -284,7 +300,7 @@ export default function CardPage({
               key={transaction.id}
               onPress={() => {
                 navigation.navigate("Transaction", {
-                  orgId: card.organization.id,
+                  orgId: card?.organization.id,
                   transaction,
                   transactionId: transaction.id,
                 });
