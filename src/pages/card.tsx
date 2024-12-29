@@ -181,8 +181,7 @@ export default function CardPage({
                 style={{ marginRight: 5 }}
               />
               <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                {card.user.name.split(" ")[0]} {card.user.name.concat(" ")[0]}'s
-                Card
+                {cardName}
               </Text>
             </View>
           ) : null}
