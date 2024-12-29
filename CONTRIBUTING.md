@@ -6,12 +6,6 @@ Thank you for choosing to contribute to HCB Mobile! Please follow the guidelines
 - Update your branch by merging `main` into your feature branch rather than rebasing. Rebasing will create new commits causing review comments to shift out of order.
 - When merging PRs into main, squash and rebase
 
+All contributors are expected to follow the Hack Club [Code of Conduct](https://hackclub.com/conduct) and Hack Club's [contributing guidelines](https://github.com/hackclub/hackclub/blob/main/CONTRIBUTING.md).
 
-## Per-merge Checklist
-
-- [ ] Descriptive PR title _(Does the title explain the changes in a concise manner?)_
-- [ ] Tag related issues so they auto-close on merge
-- [ ] Easily digestible commits _(Are the commits small and easy to understand?)_ [video](https://gist.github.com/garyhtou/97534180b0753aa607c35b6fdda9d2e0)
-- [ ] CI passes _(Do the GitHub checks pass?)_
-- [ ] Tested by submitter before requesting review _(Does it work in development?)_
-- [ ] Tested by two reviewers before merging
+Join the [#hcb-mobile](https://hackclub.slack.com/archives/C04CW5HNGR5) channel on the [Hack Club Slack](https://hackclub.com/slack) for support.
