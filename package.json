@@ -24,7 +24,7 @@
     "@react-navigation/native-stack": "^6.9.13",
     "date-fns": "^2.30.0",
     "eas-cli": "^13.4.2",
-    "expo": "~51.0.39",
+    "expo": "~52.0.23",
     "expo-alternate-app-icons": "^1.1.0",
     "expo-auth-session": "~5.5.2",
     "expo-blur": "~13.0.2",
