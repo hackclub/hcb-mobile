@@ -8,7 +8,7 @@
 ### _HCB but smaller!_
 
 </div>
- 
+
 ## Setup
 
 HCB Mobile connects to HCB throught the v4 API.
