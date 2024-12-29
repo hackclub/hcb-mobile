@@ -41,7 +41,7 @@
     "expo-linking": "~6.3.1",
     "expo-local-authentication": "~14.0.1",
     "expo-notifications": "~0.28.19",
-    "expo-secure-store": "~13.0.2",
+    "expo-secure-store": "~14.0.0",
     "expo-splash-screen": "~0.27.7",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
