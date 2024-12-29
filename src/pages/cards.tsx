@@ -36,7 +36,7 @@ export default function CardsPage({ navigation }: Props) {
     reloadGrantCards();
   });
 
-  const [frozenCardsShown, setFrozenCardsShown] = useState(true);
+  const [frozenCardsShown, setFrozenCardsShown] = useState(false);
   const [allCards, setAllCards] = useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
 
   useEffect(() => {
