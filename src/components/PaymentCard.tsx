@@ -13,6 +13,7 @@ import {
 import { SvgUri, SvgXml } from "react-native-svg";
 
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
@@ -20,7 +21,6 @@ import { redactedCardNumber, renderCardNumber } from "../util";
 import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
-import GrantCard from "../lib/types/GrantCard";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -168,7 +168,7 @@ export default function PaymentCard({
             {card.user ? card.user.name : card.organization.name}
           </Text>
         </View>
-        <View style={{ marginLeft: "auto" }}>
+        <View style={{ position: "absolute", right: 0 }}>
           <Text
             style={{
               color: "white",
@@ -176,9 +176,9 @@ export default function PaymentCard({
               fontFamily: "JetBrainsMono-Regular",
               textTransform: "uppercase",
               backgroundColor:
-                card.type == "virtual"
-                  ? "rgba(255, 255, 255, 0.05)"
-                  : "rgba(255, 255, 255, 0.08)",
+              card.type == "virtual"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,
