@@ -1,0 +1,20 @@
+name: Bug report
+description: found anything jank? let us know!
+labels: "bug"
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Describe your goals
+      description: What were you trying to do?
+      placeholder: I was trying to filter the ledger for transactions with the ACH Transfer type.
+    validations:
+      required: true
+  - type: textarea
+    id: bug
+    attributes:
+      label: Describe the bug
+      description: What went wrong? Please include screenshots or videos so we can easily reproduce it!
+      placeholder: The page only showed ACH Transfers sent in the past year. Everything before 2024 is missing!
+    validations:
+      required: true
