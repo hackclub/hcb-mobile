@@ -9,6 +9,7 @@ import useSWR from "swr";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
+import Constants from "expo-constants";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 
@@ -75,11 +76,13 @@ export default function AccountNumberPage({
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Button
-          title="Done"
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
+        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
+          <Button
+            title="Done"
+            color={palette.primary}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
       ),
     });
   }, []);
