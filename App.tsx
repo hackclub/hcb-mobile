@@ -52,8 +52,9 @@ const linking: LinkingOptions<TabParamList> = {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    "JetBrainsMono-Regular": require("./assets/fonts/JetBrainsMono-Regular.ttf"),
-    "JetBrainsMono-Bold": require("./assets/fonts/JetBrainsMono-Bold.ttf"),
+    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
+    'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
+    'Consolas-Bold': require('./assets/fonts/CONSOLAB.ttf'),
   });
 
   const [isLoading, setIsLoading] = useState(true);
