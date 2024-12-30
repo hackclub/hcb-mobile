@@ -35,12 +35,13 @@ export default function PaymentCard({
   details,
   onCardLoad,
   ...props
-}: ViewProps & { 
-  card: Card; 
-  details?: CardDetails; 
+}: ViewProps & {
+  card: Card;
+  details?: CardDetails;
   onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
 }) {
   const { colors: themeColors, dark } = useTheme();
+
 
   const patternForMeasurements = Geopattern.generate(card.id, {
     scalePattern: 1.1,
@@ -71,7 +72,7 @@ export default function PaymentCard({
   if ((card as GrantCard).amount_cents) {
     card.type = "virtual";
   }
-  
+
 
   useEffect(() => {
     if (onCardLoad) {
@@ -119,7 +120,7 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          { Constants.platform?.android ? (
+          {Constants.platform?.android ? (
             <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
           ) : (
             <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
@@ -145,7 +146,7 @@ export default function PaymentCard({
           color: "white",
           fontSize: 18,
           marginBottom: 4,
-          fontFamily: "JetBrainsMono-Regular",
+          fontFamily: "Consolas-Bold",
         }}
       >
         {details && isAppInBackground === "active"
@@ -156,8 +157,8 @@ export default function PaymentCard({
         <View>
           <Text
             style={{
-              color: "white",
-              fontFamily: "JetBrainsMono-Bold",
+              color: 'white',
+              fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
               textTransform: "uppercase",
@@ -173,12 +174,13 @@ export default function PaymentCard({
             style={{
               color: "white",
               fontSize: 14,
-              fontFamily: "JetBrainsMono-Regular",
+              fontFamily: "Consolas-Bold",
+              fontWeight: 700,
               textTransform: "uppercase",
               backgroundColor:
-              card.type == "virtual"
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(255, 255, 255, 0.08)",
+                card.type == "virtual"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,
