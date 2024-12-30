@@ -1,7 +1,9 @@
 import { useTheme } from "@react-navigation/native";
-import capitalize from "lodash/capitalize";
-import { Dimensions, Text, View, ViewProps, StyleSheet, type AppStateStatus, AppState} from "react-native";
+import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
+import { Dimensions, Text, View, ViewProps, type AppStateStatus, AppState } from "react-native";
+import { SvgXml } from 'react-native-svg';
+
 // import Animated, {
 //   SharedTransition,
 //   withSpring,
@@ -13,11 +15,8 @@ import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
-import CardHCB from "./cards/CardHCB";
-
-import * as Geopattern from "geopattern";
-import { SvgXml } from 'react-native-svg';
 import CardFrozen from "./cards/CardFrozen";
+import CardHCB from "./cards/CardHCB";
 
 // const transition = SharedTransition.custom((values) => {
 //   "worklet";
@@ -36,7 +35,7 @@ export default function PaymentCard({
 }: ViewProps & { card: Card; details?: CardDetails }) {
   const { colors: themeColors, dark } = useTheme();
 
-  const pattern = Geopattern.generate(card.id, {scalePattern: 1.1, grayscale: card.status == 'frozen' || card.status == 'inactive' || card.status == 'canceled' ? true : false}).toString();
+  const pattern = Geopattern.generate(card.id, { scalePattern: 1.1, grayscale: card.status == 'frozen' || card.status == 'inactive' || card.status == 'canceled' ? true : false }).toString();
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
 
@@ -58,7 +57,7 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor:  card.type == "physical" ? 'black' : themeColors.card,
+        backgroundColor: card.type == "physical" ? 'black' : themeColors.card,
         padding: 30,
         width: width * 0.86,
         height: width * 0.86 / 1.588,
@@ -86,19 +85,19 @@ export default function PaymentCard({
             <SvgXml
               key={index}
               xml={pattern}
-              height={width * 0.86 / 1.588} 
+              height={width * 0.86 / 1.588}
             />
           ))}
         </View>
       )}
 
-      {card.type == "physical" && <View style={{top: 5, right: 5, position: "absolute"}}><CardHCB /></View>}
-      {card.status == "frozen" && <View style={{top: 25, left: 25, position: "absolute"}}><CardFrozen /></View>}
+      {card.type == "physical" && <View style={{ top: 5, right: 5, position: "absolute" }}><CardHCB /></View>}
+      {card.status == "frozen" && <View style={{ top: 25, left: 25, position: "absolute" }}><CardFrozen /></View>}
 
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color:'white',
+          color: 'white',
           fontSize: 18,
           marginBottom: 4,
           fontFamily: "JetBrains Mono",
@@ -113,7 +112,7 @@ export default function PaymentCard({
           <Text
             style={{
               color: 'white',
-              fontFamily: "JetBrains Mono Bold", 
+              fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
               textTransform: 'uppercase',
@@ -124,12 +123,13 @@ export default function PaymentCard({
             {card.user ? card.user.name : card.organization.name}
           </Text>
         </View>
-        <View style={{marginLeft: 'auto'}}>
+        <View style={{ marginLeft: 'auto' }}>
           <Text
             style={{
               color: 'white',
               fontSize: 14,
-              fontFamily: "JetBrains Mono",
+              fontFamily: "Consolas-Bold",
+              fontWeight: 700,
               textTransform: 'uppercase',
               backgroundColor: card.type == 'virtual' ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,

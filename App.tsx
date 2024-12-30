@@ -1,13 +1,13 @@
 import "expo-dev-client";
 
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import { useFonts } from 'expo-font';
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
-import { useFonts } from 'expo-font';
 
 import AuthContext from "./src/auth";
 import { getStateFromPath } from "./src/getStateFromPath";
@@ -52,6 +52,7 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
     'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
+    'Consolas-Bold': require('./assets/fonts/CONSOLAB.ttf'),
   });
 
   const [isLoading, setIsLoading] = useState(true);
