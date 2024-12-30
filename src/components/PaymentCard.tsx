@@ -9,7 +9,9 @@ import { SvgXml } from 'react-native-svg';
 //   withSpring,
 // } from "react-native-reanimated";
 
+
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber } from "../util";
@@ -26,22 +28,56 @@ import CardHCB from "./cards/CardHCB";
 //   };
 // });
 
-const { width } = Dimensions.get("window");
-
 export default function PaymentCard({
   card,
   details,
+  onCardLoad,
   ...props
-}: ViewProps & { card: Card; details?: CardDetails }) {
+}: ViewProps & { 
+  card: Card; 
+  details?: CardDetails; 
+  onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
+}) {
   const { colors: themeColors, dark } = useTheme();
 
-  const pattern = Geopattern.generate(card.id, { scalePattern: 1.1, grayscale: card.status == 'frozen' || card.status == 'inactive' || card.status == 'canceled' ? true : false }).toString();
+
+  const patternForMeasurements = Geopattern.generate(card.id, {
+    scalePattern: 1.1,
+    grayscale: card.status != "active",
+  }).toSvg();
+
+  const pattern = Geopattern.generate(card.id, {
+    scalePattern: 1.1,
+    grayscale:
+      card.status == "active" ? false : true,
+  }).toDataUri();
+
+  const extractDimensions = (svg: string) => {
+    const widthMatch = svg.match(/width="(\d+(\.\d+)?)"/);
+    const heightMatch = svg.match(/height="(\d+(\.\d+)?)"/);
+    return {
+      svgWidth: widthMatch ? parseFloat(widthMatch[1]) : 0,
+      svgHeight: heightMatch ? parseFloat(heightMatch[1]) : 0,
+    };
+  };
+
+  const { svgWidth, svgHeight } = extractDimensions(patternForMeasurements);
+
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
+  const { width } = useWindowDimensions();
 
-  // Add listener for whenever app goes into the background on iOS
-  // to hide the card details (e.g. in app switcher)
-  // https://reactnative.dev/docs/appstate
+  if ((card as GrantCard).amount_cents) {
+    card.type = "virtual";
+  }
+  
+
+  useEffect(() => {
+    if (onCardLoad) {
+      onCardLoad(card.id, { width: svgWidth, height: svgHeight });
+    }
+  }, []);
+
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -57,10 +93,10 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor: card.type == "physical" ? 'black' : themeColors.card,
+        backgroundColor: card.type == "physical" ? "black" : themeColors.card,
         padding: 30,
         width: width * 0.86,
-        height: width * 0.86 / 1.588,
+        height: (width * 0.86) / 1.588,
         borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
@@ -72,42 +108,50 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-
       {card.type == "virtual" && (
         <View
           style={{
-            position: 'absolute',
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
+            position: "absolute",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            width: width * 0.86,
+            height: (width * 0.86) / 1.5,
           }}
         >
-          {Array.from({ length: 20 }).map((_, index) => (
-            <SvgXml
-              key={index}
-              xml={pattern}
-              height={width * 0.86 / 1.588}
-            />
-          ))}
+          { Constants.platform?.android ? (
+            <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
+          ) : (
+            <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
+          )
+          }
         </View>
       )}
 
-      {card.type == "physical" && <View style={{ top: 5, right: 5, position: "absolute" }}><CardHCB /></View>}
-      {card.status == "frozen" && <View style={{ top: 25, left: 25, position: "absolute" }}><CardFrozen /></View>}
+      {card.type == "physical" && (
+        <View style={{ top: 5, right: 5, position: "absolute" }}>
+          <CardHCB />
+        </View>
+      )}
+      {card.status == "frozen" && (
+        <View style={{ top: 25, left: 25, position: "absolute" }}>
+          <CardFrozen />
+        </View>
+      )}
 
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: 'white',
+          color: "white",
           fontSize: 18,
           marginBottom: 4,
-          fontFamily: "JetBrains Mono",
+          fontFamily: "Consolas-Bold",
         }}
       >
         {details && isAppInBackground === "active"
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
-      <View style={{ flexDirection: "row", alignItems: 'center', gap: 10 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View>
           <Text
             style={{
@@ -115,7 +159,7 @@ export default function PaymentCard({
               fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
-              textTransform: 'uppercase',
+              textTransform: "uppercase",
             }}
             numberOfLines={1}
             ellipsizeMode="tail"
@@ -123,54 +167,27 @@ export default function PaymentCard({
             {card.user ? card.user.name : card.organization.name}
           </Text>
         </View>
-        <View style={{ marginLeft: 'auto' }}>
+        <View style={{ position: "absolute", right: 0 }}>
           <Text
             style={{
-              color: 'white',
+              color: "white",
               fontSize: 14,
               fontFamily: "Consolas-Bold",
               fontWeight: 700,
-              textTransform: 'uppercase',
-              backgroundColor: card.type == 'virtual' ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)",
+              textTransform: "uppercase",
+              backgroundColor:
+              card.type == "virtual"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,
-              overflow: "hidden"
+              overflow: "hidden",
             }}
           >
-            {card.status == "active" ? "Active" : card.status == "frozen" ? "Frozen" : card.status == "inactive" ? "Inactive" : "Cancelled"}
+            {card.status}
           </Text>
         </View>
-
-        {/* <View style={{ marginLeft: "auto" }}>
-          <Text style={{ color: 'white', fontSize: 10 }}>Exp</Text>
-          <Text
-            style={{
-              color: 'white',
-              fontFamily: "JetBrains Mono",
-              fontSize: 14,
-            }}
-          >
-            {card.exp_month?.toLocaleString("en-US", {
-              minimumIntegerDigits: 2,
-            })}
-            /{card.exp_year?.toString().slice(-2)}
-          </Text>
-        </View>
-        <View>
-          <Text style={{ color: 'white', fontSize: 10 }}>CVC</Text>
-          <Text
-            style={{
-              color: 'white',
-              fontFamily: "JetBrains Mono",
-              fontSize: 14,
-              // There is no value called "no-contextual" in the fontVariant property
-              // fontVariant: ["no-contextual"], // JetBrains Mono has a ligature for "***" lol
-            }}
-          >
-            {details?.cvc || "●●●"}
-          </Text>
-        </View> */}
       </View>
     </View>
   );

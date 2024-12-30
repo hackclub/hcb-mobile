@@ -230,12 +230,6 @@ export default function App({ navigation }: Props) {
     preload("user/cards", fetcher!);
   }, []);
 
-  useFocusEffect(() => {
-    reloadOrganizations();
-    reloadInvitations();
-    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-  });
-
   if (error) {
     return (
       <View>

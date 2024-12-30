@@ -4,5 +4,6 @@
     "noImplicitAny": true,
     "strictNullChecks": true
   },
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "include": ["src/**/*", "App.tsx", "env.d.ts"]
 }

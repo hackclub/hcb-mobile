@@ -2,6 +2,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   View,
@@ -11,20 +12,19 @@ import {
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
-import { useEffect, useState } from "react";
 
 import Button from "../components/Button";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
+import UserAvatar from "../components/UserAvatar";
 import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
+import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
-import UserAvatar from "../components/UserAvatar";
-import { ca } from "date-fns/locale";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -36,6 +36,7 @@ export default function CardPage({
 }: Props) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+  const isGrantCard = (_card as GrantCard).amount_cents != null;
 
   const {
     details,
@@ -43,6 +44,7 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
+
   const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
@@ -67,6 +69,7 @@ export default function CardPage({
   }>(`cards/${_card.id}/transactions`);
 
   const { mutate } = useSWRConfig();
+  const [cardLoaded, setCardLoaded] = useState(false);
 
   const { trigger: update, isMutating } = useSWRMutation<
     Card,
@@ -88,7 +91,7 @@ export default function CardPage({
 
   const tabBarHeight = useBottomTabBarHeight();
 
-  if (!card) {
+  if (!card && !cardLoaded) {
     return <ActivityIndicator />;
   }
 
@@ -108,12 +111,13 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={card}
+          card={isGrantCard ? (_card as GrantCard) : card}
+          onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
       </View>
 
-      {card.status != "canceled" && (
+      {card.status != "canceled"  && (
         <View
           style={{
             flexDirection: "row",
@@ -122,6 +126,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
+          {(!card.status == "expired" || !isGrantCard) && (
           <Button
             style={{
               flexBasis: 0,
@@ -136,12 +141,12 @@ export default function CardPage({
           >
             {card.status == "active" ? "Freeze" : "Unfreeze"} card
           </Button>
-          {card.type == "virtual" && (
+          )}
+          {card.type == "virtual" && _card.status != "canceled" && (
             <Button
               style={{
                 flexBasis: 0,
                 flexGrow: 1,
-                // marginHorizontal: 10,
               }}
               onPress={() => toggleDetailsRevealed()}
               loading={detailsLoading}
@@ -161,30 +166,25 @@ export default function CardPage({
             borderRadius: 15,
           }}
         >
-          <View
-            style={{
-              flexDirection: "row",
-              alignContent: "center",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            {card.user ? (
-              <>
-                <UserAvatar
-                  user={card.user}
-                  size={36}
-                  style={{ marginRight: 5 }}
-                />
-                <Text style={{ color: themeColors.text, fontSize: 18 }}>
-                  {cardName}
-                </Text>
-              </>
-            ) : (
-              <ActivityIndicator />
-            )}
-          </View>
-
+          {card.user ? (
+            <View
+              style={{
+                flexDirection: "row",
+                alignContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <UserAvatar
+                user={card.user}
+                size={36}
+                style={{ marginRight: 5 }}
+              />
+              <Text style={{ color: themeColors.text, fontSize: 18 }}>
+                {cardName}
+              </Text>
+            </View>
+          ) : null}
           <View
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
@@ -192,7 +192,7 @@ export default function CardPage({
             <Text style={{ color: palette.muted }}>
               {detailsRevealed && details
                 ? renderCardNumber(details.number)
-                : redactedCardNumber(card.last4)}
+                : redactedCardNumber(isGrantCard ? _card.last4 : card?.last4)}
             </Text>
           </View>
           <View
@@ -200,8 +200,7 @@ export default function CardPage({
           >
             <Text style={{ color: themeColors.text }}>Expires</Text>
             <Text style={{ color: palette.muted }}>
-              {detailsRevealed && details ? details.exp_month : "••"}/
-              {detailsRevealed && details ? details.exp_year : "••"}
+              {detailsRevealed && details ? `${String(details.exp_month).padStart(2, '0')}/${details.exp_year}` : "••/••"}
             </Text>
           </View>
           <View
@@ -215,6 +214,19 @@ export default function CardPage({
         </View>
       ) : (
         <ActivityIndicator />
+      )}
+
+      {isGrantCard && (
+        <View
+          style={{
+            padding: 10,
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 18, textAlign: "center" }}>
+            Amount: {_card?.status == "expired" || _card?.status == "canceled" ? "$0" : renderMoney((card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0))}
+          </Text>
+        </View>
       )}
 
       {transactionsLoading || transactions === undefined ? (

@@ -67,7 +67,7 @@ function Transaction({
         try {
           await fetch(
             process.env.EXPO_PUBLIC_API_BASE +
-              `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+              `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
             {
               method: "POST",
               headers: {

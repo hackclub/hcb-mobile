@@ -1,7 +1,9 @@
 import "expo-dev-client";
 
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { useFonts } from 'expo-font';
+
+import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
@@ -10,6 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
+import asyncStorageProvider from "./src/cacheProvider";
 import { getStateFromPath } from "./src/getStateFromPath";
 import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
@@ -109,16 +112,18 @@ export default function App() {
 
       <SWRConfig
         value={{
-          fetcher,
+          provider: asyncStorageProvider, fetcher
         }}
       >
         <SafeAreaProvider>
-          <NavigationContainer
-            theme={scheme == "dark" ? theme : lightTheme}
-            linking={linking}
-          >
-            <Navigator />
-          </NavigationContainer>
+          <ActionSheetProvider>
+            <NavigationContainer
+              theme={scheme == "dark" ? theme : lightTheme}
+              linking={linking}
+            >
+              <Navigator />
+            </NavigationContainer>
+          </ActionSheetProvider>
         </SafeAreaProvider>
       </SWRConfig>
     </AuthContext.Provider>
