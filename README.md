@@ -56,3 +56,6 @@ EXPO_PUBLIC_CLIENT_ID=<uid field from the Doorkeeper app>
 5. `npm run android` - builds and runs the app in a simulator
    - Run with the `-- --device` flag to get a device selector, e.g. to run on a physical Android phone
    - Bonus task: painfully watch Gradle attempt to work
+
+## Contributing
+Please see [CONTRIBUTING.md](CONTRIBUTING.md).
