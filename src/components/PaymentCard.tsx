@@ -1,8 +1,9 @@
 import { useTheme } from "@react-navigation/native";
 import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, Text, View, ViewProps, type AppStateStatus, AppState } from "react-native";
+import { Text, View, ViewProps, type AppStateStatus, AppState } from "react-native";
 import { SvgXml } from 'react-native-svg';
+import SvgUri from 'react-native-svg-uri';
 
 // import Animated, {
 //   SharedTransition,
@@ -33,9 +34,9 @@ export default function PaymentCard({
   details,
   onCardLoad,
   ...props
-}: ViewProps & { 
-  card: Card; 
-  details?: CardDetails; 
+}: ViewProps & {
+  card: Card;
+  details?: CardDetails;
   onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
 }) {
   const { colors: themeColors, dark } = useTheme();
@@ -70,7 +71,7 @@ export default function PaymentCard({
   if ((card as GrantCard).amount_cents) {
     card.type = "virtual";
   }
-  
+
 
   useEffect(() => {
     if (onCardLoad) {
@@ -118,7 +119,7 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          { Constants.platform?.android ? (
+          {Constants.platform?.android ? (
             <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
           ) : (
             <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
@@ -176,9 +177,9 @@ export default function PaymentCard({
               fontWeight: 700,
               textTransform: "uppercase",
               backgroundColor:
-              card.type == "virtual"
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(255, 255, 255, 0.08)",
+                card.type == "virtual"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,

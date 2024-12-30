@@ -2,7 +2,6 @@ import "expo-dev-client";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
