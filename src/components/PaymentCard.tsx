@@ -1,15 +1,16 @@
 import { useTheme } from "@react-navigation/native";
+import Constants from "expo-constants";
 import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
-import { Text, View, ViewProps, type AppStateStatus, AppState } from "react-native";
-import { SvgXml } from 'react-native-svg';
-import SvgUri from 'react-native-svg-uri';
-
-// import Animated, {
-//   SharedTransition,
-//   withSpring,
-// } from "react-native-reanimated";
-
+import {
+  Text,
+  View,
+  ViewProps,
+  type AppStateStatus,
+  AppState,
+  useWindowDimensions,
+} from "react-native";
+import { SvgUri, SvgXml } from "react-native-svg";
 
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
