@@ -12,7 +12,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 import AuthContext from "../auth";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
@@ -149,6 +149,12 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
     mutate();
   });
 
+  const [refreshing] = useState(false);
+
+  const onRefresh = async () => {
+    mutate();
+  }
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -185,6 +191,8 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
         <Transaction transaction={item} onComplete={() => mutate()} />
       )}
       contentContainerStyle={{ padding: 20 }}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
     />
   );
 }

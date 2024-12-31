@@ -4,7 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -218,6 +218,7 @@ export default function App({ navigation }: Props) {
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
+  const [refreshing] = useState(false);
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
@@ -229,6 +230,11 @@ export default function App({ navigation }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("user/cards", fetcher!);
   }, []);
+
+  const onRefresh = () => {
+    reloadOrganizations();
+    reloadInvitations();
+  }
 
   if (error) {
     return (
@@ -267,6 +273,8 @@ export default function App({ navigation }: Props) {
           contentInsetAdjustmentBehavior="automatic"
           data={sortedOrgs}
           style={{ flex: 1 }}
+          onRefresh={() => onRefresh()}
+          refreshing={refreshing}
           // refreshing={isValidating}
           // onRefresh={() => {
           //   mutate(
