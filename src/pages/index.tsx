@@ -272,6 +272,7 @@ export default function App({ navigation }: Props) {
             paddingBottom: tabBarHeight,
           }}
           data={sortedOrgs}
+          keyExtractor={(item) => item.id.toString()} 
           ListHeaderComponent={() =>
             invitations &&
             invitations.length > 0 && (
