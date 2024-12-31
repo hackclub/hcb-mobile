@@ -71,6 +71,9 @@ export default function OrganizationPage({
   const { data: organization, isLoading: organizationLoading } = useSWR<
     Organization | OrganizationExpanded
   >(`organizations/${orgId}`, { fallbackData: _organization });
+
+  const { data: user, isLoading: userLoading } = useSWR("user");
+  console.log(organization)
   const {
     transactions: _transactions,
     isLoadingMore,
@@ -79,7 +82,12 @@ export default function OrganizationPage({
   } = useTransactions(orgId);
 
   useEffect(() => {
-    if (organization) {
+    if (organization && user) {
+      const isManager = "users" in organization &&
+        organization.users.some(
+          (u) => u.id === user?.id && u.role === "manager",
+        );
+
       navigation.setOptions({
         title: organization.name,
         // headerTitle: () => <OrganizationTitle organization={organization} />,
@@ -97,11 +105,20 @@ export default function OrganizationPage({
         });
       }
 
+      if (isManager) {
+        menuActions.push({
+          id: "transfer",
+          title: "Transfer Money",
+          image: "dollarsign.circle",
+        });
+      } 
+
       menuActions.push({
         id: "settings",
         title: "Manage Organization",
-        image: "gearshape",
+        image: "gearshape", 
       });
+
 
       navigation.setOptions({
         headerRight: () => (
@@ -117,6 +134,8 @@ export default function OrganizationPage({
                 navigation.navigate("OrganizationSettings", {
                   orgId: organization.id,
                 });
+              } else if (event == "transfer") {
+                navigation.navigate("Transfer", { organization: organization });
               }
             }}
           >
@@ -154,7 +173,7 @@ export default function OrganizationPage({
     [transactions],
   );
 
-  if (organizationLoading) {
+  if (organizationLoading || userLoading) {
     return <ActivityIndicator />;
   }
 
@@ -207,7 +226,7 @@ export default function OrganizationPage({
                       renderMoney(organization.balance_cents)}
                   </Text>
                 </View>
-                <Button
+                {/* <Button
                   style={{
                     backgroundColor: "#5bc0de",
                     borderTopWidth: 0,
@@ -219,7 +238,7 @@ export default function OrganizationPage({
                   }
                 >
                 Transfer Money
-                </Button>
+                </Button> */}
               </View>
 
               {isLoading && <ActivityIndicator />}

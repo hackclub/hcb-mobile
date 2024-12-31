@@ -70,6 +70,7 @@ export default function Navigator() {
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         tabBarStyle: { position: "absolute" },
+        tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
           <BlurView
             tint={scheme == "dark" ? "dark" : "light"}

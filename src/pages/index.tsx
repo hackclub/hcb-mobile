@@ -228,6 +228,10 @@ export default function App({ navigation }: Props) {
     preload("user", fetcher!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("user/cards", fetcher!);
+    // prefetch all user organization details
+    for (const org of organizations || []) {
+      preload(`organizations/${org.id}`, fetcher!);
+    }
   }, []);
 
   if (error) {
