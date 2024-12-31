@@ -14,6 +14,8 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
@@ -262,27 +264,14 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {organizations && (
         <FlatList
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
             padding: 20,
             paddingBottom: tabBarHeight,
           }}
-          contentInsetAdjustmentBehavior="automatic"
           data={sortedOrgs}
-          style={{ flex: 1 }}
-          onRefresh={() => onRefresh()}
-          refreshing={refreshing}
-          // refreshing={isValidating}
-          // onRefresh={() => {
-          //   mutate(
-          //     (key: string) =>
-          //       key?.startsWith("/organizations/") ||
-          //       key == "/user/organizations",
-          //   );
-          // }}
           ListHeaderComponent={() =>
             invitations &&
             invitations.length > 0 && (
@@ -374,6 +363,6 @@ export default function App({ navigation }: Props) {
           }
         />
       )}
-    </View>
+    </ScrollView>
   );
 }
