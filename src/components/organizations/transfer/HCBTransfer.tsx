@@ -20,23 +20,19 @@ const HCBTransferScreen = ({ organization }: HCBTransferScreenProps) => {
   const { data: organizations } = useSWR<OrganizationExpanded[]>('user/organizations');
   const { token } = useContext(AuthContext);
 
-  console.log(token)
   const handleTransfer = async () => {
-    console.log(chosenOrg)
-    console.log(organization.id)
-    const response = await fetch(`https://hcb.hackclub.com/api/v4/organizations/org_dku3wo/transfers`, {
+    const response = await fetch (process.env.EXPO_PUBLIC_API_BASE + `/organizations/${organization.id}/transfers`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer hcb_T8OBkVIsd0MzaGxPgfebcwP0X6c5h_Xm4PC13uTaToo`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            event_id: "org_dku3wo",
-            to_organization_id: "org_9rud56",
+            event_id: organization.id,
+            to_organization_id: chosenOrg,
             // amount in cents ,
-            amount_cents: 500,
-            //Number(amount.replace('$', '')) * 100,
-            name: "org_dku3wo"
+            amount_cents: Number(amount.replace('$', '')) * 100,
+            name: organization.name,
         }),
     })
     console.log(response.status)
