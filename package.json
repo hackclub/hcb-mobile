@@ -30,7 +30,7 @@
     "expo-blur": "~13.0.2",
     "expo-clipboard": "~6.0.3",
     "expo-constants": "~16.0.2",
-    "expo-crypto": "~13.0.2",
+    "expo-crypto": "~14.0.1",
     "expo-dev-client": "~4.0.29",
     "expo-device": "~7.0.1",
     "expo-haptics": "~13.0.1",
