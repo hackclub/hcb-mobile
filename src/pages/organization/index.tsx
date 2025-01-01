@@ -16,7 +16,6 @@ import {
 import useSWR from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
-import Button from "../../components/Button";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -73,7 +72,6 @@ export default function OrganizationPage({
   >(`organizations/${orgId}`, { fallbackData: _organization });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
-  console.log(organization)
   const {
     transactions: _transactions,
     isLoadingMore,
@@ -150,7 +148,7 @@ export default function OrganizationPage({
         ),
       });
     }
-  }, [organization, scheme, navigation]);
+  }, [organization, scheme, navigation, user]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();

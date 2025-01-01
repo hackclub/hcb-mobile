@@ -37,7 +37,7 @@ export default function TransferPage({ navigation, route }: Props) {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
         {/* Transfer Type Buttons */}
-        <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
+        {/* <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
           <Button
             style={{
               flex: 1,
@@ -68,7 +68,7 @@ export default function TransferPage({ navigation, route }: Props) {
           >
             Check
           </Button>
-        </View>
+        </View> */}
 
         {/* Display transfer screen based on transfer type */}
         {transferType === "hcb" && <HCBTransferScreen organization={organization} />}
