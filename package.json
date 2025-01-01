@@ -23,7 +23,7 @@
     "@react-navigation/native": "^6.1.10",
     "@react-navigation/native-stack": "^6.9.13",
     "date-fns": "^2.30.0",
-    "eas-cli": "^13.4.2",
+    "eas-cli": "^14.2.0",
     "expo": "~51.0.39",
     "expo-alternate-app-icons": "^1.1.0",
     "expo-auth-session": "~5.5.2",
