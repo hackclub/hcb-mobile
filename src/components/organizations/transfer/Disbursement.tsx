@@ -9,11 +9,11 @@ import { OrganizationExpanded } from '../../../lib/types/Organization';
 import { palette } from '../../../theme';
 import { renderMoney } from '../../../util';
 
-type HCBTransferScreenProps = {
+type DisbursementScreenProps = {
   organization: OrganizationExpanded;
 };
 
-const HCBTransferScreen = ({ organization }: HCBTransferScreenProps) => {
+const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const [amount, setAmount] = useState('$0.00');
   const [chosenOrg, setOrganization] = useState('');
   const [reason, setReason] = useState('');
@@ -107,7 +107,7 @@ const HCBTransferScreen = ({ organization }: HCBTransferScreenProps) => {
       <View style={{ backgroundColor: themeColors.card, borderRadius: 8, marginBottom: 15 }}>
         <Picker
           selectedValue={chosenOrg}
-          onValueChange={(itemValue) => setOrganization(itemValue)}
+          onValueChange={(itemValue: string) => setOrganization(itemValue)}
           style={{ color: themeColors.text }}
           dropdownIconColor={themeColors.text}
         >
@@ -190,4 +190,4 @@ const HCBTransferScreen = ({ organization }: HCBTransferScreenProps) => {
   );
 };
 
-export default HCBTransferScreen;
+export default DisbursementScreen;

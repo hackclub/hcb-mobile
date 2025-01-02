@@ -3,8 +3,7 @@ import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Button as NativeButton, View, ScrollView, Platform } from "react-native";
 
-import Button from "../../components/Button";
-import HCBTransferScreen from "../../components/organizations/transfer/Disbursement";
+import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
@@ -71,7 +70,7 @@ export default function TransferPage({ navigation, route }: Props) {
         </View> */}
 
         {/* Display transfer screen based on transfer type */}
-        {transferType === "hcb" && <HCBTransferScreen organization={organization} />}
+        {transferType === "hcb" && <DisbursementScreen organization={organization} />}
       </ScrollView>
     </KeyboardAvoidingView>
   );
