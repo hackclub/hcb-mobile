@@ -103,7 +103,7 @@ function Transaction({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
-  
+
   return (
     <View
       style={StyleSheet.compose(
