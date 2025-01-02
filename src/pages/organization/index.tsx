@@ -114,7 +114,7 @@ export default function OrganizationPage({
       menuActions.push({
         id: "settings",
         title: "Manage Organization",
-        image: "gearshape", 
+        image: "gearshape",
       });
 
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Button as NativeButton, View, ScrollView, Platform } from "react-native";
 
 import Button from "../../components/Button";
-import HCBTransferScreen from "../../components/organizations/transfer/HCBTransfer";
+import HCBTransferScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette } from "../../theme";
