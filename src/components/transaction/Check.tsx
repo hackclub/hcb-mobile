@@ -6,8 +6,8 @@ import { OrganizationExpanded } from "../../lib/types/Organization";
 import palette from "../../palette";
 
 const screenWidth = Dimensions.get("window").width;
-const checkRatio = 2.95 / 6; 
-const checkWidth = screenWidth * 0.95; 
+const checkRatio = 3.1 / 6; 
+const checkWidth = screenWidth * 0.9; 
 const checkHeight = checkWidth * checkRatio;
 
 interface CheckComponentProps {

@@ -31,7 +31,7 @@ export default function CheckTransaction({
         {renderMoney(Math.abs(transaction.amount_cents))}{" "}
         <Muted>check to</Muted> {check.recipient_name}
       </TransactionTitle>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
           <CheckComponent 
             date={transaction.date}
             recipientName={check.recipient_name}
