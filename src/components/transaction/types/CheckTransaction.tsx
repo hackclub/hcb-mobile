@@ -37,6 +37,7 @@ export default function CheckTransaction({
             recipientName={check.recipient_name}
             amount={transaction.amount_cents / 100}
             memo={check.memo}
+            orgId={props.orgId}
           />
         </View>
       <TransactionDetails

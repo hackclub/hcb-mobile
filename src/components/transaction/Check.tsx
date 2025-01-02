@@ -1,6 +1,8 @@
 import { View, Text, Image, StyleSheet, Dimensions, useColorScheme } from "react-native";
+import useSWR from "swr";
 import { ToWords } from 'to-words';
 
+import { OrganizationExpanded } from "../../lib/types/Organization";
 import palette from "../../palette";
 
 const screenWidth = Dimensions.get("window").width;
@@ -15,6 +17,7 @@ interface CheckComponentProps {
   amount: number;
   memo?: string;
   editable?: boolean;
+  orgId?: string;
 }
 
 export default function CheckComponent({
@@ -23,6 +26,7 @@ export default function CheckComponent({
   recipientName,
   amount,
   memo,
+  orgId,
 }: CheckComponentProps) {
   amount = Math.abs(amount);
   date = new Date(date).toLocaleDateString("en-US", {
@@ -31,6 +35,10 @@ export default function CheckComponent({
     day: "numeric",
   });
 
+  const { data: organization } = useSWR<OrganizationExpanded>(
+    `organizations/${orgId}`,
+  );
+  
   const scheme = useColorScheme(); // Detects the color scheme (light or dark)
   
   const renderMoneyAmount = (amount: number): string => `$${amount.toFixed(2)}`;
@@ -92,8 +100,8 @@ export default function CheckComponent({
         <Text style={styles.accountDetails}>
           &#9286;
           {checkNumber?.padStart(10, "0") || "0000000000"} &#9286;
-          {"121145307"} &#9286;
-          {"631"}[HIDDEN] &#9286;
+          {organization?.routing_number || "111111111"} &#9286;
+          {organization?.account_number?.slice(0, 3) || "123"}[HIDDEN] &#9286;
         </Text>
       </View>
     </View>

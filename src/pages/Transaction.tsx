@@ -77,7 +77,7 @@ export default function TransactionPage({
         style={{ marginBottom: 20 }}
         onPress={() =>
           Linking.openURL(
-            `https://hcb.hackclub.com/hcb/${transaction.id.slice(4)}`,
+            `${process.env.EXPO_PUBLIC_API_BASE.replace("api/v4", "")}hcb/${transaction.id.slice(4)}`,
           )
         }
       >
