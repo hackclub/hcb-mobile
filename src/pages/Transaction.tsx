@@ -55,7 +55,6 @@ export default function TransactionPage({
 
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
-
   if (!transaction) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

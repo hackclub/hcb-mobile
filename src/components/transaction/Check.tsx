@@ -1,0 +1,198 @@
+import { View, Text, Image, StyleSheet, Dimensions, useColorScheme } from "react-native";
+import { ToWords } from 'to-words';
+
+import palette from "../../palette";
+
+const screenWidth = Dimensions.get("window").width;
+const checkRatio = 2.95 / 6; 
+const checkWidth = screenWidth * 0.95; 
+const checkHeight = checkWidth * checkRatio;
+
+interface CheckComponentProps {
+  checkNumber?: string;
+  date: string;
+  recipientName: string;
+  amount: number;
+  memo?: string;
+  editable?: boolean;
+}
+
+export default function CheckComponent({
+  checkNumber,
+  date,
+  recipientName,
+  amount,
+  memo,
+}: CheckComponentProps) {
+  amount = Math.abs(amount);
+  date = new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const scheme = useColorScheme(); // Detects the color scheme (light or dark)
+  
+  const renderMoneyAmount = (amount: number): string => `$${amount.toFixed(2)}`;
+  const toWords = new ToWords({
+    localeCode: 'en-US',
+    converterOptions: {
+      ignoreDecimal: false,
+      ignoreZeroCurrency: false,
+    },
+  });
+  const amountInWords = toWords.convert(amount);
+
+  // Dynamic styles based on the color scheme
+  const styles = getStyles(scheme);
+
+  return (
+    <View style={styles.container}>
+      {/* Check Number and Date */}
+      <View style={styles.headerContainer}>
+        <Text style={styles.checkNumber}>{checkNumber || "----"}</Text>
+        <View style={{flexDirection: "row", alignItems: "center"}}>
+          <Text style={styles.label}>Date:</Text>
+          <Text style={[styles.dateText, styles.handwriting]}>{date}</Text>
+        </View>
+      </View>
+
+      {/* Pay to the Order Of */}
+      <View style={[styles.row, { gap: 12}]}>
+        <Text style={styles.label}>Pay to the{"\n"}order of</Text>
+        <Text style={[styles.flexGrow, styles.handwriting]}>
+          {recipientName}
+        </Text>
+        <Text style={styles.amountInput}>$</Text>
+        <Text style={[styles.amount]}>
+          {renderMoneyAmount(amount).replace("$", "")}
+        </Text>
+      </View>
+
+      {/* Amount in Words */}
+      <View style={[styles.row, {gap: 12}]}>
+        <Text numberOfLines={1} style={[styles.flexGrow, styles.handwriting]}>{amountInWords}</Text>
+        <Text style={styles.label}>Dollars</Text>
+      </View>
+
+      {/* Memo */}
+      <View style={[styles.row, styles.memoContainer, { marginBottom: 0 }]}>
+        <Text style={styles.label}>Memo</Text>
+        <Text style={[styles.flexGrow, styles.handwriting]}>
+          {memo}
+        </Text>
+        <Image
+            source={require("../../../assets/zach-signature.png")}
+            style={styles.signature}
+          />
+      </View>
+
+      {/* Signature and Account Details */}
+      <View style={[styles.bottomContainer]}>
+        <Text style={styles.accountDetails}>
+          &#9286;
+          {checkNumber?.padStart(10, "0") || "0000000000"} &#9286;
+          {"121145307"} &#9286;
+          {"631"}[HIDDEN] &#9286;
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+const getStyles = (scheme: 'light' | 'dark') => StyleSheet.create({
+  container: {
+    width: checkWidth,
+    height: checkHeight,
+    backgroundColor: scheme === 'dark' ? "#193046" : "#E2ECF5", 
+    padding: 12,
+    marginVertical: 12,
+    shadowColor: scheme === 'dark' ? "#000" : "#888",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: scheme === 'dark' ? "#ccc" : "#bbb", 
+    overflow: "visible",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  checkNumber: {
+    fontFamily: "check-font",
+    fontSize: 14,
+    textAlign: "right",
+    marginBottom: 8,
+    color: scheme === 'dark' ? palette.slate[300] : palette.slate[700], 
+  },
+  dateText: {
+    fontSize: 16,
+    color: scheme === 'dark' ? palette.slate[300] : palette.slate[700],
+    fontFamily: "Damion",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    marginRight: 8,
+    color: scheme === 'dark' ? palette.slate[300] : palette.slate[700], 
+  },
+  handwriting: {
+    fontFamily: "Damion",
+    fontSize: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400],
+    paddingRight: 8,
+    color: scheme === 'dark' ? "#fff" : "#000",
+  },
+  amountInput: {
+    fontFamily: "Damion",
+    fontSize: 18,
+    maxWidth: 120,
+    color: scheme === 'dark' ? "#fff" : "#000", 
+    textAlign: "right",
+  },
+  amount: {
+    fontFamily: "Damion",
+    fontSize: 18,
+    maxWidth: 120,
+    color: scheme === 'dark' ? "#fff" : "#000",
+    textAlign: "right",
+    borderWidth: 1,
+    borderColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400], 
+    paddingHorizontal: 4,
+  },
+  memoContainer: {
+    gap: 8,
+    alignItems: "center",
+  },
+  flexGrow: {
+    flexGrow: 1,
+    maxWidth: "80%",
+  },
+  bottomContainer: {
+    flexDirection: "row",
+  },
+  signature: {
+    height: 40,
+    width: 60,
+    tintColor: scheme === 'dark' ? palette.slate[100] : palette.slate[500], 
+  },
+  accountDetails: {
+    fontFamily: "check-font",
+    fontSize: 12,
+    color: scheme === 'dark' ? palette.slate[300] : palette.slate[700], 
+    textAlign: "left",
+    flex: 1,
+  },
+});

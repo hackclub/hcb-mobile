@@ -72,6 +72,7 @@ export interface TransactionDonation extends TransactionBase {
 
 export interface Check {
   recipient_name: string;
+  recipient_email?: string;
   memo: string;
   payment_for: string;
   status?:
@@ -83,6 +84,12 @@ export interface Check {
     | "canceled"
     | "returned";
   sender?: User;
+  address_line1: string;
+  address_line2?: string;
+  address_city: string;
+  address_state: string;
+  address_zip: string;
+  check_number?: string;
 }
 
 export interface TransactionCheck extends TransactionBase {

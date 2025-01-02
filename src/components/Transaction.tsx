@@ -14,6 +14,7 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
+import useSWR from "swr";
 
 function transactionIcon({
   code,
@@ -83,6 +84,7 @@ function TransactionIcon({
 
 function Transaction({
   transaction,
+  orgId,
   top = false,
   bottom = false,
   hideAvatar,
@@ -92,6 +94,7 @@ function Transaction({
   style,
 }: ViewProps & {
   transaction: TransactionWithoutId;
+  orgId: string;
   top?: boolean;
   bottom?: boolean;
   hideAvatar?: boolean;
@@ -100,7 +103,7 @@ function Transaction({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
-
+  
   return (
     <View
       style={StyleSheet.compose(
