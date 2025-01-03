@@ -290,6 +290,7 @@ export default function OrganizationPage({
               activeOpacity={0.7}
             >
               <Transaction
+                orgId={orgId}
                 transaction={item}
                 top={index == 0}
                 bottom={index == data.length - 1}

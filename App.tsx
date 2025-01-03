@@ -55,6 +55,7 @@ export default function App() {
     'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
     'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
     'Consolas-Bold': require('./assets/fonts/CONSOLAB.ttf'),
+    'Damion': require('./assets/fonts/Damion-Regular.ttf'),
   });
 
   const [isLoading, setIsLoading] = useState(true);
