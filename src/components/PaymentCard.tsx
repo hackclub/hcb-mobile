@@ -42,6 +42,7 @@ export default function PaymentCard({
 }) {
   const { colors: themeColors, dark } = useTheme();
 
+  console.log("PaymentCard", card);
 
   const patternForMeasurements = Geopattern.generate(card.id, {
     scalePattern: 1.1,

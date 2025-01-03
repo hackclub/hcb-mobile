@@ -4,7 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -14,6 +14,8 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
@@ -218,6 +220,7 @@ export default function App({ navigation }: Props) {
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
+  const [refreshing] = useState(false);
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
@@ -229,6 +232,11 @@ export default function App({ navigation }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("user/cards", fetcher!);
   }, []);
+
+  const onRefresh = () => {
+    reloadOrganizations();
+    reloadInvitations();
+  }
 
   if (error) {
     return (
@@ -256,25 +264,15 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {organizations && (
         <FlatList
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
             padding: 20,
             paddingBottom: tabBarHeight,
           }}
-          contentInsetAdjustmentBehavior="automatic"
           data={sortedOrgs}
-          style={{ flex: 1 }}
-          // refreshing={isValidating}
-          // onRefresh={() => {
-          //   mutate(
-          //     (key: string) =>
-          //       key?.startsWith("/organizations/") ||
-          //       key == "/user/organizations",
-          //   );
-          // }}
+          keyExtractor={(item) => item.id.toString()} 
           ListHeaderComponent={() =>
             invitations &&
             invitations.length > 0 && (
@@ -366,6 +364,6 @@ export default function App({ navigation }: Props) {
           }
         />
       )}
-    </View>
+    </ScrollView>
   );
 }
