@@ -6,7 +6,7 @@ import { OrganizationExpanded } from "../../lib/types/Organization";
 import palette from "../../palette";
 
 const screenWidth = Dimensions.get("window").width;
-const checkRatio = 3.1 / 6; 
+const checkRatio = 3.2 / 6; 
 const checkWidth = screenWidth * 0.9; 
 const checkHeight = checkWidth * checkRatio;
 
@@ -61,34 +61,42 @@ export default function CheckComponent({
         <Text style={styles.checkNumber}>{checkNumber || "----"}</Text>
         <View style={{flexDirection: "row", alignItems: "center"}}>
           <Text style={styles.label}>Date:</Text>
-          <Text style={[styles.dateText, styles.handwriting]}>{date}</Text>
+            <View style={{borderBottomWidth: 2, borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400]}}>
+             <Text style={[styles.dateText, styles.handwriting]}>{date}</Text>
+            </View>
         </View>
       </View>
 
       {/* Pay to the Order Of */}
-      <View style={[styles.row, { gap: 12}]}>
-        <Text style={styles.label}>Pay to the{"\n"}order of</Text>
-        <Text style={[styles.flexGrow, styles.handwriting]}>
-          {recipientName}
-        </Text>
+      <View style={[styles.row, { gap: 10 }]}>
+        <Text style={[styles.label, {fontSize: 10, marginRight: 0}]}>Pay to the{"\n"}order of</Text>
+        <View style={[styles.flexGrow, {borderBottomWidth: 2, borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400]}]}>
+          <Text style={styles.handwriting}>
+            {recipientName}
+          </Text>
+        </View>
         <Text style={styles.amountInput}>$</Text>
-        <Text style={[styles.amount]}>
+        <Text style={styles.amount}>
           {renderMoneyAmount(amount).replace("$", "")}
         </Text>
       </View>
 
       {/* Amount in Words */}
       <View style={[styles.row, {gap: 12}]}>
-        <Text numberOfLines={1} style={[styles.flexGrow, styles.handwriting]}>{amountInWords}</Text>
+        <View style={[styles.flexGrow, {borderBottomWidth: 2, borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400]}]}>
+          <Text numberOfLines={1} style={styles.handwriting}>{amountInWords}</Text>
+        </View>
         <Text style={styles.label}>Dollars</Text>
       </View>
 
       {/* Memo */}
       <View style={[styles.row, styles.memoContainer, { marginBottom: 0 }]}>
         <Text style={styles.label}>Memo</Text>
-        <Text style={[styles.flexGrow, styles.handwriting]}>
-          {memo}
-        </Text>
+        <View style={[styles.flexGrow, {borderBottomWidth: 2, borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400]}]}>
+          <Text style={styles.handwriting}>
+            {memo}
+          </Text>
+        </View>
         <Image
             source={require("../../../assets/zach-signature.png")}
             style={styles.signature}
@@ -96,7 +104,7 @@ export default function CheckComponent({
       </View>
 
       {/* Signature and Account Details */}
-      <View style={[styles.bottomContainer]}>
+      <View style={{flexDirection: "row"}}>
         <Text style={styles.accountDetails}>
           &#9286;
           {checkNumber?.padStart(10, "0") || "0000000000"} &#9286;
@@ -146,22 +154,23 @@ const getStyles = (scheme: 'light' | 'dark') => StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   label: {
     fontSize: 12,
     fontWeight: "bold",
     textTransform: "uppercase",
-    marginRight: 8,
+    marginRight: 4,
     color: scheme === 'dark' ? palette.slate[300] : palette.slate[700], 
   },
   handwriting: {
     fontFamily: "Damion",
     fontSize: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400],
     paddingRight: 8,
     color: scheme === 'dark' ? "#fff" : "#000",
+    textDecorationColor: scheme === 'dark' ? palette.slate[500] : palette.slate[400],
   },
   amountInput: {
     fontFamily: "Damion",
@@ -186,10 +195,7 @@ const getStyles = (scheme: 'light' | 'dark') => StyleSheet.create({
   },
   flexGrow: {
     flexGrow: 1,
-    maxWidth: "80%",
-  },
-  bottomContainer: {
-    flexDirection: "row",
+    maxWidth: "75%",
   },
   signature: {
     height: 40,

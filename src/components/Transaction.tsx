@@ -14,7 +14,6 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
-import useSWR from "swr";
 
 function transactionIcon({
   code,
