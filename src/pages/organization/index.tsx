@@ -4,7 +4,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Text,
   View,
@@ -13,7 +13,7 @@ import {
   TouchableHighlight,
   useColorScheme,
 } from "react-native";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
@@ -78,6 +78,7 @@ export default function OrganizationPage({
     loadMore,
     isLoading,
   } = useTransactions(orgId);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (organization && user) {
@@ -170,6 +171,11 @@ export default function OrganizationPage({
       })),
     [transactions],
   );
+  
+  const onRefresh = () => {
+    mutate("organizations");
+    mutate(`organizations/${orgId}`);
+  }
 
   if (organizationLoading || userLoading) {
     return <ActivityIndicator />;
@@ -193,6 +199,8 @@ export default function OrganizationPage({
           }
           onEndReachedThreshold={0.5}
           onEndReached={() => loadMore()}
+          refreshing={refreshing}
+          onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
               {organization?.playground_mode && (
