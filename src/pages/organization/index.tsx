@@ -4,7 +4,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Text,
   View,
@@ -13,7 +13,7 @@ import {
   TouchableHighlight,
   useColorScheme,
 } from "react-native";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
@@ -70,15 +70,23 @@ export default function OrganizationPage({
   const { data: organization, isLoading: organizationLoading } = useSWR<
     Organization | OrganizationExpanded
   >(`organizations/${orgId}`, { fallbackData: _organization });
+
+  const { data: user, isLoading: userLoading } = useSWR("user");
   const {
     transactions: _transactions,
     isLoadingMore,
     loadMore,
     isLoading,
   } = useTransactions(orgId);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    if (organization) {
+    if (organization && user) {
+      const isManager = "users" in organization &&
+        organization.users.some(
+          (u) => u.id === user?.id && u.role === "manager",
+        );
+
       navigation.setOptions({
         title: organization.name,
         // headerTitle: () => <OrganizationTitle organization={organization} />,
@@ -96,11 +104,20 @@ export default function OrganizationPage({
         });
       }
 
+      if (isManager) {
+        menuActions.push({
+          id: "transfer",
+          title: "Transfer Money",
+          image: "dollarsign.circle",
+        });
+      } 
+
       menuActions.push({
         id: "settings",
         title: "Manage Organization",
         image: "gearshape",
       });
+
 
       navigation.setOptions({
         headerRight: () => (
@@ -116,6 +133,8 @@ export default function OrganizationPage({
                 navigation.navigate("OrganizationSettings", {
                   orgId: organization.id,
                 });
+              } else if (event == "transfer") {
+                navigation.navigate("Transfer", { organization: organization });
               }
             }}
           >
@@ -130,7 +149,7 @@ export default function OrganizationPage({
         ),
       });
     }
-  }, [organization, scheme, navigation]);
+  }, [organization, scheme, navigation, user]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -152,8 +171,13 @@ export default function OrganizationPage({
       })),
     [transactions],
   );
+  
+  const onRefresh = () => {
+    mutate("organizations");
+    mutate(`organizations/${orgId}`);
+  }
 
-  if (organizationLoading) {
+  if (organizationLoading || userLoading) {
     return <ActivityIndicator />;
   }
 
@@ -175,38 +199,54 @@ export default function OrganizationPage({
           }
           onEndReachedThreshold={0.5}
           onEndReached={() => loadMore()}
+          refreshing={refreshing}
+          onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
               {organization?.playground_mode && (
                 <PlaygroundBanner organization={organization} />
               )}
-              <View style={{ marginBottom: 20 }}>
-                <Text
+               <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  marginBottom: 32,
+                  gap: 10,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Balance
+                  </Text>
+                  <Text style={{ color: themeColors.text, fontSize: 36 }}>
+                    {"balance_cents" in organization &&
+                      renderMoney(organization.balance_cents)}
+                  </Text>
+                </View>
+                {/* <Button
                   style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
+                    backgroundColor: "#5bc0de",
+                    borderTopWidth: 0,
                   }}
+                  color="#186177"
+                  disabled={organization.playground_mode}
+                  onPress={() =>
+                    navigation.navigate("Transfer", { organization })
+                  }
                 >
-                  Balance
-                </Text>
-                <Text style={{ color: themeColors.text, fontSize: 36 }}>
-                  {"balance_cents" in organization &&
-                    renderMoney(organization.balance_cents)}
-                </Text>
+                Transfer Money
+                </Button> */}
               </View>
-              {/* <View style={{ display: "flex" }}>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                  }}
-                >
-                  Transactions
-                </Text>
-              </View> */}
+
               {isLoading && <ActivityIndicator />}
             </View>
           )}
@@ -250,6 +290,7 @@ export default function OrganizationPage({
               activeOpacity={0.7}
             >
               <Transaction
+                orgId={orgId}
                 transaction={item}
                 top={index == 0}
                 bottom={index == data.length - 1}
