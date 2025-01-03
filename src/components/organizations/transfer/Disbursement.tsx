@@ -2,6 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '@react-navigation/native';
 import { useContext, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
 import useSWR from 'swr';
 
 import AuthContext from '../../../auth';
@@ -105,17 +106,13 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
       {/* To Section */}
       <Text style={{ color: themeColors.text, fontSize: 18, marginVertical: 12, fontWeight: 'bold' }}>To</Text>
       <View style={{ backgroundColor: themeColors.card, borderRadius: 8, marginBottom: 15 }}>
-        <Picker
-          selectedValue={chosenOrg}
+        <RNPickerSelect
           onValueChange={(itemValue: string) => setOrganization(itemValue)}
-          style={{ color: themeColors.text }}
-          dropdownIconColor={themeColors.text}
-        >
-          <Picker.Item label="Select one..." value="" />
-          {organizations.map((org) => (
-            <Picker.Item key={org.id} label={org.name} value={org.id} />
-          ))}
-        </Picker>
+          style={{ inputIOS: { color: themeColors.text, padding: 15, fontSize: 16 }, inputAndroid: { color: themeColors.text, padding: 15, fontSize: 16 } }}
+          items={[
+            ...organizations.map((org) => ({ label: org.name, value: org.id })),
+          ]}
+        />
       </View>
       <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
         You can transfer to any organization you're a part of.
