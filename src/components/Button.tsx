@@ -15,6 +15,7 @@ export interface ButtonProps {
   onPress?: () => void;
   color?: string;
   loading?: boolean;
+  disabled?: boolean;
   icon?: React.ComponentProps<typeof Ionicons>["name"];
 }
 
@@ -45,9 +46,13 @@ export default function Button(
 ) {
   return (
     <Pressable
-      style={{ ...styles.button, ...(props.style as object) }}
+      style={{
+        ...styles.button,
+        ...(props.style as object),
+        opacity: props.disabled ? 0.6 : undefined,
+      }}
       onPress={() => props.onPress && props.onPress()}
-      disabled={props.loading}
+      disabled={props.loading || props.disabled}
     >
       {props.icon && (
         <Ionicons
