@@ -38,6 +38,7 @@ export default function CardsPage({ navigation }: Props) {
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
   const [allCards, setAllCards] = useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
+  const [refreshing] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -82,36 +83,46 @@ export default function CardsPage({ navigation }: Props) {
       fetchFrozenCardsShown();
   
       if (cards && grantCards) {
-        // Transform grantCards
-        const transformedGrantCards = grantCards.map((grantCard) => ({
-          ...grantCard,
-          grant_id: grantCard.id, // Move original id to grant_id
-          id: grantCard.card_id, // Replace id with card_id
-        }));
-    
-        // Filter out cards that are also grantCards
-        const filteredCards = cards.filter(
-          (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
-        );
-    
-        // Combine filtered cards and transformed grantCards
-        const combinedCards = [...filteredCards, ...transformedGrantCards];
-  
-        // Sort cards by status
-        combinedCards.sort((a, b) => {
-          if (a.status == "active" && b.status != "active") {
-            return -1;
-          } else if (a.status != "active" && b.status == "active") {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
-    
-        // Update state
-        setAllCards(combinedCards);
+        combineCards();
       }
     }, [cards, grantCards]);
+
+    const combineCards = () => {
+      // Transform grantCards
+      const transformedGrantCards = grantCards?.map((grantCard) => ({
+        ...grantCard,
+        grant_id: grantCard.id, // Move original id to grant_id
+        id: grantCard.card_id, // Replace id with card_id
+      }));
+  
+      // Filter out cards that are also grantCards
+      const filteredCards = cards?.filter(
+        (card) => !transformedGrantCards?.some((grantCard) => grantCard.id === card.id)
+      );
+  
+      // Combine filtered cards and transformed grantCards
+      const combinedCards = [...(filteredCards || []), ...(transformedGrantCards || [])];
+
+      // Sort cards by status
+      combinedCards.sort((a, b) => {
+        if (a.status == "active" && b.status != "active") {
+          return -1;
+        } else if (a.status != "active" && b.status == "active") {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+  
+      // Update state
+      setAllCards(combinedCards);
+    }
+
+    const onRefresh = async () => {
+      await reloadCards();
+      await reloadGrantCards();
+    }
+  
   
 
   if (allCards) {
@@ -127,8 +138,8 @@ export default function CardsPage({ navigation }: Props) {
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         overScrollMode="never"
-        // onRefresh={() => refresh()}
-        // refreshing={isValidating}
+        onRefresh={() => onRefresh()}
+        refreshing={refreshing}
         renderItem={({ item }) => (
           <Pressable
             onPress={() =>
