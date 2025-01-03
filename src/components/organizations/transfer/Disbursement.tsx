@@ -107,10 +107,11 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
       <Text style={{ color: themeColors.text, fontSize: 18, marginVertical: 12, fontWeight: 'bold' }}>To</Text>
       <View style={{ backgroundColor: themeColors.card, borderRadius: 8, marginBottom: 15 }}>
         <RNPickerSelect
+          placeholder={{ label: 'Select an organization', value: '' }}
           onValueChange={(itemValue: string) => setOrganization(itemValue)}
           style={{ inputIOS: { color: themeColors.text, padding: 15, fontSize: 16 }, inputAndroid: { color: themeColors.text, padding: 15, fontSize: 16 } }}
           items={[
-            ...organizations.map((org) => ({ label: org.name, value: org.id })),
+            ...organizations.filter((org) => org.id !== organization.id).map((org) => ({ label: org.name, value: org.id })),
           ]}
         />
       </View>
