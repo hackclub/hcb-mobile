@@ -83,6 +83,7 @@ function TransactionIcon({
 
 function Transaction({
   transaction,
+  orgId,
   top = false,
   bottom = false,
   hideAvatar,
@@ -92,6 +93,7 @@ function Transaction({
   style,
 }: ViewProps & {
   transaction: TransactionWithoutId;
+  orgId: string;
   top?: boolean;
   bottom?: boolean;
   hideAvatar?: boolean;

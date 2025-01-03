@@ -25,7 +25,7 @@ export default function TransactionTitle({
           textAlign: "center",
           fontSize: 30,
           fontWeight: "700",
-          marginBottom: 30,
+          marginBottom: 20,
         }}
       >
         {children}
