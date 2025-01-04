@@ -1,3 +1,4 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -21,7 +22,6 @@ import { TransactionCardCharge } from "../lib/types/Transaction";
 import p from "../palette";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
-import { useActionSheet } from "@expo/react-native-action-sheet";
 
 function Transaction({
   transaction,
@@ -30,7 +30,6 @@ function Transaction({
   transaction: TransactionCardCharge & { organization: Organization };
   onComplete: () => void;
 }) {
-  const [status, requestPermission] = ImagePicker.useCameraPermissions();
   const { token } = useContext(AuthContext);
 
   const { colors: themeColors } = useTheme();
@@ -73,7 +72,6 @@ function Transaction({
       onComplete();
       Alert.alert("Receipt uploaded!");
     } catch (e) {
-      console.log(e);
       Alert.alert("Something went wrong.");
     }
   };
@@ -239,7 +237,3 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
     />
   );
 }
-function showActionSheetWithOptions(arg0: { options: string[]; cancelButtonIndex: number; }, arg1: (buttonIndex: any) => Promise<void>) {
-  throw new Error("Function not implemented.");
-}
-
