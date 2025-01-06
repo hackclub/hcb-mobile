@@ -1,3 +1,4 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -29,63 +30,103 @@ function Transaction({
   transaction: TransactionCardCharge & { organization: Organization };
   onComplete: () => void;
 }) {
-  const [status, requestPermission] = ImagePicker.useCameraPermissions();
   const { token } = useContext(AuthContext);
 
   const { colors: themeColors } = useTheme();
 
   const [loading, setLoading] = useState(false);
 
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [selectedImage, setSelectedImage] = useState<{
+      uri: string;
+      fileName?: string;
+  } | null>(null);
+
+  const uploadReceipt = async () => {
+    const body = new FormData();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+
+    body.append("file", {
+      uri: selectedImage?.uri,
+      name: selectedImage?.fileName || "yeet.jpg",
+      type: "image/jpeg",
+    });
+
+    try {
+      await fetch(
+        process.env.EXPO_PUBLIC_API_BASE +
+          `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body,
+        },
+      );
+      mutate(
+        `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+      );
+      setLoading(false);
+      onComplete();
+      Alert.alert("Receipt uploaded!");
+    } catch (e) {
+      Alert.alert("Something went wrong.");
+    }
+  };
+
+    const handleActionSheet = () => {
+      const options = ["Camera", "Photo Library", "Cancel"];
+      const cancelButtonIndex = 2;
+  
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+        },
+        async (buttonIndex) => {
+          if (buttonIndex === 0) {
+            // Take a photo
+            ImagePicker.requestCameraPermissionsAsync();
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: "images",
+              allowsEditing: true,
+              quality: 1,
+            });
+            if (!result.canceled) {
+              setSelectedImage({
+                uri: result.assets[0].uri,
+                fileName: result.assets[0].fileName || "",
+              });
+              setLoading(true);
+              await uploadReceipt();
+            }
+          } else if (buttonIndex === 1) {
+            // Pick from photo library
+            ImagePicker.requestMediaLibraryPermissionsAsync();
+            const result = await ImagePicker.launchImageLibraryAsync({
+              allowsEditing: true,
+              quality: 1,
+            });
+            if (!result.canceled) {
+              setSelectedImage({
+                uri: result.assets[0].uri,
+                fileName: result.assets[0].fileName || "",
+              });
+              setLoading(true);
+              await uploadReceipt();
+            }
+          }
+        },
+      );
+    };
+  
+
   return (
     <TouchableHighlight
       underlayColor={themeColors.background}
-      onPress={async () => {
-        if (!status?.granted) {
-          const { granted } = await requestPermission();
-          if (!granted) return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        });
-
-        if (result.canceled || result.assets.length == 0) return;
-        const asset = result.assets[0];
-
-        setLoading(true);
-
-        const body = new FormData();
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        body.append("file", {
-          uri: asset.uri,
-          name: asset.fileName || "yeet.jpg",
-          type: "image/jpeg",
-        });
-
-        try {
-          await fetch(
-            process.env.EXPO_PUBLIC_API_BASE +
-              `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              body,
-            },
-          );
-        } catch (e) {
-          Alert.alert("Something went wrong.");
-        } finally {
-          setLoading(false);
-        }
-
-        onComplete();
-
-        Alert.alert("Receipt uploaded!");
-      }}
+      onPress={handleActionSheet}
     >
       <View
         style={{

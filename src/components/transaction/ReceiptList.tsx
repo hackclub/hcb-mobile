@@ -111,7 +111,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           // Take a photo
           ImagePicker.requestCameraPermissionsAsync();
           const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: "images",
             allowsEditing: true,
             quality: 1,
           });
