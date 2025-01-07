@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -82,6 +82,7 @@ function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
+  const scheme = useColorScheme();
 
   const color = orgColor(event.id);
 
@@ -163,6 +164,11 @@ function Event({
             >
               {event.name}
             </Text>
+            { data?.playground_mode && (
+                <View style={{backgroundColor: scheme == "dark" ? "#283140" : "#348EDA", paddingVertical: 4, paddingHorizontal: 12, borderRadius: 20, alignSelf: "flex-start", marginVertical: 4}}>
+                  <Text style={{color: scheme == "dark" ? "#248EDA" : "white", fontSize: 12, fontWeight: "bold"}}>Playground Mode</Text>
+                </View>
+            )}
             {!hideBalance && (
               <EventBalance balance_cents={data?.balance_cents} />
             )}
@@ -178,6 +184,7 @@ function Event({
             {transactions.data.map((tx, index) => (
               <Transaction
                 transaction={tx}
+                orgId={event.id}
                 key={tx.id}
                 bottom={index == transactions.data.length - 1}
                 hideMissingReceipt
