@@ -64,9 +64,9 @@ export default function App() {
   const scheme = useColorScheme();
 
   const fetcher = useCallback(
-    async (url: string) => {
+    async (url: string, options: any) => {
       try {
-        return await hcb(url).json();
+        return await hcb(url, options).json();
       } catch (error) {
         if (
           error.name === "HTTPError" &&

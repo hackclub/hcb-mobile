@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, useColorScheme, View } from "react-native";
 
 import Organization from "../../lib/types/Organization";
 import { palette } from "../../theme";
@@ -8,11 +8,15 @@ export default function PlaygroundBanner({
 }: {
   organization: Organization;
 }) {
+
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+
   return (
     <View
       style={{
-        backgroundColor: "rgb(43, 65, 95)",
-        borderColor: "rgb(52, 152, 219)", 
+        backgroundColor: isDark ? "rgb(43, 65, 95)" : "rgb(52, 152, 219)",
+        borderColor: isDark ? "rgb(52, 152, 219)" : "rgb(52, 152, 219)", 
         borderWidth: 2,
         borderStyle: "dotted",
         padding: 10,

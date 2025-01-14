@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -247,7 +247,15 @@ export default function App({ navigation }: Props) {
   const onRefresh = () => {
     reloadOrganizations();
     reloadInvitations();
+    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
   }
+
+  useFocusEffect(() => {
+    reloadOrganizations();
+    reloadInvitations();
+    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
+  });
+
 
   if (error) {
     return (
@@ -275,15 +283,25 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-      {organizations && (
+    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
+     {organizations && (
         <FlatList
+          scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
             padding: 20,
             paddingBottom: tabBarHeight,
           }}
+          contentInsetAdjustmentBehavior="automatic"
           data={sortedOrgs}
-          keyExtractor={(item) => item.id.toString()} 
+          style={{ flex: 1 }}
+          // refreshing={isValidating}
+          // onRefresh={() => {
+          //   mutate(
+          //     (key: string) =>
+          //       key?.startsWith("/organizations/") ||
+          //       key == "/user/organizations",
+          //   );
+          // }}
           ListHeaderComponent={() =>
             invitations &&
             invitations.length > 0 && (
