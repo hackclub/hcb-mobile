@@ -9,6 +9,8 @@ export enum TransactionType {
   Donation = "200",
   PartnerDonation = "201",
   AchTransfer = "300",
+  Wire = "310",
+  Paypal = "350",
   Check = "400",
   IncreaseCheck = "401",
   CheckDeposit = "402",
@@ -18,6 +20,7 @@ export enum TransactionType {
   BankFee = "700",
   IncomingBankFee = "701",
   FeeRevenue = "702",
+  ExpensePayout = "710",
   AchPayment = "800",
 }
 
@@ -72,6 +75,7 @@ export interface TransactionDonation extends TransactionBase {
 
 export interface Check {
   recipient_name: string;
+  recipient_email?: string;
   memo: string;
   payment_for: string;
   status?:
@@ -83,6 +87,12 @@ export interface Check {
     | "canceled"
     | "returned";
   sender?: User;
+  address_line1: string;
+  address_line2?: string;
+  address_city: string;
+  address_state: string;
+  address_zip: string;
+  check_number?: string;
 }
 
 export interface TransactionCheck extends TransactionBase {

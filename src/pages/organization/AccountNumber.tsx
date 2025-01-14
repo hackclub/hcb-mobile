@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
+import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, StatusBar, Button } from "react-native";
 import useSWR from "swr";
@@ -75,11 +76,13 @@ export default function AccountNumberPage({
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Button
-          title="Done"
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
+        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
+          <Button
+            title="Done"
+            color={palette.primary}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
       ),
     });
   }, []);

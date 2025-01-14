@@ -84,13 +84,13 @@ export default function TransactionDetails({
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
-                alignItems: "center",
+                alignItems: "flex-start",
                 padding: 10,
                 borderTopLeftRadius: index == 0 ? 8 : 0,
                 borderTopRightRadius: index == 0 ? 8 : 0,
                 borderBottomLeftRadius: index == details.length - 1 ? 8 : 0,
                 borderBottomRightRadius: index == details.length - 1 ? 8 : 0,
-                maxHeight: 40,
+                maxHeight: 70,
               }}
             >
               <Text style={{ color: palette.muted, marginRight: 10 }}>
@@ -98,7 +98,7 @@ export default function TransactionDetails({
               </Text>
               {typeof value == "string" ? (
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={{
                     color: themeColors.text,
                     overflow: "hidden",

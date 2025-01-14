@@ -23,6 +23,7 @@ import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
 import OrganizationSettingsPage from "./pages/organization/Settings";
+import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
@@ -71,6 +72,7 @@ export default function Navigator() {
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         tabBarStyle: { position: "absolute" },
+        tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
           <BlurView
             tint={scheme == "dark" ? "dark" : "light"}
@@ -178,6 +180,14 @@ export default function Navigator() {
                 title: "Edit Transaction Description",
               }}
             />
+            <Stack.Screen
+              name="Transfer"
+              component={TransferPage}
+              options={{
+                presentation: "modal",
+                title: "Send Transfer",
+              }}
+            />
           </Stack.Navigator>
         )}
       </Tab.Screen>
@@ -193,7 +203,7 @@ export default function Navigator() {
               name="Card"
               component={CardPage}
               options={({ route }) => ({
-                title: `Card ····${route.params.card.last4}`,
+                title: "Card",
               })}
             />
             <Stack.Screen

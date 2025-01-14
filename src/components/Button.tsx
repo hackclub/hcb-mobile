@@ -15,8 +15,8 @@ export interface ButtonProps {
   onPress?: () => void;
   color?: string;
   loading?: boolean;
-  icon?: React.ComponentProps<typeof Ionicons>["name"];
   disabled?: boolean;
+  icon?: React.ComponentProps<typeof Ionicons>["name"];
 }
 
 const styles = StyleSheet.create({

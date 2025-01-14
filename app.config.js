@@ -1,5 +1,4 @@
-import { appIconConfig } from "./src/lib/AppIconList";
-
+import appIcons from "./src/lib/AppIconList";
 const IS_DEV = process.env.APP_VARIANT === "development";
 
 export default {
@@ -19,9 +18,9 @@ export default {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.11",
+      buildNumber: "1.0.0.15",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -31,7 +30,6 @@ export default {
       ],
       entitlements: {
         "com.apple.developer.proximity-reader.payment.acceptance": true,
-        // I'm not entirely sure what to do here
       }
     },
     android: {
@@ -56,6 +54,7 @@ export default {
         "expo-image-picker",
         {
           cameraPermission: "Allow HCB to take photos of receipts",
+          photosPermission: "Allow HCB to access your photos for receipts",
         },
       ],
       [
@@ -65,7 +64,6 @@ export default {
         },
       ],
       "expo-secure-store",
-      ["@config-plugins/react-native-dynamic-app-icon", appIconConfig],
       [
         "expo-local-authentication",
         { faceIDPermission: "Allow $(PRODUCT_NAME) to use Face ID." },
@@ -85,7 +83,11 @@ export default {
           android: {
             minSdkVersion: 26
           }
-        }
+        },
+      ],
+      [
+        "expo-alternate-app-icons",
+        appIcons
       ],
     ],
   },
