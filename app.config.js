@@ -57,12 +57,6 @@ export default {
           photosPermission: "Allow HCB to access your photos for receipts",
         },
       ],
-      [
-        "expo-font",
-        {
-          fonts: ["./assets/fonts/JetBrainsMono-Regular.ttf"],
-        },
-      ],
       "expo-secure-store",
       [
         "expo-local-authentication",

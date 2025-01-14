@@ -4,7 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -14,6 +14,8 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
 
@@ -218,6 +220,7 @@ export default function App({ navigation }: Props) {
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
+  const [refreshing] = useState(false);
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
@@ -228,7 +231,17 @@ export default function App({ navigation }: Props) {
     preload("user", fetcher!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     preload("user/cards", fetcher!);
+    // prefetch all user organization details
+    for (const org of organizations || []) {
+      preload(`organizations/${org.id}`, fetcher!);
+    }
   }, []);
+
+  const onRefresh = () => {
+    reloadOrganizations();
+    reloadInvitations();
+    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
+  }
 
   useFocusEffect(() => {
     reloadOrganizations();
@@ -263,8 +276,8 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      {organizations && (
+    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
+     {organizations && (
         <FlatList
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
@@ -373,6 +386,6 @@ export default function App({ navigation }: Props) {
           }
         />
       )}
-    </View>
+    </ScrollView>
   );
 }
