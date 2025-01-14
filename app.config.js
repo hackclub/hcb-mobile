@@ -18,7 +18,7 @@ export default {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       buildNumber: "1.0.0.15",
       config: {
@@ -28,6 +28,9 @@ export default {
         "applinks:hcb.hackclub.com",
         "applinks:bank.hackclub.com",
       ],
+      entitlements: {
+        "com.apple.developer.proximity-reader.payment.acceptance": true,
+      }
     },
     android: {
       icon: "./assets/app-icon.png",
@@ -54,19 +57,27 @@ export default {
           photosPermission: "Allow HCB to access your photos for receipts",
         },
       ],
-      [
-        "expo-font",
-        {
-          fonts: [
-            "./assets/fonts/JetBrainsMono-Regular.ttf",
-            "./assets/fonts/JetBrainsMono-Bold.ttf",
-          ],
-        },
-      ],
       "expo-secure-store",
       [
         "expo-local-authentication",
         { faceIDPermission: "Allow $(PRODUCT_NAME) to use Face ID." },
+      ],
+      [
+        "@stripe/stripe-terminal-react-native",
+        {
+          "bluetoothBackgroundMode": true,
+          "locationWhenInUsePermission": "Location access is required in order to accept payments.",
+          "bluetoothPeripheralPermission": "Bluetooth access is required in order to connect to supported bluetooth card readers.",
+          "bluetoothAlwaysUsagePermission": "This app uses Bluetooth to connect to supported card readers."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 26
+          }
+        },
       ],
       [
         "expo-alternate-app-icons",

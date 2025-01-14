@@ -29,6 +29,8 @@ import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
+import OrganizationDonationPage from "./pages/organization/Donation";
+import ProcessDonationPage from "./pages/organization/ProcessDonation";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -151,6 +153,19 @@ export default function Navigator() {
                 headerBackTitle: "Back",
                 title: "Manage Organization",
               }}
+            />
+            <Stack.Screen
+              name="OrganizationDonation"
+              component={OrganizationDonationPage}
+              options={{
+                headerBackTitle: "Back",
+                title: "Collect Donations",
+              }}
+            />
+            <Stack.Screen
+              name="ProcessDonation"
+              component={ProcessDonationPage}
+              options={{ presentation: "modal", title: "Process Donation" }}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}

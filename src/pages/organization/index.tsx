@@ -118,6 +118,11 @@ export default function OrganizationPage({
         image: "gearshape",
       });
 
+      // menuActions.push({
+      //   id: "donation",
+      //   title: "Collect Donations",
+      //   image: "dollarsign.circle",
+      // });
 
       navigation.setOptions({
         headerRight: () => (
@@ -133,6 +138,11 @@ export default function OrganizationPage({
                 navigation.navigate("OrganizationSettings", {
                   orgId: organization.id,
                 });
+              } else if (event == "donation") {
+                navigation.navigate("OrganizationDonation", {
+                  orgId: organization.id,
+                });
+
               } else if (event == "transfer") {
                 navigation.navigate("Transfer", { organization: organization });
               }
