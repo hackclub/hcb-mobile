@@ -2,6 +2,7 @@ import "expo-dev-client";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
@@ -62,7 +63,8 @@ export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const hcb = useClient(token);
   const scheme = useColorScheme();
-
+  useStripeTerminal()
+  
   const fetcher = useCallback(
     async (url: string, options: any) => {
       try {

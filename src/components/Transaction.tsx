@@ -3,7 +3,7 @@ import { faPaypal } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "hackclub-icons-rn";
+import Icon from "@hackclub/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 import { match } from "ts-pattern";
