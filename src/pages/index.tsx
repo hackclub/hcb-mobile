@@ -242,7 +242,8 @@ export default function App({ navigation }: Props) {
     for (const org of organizations || []) {
       preload(`organizations/${org.id}`, fetcher!);
     }
-  }, []);
+  }), [];
+
 
   const onRefresh = () => {
     reloadOrganizations();

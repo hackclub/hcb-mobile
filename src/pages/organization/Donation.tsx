@@ -233,6 +233,7 @@ function PageContent({ orgId, orgName, navigation }: any) {
           donation: "true"
         },
         statementDescriptor: `HCB* ${orgName || "DONATION"}`.substring(0, 22),
+        receiptEmail: email,
       })
 
       if (error) {
@@ -435,8 +436,8 @@ function PageContent({ orgId, orgName, navigation }: any) {
       <View style={{
         flexDirection: "column",
         display: "flex",
-        alignItems: "start",
-        justifyContent: "center",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
         marginBottom: 10,
 
       }}>
@@ -444,10 +445,12 @@ function PageContent({ orgId, orgName, navigation }: any) {
         <View style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "flex-start",
           gap: 20
         }}>
-          <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
-
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -479,11 +482,13 @@ function PageContent({ orgId, orgName, navigation }: any) {
         <View style={{
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "flex-start",
           gap: 20,
           marginTop: 10
         }}>
-          <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
-
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -519,6 +524,10 @@ function PageContent({ orgId, orgName, navigation }: any) {
       {connectedReader ? (
         <Button
           onPress={async () => {
+            if (!email.includes("@") || !email.includes(".")) {
+              Alert.alert("Please provide a valid email address")
+              return
+            }
             const donation_id = await createDonation();
             await paymentIntent({ donation_id });
           }}
