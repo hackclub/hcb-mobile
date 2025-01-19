@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { faPaypal } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import Icon from "@hackclub/hackclub-icons-rn";
 import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "@hackclub/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 import { match } from "ts-pattern";
@@ -18,10 +18,7 @@ import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
 
-function transactionIcon({
-  code,
-  ...transaction
-}: TransactionWithoutId) {
+function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
     case TransactionType.Donation:
     case TransactionType.PartnerDonation:
@@ -87,11 +84,13 @@ function TransactionIcon({
     );
   } else {
     if (transactionIcon(transaction) == "paypal") {
-      return <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
-    }
-    else {
+      return (
+        <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
+      );
+    } else {
       return (
         <Icon
+          // @ts-expect-error it is checked above
           glyph={transactionIcon(transaction)}
           color={
             transaction.appearance == "hackathon_grant"
@@ -107,7 +106,7 @@ function TransactionIcon({
 
 function Transaction({
   transaction,
-  orgId,
+  // orgId,
   top = false,
   bottom = false,
   hideAvatar,

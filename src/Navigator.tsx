@@ -22,6 +22,8 @@ import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
+import OrganizationDonationPage from "./pages/organization/Donation";
+import ProcessDonationPage from "./pages/organization/ProcessDonation";
 import OrganizationSettingsPage from "./pages/organization/Settings";
 import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
@@ -29,8 +31,6 @@ import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
-import OrganizationDonationPage from "./pages/organization/Donation";
-import ProcessDonationPage from "./pages/organization/ProcessDonation";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -202,7 +202,7 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={({ route }) => ({
+              options={() => ({
                 title: "Card",
               })}
             />

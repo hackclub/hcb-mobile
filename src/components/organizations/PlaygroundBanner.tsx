@@ -1,14 +1,8 @@
 import { Text, useColorScheme, View } from "react-native";
 
-import Organization from "../../lib/types/Organization";
 import { palette } from "../../theme";
 
-export default function PlaygroundBanner({
-  organization,
-}: {
-  organization: Organization;
-}) {
-
+export default function PlaygroundBanner() {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
@@ -16,7 +10,7 @@ export default function PlaygroundBanner({
     <View
       style={{
         backgroundColor: isDark ? "rgb(43, 65, 95)" : "rgb(52, 152, 219)",
-        borderColor: isDark ? "rgb(52, 152, 219)" : "rgb(52, 152, 219)", 
+        borderColor: isDark ? "rgb(52, 152, 219)" : "rgb(52, 152, 219)",
         borderWidth: 2,
         borderStyle: "dotted",
         padding: 10,
@@ -30,11 +24,14 @@ export default function PlaygroundBanner({
           justifyContent: "center",
         }}
       >
-        <Text style={{ color: palette.smoke, fontWeight: "bold", marginBottom: 5 }}>
+        <Text
+          style={{ color: palette.smoke, fontWeight: "bold", marginBottom: 5 }}
+        >
           Playground Mode
         </Text>
         <Text style={{ color: palette.smoke, flex: 1, textAlign: "center" }}>
-          To raise & spend money, wait for your organization&apos;s account to be activated by a staff member.
+          To raise & spend money, wait for your organization&apos;s account to
+          be activated by a staff member.
         </Text>
         {/* <Button
           title="Activate"
