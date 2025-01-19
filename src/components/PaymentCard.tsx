@@ -79,7 +79,7 @@ export default function PaymentCard({
     if (onCardLoad) {
       onCardLoad(card.id, { width: svgWidth, height: svgHeight });
     }
-  }, []);
+  }, [card.id, onCardLoad, svgHeight, svgWidth]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(

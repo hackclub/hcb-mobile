@@ -122,7 +122,7 @@ export function PageStripe() {
 
       if (error) {
         console.log("Error collecting payment", error);
-        Alert.alert("Error collecting payment", error.message);
+          Alert.alert("Error collecting payment", error.message);
         return;
       }
 

@@ -62,7 +62,7 @@ export default function CardPage({
     navigation.setOptions({
       title: cardName,
     });
-  }, [cardName]);
+  }, [cardName, navigation]);
 
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];

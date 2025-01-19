@@ -66,7 +66,7 @@ export default function Login() {
         })
         .catch(() => setLoading(false));
     }
-  }, [response]);
+  }, [response, request, setToken]);
 
   const animation = useRef(new Animated.Value(0)).current;
 
