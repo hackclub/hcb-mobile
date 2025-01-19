@@ -90,6 +90,7 @@ function TransactionIcon({
     } else {
       return (
         <Icon
+          // @ts-expect-error it is checked above
           glyph={transactionIcon(transaction)}
           color={
             transaction.appearance == "hackathon_grant"

@@ -46,7 +46,7 @@ export default function CheckComponent({
     `organizations/${orgId}`,
   );
 
-  const scheme = useColorScheme(); // Detects the color scheme (light or dark)
+  const scheme = useColorScheme() || "light"; // Detects the color scheme (light or dark)
 
   const renderMoneyAmount = (amount: number): string => `$${amount.toFixed(2)}`;
   const toWords = new ToWords({

@@ -8,7 +8,7 @@ export default function asyncStorageProvider() {
     try {
       const appCache = await AsyncStorage.getItem("app-cache");
       if (appCache) {
-        JSON.parse(appCache).forEach(([key, value]) => {
+        JSON.parse(appCache).forEach(([key, value]: [string, unknown]) => {
           map.set(key, value);
         });
       }

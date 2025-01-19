@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Constants from "expo-constants";
+// @ts-expect-error will be removed later
 import * as Geopattern from "geopattern";
 import { useEffect, useRef, useState } from "react";
 import {

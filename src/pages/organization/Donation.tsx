@@ -45,7 +45,8 @@ export default function OrganizationDonationPage({
 
   const fetchTokenProvider = async () => {
     const result = await fetcher!("stripe_terminal_connection_token");
-    const token = (result as { terminal_connection_token: { secret: string } }).terminal_connection_token;
+    const token = (result as { terminal_connection_token: { secret: string } })
+      .terminal_connection_token;
     return token.secret;
   };
 
@@ -135,7 +136,7 @@ function PageContent({
   orgName,
   navigation,
 }: {
-  orgId: string;
+  orgId: `org_${string}`;
   orgName?: string;
   navigation: NavigationProp<StackParamList>;
 }) {
@@ -287,7 +288,9 @@ function PageContent({
     }
   }
 
-  async function collectPayment(localPayment: PaymentIntent.Type): Promise<boolean> {
+  async function collectPayment(
+    localPayment: PaymentIntent.Type,
+  ): Promise<boolean> {
     // setLoadingCollectPayment(true);
     console.log(localPayment);
     let output: boolean;
@@ -419,7 +422,9 @@ function PageContent({
           <Button
             onPress={async () => {
               if (!connectedReader) {
-                return await connectReader(reader);
+                if (reader) {
+                  return await connectReader(reader);
+                }
               }
             }}
             style={{
@@ -458,7 +463,7 @@ function PageContent({
         style={{
           flexDirection: "column",
           display: "flex",
-          alignItems: "start",
+          alignItems: "flex-start",
           justifyContent: "center",
           marginBottom: 10,
         }}
@@ -550,7 +555,7 @@ function PageContent({
           Create donation
         </Button>
       ) : (
-        <Button onPress={() => connectReader(reader)}>
+        <Button onPress={() => reader && connectReader(reader)}>
           Reconnect reader reader
         </Button>
       )}
@@ -565,7 +570,13 @@ function PageContent({
   );
 }
 
-function Keyboard({ amount, setAmount }: { amount: string; setAmount: (value: string) => void }) {
+function Keyboard({
+  amount,
+  setAmount,
+}: {
+  amount: string;
+  setAmount: (value: string) => void;
+}) {
   const [error, setError] = useState(false);
   const theme = useTheme();
   function pressNumber(amount: string, number: number) {

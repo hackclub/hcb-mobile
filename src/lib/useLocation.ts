@@ -1,4 +1,7 @@
-import Geolocation, { GeolocationError, GeolocationResponse } from "@react-native-community/geolocation";
+import Geolocation, {
+  GeolocationError,
+  GeolocationResponse,
+} from "@react-native-community/geolocation";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { useCallback, useState } from "react";
@@ -6,7 +9,10 @@ import { PermissionsAndroid, Platform } from "react-native";
 
 export function useLocation() {
   const [accessDenied, setAccessDenied] = useState<boolean>(false);
-  const [location, setLocation] = useState<{ latitude: string; longitude: string } | null>(null);
+  const [location, setLocation] = useState<{
+    latitude: string;
+    longitude: string;
+  } | null>(null);
 
   async function requestLocationPermission() {
     try {

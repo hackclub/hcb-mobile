@@ -12,7 +12,7 @@ export type StackParamList = {
   AccountNumber: { orgId: Organization["id"] };
   ProcessDonation: {
     orgId: Organization["id"];
-    payment: { amount: number; method: string };
+    payment: { amount: number };
     collectPayment: () => Promise<boolean>;
     name: string;
     email: string;

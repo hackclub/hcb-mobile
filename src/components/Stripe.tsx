@@ -1,4 +1,7 @@
-import { Reader, useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import {
+  Reader,
+  useStripeTerminal,
+} from "@stripe/stripe-terminal-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -77,7 +80,6 @@ export function PageStripe() {
       }
 
       Alert.alert("Reader connected successfully");
-
     } catch (error) {
       console.log(error);
     } finally {
@@ -143,7 +145,7 @@ export function PageStripe() {
     setLoadingConfirmPayment(true);
     console.log("foo", { payment });
     try {
-      const { error,  } = await confirmPaymentIntent({
+      const { error } = await confirmPaymentIntent({
         // @ts-expect-error works without extra PaymentIntent props
         paymentIntent: payment,
       });
@@ -225,7 +227,13 @@ export function PageStripe() {
           </View>
 
           <Button
-            onPress={() => connectReader(reader)}
+            onPress={() => {
+              if (reader) {
+                connectReader(reader);
+              } else {
+                Alert.alert("No reader available");
+              }
+            }}
             loading={loadingConnectingReader}
           >
             Connecting with the reader{"disabled" + !!connectedReader}
@@ -239,10 +247,7 @@ export function PageStripe() {
             Collect payment{"disabled" + !connectedReader}
           </Button>
 
-          <Button
-            onPress={confirmPayment}
-            loading={loadingConfirmPayment}
-          >
+          <Button onPress={confirmPayment} loading={loadingConfirmPayment}>
             Confirm payment
           </Button>
         </View>

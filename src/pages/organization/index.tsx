@@ -213,9 +213,7 @@ export default function OrganizationPage({
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
-              {organization?.playground_mode && (
-                <PlaygroundBanner organization={organization} />
-              )}
+              {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{
                   display: "flex",

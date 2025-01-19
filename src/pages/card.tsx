@@ -45,7 +45,7 @@ export default function CardPage({
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
 
-  const { data: card } = useSWR<Card>(`cards/${_card.id}`, {
+  const { data: card = _card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
   const [cardName, setCardName] = useState(_card.name);
@@ -126,7 +126,7 @@ export default function CardPage({
             gap: 20,
           }}
         >
-          {(!card.status == "expired" || !isGrantCard) && (
+          {(card.status !== "expired" || !isGrantCard) && (
             <Button
               style={{
                 flexBasis: 0,
@@ -311,6 +311,7 @@ export default function CardPage({
                 top={index == 0}
                 bottom={index == transactions.data.length - 1}
                 hideAvatar
+                orgId={card.organization.id}
               />
             </TouchableHighlight>
           ))}

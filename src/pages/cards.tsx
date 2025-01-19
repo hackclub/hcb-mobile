@@ -125,6 +125,7 @@ export default function CardsPage({ navigation }: Props) {
     });
 
     // Update state
+    // @ts-expect-error both types have the same properties that are used
     setAllCards(combinedCards);
   };
 
