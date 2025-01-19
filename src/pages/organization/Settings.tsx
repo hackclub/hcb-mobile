@@ -102,9 +102,12 @@ export default function OrganizationSettingsPage({
                 }}
               >
                 <Text
-                  style={{ color: themeColors.text, fontSize: 18, flexShrink: 1 }}
+                  style={{
+                    color: themeColors.text,
+                    fontSize: 18,
+                    flexShrink: 1,
+                  }}
                   numberOfLines={1}
-                  
                 >
                   {user.name}
                 </Text>

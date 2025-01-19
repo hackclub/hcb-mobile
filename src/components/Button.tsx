@@ -46,11 +46,17 @@ export default function Button(
 ) {
   return (
     <Pressable
-      style={{ ...styles.button, ...(props.style as object), ...(props.disabled ? {
-        backgroundColor: palette.muted,
-        borderColor: palette.muted,
-        opacity: 0.6
-      } : {}) }}
+      style={{
+        ...styles.button,
+        ...(props.style as object),
+        ...(props.disabled
+          ? {
+              backgroundColor: palette.muted,
+              borderColor: palette.muted,
+              opacity: 0.6,
+            }
+          : {}),
+      }}
       onPress={() => props.onPress && props.onPress()}
       disabled={props.loading || props.disabled}
     >

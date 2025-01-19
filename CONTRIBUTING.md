@@ -1,4 +1,5 @@
 # Contributing
+
 Thank you for choosing to contribute to HCB Mobile! Please follow the guidelines before on how to contribute.
 
 - Use the PR template

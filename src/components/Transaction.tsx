@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { faPaypal } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "hackclub-icons-rn";
@@ -18,10 +18,7 @@ import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
 
-function transactionIcon({
-  code,
-  ...transaction
-}: TransactionWithoutId) {
+function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
     case TransactionType.Donation:
     case TransactionType.PartnerDonation:
@@ -87,9 +84,10 @@ function TransactionIcon({
     );
   } else {
     if (transactionIcon(transaction) == "paypal") {
-      return <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
-    }
-    else {
+      return (
+        <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
+      );
+    } else {
       return (
         <Icon
           glyph={transactionIcon(transaction)}
@@ -107,7 +105,7 @@ function TransactionIcon({
 
 function Transaction({
   transaction,
-  orgId,
+  // orgId,
   top = false,
   bottom = false,
   hideAvatar,

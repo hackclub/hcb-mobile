@@ -58,4 +58,5 @@ EXPO_PUBLIC_CLIENT_ID=<uid field from the Doorkeeper app>
    - Bonus task: painfully watch Gradle attempt to work
 
 ## Contributing
+
 Please see [CONTRIBUTING.md](CONTRIBUTING.md).

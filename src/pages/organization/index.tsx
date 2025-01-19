@@ -78,11 +78,12 @@ export default function OrganizationPage({
     loadMore,
     isLoading,
   } = useTransactions(orgId);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing] = useState(false);
 
   useEffect(() => {
     if (organization && user) {
-      const isManager = "users" in organization &&
+      const isManager =
+        "users" in organization &&
         organization.users.some(
           (u) => u.id === user?.id && u.role === "manager",
         );
@@ -110,7 +111,7 @@ export default function OrganizationPage({
           title: "Transfer Money",
           image: "dollarsign.circle",
         });
-      } 
+      }
 
       menuActions.push({
         id: "settings",
@@ -142,7 +143,6 @@ export default function OrganizationPage({
                 navigation.navigate("OrganizationDonation", {
                   orgId: organization.id,
                 });
-
               } else if (event == "transfer") {
                 navigation.navigate("Transfer", { organization: organization });
               }
@@ -181,11 +181,11 @@ export default function OrganizationPage({
       })),
     [transactions],
   );
-  
+
   const onRefresh = () => {
     mutate("organizations");
     mutate(`organizations/${orgId}`);
-  }
+  };
 
   if (organizationLoading || userLoading) {
     return <ActivityIndicator />;
@@ -216,7 +216,7 @@ export default function OrganizationPage({
               {organization?.playground_mode && (
                 <PlaygroundBanner organization={organization} />
               )}
-               <View
+              <View
                 style={{
                   display: "flex",
                   flexDirection: "row",

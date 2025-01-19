@@ -1,7 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Button as NativeButton, View, ScrollView, Platform } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Button as NativeButton,
+  View,
+  ScrollView,
+  Platform,
+} from "react-native";
 
 import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -11,7 +17,9 @@ import { palette } from "../../theme";
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 
 export default function TransferPage({ navigation, route }: Props) {
-  const { organization } = route.params as { organization: OrganizationExpanded }; // Grab the organization value from the route params
+  const { organization } = route.params as {
+    organization: OrganizationExpanded;
+  }; // Grab the organization value from the route params
 
   useEffect(() => {
     navigation.setOptions({
@@ -25,9 +33,12 @@ export default function TransferPage({ navigation, route }: Props) {
         </View>
       ),
     });
-  }, []);
+  }, [navigation]);
 
-  const [transferType, setTransferType] = useState<"ach" | "check" | "hcb">("hcb");
+  const [transferType, setTransferType] = useState<"ach" | "check" | "hcb">(
+    "hcb",
+  );
+  setTransferType("hcb");
 
   return (
     <KeyboardAvoidingView
@@ -70,7 +81,9 @@ export default function TransferPage({ navigation, route }: Props) {
         </View> */}
 
         {/* Display transfer screen based on transfer type */}
-        {transferType === "hcb" && <DisbursementScreen organization={organization} />}
+        {transferType === "hcb" && (
+          <DisbursementScreen organization={organization} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

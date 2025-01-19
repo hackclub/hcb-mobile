@@ -38,11 +38,12 @@ export default function PaymentCard({
 }: ViewProps & {
   card: Card;
   details?: CardDetails;
-  onCardLoad?: (cardId: string, dimensions: { width: number; height: number }) => void;
+  onCardLoad?: (
+    cardId: string,
+    dimensions: { width: number; height: number },
+  ) => void;
 }) {
   const { colors: themeColors, dark } = useTheme();
-
-  console.log("PaymentCard", card);
 
   const patternForMeasurements = Geopattern.generate(card.id, {
     scalePattern: 1.1,
@@ -51,8 +52,7 @@ export default function PaymentCard({
 
   const pattern = Geopattern.generate(card.id, {
     scalePattern: 1.1,
-    grayscale:
-      card.status == "active" ? false : true,
+    grayscale: card.status == "active" ? false : true,
   }).toDataUri();
 
   const extractDimensions = (svg: string) => {
@@ -73,7 +73,6 @@ export default function PaymentCard({
   if ((card as GrantCard).amount_cents) {
     card.type = "virtual";
   }
-
 
   useEffect(() => {
     if (onCardLoad) {
@@ -122,11 +121,14 @@ export default function PaymentCard({
           }}
         >
           {Constants.platform?.android ? (
-            <SvgXml xml={patternForMeasurements} width={svgWidth} height={svgHeight} />
+            <SvgXml
+              xml={patternForMeasurements}
+              width={svgWidth}
+              height={svgHeight}
+            />
           ) : (
             <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
-          )
-          }
+          )}
         </View>
       )}
 
@@ -158,7 +160,7 @@ export default function PaymentCard({
         <View>
           <Text
             style={{
-              color: 'white',
+              color: "white",
               fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,

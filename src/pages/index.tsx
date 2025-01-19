@@ -164,10 +164,27 @@ function Event({
             >
               {event.name}
             </Text>
-            { data?.playground_mode && (
-                <View style={{backgroundColor: scheme == "dark" ? "#283140" : "#348EDA", paddingVertical: 4, paddingHorizontal: 12, borderRadius: 20, alignSelf: "flex-start", marginVertical: 4}}>
-                  <Text style={{color: scheme == "dark" ? "#248EDA" : "white", fontSize: 12, fontWeight: "bold"}}>Playground Mode</Text>
-                </View>
+            {data?.playground_mode && (
+              <View
+                style={{
+                  backgroundColor: scheme == "dark" ? "#283140" : "#348EDA",
+                  paddingVertical: 4,
+                  paddingHorizontal: 12,
+                  borderRadius: 20,
+                  alignSelf: "flex-start",
+                  marginVertical: 4,
+                }}
+              >
+                <Text
+                  style={{
+                    color: scheme == "dark" ? "#248EDA" : "white",
+                    fontSize: 12,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Playground Mode
+                </Text>
+              </View>
             )}
             {!hideBalance && (
               <EventBalance balance_cents={data?.balance_cents} />
@@ -248,14 +265,13 @@ export default function App({ navigation }: Props) {
     reloadOrganizations();
     reloadInvitations();
     mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-  }
+  };
 
   useFocusEffect(() => {
     reloadOrganizations();
     reloadInvitations();
     mutate((k) => typeof k === "string" && k.startsWith("organizations"));
   });
-
 
   if (error) {
     return (
@@ -283,8 +299,14 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollView style={{ flex: 1, flexGrow: 1, }} contentInsetAdjustmentBehavior="automatic" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}> 
-     {organizations && (
+    <ScrollView
+      style={{ flex: 1, flexGrow: 1 }}
+      contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {organizations && (
         <FlatList
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
           contentContainerStyle={{
