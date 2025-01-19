@@ -75,41 +75,41 @@ export default function CardsPage({ navigation }: Props) {
   }, [navigation, frozenCardsShown, scheme]);
 
   const combineCards = useCallback(() => {
-      // Transform grantCards
-      const transformedGrantCards = grantCards?.map((grantCard) => ({
-        ...grantCard,
-        grant_id: grantCard.id, // Move original id to grant_id
-        id: grantCard.card_id, // Replace id with card_id
-      }));
-  
-      // Filter out cards that are also grantCards
-      const filteredCards = cards?.filter(
-        (card) =>
-          !transformedGrantCards?.some((grantCard) => grantCard.id === card.id),
-      );
-  
-      // Combine filtered cards and transformed grantCards
-      const combinedCards = [
-        ...(filteredCards || []),
-        ...(transformedGrantCards || []),
-      ];
-  
-      // Sort cards by status
-      combinedCards.sort((a, b) => {
-        if (a.status == "active" && b.status != "active") {
-          return -1;
-        } else if (a.status != "active" && b.status == "active") {
-          return 1;
-        } else {
-          return 0;
-        }
-      });
-  
-      // Update state
-      // @ts-expect-error both types have the same properties that are used
-      setAllCards(combinedCards);
-    }, [cards, grantCards]);
-  
+    // Transform grantCards
+    const transformedGrantCards = grantCards?.map((grantCard) => ({
+      ...grantCard,
+      grant_id: grantCard.id, // Move original id to grant_id
+      id: grantCard.card_id, // Replace id with card_id
+    }));
+
+    // Filter out cards that are also grantCards
+    const filteredCards = cards?.filter(
+      (card) =>
+        !transformedGrantCards?.some((grantCard) => grantCard.id === card.id),
+    );
+
+    // Combine filtered cards and transformed grantCards
+    const combinedCards = [
+      ...(filteredCards || []),
+      ...(transformedGrantCards || []),
+    ];
+
+    // Sort cards by status
+    combinedCards.sort((a, b) => {
+      if (a.status == "active" && b.status != "active") {
+        return -1;
+      } else if (a.status != "active" && b.status == "active") {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    // Update state
+    // @ts-expect-error both types have the same properties that are used
+    setAllCards(combinedCards);
+  }, [cards, grantCards]);
+
   useEffect(() => {
     const fetchFrozenCardsShown = async () => {
       const isFrozenCardsShown = await AsyncStorage.getItem("frozenCardsShown");
