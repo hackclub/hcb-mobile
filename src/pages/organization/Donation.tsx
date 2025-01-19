@@ -472,11 +472,13 @@ function PageContent({
           style={{
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "flex-start",
             gap: 20,
           }}
         >
-          <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
-
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -501,17 +503,18 @@ function PageContent({
             }}
           />
         </View>
-
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "flex-start",
             gap: 20,
             marginTop: 10,
           }}
         >
-          <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
-
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -526,16 +529,7 @@ function PageContent({
             clearButtonMode="while-editing"
             autoCapitalize="none"
             value={email}
-            keyboardType="email-address"
-            autoComplete="off"
-            autoCorrect={false}
             onChangeText={setEmail}
-            ref={emailRef}
-            placeholder={"Email address"}
-            returnKeyType="done"
-            onSubmitEditing={() => {
-              //   navigation.goBack();
-            }}
           />
         </View>
       </View>
@@ -544,6 +538,10 @@ function PageContent({
       {connectedReader ? (
         <Button
           onPress={async () => {
+            if (!email.includes("@") || !email.includes(".")) {
+              Alert.alert("Please provide a valid email address");
+              return;
+            }
             const donation_id = await createDonation();
             await paymentIntent({ donation_id });
           }}
@@ -570,15 +568,21 @@ function PageContent({
   );
 }
 
-function Keyboard({
-  amount,
-  setAmount,
-}: {
+interface KeyboardProps {
   amount: string;
   setAmount: (value: string) => void;
-}) {
+}
+
+interface NumberProps {
+  number?: number;
+  symbol?: string;
+  onPress?: () => void;
+}
+
+const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
   const [error, setError] = useState(false);
   const theme = useTheme();
+
   function pressNumber(amount: string, number: number) {
     if (
       parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
@@ -610,15 +614,7 @@ function Keyboard({
     }
   }
 
-  const Number = ({
-    number,
-    symbol,
-    onPress,
-  }: {
-    number?: number;
-    symbol?: string;
-    onPress?: () => void;
-  }) => (
+  const Number = ({ number, symbol, onPress }: NumberProps) => (
     <Text
       style={{
         color: theme.colors.text,
@@ -654,7 +650,6 @@ function Keyboard({
       <Text
         style={{
           color: error ? palette.primary : theme.colors.text,
-
           paddingBottom: 0,
           paddingHorizontal: 10,
           fontSize: 72,
@@ -701,4 +696,4 @@ function Keyboard({
       </View>
     </View>
   );
-}
+};
