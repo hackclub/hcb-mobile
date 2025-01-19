@@ -261,6 +261,7 @@ function PageContent({
         statementDescriptor: `HCB* ${orgName || "DONATION"}`.substring(0, 22),
       });
 
+
       if (error) {
         console.log("Error creating payment intent", error);
         return false;
@@ -454,24 +455,24 @@ function PageContent({
         subtitle="Collect donations for your organization right from your mobile device."
       />
 
-      <View
-        style={{
-          flexDirection: "column",
-          display: "flex",
-          alignItems: "start",
-          justifyContent: "center",
-          marginBottom: 10,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
-          <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+      <View style={{
+        flexDirection: "column",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        marginBottom: 10,
 
+      }}>
+
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 20
+        }}>
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -496,17 +497,16 @@ function PageContent({
             }}
           />
         </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 20,
-            marginTop: 10,
-          }}
-        >
-          <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
-
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 20,
+          marginTop: 10
+        }}>
+          <View style={{ flexBasis: 55 }}>
+            <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+          </View>
           <TextInput
             style={{
               color: colors.text,
@@ -521,15 +521,6 @@ function PageContent({
             clearButtonMode="while-editing"
             autoCapitalize="none"
             value={email}
-            keyboardType="email-address"
-            autoComplete="off"
-            autoCorrect={false}
-            onChangeText={setEmail}
-            ref={emailRef}
-            placeholder={"Email address"}
-            returnKeyType="done"
-            onSubmitEditing={() => {
-              //   navigation.goBack();
             }}
           />
         </View>
@@ -539,6 +530,10 @@ function PageContent({
       {connectedReader ? (
         <Button
           onPress={async () => {
+            if (!email.includes("@") || !email.includes(".")) {
+              Alert.alert("Please provide a valid email address")
+              return
+            }
             const donation_id = await createDonation();
             await paymentIntent({ donation_id });
           }}
@@ -588,6 +583,15 @@ function Keyboard({ amount, setAmount }: { amount: string; setAmount: (value: st
     } else {
       setAmount(amount + ".");
     }
+            keyboardType="email-address"
+            autoComplete="off"
+            autoCorrect={false}
+            onChangeText={setEmail}
+            ref={emailRef}
+            placeholder={"Email address"}
+            returnKeyType="done"
+            onSubmitEditing={() => {
+              //   navigation.goBack();
   }
 
   function pressBackspace(amount: string) {
