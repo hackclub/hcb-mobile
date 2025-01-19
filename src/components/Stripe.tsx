@@ -1,52 +1,50 @@
-import { useEffect, useState } from 'react'
+import {
+  Reader,
+  useStripeTerminal,
+} from "@stripe/stripe-terminal-react-native";
+import { useEffect, useState } from "react";
 import {
   Alert,
-  ImageBackground,
   Linking,
   SafeAreaView,
   Text,
   TextInput,
   View,
-} from 'react-native'
-import { useStripeTerminal } from '@stripe/stripe-terminal-react-native'
-
-
+} from "react-native";
 
 import Button from "../components/Button";
-import { useLocation } from '../lib/useLocation';
+import { useLocation } from "../lib/useLocation";
 
 export default function Stripe() {
-  const { initialize, connectLocalMobileReader } = useStripeTerminal();
+  const { initialize } = useStripeTerminal();
   useEffect(() => {
     initialize();
   }, [initialize]);
-  return (
-    <PageStripe />
-  );
+  return <PageStripe />;
 }
 
-
 interface PaymentIntent {
-  id: string
-  amount: number
-  created: string
-  currency: string
-  sdkUuid: string
-  paymentMethodId: string
+  id: string;
+  amount: number;
+  created: string;
+  currency: string;
+  sdkUuid: string;
+  paymentMethodId: string;
 }
 
 export function PageStripe() {
-  const { location, accessDenied } = useLocation()
+  const { accessDenied } = useLocation();
+  // const { location, accessDenied } = useLocation();
 
-  const [value, setValue] = useState(0)
-  const [reader, setReader] = useState()
-  const [payment, setPayment] = useState<PaymentIntent>()
-  const [loadingCreatePayment, setLoadingCreatePayment] = useState(false)
-  const [loadingCollectPayment, setLoadingCollectPayment] = useState(false)
-  const [loadingConfirmPayment, setLoadingConfirmPayment] = useState(false)
-  const [loadingConnectingReader, setLoadingConnectingReader] = useState(false)
+  const [value, setValue] = useState(0);
+  const [reader, setReader] = useState<Reader.Type | undefined>(undefined);
+  const [payment, setPayment] = useState<PaymentIntent>();
+  const [loadingCreatePayment, setLoadingCreatePayment] = useState(false);
+  const [loadingCollectPayment, setLoadingCollectPayment] = useState(false);
+  const [loadingConfirmPayment, setLoadingConfirmPayment] = useState(false);
+  const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
 
-  const locationIdStripeMock = 'tml_FrcFgksbiIZZ2V'
+  const locationIdStripeMock = "tml_FrcFgksbiIZZ2V";
 
   const {
     discoverReaders,
@@ -56,142 +54,140 @@ export function PageStripe() {
     confirmPaymentIntent,
     connectedReader,
   } = useStripeTerminal({
-    onUpdateDiscoveredReaders: (readers: any) => {
-      setReader(readers[0])
+    onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
+      setReader(readers[0]);
     },
-  })
+  });
 
   useEffect(() => {
     discoverReaders({
-      discoveryMethod: 'localMobile',
+      discoveryMethod: "localMobile",
       simulated: false,
-    })
-  }, [discoverReaders])
+    });
+  }, [discoverReaders]);
 
-  async function connectReader(selectedReader: any) {
-    setLoadingConnectingReader(true)
+  async function connectReader(selectedReader: Reader.Type) {
+    setLoadingConnectingReader(true);
     try {
-      const { reader, error } = await connectLocalMobileReader({
+      const { error } = await connectLocalMobileReader({
         reader: selectedReader,
         locationId: locationIdStripeMock,
-      })
+      });
 
       if (error) {
-        console.log('connectLocalMobileReader error:', error)
-        return
+        console.log("connectLocalMobileReader error:", error);
+        return;
       }
 
-      Alert.alert('Reader connected successfully')
-
-      console.log('Reader connected successfully', reader)
+      Alert.alert("Reader connected successfully");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setLoadingConnectingReader(false)
+      setLoadingConnectingReader(false);
     }
   }
 
   async function paymentIntent() {
-    setLoadingCreatePayment(true)
+    setLoadingCreatePayment(true);
     try {
       const { error, paymentIntent } = await createPaymentIntent({
         amount: Number((value * 100).toFixed()),
-        currency: 'usd',
-        paymentMethodTypes: ['card_present'],
-        offlineBehavior: 'prefer_online',
-      })
+        currency: "usd",
+        paymentMethodTypes: ["card_present"],
+        offlineBehavior: "prefer_online",
+      });
 
       if (error) {
-        console.log('Error creating payment intent', error)
-        return
+        console.log("Error creating payment intent", error);
+        return;
       }
 
-      setPayment(paymentIntent)
+      setPayment(paymentIntent);
 
-      Alert.alert('Payment intent created successfully')
+      Alert.alert("Payment intent created successfully");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setLoadingCreatePayment(false)
+      setLoadingCreatePayment(false);
     }
   }
 
   async function collectPayment() {
-    setLoadingCollectPayment(true)
+    setLoadingCollectPayment(true);
     try {
-      const { error, paymentIntent } = await collectPaymentMethod({
+      const { error } = await collectPaymentMethod({
+        // @ts-expect-error works without extra PaymentIntent props
         paymentIntent: payment,
-      } as any)
+      });
 
       if (error) {
-        console.log('Error collecting payment', error)
-        Alert.alert('Error collecting payment', error.message)
-        return
+        console.log("Error collecting payment", error);
+        Alert.alert("Error collecting payment", error.message);
+        return;
       }
 
-      Alert.alert('Payment successfully collected', '', [
+      Alert.alert("Payment successfully collected", "", [
         {
-          text: 'Ok',
+          text: "Ok",
           onPress: async () => {
-            console.log(paymentIntent);
-            await confirmPayment()
+            await confirmPayment();
           },
         },
-      ])
+      ]);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setLoadingCollectPayment(false)
+      setLoadingCollectPayment(false);
     }
   }
 
   async function confirmPayment() {
-    setLoadingConfirmPayment(true)
-    console.log("foo", { payment })
+    setLoadingConfirmPayment(true);
+    console.log("foo", { payment });
     try {
-      const { error, paymentIntent } = await confirmPaymentIntent({
-        paymentIntent: payment as any
-      })
+      const { error } = await confirmPaymentIntent({
+        // @ts-expect-error works without extra PaymentIntent props
+        paymentIntent: payment,
+      });
 
       if (error) {
-        console.log('Error confirm payment', error)
-        return
+        console.log("Error confirm payment", error);
+        return;
       }
 
-      Alert.alert('Payment successfully confirmed!', 'Congratulations')
-      console.log('Payment confirmed', paymentIntent)
+      Alert.alert("Payment successfully confirmed!", "Congratulations");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setLoadingConfirmPayment(false)
+      setLoadingConfirmPayment(false);
     }
   }
 
   async function handleRequestLocation() {
-    await Linking.openSettings()
+    await Linking.openSettings();
   }
 
   useEffect(() => {
     if (accessDenied) {
       Alert.alert(
-        'Access to location',
-        'To use the app, you need to allow the use of your device location.',
+        "Access to location",
+        "To use the app, you need to allow the use of your device location.",
         [
           {
-            text: 'Activate',
+            text: "Activate",
             onPress: handleRequestLocation,
           },
-        ]
-      )
+        ],
+      );
     }
-  }, [accessDenied])
+  }, [accessDenied]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
         style={{
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          justifyContent: "space-between",
+          alignItems: "center",
           flex: 1,
         }}
       >
@@ -199,8 +195,8 @@ export function PageStripe() {
           <Text
             style={{
               fontSize: 20,
-              fontWeight: 'bold',
-              textAlign: 'center',
+              fontWeight: "bold",
+              textAlign: "center",
             }}
           >
             Stripe
@@ -211,15 +207,15 @@ export function PageStripe() {
             <Text
               style={{
                 fontSize: 18,
-                fontWeight: 'bold',
-                color: '#635AFF',
+                fontWeight: "bold",
+                color: "#635AFF",
               }}
             >
               Amount to be charged
             </Text>
             <TextInput
               style={{
-                borderColor: '#635AFF',
+                borderColor: "#635AFF",
                 borderWidth: 1,
                 borderRadius: 8,
                 padding: 15,
@@ -231,27 +227,32 @@ export function PageStripe() {
           </View>
 
           <Button
-            onPress={() => connectReader(reader)}
+            onPress={() => {
+              if (reader) {
+                connectReader(reader);
+              } else {
+                Alert.alert("No reader available");
+              }
+            }}
             loading={loadingConnectingReader}
-          >Connecting with the reader{'disabled' + !!connectedReader}</Button>
+          >
+            Connecting with the reader{"disabled" + !!connectedReader}
+          </Button>
 
-          <Button
-            onPress={paymentIntent}
-            loading={loadingCreatePayment}
-          >Create payment intent{'disabled' + !connectedReader}</Button>
+          <Button onPress={paymentIntent} loading={loadingCreatePayment}>
+            Create payment intent{"disabled" + !connectedReader}
+          </Button>
 
-          <Button
-            onPress={collectPayment}
-            loading={loadingCollectPayment}
-          >Collect payment{'disabled' + !connectedReader}</Button>
+          <Button onPress={collectPayment} loading={loadingCollectPayment}>
+            Collect payment{"disabled" + !connectedReader}
+          </Button>
 
-          <Button
-            onPress={confirmPayment as any}
-            loading={loadingConfirmPayment}
-          >Confirm payment</Button>
+          <Button onPress={confirmPayment} loading={loadingConfirmPayment}>
+            Confirm payment
+          </Button>
         </View>
         <View></View>
       </View>
     </SafeAreaView>
-  )
+  );
 }

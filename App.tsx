@@ -53,20 +53,20 @@ const linking: LinkingOptions<TabParamList> = {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
-    'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
-    'Consolas-Bold': require('./assets/fonts/CONSOLAB.ttf'),
-    'Damion': require('./assets/fonts/Damion-Regular.ttf'),
+    "JetBrainsMono-Regular": require("./assets/fonts/JetBrainsMono-Regular.ttf"),
+    "JetBrainsMono-Bold": require("./assets/fonts/JetBrainsMono-Bold.ttf"),
+    "Consolas-Bold": require("./assets/fonts/CONSOLAB.ttf"),
+    Damion: require("./assets/fonts/Damion-Regular.ttf"),
   });
 
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const hcb = useClient(token);
   const scheme = useColorScheme();
-  useStripeTerminal()
-  
+  useStripeTerminal();
+
   const fetcher = useCallback(
-    async (url: string, options: any) => {
+    async (url: string, options: RequestInit) => {
       try {
         return await hcb(url, options).json();
       } catch (error) {
@@ -114,7 +114,8 @@ export default function App() {
 
       <SWRConfig
         value={{
-          provider: asyncStorageProvider, fetcher
+          provider: asyncStorageProvider,
+          fetcher,
         }}
       >
         <SafeAreaProvider>

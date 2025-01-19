@@ -85,7 +85,7 @@ export default function AccountNumberPage({
         </View>
       ),
     });
-  }, []);
+  }, [navigation]);
 
   return (
     <View

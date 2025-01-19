@@ -38,8 +38,8 @@ function Transaction({
 
   const { showActionSheetWithOptions } = useActionSheet();
   const [selectedImage, setSelectedImage] = useState<{
-      uri: string;
-      fileName?: string;
+    uri: string;
+    fileName?: string;
   } | null>(null);
 
   const uploadReceipt = async () => {
@@ -76,52 +76,51 @@ function Transaction({
     }
   };
 
-    const handleActionSheet = () => {
-      const options = ["Camera", "Photo Library", "Cancel"];
-      const cancelButtonIndex = 2;
-  
-      showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        async (buttonIndex) => {
-          if (buttonIndex === 0) {
-            // Take a photo
-            ImagePicker.requestCameraPermissionsAsync();
-            const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: "images",
-              allowsEditing: true,
-              quality: 1,
+  const handleActionSheet = () => {
+    const options = ["Camera", "Photo Library", "Cancel"];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      async (buttonIndex) => {
+        if (buttonIndex === 0) {
+          // Take a photo
+          ImagePicker.requestCameraPermissionsAsync();
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: "images",
+            allowsEditing: true,
+            quality: 1,
+          });
+          if (!result.canceled) {
+            setSelectedImage({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || "",
             });
-            if (!result.canceled) {
-              setSelectedImage({
-                uri: result.assets[0].uri,
-                fileName: result.assets[0].fileName || "",
-              });
-              setLoading(true);
-              await uploadReceipt();
-            }
-          } else if (buttonIndex === 1) {
-            // Pick from photo library
-            ImagePicker.requestMediaLibraryPermissionsAsync();
-            const result = await ImagePicker.launchImageLibraryAsync({
-              allowsEditing: true,
-              quality: 1,
-            });
-            if (!result.canceled) {
-              setSelectedImage({
-                uri: result.assets[0].uri,
-                fileName: result.assets[0].fileName || "",
-              });
-              setLoading(true);
-              await uploadReceipt();
-            }
+            setLoading(true);
+            await uploadReceipt();
           }
-        },
-      );
-    };
-  
+        } else if (buttonIndex === 1) {
+          // Pick from photo library
+          ImagePicker.requestMediaLibraryPermissionsAsync();
+          const result = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            quality: 1,
+          });
+          if (!result.canceled) {
+            setSelectedImage({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || "",
+            });
+            setLoading(true);
+            await uploadReceipt();
+          }
+        }
+      },
+    );
+  };
 
   return (
     <TouchableHighlight
@@ -194,7 +193,7 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
 
   const onRefresh = async () => {
     mutate();
-  }
+  };
 
   if (isLoading) {
     return (

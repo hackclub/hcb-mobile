@@ -7,7 +7,7 @@ export default interface Card extends HcbApiObject<"crd"> {
   exp_month?: number;
   exp_year?: number;
   type: "virtual" | "physical";
-  status: "inactive" | "frozen" | "active" | "canceled";
+  status: "inactive" | "frozen" | "active" | "canceled" | "expired";
   name?: string;
   organization: Organization;
   total_spent_cents?: number;

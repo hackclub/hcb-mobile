@@ -43,7 +43,7 @@ export default function InvitationPage({
         organization: invitation.organization,
       });
     }
-  }, [invitation]);
+  }, [invitation, navigation]);
 
   const { mutate } = useSWRConfig();
 

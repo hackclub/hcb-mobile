@@ -168,7 +168,7 @@ export default function SettingsPage(
 
   useEffect(() => {
     let iconName = getAppIconName() || "default";
-    iconName = iconName.toLowerCase()
+    iconName = iconName.toLowerCase();
     setIcon(iconName);
   }, []);
 
@@ -188,53 +188,53 @@ export default function SettingsPage(
     >
       <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
         <SectionHeader title="App Icon" />
-          <ListSection>
-            <IconComponent
-              onPress={handleClick}
-              currentIcon={appIcon}
-              name="default"
-              displayName="Classic"
-            />
-            <IconComponent
-              onPress={handleClick}
-              currentIcon={appIcon}
-              name="cashmoney"
-              displayName="Cash Money"
-            />
-            <IconComponent
-              onPress={handleClick}
-              currentIcon={appIcon}
-              name="dev"
-              displayName="Dev"
-              last
-            />
-          </ListSection>
-          <ListHeader title="Shiny- catchem all!" />
-          <ListSection>
-            {Constants.platform?.ios && (
-              <>
-                <IconComponent
-                  onPress={handleClick}
-                  currentIcon={appIcon}
-                  name="hacknight"
-                  displayName="Open Late"
-                />
-                <IconComponent
-                  onPress={handleClick}
-                  currentIcon={appIcon}
-                  name="testflight"
-                  displayName="Early Adopter"
-                />
-              </>
-            )}
-            <IconComponent
-              onPress={handleClick}
-              currentIcon={appIcon}
-              name="artskillz"
-              displayName="Graphic Design Is My Passion"
-              last
-            />
-          </ListSection>
+        <ListSection>
+          <IconComponent
+            onPress={handleClick}
+            currentIcon={appIcon}
+            name="default"
+            displayName="Classic"
+          />
+          <IconComponent
+            onPress={handleClick}
+            currentIcon={appIcon}
+            name="cashmoney"
+            displayName="Cash Money"
+          />
+          <IconComponent
+            onPress={handleClick}
+            currentIcon={appIcon}
+            name="dev"
+            displayName="Dev"
+            last
+          />
+        </ListSection>
+        <ListHeader title="Shiny- catchem all!" />
+        <ListSection>
+          {Constants.platform?.ios && (
+            <>
+              <IconComponent
+                onPress={handleClick}
+                currentIcon={appIcon}
+                name="hacknight"
+                displayName="Open Late"
+              />
+              <IconComponent
+                onPress={handleClick}
+                currentIcon={appIcon}
+                name="testflight"
+                displayName="Early Adopter"
+              />
+            </>
+          )}
+          <IconComponent
+            onPress={handleClick}
+            currentIcon={appIcon}
+            name="artskillz"
+            displayName="Graphic Design Is My Passion"
+            last
+          />
+        </ListSection>
         <View style={{ paddingTop: 12 }}>
           <SectionHeader title="Connected Account" />
           <View
