@@ -301,7 +301,9 @@ function PageContent({
 
       if (error) {
         console.log("Error collecting payment", error);
-        Alert.alert("Error collecting payment", error.message);
+        if (error.code != "Canceled") {
+          Alert.alert("Error collecting payment", error.message);
+        }
         return false;
       }
       output = (await confirmPayment(localPayment)) ?? false;
@@ -527,6 +529,7 @@ function PageContent({
             selectTextOnFocus
             autoFocus
             clearButtonMode="while-editing"
+            placeholder="Email"
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}

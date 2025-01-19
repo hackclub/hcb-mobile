@@ -35,10 +35,7 @@ export default function TransferPage({ navigation, route }: Props) {
     });
   }, [navigation]);
 
-  const [transferType, setTransferType] = useState<"ach" | "check" | "hcb">(
-    "hcb",
-  );
-  setTransferType("hcb");
+  const [transferType] = useState<"ach" | "check" | "hcb">("hcb");
 
   return (
     <KeyboardAvoidingView

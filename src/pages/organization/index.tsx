@@ -119,11 +119,11 @@ export default function OrganizationPage({
         image: "gearshape",
       });
 
-      // menuActions.push({
-      //   id: "donation",
-      //   title: "Collect Donations",
-      //   image: "dollarsign.circle",
-      // });
+      menuActions.push({
+        id: "donation",
+        title: "Collect Donations",
+        image: "dollarsign.circle",
+      });
 
       navigation.setOptions({
         headerRight: () => (
