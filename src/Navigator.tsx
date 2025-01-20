@@ -3,8 +3,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
+import * as Updates from "expo-updates";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, useColorScheme, View } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
@@ -48,6 +49,20 @@ export default function Navigator() {
   const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
+
+  async function onFetchUpdateAsync() {
+    try {
+      const update = await Updates.checkForUpdateAsync();
+
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (error) {
+      // You can also add an alert() to see the error message in case of an error when fetching updates.
+      alert(`Error fetching latest Expo update: ${error}`);
+    }
+  }
 
   return (
     <Tab.Navigator
@@ -99,28 +114,39 @@ export default function Navigator() {
                 title: "Home",
                 headerLargeTitle: true,
                 headerRight: () => (
-                  <Ionicons.Button
-                    name="add-circle-outline"
-                    backgroundColor="transparent"
-                    size={24}
-                    underlayColor={themeColors.card}
-                    color={palette.primary}
-                    iconStyle={{ marginRight: 0 }}
-                    onPress={() =>
-                      WebBrowser.openBrowserAsync(
-                        "https://hackclub.com/hcb/apply",
-                        {
-                          presentationStyle:
-                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                          controlsColor: palette.primary,
-                          dismissButtonStyle: "cancel",
-                        },
-                      ).then(() => {
-                        mutate("user/organizations");
-                        mutate("user/invitations");
-                      })
-                    }
-                  />
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Ionicons.Button
+                      name="add-circle-outline"
+                      backgroundColor="transparent"
+                      size={24}
+                      underlayColor={themeColors.card}
+                      color={palette.primary}
+                      iconStyle={{ marginRight: 0 }}
+                      onPress={() =>
+                        WebBrowser.openBrowserAsync(
+                          "https://hackclub.com/hcb/apply",
+                          {
+                            presentationStyle:
+                              WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                            controlsColor: palette.primary,
+                            dismissButtonStyle: "cancel",
+                          },
+                        ).then(() => {
+                          mutate("user/organizations");
+                          mutate("user/invitations");
+                        })
+                      }
+                    />
+                    <Ionicons.Button
+                      name="refresh-outline"
+                      backgroundColor="transparent"
+                      size={24}
+                      underlayColor={themeColors.card}
+                      color={palette.primary}
+                      iconStyle={{ marginRight: 0 }}
+                      onPress={() => onFetchUpdateAsync()}
+                    />
+                  </View>
                 ),
               }}
             />
