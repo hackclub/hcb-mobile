@@ -162,7 +162,7 @@ function Event({
                 fontWeight: "600",
               }}
             >
-              {event.name}
+              Hi Luke
             </Text>
             {data?.playground_mode && (
               <View
