@@ -258,15 +258,15 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         {isLoading ? (
           <ActivityIndicator size="small" color={themeColors.text} />
         ) : (
-            <Text
-              style={{
-                color: scheme === "dark" ? themeColors.text : "#fff",
-                fontSize: 16,
-                fontWeight: "bold",
-              }}
-            >
-              Make Transfer
-            </Text>
+          <Text
+            style={{
+              color: scheme === "dark" ? themeColors.text : "#fff",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            Make Transfer
+          </Text>
         )}
       </TouchableOpacity>
     </View>
