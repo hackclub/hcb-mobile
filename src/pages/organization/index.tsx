@@ -105,7 +105,7 @@ export default function OrganizationPage({
         });
       }
 
-      if (isManager) {
+      if (isManager && !organization.playground_mode) {
         menuActions.push({
           id: "transfer",
           title: "Transfer Money",
@@ -119,11 +119,13 @@ export default function OrganizationPage({
         image: "gearshape",
       });
 
-      menuActions.push({
-        id: "donation",
-        title: "Collect Donations",
-        image: "dollarsign.circle",
-      });
+      if (!organization.playground_mode) {
+        menuActions.push({
+          id: "donation",
+          title: "Collect Donations",
+          image: "dollarsign.circle",
+        });
+      }
 
       navigation.setOptions({
         headerRight: () => (
