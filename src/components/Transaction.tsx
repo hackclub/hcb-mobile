@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Icon from "@hackclub/hackclub-icons-rn";
 import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
