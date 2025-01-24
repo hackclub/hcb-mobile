@@ -3,22 +3,13 @@ on: pull_request
 
 jobs:
   update:
+    if: github.event.pull_request.head.repo.fork == false
     name: EAS Update
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - name: Check if PR is from a fork
-        id: fork-check
-        run: |
-          if [ "${{ github.event.pull_request.head.repo.fork }}" == "true" ]; then
-            echo "PR is from a fork. Exiting workflow."
-            exit 0
-          else
-            echo "PR is not from a fork."
-          fi
-
       - name: Check for EXPO_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
