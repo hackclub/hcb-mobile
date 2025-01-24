@@ -17,7 +17,8 @@ jobs:
             exit 0
           else
             echo "PR is not from a fork."
-      
+          fi
+
       - name: Check for EXPO_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
