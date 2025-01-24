@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  useColorScheme,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
@@ -29,6 +30,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
   const { token } = useContext(AuthContext);
+  const scheme = useColorScheme();
 
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
@@ -167,6 +169,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           items={[
             ...organizations
               .filter((org) => org.id !== organization.id)
+              .filter((org) => org.playground_mode === false)
               .map((org) => ({ label: org.name, value: org.id })),
           ]}
         />
@@ -257,7 +260,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         ) : (
           <Text
             style={{
-              color: themeColors.text,
+              color: scheme === "dark" ? themeColors.text : "#fff",
               fontSize: 16,
               fontWeight: "bold",
             }}
