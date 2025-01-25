@@ -98,7 +98,7 @@ function Event({
   const scheme = useColorScheme();
 
   const color = orgColor(event.id);
-  
+
   return (
     <TouchableHighlight
       onPress={onPress}
@@ -126,7 +126,11 @@ function Event({
       >
         {event.background_image && !pinned && (
           <LinearGradient
-            colors={scheme === "dark" ? ["transparent", themeColors.background] : ["#transparent", "#f0f4f8"]}
+            colors={
+              scheme === "dark"
+                ? ["transparent", themeColors.background]
+                : ["#transparent", "#f0f4f8"]
+            }
             locations={[0.5, 1]}
             style={{
               ...StyleSheet.absoluteFillObject,
@@ -201,7 +205,10 @@ function Event({
               <Text
                 numberOfLines={2}
                 style={{
-                  color: event.background_image && !pinned ? "#fff" : themeColors.text,
+                  color:
+                    event.background_image && !pinned
+                      ? "#fff"
+                      : themeColors.text,
                   fontSize: 20,
                   fontWeight: "600",
                 }}
