@@ -53,7 +53,7 @@ export default {
       url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
     },
     runtimeVersion: {
-      policy: "appVersion"
+      policy: "appVersion",
     },
     plugins: [
       [
@@ -88,7 +88,7 @@ export default {
           },
         },
       ],
-      ["expo-alternate-app-icons", appIcons]
+      ["expo-alternate-app-icons", appIcons],
     ],
   },
 };
