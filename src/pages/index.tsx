@@ -4,6 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image, ImageBackground } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import {
   FlatList,
@@ -67,8 +68,6 @@ function EventBalance({
     </View>
   );
 }
-
-import { LinearGradient } from "expo-linear-gradient";
 
 function Event({
   event,
