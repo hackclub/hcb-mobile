@@ -3,7 +3,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
+import { Image, ImageBackground } from "expo-image";
 import { useEffect, useState } from "react";
 import {
   FlatList,
@@ -29,9 +29,21 @@ import ITransaction from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { orgColor, renderMoney } from "../util";
 
-function EventBalance({ balance_cents }: { balance_cents?: number }) {
+function EventBalance({
+  balance_cents,
+  hasBackgroundImage,
+}: {
+  balance_cents?: number;
+  hasBackgroundImage?: boolean;
+}) {
   return balance_cents !== undefined ? (
-    <Text style={{ color: palette.muted, fontSize: 16, marginTop: 5 }}>
+    <Text
+      style={{
+        color: hasBackgroundImage ? "#fff" : palette.muted,
+        fontSize: 16,
+        marginTop: 5,
+      }}
+    >
       {renderMoney(balance_cents)}
     </Text>
   ) : (
@@ -56,6 +68,8 @@ function EventBalance({ balance_cents }: { balance_cents?: number }) {
   );
 }
 
+import { LinearGradient } from "expo-linear-gradient";
+
 function Event({
   event,
   hideBalance = false,
@@ -77,6 +91,7 @@ function Event({
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
   );
+  console.log(event);
   const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
     PaginatedResponse<ITransaction>
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
@@ -93,142 +108,175 @@ function Event({
       underlayColor={themeColors.background}
       activeOpacity={0.7}
     >
-      <View
-        style={StyleSheet.compose(
-          {
-            backgroundColor: themeColors.card,
-            marginBottom: 16,
-            borderRadius: 10,
-          },
-          style,
-        )}
+      <ImageBackground
+        source={{
+          uri:
+            event.background_image && !pinned
+              ? event.background_image
+              : undefined,
+        }}
+        imageStyle={{
+          borderRadius: 10,
+        }}
+        contentFit="cover"
+        style={{
+          borderRadius: 10,
+          overflow: event.background_image && !pinned ? "hidden" : "visible",
+        }}
       >
-        {pinned && (
-          <Text
+        {event.background_image && !pinned && (
+          <LinearGradient
+            colors={["transparent", "#222226"]}
+            locations={[0.5, 1]}
             style={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              fontSize: 20,
+              ...StyleSheet.absoluteFillObject,
+              zIndex: 1,
             }}
-          >
-            📌
-          </Text>
+          />
         )}
         <View
-          style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
-        >
-          {event.icon ? (
-            <Image
-              source={{ uri: event.icon }}
-              cachePolicy="disk"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                marginRight: 16,
-              }}
-            />
-          ) : (
-            <View
-              style={{
-                borderRadius: 8,
-                width: 40,
-                height: 40,
-                backgroundColor: color,
-                marginRight: 16,
-              }}
-            ></View>
+          style={StyleSheet.compose(
+            {
+              backgroundColor:
+                !event.background_image || (event.background_image && pinned)
+                  ? themeColors.card
+                  : undefined,
+              marginBottom: 16,
+              borderRadius: 10,
+            },
+            style,
           )}
-          <View
-            style={{
-              flexDirection: "column",
-              flex: 1,
-            }}
-          >
-            {invitation && invitation.sender && (
-              <Text style={{ color: palette.muted, marginBottom: 3 }}>
-                <Text style={{ fontWeight: "600" }}>
-                  {invitation.sender.name}
-                </Text>{" "}
-                invited you to
-              </Text>
-            )}
+        >
+          {pinned && (
             <Text
-              numberOfLines={2}
               style={{
-                color: themeColors.text,
+                position: "absolute",
+                top: -10,
+                right: -10,
                 fontSize: 20,
-                fontWeight: "600",
               }}
             >
-              {event.name}
+              📌
             </Text>
-            {data?.playground_mode && (
+          )}
+          <View
+            style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
+          >
+            {event.icon ? (
+              <Image
+                source={{ uri: event.icon }}
+                cachePolicy="disk"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  marginRight: 16,
+                }}
+              />
+            ) : (
               <View
                 style={{
-                  backgroundColor: scheme == "dark" ? "#283140" : "#348EDA",
-                  paddingVertical: 4,
-                  paddingHorizontal: 12,
-                  borderRadius: 20,
-                  alignSelf: "flex-start",
-                  marginVertical: 4,
+                  borderRadius: 8,
+                  width: 40,
+                  height: 40,
+                  backgroundColor: color,
+                  marginRight: 16,
+                }}
+              ></View>
+            )}
+            <View
+              style={{
+                flexDirection: "column",
+                flex: 1,
+              }}
+            >
+              {invitation && invitation.sender && (
+                <Text style={{ color: palette.muted, marginBottom: 3 }}>
+                  <Text style={{ fontWeight: "600" }}>
+                    {invitation.sender.name}
+                  </Text>{" "}
+                  invited you to
+                </Text>
+              )}
+              <Text
+                numberOfLines={2}
+                style={{
+                  color: themeColors.text,
+                  fontSize: 20,
+                  fontWeight: "600",
                 }}
               >
-                <Text
+                {event.name}
+              </Text>
+              {data?.playground_mode && (
+                <View
                   style={{
-                    color: scheme == "dark" ? "#248EDA" : "white",
-                    fontSize: 12,
-                    fontWeight: "bold",
+                    backgroundColor: scheme === "dark" ? "#283140" : "#348EDA",
+                    paddingVertical: 4,
+                    paddingHorizontal: 12,
+                    borderRadius: 20,
+                    alignSelf: "flex-start",
+                    marginVertical: 4,
                   }}
                 >
-                  Playground Mode
-                </Text>
-              </View>
-            )}
-            {!hideBalance && (
-              <EventBalance balance_cents={data?.balance_cents} />
-            )}
-          </View>
-          <Ionicons
-            name="chevron-forward-outline"
-            size={24}
-            color={palette.muted}
-          />
-        </View>
-        {transactions?.data && transactions.data.length >= 1 ? (
-          <>
-            {transactions.data.map((tx, index) => (
-              <Transaction
-                transaction={tx}
-                orgId={event.id}
-                key={tx.id}
-                bottom={index == transactions.data.length - 1}
-                hideMissingReceipt
-              />
-            ))}
-            {transactions.has_more && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: 10,
-                }}
-              >
-                <Text style={{ color: palette.info }}>See more activity</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  color={palette.info}
-                  size={18}
+                  <Text
+                    style={{
+                      color: scheme === "dark" ? "#248EDA" : "white",
+                      fontSize: 12,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Playground Mode
+                  </Text>
+                </View>
+              )}
+              {!hideBalance && (
+                <EventBalance
+                  balance_cents={data?.balance_cents}
+                  hasBackgroundImage={!!event.background_image && !pinned}
                 />
-              </View>
-            )}
-          </>
-        ) : transactionsIsLoading ? (
-          <ActivityIndicator style={{ marginVertical: 20 }} />
-        ) : null}
-      </View>
+              )}
+            </View>
+            <Ionicons
+              name="chevron-forward-outline"
+              size={24}
+              color={event.background_image && !pinned ? "#fff" : palette.muted}
+            />
+          </View>
+          {transactions?.data && transactions.data.length >= 1 ? (
+            <>
+              {transactions.data.map((tx, index) => (
+                <Transaction
+                  transaction={tx}
+                  orgId={event.id}
+                  key={tx.id}
+                  bottom={index === transactions.data.length - 1}
+                  hideMissingReceipt
+                />
+              ))}
+              {transactions.has_more && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: 10,
+                  }}
+                >
+                  <Text style={{ color: palette.info }}>See more activity</Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    color={palette.info}
+                    size={18}
+                  />
+                </View>
+              )}
+            </>
+          ) : transactionsIsLoading ? (
+            <ActivityIndicator style={{ marginVertical: 20 }} />
+          ) : null}
+        </View>
+      </ImageBackground>
     </TouchableHighlight>
   );
 }
@@ -399,6 +447,7 @@ export default function App({ navigation }: Props) {
                 );
                 togglePinnedOrg(organization.id);
               }}
+              style={{ borderRadius: 10 }}
             />
           )}
           ListFooterComponent={() =>
