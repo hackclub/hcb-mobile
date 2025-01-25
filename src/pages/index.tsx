@@ -90,7 +90,6 @@ function Event({
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
   );
-  console.log(event);
   const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
     PaginatedResponse<ITransaction>
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
@@ -99,7 +98,7 @@ function Event({
   const scheme = useColorScheme();
 
   const color = orgColor(event.id);
-
+  
   return (
     <TouchableHighlight
       onPress={onPress}
@@ -116,6 +115,8 @@ function Event({
         }}
         imageStyle={{
           borderRadius: 10,
+          width: event.background_image && !pinned ? "100%" : 0,
+          height: event.background_image && !pinned ? "auto" : 0,
         }}
         contentFit="cover"
         style={{
@@ -125,7 +126,7 @@ function Event({
       >
         {event.background_image && !pinned && (
           <LinearGradient
-            colors={["transparent", "#222226"]}
+            colors={scheme === "dark" ? ["transparent", themeColors.background] : ["#transparent", "#f0f4f8"]}
             locations={[0.5, 1]}
             style={{
               ...StyleSheet.absoluteFillObject,
@@ -200,7 +201,7 @@ function Event({
               <Text
                 numberOfLines={2}
                 style={{
-                  color: themeColors.text,
+                  color: event.background_image && !pinned ? "#fff" : themeColors.text,
                   fontSize: 20,
                   fontWeight: "600",
                 }}
