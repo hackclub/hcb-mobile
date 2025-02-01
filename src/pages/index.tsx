@@ -122,22 +122,27 @@ function Event({
         style={{
           borderRadius: 10,
           overflow: event.background_image && !pinned ? "hidden" : "visible",
+          marginBottom:  event.background_image && !pinned
+          ? 16
+          : undefined,
         }}
       >
+        
         {event.background_image && !pinned && (
           <LinearGradient
             colors={
               scheme === "dark"
-                ? ["transparent", themeColors.background]
-                : ["#transparent", "#f0f4f8"]
+                ? ["transparent", "rgba(0,0,0,0.65)"]
+                : ["transparent", "rgba(240,244,248,0.35)"] 
             }
-            locations={[0.5, 1]}
+            locations={[0.3, 1]}
             style={{
               ...StyleSheet.absoluteFillObject,
               zIndex: 1,
             }}
           />
         )}
+
         <View
           style={StyleSheet.compose(
             {
