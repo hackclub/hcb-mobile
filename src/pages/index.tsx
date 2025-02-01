@@ -122,18 +122,15 @@ function Event({
         style={{
           borderRadius: 10,
           overflow: event.background_image && !pinned ? "hidden" : "visible",
-          marginBottom:  event.background_image && !pinned
-          ? 16
-          : undefined,
+          marginBottom: event.background_image && !pinned ? 16 : undefined,
         }}
       >
-        
         {event.background_image && !pinned && (
           <LinearGradient
             colors={
               scheme === "dark"
                 ? ["transparent", "rgba(0,0,0,0.65)"]
-                : ["transparent", "rgba(240,244,248,0.35)"] 
+                : ["transparent", "rgba(240,244,248,0.35)"]
             }
             locations={[0.3, 1]}
             style={{
