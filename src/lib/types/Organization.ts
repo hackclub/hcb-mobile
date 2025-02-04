@@ -6,6 +6,7 @@ export default interface Organization extends HcbApiObject<"org"> {
   country: string;
   slug: string;
   icon?: string;
+  background_image?: string;
   playground_mode: boolean;
   playground_mode_meeting_requested: boolean;
   transparent: boolean;
