@@ -147,7 +147,7 @@ function Event({
                 !event.background_image || (event.background_image && pinned)
                   ? themeColors.card
                   : undefined,
-              marginBottom: 16,
+              marginBottom: event.background_image && !pinned ? undefined : 16,
               borderRadius: 10,
             },
             style,
