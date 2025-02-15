@@ -240,7 +240,11 @@ export default function App({ navigation }: Props) {
     data: organizations,
     error,
     mutate: reloadOrganizations,
-  } = useSWR<Organization[]>("user/organizations");
+  } = useSWR<Organization[]>("user/organizations", {
+    revalidateOnMount: false,
+    revalidateIfStale: true,
+    revalidateOnReconnect: true,
+  });
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
