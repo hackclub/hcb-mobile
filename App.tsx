@@ -9,10 +9,9 @@ import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
-import asyncStorageProvider from "./src/cacheProvider";
+import { SWRWrapper } from "./src/components/SWRWrapper";
 import { getStateFromPath } from "./src/getStateFromPath";
 import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
@@ -112,12 +111,7 @@ export default function App() {
         backgroundColor={palette.background}
       />
 
-      <SWRConfig
-        value={{
-          provider: asyncStorageProvider,
-          fetcher,
-        }}
-      >
+      <SWRWrapper fetcher={fetcher}>
         <SafeAreaProvider>
           <ActionSheetProvider>
             <NavigationContainer
@@ -128,7 +122,7 @@ export default function App() {
             </NavigationContainer>
           </ActionSheetProvider>
         </SafeAreaProvider>
-      </SWRConfig>
+      </SWRWrapper>
     </AuthContext.Provider>
   );
 }

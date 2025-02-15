@@ -20,7 +20,6 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/react-native-fontawesome": "^0.3.2",
-    "@hackclub/hackclub-icons-rn": "github:thedev132/hackclub-icons-rn",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/geolocation": "^3.3.0",
     "@react-native-menu/menu": "^1.1.6",
