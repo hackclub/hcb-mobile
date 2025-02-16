@@ -21,7 +21,7 @@ export default function usePinnedOrgs(
 
   const orgs = useMemo(
     () =>
-      organizations === undefined
+      organizations === undefined || organizations === null
         ? []
         : orderBy(
             organizations.map<Organization & { pinned: boolean }>((o) => ({

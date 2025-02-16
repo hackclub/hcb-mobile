@@ -9,16 +9,16 @@ import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
-import asyncStorageProvider from "./src/cacheProvider";
+import { SWRWrapper } from "./src/components/SWRWrapper";
 import { getStateFromPath } from "./src/getStateFromPath";
 import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
+import { NetworkProvider } from "react-native-offline";
 
 const linking: LinkingOptions<TabParamList> = {
   prefixes: [
@@ -68,9 +68,16 @@ export default function App() {
   const fetcher = useCallback(
     async (url: string, options: RequestInit) => {
       try {
-        return await hcb(url, options).json();
+        const response = await hcb(url, options);
+        return await response.json();
       } catch (error) {
         if (
+          !navigator.onLine ||
+          error.message.includes("network") ||
+          error.message.includes("failed to fetch")
+        ) {
+          return null;
+        } else if (
           error.name === "HTTPError" &&
           (await error.response.json()).error === "invalid_auth"
         ) {
@@ -111,13 +118,9 @@ export default function App() {
         barStyle={scheme == "dark" ? "light-content" : "dark-content"}
         backgroundColor={palette.background}
       />
+   <NetworkProvider>
 
-      <SWRConfig
-        value={{
-          provider: asyncStorageProvider,
-          fetcher,
-        }}
-      >
+      <SWRWrapper fetcher={fetcher}>
         <SafeAreaProvider>
           <ActionSheetProvider>
             <NavigationContainer
@@ -128,7 +131,8 @@ export default function App() {
             </NavigationContainer>
           </ActionSheetProvider>
         </SafeAreaProvider>
-      </SWRConfig>
+      </SWRWrapper>
+    </NetworkProvider>
     </AuthContext.Provider>
   );
 }
