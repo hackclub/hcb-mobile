@@ -1,3 +1,4 @@
+import NetInfo from "@react-native-community/netinfo";
 import * as FileSystem from "expo-file-system";
 import { useEffect, useMemo, useRef, useState, ReactNode } from "react";
 import {
@@ -8,8 +9,11 @@ import {
 } from "react-native";
 import "react-native-gesture-handler";
 import { SWRConfig } from "swr";
+import { useIsConnected } from 'react-native-offline';
 
 async function fileSystemProvider(cacheData: Map<unknown, unknown> | null) {
+
+
   InteractionManager.runAfterInteractions(async () => {
     const cacheDir = FileSystem.cacheDirectory + "hcb-mobile-cache/";
     const file = `${cacheDir}cache.json`;
@@ -22,17 +26,18 @@ async function fileSystemProvider(cacheData: Map<unknown, unknown> | null) {
     }
 
     const map = cacheData || new Map();
-
     if (map.size === 0) {
       console.log("⛔ Cache is empty, not saving to disk.");
       return;
     }
+
     await ensureDirExists();
-    await FileSystem.writeAsStringAsync(
-      file,
-      JSON.stringify(Array.from(map.entries())),
-    );
-    // console.log(`💾 Saved ${map.size} API routes to cache! `);
+    try {
+      await FileSystem.writeAsStringAsync(file, JSON.stringify([...map]));
+      console.log(`💾 Saved ${map.size} API routes to cache.`);
+    } catch (error) {
+      console.error("❌ Failed to save cache:", error);
+    }
   });
 }
 
@@ -45,10 +50,16 @@ export function SWRWrapper({ fetcher, children }: SWRWrapperProps) {
   const cacheData = useRef(new Map());
   const lastSaveTime = useRef(Date.now());
   const [cacheLoaded, setCacheLoaded] = useState(Platform.OS === "web");
+  const isConnected = useIsConnected();
 
-  // Effect to handle periodic cache saving
+  // Periodic cache saving
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log("📶 Network state:", isConnected);
+      if (!isConnected) {
+        console.log("📴 Offline - Skipping cache save");
+        return;
+      }
       if (cacheData.current && Date.now() - lastSaveTime.current >= 10000) {
         fileSystemProvider(cacheData.current);
         lastSaveTime.current = Date.now();
@@ -56,44 +67,51 @@ export function SWRWrapper({ fetcher, children }: SWRWrapperProps) {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isConnected]);
 
-  // handle app state changes
+  // Handle app state changes
   useEffect(() => {
-    const save = () => {
+    const saveCache = () => {
       if (cacheData.current) {
         fileSystemProvider(cacheData.current);
         lastSaveTime.current = Date.now();
       }
     };
 
-    const subscription = AppState.addEventListener("change", save);
+    const subscription = AppState.addEventListener("change", saveCache);
 
     return () => {
       subscription.remove();
     };
   }, []);
 
-  // load initial cache
+  // Load cache from file system
   useEffect(() => {
     (async () => {
       if (cacheLoaded) return;
+
       const cacheDir = FileSystem.cacheDirectory + "hcb-mobile-cache/";
       const file = `${cacheDir}cache.json`;
-      const fileInfo = await FileSystem.getInfoAsync(file);
-      if (fileInfo.exists) {
-        console.log("📂 Cache file exists, restoring cache…");
-        const data = await FileSystem.readAsStringAsync(file);
-        const entries = JSON.parse(data);
-        cacheData.current = new Map(entries);
-        console.log(`📂 Restored ${cacheData.current.size} API routes!`);
-      } else {
-        console.log("📂 Cache file doesn't exist, creating new cache…");
+
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(file);
+        if (fileInfo.exists) {
+          console.log("📂 Cache file found, restoring cache...");
+          const data = await FileSystem.readAsStringAsync(file);
+          cacheData.current = new Map(JSON.parse(data));
+          console.log(`📂 Restored ${cacheData.current.size} API routes.`);
+        } else {
+          console.log("📂 No cache file found, initializing empty cache.");
+          cacheData.current = new Map();
+        }
+      } catch (error) {
+        console.error("❌ Error loading cache:", error);
         cacheData.current = new Map();
       }
+
       if (!cacheLoaded) setCacheLoaded(true);
     })();
-  }, [cacheData, cacheLoaded]);
+  }, [cacheLoaded]);
 
   const contextValue = useMemo(
     () => ({
@@ -103,14 +121,14 @@ export function SWRWrapper({ fetcher, children }: SWRWrapperProps) {
       initFocus(callback: () => void) {
         let appState: AppStateStatus = AppState.currentState as AppStateStatus;
 
-        const onAppStateChange = (nextAppState: string) => {
+        const onAppStateChange = (nextAppState: AppStateStatus) => {
           if (
             appState.match(/inactive|background/) &&
             nextAppState === "active"
           ) {
             callback();
           }
-          appState = nextAppState as AppStateStatus;
+          appState = nextAppState;
         };
 
         const subscription = AppState.addEventListener(

@@ -18,6 +18,7 @@ import { TabParamList } from "./src/lib/NavigatorParamList";
 import Navigator from "./src/Navigator";
 import Login from "./src/pages/login";
 import { lightTheme, palette, theme } from "./src/theme";
+import { NetworkProvider } from "react-native-offline";
 
 const linking: LinkingOptions<TabParamList> = {
   prefixes: [
@@ -71,24 +72,22 @@ export default function App() {
         return await response.json();
       } catch (error) {
         if (
-          !navigator.onLine || 
-          error.message.includes('network') ||
-          error.message.includes('failed to fetch')
+          !navigator.onLine ||
+          error.message.includes("network") ||
+          error.message.includes("failed to fetch")
         ) {
           return null;
-        } 
-        else if (
-            error.name === "HTTPError" &&
-            (await error.response.json()).error === "invalid_auth"
-          ) {
-             setToken("");
-          }
-        else {
+        } else if (
+          error.name === "HTTPError" &&
+          (await error.response.json()).error === "invalid_auth"
+        ) {
+          setToken("");
+        } else {
           throw error;
         }
       }
     },
-    [hcb]
+    [hcb],
   );
 
   useEffect(() => {
@@ -119,6 +118,7 @@ export default function App() {
         barStyle={scheme == "dark" ? "light-content" : "dark-content"}
         backgroundColor={palette.background}
       />
+   <NetworkProvider>
 
       <SWRWrapper fetcher={fetcher}>
         <SafeAreaProvider>
@@ -132,6 +132,7 @@ export default function App() {
           </ActionSheetProvider>
         </SafeAreaProvider>
       </SWRWrapper>
+    </NetworkProvider>
     </AuthContext.Provider>
   );
 }
