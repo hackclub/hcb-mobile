@@ -67,19 +67,28 @@ export default function App() {
   const fetcher = useCallback(
     async (url: string, options: RequestInit) => {
       try {
-        return await hcb(url, options).json();
+        const response = await hcb(url, options);
+        return await response.json();
       } catch (error) {
         if (
-          error.name === "HTTPError" &&
-          (await error.response.json()).error === "invalid_auth"
+          !navigator.onLine || 
+          error.message.includes('network') ||
+          error.message.includes('failed to fetch')
         ) {
-          setToken("");
-        } else {
+          return null;
+        } 
+        else if (
+            error.name === "HTTPError" &&
+            (await error.response.json()).error === "invalid_auth"
+          ) {
+             setToken("");
+          }
+        else {
           throw error;
         }
       }
     },
-    [hcb],
+    [hcb]
   );
 
   useEffect(() => {
