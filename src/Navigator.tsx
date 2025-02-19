@@ -8,6 +8,7 @@ import { StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
+import OrganizationLoader from "./components/organizations/OrganizationLoader";
 import {
   StackParamList,
   CardsStackParamList,
@@ -140,6 +141,13 @@ export default function Navigator() {
                 headerBackTitle: "Back",
               })}
               component={OrganizationPage}
+            />
+            <Stack.Screen
+              name="OrganizationLoader"
+              component={OrganizationLoader}
+              options={{
+                headerShown: false,
+              }}
             />
             <Stack.Screen
               name="AccountNumber"

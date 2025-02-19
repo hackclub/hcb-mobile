@@ -49,6 +49,12 @@ export default {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
       },
     },
+    updates: {
+      url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
+    },
+    runtimeVersion: {
+      policy: "appVersion",
+    },
     plugins: [
       [
         "expo-image-picker",
