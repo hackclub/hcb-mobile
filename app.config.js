@@ -89,8 +89,11 @@ export default {
           android: {
             minSdkVersion: 26,
             packagingOptions: {
-              pickFirst: ["org/bouncycastle/pqc/crypto/picnic/lowmcL*", "org/bouncycastle/x509/CertPathReviewerMessages*"]
-            }
+              pickFirst: [
+                "org/bouncycastle/pqc/crypto/picnic/lowmcL*",
+                "org/bouncycastle/x509/CertPathReviewerMessages*",
+              ],
+            },
           },
         },
       ],
