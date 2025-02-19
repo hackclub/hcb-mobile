@@ -12,6 +12,7 @@ import {
   SectionList,
   TouchableHighlight,
   useColorScheme,
+  Platform,
 } from "react-native";
 import useSWR, { mutate } from "swr";
 
@@ -94,72 +95,80 @@ export default function OrganizationPage({
       });
 
       const menuActions: MenuAction[] = [];
+
       if (
-        "account_number" in organization &&
-        organization.account_number !== null
+        "users" in organization &&
+        organization.users.some((u) => u.id === user?.id)
       ) {
+        if (
+          "account_number" in organization &&
+          organization.account_number !== null
+        ) {
+          menuActions.push({
+            id: "accountNumber",
+            title: "View Account Details",
+            image: "creditcard.and.123",
+          });
+        }
+
+        if (isManager && !organization.playground_mode) {
+          menuActions.push({
+            id: "transfer",
+            title: "Transfer Money",
+            image: "dollarsign.circle",
+          });
+        }
+
         menuActions.push({
-          id: "accountNumber",
-          title: "View Account Details",
-          image: "creditcard.and.123",
+          id: "settings",
+          title: "Manage Organization",
+          image: "gearshape",
+        });
+
+        if (!organization.playground_mode && Platform.OS == "android") {
+          menuActions.push({
+            id: "donation",
+            title: "Collect Donations",
+            image: "dollarsign.circle",
+          });
+        }
+
+        navigation.setOptions({
+          headerRight: () => (
+            <MenuView
+              actions={menuActions}
+              themeVariant={scheme || undefined}
+              onPressAction={({ nativeEvent: { event } }) => {
+                if (event == "accountNumber") {
+                  navigation.navigate("AccountNumber", {
+                    orgId: organization.id,
+                  });
+                } else if (event == "settings") {
+                  navigation.navigate("OrganizationSettings", {
+                    orgId: organization.id,
+                  });
+                } else if (event == "donation") {
+                  navigation.navigate("OrganizationDonation", {
+                    orgId: organization.id,
+                  });
+                } else if (event == "transfer") {
+                  navigation.navigate("Transfer", {
+                    organization: organization,
+                  });
+                }
+              }}
+            >
+              <Ionicons.Button
+                name="ellipsis-horizontal-circle"
+                backgroundColor="transparent"
+                size={24}
+                color={palette.primary}
+                iconStyle={{ marginRight: 0 }}
+              />
+            </MenuView>
+          ),
         });
       }
-
-      if (isManager && !organization.playground_mode) {
-        menuActions.push({
-          id: "transfer",
-          title: "Transfer Money",
-          image: "dollarsign.circle",
-        });
-      }
-
-      menuActions.push({
-        id: "settings",
-        title: "Manage Organization",
-        image: "gearshape",
-      });
-
-      if (!organization.playground_mode) {
-        menuActions.push({
-          id: "donation",
-          title: "Collect Donations",
-          image: "dollarsign.circle",
-        });
-      }
-
-      navigation.setOptions({
-        headerRight: () => (
-          <MenuView
-            actions={menuActions}
-            themeVariant={scheme || undefined}
-            onPressAction={({ nativeEvent: { event } }) => {
-              if (event == "accountNumber") {
-                navigation.navigate("AccountNumber", {
-                  orgId: organization.id,
-                });
-              } else if (event == "settings") {
-                navigation.navigate("OrganizationSettings", {
-                  orgId: organization.id,
-                });
-              } else if (event == "donation") {
-                navigation.navigate("OrganizationDonation", {
-                  orgId: organization.id,
-                });
-              } else if (event == "transfer") {
-                navigation.navigate("Transfer", { organization: organization });
-              }
-            }}
-          >
-            <Ionicons.Button
-              name="ellipsis-horizontal-circle"
-              backgroundColor="transparent"
-              size={24}
-              color={palette.primary}
-              iconStyle={{ marginRight: 0 }}
-            />
-          </MenuView>
-        ),
-      });
     }
   }, [organization, scheme, navigation, user]);
 
@@ -286,7 +295,9 @@ export default function OrganizationPage({
           renderItem={({ item, index, section: { data } }) => (
             <TouchableHighlight
               onPress={
-                item.id
+                item.id &&
+                "users" in organization &&
+                organization.users.some((u) => u.id === user?.id)
                   ? () => {
                       navigation.navigate("Transaction", {
                         transactionId: item.id!,
