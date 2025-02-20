@@ -38,6 +38,7 @@ const linking: LinkingOptions<TabParamList> = {
               transactionId: (id) => `txn_${id}`,
             },
           },
+          OrganizationLoader: ":orgId",
         },
       },
       Cards: {
@@ -46,6 +47,7 @@ const linking: LinkingOptions<TabParamList> = {
           CardList: "my/cards",
         },
       },
+      Receipts: "my/inbox",
     },
   },
   getStateFromPath,
@@ -68,6 +70,7 @@ export default function App() {
   const fetcher = useCallback(
     async (url: string, options: RequestInit) => {
       try {
+        // Allows us to use the v3 API in the v4 SWR
         return await hcb(url, options).json();
       } catch (error) {
         if (
