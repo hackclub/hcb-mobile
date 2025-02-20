@@ -3,6 +3,7 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   useColorScheme,
   Platform,
 } from "react-native";
+import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
@@ -125,12 +127,27 @@ export default function OrganizationPage({
           image: "gearshape",
         });
 
-        if (!organization.playground_mode && Platform.OS == "android") {
-          menuActions.push({
-            id: "donation",
-            title: "Collect Donations",
-            image: "dollarsign.circle",
-          });
+        if (!organization.playground_mode) {
+          if (Device.brand === "Apple" && Device.modelId) {
+            const modelNumber = parseInt(
+              Device.modelId.replace("iPhone", "").split(",")[0],
+              10,
+            );
+            // iPhone XS starts at iPhone11,2
+            if (modelNumber >= 11) {
+              menuActions.push({
+                id: "donation",
+                title: "Collect Donations",
+                image: "dollarsign.circle",
+              });
+            }
+          } else if (Platform.OS === "android") {
+            menuActions.push({
+              id: "donation",
+              title: "Collect Donations",
+              image: "dollarsign.circle",
+            });
+          }
         }
 
         navigation.setOptions({
@@ -148,9 +165,30 @@ export default function OrganizationPage({
                     orgId: organization.id,
                   });
                 } else if (event == "donation") {
-                  navigation.navigate("OrganizationDonation", {
-                    orgId: organization.id,
-                  });
+                  if (Platform.OS === "android") {
+                    navigation.navigate("OrganizationDonation", {
+                      orgId: organization.id,
+                    });
+                  } else if (Platform.OS === "ios") {
+                    const [major, minor] = (Device.osVersion ?? "0.0")
+                      .split(".")
+                      .map(Number);
+
+                    // iOS 16.4 and later
+                    if (major > 16 || (major === 16 && minor >= 4)) {
+                      navigation.navigate("OrganizationDonation", {
+                        orgId: organization.id,
+                      });
+                    } else {
+                      Dialog.show({
+                        type: ALERT_TYPE.DANGER,
+                        title: "Unsupported iOS Version",
+                        textBody:
+                          "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                        button: "Ok",
+                      });
+                    }
+                  }
                 } else if (event == "transfer") {
                   navigation.navigate("Transfer", {
                     organization: organization,
