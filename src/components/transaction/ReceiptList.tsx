@@ -73,7 +73,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
 
     body.append("file", {
       uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "",
+      name: selectedImage?.fileName || "skibidi",
       type: "image/jpeg",
     });
 

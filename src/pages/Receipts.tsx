@@ -51,7 +51,7 @@ function Transaction({
 
     body.append("file", {
       uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "yeet.jpg",
+      name: selectedImage?.fileName || "skibidi.jpg",
       type: "image/jpeg",
     });
 
