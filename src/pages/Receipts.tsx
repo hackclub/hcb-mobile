@@ -12,7 +12,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
 import AuthContext from "../auth";
@@ -72,15 +72,15 @@ function Transaction({
       onComplete();
       Toast.show({
         type: ALERT_TYPE.SUCCESS,
-        title: 'Reciept Uploaded!',
-        textBody: 'Your reciept has been uploaded successfully.',
-      })
+        title: "Reciept Uploaded!",
+        textBody: "Your reciept has been uploaded successfully.",
+      });
     } catch (e) {
       Toast.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
-        textBody: 'An error occurred while uploading the reciept.',
-      })
+        title: "Error",
+        textBody: "An error occurred while uploading the reciept.",
+      });
     }
   };
 

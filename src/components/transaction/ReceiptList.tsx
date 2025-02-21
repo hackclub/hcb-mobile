@@ -8,13 +8,8 @@ import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useContext, useState } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
-import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
+import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR, { mutate } from "swr";
@@ -95,8 +90,8 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     } catch (e) {
       Toast.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Failed to upload receipt',
-        textBody: 'Please try again later.',
+        title: "Failed to upload receipt",
+        textBody: "Please try again later.",
       });
     }
   };
@@ -127,8 +122,8 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             await uploadReceipt();
             Toast.show({
               type: ALERT_TYPE.SUCCESS,
-              title: 'Receipt Uploaded!',
-              textBody: 'Your receipt has been uploaded successfully.',
+              title: "Receipt Uploaded!",
+              textBody: "Your receipt has been uploaded successfully.",
             });
           }
         } else if (buttonIndex === 1) {
@@ -146,8 +141,8 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             await uploadReceipt();
             Toast.show({
               type: ALERT_TYPE.SUCCESS,
-              title: 'Receipt Uploaded!',
-              textBody: 'Your receipt has been uploaded successfully.',
+              title: "Receipt Uploaded!",
+              textBody: "Your receipt has been uploaded successfully.",
             });
           }
         }
