@@ -8,6 +8,8 @@ import { useContext, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
+  ScrollView,
   Text,
   TouchableHighlight,
   View,
@@ -37,12 +39,12 @@ function Transaction({
   const [loading, setLoading] = useState(false);
 
   const { showActionSheetWithOptions } = useActionSheet();
-  const [selectedImage, setSelectedImage] = useState<{
-    uri: string;
-    fileName?: string;
-  } | null>(null);
-
-  const uploadReceipt = async () => {
+  const uploadReceipt = async (
+    selectedImage: {
+      uri: string;
+      fileName?: string;
+    } | null,
+  ) => {
     const body = new FormData();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
@@ -52,15 +54,6 @@ function Transaction({
       name: selectedImage?.fileName || "yeet.jpg",
       type: "image/jpeg",
     });
-
-    if (!selectedImage) {
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Error",
-        textBody: "An error occurred while uploading the reciept.",
-      });
-      return;
-    }
 
     try {
       await fetch(
@@ -90,6 +83,7 @@ function Transaction({
         title: "Error",
         textBody: "An error occurred while uploading the reciept.",
       });
+      setLoading(false);
     }
   };
 
@@ -112,12 +106,11 @@ function Transaction({
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
-            });
             setLoading(true);
-            await uploadReceipt();
+            await uploadReceipt({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || undefined,
+            });
           }
         } else if (buttonIndex === 1) {
           // Pick from photo library
@@ -127,12 +120,11 @@ function Transaction({
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
-            });
             setLoading(true);
-            await uploadReceipt();
+            await uploadReceipt({
+              uri: result.assets[0].uri,
+              fileName: result.assets[0].fileName || undefined,
+            });
           }
         }
       },
@@ -222,7 +214,16 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
 
   if (data?.data?.length == 0) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ScrollView
+        contentContainerStyle={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={{ marginBottom: 10 }}>
           <Ionicons name="receipt-outline" color={palette.muted} size={60} />
           <Ionicons
@@ -237,7 +238,7 @@ export default function ReceiptsPage({ navigation: _navigation }: Props) {
           />
         </View>
         <Text style={{ color: palette.muted }}>No receipts to upload.</Text>
-      </View>
+      </ScrollView>
     );
   }
 

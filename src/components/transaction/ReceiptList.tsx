@@ -46,7 +46,11 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
-  const { data: receipts, isLoading } = useSWR<Receipt[]>(
+  const {
+    data: receipts,
+    isLoading,
+    mutate,
+  } = useSWR<Receipt[]>(
     `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
   );
 
@@ -54,14 +58,15 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { token } = useContext(AuthContext);
 
   const { showActionSheetWithOptions } = useActionSheet();
-  const [selectedImage, setSelectedImage] = useState<{
-    uri: string;
-    fileName?: string;
-  } | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = async () => {
+  const uploadReceipt = async (
+    selectedImage: {
+      uri: string;
+      fileName?: string;
+    } | null,
+  ) => {
     const body = new FormData();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
@@ -84,9 +89,12 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           body,
         },
       );
-      mutate(
-        `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
-      );
+      mutate();
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: "Receipt Uploaded!",
+        textBody: "Your receipt has been uploaded successfully.",
+      });
     } catch (e) {
       Toast.show({
         type: ALERT_TYPE.DANGER,
@@ -115,15 +123,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
+            await uploadReceipt({
               uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
-            });
-            await uploadReceipt();
-            Toast.show({
-              type: ALERT_TYPE.SUCCESS,
-              title: "Receipt Uploaded!",
-              textBody: "Your receipt has been uploaded successfully.",
+              fileName: result.assets[0].fileName || undefined,
             });
           }
         } else if (buttonIndex === 1) {
@@ -134,15 +136,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
+            await uploadReceipt({
               uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
-            });
-            await uploadReceipt();
-            Toast.show({
-              type: ALERT_TYPE.SUCCESS,
-              title: "Receipt Uploaded!",
-              textBody: "Your receipt has been uploaded successfully.",
+              fileName: result.assets[0].fileName || undefined,
             });
           }
         }
