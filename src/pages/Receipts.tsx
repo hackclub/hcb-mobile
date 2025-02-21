@@ -53,6 +53,15 @@ function Transaction({
       type: "image/jpeg",
     });
 
+    if (!selectedImage) {
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: "Error",
+        textBody: "An error occurred while uploading the reciept.",
+      });
+      return;
+    }
+
     try {
       await fetch(
         process.env.EXPO_PUBLIC_API_BASE +
