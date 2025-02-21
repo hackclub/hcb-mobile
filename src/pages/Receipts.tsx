@@ -7,12 +7,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useContext, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Text,
   TouchableHighlight,
   View,
 } from "react-native";
+import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
 import useSWR, { mutate } from "swr";
 
 import AuthContext from "../auth";
@@ -70,9 +70,17 @@ function Transaction({
       );
       setLoading(false);
       onComplete();
-      Alert.alert("Receipt uploaded!");
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: 'Reciept Uploaded!',
+        textBody: 'Your reciept has been uploaded successfully.',
+      })
     } catch (e) {
-      Alert.alert("Something went wrong.");
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Error',
+        textBody: 'An error occurred while uploading the reciept.',
+      })
     }
   };
 

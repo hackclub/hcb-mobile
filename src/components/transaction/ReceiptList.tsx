@@ -12,9 +12,9 @@ import {
   View,
   Text,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from "react-native";
+import { ALERT_TYPE, Toast } from 'react-native-alert-notification';
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR, { mutate } from "swr";
@@ -93,7 +93,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
       );
     } catch (e) {
-      Alert.alert("Something went wrong.");
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Failed to upload receipt',
+        textBody: 'Please try again later.',
+      });
     }
   };
 
@@ -121,6 +125,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               fileName: result.assets[0].fileName || "",
             });
             await uploadReceipt();
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: 'Receipt Uploaded!',
+              textBody: 'Your receipt has been uploaded successfully.',
+            });
           }
         } else if (buttonIndex === 1) {
           // Pick from photo library
@@ -135,6 +144,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               fileName: result.assets[0].fileName || "",
             });
             await uploadReceipt();
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: 'Receipt Uploaded!',
+              textBody: 'Your receipt has been uploaded successfully.',
+            });
           }
         }
       },
