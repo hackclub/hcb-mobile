@@ -8,7 +8,7 @@ import * as Linking from "expo-linking";
 import * as SecureStorage from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
 import { StatusBar, useColorScheme } from "react-native";
-import { AlertNotificationRoot } from 'react-native-alert-notification';
+import { AlertNotificationRoot } from "react-native-alert-notification";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
@@ -125,12 +125,12 @@ export default function App() {
         <SafeAreaProvider>
           <ActionSheetProvider>
             <AlertNotificationRoot>
-            <NavigationContainer
-              theme={scheme == "dark" ? theme : lightTheme}
-              linking={linking}
-            >
-              <Navigator />
-            </NavigationContainer>
+              <NavigationContainer
+                theme={scheme == "dark" ? theme : lightTheme}
+                linking={linking}
+              >
+                <Navigator />
+              </NavigationContainer>
             </AlertNotificationRoot>
           </ActionSheetProvider>
         </SafeAreaProvider>
