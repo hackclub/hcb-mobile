@@ -12,7 +12,7 @@ import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 
 import AuthContext from "../../auth";
 import { StackParamList } from "../../lib/NavigatorParamList";
