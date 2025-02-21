@@ -9,16 +9,17 @@ import { StackParamList } from "./lib/NavigatorParamList";
 
 export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
   const state = _getStateFromPath(path, options);
-
+  console.log("getStateFromPath", path, state);
   if (state) return state;
 
   const extractedOrg = extractOrgName(path);
+  console.log("extractedOrg", extractedOrg);
+
+  const routes: PartialRoute<Route<keyof StackParamList>>[] = [];
 
   if (extractedOrg) {
-    const routes: PartialRoute<Route<keyof StackParamList>>[] = [
-      { name: "Organizations" },
-      { name: "Event", params: { orgId: extractedOrg.orgId } },
-    ];
+    routes.push({ name: "Organizations" });
+    routes.push({ name: "Event", params: { orgId: extractedOrg.orgId } });
 
     if (extractedOrg.transactionId) {
       routes.push({
@@ -29,7 +30,19 @@ export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
         },
       });
     }
+  }
 
+  const match = path.match(/([^/]+)\/transactions/);
+  if (match) {
+    const orgId = match[1];
+    console.log("transactions detected, orgId:", orgId);
+    routes.push({
+      name: "OrganizationLoader",
+      params: { orgId },
+    });
+  }
+
+  if (routes.length > 0) {
     return {
       routes: [
         {
