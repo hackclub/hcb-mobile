@@ -1,3 +1,4 @@
+import { checkAutomatically } from "expo-updates";
 import appIcons from "./src/lib/AppIconList";
 const IS_DEV = process.env.APP_VARIANT === "development";
 
@@ -85,6 +86,12 @@ export default {
         {
           android: {
             minSdkVersion: 26,
+            packagingOptions: {
+              pickFirst: [
+                "org/bouncycastle/pqc/crypto/picnic/lowmcL*",
+                "org/bouncycastle/x509/CertPathReviewerMessages*",
+              ],
+            },
           },
         },
       ],
