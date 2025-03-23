@@ -294,7 +294,7 @@ export default function OrganizationPage({
                     fontSize: 16,
                   }}
                 >
-                  no transactions :{"("}
+                  No Transactions
                 </Text>
               )}
             </View>
