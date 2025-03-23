@@ -17,9 +17,14 @@ import {
 import useSWR, { mutate } from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
+import Button from "../../components/Button";
+import MockTransaction, {
+  MockTransactionType,
+} from "../../components/MockTransaction";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
+import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
 import Organization, {
   OrganizationExpanded,
@@ -73,6 +78,7 @@ export default function OrganizationPage({
   >(`organizations/${orgId}`, { fallbackData: _organization });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
+  const [showMockData, setShowMockData] = useState(false);
   const {
     transactions: _transactions,
     isLoadingMore,
@@ -193,6 +199,20 @@ export default function OrganizationPage({
     [transactions],
   );
 
+  const mock = new MockTransactionEngine();
+  const mockTransactions = mock.generateMockTransactionList();
+  const mockSections: { title: string; data: MockTransactionType[] }[] =
+    useMemo(
+      () =>
+        Object.entries(
+          groupBy(mockTransactions, (t) => renderDate(t.date)),
+        ).map(([title, data]) => ({
+          title,
+          data,
+        })),
+      [mockTransactions],
+    );
+
   const onRefresh = () => {
     mutate("organizations");
     mutate(`organizations/${orgId}`);
@@ -251,25 +271,40 @@ export default function OrganizationPage({
                       renderMoney(organization.balance_cents)}
                   </Text>
                 </View>
-                {/* <Button
-                  style={{
-                    backgroundColor: "#5bc0de",
-                    borderTopWidth: 0,
-                  }}
-                  color="#186177"
-                  disabled={organization.playground_mode}
-                  onPress={() =>
-                    navigation.navigate("Transfer", { organization })
-                  }
-                >
-                Transfer Money
-                </Button> */}
+                {organization?.playground_mode && (
+                  <Button
+                    style={{
+                      backgroundColor: "#3F9CEE",
+                      borderTopWidth: 0,
+                    }}
+                    color="#fff"
+                    onPress={() => setShowMockData((prev) => !prev)}
+                  >
+                    {showMockData ? "Hide Mock Data" : "Show Mock Data"}
+                  </Button>
+                )}
               </View>
 
               {isLoading && <ActivityIndicator />}
+              {!isLoading && sections.length === 0 && !showMockData && (
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: palette.muted,
+                    fontSize: 16,
+                  }}
+                >
+                  no transactions :{"("}
+                </Text>
+              )}
             </View>
           )}
-          sections={sections}
+          // @ts-expect-error workaround for mock data
+          sections={
+            organization?.playground_mode && showMockData
+              ? (mockSections as unknown)
+              : sections
+          }
           // stickySectionHeadersEnabled={false}
           style={{ flexGrow: 1 }}
           contentContainerStyle={{
@@ -292,32 +327,40 @@ export default function OrganizationPage({
               {title}
             </Text>
           )}
-          renderItem={({ item, index, section: { data } }) => (
-            <TouchableHighlight
-              onPress={
-                item.id &&
-                "users" in organization &&
-                organization.users.some((u) => u.id === user?.id)
-                  ? () => {
-                      navigation.navigate("Transaction", {
-                        transactionId: item.id!,
-                        orgId,
-                        transaction: item as ITransaction,
-                      });
-                    }
-                  : undefined
-              }
-              underlayColor={themeColors.background}
-              activeOpacity={0.7}
-            >
-              <Transaction
-                orgId={orgId}
+          renderItem={({ item, index, section: { data } }) =>
+            organization?.playground_mode ? (
+              <MockTransaction
                 transaction={item}
                 top={index == 0}
                 bottom={index == data.length - 1}
               />
-            </TouchableHighlight>
-          )}
+            ) : (
+              <TouchableHighlight
+                onPress={
+                  item.id &&
+                  "users" in organization &&
+                  organization.users.some((u) => u.id === user?.id)
+                    ? () => {
+                        navigation.navigate("Transaction", {
+                          transactionId: item.id!,
+                          orgId,
+                          transaction: item as ITransaction,
+                        });
+                      }
+                    : undefined
+                }
+                underlayColor={themeColors.background}
+                activeOpacity={0.7}
+              >
+                <Transaction
+                  orgId={orgId}
+                  transaction={item}
+                  top={index == 0}
+                  bottom={index == data.length - 1}
+                />
+              </TouchableHighlight>
+            )
+          }
         />
       ) : (
         <ActivityIndicator />
