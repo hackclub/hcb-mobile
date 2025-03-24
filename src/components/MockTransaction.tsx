@@ -27,9 +27,9 @@ export interface MockTransactionType {
 }
 
 function mockTransactionIcon(transaction: MockTransactionType): string {
-  if (transaction.localHcbCode?.isDonation) {
+  if (transaction?.localHcbCode?.isDonation) {
     return "support";
-  } else if (transaction.feePayment) {
+  } else if (transaction?.feePayment) {
     return "bank-circle";
   } else {
     return "payment-docs";
@@ -77,7 +77,7 @@ function MockTransactionComponent({
 }) {
   const { colors: themeColors } = useTheme();
   const hasMissingReceipt =
-    transaction.localHcbCode?.receipts.length === 0 &&
+    transaction?.localHcbCode?.receipts.length === 0 &&
     transaction.amount.cents < 0 &&
     !transaction.feePayment;
 
@@ -109,7 +109,7 @@ function MockTransactionComponent({
           flex: 1,
         }}
       >
-        {transaction.localHcbCode?.memo?.replaceAll(/\s{2,}/g, " ") || ""}
+        {transaction?.localHcbCode?.memo?.replaceAll(/\s{2,}/g, " ") || ""}
       </Text>
       {hasMissingReceipt && !hideMissingReceipt && (
         <View>
@@ -124,10 +124,10 @@ function MockTransactionComponent({
       )}
       <Text
         style={{
-          color: transaction.amount.cents > 0 ? "#33d6a6" : "#d63333",
+          color: transaction?.amount.cents > 0 ? "#33d6a6" : "#d63333",
         }}
       >
-        {renderMoney(transaction.amount.cents)}
+        {renderMoney(transaction?.amount.cents)}
       </Text>
     </View>
   );

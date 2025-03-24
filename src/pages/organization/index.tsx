@@ -3,6 +3,7 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Icon from "@thedev132/hackclub-icons-rn";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -190,7 +191,7 @@ export default function OrganizationPage({
     () =>
       Object.entries(
         groupBy(transactions, (t) =>
-          t.pending ? "Pending" : renderDate(t.date),
+          t?.pending ? "Pending" : renderDate(t?.date),
         ),
       ).map(([title, data]) => ({
         title,
@@ -201,17 +202,20 @@ export default function OrganizationPage({
 
   const mock = new MockTransactionEngine();
   const mockTransactions = mock.generateMockTransactionList();
-  const mockSections: { title: string; data: MockTransactionType[] }[] =
-    useMemo(
-      () =>
-        Object.entries(
-          groupBy(mockTransactions, (t) => renderDate(t.date)),
-        ).map(([title, data]) => ({
-          title,
-          data,
-        })),
-      [mockTransactions],
-    );
+  const mockSections: { title: string; data: MockTransactionType[] }[] = useMemo(() => {
+    return Object.entries(
+      groupBy(mockTransactions, (t) => t.date) 
+    )
+      .sort(([dateA], [dateB]) => dateB.localeCompare(dateA)) 
+      .map(([title, data]) => ({
+        title: renderDate(title), 
+        data,
+      }));
+  }, [mockTransactions]);
+  
+  
+  
+  
 
   const onRefresh = () => {
     mutate("organizations");
@@ -236,7 +240,10 @@ export default function OrganizationPage({
           initialNumToRender={30}
           ListFooterComponent={() =>
             isLoadingMore &&
-            !isLoading && <ActivityIndicator style={{ marginTop: 20 }} />
+            !isLoading &&
+            !organization.playground_mode && (
+              <ActivityIndicator style={{ marginTop: 20 }} />
+            )
           }
           onEndReachedThreshold={0.5}
           onEndReached={() => loadMore()}
@@ -287,15 +294,31 @@ export default function OrganizationPage({
 
               {isLoading && <ActivityIndicator />}
               {!isLoading && sections.length === 0 && !showMockData && (
-                <Text
+                <View
                   style={{
-                    textAlign: "center",
-                    color: palette.muted,
-                    fontSize: 16,
+                    flex: 1,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 4,
                   }}
                 >
-                  No Transactions
-                </Text>
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: palette.muted,
+                      fontSize: 16,
+                    }}
+                  >
+                    No Transactions
+                  </Text>
+                  <Icon
+                    glyph="sad"
+                    color={palette.muted}
+                    size={32}
+                    style={{ alignSelf: "center" }}
+                  />
+                </View>
               )}
             </View>
           )}
