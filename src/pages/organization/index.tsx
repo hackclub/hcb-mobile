@@ -202,20 +202,15 @@ export default function OrganizationPage({
 
   const mock = new MockTransactionEngine();
   const mockTransactions = mock.generateMockTransactionList();
-  const mockSections: { title: string; data: MockTransactionType[] }[] = useMemo(() => {
-    return Object.entries(
-      groupBy(mockTransactions, (t) => t.date) 
-    )
-      .sort(([dateA], [dateB]) => dateB.localeCompare(dateA)) 
-      .map(([title, data]) => ({
-        title: renderDate(title), 
-        data,
-      }));
-  }, [mockTransactions]);
-  
-  
-  
-  
+  const mockSections: { title: string; data: MockTransactionType[] }[] =
+    useMemo(() => {
+      return Object.entries(groupBy(mockTransactions, (t) => t.date))
+        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+        .map(([title, data]) => ({
+          title: renderDate(title),
+          data,
+        }));
+    }, [mockTransactions]);
 
   const onRefresh = () => {
     mutate("organizations");

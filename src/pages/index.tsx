@@ -258,8 +258,8 @@ export default function App({ navigation }: Props) {
     for (const org of organizations || []) {
       await preload(`organizations/${org.id}`, fetcher!);
       await preload(`organizations/${org.id}/transactions?limit=35`, fetcher!);
-  }
-}
+    }
+  };
 
   useEffect(() => {
     preloadInfo();
