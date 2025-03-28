@@ -26,7 +26,7 @@ export default function useTransactions(orgId: string) {
   const { data, size, setSize, isLoading } = useSWRInfinite(getKey(orgId));
 
   const transactions: Transaction[] = useMemo(
-    () => data?.flatMap((d) => d.data) || [],
+    () => data?.flatMap((d) => d?.data) || [],
     [data],
   );
   const isLoadingMore =
