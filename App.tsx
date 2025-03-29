@@ -25,6 +25,8 @@ const linking: LinkingOptions<TabParamList> = {
     Linking.createURL("/"),
     "https://bank.hackclub.com",
     "https://hcb.hackclub.com",
+    "http://bank.hackclub.com",
+    "http://hcb.hackclub.com",
   ],
   config: {
     screens: {
