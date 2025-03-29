@@ -8,16 +8,11 @@ import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useContext, useState } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 
 import AuthContext from "../../auth";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -51,7 +46,11 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
-  const { data: receipts, isLoading } = useSWR<Receipt[]>(
+  const {
+    data: receipts,
+    isLoading,
+    mutate,
+  } = useSWR<Receipt[]>(
     `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
   );
 
@@ -59,21 +58,22 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { token } = useContext(AuthContext);
 
   const { showActionSheetWithOptions } = useActionSheet();
-  const [selectedImage, setSelectedImage] = useState<{
-    uri: string;
-    fileName?: string;
-  } | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = async () => {
+  const uploadReceipt = async (
+    selectedImage: {
+      uri: string;
+      fileName?: string;
+    } | null,
+  ) => {
     const body = new FormData();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
 
     body.append("file", {
       uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "",
+      name: selectedImage?.fileName || "skibidi",
       type: "image/jpeg",
     });
 
@@ -89,11 +89,18 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           body,
         },
       );
-      mutate(
-        `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
-      );
+      mutate();
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: "Receipt Uploaded!",
+        textBody: "Your receipt has been uploaded successfully.",
+      });
     } catch (e) {
-      Alert.alert("Something went wrong.");
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: "Failed to upload receipt",
+        textBody: "Please try again later.",
+      });
     }
   };
 
@@ -116,11 +123,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
+            await uploadReceipt({
               uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
+              fileName: result.assets[0].fileName || undefined,
             });
-            await uploadReceipt();
           }
         } else if (buttonIndex === 1) {
           // Pick from photo library
@@ -130,11 +136,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             quality: 1,
           });
           if (!result.canceled) {
-            setSelectedImage({
+            await uploadReceipt({
               uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || "",
+              fileName: result.assets[0].fileName || undefined,
             });
-            await uploadReceipt();
           }
         }
       },
