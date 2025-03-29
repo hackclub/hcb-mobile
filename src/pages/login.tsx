@@ -90,7 +90,11 @@ export default function Login() {
         style={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}
       >
         <Animated.Image
-          source={require("../../assets/icon.png")}
+          source={
+            scheme == "dark"
+              ? require("../../assets/icon.png")
+              : require("../../assets/icon-light.png")
+          }
           style={{
             width: 100,
             height: 100,
