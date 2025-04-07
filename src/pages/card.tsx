@@ -243,9 +243,9 @@ export default function CardPage({
         </View>
       )}
 
-      {transactionsLoading || transactions === undefined ? (
+      {transactionsLoading ? (
         <ActivityIndicator />
-      ) : transactions.data.length == 0 ? (
+      ) :  transactions === undefined || transactions.data.length == 0  ? (
         <Text
           style={{
             color: palette.muted,
@@ -254,7 +254,7 @@ export default function CardPage({
             textAlign: "center",
           }}
         >
-          No purchases on this card yet.
+          There are no purchases on this card.
         </Text>
       ) : (
         <>
