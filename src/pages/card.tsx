@@ -245,7 +245,7 @@ export default function CardPage({
 
       {transactionsLoading ? (
         <ActivityIndicator />
-      ) :  transactions === undefined || transactions.data.length == 0  ? (
+      ) : transactions === undefined || transactions.data.length === 0 ? (
         <Text
           style={{
             color: palette.muted,
