@@ -60,3 +60,4 @@ EXPO_PUBLIC_CLIENT_ID=<uid field from the Doorkeeper app>
 ## Contributing
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
