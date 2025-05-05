@@ -20,6 +20,7 @@ import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
+import OrderCardPage from "./pages/OrderCard";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
 import OrganizationSettingsPage from "./pages/organization/Settings";
@@ -181,6 +182,18 @@ export default function Navigator() {
               options={({ route }) => ({
                 title: "Card",
               })}
+            />
+            <CardsStack.Screen
+              name="OrderCard"
+              component={OrderCardPage}
+              options={{
+                presentation: "card",
+                headerShown: true,
+                title: "",
+                headerBackTitle: "Cards",
+                headerShadowVisible: false,
+                headerTransparent: true,
+              }}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}

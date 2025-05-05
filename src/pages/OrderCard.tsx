@@ -1,67 +1,59 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { useTheme } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Linking } from "react-native";
-import Modal from "react-native-modal";
 
-import User from "../../lib/types/User";
-import { palette } from "../../theme";
+import { CardsStackParamList } from "../lib/NavigatorParamList";
+import { palette } from "../theme";
 
-import CardIcon from "./CardIcon";
-import RepIcon from "./RepIcon";
+import CardIcon from "../components/cards/CardIcon";
+import RepIcon from "../components/cards/RepIcon";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+type Props = NativeStackScreenProps<CardsStackParamList, "OrderCard">;
 
-interface OrderCardModalProps {
-  isVisible: boolean;
-  onClose: () => void;
-  user: User;
-  organizations: string[];
-}
-
-export default function OrderCardModal({ isVisible, onClose, user, organizations }: OrderCardModalProps) {
-  const [cardType, setCardType] = useState("virtual"); // 'virtual' or 'plastic'
+export default function OrderCardScreen({ navigation, route }: Props) {
   const { colors: themeColors } = useTheme();
+  const { user, organizations } = route.params;
+
+  // Form state variables
+  const [cardType, setCardType] = useState("virtual"); // 'virtual' or 'plastic'
+  const [organization, setOrganization] = useState(organizations?.[0] || "");
+  const [shippingName, setShippingName] = useState(user?.name || "");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [stateProvince, setStateProvince] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [country, setCountry] = useState("United States");
 
   return (
-    <Modal
-      isVisible={isVisible}
-      onBackdropPress={onClose}
-      animationIn="zoomIn"
-      animationOut="zoomOut"
-      backdropOpacity={0.5}
-      style={{ margin: 0, justifyContent: "center" }}
-    >
+    <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1, justifyContent: "center" }}
+        style={{ flex: 1 }}
       >
         <ScrollView
+          scrollToOverflowEnabled={false}
+          bounces={false}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
-            padding: 5,
-            paddingBottom: cardType === "plastic" ? 30 : 0,
-          }}
-          style={{
-            backgroundColor: themeColors.background,
-            borderRadius: 20,
-            marginHorizontal: 20,
             padding: 20,
-            maxHeight: cardType === "plastic" ? "80%" : "60%",
+            paddingBottom: cardType === "plastic" ? 50 : 20,
           }}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20}}>
-            <Text
-                style={{
-                color: themeColors.text,
-                fontSize: 20,
-                fontWeight: "bold",
-                }}
-            >
-                Order a card
-            </Text>
-            <AntDesign name="closecircle" size={24} color={themeColors.text} />
-          </View>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 22,
+              fontWeight: "bold",
+              marginBottom: 20,
+            }}
+          >
+            Order a card
+          </Text>
+          
           <Text
             style={{
               color: palette.smoke,
@@ -97,7 +89,6 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              marginBottom: 20,
             }}
           >
             <TouchableOpacity
@@ -165,8 +156,18 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
                 Mailed, 10-12 biz. days
               </Text>
             </TouchableOpacity>
-          </View>
 
+          </View>
+          <Text
+              style={{
+                  color: palette.smoke,
+                  fontSize: 12,
+                  marginTop: 10,
+                  marginBottom: 20,
+                  }}
+              >
+                  Physical cards can only be shipped within the US.
+              </Text>
           {cardType === "plastic" && (
             <>
               <Text
@@ -181,7 +182,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
               <TextInput
                 placeholder="Shipping name"
                 placeholderTextColor={palette.muted}
-                value={user.name}
+                value={shippingName}
+                onChangeText={setShippingName}
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
@@ -193,6 +195,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
               <TextInput
                 placeholder="Address (line 1)"
                 placeholderTextColor={palette.muted}
+                value={addressLine1}
+                onChangeText={setAddressLine1}
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
@@ -204,6 +208,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
               <TextInput
                 placeholder="Address (line 2)"
                 placeholderTextColor={palette.muted}
+                value={addressLine2}
+                onChangeText={setAddressLine2}
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
@@ -223,6 +229,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
                 <TextInput
                   placeholder="City"
                   placeholderTextColor={palette.muted}
+                  value={city}
+                  onChangeText={setCity}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
@@ -234,6 +242,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
                 <TextInput
                   placeholder="State / province"
                   placeholderTextColor={palette.muted}
+                  value={stateProvince}
+                  onChangeText={setStateProvince}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
@@ -254,6 +264,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
                 <TextInput
                   placeholder="ZIP code"
                   placeholderTextColor={palette.muted}
+                  value={zipCode}
+                  onChangeText={setZipCode}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
@@ -265,6 +277,8 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
                 <TextInput
                   placeholder="Country"
                   placeholderTextColor={palette.muted}
+                  value={country}
+                  onChangeText={setCountry}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
@@ -287,23 +301,23 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
             Plastic cards can only be shipped within the US.
           </Text>
 
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 12,
+              marginBottom: 20,
+            }}
+          >
+            By submitting, you agree to Stripe's{' '}
             <Text
-                style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    marginBottom: 20,
-                }}
-                >
-                    By submitting, you agree to Stripe's{' '}
-                    <Text
-                        style={{ textDecorationLine: 'underline' }}
-                        onPress={() => Linking.openURL('https://www.stripe.com/cardholder-terms')}
-                    >
-                        cardholder terms
-                    </Text>. Your name,
-                    birthday, and contact information is shared with them and their
-                    banking partners.
-            </Text>
+              style={{ textDecorationLine: 'underline' }}
+              onPress={() => Linking.openURL('https://www.stripe.com/cardholder-terms')}
+            >
+              cardholder terms
+            </Text>. Your name,
+            birthday, and contact information is shared with them and their
+            banking partners.
+          </Text>
 
           <TouchableOpacity
             style={{
@@ -312,7 +326,7 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
               borderRadius: 10,
               alignItems: "center",
             }}
-            onPress={onClose}
+            onPress={() => navigation.goBack()}
           >
             <Text style={{ color: themeColors.text, fontWeight: "bold" }}>
               Issue my card
@@ -320,6 +334,6 @@ export default function OrderCardModal({ isVisible, onClose, user, organizations
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-    </Modal>
+    </SafeAreaView>
   );
 }

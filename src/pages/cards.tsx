@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
-import OrderCardModal from "../components/cards/AddCard";
 import PaymentCard from "../components/PaymentCard";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
@@ -29,7 +28,7 @@ export default function CardsPage({ navigation }: Props) {
   const { data: grantCards, mutate: reloadGrantCards } = useSWR<GrantCard[]>(
     "user/card_grants"
   );
-  const {data: user} = useSWR("user");
+  const { data: user } = useSWR("user");
 
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
@@ -41,97 +40,91 @@ export default function CardsPage({ navigation }: Props) {
 
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
   const [allCards, setAllCards] = useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
-  const [isModalVisible, setModalVisible] = useState(false);
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={{ flexDirection: "row" }}>
-        <MenuView
-          actions={[
-            {
-              id: "showFrozenCards",
-              title: "Show inactive cards",
-              state: frozenCardsShown ? "on" : "off",
-            },
-          ]}
-          onPressAction={({ nativeEvent: { event } }) => {
-            if (event == "showFrozenCards") {
-              setFrozenCardsShown(!frozenCardsShown);
-              AsyncStorage.setItem("frozenCardsShown", (!frozenCardsShown).toString());
-            }
-          }}
-          themeVariant={scheme || undefined}
-        >
-          <Ionicons.Button
-            name="ellipsis-horizontal-circle"
-            backgroundColor="transparent"
-            size={24}
-            color={palette.primary}
-            iconStyle={{ marginRight: 0 }}
-          />
-        </MenuView>
+          <MenuView
+            actions={[
+              {
+                id: "showFrozenCards",
+                title: "Show inactive cards",
+                state: frozenCardsShown ? "on" : "off",
+              },
+            ]}
+            onPressAction={({ nativeEvent: { event } }) => {
+              if (event == "showFrozenCards") {
+                setFrozenCardsShown(!frozenCardsShown);
+                AsyncStorage.setItem("frozenCardsShown", (!frozenCardsShown).toString());
+              }
+            }}
+            themeVariant={scheme || undefined}
+          >
+            <Ionicons.Button
+              name="ellipsis-horizontal-circle"
+              backgroundColor="transparent"
+              size={24}
+              color={palette.primary}
+              iconStyle={{ marginRight: 0 }}
+            />
+          </MenuView>
           <Ionicons.Button
             name="add-circle-outline"
             backgroundColor="transparent"
             size={24}
             color={palette.primary}
             iconStyle={{ marginRight: 0 }}
-            onPress={() => toggleModal()}
+            onPress={() => navigation.navigate("OrderCard", { user, organizations: [] })}
             underlayColor={"transparent"}
           />
         </View>
       ),
     });
-  }, [navigation, frozenCardsShown, scheme]);
+  }, [navigation, frozenCardsShown, scheme, user]);
 
   useEffect(() => {
-      const fetchFrozenCardsShown = async () => {
-        const isFrozenCardsShown = await AsyncStorage.getItem("frozenCardsShown");
-        if (isFrozenCardsShown) {
-          setFrozenCardsShown(isFrozenCardsShown === "true");
-          await AsyncStorage.setItem("frozenCardsShown", (isFrozenCardsShown === "true").toString());
-        }
-      };
-  
-      fetchFrozenCardsShown();
-  
-      if (cards && grantCards) {
-        // Transform grantCards
-        const transformedGrantCards = grantCards.map((grantCard) => ({
-          ...grantCard,
-          grant_id: grantCard.id, // Move original id to grant_id
-          id: grantCard.card_id, // Replace id with card_id
-        }));
-    
-        // Filter out cards that are also grantCards
-        const filteredCards = cards.filter(
-          (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
-        );
-    
-        // Combine filtered cards and transformed grantCards
-        const combinedCards = [...filteredCards, ...transformedGrantCards];
-  
-        // Sort cards by status
-        combinedCards.sort((a, b) => {
-          if (a.status == "active" && b.status != "active") {
-            return -1;
-          } else if (a.status != "active" && b.status == "active") {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
-    
-        // Update state
-        setAllCards(combinedCards);
+    const fetchFrozenCardsShown = async () => {
+      const isFrozenCardsShown = await AsyncStorage.getItem("frozenCardsShown");
+      if (isFrozenCardsShown) {
+        setFrozenCardsShown(isFrozenCardsShown === "true");
+        await AsyncStorage.setItem("frozenCardsShown", (isFrozenCardsShown === "true").toString());
       }
-    }, [cards, grantCards]);
-  
+    };
+
+    fetchFrozenCardsShown();
+
+    if (cards && grantCards) {
+      // Transform grantCards
+      const transformedGrantCards = grantCards.map((grantCard) => ({
+        ...grantCard,
+        grant_id: grantCard.id, // Move original id to grant_id
+        id: grantCard.card_id, // Replace id with card_id
+      }));
+
+      // Filter out cards that are also grantCards
+      const filteredCards = cards.filter(
+        (card) => !transformedGrantCards.some((grantCard) => grantCard.id === card.id)
+      );
+
+      // Combine filtered cards and transformed grantCards
+      const combinedCards = [...filteredCards, ...transformedGrantCards];
+
+      // Sort cards by status
+      combinedCards.sort((a, b) => {
+        if (a.status == "active" && b.status != "active") {
+          return -1;
+        } else if (a.status != "active" && b.status == "active") {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+      // Update state
+      setAllCards(combinedCards);
+    }
+  }, [cards, grantCards]);
 
   if (allCards) {
     return (
@@ -147,8 +140,6 @@ export default function CardsPage({ navigation }: Props) {
           }}
           scrollIndicatorInsets={{ bottom: tabBarHeight }}
           overScrollMode="never"
-          // onRefresh={() => refresh()}
-          // refreshing={isValidating}
           renderItem={({ item }) => (
             <Pressable
               onPress={() =>
@@ -164,7 +155,6 @@ export default function CardsPage({ navigation }: Props) {
             </Pressable>
           )}
         />
-        <OrderCardModal isVisible={isModalVisible} onClose={toggleModal} user={user} />
       </View>
     );
   } else {
