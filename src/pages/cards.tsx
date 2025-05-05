@@ -76,13 +76,15 @@ export default function CardsPage({ navigation }: Props) {
 
   const combineCards = useCallback(() => {
     // Transform grantCards
-    const transformedGrantCards = grantCards?.map((grantCard) => ({
-      ...grantCard,
-      grant_id: grantCard.id, // Move original id to grant_id
-      id: grantCard.card_id, // Repl`ace id with card_id
-    })).filter(
-      (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet
-    );
+    const transformedGrantCards = grantCards
+      ?.map((grantCard) => ({
+        ...grantCard,
+        grant_id: grantCard.id, // Move original id to grant_id
+        id: grantCard.card_id, // Repl`ace id with card_id
+      }))
+      .filter(
+        (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet
+      );
 
     // Filter out cards that are also grantCards
     const filteredCards = cards?.filter(
