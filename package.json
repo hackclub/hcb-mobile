@@ -30,6 +30,7 @@
     "@react-navigation/native-stack": "^6.9.13",
     "@stripe/stripe-terminal-react-native": "^0.0.1-beta.20",
     "@thedev132/hackclub-icons-rn": "^0.0.14",
+    "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "eas-cli": "^13.4.2",
     "expo": "^52.0.23",
