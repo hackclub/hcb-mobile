@@ -55,3 +55,15 @@ export function redactedCardNumber(last4?: string) {
 export function renderCardNumber(number: string) {
   return words(number, /\d{4}/g).join(" ");
 }
+
+export const normalizeSvg = (
+  svg: string,
+  width: number,
+  height: number,
+  scaleFactor: number = 1.25,
+): string => {
+  return svg.replace(
+    "<svg",
+    `<svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 ${width / scaleFactor} ${height / scaleFactor}"`,
+  );
+};

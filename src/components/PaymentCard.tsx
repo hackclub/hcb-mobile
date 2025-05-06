@@ -1,7 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import Constants from "expo-constants";
-// @ts-expect-error will be removed later
-import * as Geopattern from "geopattern";
+import { generate } from "hcb-geo-pattern";
 import { useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -11,13 +9,13 @@ import {
   AppState,
   useWindowDimensions,
 } from "react-native";
-import { SvgUri, SvgXml } from "react-native-svg";
+import { SvgXml } from "react-native-svg";
 
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
-import { redactedCardNumber, renderCardNumber } from "../util";
+import { redactedCardNumber, renderCardNumber, normalizeSvg } from "../util";
 
 import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
@@ -45,27 +43,29 @@ export default function PaymentCard({
   ) => void;
 }) {
   const { colors: themeColors, dark } = useTheme();
+  const [svgWidth, setSvgWidth] = useState(500);
+  const [svgHeight, setSvgHeight] = useState(500);
+  const [patternForMeasurements, setPatternForMeasurements] = useState<
+    string | null
+  >(null);
 
-  const patternForMeasurements = Geopattern.generate(card.id, {
-    scalePattern: 1.1,
-    grayscale: card.status != "active",
-  }).toSvg();
-
-  const pattern = Geopattern.generate(card.id, {
-    scalePattern: 1.1,
-    grayscale: card.status == "active" ? false : true,
-  }).toDataUri();
-
-  const extractDimensions = (svg: string) => {
-    const widthMatch = svg.match(/width="(\d+(\.\d+)?)"/);
-    const heightMatch = svg.match(/height="(\d+(\.\d+)?)"/);
-    return {
-      svgWidth: widthMatch ? parseFloat(widthMatch[1]) : 0,
-      svgHeight: heightMatch ? parseFloat(heightMatch[1]) : 0,
+  useEffect(() => {
+    const fetchCardPattern = async () => {
+      const patternData = await generate({
+        input: card.id,
+        grayScale: card.status == "active" ? false : true,
+      });
+      const normalizedPattern = normalizeSvg(
+        patternData.toSVG(),
+        patternData.width,
+        patternData.height,
+      );
+      setSvgHeight(patternData.height);
+      setSvgWidth(patternData.width);
+      setPatternForMeasurements(normalizedPattern);
     };
-  };
-
-  const { svgWidth, svgHeight } = extractDimensions(patternForMeasurements);
+    fetchCardPattern();
+  }, []);
 
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
@@ -111,7 +111,7 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-      {card.type == "virtual" && (
+      {card.type == "virtual" && patternForMeasurements && (
         <View
           style={{
             position: "absolute",
@@ -121,15 +121,7 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          {Constants.platform?.android ? (
-            <SvgXml
-              xml={patternForMeasurements}
-              width={svgWidth}
-              height={svgHeight}
-            />
-          ) : (
-            <SvgUri uri={pattern} width={svgWidth} height={svgHeight} />
-          )}
+          <SvgXml xml={patternForMeasurements} width="100%" height="100%" />
         </View>
       )}
 
