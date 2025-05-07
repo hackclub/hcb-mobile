@@ -72,7 +72,7 @@ function App() {
   useStripeTerminal();
 
   Sentry.init({
-    dsn: "https://d61ba2b2693004ba8ce550ccf90cad34@o4509282537242624.ingest.us.sentry.io/4509282539995136",
+    dsn: process.env.SENTRY_DSN,
     debug: true,
   });
 
