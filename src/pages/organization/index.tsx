@@ -90,6 +90,7 @@ export default function OrganizationPage({
   } = useTransactions(orgId);
   const [refreshing] = useState(false);
 
+
   useEffect(() => {
     if (organization && user) {
       const isManager =
@@ -157,7 +158,7 @@ export default function OrganizationPage({
             });
           }
         }
-
+        
         navigation.setOptions({
           headerRight: () => (
             <MenuView

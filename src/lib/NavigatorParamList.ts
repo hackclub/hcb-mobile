@@ -4,6 +4,7 @@ import Card from "./types/Card";
 import Invitation from "./types/Invitation";
 import Organization from "./types/Organization";
 import Transaction from "./types/Transaction";
+import User from "./types/User";
 
 export type StackParamList = {
   Organizations: undefined;
@@ -31,6 +32,7 @@ export type StackParamList = {
 export type CardsStackParamList = {
   CardList: undefined;
   Card: { card: Card };
+  OrderCard: { user: User; organizations: string[] };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];

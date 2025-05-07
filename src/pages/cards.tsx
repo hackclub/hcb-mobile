@@ -25,8 +25,11 @@ type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
     useSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
-  const { data: grantCards, mutate: reloadGrantCards } =
-    useSWR<GrantCard[]>("user/card_grants");
+  const { data: grantCards, mutate: reloadGrantCards } = useSWR<GrantCard[]>(
+    "user/card_grants"
+  );
+  const { data: user } = useSWR("user");
+  
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
@@ -43,7 +46,8 @@ export default function CardsPage({ navigation }: Props) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <MenuView
+        <View style={{ flexDirection: "row" }}>
+          <MenuView
           actions={[
             {
               id: "showFrozenCards",
@@ -61,18 +65,28 @@ export default function CardsPage({ navigation }: Props) {
             }
           }}
           themeVariant={scheme || undefined}
-        >
+          >
+            <Ionicons.Button
+              name="ellipsis-horizontal-circle"
+              backgroundColor="transparent"
+              size={24}
+              color={palette.primary}
+              iconStyle={{ marginRight: 0 }}
+            />
+          </MenuView>
           <Ionicons.Button
-            name="ellipsis-horizontal-circle"
+            name="add-circle-outline"
             backgroundColor="transparent"
             size={24}
             color={palette.primary}
             iconStyle={{ marginRight: 0 }}
+            onPress={() => navigation.navigate("OrderCard", { user, organizations: [] })}
+            underlayColor={"transparent"}
           />
-        </MenuView>
+        </View>
       ),
     });
-  }, [navigation, frozenCardsShown, scheme]);
+  }, [navigation, frozenCardsShown, scheme, user]);
 
   const combineCards = useCallback(() => {
     // Transform grantCards

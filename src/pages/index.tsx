@@ -243,6 +243,7 @@ export default function App({ navigation }: Props) {
   const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } =
     useSWR<Invitation[]>("user/invitations");
+
   const [refreshing] = useState(false);
 
   const { fetcher, mutate } = useSWRConfig();
