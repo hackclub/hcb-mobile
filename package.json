@@ -28,6 +28,7 @@
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^6.1.10",
     "@react-navigation/native-stack": "^6.9.13",
+    "@sentry/react-native": "~6.10.0",
     "@stripe/stripe-terminal-react-native": "^0.0.1-beta.20",
     "@thedev132/hackclub-icons-rn": "^0.0.14",
     "buffer": "^6.0.3",

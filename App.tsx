@@ -2,6 +2,7 @@ import "expo-dev-client";
 
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
@@ -56,7 +57,7 @@ const linking: LinkingOptions<TabParamList> = {
   getStateFromPath,
 };
 
-export default function App() {
+function App() {
   const [fontsLoaded] = useFonts({
     "JetBrainsMono-Regular": require("./assets/fonts/JetBrainsMono-Regular.ttf"),
     "JetBrainsMono-Bold": require("./assets/fonts/JetBrainsMono-Bold.ttf"),
@@ -69,6 +70,11 @@ export default function App() {
   const hcb = useClient(token);
   const scheme = useColorScheme();
   useStripeTerminal();
+
+  Sentry.init({
+    dsn: "https://d61ba2b2693004ba8ce550ccf90cad34@o4509282537242624.ingest.us.sentry.io/4509282539995136",
+    debug: true,
+  });
 
   const fetcher = useCallback(
     async (url: string, options: RequestInit) => {
@@ -140,3 +146,5 @@ export default function App() {
     </AuthContext.Provider>
   );
 }
+
+export default Sentry.wrap(App);

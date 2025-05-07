@@ -22,3 +22,4 @@ build-*.ipa
 
 ios/
 android/
+.env.local
