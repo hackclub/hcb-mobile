@@ -41,7 +41,7 @@ const linking: LinkingOptions<TabParamList> = {
               transactionId: (id) => `txn_${id}`,
             },
           },
-          OrganizationLoader: ":orgId",
+          Event: ":orgId",
         },
       },
       Cards: {

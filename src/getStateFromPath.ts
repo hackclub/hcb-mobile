@@ -34,7 +34,7 @@ export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
   if (match) {
     const orgId = match[1];
     routes.push({
-      name: "OrganizationLoader",
+      name: "Event",
       params: { orgId },
     });
   }
