@@ -106,7 +106,7 @@ export default function Navigator() {
                     underlayColor={themeColors.card}
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
-                    onPress={() =>
+                    onPress={() => {
                       WebBrowser.openBrowserAsync(
                         "https://hackclub.com/hcb/apply",
                         {
@@ -118,8 +118,8 @@ export default function Navigator() {
                       ).then(() => {
                         mutate("user/organizations");
                         mutate("user/invitations");
-                      })
-                    }
+                      });
+                    }}
                   />
                 ),
               }}

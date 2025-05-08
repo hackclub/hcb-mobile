@@ -95,6 +95,14 @@ export default {
         },
       ],
       ["expo-alternate-app-icons", appIcons],
+      [
+        "@sentry/react-native/expo",
+        {
+          organization: "hcb-mobile",
+          project: "hcb-mobile",
+          url: "https://sentry.io/",
+        },
+      ],
     ],
   },
 };
