@@ -72,8 +72,12 @@ function App() {
   useStripeTerminal();
 
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    debug: true,
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    debug: false,
+    integrations: [Sentry.reactNativeTracingIntegration()],
+    sendDefaultPii: true,
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
   });
 
   const fetcher = useCallback(
