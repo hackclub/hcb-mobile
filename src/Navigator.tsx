@@ -6,7 +6,6 @@ import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
-import * as Sentry from "@sentry/react-native";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
@@ -108,7 +107,18 @@ export default function Navigator() {
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
                     onPress={() => {
-                      throw new Error("testing");
+                      WebBrowser.openBrowserAsync(
+                        "https://hackclub.com/hcb/apply",
+                        {
+                          presentationStyle:
+                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                          controlsColor: palette.primary,
+                          dismissButtonStyle: "cancel",
+                        },
+                      ).then(() => {
+                        mutate("user/organizations");
+                        mutate("user/invitations");
+                      });
                     }}
                   />
                 ),
