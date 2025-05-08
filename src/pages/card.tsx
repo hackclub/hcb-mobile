@@ -22,6 +22,7 @@ import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
+import { useOffline } from "../lib/useOffline";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
@@ -37,10 +38,11 @@ export default function CardPage({
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   const isGrantCard = (_card as GrantCard).amount_cents != null;
+  const { isOnline, withOfflineCheck } = useOffline();
 
   const {
     details,
-    toggle: toggleDetailsRevealed,
+    toggle: toggleDetailsRevealedBase,
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
@@ -60,13 +62,20 @@ export default function CardPage({
   }, [card]);
   useEffect(() => {
     navigation.setOptions({
-      title: cardName,
+      title: cardName || "Card",
     });
   }, [cardName, navigation]);
 
   const { data: transactions, isLoading: transactionsLoading } = useSWR<{
     data: ITransaction[];
-  }>(`cards/${_card.id}/transactions`);
+  }>(isOnline ? `cards/${_card.id}/transactions` : null, {
+    fallbackData: { data: [] },
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 2000,
+    shouldRetryOnError: false,
+    keepPreviousData: true,
+  });
 
   const { mutate } = useSWRConfig();
   const [cardLoaded, setCardLoaded] = useState(false);
@@ -95,13 +104,17 @@ export default function CardPage({
     return <ActivityIndicator />;
   }
 
-  const toggleCardFrozen = () => {
+  const toggleCardFrozen = withOfflineCheck(() => {
     if (card.status == "active") {
       update("frozen");
     } else {
       update("active");
     }
-  };
+  });
+
+  const toggleDetailsRevealed = withOfflineCheck(() => {
+    toggleDetailsRevealedBase();
+  });
 
   return (
     <ScrollView
@@ -131,15 +144,18 @@ export default function CardPage({
               style={{
                 flexBasis: 0,
                 flexGrow: 1,
-                // marginR: 10,
                 backgroundColor: "#5bc0de",
                 borderTopWidth: 0,
+                opacity: isOnline ? 1 : 0.7,
               }}
               color="#186177"
-              onPress={() => toggleCardFrozen()}
+              onPress={toggleCardFrozen}
               loading={isMutating}
+              disabled={!isOnline}
             >
-              {card.status == "active" ? "Freeze" : "Unfreeze"} card
+              {isOnline 
+                ? `${card.status == "active" ? "Freeze" : "Unfreeze"} card`
+                : "Offline Mode"}
             </Button>
           )}
           {card.type == "virtual" && _card.status != "canceled" && (
@@ -147,11 +163,15 @@ export default function CardPage({
               style={{
                 flexBasis: 0,
                 flexGrow: 1,
+                opacity: isOnline ? 1 : 0.7,
               }}
-              onPress={() => toggleDetailsRevealed()}
+              onPress={toggleDetailsRevealed}
               loading={detailsLoading}
+              disabled={!isOnline}
             >
-              {detailsRevealed ? "Hide" : "Reveal"} details
+              {isOnline 
+                ? `${detailsRevealed ? "Hide" : "Reveal"} details`
+                : "Offline Mode"}
             </Button>
           )}
         </View>
@@ -243,7 +263,18 @@ export default function CardPage({
         </View>
       )}
 
-      {transactionsLoading ? (
+      {!isOnline && transactions?.data.length === 0 ? (
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 16,
+            marginTop: 12,
+            textAlign: "center",
+          }}
+        >
+          No transactions available offline.
+        </Text>
+      ) : transactionsLoading && isOnline ? (
         <ActivityIndicator />
       ) : transactions === undefined || transactions.data.length === 0 ? (
         <Text

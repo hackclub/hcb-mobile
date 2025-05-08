@@ -19,6 +19,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../theme";
+import { useOffline } from "../../lib/useOffline";
 
 function ZoomAndFadeIn() {
   "worklet";
@@ -56,12 +57,13 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
 
   const { colors: themeColors } = useTheme();
   const { token } = useContext(AuthContext);
+  const { isOnline, withOfflineCheck } = useOffline();
 
   const { showActionSheetWithOptions } = useActionSheet();
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = async (
+  const uploadReceipt = withOfflineCheck(async (
     selectedImage: {
       uri: string;
       fileName?: string;
@@ -102,9 +104,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         textBody: "Please try again later.",
       });
     }
-  };
+  });
 
-  const handleActionSheet = () => {
+  const handleActionSheet = withOfflineCheck(() => {
     const options = ["Camera", "Photo Library", "Cancel"];
     const cancelButtonIndex = 2;
 
@@ -144,7 +146,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         }
       },
     );
-  };
+  });
 
   return (
     <View style={{ marginBottom: 30 }}>
@@ -209,7 +211,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           onRequestClose={() => setIsImageViewerVisible(false)}
         />
 
-        <TouchableOpacity onPress={handleActionSheet}>
+        <TouchableOpacity onPress={handleActionSheet} disabled={!isOnline}>
           <Animated.View
             style={{
               width: 150,
@@ -219,6 +221,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              opacity: isOnline ? 1 : 0.7,
             }}
             layout={transition}
           >
@@ -232,7 +235,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                   size={36}
                 />
                 <Text style={{ color: palette.muted, marginTop: 10 }}>
-                  Add Receipt
+                  {isOnline ? "Add Receipt" : "Offline Mode"}
                 </Text>
               </>
             )}

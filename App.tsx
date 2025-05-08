@@ -14,7 +14,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./src/auth";
-import asyncStorageProvider from "./src/cacheProvider";
+import { useCache } from "./src/cacheProvider";
 import { getStateFromPath } from "./src/getStateFromPath";
 import useClient from "./src/lib/client";
 import { TabParamList } from "./src/lib/NavigatorParamList";
@@ -69,6 +69,7 @@ function App() {
   const [token, setToken] = useState<string | null>(null);
   const hcb = useClient(token);
   const scheme = useColorScheme();
+  const cache = useCache();
   useStripeTerminal();
 
   Sentry.init({
@@ -130,8 +131,11 @@ function App() {
 
       <SWRConfig
         value={{
-          provider: asyncStorageProvider,
+          provider: () => cache,
           fetcher,
+          revalidateOnFocus: true,
+          revalidateOnReconnect: true,
+          dedupingInterval: 2000,
         }}
       >
         <SafeAreaProvider>

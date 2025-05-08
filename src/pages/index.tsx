@@ -1,10 +1,11 @@
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   FlatList,
   Text,
@@ -14,6 +15,7 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
+  ScrollView,
   RefreshControl,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
@@ -235,53 +237,141 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
+  const lastErrorTime = useRef<number>(0);
+  const ERROR_DEBOUNCE_MS = 5000;
+  const [isOnline, setIsOnline] = useState(true);
+  const lastFetchTime = useRef<number>(0);
+  const FETCH_COOLDOWN_MS = 10000; // Only attempt to fetch every 10 seconds
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      setIsOnline(state.isConnected ?? false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const logError = (message: string, error: Error | unknown) => {
+    const now = Date.now();
+    if (now - lastErrorTime.current > ERROR_DEBOUNCE_MS) {
+      console.error(message, error);
+      lastErrorTime.current = now;
+    }
+  };
+
+  const shouldFetch = () => {
+    const now = Date.now();
+    if (!isOnline) return false;
+    if (now - lastFetchTime.current < FETCH_COOLDOWN_MS) return false;
+    lastFetchTime.current = now;
+    return true;
+  };
+
   const {
     data: organizations,
     error,
     mutate: reloadOrganizations,
-  } = useSWR<Organization[]>("user/organizations");
-  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations);
-  const { data: invitations, mutate: reloadInvitations } =
-    useSWR<Invitation[]>("user/invitations");
-  const [refreshing] = useState(false);
+  } = useSWR<Organization[]>(
+    isOnline ? "user/organizations" : null,
+    {
+      fallbackData: [],
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 2000,
+      shouldRetryOnError: false,
+      keepPreviousData: true,
+      onError: (err) => {
+        if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+          logError("Error fetching organizations:", err);
+        }
+      },
+    }
+  );
 
+  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations || []);
+  const { data: invitations, mutate: reloadInvitations } =
+    useSWR<Invitation[]>(
+      isOnline ? "user/invitations" : null,
+      {
+        fallbackData: [],
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+        dedupingInterval: 2000,
+        shouldRetryOnError: false,
+        keepPreviousData: true,
+        onError: (err) => {
+          if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+            logError("Error fetching invitations:", err);
+          }
+        },
+      }
+    );
+
+  const [refreshing] = useState(false);
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
-  const preloadInfo = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await preload("user", fetcher!);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await preload("user/cards", fetcher!);
-    // prefetch all user organization details
-    for (const org of organizations || []) {
-      await preload(`organizations/${org.id}`, fetcher!);
-      await preload(`organizations/${org.id}/transactions?limit=35`, fetcher!);
+  useEffect(() => {
+    if (!shouldFetch()) return;
+    
+    try {
+      if (isOnline) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        preload("user", fetcher!);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        preload("user/cards", fetcher!);
+        // prefetch all user organization details
+        for (const org of organizations || []) {
+          preload(`organizations/${org.id}`, fetcher!);
+        }
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+        logError("Error preloading data:", err);
+      }
+    }
+  }, [organizations, fetcher, isOnline]);
+
+  const onRefresh = () => {
+    if (!shouldFetch()) return;
+    
+    try {
+      reloadOrganizations();
+      reloadInvitations();
+      mutate((k) => typeof k === "string" && k.startsWith("organizations"));
+    } catch (err) {
+      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+        logError("Error refreshing data:", err);
+      }
     }
   };
 
-  useEffect(() => {
-    preloadInfo();
-  }),
-    [];
-
-  const onRefresh = () => {
-    reloadOrganizations();
-    reloadInvitations();
-    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-  };
-
   useFocusEffect(() => {
-    reloadOrganizations();
-    reloadInvitations();
-    mutate((k) => typeof k === "string" && k.startsWith("organizations"));
+    if (!shouldFetch()) return;
+    
+    try {
+      reloadOrganizations();
+      reloadInvitations();
+      mutate((k) => typeof k === "string" && k.startsWith("organizations"));
+    } catch (err) {
+      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+        logError("Error reloading data on focus:", err);
+      }
+    }
   });
 
-  if (error) {
+  // Show cached data even if there's an error
+  if (error && !organizations?.length) {
     return (
-      <View>
-        <Text style={{ color: "white" }}>{error.toString()}</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Ionicons name="cloud-offline-outline" color={palette.muted} size={60} />
+        <Text style={{ color: palette.muted }}>Offline mode</Text>
+        <Text style={{ color: palette.muted, marginTop: 10 }}>
+          Using cached data
+        </Text>
       </View>
     );
   }
@@ -303,117 +393,123 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizations) {
-    return (
-      <FlatList
-        scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: tabBarHeight,
-        }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        nestedScrollEnabled
-        contentInsetAdjustmentBehavior="automatic"
-        data={sortedOrgs}
-        style={{ flex: 1 }}
-        // refreshing={isValidating}
-        // onRefresh={() => {
-        //   mutate(
-        //     (key: string) =>
-        //       key?.startsWith("/organizations/") ||
-        //       key == "/user/organizations",
-        //   );
-        // }}
-        ListHeaderComponent={() =>
-          invitations &&
-          invitations.length > 0 && (
-            <View
-              style={{
-                marginTop: 10,
-                marginBottom: 20,
-                borderRadius: 10,
+  return (
+    <ScrollView
+      style={{ flex: 1, flexGrow: 1 }}
+      contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {organizations && (
+        <FlatList
+          scrollIndicatorInsets={{ bottom: tabBarHeight }}
+          contentContainerStyle={{
+            padding: 20,
+            paddingBottom: tabBarHeight,
+          }}
+          contentInsetAdjustmentBehavior="automatic"
+          data={sortedOrgs}
+          style={{ flex: 1 }}
+          // refreshing={isValidating}
+          // onRefresh={() => {
+          //   mutate(
+          //     (key: string) =>
+          //       key?.startsWith("/organizations/") ||
+          //       key == "/user/organizations",
+          //   );
+          // }}
+          ListHeaderComponent={() =>
+            invitations &&
+            invitations.length > 0 && (
+              <View
+                style={{
+                  marginTop: 10,
+                  marginBottom: 20,
+                  borderRadius: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                    marginBottom: 10,
+                  }}
+                >
+                  Pending invitations
+                </Text>
+                {invitations.map((invitation) => (
+                  <Event
+                    key={invitation.id}
+                    invitation={invitation}
+                    style={{
+                      borderWidth: 2,
+                      borderColor:
+                        scheme == "dark" ? palette.primary : palette.muted,
+                    }}
+                    event={invitation.organization}
+                    onPress={() =>
+                      navigation.navigate("Invitation", {
+                        inviteId: invitation.id,
+                        invitation,
+                      })
+                    }
+                    hideBalance
+                  />
+                  // <TouchableHighlight key={invitation.id}>
+                  //   <Text
+                  //     style={{
+                  //       color: palette.smoke,
+                  //       backgroundColor: palette.darkless,
+                  //       padding: 10,
+                  //       borderRadius: 10,
+                  //       overflow: "hidden",
+                  //     }}
+                  //   >
+                  //     {invitation.organization.name}
+                  //   </Text>
+                  // </TouchableHighlight>
+                ))}
+              </View>
+            )
+          }
+          renderItem={({ item: organization }) => (
+            <Event
+              event={organization}
+              showTransactions={
+                organizations.length <= 2 || organization.pinned
+              }
+              pinned={organization.pinned}
+              onPress={() =>
+                navigation.navigate("Event", {
+                  orgId: organization.id,
+                  organization,
+                })
+              }
+              onHold={() => {
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
+                togglePinnedOrg(organization.id);
               }}
-            >
+            />
+          )}
+          ListFooterComponent={() =>
+            organizations.length > 2 && (
               <Text
                 style={{
                   color: palette.muted,
-                  fontSize: 12,
-                  textTransform: "uppercase",
-                  marginBottom: 10,
+                  textAlign: "center",
+                  marginTop: 10,
                 }}
               >
-                Pending invitations
+                Tap and hold to pin an organization
               </Text>
-              {invitations.map((invitation) => (
-                <Event
-                  key={invitation.id}
-                  invitation={invitation}
-                  style={{
-                    borderWidth: 2,
-                    borderColor:
-                      scheme == "dark" ? palette.primary : palette.muted,
-                  }}
-                  event={invitation.organization}
-                  onPress={() =>
-                    navigation.navigate("Invitation", {
-                      inviteId: invitation.id,
-                      invitation,
-                    })
-                  }
-                  hideBalance
-                />
-                // <TouchableHighlight key={invitation.id}>
-                //   <Text
-                //     style={{
-                //       color: palette.smoke,
-                //       backgroundColor: palette.darkless,
-                //       padding: 10,
-                //       borderRadius: 10,
-                //       overflow: "hidden",
-                //     }}
-                //   >
-                //     {invitation.organization.name}
-                //   </Text>
-                // </TouchableHighlight>
-              ))}
-            </View>
-          )
-        }
-        renderItem={({ item: organization }) => (
-          <Event
-            event={organization}
-            showTransactions={organizations.length <= 2 || organization.pinned}
-            pinned={organization.pinned}
-            onPress={() =>
-              navigation.navigate("Event", {
-                orgId: organization.id,
-                organization,
-              })
-            }
-            onHold={() => {
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              togglePinnedOrg(organization.id);
-            }}
-          />
-        )}
-        ListFooterComponent={() =>
-          organizations.length > 2 && (
-            <Text
-              style={{
-                color: palette.muted,
-                textAlign: "center",
-                marginTop: 10,
-              }}
-            >
-              Tap and hold to pin an organization
-            </Text>
-          )
-        }
-      />
-    );
-  }
+            )
+          }
+        />
+      )}
+    </ScrollView>
+  );
 }
