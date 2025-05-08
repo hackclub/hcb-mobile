@@ -1,5 +1,6 @@
 import "expo-dev-client";
 
+import { ErrorBoundary } from "@appsignal/react";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
@@ -12,6 +13,7 @@ import { AlertNotificationRoot } from "react-native-alert-notification";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
+import { appsignal } from "./src/appsignal";
 import AuthContext from "./src/auth";
 import asyncStorageProvider from "./src/cacheProvider";
 import { getStateFromPath } from "./src/getStateFromPath";
@@ -73,7 +75,6 @@ export default function App() {
   const fetcher = useCallback(
     async (url: string, options: RequestInit) => {
       try {
-        // Allows us to use the v3 API in the v4 SWR
         return await hcb(url, options).json();
       } catch (error) {
         if (
@@ -105,38 +106,42 @@ export default function App() {
     return null;
   } else if (!token) {
     return (
-      <AuthContext.Provider value={{ token, setToken }}>
-        <Login />
-      </AuthContext.Provider>
+      <ErrorBoundary instance={appsignal} action="App">
+        <AuthContext.Provider value={{ token, setToken }}>
+          <Login />
+        </AuthContext.Provider>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <AuthContext.Provider value={{ token, setToken }}>
-      <StatusBar
-        barStyle={scheme == "dark" ? "light-content" : "dark-content"}
-        backgroundColor={palette.background}
-      />
+    <ErrorBoundary instance={appsignal} action="App">
+      <AuthContext.Provider value={{ token, setToken }}>
+        <StatusBar
+          barStyle={scheme == "dark" ? "light-content" : "dark-content"}
+          backgroundColor={palette.background}
+        />
 
-      <SWRConfig
-        value={{
-          provider: asyncStorageProvider,
-          fetcher,
-        }}
-      >
-        <SafeAreaProvider>
-          <ActionSheetProvider>
-            <AlertNotificationRoot>
-              <NavigationContainer
-                theme={scheme == "dark" ? theme : lightTheme}
-                linking={linking}
-              >
-                <Navigator />
-              </NavigationContainer>
-            </AlertNotificationRoot>
-          </ActionSheetProvider>
-        </SafeAreaProvider>
-      </SWRConfig>
-    </AuthContext.Provider>
+        <SWRConfig
+          value={{
+            provider: asyncStorageProvider,
+            fetcher,
+          }}
+        >
+          <SafeAreaProvider>
+            <ActionSheetProvider>
+              <AlertNotificationRoot>
+                <NavigationContainer
+                  theme={scheme == "dark" ? theme : lightTheme}
+                  linking={linking}
+                >
+                  <Navigator />
+                </NavigationContainer>
+              </AlertNotificationRoot>
+            </ActionSheetProvider>
+          </SafeAreaProvider>
+        </SWRConfig>
+      </AuthContext.Provider>
+    </ErrorBoundary>
   );
 }
