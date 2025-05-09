@@ -14,6 +14,7 @@ import useSWR from "swr";
 
 import AuthContext from "../../../auth";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
+import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
 
@@ -31,6 +32,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     useSWR<OrganizationExpanded[]>("user/organizations");
   const { token } = useContext(AuthContext);
   const scheme = useColorScheme();
+  const { isOnline, withOfflineCheck } = useOffline();
 
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
@@ -53,7 +55,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     return true;
   };
 
-  const handleTransfer = async () => {
+  const handleTransfer = withOfflineCheck(async () => {
     if (!validateInputs()) return;
 
     setIsLoading(true);
@@ -95,7 +97,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
     if (chosenOrg === "") {
@@ -250,10 +252,10 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           borderRadius: 8,
           marginTop: 20,
           alignItems: "center",
-          opacity: isLoading ? 0.7 : 1,
+          opacity: isLoading || !isOnline ? 0.7 : 1,
         }}
         onPress={handleTransfer}
-        disabled={isLoading}
+        disabled={isLoading || !isOnline}
       >
         {isLoading ? (
           <ActivityIndicator size="small" color={themeColors.text} />
@@ -265,7 +267,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
               fontWeight: "bold",
             }}
           >
-            Make Transfer
+            {isOnline ? "Make Transfer" : "Offline Mode"}
           </Text>
         )}
       </TouchableOpacity>
