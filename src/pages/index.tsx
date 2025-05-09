@@ -1,5 +1,5 @@
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { Ionicons } from "@expo/vector-icons";
+import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -273,8 +273,23 @@ export default function App({ navigation }: Props) {
     data: organizations,
     error,
     mutate: reloadOrganizations,
-  } = useSWR<Organization[]>(
-    isOnline ? "user/organizations" : null,
+  } = useSWR<Organization[]>(isOnline ? "user/organizations" : null, {
+    fallbackData: [],
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 2000,
+    shouldRetryOnError: false,
+    keepPreviousData: true,
+    onError: (err) => {
+      if (err.name !== "AbortError" && err.name !== "NetworkError") {
+        logError("Error fetching organizations:", err);
+      }
+    },
+  });
+
+  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations || []);
+  const { data: invitations, mutate: reloadInvitations } = useSWR<Invitation[]>(
+    isOnline ? "user/invitations" : null,
     {
       fallbackData: [],
       revalidateOnFocus: false,
@@ -283,31 +298,12 @@ export default function App({ navigation }: Props) {
       shouldRetryOnError: false,
       keepPreviousData: true,
       onError: (err) => {
-        if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
-          logError("Error fetching organizations:", err);
+        if (err.name !== "AbortError" && err.name !== "NetworkError") {
+          logError("Error fetching invitations:", err);
         }
       },
-    }
+    },
   );
-
-  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations || []);
-  const { data: invitations, mutate: reloadInvitations } =
-    useSWR<Invitation[]>(
-      isOnline ? "user/invitations" : null,
-      {
-        fallbackData: [],
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-        dedupingInterval: 2000,
-        shouldRetryOnError: false,
-        keepPreviousData: true,
-        onError: (err) => {
-          if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
-            logError("Error fetching invitations:", err);
-          }
-        },
-      }
-    );
 
   const [refreshing] = useState(false);
   const { fetcher, mutate } = useSWRConfig();
@@ -316,7 +312,7 @@ export default function App({ navigation }: Props) {
 
   useEffect(() => {
     if (!shouldFetch()) return;
-    
+
     try {
       if (isOnline) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -329,7 +325,7 @@ export default function App({ navigation }: Props) {
         }
       }
     } catch (err) {
-      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+      if (err.name !== "AbortError" && err.name !== "NetworkError") {
         logError("Error preloading data:", err);
       }
     }
@@ -337,13 +333,13 @@ export default function App({ navigation }: Props) {
 
   const onRefresh = () => {
     if (!shouldFetch()) return;
-    
+
     try {
       reloadOrganizations();
       reloadInvitations();
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
-      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+      if (err.name !== "AbortError" && err.name !== "NetworkError") {
         logError("Error refreshing data:", err);
       }
     }
@@ -351,13 +347,13 @@ export default function App({ navigation }: Props) {
 
   useFocusEffect(() => {
     if (!shouldFetch()) return;
-    
+
     try {
       reloadOrganizations();
       reloadInvitations();
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
-      if (err.name !== 'AbortError' && err.name !== 'NetworkError') {
+      if (err.name !== "AbortError" && err.name !== "NetworkError") {
         logError("Error reloading data on focus:", err);
       }
     }
@@ -367,7 +363,11 @@ export default function App({ navigation }: Props) {
   if (error && !organizations?.length) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Ionicons name="cloud-offline-outline" color={palette.muted} size={60} />
+        <Ionicons
+          name="cloud-offline-outline"
+          color={palette.muted}
+          size={60}
+        />
         <Text style={{ color: palette.muted }}>Offline mode</Text>
         <Text style={{ color: palette.muted, marginTop: 10 }}>
           Using cached data

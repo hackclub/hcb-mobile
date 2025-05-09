@@ -13,8 +13,8 @@ import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth";
-import { useOffline } from "../../../lib/useOffline";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
+import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
 

@@ -153,7 +153,7 @@ export default function CardPage({
               loading={isMutating}
               disabled={!isOnline}
             >
-              {isOnline 
+              {isOnline
                 ? `${card.status == "active" ? "Freeze" : "Unfreeze"} card`
                 : "Offline Mode"}
             </Button>
@@ -169,7 +169,7 @@ export default function CardPage({
               loading={detailsLoading}
               disabled={!isOnline}
             >
-              {isOnline 
+              {isOnline
                 ? `${detailsRevealed ? "Hide" : "Reveal"} details`
                 : "Offline Mode"}
             </Button>

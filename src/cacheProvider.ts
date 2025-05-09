@@ -25,9 +25,11 @@ class CacheProvider implements Cache<CacheValue> {
       if (Platform.OS === "web") {
         const appCache = localStorage.getItem("app-cache");
         if (appCache) {
-          JSON.parse(appCache).forEach(([key, value]: [string, State<CacheValue, Error>]) => {
-            this.map.set(key, value);
-          });
+          JSON.parse(appCache).forEach(
+            ([key, value]: [string, State<CacheValue, Error>]) => {
+              this.map.set(key, value);
+            },
+          );
         }
       } else {
         await this.ensureCacheDirectory();
@@ -35,9 +37,11 @@ class CacheProvider implements Cache<CacheValue> {
         if (fileInfo.exists) {
           const data = await FileSystem.readAsStringAsync(this.cacheFile);
           const entries = JSON.parse(data);
-          entries.forEach(([key, value]: [string, State<CacheValue, Error>]) => {
-            this.map.set(key, value);
-          });
+          entries.forEach(
+            ([key, value]: [string, State<CacheValue, Error>]) => {
+              this.map.set(key, value);
+            },
+          );
         }
       }
       this.isInitialized = true;
@@ -49,7 +53,9 @@ class CacheProvider implements Cache<CacheValue> {
   private async ensureCacheDirectory() {
     const dirInfo = await FileSystem.getInfoAsync(this.cacheDir);
     if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(this.cacheDir, { intermediates: true });
+      await FileSystem.makeDirectoryAsync(this.cacheDir, {
+        intermediates: true,
+      });
     }
   }
 
@@ -64,7 +70,7 @@ class CacheProvider implements Cache<CacheValue> {
         await this.ensureCacheDirectory();
         await FileSystem.writeAsStringAsync(
           this.cacheFile,
-          JSON.stringify(Array.from(this.map.entries()))
+          JSON.stringify(Array.from(this.map.entries())),
         );
       }
     } catch (error) {

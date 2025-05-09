@@ -18,8 +18,8 @@ import AuthContext from "../../auth";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
-import { palette } from "../../theme";
 import { useOffline } from "../../lib/useOffline";
+import { palette } from "../../theme";
 
 function ZoomAndFadeIn() {
   "worklet";
@@ -63,48 +63,50 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = withOfflineCheck(async (
-    selectedImage: {
-      uri: string;
-      fileName?: string;
-    } | null,
-  ) => {
-    const body = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
+  const uploadReceipt = withOfflineCheck(
+    async (
+      selectedImage: {
+        uri: string;
+        fileName?: string;
+      } | null,
+    ) => {
+      const body = new FormData();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
 
-    body.append("file", {
-      uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "skibidi",
-      type: "image/jpeg",
-    });
+      body.append("file", {
+        uri: selectedImage?.uri,
+        name: selectedImage?.fileName || "skibidi",
+        type: "image/jpeg",
+      });
 
-    try {
-      await fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
+      try {
+        await fetch(
+          process.env.EXPO_PUBLIC_API_BASE +
+            `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body,
           },
-          body,
-        },
-      );
-      mutate();
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: "Receipt Uploaded!",
-        textBody: "Your receipt has been uploaded successfully.",
-      });
-    } catch (e) {
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Failed to upload receipt",
-        textBody: "Please try again later.",
-      });
-    }
-  });
+        );
+        mutate();
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: "Receipt Uploaded!",
+          textBody: "Your receipt has been uploaded successfully.",
+        });
+      } catch (e) {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Failed to upload receipt",
+          textBody: "Please try again later.",
+        });
+      }
+    },
+  );
 
   const handleActionSheet = withOfflineCheck(() => {
     const options = ["Camera", "Photo Library", "Cancel"];
