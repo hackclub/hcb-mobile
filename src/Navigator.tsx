@@ -8,7 +8,6 @@ import { StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
-import OrganizationLoader from "./components/organizations/OrganizationLoader";
 import {
   StackParamList,
   CardsStackParamList,
@@ -107,7 +106,7 @@ export default function Navigator() {
                     underlayColor={themeColors.card}
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
-                    onPress={() =>
+                    onPress={() => {
                       WebBrowser.openBrowserAsync(
                         "https://hackclub.com/hcb/apply",
                         {
@@ -119,8 +118,8 @@ export default function Navigator() {
                       ).then(() => {
                         mutate("user/organizations");
                         mutate("user/invitations");
-                      })
-                    }
+                      });
+                    }}
                   />
                 ),
               }}
@@ -141,13 +140,6 @@ export default function Navigator() {
                 headerBackTitle: "Back",
               })}
               component={OrganizationPage}
-            />
-            <Stack.Screen
-              name="OrganizationLoader"
-              component={OrganizationLoader}
-              options={{
-                headerShown: false,
-              }}
             />
             <Stack.Screen
               name="AccountNumber"

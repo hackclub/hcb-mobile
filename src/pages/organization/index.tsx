@@ -3,6 +3,8 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Icon from "@thedev132/hackclub-icons-rn";
+import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -14,12 +16,18 @@ import {
   useColorScheme,
   Platform,
 } from "react-native";
+import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
 // import OrganizationTitle from "../../components/organizations/OrganizationTitle";
+import Button from "../../components/Button";
+import MockTransaction, {
+  MockTransactionType,
+} from "../../components/MockTransaction";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
+import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
 import Organization, {
   OrganizationExpanded,
@@ -73,6 +81,7 @@ export default function OrganizationPage({
   >(`organizations/${orgId}`, { fallbackData: _organization });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
+  const [showMockData, setShowMockData] = useState(false);
   const {
     transactions: _transactions,
     isLoadingMore,
@@ -125,12 +134,28 @@ export default function OrganizationPage({
           image: "gearshape",
         });
 
-        if (!organization.playground_mode && Platform.OS == "android") {
-          menuActions.push({
-            id: "donation",
-            title: "Collect Donations",
-            image: "dollarsign.circle",
-          });
+        if (!organization.playground_mode) {
+          // if (Device.brand === "Apple" && Device.modelId) {
+          //   const modelNumber = parseInt(
+          //     Device.modelId.replace("iPhone", "").split(",")[0],
+          //     10,
+          //   );
+          //   // iPhone XS starts at iPhone11,2 (Commented out for now)
+          // //   if (modelNumber >= 11) {
+          // //     menuActions.push({
+          // //       id: "donation",
+          // //       title: "Collect Donations",
+          // //       image: "dollarsign.circle",
+          // //     });
+          // //   }
+          // }
+          if (Platform.OS === "android") {
+            menuActions.push({
+              id: "donation",
+              title: "Collect Donations",
+              image: "dollarsign.circle",
+            });
+          }
         }
 
         navigation.setOptions({
@@ -148,9 +173,30 @@ export default function OrganizationPage({
                     orgId: organization.id,
                   });
                 } else if (event == "donation") {
-                  navigation.navigate("OrganizationDonation", {
-                    orgId: organization.id,
-                  });
+                  if (Platform.OS === "android") {
+                    navigation.navigate("OrganizationDonation", {
+                      orgId: organization.id,
+                    });
+                  } else if (Platform.OS === "ios") {
+                    const [major, minor] = (Device.osVersion ?? "0.0")
+                      .split(".")
+                      .map(Number);
+
+                    // iOS 16.4 and later
+                    if (major > 16 || (major === 16 && minor >= 4)) {
+                      navigation.navigate("OrganizationDonation", {
+                        orgId: organization.id,
+                      });
+                    } else {
+                      Dialog.show({
+                        type: ALERT_TYPE.DANGER,
+                        title: "Unsupported iOS Version",
+                        textBody:
+                          "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                        button: "Ok",
+                      });
+                    }
+                  }
                 } else if (event == "transfer") {
                   navigation.navigate("Transfer", {
                     organization: organization,
@@ -184,7 +230,7 @@ export default function OrganizationPage({
     () =>
       Object.entries(
         groupBy(transactions, (t) =>
-          t.pending ? "Pending" : renderDate(t.date),
+          t?.pending ? "Pending" : renderDate(t?.date),
         ),
       ).map(([title, data]) => ({
         title,
@@ -192,6 +238,18 @@ export default function OrganizationPage({
       })),
     [transactions],
   );
+
+  const mock = new MockTransactionEngine();
+  const mockTransactions = mock.generateMockTransactionList();
+  const mockSections: { title: string; data: MockTransactionType[] }[] =
+    useMemo(() => {
+      return Object.entries(groupBy(mockTransactions, (t) => t.date))
+        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+        .map(([title, data]) => ({
+          title: renderDate(title),
+          data,
+        }));
+    }, [mockTransactions]);
 
   const onRefresh = () => {
     mutate("organizations");
@@ -216,7 +274,10 @@ export default function OrganizationPage({
           initialNumToRender={30}
           ListFooterComponent={() =>
             isLoadingMore &&
-            !isLoading && <ActivityIndicator style={{ marginTop: 20 }} />
+            !isLoading &&
+            !organization.playground_mode && (
+              <ActivityIndicator style={{ marginTop: 20 }} />
+            )
           }
           onEndReachedThreshold={0.5}
           onEndReached={() => loadMore()}
@@ -251,25 +312,56 @@ export default function OrganizationPage({
                       renderMoney(organization.balance_cents)}
                   </Text>
                 </View>
-                {/* <Button
-                  style={{
-                    backgroundColor: "#5bc0de",
-                    borderTopWidth: 0,
-                  }}
-                  color="#186177"
-                  disabled={organization.playground_mode}
-                  onPress={() =>
-                    navigation.navigate("Transfer", { organization })
-                  }
-                >
-                Transfer Money
-                </Button> */}
+                {organization?.playground_mode && (
+                  <Button
+                    style={{
+                      backgroundColor: "#3F9CEE",
+                      borderTopWidth: 0,
+                    }}
+                    color="#fff"
+                    onPress={() => setShowMockData((prev) => !prev)}
+                  >
+                    {showMockData ? "Hide Mock Data" : "Show Mock Data"}
+                  </Button>
+                )}
               </View>
 
               {isLoading && <ActivityIndicator />}
+              {!isLoading && sections.length === 0 && !showMockData && (
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: palette.muted,
+                      fontSize: 16,
+                    }}
+                  >
+                    No Transactions
+                  </Text>
+                  <Icon
+                    glyph="sad"
+                    color={palette.muted}
+                    size={32}
+                    style={{ alignSelf: "center" }}
+                  />
+                </View>
+              )}
             </View>
           )}
-          sections={sections}
+          // @ts-expect-error workaround for mock data
+          sections={
+            organization?.playground_mode && showMockData
+              ? (mockSections as unknown)
+              : sections
+          }
           // stickySectionHeadersEnabled={false}
           style={{ flexGrow: 1 }}
           contentContainerStyle={{
@@ -292,32 +384,40 @@ export default function OrganizationPage({
               {title}
             </Text>
           )}
-          renderItem={({ item, index, section: { data } }) => (
-            <TouchableHighlight
-              onPress={
-                item.id &&
-                "users" in organization &&
-                organization.users.some((u) => u.id === user?.id)
-                  ? () => {
-                      navigation.navigate("Transaction", {
-                        transactionId: item.id!,
-                        orgId,
-                        transaction: item as ITransaction,
-                      });
-                    }
-                  : undefined
-              }
-              underlayColor={themeColors.background}
-              activeOpacity={0.7}
-            >
-              <Transaction
-                orgId={orgId}
+          renderItem={({ item, index, section: { data } }) =>
+            organization?.playground_mode ? (
+              <MockTransaction
                 transaction={item}
                 top={index == 0}
                 bottom={index == data.length - 1}
               />
-            </TouchableHighlight>
-          )}
+            ) : (
+              <TouchableHighlight
+                onPress={
+                  item.id &&
+                  "users" in organization &&
+                  organization.users.some((u) => u.id === user?.id)
+                    ? () => {
+                        navigation.navigate("Transaction", {
+                          transactionId: item.id!,
+                          orgId,
+                          transaction: item as ITransaction,
+                        });
+                      }
+                    : undefined
+                }
+                underlayColor={themeColors.background}
+                activeOpacity={0.7}
+              >
+                <Transaction
+                  orgId={orgId}
+                  transaction={item}
+                  top={index == 0}
+                  bottom={index == data.length - 1}
+                />
+              </TouchableHighlight>
+            )
+          }
         />
       ) : (
         <ActivityIndicator />
