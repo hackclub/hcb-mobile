@@ -199,7 +199,7 @@ export default function ProcessDonationPage({
             style={{
               fontSize: 20,
               fontWeight: "600",
-              paddingBottom: 10,
+              paddingVertical: 10,
               color: theme.colors.text,
             }}
           >
@@ -209,10 +209,11 @@ export default function ProcessDonationPage({
             style={{
               fontSize: 16,
               color: theme.colors.text,
+              marginTop: 10,
+              textAlign: "center",
             }}
           >
-            {"$" + (payment?.amount / 100).toFixed(2)} donation encountered an
-            error
+            An error occurred while processing the donation. Please try again.
           </Text>
 
           <StyledButton
