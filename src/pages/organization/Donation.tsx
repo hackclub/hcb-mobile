@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme, NavigationProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
+  ConnectTapToPayParams,
   PaymentIntent,
   Reader,
   StripeTerminalProvider,
@@ -17,10 +18,11 @@ import {
   TextInput,
 } from "react-native";
 import * as Progress from "react-native-progress";
-import { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
+import Organization from "../../lib/types/Organization";
 import { useLocation } from "../../lib/useLocation";
 import { palette } from "../../theme";
 
@@ -43,6 +45,8 @@ export default function OrganizationDonationPage({
 }: Props) {
   const { fetcher } = useSWRConfig();
 
+  const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
+
   const fetchTokenProvider = async () => {
     const result = await fetcher!("stripe_terminal_connection_token");
     const token = (result as { terminal_connection_token: { secret: string } })
@@ -55,7 +59,11 @@ export default function OrganizationDonationPage({
       logLevel="verbose"
       tokenProvider={fetchTokenProvider}
     >
-      <PageWrapper orgId={orgId} navigation={navigation} />
+      <PageWrapper
+        orgId={orgId}
+        orgName={organization?.name}
+        navigation={navigation}
+      />
     </StripeTerminalProvider>
   );
 }
@@ -171,7 +179,7 @@ function PageContent({
 
   const {
     discoverReaders,
-    connectLocalMobileReader,
+    connectReader: connectReaderTapToPay,
     createPaymentIntent,
     collectPaymentMethod,
     confirmPaymentIntent,
@@ -211,18 +219,24 @@ function PageContent({
 
   useEffect(() => {
     discoverReaders({
-      discoveryMethod: "localMobile",
+      discoveryMethod: "tapToPay",
       simulated: false,
     });
   }, [discoverReaders]);
 
   async function connectReader(selectedReader: Reader.Type) {
+    console.log("orgName", orgName);
     setLoadingConnectingReader(true);
     try {
-      const { error } = await connectLocalMobileReader({
-        reader: selectedReader,
-        locationId: locationIdStripeMock,
-      });
+      const { error } = await connectReaderTapToPay(
+        {
+          reader: selectedReader,
+          locationId: locationIdStripeMock,
+          merchantDisplayName: orgName,
+          tosAcceptancePermitted: false,
+        } as ConnectTapToPayParams,
+        "tapToPay",
+      );
 
       setCurrentProgress(null);
 
@@ -230,7 +244,7 @@ function PageContent({
         console.log("connectLocalMobileReader error:", error);
         if (error.message == "You must provide a reader object") {
           discoverReaders({
-            discoveryMethod: "localMobile",
+            discoveryMethod: "tapToPay",
             simulated: false,
           });
         }
