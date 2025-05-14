@@ -233,7 +233,6 @@ function PageContent({
           reader: selectedReader,
           locationId: locationIdStripeMock,
           merchantDisplayName: orgName,
-          tosAcceptancePermitted: false,
         } as ConnectTapToPayParams,
         "tapToPay",
       );
