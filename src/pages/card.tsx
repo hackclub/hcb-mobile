@@ -48,6 +48,7 @@ export default function CardPage({
   const { data: card = _card } = useSWR<Card>(`cards/${_card.id}`, {
     fallbackData: _card,
   });
+
   const [cardName, setCardName] = useState(_card.name);
   useEffect(() => {
     if (card?.name) {
@@ -72,22 +73,30 @@ export default function CardPage({
   const [cardLoaded, setCardLoaded] = useState(false);
 
   const { trigger: update, isMutating } = useSWRMutation<
-    Card,
-    unknown,
-    string,
-    "frozen" | "active",
-    Card
-  >(
-    `cards/${_card.id}`,
-    (url, { arg }) => hcb.patch(url, { json: { status: arg } }).json(),
-    {
-      populateCache: true,
-      onSuccess: () => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        mutate(`user/cards`);
-      },
+  Card,          
+  unknown,           
+  string,            
+  "frozen" | "active", 
+  Card             
+>(
+  `cards/${_card.id}`,
+  (url, { arg }) =>
+    hcb.patch(url, { json: { status: arg } }).json(),
+  {
+    populateCache: true,
+    rollbackOnError: true,
+
+    onSuccess: (updatedCard) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      mutate(
+        "user/cards",
+        (list: Card[] | undefined) =>
+          list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
+        false 
+      );
     },
-  );
+  }
+);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -111,7 +120,7 @@ export default function CardPage({
       <View style={{ alignItems: "center" }}>
         <PaymentCard
           details={details}
-          card={isGrantCard ? (_card as GrantCard) : card}
+          card={isGrantCard ? (_card as GrantCard) : _card}
           onCardLoad={() => setCardLoaded(true)}
           style={{ marginBottom: 20 }}
         />
@@ -142,7 +151,7 @@ export default function CardPage({
               {card.status == "active" ? "Freeze" : "Unfreeze"} card
             </Button>
           )}
-          {card.type == "virtual" && _card.status != "canceled" && (
+          {_card.type == "virtual" && _card.status != "canceled" && (
             <Button
               style={{
                 flexBasis: 0,
@@ -311,7 +320,7 @@ export default function CardPage({
                 top={index == 0}
                 bottom={index == transactions.data.length - 1}
                 hideAvatar
-                orgId={card.organization.id}
+                orgId={card.organization ? card.organization.id : _card.organization.id}
               />
             </TouchableHighlight>
           ))}

@@ -49,6 +49,7 @@ export default function PaymentCard({
     string | null
   >(null);
 
+
   useEffect(() => {
     const fetchCardPattern = async () => {
       const patternData = await generate({
@@ -162,7 +163,7 @@ export default function PaymentCard({
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {card.user ? card.user.name : card.organization.name}
+            {card.user ? card.user?.name : card.organization.name}
           </Text>
         </View>
         <View style={{ position: "absolute", right: 0 }}>
