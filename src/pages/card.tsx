@@ -73,30 +73,29 @@ export default function CardPage({
   const [cardLoaded, setCardLoaded] = useState(false);
 
   const { trigger: update, isMutating } = useSWRMutation<
-  Card,          
-  unknown,           
-  string,            
-  "frozen" | "active", 
-  Card             
->(
-  `cards/${_card.id}`,
-  (url, { arg }) =>
-    hcb.patch(url, { json: { status: arg } }).json(),
-  {
-    populateCache: true,
-    rollbackOnError: true,
+    Card,
+    unknown,
+    string,
+    "frozen" | "active",
+    Card
+  >(
+    `cards/${_card.id}`,
+    (url, { arg }) => hcb.patch(url, { json: { status: arg } }).json(),
+    {
+      populateCache: true,
+      rollbackOnError: true,
 
-    onSuccess: (updatedCard) => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      mutate(
-        "user/cards",
-        (list: Card[] | undefined) =>
-          list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
-        false 
-      );
+      onSuccess: (updatedCard) => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        mutate(
+          "user/cards",
+          (list: Card[] | undefined) =>
+            list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
+          false,
+        );
+      },
     },
-  }
-);
+  );
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -320,7 +319,11 @@ export default function CardPage({
                 top={index == 0}
                 bottom={index == transactions.data.length - 1}
                 hideAvatar
-                orgId={card.organization ? card.organization.id : _card.organization.id}
+                orgId={
+                  card.organization
+                    ? card.organization.id
+                    : _card.organization.id
+                }
               />
             </TouchableHighlight>
           ))}

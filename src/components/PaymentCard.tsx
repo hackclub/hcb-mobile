@@ -49,7 +49,6 @@ export default function PaymentCard({
     string | null
   >(null);
 
-
   useEffect(() => {
     const fetchCardPattern = async () => {
       const patternData = await generate({
