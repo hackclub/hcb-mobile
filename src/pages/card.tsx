@@ -210,7 +210,7 @@ export default function CardPage({
           duration: 1000,
           useNativeDriver: false,
         }),
-      ])
+      ]),
     ).start();
   }, [skeletonAnim]);
 
@@ -221,12 +221,16 @@ export default function CardPage({
   });
 
   // Create a shared skeleton style for reuse
-  const createSkeletonStyle = (width: number, height: number, extraStyles = {}) => ({
+  const createSkeletonStyle = (
+    width: number,
+    height: number,
+    extraStyles = {},
+  ) => ({
     width,
     height,
     backgroundColor: skeletonBackground,
     borderRadius: 8,
-    overflow: 'hidden' as const,
+    overflow: "hidden" as const,
     ...extraStyles,
   });
 
@@ -248,22 +252,26 @@ export default function CardPage({
     return (
       <View style={{ flex: 1, padding: 20 }}>
         {/* Card preview skeleton */}
-        <Animated.View 
+        <Animated.View
           style={{
             height: 200,
             borderRadius: 16,
             marginBottom: 20,
             backgroundColor: skeletonBackground,
-            overflow: 'hidden',
+            overflow: "hidden",
           }}
         >
-          <View style={{ 
-            position: 'absolute', 
-            bottom: 20, 
-            left: 20,
-            width: '70%',
-          }}>
-            <Animated.View style={createSkeletonStyle(120, 16, { marginBottom: 10 })} />
+          <View
+            style={{
+              position: "absolute",
+              bottom: 20,
+              left: 20,
+              width: "70%",
+            }}
+          >
+            <Animated.View
+              style={createSkeletonStyle(120, 16, { marginBottom: 10 })}
+            />
             <Animated.View style={createSkeletonStyle(180, 26)} />
           </View>
         </Animated.View>
@@ -301,9 +309,7 @@ export default function CardPage({
               <Animated.View
                 style={createSkeletonStyle(140, 20, { marginBottom: 8 })}
               />
-              <Animated.View
-                style={createSkeletonStyle(90, 14)}
-              />
+              <Animated.View style={createSkeletonStyle(90, 14)} />
             </View>
           </View>
 
@@ -326,9 +332,7 @@ export default function CardPage({
               >
                 Card number
               </Text>
-              <Animated.View
-                style={createSkeletonStyle(140, 22)}
-              />
+              <Animated.View style={createSkeletonStyle(140, 22)} />
             </View>
 
             <View
@@ -347,9 +351,7 @@ export default function CardPage({
               >
                 Expires
               </Text>
-              <Animated.View
-                style={createSkeletonStyle(70, 22)}
-              />
+              <Animated.View style={createSkeletonStyle(70, 22)} />
             </View>
 
             <View
@@ -368,9 +370,7 @@ export default function CardPage({
               >
                 CVC
               </Text>
-              <Animated.View
-                style={createSkeletonStyle(50, 22)}
-              />
+              <Animated.View style={createSkeletonStyle(50, 22)} />
             </View>
           </View>
         </View>
@@ -412,17 +412,13 @@ export default function CardPage({
               marginBottom: 16,
             }}
           >
-            <Animated.View
-              style={createSkeletonStyle(160, 22)}
-            />
-            <Animated.View
-              style={createSkeletonStyle(80, 22)}
-            />
+            <Animated.View style={createSkeletonStyle(160, 22)} />
+            <Animated.View style={createSkeletonStyle(80, 22)} />
           </View>
 
           <View style={{ gap: 12 }}>
             {[1, 2, 3].map((_, index) => (
-              <View 
+              <View
                 key={index}
                 style={{
                   flexDirection: "row",
@@ -431,7 +427,7 @@ export default function CardPage({
                   borderRadius: 12,
                 }}
               >
-                <Animated.View 
+                <Animated.View
                   style={{
                     width: 40,
                     height: 40,
@@ -441,11 +437,13 @@ export default function CardPage({
                   }}
                 />
                 <View style={{ flex: 1 }}>
-                  <View style={{ 
-                    flexDirection: "row", 
-                    justifyContent: "space-between",
-                    marginBottom: 6,
-                  }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 6,
+                    }}
+                  >
                     <Animated.View style={createSkeletonStyle(120, 16)} />
                     <Animated.View style={createSkeletonStyle(70, 16)} />
                   </View>
@@ -818,10 +816,10 @@ export default function CardPage({
                   Card number
                 </Text>
                 <View>
-                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
-                    <Animated.View
-                      style={createSkeletonStyle(120, 22)}
-                    />
+                  {detailsLoading ||
+                  cardDetailsLoading ||
+                  (detailsRevealed && !details) ? (
+                    <Animated.View style={createSkeletonStyle(120, 22)} />
                   ) : (
                     <Text
                       style={{
@@ -858,10 +856,10 @@ export default function CardPage({
                   Expires
                 </Text>
                 <View>
-                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
-                    <Animated.View
-                      style={createSkeletonStyle(70, 22)}
-                    />
+                  {detailsLoading ||
+                  cardDetailsLoading ||
+                  (detailsRevealed && !details) ? (
+                    <Animated.View style={createSkeletonStyle(70, 22)} />
                   ) : (
                     <Text
                       style={{
@@ -896,10 +894,10 @@ export default function CardPage({
                   CVC
                 </Text>
                 <View>
-                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
-                    <Animated.View
-                      style={createSkeletonStyle(50, 22)}
-                    />
+                  {detailsLoading ||
+                  cardDetailsLoading ||
+                  (detailsRevealed && !details) ? (
+                    <Animated.View style={createSkeletonStyle(50, 22)} />
                   ) : (
                     <Text
                       style={{
