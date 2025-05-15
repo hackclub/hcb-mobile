@@ -3,7 +3,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ScrollView,
   View,
@@ -47,6 +47,7 @@ export default function CardPage({
   const [cardExpanded, setCardExpanded] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const skeletonAnim = useRef(new Animated.Value(0)).current;
 
   const {
     details,
@@ -195,20 +196,265 @@ export default function CardPage({
 
   const tabBarHeight = useBottomTabBarHeight();
 
+  useEffect(() => {
+    // Create skeleton loading animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(skeletonAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(skeletonAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, [skeletonAnim]);
+
+  // Create the interpolated background color for skeleton animation
+  const skeletonBackground = skeletonAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["rgba(0, 0, 0, 0.03)", "rgba(0, 0, 0, 0.12)"],
+  });
+
+  // Create a shared skeleton style for reuse
+  const createSkeletonStyle = (width: number, height: number, extraStyles = {}) => ({
+    width,
+    height,
+    backgroundColor: skeletonBackground,
+    borderRadius: 8,
+    overflow: 'hidden' as const,
+    ...extraStyles,
+  });
+
+  const toggleCardDetails = async () => {
+    if (!detailsRevealed) {
+      setCardDetailsLoading(true);
+    }
+    await toggleDetailsRevealed();
+    if (!detailsRevealed) {
+      setTimeout(() => setCardDetailsLoading(false), 800);
+    } else {
+      setCardDetailsLoading(false);
+    }
+  };
+
+  const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
+
   if (!card && !cardLoaded && !cardError) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <ActivityIndicator size="large" color={palette.primary} />
-        <Text style={{ marginTop: 10, fontSize: 16, color: themeColors.text }}>
-          Loading card details...
-        </Text>
+      <View style={{ flex: 1, padding: 20 }}>
+        {/* Card preview skeleton */}
+        <Animated.View 
+          style={{
+            height: 200,
+            borderRadius: 16,
+            marginBottom: 20,
+            backgroundColor: skeletonBackground,
+            overflow: 'hidden',
+          }}
+        >
+          <View style={{ 
+            position: 'absolute', 
+            bottom: 20, 
+            left: 20,
+            width: '70%',
+          }}>
+            <Animated.View style={createSkeletonStyle(120, 16, { marginBottom: 10 })} />
+            <Animated.View style={createSkeletonStyle(180, 26)} />
+          </View>
+        </Animated.View>
+
+        <View
+          style={{
+            marginBottom: 24,
+            padding: 20,
+            borderRadius: 15,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.07,
+            shadowRadius: 8,
+            elevation: 4,
+            backgroundColor: themeColors.card,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            <Animated.View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: skeletonBackground,
+                marginRight: 16,
+              }}
+            />
+            <View>
+              <Animated.View
+                style={createSkeletonStyle(140, 20, { marginBottom: 8 })}
+              />
+              <Animated.View
+                style={createSkeletonStyle(90, 14)}
+              />
+            </View>
+          </View>
+
+          <Divider />
+
+          <View style={{ marginTop: 16, gap: 16 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "500",
+                  color: themeColors.text,
+                }}
+              >
+                Card number
+              </Text>
+              <Animated.View
+                style={createSkeletonStyle(140, 22)}
+              />
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "500",
+                  color: themeColors.text,
+                }}
+              >
+                Expires
+              </Text>
+              <Animated.View
+                style={createSkeletonStyle(70, 22)}
+              />
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "500",
+                  color: themeColors.text,
+                }}
+              >
+                CVC
+              </Text>
+              <Animated.View
+                style={createSkeletonStyle(50, 22)}
+              />
+            </View>
+          </View>
+        </View>
+
+        <View
+          style={{
+            marginBottom: 28,
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 16,
+          }}
+        >
+          <Animated.View
+            style={{
+              flexBasis: 0,
+              flexGrow: 1,
+              height: 50,
+              backgroundColor: skeletonBackground,
+              borderRadius: 12,
+            }}
+          />
+          <Animated.View
+            style={{
+              flexBasis: 0,
+              flexGrow: 1,
+              height: 50,
+              backgroundColor: skeletonBackground,
+              borderRadius: 12,
+            }}
+          />
+        </View>
+
+        <View style={{ marginBottom: 20 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <Animated.View
+              style={createSkeletonStyle(160, 22)}
+            />
+            <Animated.View
+              style={createSkeletonStyle(80, 22)}
+            />
+          </View>
+
+          <View style={{ gap: 12 }}>
+            {[1, 2, 3].map((_, index) => (
+              <View 
+                key={index}
+                style={{
+                  flexDirection: "row",
+                  backgroundColor: "rgba(0, 0, 0, 0.02)",
+                  padding: 16,
+                  borderRadius: 12,
+                }}
+              >
+                <Animated.View 
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: skeletonBackground,
+                    marginRight: 16,
+                  }}
+                />
+                <View style={{ flex: 1 }}>
+                  <View style={{ 
+                    flexDirection: "row", 
+                    justifyContent: "space-between",
+                    marginBottom: 6,
+                  }}>
+                    <Animated.View style={createSkeletonStyle(120, 16)} />
+                    <Animated.View style={createSkeletonStyle(70, 16)} />
+                  </View>
+                  <Animated.View style={createSkeletonStyle(100, 12)} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
       </View>
     );
   }
@@ -451,7 +697,7 @@ export default function CardPage({
                     color="white"
                     iconColor="white"
                     icon={detailsRevealed ? "eye-off" : "eye"}
-                    onPress={() => toggleDetailsRevealed()}
+                    onPress={toggleCardDetails}
                     loading={detailsLoading}
                   >
                     {detailsRevealed ? "Hide details" : "Reveal details"}
@@ -461,118 +707,122 @@ export default function CardPage({
             )}
 
             {/* Card Details Section */}
-            {!detailsLoading || details !== undefined ? (
-              <View
-                style={{
-                  marginBottom: 24,
-                  padding: 20,
-                  borderRadius: 15,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                  backgroundColor: themeColors.card,
-                }}
-              >
-                {renderCardStatus()}
+            <View
+              style={{
+                marginBottom: 24,
+                padding: 20,
+                borderRadius: 15,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+                elevation: 2,
+                backgroundColor: themeColors.card,
+              }}
+            >
+              {renderCardStatus()}
 
-                {card?.user?.id ? (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 15,
-                    }}
-                  >
-                    <UserAvatar
-                      user={card.user}
-                      size={40}
-                      style={{ marginRight: 10 }}
-                    />
-                    <View>
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "600",
-                          color: themeColors.text,
-                        }}
-                      >
-                        {cardName}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: palette.muted,
-                          marginTop: 2,
-                        }}
-                      >
-                        {card.type === "virtual"
-                          ? "Virtual Card"
-                          : "Physical Card"}
-                      </Text>
-                    </View>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 15,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        backgroundColor: palette.muted,
-                        marginRight: 10,
-                      }}
-                    />
-                    <View>
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "600",
-                          color: themeColors.text,
-                        }}
-                      >
-                        {cardName}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          color: palette.muted,
-                          marginTop: 2,
-                        }}
-                      >
-                        {card.type === "virtual"
-                          ? "Virtual Card"
-                          : "Physical Card"}
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                <Divider />
-
+              {card?.user?.id ? (
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 12,
+                    alignItems: "center",
+                    marginBottom: 15,
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: themeColors.text,
-                    }}
-                  >
-                    Card number
-                  </Text>
+                  <UserAvatar
+                    user={card.user}
+                    size={40}
+                    style={{ marginRight: 10 }}
+                  />
                   <View>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "600",
+                        color: themeColors.text,
+                      }}
+                    >
+                      {cardName}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: palette.muted,
+                        marginTop: 2,
+                      }}
+                    >
+                      {card.type === "virtual"
+                        ? "Virtual Card"
+                        : "Physical Card"}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 15,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: palette.muted,
+                      marginRight: 10,
+                    }}
+                  />
+                  <View>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "600",
+                        color: themeColors.text,
+                      }}
+                    >
+                      {cardName}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: palette.muted,
+                        marginTop: 2,
+                      }}
+                    >
+                      {card.type === "virtual"
+                        ? "Virtual Card"
+                        : "Physical Card"}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              <Divider />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: themeColors.text,
+                  }}
+                >
+                  Card number
+                </Text>
+                <View>
+                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
+                    <Animated.View
+                      style={createSkeletonStyle(120, 22)}
+                    />
+                  ) : (
                     <Text
                       style={{
                         color: palette.muted,
@@ -588,25 +838,31 @@ export default function CardPage({
                             isGrantCard ? _card.last4 : card?.last4,
                           )}
                     </Text>
-                  </View>
+                  )}
                 </View>
+              </View>
 
-                <View
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                }}
+              >
+                <Text
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 12,
+                    fontSize: 16,
+                    color: themeColors.text,
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: themeColors.text,
-                    }}
-                  >
-                    Expires
-                  </Text>
-                  <View>
+                  Expires
+                </Text>
+                <View>
+                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
+                    <Animated.View
+                      style={createSkeletonStyle(70, 22)}
+                    />
+                  ) : (
                     <Text
                       style={{
                         color: palette.muted,
@@ -620,25 +876,31 @@ export default function CardPage({
                         ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
                         : "••/••"}
                     </Text>
-                  </View>
+                  )}
                 </View>
+              </View>
 
-                <View
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                }}
+              >
+                <Text
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 12,
+                    fontSize: 16,
+                    color: themeColors.text,
                   }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: themeColors.text,
-                    }}
-                  >
-                    CVC
-                  </Text>
-                  <View>
+                  CVC
+                </Text>
+                <View>
+                  {(detailsLoading || cardDetailsLoading || (detailsRevealed && !details)) ? (
+                    <Animated.View
+                      style={createSkeletonStyle(50, 22)}
+                    />
+                  ) : (
                     <Text
                       style={{
                         color: palette.muted,
@@ -650,24 +912,10 @@ export default function CardPage({
                     >
                       {detailsRevealed && details ? details.cvc : "•••"}
                     </Text>
-                  </View>
+                  )}
                 </View>
               </View>
-            ) : (
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 150,
-                  marginBottom: 24,
-                }}
-              >
-                <ActivityIndicator color={palette.primary} />
-                <Text style={{ color: themeColors.text, marginTop: 10 }}>
-                  Loading card details...
-                </Text>
-              </View>
-            )}
+            </View>
 
             {/* Transactions Section */}
             <View
