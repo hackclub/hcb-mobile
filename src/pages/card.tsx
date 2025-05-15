@@ -132,7 +132,7 @@ export default function CardPage({
 
     const updatedCard = {
       ..._card,
-      ...card, 
+      ...card,
       status: updatedStatus,
     };
 

@@ -221,8 +221,7 @@ export default function PaymentCard({
             justifyContent: "center",
             alignItems: "center",
           }}
-        >
-        </View>
+        ></View>
       )}
     </View>
   );
