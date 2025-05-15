@@ -58,7 +58,7 @@ export default function CardChargeTransaction({
           },
         ]}
       />
-      <ReceiptList transaction={transaction} />
+      {!transaction.declined && <ReceiptList transaction={transaction} />}
     </View>
   );
 }
