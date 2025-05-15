@@ -48,6 +48,7 @@ export default function CardPage({
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const skeletonAnim = useRef(new Animated.Value(0)).current;
+  const [errorDisplayReady, setErrorDisplayReady] = useState(false);
 
   const {
     details,
@@ -70,12 +71,20 @@ export default function CardPage({
   const [cardName, setCardName] = useState(_card.name);
 
   useEffect(() => {
-    if (cardFetchError) {
+    const timer = setTimeout(() => {
+      setErrorDisplayReady(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (cardFetchError && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
-    } else {
+    } else if (!cardFetchError) {
       setCardError(null);
     }
-  }, [cardFetchError]);
+  }, [cardFetchError, errorDisplayReady]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -116,14 +125,14 @@ export default function CardPage({
   const transactions = transactionsData?.data || [];
 
   useEffect(() => {
-    if (transactionsError) {
+    if (transactionsError && errorDisplayReady) {
       setTransactionError(
         "Unable to load transaction history. Pull down to retry.",
       );
-    } else {
+    } else if (!transactionsError) {
       setTransactionError(null);
     }
-  }, [transactionsError]);
+  }, [transactionsError, errorDisplayReady]);
 
   const { mutate } = useSWRConfig();
   const [cardLoaded, setCardLoaded] = useState(false);
