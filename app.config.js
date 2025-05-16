@@ -1,3 +1,4 @@
+import { checkAutomatically } from "expo-updates";
 import appIcons from "./src/lib/AppIconList";
 const IS_DEV = process.env.APP_VARIANT === "development";
 
