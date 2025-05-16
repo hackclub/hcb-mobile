@@ -14,6 +14,20 @@ import { palette } from "../theme";
 export interface ButtonProps {
   onPress?: () => void;
   color?: string;
+  iconColor?: string;
+  fontSize?: number;
+  fontWeight?:
+    | "normal"
+    | "bold"
+    | "100"
+    | "200"
+    | "300"
+    | "400"
+    | "500"
+    | "600"
+    | "700"
+    | "800"
+    | "900";
   loading?: boolean;
   disabled?: boolean;
   icon?: React.ComponentProps<typeof Ionicons>["name"];
@@ -63,13 +77,19 @@ export default function Button(
       {props.icon && (
         <Ionicons
           name={props.icon}
-          style={{ ...styles.buttonText, opacity: props.loading ? 0 : 1 }}
+          style={{
+            ...styles.buttonText,
+            color: props.iconColor || props.color || styles.buttonText.color,
+            opacity: props.loading ? 0 : 1,
+          }}
         />
       )}
       <Text
         style={{
           ...styles.buttonText,
           color: props.color || styles.buttonText.color,
+          fontSize: props.fontSize || styles.buttonText.fontSize,
+          fontWeight: props.fontWeight || styles.buttonText.fontWeight,
           opacity: props.loading ? 0 : 1,
         }}
       >
