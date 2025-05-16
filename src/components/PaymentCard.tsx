@@ -21,14 +21,6 @@ import CardChip from "./cards/CardChip";
 import CardFrozen from "./cards/CardFrozen";
 import CardHCB from "./cards/CardHCB";
 
-// const transition = SharedTransition.custom((values) => {
-//   "worklet";
-//   return {
-//     originX: withSpring(values.targetOriginX, { damping: 20, stiffness: 200 }),
-//     originY: withSpring(values.targetOriginY, { damping: 20, stiffness: 200 }),
-//   };
-// });
-
 export default function PaymentCard({
   card,
   details,
@@ -48,38 +40,45 @@ export default function PaymentCard({
   const [patternForMeasurements, setPatternForMeasurements] = useState<
     string | null
   >(null);
-
-  useEffect(() => {
-    const fetchCardPattern = async () => {
-      const patternData = await generate({
-        input: card.id,
-        grayScale: card.status == "active" ? false : true,
-      });
-      const normalizedPattern = normalizeSvg(
-        patternData.toSVG(),
-        patternData.width,
-        patternData.height,
-      );
-      setSvgHeight(patternData.height);
-      setSvgWidth(patternData.width);
-      setPatternForMeasurements(normalizedPattern);
-    };
-    fetchCardPattern();
-  }, []);
-
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
 
-  if ((card as GrantCard).amount_cents) {
+  const isCardDataValid = card && card.id;
+
+  useEffect(() => {
+    const fetchCardPattern = async () => {
+      try {
+        if (!isCardDataValid) return;
+
+        const patternData = await generate({
+          input: card.id,
+          grayScale: card.status !== "active",
+        });
+        const normalizedPattern = normalizeSvg(
+          patternData.toSVG(),
+          patternData.width,
+          patternData.height,
+        );
+        setSvgHeight(patternData.height);
+        setSvgWidth(patternData.width);
+        setPatternForMeasurements(normalizedPattern);
+      } catch (error) {
+        console.error("Error generating card pattern:", error);
+      }
+    };
+    fetchCardPattern();
+  }, [card?.id, card?.status, isCardDataValid]);
+
+  if ((card as GrantCard)?.amount_cents) {
     card.type = "virtual";
   }
 
   useEffect(() => {
-    if (onCardLoad) {
+    if (onCardLoad && isCardDataValid) {
       onCardLoad(card.id, { width: svgWidth, height: svgHeight });
     }
-  }, [card.id, onCardLoad, svgHeight, svgWidth]);
+  }, [card?.id, onCardLoad, svgHeight, svgWidth, isCardDataValid]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -91,7 +90,26 @@ export default function PaymentCard({
     );
 
     return () => subscription.remove();
-  });
+  }, []);
+
+  if (!isCardDataValid) {
+    return (
+      <View
+        style={{
+          backgroundColor: dark ? "#222" : "#eee",
+          padding: 30,
+          width: width * 0.86,
+          height: (width * 0.86) / 1.588,
+          borderRadius: 15,
+          justifyContent: "center",
+          alignItems: "center",
+          ...(props.style as object),
+        }}
+      >
+        <Text style={{ color: dark ? "#999" : "#666" }}>Loading card...</Text>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -162,7 +180,7 @@ export default function PaymentCard({
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {card.user ? card.user.name : card.organization.name}
+            {card.user?.name || card.organization?.name || "Card Holder"}
           </Text>
         </View>
         <View style={{ position: "absolute", right: 0 }}>
@@ -187,6 +205,24 @@ export default function PaymentCard({
           </Text>
         </View>
       </View>
+
+      {card.status === "frozen" && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(59, 130, 246, 0.08)",
+            borderWidth: 2,
+            borderColor: "rgba(59, 130, 246, 0.3)",
+            borderRadius: 15,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        ></View>
+      )}
     </View>
   );
 }
