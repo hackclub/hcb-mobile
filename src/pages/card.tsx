@@ -658,7 +658,7 @@ export default function CardPage({
                     {_card?.status == "expired" || _card?.status == "canceled"
                       ? "$0"
                       : renderMoney(
-                          (card as GrantCard).amount_cents -
+                          (_card as GrantCard).amount_cents -
                             (card?.total_spent_cents ?? 0),
                         )}
                   </Text>
@@ -675,7 +675,7 @@ export default function CardPage({
                   gap: 20,
                 }}
               >
-                {(card.status !== "expired" || !isGrantCard) && (
+                {card.status !== "expired" && !isGrantCard && (
                   <Button
                     style={{
                       flexBasis: 0,
