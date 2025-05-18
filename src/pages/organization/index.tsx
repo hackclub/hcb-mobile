@@ -341,7 +341,12 @@ export default function OrganizationPage({
                 >
                   {!isOnline ? (
                     <>
-                      <Ionicons name="cloud-offline" size={24} color={palette.muted} style={{alignSelf: "center"}} />
+                      <Ionicons
+                        name="cloud-offline"
+                        size={24}
+                        color={palette.muted}
+                        style={{ alignSelf: "center" }}
+                      />
                       <Text
                         style={{
                           textAlign: "center",

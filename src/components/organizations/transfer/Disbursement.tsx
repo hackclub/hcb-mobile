@@ -247,7 +247,9 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         onPress={handleTransfer}
         disabled={isLoading || !isOnline}
         style={{
-          backgroundColor: isOnline ? themeColors.primary : themeColors.primary + '80',
+          backgroundColor: isOnline
+            ? themeColors.primary
+            : themeColors.primary + "80",
           padding: 15,
           borderRadius: 8,
           alignItems: "center",
