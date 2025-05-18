@@ -104,7 +104,9 @@ export class CacheProvider implements Cache<CacheValue> {
 const cacheProvider = new CacheProvider();
 
 // Initialize cache when the app starts
-cacheProvider.initialize();
+(async () => {
+  await cacheProvider.initialize();
+})();
 
 // Set up app state listeners for saving cache
 AppState.addEventListener("change", (nextAppState) => {
