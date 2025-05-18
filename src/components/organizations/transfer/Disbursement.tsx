@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  useColorScheme,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
+import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
 
@@ -29,8 +29,8 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { colors: themeColors } = useTheme();
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
-  const { token } = useContext(AuthContext);
-  const scheme = useColorScheme();
+  const { tokens } = useContext(AuthContext);
+  const { isOnline, withOfflineCheck } = useOffline();
 
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
@@ -53,7 +53,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     return true;
   };
 
-  const handleTransfer = async () => {
+  const handleTransfer = withOfflineCheck(async () => {
     if (!validateInputs()) return;
 
     setIsLoading(true);
@@ -64,7 +64,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokens?.accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -95,7 +95,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  });
 
   useEffect(() => {
     if (chosenOrg === "") {
@@ -244,28 +244,23 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
       {/* Transfer Button */}
       <TouchableOpacity
+        onPress={handleTransfer}
+        disabled={isLoading || !isOnline}
         style={{
-          backgroundColor: themeColors.primary,
+          backgroundColor: isOnline
+            ? themeColors.primary
+            : themeColors.primary + "80",
           padding: 15,
           borderRadius: 8,
-          marginTop: 20,
           alignItems: "center",
-          opacity: isLoading ? 0.7 : 1,
+          marginVertical: 20,
         }}
-        onPress={handleTransfer}
-        disabled={isLoading}
       >
         {isLoading ? (
-          <ActivityIndicator size="small" color={themeColors.text} />
+          <ActivityIndicator color="white" />
         ) : (
-          <Text
-            style={{
-              color: scheme === "dark" ? themeColors.text : "#fff",
-              fontSize: 16,
-              fontWeight: "bold",
-            }}
-          >
-            Make Transfer
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+            Submit Transfer
           </Text>
         )}
       </TouchableOpacity>
