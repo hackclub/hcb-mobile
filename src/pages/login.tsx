@@ -63,26 +63,26 @@ export default function Login() {
         discovery,
       )
         .then((r) => {
-          console.log('Token exchange successful');
-          
+          console.log("Token exchange successful");
+
           if (!r.refreshToken) {
-            console.warn('No refresh token received from authorization server');
+            console.warn("No refresh token received from authorization server");
           }
-          
+
           const expiresAt = Date.now() + (r.expiresIn || 7200) * 1000;
-          
+
           setTokens({
             accessToken: r.accessToken,
-            refreshToken: r.refreshToken || '',
+            refreshToken: r.refreshToken || "",
             expiresAt,
             createdAt: Date.now(),
-            codeVerifier: request?.codeVerifier
+            codeVerifier: request?.codeVerifier,
           });
-          
+
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         })
         .catch((error) => {
-          console.error('Error exchanging code for token:', error);
+          console.error("Error exchanging code for token:", error);
           setLoading(false);
         });
     }

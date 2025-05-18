@@ -4,14 +4,17 @@ export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
-  createdAt: number; 
-  codeVerifier?: string; 
+  createdAt: number;
+  codeVerifier?: string;
 }
 
 const AuthContext = createContext<{
   tokens: AuthTokens | null;
   setTokens: (tokens: AuthTokens | null) => void;
-  refreshAccessToken: () => Promise<{ success: boolean; newTokens?: AuthTokens }>;
+  refreshAccessToken: () => Promise<{
+    success: boolean;
+    newTokens?: AuthTokens;
+  }>;
 }>({
   tokens: null,
   setTokens: () => {},

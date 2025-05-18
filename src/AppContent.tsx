@@ -51,28 +51,28 @@ const linking: LinkingOptions<TabParamList> = {
   getStateFromPath,
 };
 
-export default function AppContent({ 
-  scheme, 
-  cache 
-}: { 
+export default function AppContent({
+  scheme,
+  cache,
+}: {
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
   const { tokens } = useContext(AuthContext);
   const hcb = useClient();
-  
+
   useEffect(() => {
     if (tokens) {
-      console.log('Token state updated - user is authenticated');
+      console.log("Token state updated - user is authenticated");
     } else {
-      console.log('Token state updated - user is logged out');
+      console.log("Token state updated - user is logged out");
     }
   }, [tokens]);
-  
+
   const fetcher = (url: string, options?: RequestInit) => {
     return hcb(url, options).json();
   };
-  
+
   return (
     <>
       <StatusBar
@@ -104,4 +104,4 @@ export default function AppContent({
       </SWRConfig>
     </>
   );
-} 
+}
