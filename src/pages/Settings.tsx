@@ -163,7 +163,7 @@ export default function SettingsPage(
   _props: BottomTabScreenProps<TabParamList, "Settings">,
 ) {
   const { mutate } = useSWRConfig();
-  const { tokens, setTokens, refreshAccessToken } = useContext(AuthContext);
+  const { token, setToken } = useContext(AuthContext);
   const [appIcon, setIcon] = useState<string>("");
 
   useEffect(() => {
@@ -179,29 +179,6 @@ export default function SettingsPage(
       iconName.charAt(0).toUpperCase() + iconName.slice(1);
     setAlternateAppIcon(formattedIconName.toString());
     setIcon(iconName);
-  };
-
-  const handleLogout = async () => {
-    if (tokens?.accessToken) {
-      try {
-        // Attempt to revoke the token on the server
-        await revokeAsync(
-          {
-            token: tokens.accessToken,
-            clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
-          },
-          discovery,
-        );
-      } catch (error) {
-        console.error('Error revoking token:', error);
-      }
-      
-      // Clear all cached data
-      mutate((k) => k, undefined, { revalidate: false });
-      
-      // Clear tokens locally
-      setTokens(null);
-    }
   };
 
   return (
@@ -274,78 +251,25 @@ export default function SettingsPage(
             </Text>
             {user && <UserMention user={user} />}
           </View>
-          <Button onPress={handleLogout}>
+          <Button
+            onPress={() => {
+              // intentionally not `await`ed
+              revokeAsync(
+                {
+                  token: token!,
+                  clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+                },
+                discovery,
+              );
+
+              mutate((k) => k, undefined, { revalidate: false });
+
+              setToken("");
+            }}
+          >
             Log out
           </Button>
         </View>
-        
-        {__DEV__ && (
-          <View style={{ paddingTop: 24 }}>
-            <SectionHeader title="Debug Options" />
-            <ListSection>
-              <Button 
-                onPress={() => {
-                  if (tokens) {
-                    const expiredTokens = {
-                      ...tokens,
-                      expiresAt: Date.now() - 60 * 1000
-                    };
-                    setTokens(expiredTokens);
-                  }
-                }}
-                style={{ marginBottom: 10 }}
-              >
-                Test Token Expiration
-              </Button>
-              
-              <Button 
-                onPress={() => {
-                  if (tokens) {
-                    // Force token invalidation by corrupting it
-                    const invalidTokens = {
-                      ...tokens,
-                      accessToken: tokens.accessToken + "invalid"  // Append text to make token invalid
-                    };
-                    setTokens(invalidTokens);
-                    
-                    console.log("Token intentionally invalidated. Next API request will produce a 401.");
-                  }
-                }}
-                style={{ marginBottom: 10 }}
-              >
-                Force 401 Response
-              </Button>
-              
-              <Button 
-                onPress={() => {
-                  if (tokens) {
-                    // Log current token state
-                    const now = Date.now();
-                    const expiresIn = Math.round((tokens.expiresAt - now) / 1000);
-                    console.log(`Access Token: ${tokens.accessToken.substring(0, 10)}...`);
-                    console.log(`Refresh Token: ${tokens.refreshToken.substring(0, 10)}...`);
-                    console.log(`Expires in: ${expiresIn} seconds`);
-                    console.log(`Current time: ${new Date(now).toISOString()}`);
-                    console.log(`Expires at: ${new Date(tokens.expiresAt).toISOString()}`);
-                  }
-                }}
-              >
-                Log Token Info
-              </Button>
-              
-              <Button
-                onPress={async () => {
-                  console.log("Manually triggering token refresh...");
-                  const success = await refreshAccessToken();
-                  console.log(`Manual token refresh ${success ? 'succeeded' : 'failed'}`);
-                }}
-                style={{ marginTop: 10 }}
-              >
-                Test Token Refresh
-              </Button>
-            </ListSection>
-          </View>
-        )}
       </View>
     </ScrollView>
   );
