@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  useColorScheme,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
@@ -31,7 +30,6 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
   const { tokens } = useContext(AuthContext);
-  const scheme = useColorScheme();
   const { isOnline, withOfflineCheck } = useOffline();
 
   const validateInputs = () => {
@@ -246,28 +244,21 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
       {/* Transfer Button */}
       <TouchableOpacity
-        style={{
-          backgroundColor: themeColors.primary,
-          padding: 15,
-          borderRadius: 8,
-          marginTop: 20,
-          alignItems: "center",
-          opacity: isLoading || !isOnline ? 0.7 : 1,
-        }}
         onPress={handleTransfer}
         disabled={isLoading || !isOnline}
+        style={{
+          backgroundColor: isOnline ? themeColors.primary : themeColors.primary + '80',
+          padding: 15,
+          borderRadius: 8,
+          alignItems: "center",
+          marginVertical: 20,
+        }}
       >
         {isLoading ? (
-          <ActivityIndicator size="small" color={themeColors.text} />
+          <ActivityIndicator color="white" />
         ) : (
-          <Text
-            style={{
-              color: scheme === "dark" ? themeColors.text : "#fff",
-              fontSize: 16,
-              fontWeight: "bold",
-            }}
-          >
-            {isOnline ? "Make Transfer" : "Offline Mode"}
+          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+            Submit Transfer
           </Text>
         )}
       </TouchableOpacity>

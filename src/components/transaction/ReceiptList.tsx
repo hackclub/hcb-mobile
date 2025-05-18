@@ -237,7 +237,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                   size={36}
                 />
                 <Text style={{ color: palette.muted, marginTop: 10 }}>
-                  {isOnline ? "Add Receipt" : "Offline Mode"}
+                  Add Receipt
                 </Text>
               </>
             )}
