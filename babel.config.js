@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = function async(api) {
   api.cache(true);
   return {

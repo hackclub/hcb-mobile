@@ -18,6 +18,7 @@ import AuthContext from "../../auth";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction from "../../lib/types/Transaction";
+import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
 
 function ZoomAndFadeIn() {
@@ -56,55 +57,58 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
 
   const { colors: themeColors } = useTheme();
   const { token } = useContext(AuthContext);
+  const { isOnline, withOfflineCheck } = useOffline();
 
   const { showActionSheetWithOptions } = useActionSheet();
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = async (
-    selectedImage: {
-      uri: string;
-      fileName?: string;
-    } | null,
-  ) => {
-    const body = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
+  const uploadReceipt = withOfflineCheck(
+    async (
+      selectedImage: {
+        uri: string;
+        fileName?: string;
+      } | null,
+    ) => {
+      const body = new FormData();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
 
-    body.append("file", {
-      uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "skibidi",
-      type: "image/jpeg",
-    });
+      body.append("file", {
+        uri: selectedImage?.uri,
+        name: selectedImage?.fileName || "skibidi",
+        type: "image/jpeg",
+      });
 
-    try {
-      await fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
+      try {
+        await fetch(
+          process.env.EXPO_PUBLIC_API_BASE +
+            `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body,
           },
-          body,
-        },
-      );
-      mutate();
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: "Receipt Uploaded!",
-        textBody: "Your receipt has been uploaded successfully.",
-      });
-    } catch (e) {
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Failed to upload receipt",
-        textBody: "Please try again later.",
-      });
-    }
-  };
+        );
+        mutate();
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: "Receipt Uploaded!",
+          textBody: "Your receipt has been uploaded successfully.",
+        });
+      } catch (e) {
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Failed to upload receipt",
+          textBody: "Please try again later.",
+        });
+      }
+    },
+  );
 
-  const handleActionSheet = () => {
+  const handleActionSheet = withOfflineCheck(() => {
     const options = ["Camera", "Photo Library", "Cancel"];
     const cancelButtonIndex = 2;
 
@@ -144,7 +148,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         }
       },
     );
-  };
+  });
 
   return (
     <View style={{ marginBottom: 30 }}>
@@ -209,7 +213,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           onRequestClose={() => setIsImageViewerVisible(false)}
         />
 
-        <TouchableOpacity onPress={handleActionSheet}>
+        <TouchableOpacity onPress={handleActionSheet} disabled={!isOnline}>
           <Animated.View
             style={{
               width: 150,
@@ -219,6 +223,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              opacity: isOnline ? 1 : 0.7,
             }}
             layout={transition}
           >
@@ -232,7 +237,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                   size={36}
                 />
                 <Text style={{ color: palette.muted, marginTop: 10 }}>
-                  Add Receipt
+                  {isOnline ? "Add Receipt" : "Offline Mode"}
                 </Text>
               </>
             )}

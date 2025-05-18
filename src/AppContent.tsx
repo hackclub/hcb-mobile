@@ -8,7 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "./auth";
-import asyncStorageProvider from "./cacheProvider";
+import { CacheProvider } from "./cacheProvider";
 import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
 import { TabParamList } from "./lib/NavigatorParamList";
@@ -51,7 +51,13 @@ const linking: LinkingOptions<TabParamList> = {
   getStateFromPath,
 };
 
-export default function AppContent({ scheme }: { scheme: ColorSchemeName }) {
+export default function AppContent({ 
+  scheme, 
+  cache 
+}: { 
+  scheme: ColorSchemeName;
+  cache: CacheProvider;
+}) {
   const { tokens } = useContext(AuthContext);
   const hcb = useClient();
   
@@ -76,8 +82,11 @@ export default function AppContent({ scheme }: { scheme: ColorSchemeName }) {
 
       <SWRConfig
         value={{
-          provider: asyncStorageProvider,
+          provider: () => cache,
           fetcher,
+          revalidateOnFocus: true,
+          revalidateOnReconnect: true,
+          dedupingInterval: 2000,
         }}
       >
         <SafeAreaProvider>

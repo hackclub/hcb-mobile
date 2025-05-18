@@ -7,6 +7,7 @@ import { useColorScheme } from "react-native";
 
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
+import { useCache } from "./src/cacheProvider";
 
 function App() {
   const [fontsLoaded] = useFonts({
@@ -17,6 +18,7 @@ function App() {
   });
 
   const scheme = useColorScheme();
+  const cache = useCache();
   useStripeTerminal();
 
   Sentry.init({
@@ -34,7 +36,7 @@ function App() {
 
   return (
     <AuthProvider>
-      <AppContent scheme={scheme} />
+      <AppContent scheme={scheme} cache={cache} />
     </AuthProvider>
   );
 }
