@@ -36,6 +36,8 @@ export default function Login() {
       clientId,
       redirectUri,
       scopes: ["read", "write"],
+      usePKCE: true,
+      responseType: "code",
       extraParams: {
         no_app_shell: "true",
         theme: scheme || "",
@@ -46,7 +48,7 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
 
-  const { setToken } = useContext(AuthContext);
+  const { setTokens } = useContext(AuthContext);
 
   useEffect(() => {
     if (response?.type == "success") {
@@ -61,12 +63,30 @@ export default function Login() {
         discovery,
       )
         .then((r) => {
-          setToken(r.accessToken);
+          console.log('Token exchange successful');
+          
+          if (!r.refreshToken) {
+            console.warn('No refresh token received from authorization server');
+          }
+          
+          const expiresAt = Date.now() + (r.expiresIn || 7200) * 1000;
+          
+          setTokens({
+            accessToken: r.accessToken,
+            refreshToken: r.refreshToken || '',
+            expiresAt,
+            createdAt: Date.now(),
+            codeVerifier: request?.codeVerifier
+          });
+          
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         })
-        .catch(() => setLoading(false));
+        .catch((error) => {
+          console.error('Error exchanging code for token:', error);
+          setLoading(false);
+        });
     }
-  }, [response, request, setToken]);
+  }, [response, request, setTokens]);
 
   const animation = useRef(new Animated.Value(0)).current;
 

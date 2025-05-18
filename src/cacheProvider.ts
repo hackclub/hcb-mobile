@@ -3,7 +3,7 @@ import { AppState } from "react-native";
 
 export default function asyncStorageProvider() {
   const map = new Map();
-  // Initialize the map with data from AsyncStorage
+
   (async () => {
     try {
       const appCache = await AsyncStorage.getItem("app-cache");
@@ -16,7 +16,7 @@ export default function asyncStorageProvider() {
       console.error("Error initializing asyncStorageProvider:", error);
     }
   })();
-  // Save the map to AsyncStorage before the app goes to the background
+
   const saveAppCache = async () => {
     try {
       const appCache = JSON.stringify(Array.from(map.entries()));
