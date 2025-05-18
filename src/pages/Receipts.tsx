@@ -32,7 +32,7 @@ function Transaction({
   transaction: TransactionCardCharge & { organization: Organization };
   onComplete: () => void;
 }) {
-  const { token } = useContext(AuthContext);
+  const { tokens } = useContext(AuthContext);
 
   const { colors: themeColors } = useTheme();
 
@@ -62,7 +62,7 @@ function Transaction({
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokens?.accessToken}`,
           },
           body,
         },

@@ -36,6 +36,7 @@ import ITransaction, {
   TransactionType,
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
+import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
 import { renderDate, renderMoney } from "../../util";
 
@@ -89,6 +90,7 @@ export default function OrganizationPage({
     isLoading,
   } = useTransactions(orgId);
   const [refreshing] = useState(false);
+  const { isOnline } = useOffline();
 
   useEffect(() => {
     if (organization && user) {
@@ -334,24 +336,46 @@ export default function OrganizationPage({
                     flexDirection: "row",
                     justifyContent: "center",
                     alignItems: "center",
-                    gap: 4,
+                    gap: 8,
                   }}
                 >
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      color: palette.muted,
-                      fontSize: 16,
-                    }}
-                  >
-                    No Transactions
-                  </Text>
-                  <Icon
-                    glyph="sad"
-                    color={palette.muted}
-                    size={32}
-                    style={{ alignSelf: "center" }}
-                  />
+                  {!isOnline ? (
+                    <>
+                      <Ionicons
+                        name="cloud-offline"
+                        size={24}
+                        color={palette.muted}
+                        style={{ alignSelf: "center" }}
+                      />
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          color: palette.muted,
+                          fontSize: 16,
+                        }}
+                      >
+                        Offline
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Icon
+                        glyph="sad"
+                        color={palette.muted}
+                        size={24}
+                        style={{ alignSelf: "center" }}
+                      />
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          color: palette.muted,
+                          fontSize: 16,
+                        }}
+                      >
+                        No Transactions
+                      </Text>
+                    </>
+                  )}
                 </View>
               )}
             </View>
