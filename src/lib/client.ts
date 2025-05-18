@@ -7,13 +7,12 @@ export default function useClient() {
   const { tokens, setTokens, refreshAccessToken } = useContext(AuthContext);
 
   return useMemo(() => {
-    // Keep track of requests that are currently being retried after a token refresh
     const pendingRetries = new Set();
     
     const client = ky.create({
       prefixUrl: process.env.EXPO_PUBLIC_API_BASE,
       retry: {
-        limit: 0, // Disable ky's built-in retry to use our custom logic
+        limit: 0,
       },
       headers: {
         "User-Agent": "HCB-Mobile",
@@ -21,19 +20,15 @@ export default function useClient() {
       hooks: {
         beforeRequest: [
           async (request) => {
-            // Check if we have a token and add it to the request
             if (tokens?.accessToken) {
-              console.log(`Adding token to request: ${request.method} ${request.url}`);
               request.headers.set('Authorization', `Bearer ${tokens.accessToken}`);
             }
           }
         ],
         afterResponse: [
           async (request, options, response) => {
-            // If the request was successful, don't do anything
             if (response.ok) return response;
             
-            // Check if this request is already being retried to prevent infinite loops
             const requestKey = `${request.method}:${request.url}`;
             if (pendingRetries.has(requestKey)) {
               console.log('Request already being retried, returning response as-is to avoid loop');
