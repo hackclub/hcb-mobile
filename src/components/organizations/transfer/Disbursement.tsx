@@ -30,7 +30,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { colors: themeColors } = useTheme();
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
-  const { token } = useContext(AuthContext);
+  const { tokens } = useContext(AuthContext);
   const scheme = useColorScheme();
   const { isOnline, withOfflineCheck } = useOffline();
 
@@ -66,7 +66,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokens?.accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

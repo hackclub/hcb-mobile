@@ -163,7 +163,7 @@ export default function SettingsPage(
   _props: BottomTabScreenProps<TabParamList, "Settings">,
 ) {
   const { mutate } = useSWRConfig();
-  const { token, setToken } = useContext(AuthContext);
+  const { tokens, setTokens } = useContext(AuthContext);
   const [appIcon, setIcon] = useState<string>("");
 
   useEffect(() => {
@@ -256,7 +256,7 @@ export default function SettingsPage(
               // intentionally not `await`ed
               revokeAsync(
                 {
-                  token: token!,
+                  token: tokens?.accessToken ?? "",
                   clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
                 },
                 discovery,
@@ -264,7 +264,7 @@ export default function SettingsPage(
 
               mutate((k) => k, undefined, { revalidate: false });
 
-              setToken("");
+              setTokens(null);
             }}
           >
             Log out

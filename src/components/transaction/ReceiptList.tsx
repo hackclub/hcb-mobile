@@ -56,7 +56,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   );
 
   const { colors: themeColors } = useTheme();
-  const { token } = useContext(AuthContext);
+  const { tokens } = useContext(AuthContext);
   const { isOnline, withOfflineCheck } = useOffline();
 
   const { showActionSheetWithOptions } = useActionSheet();
@@ -87,7 +87,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${tokens?.accessToken}`,
             },
             body,
           },
