@@ -8,6 +8,7 @@ import {
   type AppStateStatus,
   AppState,
   useWindowDimensions,
+  Image,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -53,7 +54,8 @@ export default function PaymentCard({
 
         const patternData = await generate({
           input: card.id,
-          grayScale: card.status !== "active",
+          grayScale:
+            card.status !== "active" ? (card.status == "frozen" ? 0.23 : 1) : 0,
         });
         const normalizedPattern = normalizeSvg(
           patternData.toSVG(),
@@ -140,6 +142,21 @@ export default function PaymentCard({
           }}
         >
           <SvgXml xml={patternForMeasurements} width="100%" height="100%" />
+          {card.status == "frozen" && (
+            <Image
+              source={require("../../assets/card-frost.png")}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: "100%",
+                height: "100%",
+                resizeMode: "cover",
+                opacity: 0.32,
+              }}
+            />
+          )}
         </View>
       )}
 
@@ -205,24 +222,6 @@ export default function PaymentCard({
           </Text>
         </View>
       </View>
-
-      {card.status === "frozen" && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(59, 130, 246, 0.08)",
-            borderWidth: 2,
-            borderColor: "rgba(59, 130, 246, 0.3)",
-            borderRadius: 15,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        ></View>
-      )}
     </View>
   );
 }
