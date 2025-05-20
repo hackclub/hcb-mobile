@@ -19,6 +19,7 @@ import {
   Alert,
   TextInput,
   useColorScheme,
+  Platform,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
@@ -69,7 +70,10 @@ export default function OrganizationDonationPage({
         await AsyncStorage.setItem("ttpDidOnboarding", "true");
       }
     };
-    getDidOnboarding();
+
+    if (Platform.OS === "ios") {
+      getDidOnboarding();
+    }
   }, [scheme]);
 
   return (
