@@ -60,7 +60,6 @@ export default function OrganizationDonationPage({
 
   useEffect(() => {
     const getDidOnboarding = async () => {
-      await AsyncStorage.setItem("ttpDidOnboarding", "false");
       const didOnboarding = await AsyncStorage.getItem("ttpDidOnboarding");
       if (didOnboarding !== "true") {
         await new Promise((resolve) => setTimeout(resolve, 1000));
