@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme, NavigationProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -8,6 +9,7 @@ import {
   StripeTerminalProvider,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
+import ExpoTtpEdu from "expo-ttp-edu";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +18,8 @@ import {
   View,
   Alert,
   TextInput,
+  useColorScheme,
+  Platform,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
@@ -44,7 +48,7 @@ export default function OrganizationDonationPage({
   navigation,
 }: Props) {
   const { fetcher } = useSWRConfig();
-
+  const scheme = useColorScheme();
   const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
 
   const fetchTokenProvider = async () => {
@@ -53,6 +57,23 @@ export default function OrganizationDonationPage({
       .terminal_connection_token;
     return token.secret;
   };
+
+  useEffect(() => {
+    const getDidOnboarding = async () => {
+      const didOnboarding = await AsyncStorage.getItem("ttpDidOnboarding");
+      if (didOnboarding !== "true") {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        ExpoTtpEdu.showTapToPayEducation({
+          uiMode: scheme === "dark" ? "dark" : "light",
+        });
+        await AsyncStorage.setItem("ttpDidOnboarding", "true");
+      }
+    };
+
+    if (Platform.OS === "ios") {
+      getDidOnboarding();
+    }
+  }, []);
 
   return (
     <StripeTerminalProvider
@@ -92,15 +113,7 @@ function PageWrapper({
           flex: 1,
         }}
       >
-        <Text
-          style={{
-            marginBottom: 20,
-            fontSize: 20,
-          }}
-        >
-          Connecting...
-        </Text>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={palette.primary} />
       </View>
     );
 
@@ -491,7 +504,7 @@ function PageContent({
             gap: 20,
           }}
         >
-          <View style={{ flexBasis: 55 }}>
+          <View style={{ flexBasis: 70 }}>
             <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
           </View>
           <TextInput
@@ -527,7 +540,7 @@ function PageContent({
             marginTop: 10,
           }}
         >
-          <View style={{ flexBasis: 55 }}>
+          <View style={{ flexBasis: 70 }}>
             <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
           </View>
           <TextInput
