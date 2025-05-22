@@ -4,15 +4,15 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import {
   Linking,
   Text,
   View,
   Pressable,
   ScrollView,
-  Image,
   useColorScheme,
+  Animated,
 } from "react-native";
 import useSWR from "swr";
 
@@ -60,6 +60,7 @@ export default function SettingsPage({ navigation }: Props) {
   const { colors } = useTheme();
   const { theme, setTheme } = useThemeContext();
   const systemColorScheme = useColorScheme();
+  const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
@@ -73,6 +74,14 @@ export default function SettingsPage({ navigation }: Props) {
       }
     })();
   }, [setTheme]);
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, [animation]);
 
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     setTheme(value);
@@ -100,27 +109,24 @@ export default function SettingsPage({ navigation }: Props) {
             marginBottom: 12,
           }}
         >
-          {user?.avatar ? (
-            <Image
-              source={{ uri: user.avatar }}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 27,
-                marginRight: 16,
-              }}
-            />
-          ) : (
-            <Image
-              source={require("../../assets/icons/default.png")}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 27,
-                marginRight: 16,
-              }}
-            />
-          )}
+          <Animated.Image
+            source={{ uri: user?.avatar }}
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 27,
+              marginRight: 16,
+              opacity: animation,
+              transform: [
+                {
+                  scale: animation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.8, 1],
+                  }),
+                },
+              ],
+            }}
+          />
           <View>
             <Text
               style={{
