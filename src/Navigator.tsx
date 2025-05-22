@@ -7,12 +7,12 @@ import * as WebBrowser from "expo-web-browser";
 import { StyleSheet, useColorScheme } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
-// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
   StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
   TabParamList,
+  SettingsStackParamList,
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
@@ -30,11 +30,17 @@ import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
+import AppIconSelector from "./pages/AppIconSelector";
+import About from "./pages/About";
 import { palette } from "./theme";
+import { useThemeContext } from "./ThemeContext";
+
+// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
 const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
+const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -44,10 +50,12 @@ export default function Navigator() {
   );
   const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
 
-  const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
+  const { theme: themePref } = useThemeContext();
+  const colorScheme = useColorScheme();
+  const isDark = themePref === "dark" || (themePref === "system" && colorScheme === "dark");
 
   return (
     <Tab.Navigator
@@ -74,11 +82,12 @@ export default function Navigator() {
         tabBarStyle: { position: "absolute" },
         tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
-          <BlurView
-            tint={scheme == "dark" ? "dark" : "light"}
-            intensity={100}
-            style={StyleSheet.absoluteFill}
-          />
+              <BlurView
+                tint= {isDark ? "dark" : "light"}
+                intensity={100}
+                style={StyleSheet.absoluteFill}
+              />
+
         ),
       })}
     >
@@ -240,9 +249,33 @@ export default function Navigator() {
       </Tab.Screen>
       <Tab.Screen
         name="Settings"
-        options={{ headerShown: true }}
-        component={SettingsPage}
-      />
+        options={{ headerShown: false }}
+      >
+        {() => (
+          <SettingsStack.Navigator>
+            <SettingsStack.Screen
+              name="SettingsMain"
+              component={SettingsPage}
+              options={{ title: "Settings" }}
+            />
+            <SettingsStack.Screen
+              name="AppIconSelector"
+              component={AppIconSelector}
+              options={{ title: "App Icon" }}
+            />
+            <SettingsStack.Screen
+              name="Tutorials"
+              component={() => null} // Placeholder, will implement next
+              options={{ title: "Tutorials" }}
+            />
+            <SettingsStack.Screen
+              name="About"
+              component={About}
+              options={{ title: "About" }}
+            />
+          </SettingsStack.Navigator>
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
