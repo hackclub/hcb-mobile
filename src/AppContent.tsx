@@ -139,12 +139,17 @@ export default function AppContent({
 
   let navTheme = lightTheme;
   if (themePref === "dark") navTheme = theme;
-  else if (themePref === "system") navTheme = scheme === "dark" ? theme : lightTheme;
+  else if (themePref === "system")
+    navTheme = scheme === "dark" ? theme : lightTheme;
 
   return (
     <>
       <StatusBar
-        barStyle={themePref === "dark" || (themePref === "system" && scheme == "dark") ? "light-content" : "dark-content"}
+        barStyle={
+          themePref === "dark" || (themePref === "system" && scheme == "dark")
+            ? "light-content"
+            : "dark-content"
+        }
         backgroundColor={palette.background}
       />
 
@@ -160,10 +165,7 @@ export default function AppContent({
         <SafeAreaProvider>
           <ActionSheetProvider>
             <AlertNotificationRoot>
-              <NavigationContainer
-                theme={navTheme}
-                linking={linking}
-              >
+              <NavigationContainer theme={navTheme} linking={linking}>
                 <OfflineBanner />
                 {tokens?.accessToken ? <Navigator /> : <Login />}
               </NavigationContainer>

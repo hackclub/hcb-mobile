@@ -16,6 +16,8 @@ import {
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
+import About from "./pages/About";
+import AppIconSelector from "./pages/AppIconSelector";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
@@ -30,8 +32,7 @@ import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import SettingsPage from "./pages/Settings";
 import TransactionPage from "./pages/Transaction";
-import AppIconSelector from "./pages/AppIconSelector";
-import About from "./pages/About";
+import Tutorials from "./pages/Tutorials";
 import { palette } from "./theme";
 import { useThemeContext } from "./ThemeContext";
 
@@ -55,7 +56,8 @@ export default function Navigator() {
   const { mutate } = useSWRConfig();
   const { theme: themePref } = useThemeContext();
   const colorScheme = useColorScheme();
-  const isDark = themePref === "dark" || (themePref === "system" && colorScheme === "dark");
+  const isDark =
+    themePref === "dark" || (themePref === "system" && colorScheme === "dark");
 
   return (
     <Tab.Navigator
@@ -82,12 +84,11 @@ export default function Navigator() {
         tabBarStyle: { position: "absolute" },
         tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
-              <BlurView
-                tint= {isDark ? "dark" : "light"}
-                intensity={100}
-                style={StyleSheet.absoluteFill}
-              />
-
+          <BlurView
+            tint={isDark ? "dark" : "light"}
+            intensity={100}
+            style={StyleSheet.absoluteFill}
+          />
         ),
       })}
     >
@@ -247,10 +248,7 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen
-        name="Settings"
-        options={{ headerShown: false }}
-      >
+      <Tab.Screen name="Settings" options={{ headerShown: false }}>
         {() => (
           <SettingsStack.Navigator>
             <SettingsStack.Screen
@@ -265,7 +263,7 @@ export default function Navigator() {
             />
             <SettingsStack.Screen
               name="Tutorials"
-              component={() => null} // Placeholder, will implement next
+              component={Tutorials}
               options={{ title: "Tutorials" }}
             />
             <SettingsStack.Screen
