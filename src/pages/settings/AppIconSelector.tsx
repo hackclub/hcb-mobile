@@ -6,15 +6,15 @@ import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Image } from "react-native";
 
 const icons: { [key: string]: number | null } = {
-  default: require("../../assets/icons/default.png"),
-  artskillz: require("../../assets/icons/art-skillz.png"),
-  cashmoney: require("../../assets/icons/cash-money.png"),
-  dev: require("../../assets/icons/dev.png"),
+  default: require("../../../assets/icons/default.png"),
+  artskillz: require("../../../assets/icons/art-skillz.png"),
+  cashmoney: require("../../../assets/icons/cash-money.png"),
+  dev: require("../../../assets/icons/dev.png"),
   testflight: Constants.platform?.ios
-    ? require("../../assets/icons/testflight.png")
+    ? require("../../../assets/icons/testflight.png")
     : null,
   hacknight: Constants.platform?.ios
-    ? require("../../assets/icons/hack-night.png")
+    ? require("../../../assets/icons/hack-night.png")
     : null,
 };
 

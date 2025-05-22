@@ -16,12 +16,12 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
-import AuthContext from "../auth";
-import Button from "../components/Button";
-import { SettingsStackParamList } from "../lib/NavigatorParamList";
-import User from "../lib/types/User";
-import { palette } from "../theme";
-import { useThemeContext } from "../ThemeContext";
+import AuthContext from "../../auth";
+import Button from "../../components/Button";
+import { SettingsStackParamList } from "../../lib/NavigatorParamList";
+import User from "../../lib/types/User";
+import { palette } from "../../theme";
+import { useThemeContext } from "../../ThemeContext";
 
 const TOS_URL = "https://hcb.hackclub.com/tos";
 

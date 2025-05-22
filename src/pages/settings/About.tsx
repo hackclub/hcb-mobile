@@ -4,7 +4,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { View, Text, Platform, ScrollView } from "react-native";
 
-import { useThemeContext } from "../ThemeContext";
+import { useThemeContext } from "../../ThemeContext";
 
 function isTapToPayEnabled() {
   if (Constants.platform?.ios && Device.osVersion) {

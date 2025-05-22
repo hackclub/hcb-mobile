@@ -16,8 +16,6 @@ import {
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
-import About from "./pages/About";
-import AppIconSelector from "./pages/AppIconSelector";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
@@ -30,9 +28,11 @@ import OrganizationSettingsPage from "./pages/organization/Settings";
 import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
-import SettingsPage from "./pages/Settings";
+import About from "./pages/settings/About";
+import AppIconSelector from "./pages/settings/AppIconSelector";
+import SettingsPage from "./pages/settings/Settings";
+import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
-import Tutorials from "./pages/Tutorials";
 import { palette } from "./theme";
 import { useThemeContext } from "./ThemeContext";
 
