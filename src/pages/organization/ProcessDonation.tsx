@@ -233,7 +233,8 @@ export default function ProcessDonationPage({
                     marginBottom: 24,
                   }}
                 >
-                  An error occurred while processing the donation. Please try again.
+                  An error occurred while processing the donation. Please try
+                  again.
                 </Text>
               </>
             )}
