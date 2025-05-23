@@ -30,7 +30,7 @@ export default {
       ],
       entitlements: {
         "com.apple.developer.proximity-reader.payment.acceptance": true,
-      }
+      },
     },
     android: {
       icon: "./assets/app-icon.png",

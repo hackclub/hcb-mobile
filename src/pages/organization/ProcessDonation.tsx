@@ -190,19 +190,19 @@ export default function ProcessDonationPage({
         <View
           style={{
             flex: 1,
-            justifyContent: 'flex-end',
-            alignItems: 'stretch',
+            justifyContent: "flex-end",
+            alignItems: "stretch",
             paddingHorizontal: 20,
             paddingBottom: 30,
             backgroundColor: theme.colors.background,
           }}
         >
-          <View style={{ width: '100%', flex: 1, justifyContent: 'center' }}>
+          <View style={{ width: "100%", flex: 1, justifyContent: "center" }}>
             <Ionicons
               name="close-circle-outline"
               size={100}
               color={palette.warning}
-              style={{ marginBottom: 16, alignSelf: 'center' }}
+              style={{ marginBottom: 16, alignSelf: "center" }}
             />
             <Text
               style={{
@@ -210,7 +210,7 @@ export default function ProcessDonationPage({
                 fontWeight: "600",
                 color: theme.colors.text,
                 marginBottom: 8,
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               Error
@@ -227,23 +227,25 @@ export default function ProcessDonationPage({
             </Text>
 
             {showQR ? (
-              <View style={{ 
-                marginBottom: 0, 
-                alignItems: 'center',
-                backgroundColor: theme.colors.card,
-                padding: 20,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme.colors.border,
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}>
+              <View
+                style={{
+                  marginBottom: 0,
+                  alignItems: "center",
+                  backgroundColor: theme.colors.card,
+                  padding: 20,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
+                  shadowColor: "#000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+              >
                 <QRCodeStyled
                   data={donationUrl}
                   style={{ backgroundColor: theme.colors.card }}
@@ -254,20 +256,22 @@ export default function ProcessDonationPage({
                   pieceBorderRadius={1}
                   color={theme.colors.text}
                 />
-                <Text style={{ 
-                  color: theme.colors.text,
-                  marginTop: 15,
-                  textAlign: 'center',
-                  fontSize: 14,
-                  opacity: 0.8
-                }}>
+                <Text
+                  style={{
+                    color: theme.colors.text,
+                    marginTop: 15,
+                    textAlign: "center",
+                    fontSize: 14,
+                    opacity: 0.8,
+                  }}
+                >
                   Scan to complete donation
                 </Text>
               </View>
             ) : null}
           </View>
 
-          <View style={{ width: '100%', position: 'absolute', bottom: 30 }}>
+          <View style={{ width: "100%", position: "absolute", bottom: 30 }}>
             {!showQR && (
               <StyledButton
                 onPress={() => setShowQR(true)}
