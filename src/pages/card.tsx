@@ -820,11 +820,12 @@ export default function CardPage({
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   Card number
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
@@ -860,11 +861,12 @@ export default function CardPage({
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   Expires
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
@@ -898,11 +900,12 @@ export default function CardPage({
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   CVC
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
