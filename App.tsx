@@ -8,6 +8,7 @@ import { useColorScheme } from "react-native";
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
+import { ThemeProvider } from "./src/ThemeContext";
 
 function App() {
   const [fontsLoaded] = useFonts({
@@ -35,9 +36,11 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <AppContent scheme={scheme} cache={cache} />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent scheme={scheme} cache={cache} />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

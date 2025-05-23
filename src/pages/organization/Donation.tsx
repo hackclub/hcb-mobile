@@ -73,7 +73,7 @@ export default function OrganizationDonationPage({
     if (Platform.OS === "ios") {
       getDidOnboarding();
     }
-  }, []);
+  }, [scheme]);
 
   return (
     <StripeTerminalProvider
