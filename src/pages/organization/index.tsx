@@ -225,9 +225,11 @@ export default function OrganizationPage({
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
-      const hasSeenBanner = await AsyncStorage.getItem('hasSeenTapToPayBanner');
-      if (!hasSeenBanner && Platform.OS === 'ios') {
-        const [major, minor] = (Device.osVersion ?? "0.0").split(".").map(Number);
+      const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+      if (!hasSeenBanner && Platform.OS === "ios") {
+        const [major, minor] = (Device.osVersion ?? "0.0")
+          .split(".")
+          .map(Number);
         // iOS 16.4 and later
         if (major > 16 || (major === 16 && minor >= 4)) {
           setShowTapToPayBanner(true);
@@ -238,7 +240,7 @@ export default function OrganizationPage({
   }, []);
 
   const handleDismissTapToPayBanner = async () => {
-    await AsyncStorage.setItem('hasSeenTapToPayBanner', 'true');
+    await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
     setShowTapToPayBanner(false);
   };
 
@@ -309,7 +311,12 @@ export default function OrganizationPage({
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
-              {showTapToPayBanner && <TapToPayBanner onDismiss={handleDismissTapToPayBanner} orgId={orgId} />}
+              {showTapToPayBanner && (
+                <TapToPayBanner
+                  onDismiss={handleDismissTapToPayBanner}
+                  orgId={orgId}
+                />
+              )}
               {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{
