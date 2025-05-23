@@ -27,6 +27,14 @@ export default function ProcessDonationPage({
   const donationUrl = `https://hcb.hackclub.com/donations/start/cider?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
 
   useEffect(() => {
+    if (showQR) {
+      navigation.setOptions({
+        title: "Donation Link",
+      });
+    }
+  }, [showQR, navigation]);
+
+  useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <Button
@@ -198,34 +206,37 @@ export default function ProcessDonationPage({
           }}
         >
           <View style={{ width: "100%", flex: 1, justifyContent: "center" }}>
-            <Ionicons
-              name="close-circle-outline"
-              size={100}
-              color={palette.warning}
-              style={{ marginBottom: 16, alignSelf: "center" }}
-            />
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "600",
-                color: theme.colors.text,
-                marginBottom: 8,
-                textAlign: "center",
-              }}
-            >
-              Error
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                color: theme.colors.text,
-                textAlign: "center",
-                marginBottom: 24,
-              }}
-            >
-              An error occurred while processing the donation. Please try again.
-            </Text>
-
+            {!showQR && (
+              <>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={100}
+                  color={palette.warning}
+                  style={{ marginBottom: 16, alignSelf: "center" }}
+                />
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "600",
+                    color: theme.colors.text,
+                    marginBottom: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Error
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: theme.colors.text,
+                    textAlign: "center",
+                    marginBottom: 24,
+                  }}
+                >
+                  An error occurred while processing the donation. Please try again.
+                </Text>
+              </>
+            )}
             {showQR ? (
               <View
                 style={{
