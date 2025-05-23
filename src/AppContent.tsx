@@ -20,6 +20,7 @@ import { useOffline } from "./lib/useOffline";
 import Navigator from "./Navigator";
 import Login from "./pages/login";
 import { lightTheme, palette, theme } from "./theme";
+import { useThemeContext } from "./ThemeContext";
 
 const linking: LinkingOptions<TabParamList> = {
   prefixes: [
@@ -122,6 +123,7 @@ export default function AppContent({
 }) {
   const { tokens } = useContext(AuthContext);
   const hcb = useClient();
+  const { theme: themePref } = useThemeContext();
 
   useEffect(() => {
     if (tokens) {
@@ -135,10 +137,19 @@ export default function AppContent({
     return hcb(url, options).json();
   };
 
+  let navTheme = lightTheme;
+  if (themePref === "dark") navTheme = theme;
+  else if (themePref === "system")
+    navTheme = scheme === "dark" ? theme : lightTheme;
+
   return (
     <>
       <StatusBar
-        barStyle={scheme == "dark" ? "light-content" : "dark-content"}
+        barStyle={
+          themePref === "dark" || (themePref === "system" && scheme == "dark")
+            ? "light-content"
+            : "dark-content"
+        }
         backgroundColor={palette.background}
       />
 
@@ -154,10 +165,7 @@ export default function AppContent({
         <SafeAreaProvider>
           <ActionSheetProvider>
             <AlertNotificationRoot>
-              <NavigationContainer
-                theme={scheme == "dark" ? theme : lightTheme}
-                linking={linking}
-              >
+              <NavigationContainer theme={navTheme} linking={linking}>
                 <OfflineBanner />
                 {tokens?.accessToken ? <Navigator /> : <Login />}
               </NavigationContainer>

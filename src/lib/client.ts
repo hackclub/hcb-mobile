@@ -4,7 +4,7 @@ import { useContext, useMemo } from "react";
 import AuthContext from "../auth";
 
 export default function useClient() {
-  const { tokens, setTokens, refreshAccessToken } = useContext(AuthContext);
+  const { tokens, refreshAccessToken } = useContext(AuthContext);
 
   return useMemo(() => {
     const pendingRetries = new Set();
@@ -130,5 +130,5 @@ export default function useClient() {
     });
 
     return client;
-  }, [tokens, refreshAccessToken, setTokens]);
+  }, [tokens, refreshAccessToken]);
 }

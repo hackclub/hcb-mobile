@@ -49,3 +49,10 @@ export type TabParamList = {
   Receipts: undefined;
   Settings: undefined;
 };
+
+export type SettingsStackParamList = {
+  SettingsMain: undefined;
+  AppIconSelector: undefined;
+  Tutorials: undefined;
+  About: undefined;
+};
