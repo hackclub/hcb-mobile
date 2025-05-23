@@ -218,7 +218,7 @@ export default function PaymentCard({
               overflow: "hidden",
             }}
           >
-            {card.status}
+            {card.status === "expired" ? "canceled" : card.status}
           </Text>
         </View>
       </View>
