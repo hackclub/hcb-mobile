@@ -28,9 +28,10 @@ export default {
         "applinks:hcb.hackclub.com",
         "applinks:bank.hackclub.com",
       ],
-      // entitlements: {
-      //   "com.apple.developer.proximity-reader.payment.acceptance": true,
-      // }
+      entitlements: {
+        "com.apple.developer.proximity-reader.payment.acceptance": true,
+        "com.apple.developer.payment-pass-provisioning": true
+      }
     },
     android: {
       icon: "./assets/app-icon.png",

@@ -29,6 +29,9 @@ import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
+import useStripeCardWallet from "../lib/useStripeCardWallet";
+import { AddToWalletButton } from "@stripe/stripe-react-native";
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -56,6 +59,19 @@ export default function CardPage({
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card.id);
+
+  const { 
+    canAddToWallet, 
+    ephemeralKey, 
+    stripeId,
+    cardDetails, 
+    androidCardToken,
+    loading,
+    error 
+  } = useStripeCardWallet(_card.id);
+
+  console.log(canAddToWallet, ephemeralKey, cardDetails, androidCardToken, loading, error);
+  console.log("ephemeralKey", ephemeralKey);
 
   const { data: card = _card, error: cardFetchError } = useSWR<Card>(
     `cards/${_card.id}`,
@@ -223,13 +239,11 @@ export default function CardPage({
     ).start();
   }, [skeletonAnim]);
 
-  // Create the interpolated background color for skeleton animation
   const skeletonBackground = skeletonAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["rgba(0, 0, 0, 0.03)", "rgba(0, 0, 0, 0.12)"],
   });
 
-  // Create a shared skeleton style for reuse
   const createSkeletonStyle = (
     width: number,
     height: number,
@@ -257,10 +271,9 @@ export default function CardPage({
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
 
-  if (!card && !cardLoaded && !cardError) {
+  if (!card && !cardLoaded && !cardError && !loading) {
     return (
       <View style={{ flex: 1, padding: 20 }}>
-        {/* Card preview skeleton */}
         <Animated.View
           style={{
             height: 200,
@@ -712,6 +725,38 @@ export default function CardPage({
                 )}
               </View>
             )}
+
+            <View style={{ marginBottom: 20 }}>
+              {loading ? (
+                <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
+                  <ActivityIndicator color={palette.primary} />
+                </View>
+              ) : canAddToWallet && ephemeralKey && stripeId ? (
+<AddToWalletButton
+                      style={{
+                        width: '100%',
+                        height: 50,
+                        marginBottom: 10,
+                      }}
+                      ephemeralKey={{
+                        id: ephemeralKey.id,
+                        secret: ephemeralKey.secret,
+                        object: "ephemeral_key",
+                        associated_objects: [{
+                          id: ephemeralKey.stripeId,
+                          type: "issuing.card"
+                        }]
+                      }}
+                      cardDetails={{
+                        name: cardDetails?.cardholder.name ?? card?.user?.name ?? "",
+                        lastFour: cardDetails?.last4 ?? card?.last4 ?? "",
+                        primaryAccountIdentifier: cardDetails?.wallets.primary_account_identifier ?? null,
+                        description: "HCB Card",
+                      }}
+                      onComplete={({ error }) => console.log(error)} 
+                      androidAssetSource={require("../../assets/google-pay.png")}
+                      />             ) : null}
+            </View>
 
             {/* Card Details Section */}
             <View
