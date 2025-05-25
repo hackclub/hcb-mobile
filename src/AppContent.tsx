@@ -23,11 +23,11 @@ import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
 import { TabParamList } from "./lib/NavigatorParamList";
 import { useOffline } from "./lib/useOffline";
+import { LinkingProvider, useLinkingPref } from "./LinkingContext";
 import Navigator from "./Navigator";
 import Login from "./pages/login";
 import { lightTheme, palette, theme } from "./theme";
 import { useThemeContext } from "./ThemeContext";
-import { LinkingProvider, useLinkingPref } from "./LinkingContext";
 
 function OfflineBanner() {
   const insets = useSafeAreaInsets();
@@ -111,10 +111,6 @@ function InnerAppContent({
   const hcb = useClient();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
-
-  if (isUniversalLinkingEnabled === null) {
-    return <ActivityIndicator color="white" />;
-  }
 
   useEffect(() => {
     if (tokens) {
@@ -205,6 +201,10 @@ function InnerAppContent({
   if (themePref === "dark") navTheme = theme;
   else if (themePref === "system")
     navTheme = scheme === "dark" ? theme : lightTheme;
+
+  if (isUniversalLinkingEnabled === null) {
+    return <ActivityIndicator color="white" />;
+  }
 
   return (
     <>
