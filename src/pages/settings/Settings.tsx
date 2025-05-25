@@ -257,6 +257,35 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
+            onPress={() => navigation.navigate("DeepLinkingSettings")}
+          >
+            <Ionicons
+              name="link"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              Deep linking
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+
           {showTutorials && (
             <>
               <View

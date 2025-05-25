@@ -53,6 +53,7 @@ export type TabParamList = {
 export type SettingsStackParamList = {
   SettingsMain: undefined;
   AppIconSelector: undefined;
+  DeepLinkingSettings: undefined;
   Tutorials: undefined;
   About: undefined;
 };
