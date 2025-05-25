@@ -256,6 +256,52 @@ export default function CardPage({
   };
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
+  const [isReturningGrant, setisReturningGrant] = useState(false);
+  const returnGrant = async () => {
+    if (!card || !card.id) {
+      Alert.alert("Error", "Cannot update card status. Please try again.");
+      return;
+    }
+    Alert.alert(
+      `Return ${renderMoney(
+        (_card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0),
+      )} to ${card.organization.name}?`,
+      "Caution, returning this grant will render it unusable.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "I understand",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setisReturningGrant(true);
+              await hcb.post(
+                `card_grants/${(_card as GrantCard).grant_id}/cancel`,
+              );
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              await mutate("user/cards");
+              navigation.goBack();
+            } catch (err) {
+              console.error("Error returning grant:", err);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              Alert.alert(
+                "Error",
+                "Failed to return grant. Please try again later.",
+                [{ text: "OK" }],
+              );
+            } finally {
+              setisReturningGrant(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   if (!card && !cardLoaded && !cardError) {
     return (
@@ -708,6 +754,25 @@ export default function CardPage({
                     loading={detailsLoading}
                   >
                     {detailsRevealed ? "Hide details" : "Reveal details"}
+                  </Button>
+                )}
+
+                {isGrantCard && _card.status != "canceled" && (
+                  <Button
+                    style={{
+                      flexBasis: 0,
+                      flexGrow: 1,
+                      backgroundColor: "#3097ed",
+                      borderTopWidth: 0,
+                      borderRadius: 12,
+                    }}
+                    color="white"
+                    iconColor="white"
+                    icon="heart-circle"
+                    onPress={returnGrant}
+                    loading={detailsLoading || isReturningGrant}
+                  >
+                    Return Grant
                   </Button>
                 )}
               </View>
