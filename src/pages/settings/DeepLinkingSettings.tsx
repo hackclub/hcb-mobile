@@ -8,9 +8,7 @@ export default function DeepLinkingSettings() {
   const { colors } = useTheme();
 
   return (
-    <View
-      style={{ backgroundColor: colors.background, padding: 32 }}
-    >
+    <View style={{ backgroundColor: colors.background, padding: 32 }}>
       <View style={{ width: "100%" }}>
         <View
           style={{
