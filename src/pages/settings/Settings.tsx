@@ -16,6 +16,7 @@ import {
 import useSWR from "swr";
 
 import AuthContext from "../../auth";
+import { useCache } from "../../cacheProvider";
 import Button from "../../components/Button";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
@@ -58,12 +59,14 @@ export default function SettingsPage({ navigation }: Props) {
   const { setTokens } = useContext(AuthContext);
   const { data: user } = useSWR<User>("user");
   const { colors } = useTheme();
-  const { theme, setTheme } = useThemeContext();
+  const cache = useCache();
+  const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
       const storedTheme = await AsyncStorage.getItem(THEME_KEY);
+      console.log(storedTheme);
       if (
         storedTheme === "light" ||
         storedTheme === "dark" ||
@@ -84,6 +87,13 @@ export default function SettingsPage({ navigation }: Props) {
 
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     setTheme(value);
+  };
+
+  const handleSignOut = async () => {
+    resetTheme();
+    await AsyncStorage.clear();
+    cache.clear();
+    setTokens(null);
   };
 
   const isDark = useIsDark();
@@ -384,7 +394,7 @@ export default function SettingsPage({ navigation }: Props) {
             paddingVertical: 16,
             alignItems: "center",
           }}
-          onPress={() => setTokens(null)}
+          onPress={() => handleSignOut()}
         >
           Sign Out
         </Button>

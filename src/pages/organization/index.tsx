@@ -3,7 +3,6 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Icon from "@thedev132/hackclub-icons-rn";
 import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
@@ -19,11 +18,12 @@ import {
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
-// import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import Button from "../../components/Button";
 import MockTransaction, {
   MockTransactionType,
 } from "../../components/MockTransaction";
+import { EmptyState } from "../../components/organizations/EmptyState";
+import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -259,29 +259,22 @@ export default function OrganizationPage({
   };
 
   if (organizationLoading || userLoading) {
-    return <ActivityIndicator />;
+    return <LoadingSkeleton />;
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "center",
-      }}
-    >
+    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
       {organization !== undefined ? (
         <SectionList
-          initialNumToRender={30}
+          initialNumToRender={20}
           ListFooterComponent={() =>
-            isLoadingMore &&
-            !isLoading &&
-            !organization.playground_mode && (
-              <ActivityIndicator style={{ marginTop: 20 }} />
-            )
+            isLoadingMore && !isLoading && !organization.playground_mode ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color={themeColors.primary} />
+              </View>
+            ) : null
           }
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.2}
           onEndReached={() => loadMore()}
           refreshing={refreshing}
           onRefresh={() => onRefresh()}
@@ -328,55 +321,9 @@ export default function OrganizationPage({
                 )}
               </View>
 
-              {isLoading && <ActivityIndicator />}
+              {isLoading && <LoadingSkeleton />}
               {!isLoading && sections.length === 0 && !showMockData && (
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  {!isOnline ? (
-                    <>
-                      <Ionicons
-                        name="cloud-offline"
-                        size={24}
-                        color={palette.muted}
-                        style={{ alignSelf: "center" }}
-                      />
-                      <Text
-                        style={{
-                          textAlign: "center",
-                          color: palette.muted,
-                          fontSize: 16,
-                        }}
-                      >
-                        Offline
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      <Icon
-                        glyph="sad"
-                        color={palette.muted}
-                        size={24}
-                        style={{ alignSelf: "center" }}
-                      />
-                      <Text
-                        style={{
-                          textAlign: "center",
-                          color: palette.muted,
-                          fontSize: 16,
-                        }}
-                      >
-                        No Transactions
-                      </Text>
-                    </>
-                  )}
-                </View>
+                <EmptyState isOnline={isOnline} />
               )}
             </View>
           )}
@@ -444,7 +391,7 @@ export default function OrganizationPage({
           }
         />
       ) : (
-        <ActivityIndicator />
+        <LoadingSkeleton />
       )}
     </View>
   );
