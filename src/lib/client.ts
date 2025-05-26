@@ -17,6 +17,7 @@ export default function useClient() {
       headers: {
         "User-Agent": "HCB-Mobile",
       },
+      timeout: 30000,
       hooks: {
         beforeRequest: [
           async (request) => {

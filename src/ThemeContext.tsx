@@ -14,11 +14,13 @@ const THEME_KEY = "app_theme";
 interface ThemeContextProps {
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
+  resetTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
   theme: "system",
   setTheme: () => {},
+  resetTheme: () => {},
 });
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
@@ -42,8 +44,13 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     AsyncStorage.setItem(THEME_KEY, newTheme);
   };
 
+  const resetTheme = () => {
+    setThemeState("system");
+    AsyncStorage.setItem(THEME_KEY, "system");
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, resetTheme }}>
       {children}
     </ThemeContext.Provider>
   );
