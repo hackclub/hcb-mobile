@@ -13,7 +13,7 @@ import {
   TransactionType,
   TransactionWithoutId,
 } from "../lib/types/Transaction";
-import { palette } from "../theme";
+import { palette, theme } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
@@ -125,100 +125,147 @@ function Transaction({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
-
+  const isLight = themeColors.background !== '#fff';
+  
   return (
-    <View
-      style={StyleSheet.compose(
-        {
-          padding: 10,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 10,
-          backgroundColor:
-            transaction.appearance == "hackathon_grant"
-              ? undefined
-              : themeColors.card,
-          borderTopLeftRadius: top ? 8 : 0,
-          borderTopRightRadius: top ? 8 : 0,
-          borderBottomLeftRadius: bottom ? 8 : 0,
-          borderBottomRightRadius: bottom ? 8 : 0,
-          overflow: "hidden",
-        },
-        style,
-      )}
-    >
-      {transaction.appearance == "hackathon_grant" && (
-        <LinearGradient
-          colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        />
-      )}
-
-      <TransactionIcon
-        transaction={transaction}
-        hideAvatar={hideAvatar}
-        hideIcon={hideIcon}
-      />
-      <Text
-        numberOfLines={1}
-        style={{
-          fontSize: 14,
-          color:
-            transaction.appearance == "hackathon_grant"
-              ? palette.black
-              : transaction.pending || transaction.declined
-                ? palette.muted
-                : themeColors.text,
-          overflow: "hidden",
-          flex: 1,
-        }}
+    <View>
+      <View
+        style={StyleSheet.compose(
+          {
+            padding: 10,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+            backgroundColor:
+              transaction.declined || transaction.amount_cents < 0
+                ? (isLight ? '#F9E3E7' : '#351921')
+                : transaction.amount_cents > 0
+                  ? (isLight ? '#d7f7ee' : '#234740')
+                  : themeColors.card,
+            borderTopLeftRadius: top ? 8 : 0,
+            borderTopRightRadius: top ? 8 : 0,
+            borderBottomLeftRadius: bottom ? 8 : 0,
+            borderBottomRightRadius: bottom ? 8 : 0,
+            overflow: "hidden",
+          },
+          style,
+        )}
       >
-        {!hidePendingLabel &&
-          (transaction.declined
-            ? "Declined: "
-            : transaction.pending
-              ? "Pending: "
-              : "")}
-        {match(transaction)
-          .with(
-            { appearance: "hackathon_grant", has_custom_memo: false },
-            () => "💰 Hackathon grant",
-          )
-          // .with(
-          //   {
-          //     card_charge: { merchant: { smart_name: P.string } },
-          //     has_custom_memo: false,
-          //   },
-          //   (tx) => tx.card_charge.merchant.smart_name,
-          // )
-          .otherwise((tx) => tx.memo)
-          .replaceAll(/\s{2,}/g, " ")}
-      </Text>
-      {transaction.missing_receipt && !hideMissingReceipt && (
-        <View>
-          <Ionicons name="receipt-outline" color={palette.muted} size={18} />
-          <Ionicons
-            name="alert"
-            color={palette.warning}
-            style={{ position: "absolute", top: -8, left: -10 }}
-            size={18}
+        {transaction.appearance == "hackathon_grant" && (
+          <LinearGradient
+            colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
           />
-        </View>
-      )}
-      <Text
-        style={{
-          color:
-            transaction.appearance == "hackathon_grant"
-              ? palette.black
-              : transaction.amount_cents > 0
-                ? "#33d6a6"
-                : "#d63333",
-        }}
-      >
-        {renderMoney(transaction.amount_cents)}
-      </Text>
+        )}
+
+        <TransactionIcon
+          transaction={transaction}
+          hideAvatar={hideAvatar}
+          hideIcon={hideIcon}
+        />
+        {!hidePendingLabel && (transaction.declined || transaction.pending) && (
+          <View
+            style={
+              transaction.declined
+                ? {
+                    backgroundColor: isLight ? '#891A2A' : '#401A23',
+                    borderWidth: 1,
+                    borderColor: isLight ? '#891A2A' : '#401A23',
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    marginRight: 4,
+                  }
+                : {
+                    borderWidth: 1,
+                    borderStyle: 'dashed',
+                    borderColor: '#8492a6',
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    marginRight: 4,
+                  }
+            }
+          >
+            <Text
+              style={
+                transaction.declined
+                  ? { color: isLight ? "#fff" : '#891A2A', fontSize: 12, fontWeight: 'bold' }
+                  : { color: '#8492a6', fontSize: 12, fontWeight: 'bold' }
+              }
+            >
+              {transaction.declined ? 'Declined' : 'Pending'}
+            </Text>
+          </View>
+        )}
+        <Text
+          numberOfLines={1}
+          style={{
+            fontSize: 14,
+            color:
+transaction.appearance == "hackathon_grant"
+                  ? palette.black
+                  : transaction.pending
+                    ? palette.muted
+                    : themeColors.text,
+            overflow: "hidden",
+            flex: 1,
+          }}
+        >
+          {match(transaction)
+            .with(
+              { appearance: "hackathon_grant", has_custom_memo: false },
+              () => "💰 Hackathon grant",
+            )
+            // .with(
+            //   {
+            //     card_charge: { merchant: { smart_name: P.string } },
+            //     has_custom_memo: false,
+            //   },
+            //   (tx) => tx.card_charge.merchant.smart_name,
+            // )
+            .otherwise((tx) => tx.memo)
+            .replaceAll(/\s{2,}/g, " ")}
+        </Text>
+        {transaction.missing_receipt && !hideMissingReceipt && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "#ff8c37",
+              borderRadius: 20,
+              paddingHorizontal: 5,
+              paddingVertical: 2,
+              marginRight: 4,
+              backgroundColor: "transparent",
+            }}
+          >
+            <Icon glyph="payment-docs" color="#ff8c37" size={18} />
+            <Text
+              style={{
+                color: "#ff8c37",
+                fontSize: 12,
+                fontFamily: "monospace",
+                fontWeight: "bold",
+              }}
+            >
+              0
+            </Text>
+          </View>
+        )}
+        <Text
+          style={{
+            color:
+                transaction.appearance == "hackathon_grant"
+                  ? palette.black : themeColors.text,
+          }}
+        >
+          {renderMoney(transaction.amount_cents)}
+        </Text>
+      </View>
     </View>
   );
 }
