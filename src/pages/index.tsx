@@ -27,6 +27,7 @@ import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
+import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, renderMoney } from "../util";
 
@@ -83,9 +84,9 @@ function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  const scheme = useColorScheme();
 
   const color = orgColor(event.id);
+  const isDark = useIsDark();
 
   return (
     <TouchableHighlight
@@ -168,7 +169,7 @@ function Event({
             {data?.playground_mode && (
               <View
                 style={{
-                  backgroundColor: scheme == "dark" ? "#283140" : "#348EDA",
+                  backgroundColor: isDark ? "#283140" : "#348EDA",
                   paddingVertical: 4,
                   paddingHorizontal: 12,
                   borderRadius: 20,
@@ -178,7 +179,7 @@ function Event({
               >
                 <Text
                   style={{
-                    color: scheme == "dark" ? "#248EDA" : "white",
+                    color: isDark ? "#248EDA" : "white",
                     fontSize: 12,
                     fontWeight: "bold",
                   }}

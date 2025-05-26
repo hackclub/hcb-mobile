@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
-  useColorScheme,
   View,
   Text,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
+import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../theme";
 
 type NavigationProp = NativeStackNavigationProp<StackParamList>;
@@ -21,8 +21,7 @@ export default function TapToPayBanner({
   onDismiss: () => void;
   orgId: `org_${string}`;
 }) {
-  const scheme = useColorScheme();
-  const isDark = scheme === "dark";
+  const isDark = useIsDark();
   const navigation = useNavigation<NavigationProp>();
 
   const handlePress = () => {

@@ -11,7 +11,6 @@ import {
   View,
   Pressable,
   ScrollView,
-  useColorScheme,
   Animated,
 } from "react-native";
 import useSWR from "swr";
@@ -20,6 +19,7 @@ import AuthContext from "../../auth";
 import Button from "../../components/Button";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
+import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../theme";
 import { useThemeContext } from "../../ThemeContext";
 
@@ -59,7 +59,6 @@ export default function SettingsPage({ navigation }: Props) {
   const { data: user } = useSWR<User>("user");
   const { colors } = useTheme();
   const { theme, setTheme } = useThemeContext();
-  const systemColorScheme = useColorScheme();
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -87,8 +86,7 @@ export default function SettingsPage({ navigation }: Props) {
     setTheme(value);
   };
 
-  const isDark =
-    theme === "dark" || (theme === "system" && systemColorScheme === "dark");
+  const isDark = useIsDark();
   const dividerColor = isDark ? palette.slate : colors.border;
   const showTutorials = isTapToPaySupported();
 
