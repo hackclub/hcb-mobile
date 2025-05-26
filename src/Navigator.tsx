@@ -30,6 +30,7 @@ import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import About from "./pages/settings/About";
 import AppIconSelector from "./pages/settings/AppIconSelector";
+import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
 import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
@@ -260,6 +261,11 @@ export default function Navigator() {
               name="AppIconSelector"
               component={AppIconSelector}
               options={{ title: "App Icon" }}
+            />
+            <SettingsStack.Screen
+              name="DeepLinkingSettings"
+              component={DeepLinkingSettings}
+              options={{ title: "Deep Linking" }}
             />
             <SettingsStack.Screen
               name="Tutorials"
