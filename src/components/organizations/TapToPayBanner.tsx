@@ -1,12 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { View, Text, TouchableOpacity, Pressable } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { useIsDark } from "../../lib/useColorScheme";

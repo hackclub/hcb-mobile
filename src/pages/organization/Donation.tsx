@@ -26,9 +26,9 @@ import useSWR, { useSWRConfig } from "swr";
 import Button from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
+import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
 import { palette } from "../../theme";
-import { useIsDark } from "../../lib/useColorScheme";
 
 // interface PaymentIntent {
 //   id: string;
