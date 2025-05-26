@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
@@ -6,6 +5,7 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
+import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
@@ -76,6 +76,7 @@ function MockTransactionComponent({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
   const hasMissingReceipt =
     transaction?.localHcbCode?.receipts.length === 0 &&
     transaction.amount.cents < 0 &&
@@ -89,7 +90,16 @@ function MockTransactionComponent({
           flexDirection: "row",
           alignItems: "center",
           gap: 10,
-          backgroundColor: themeColors.card,
+          backgroundColor:
+            transaction.feePayment || transaction.amount.cents < 0
+              ? isDark
+                ? "#351921"
+                : "#F9E3E7"
+              : transaction.amount.cents > 0
+                ? isDark
+                  ? "#234740"
+                  : "#d7f7ee"
+                : themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
           borderBottomLeftRadius: bottom ? 8 : 0,
@@ -112,19 +122,35 @@ function MockTransactionComponent({
         {transaction?.localHcbCode?.memo?.replaceAll(/\s{2,}/g, " ") || ""}
       </Text>
       {hasMissingReceipt && !hideMissingReceipt && (
-        <View>
-          <Ionicons name="receipt-outline" color={palette.muted} size={18} />
-          <Ionicons
-            name="alert"
-            color={palette.warning}
-            style={{ position: "absolute", top: -8, left: -10 }}
-            size={18}
-          />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            borderWidth: 1,
+            borderColor: "#ff8c37",
+            borderRadius: 20,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
+            marginRight: 4,
+            backgroundColor: isDark ? "#2E161D" : "#FBEAED",
+          }}
+        >
+          <Icon glyph="payment-docs" color="#ff8c37" size={18} />
+          <Text
+            style={{
+              color: "#ff8c37",
+              fontSize: 12,
+              fontFamily: "monospace",
+              fontWeight: "bold",
+            }}
+          >
+            0
+          </Text>
         </View>
       )}
       <Text
         style={{
-          color: transaction?.amount.cents > 0 ? "#33d6a6" : "#d63333",
+          color: themeColors.text,
         }}
       >
         {renderMoney(transaction?.amount.cents)}
