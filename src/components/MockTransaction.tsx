@@ -1,12 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
-import { useIsDark } from "../lib/useColorScheme";
 
+import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
 
@@ -93,9 +92,13 @@ function MockTransactionComponent({
           gap: 10,
           backgroundColor:
             transaction.feePayment || transaction.amount.cents < 0
-              ? (isDark ? '#351921' : '#F9E3E7')
+              ? isDark
+                ? "#351921"
+                : "#F9E3E7"
               : transaction.amount.cents > 0
-                ? (isDark ? '#234740' : '#d7f7ee')
+                ? isDark
+                  ? "#234740"
+                  : "#d7f7ee"
                 : themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
@@ -129,7 +132,7 @@ function MockTransactionComponent({
             paddingHorizontal: 5,
             paddingVertical: 2,
             marginRight: 4,
-            backgroundColor: "transparent",
+            backgroundColor: isDark ? "#2E161D" : "#FBEAED",
           }}
         >
           <Icon glyph="payment-docs" color="#ff8c37" size={18} />

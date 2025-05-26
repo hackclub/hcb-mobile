@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
@@ -13,11 +12,11 @@ import {
   TransactionType,
   TransactionWithoutId,
 } from "../lib/types/Transaction";
-import { palette, theme } from "../theme";
+import { useIsDark } from "../lib/useColorScheme";
+import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
-import { useIsDark } from "../lib/useColorScheme";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
@@ -127,7 +126,7 @@ function Transaction({
 }) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
-  
+
   return (
     <View>
       <View
@@ -139,9 +138,13 @@ function Transaction({
             gap: 10,
             backgroundColor:
               transaction.declined || transaction.amount_cents < 0
-                ? (isDark ? '#351921' : '#F9E3E7')
+                ? isDark
+                  ? "#351921"
+                  : "#F9E3E7"
                 : transaction.amount_cents > 0
-                  ? (isDark ? '#234740' : '#d7f7ee')
+                  ? isDark
+                    ? "#234740"
+                    : "#d7f7ee"
                   : themeColors.card,
             borderTopLeftRadius: top ? 8 : 0,
             borderTopRightRadius: top ? 8 : 0,
@@ -155,7 +158,13 @@ function Transaction({
         {transaction.appearance == "hackathon_grant" && (
           <LinearGradient
             colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           />
@@ -171,9 +180,9 @@ function Transaction({
             style={
               transaction.declined
                 ? {
-                    backgroundColor: isDark ? '#401A23' : '#891A2A',
+                    backgroundColor: isDark ? "#401A23" : "#891A2A",
                     borderWidth: 1,
-                    borderColor: isDark ? '#401A23' : '#891A2A',
+                    borderColor: isDark ? "#401A23" : "#891A2A",
                     borderRadius: 10,
                     paddingHorizontal: 8,
                     paddingVertical: 2,
@@ -181,8 +190,8 @@ function Transaction({
                   }
                 : {
                     borderWidth: 1,
-                    borderStyle: 'dashed',
-                    borderColor: '#8492a6',
+                    borderStyle: "dashed",
+                    borderColor: "#8492a6",
                     borderRadius: 10,
                     paddingHorizontal: 8,
                     paddingVertical: 2,
@@ -193,11 +202,15 @@ function Transaction({
             <Text
               style={
                 transaction.declined
-                  ? { color: isDark ? "#891A2A" : '#fff', fontSize: 12, fontWeight: 'bold' }
-                  : { color: '#8492a6', fontSize: 12, fontWeight: 'bold' }
+                  ? {
+                      color: isDark ? "#891A2A" : "#fff",
+                      fontSize: 12,
+                      fontWeight: "bold",
+                    }
+                  : { color: "#8492a6", fontSize: 12, fontWeight: "bold" }
               }
             >
-              {transaction.declined ? 'Declined' : 'Pending'}
+              {transaction.declined ? "Declined" : "Pending"}
             </Text>
           </View>
         )}
@@ -206,11 +219,11 @@ function Transaction({
           style={{
             fontSize: 14,
             color:
-transaction.appearance == "hackathon_grant"
-                  ? palette.black
-                  : transaction.pending
-                    ? palette.muted
-                    : themeColors.text,
+              transaction.appearance == "hackathon_grant"
+                ? palette.black
+                : transaction.pending
+                  ? palette.muted
+                  : themeColors.text,
             overflow: "hidden",
             flex: 1,
           }}
@@ -241,7 +254,7 @@ transaction.appearance == "hackathon_grant"
               paddingHorizontal: 5,
               paddingVertical: 2,
               marginRight: 4,
-              backgroundColor: "transparent",
+              backgroundColor: isDark ? "#2E161D" : "#FBEAED",
             }}
           >
             <Icon glyph="payment-docs" color="#ff8c37" size={18} />
@@ -260,8 +273,9 @@ transaction.appearance == "hackathon_grant"
         <Text
           style={{
             color:
-                transaction.appearance == "hackathon_grant"
-                  ? palette.black : themeColors.text,
+              transaction.appearance == "hackathon_grant"
+                ? palette.black
+                : themeColors.text,
           }}
         >
           {renderMoney(transaction.amount_cents)}
