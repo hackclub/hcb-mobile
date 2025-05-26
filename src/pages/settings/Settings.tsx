@@ -91,7 +91,7 @@ export default function SettingsPage({ navigation }: Props) {
 
   const handleSignOut = async () => {
     resetTheme();
-    await AsyncStorage.clear();
+    await AsyncStorage.multiRemove([THEME_KEY, "pinnedOrgs", "frozenCardsShown", "ttpDidOnboarding"]);
     cache.clear();
     setTokens(null);
   };
