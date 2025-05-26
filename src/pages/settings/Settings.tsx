@@ -11,15 +11,16 @@ import {
   View,
   Pressable,
   ScrollView,
-  useColorScheme,
   Animated,
 } from "react-native";
 import useSWR from "swr";
 
 import AuthContext from "../../auth";
+import { useCache } from "../../cacheProvider";
 import Button from "../../components/Button";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
+import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../theme";
 import { useThemeContext } from "../../ThemeContext";
 
@@ -58,13 +59,14 @@ export default function SettingsPage({ navigation }: Props) {
   const { setTokens } = useContext(AuthContext);
   const { data: user } = useSWR<User>("user");
   const { colors } = useTheme();
-  const { theme, setTheme } = useThemeContext();
-  const systemColorScheme = useColorScheme();
+  const cache = useCache();
+  const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
       const storedTheme = await AsyncStorage.getItem(THEME_KEY);
+      console.log(storedTheme);
       if (
         storedTheme === "light" ||
         storedTheme === "dark" ||
@@ -87,8 +89,19 @@ export default function SettingsPage({ navigation }: Props) {
     setTheme(value);
   };
 
-  const isDark =
-    theme === "dark" || (theme === "system" && systemColorScheme === "dark");
+  const handleSignOut = async () => {
+    resetTheme();
+    await AsyncStorage.multiRemove([
+      THEME_KEY,
+      "pinnedOrgs",
+      "frozenCardsShown",
+      "ttpDidOnboarding",
+    ]);
+    cache.clear();
+    setTokens(null);
+  };
+
+  const isDark = useIsDark();
   const dividerColor = isDark ? palette.slate : colors.border;
   const showTutorials = isTapToPaySupported();
 
@@ -415,7 +428,7 @@ export default function SettingsPage({ navigation }: Props) {
             paddingVertical: 16,
             alignItems: "center",
           }}
-          onPress={() => setTokens(null)}
+          onPress={() => handleSignOut()}
         >
           Sign Out
         </Button>

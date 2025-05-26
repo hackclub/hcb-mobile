@@ -1,14 +1,15 @@
-import { View, useColorScheme } from "react-native";
+import { View } from "react-native";
 
+import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 
 export default function Divider() {
-  const scheme = useColorScheme();
+  const isDark = useIsDark();
 
   return (
     <View
       style={{
-        backgroundColor: scheme == "dark" ? palette.slate : palette.smoke,
+        backgroundColor: isDark ? palette.slate : palette.smoke,
         height: 1,
         width: "100%",
         marginBottom: 30,

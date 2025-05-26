@@ -4,7 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import {
@@ -16,6 +16,7 @@ import {
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
+import { useIsDark } from "./lib/useColorScheme";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import Home from "./pages/index";
@@ -35,7 +36,6 @@ import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
-import { useThemeContext } from "./ThemeContext";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
 
@@ -55,10 +55,7 @@ export default function Navigator() {
   const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
-  const { theme: themePref } = useThemeContext();
-  const colorScheme = useColorScheme();
-  const isDark =
-    themePref === "dark" || (themePref === "system" && colorScheme === "dark");
+  const isDark = useIsDark();
 
   return (
     <Tab.Navigator
