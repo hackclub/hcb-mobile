@@ -5,6 +5,7 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
+import { useIsDark } from "../lib/useColorScheme";
 
 import { palette } from "../theme";
 import { renderMoney } from "../util";
@@ -76,7 +77,7 @@ function MockTransactionComponent({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
-  const isLight = themeColors.background === '#fff' || themeColors.background === '#ffffff';
+  const isDark = useIsDark();
   const hasMissingReceipt =
     transaction?.localHcbCode?.receipts.length === 0 &&
     transaction.amount.cents < 0 &&
@@ -92,9 +93,9 @@ function MockTransactionComponent({
           gap: 10,
           backgroundColor:
             transaction.feePayment || transaction.amount.cents < 0
-              ? (isLight ? '#F9E3E7' : '#351921')
+              ? (isDark ? '#351921' : '#F9E3E7')
               : transaction.amount.cents > 0
-                ? (isLight ? '#E4F6F1' : '#234740')
+                ? (isDark ? '#234740' : '#d7f7ee')
                 : themeColors.card,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,

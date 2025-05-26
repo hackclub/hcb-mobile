@@ -17,6 +17,7 @@ import { palette, theme } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
+import { useIsDark } from "../lib/useColorScheme";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
@@ -125,7 +126,7 @@ function Transaction({
   hideMissingReceipt?: boolean;
 }) {
   const { colors: themeColors } = useTheme();
-  const isLight = themeColors.background !== '#fff';
+  const isDark = useIsDark();
   
   return (
     <View>
@@ -138,9 +139,9 @@ function Transaction({
             gap: 10,
             backgroundColor:
               transaction.declined || transaction.amount_cents < 0
-                ? (isLight ? '#F9E3E7' : '#351921')
+                ? (isDark ? '#351921' : '#F9E3E7')
                 : transaction.amount_cents > 0
-                  ? (isLight ? '#d7f7ee' : '#234740')
+                  ? (isDark ? '#234740' : '#d7f7ee')
                   : themeColors.card,
             borderTopLeftRadius: top ? 8 : 0,
             borderTopRightRadius: top ? 8 : 0,
@@ -170,9 +171,9 @@ function Transaction({
             style={
               transaction.declined
                 ? {
-                    backgroundColor: isLight ? '#891A2A' : '#401A23',
+                    backgroundColor: isDark ? '#401A23' : '#891A2A',
                     borderWidth: 1,
-                    borderColor: isLight ? '#891A2A' : '#401A23',
+                    borderColor: isDark ? '#401A23' : '#891A2A',
                     borderRadius: 10,
                     paddingHorizontal: 8,
                     paddingVertical: 2,
@@ -192,7 +193,7 @@ function Transaction({
             <Text
               style={
                 transaction.declined
-                  ? { color: isLight ? "#fff" : '#891A2A', fontSize: 12, fontWeight: 'bold' }
+                  ? { color: isDark ? "#891A2A" : '#fff', fontSize: 12, fontWeight: 'bold' }
                   : { color: '#8492a6', fontSize: 12, fontWeight: 'bold' }
               }
             >
