@@ -735,6 +735,7 @@ export default function CardPage({
                     flexDirection: "row",
                     alignItems: "center",
                     marginBottom: 15,
+                    maxWidth: "75%",
                   }}
                 >
                   <UserAvatar
