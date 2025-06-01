@@ -77,9 +77,13 @@ export default function OrganizationPage({
   navigation,
 }: Props) {
   const scheme = useColorScheme();
-  const { data: organization, error: organizationError, isLoading: organizationLoading } = useSWR<
-    Organization | OrganizationExpanded
-  >(`organizations/${orgId}`, { fallbackData: _organization });
+  const {
+    data: organization,
+    error: organizationError,
+    isLoading: organizationLoading,
+  } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
+    fallbackData: _organization,
+  });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
@@ -272,63 +276,74 @@ export default function OrganizationPage({
 
   if (organizationError || !organization) {
     return (
-      <View style={{ 
-        flex: 1, 
-        backgroundColor: themeColors.background,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24
-      }}>
-        <View style={{
-          backgroundColor: themeColors.card,
-          borderRadius: 20,
-          padding: 32,
-          width: '100%',
-          maxWidth: 400,
-          alignItems: 'center',
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 4,
-          },
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          elevation: 8,
-        }}>
-          <View style={{
-            width: 96,
-            height: 96,
-            borderRadius: 48,
-            backgroundColor: `${palette.primary}15`,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 32,
-          }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 20,
+            padding: 32,
+            width: "100%",
+            maxWidth: 400,
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <View
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              backgroundColor: `${palette.primary}15`,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 32,
+            }}
+          >
             <Ionicons name="lock-closed" size={48} color={palette.primary} />
           </View>
-          <Text style={{ 
-            color: themeColors.text, 
-            fontSize: 28, 
-            fontWeight: '700',
-            marginBottom: 16,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-          }}>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 28,
+              fontWeight: "700",
+              marginBottom: 16,
+              textAlign: "center",
+              letterSpacing: -0.5,
+            }}
+          >
             Access Denied
           </Text>
-          <Text style={{ 
-            color: palette.muted, 
-            fontSize: 17, 
-            lineHeight: 24,
-            textAlign: 'center',
-            marginBottom: 32,
-            paddingHorizontal: 8,
-          }}>
-            You don't have permission to view this organization. Please contact the organization's manager for access.
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 17,
+              lineHeight: 24,
+              textAlign: "center",
+              marginBottom: 32,
+              paddingHorizontal: 8,
+            }}
+          >
+            You don't have permission to view this organization. Please contact
+            the organization's manager for access.
           </Text>
           <Button
             style={{
-              width: '100%',
+              width: "100%",
               backgroundColor: themeColors.primary,
               borderRadius: 12,
               height: 50,

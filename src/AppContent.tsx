@@ -154,9 +154,13 @@ function InnerAppContent({
         },
       },
       getStateFromPath: (path, options) => {
-        if (path.startsWith('/branding') || path.startsWith('/security') || path.startsWith('/roles')) {
+        if (
+          path.startsWith("/branding") ||
+          path.startsWith("/security") ||
+          path.startsWith("/roles")
+        ) {
           Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
-          return null;
+          return undefined;
         }
         return getStateFromPath(path, options);
       },
