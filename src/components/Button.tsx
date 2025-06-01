@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
@@ -30,14 +30,15 @@ export interface ButtonProps {
     | "900";
   loading?: boolean;
   disabled?: boolean;
-  icon?: React.ComponentProps<typeof Ionicons>["name"];
+  icon?: React.ComponentProps<typeof Icon>["glyph"];
+  iconSize?: number;
+  iconOffset?: number;
 }
 
 const styles = StyleSheet.create({
   button: {
     backgroundColor: palette.primary,
     borderColor: "#e85d6f",
-    borderTopWidth: 1,
     color: "white",
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -75,14 +76,25 @@ export default function Button(
       disabled={props.loading || props.disabled}
     >
       {props.icon && (
-        <Ionicons
-          name={props.icon}
+        <View
           style={{
-            ...styles.buttonText,
-            color: props.iconColor || props.color || styles.buttonText.color,
-            opacity: props.loading ? 0 : 1,
+            width: 24,
+            height: 24,
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+            paddingBottom: props.iconOffset || 0,
           }}
-        />
+        >
+          <Icon
+            size={props.iconSize || 24}
+            glyph={props.icon}
+            style={{
+              color: props.iconColor || props.color || styles.buttonText.color,
+              opacity: props.loading ? 0 : 1,
+            }}
+          />
+        </View>
       )}
       <Text
         style={{

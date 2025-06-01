@@ -60,7 +60,9 @@ export default function OrganizationSettingsPage({
       >
         <Text style={{ color: themeColors.text, fontSize: 18 }}>Members</Text>
         <Button
-          icon="add-circle-outline"
+          icon="member-add"
+          iconSize={28}
+          iconOffset={2}
           onPress={() =>
             Linking.openURL(
               `https://hcb.hackclub.com/${organization.slug}/invites/new`,
