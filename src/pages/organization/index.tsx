@@ -77,9 +77,13 @@ export default function OrganizationPage({
   navigation,
 }: Props) {
   const scheme = useColorScheme();
-  const { data: organization, isLoading: organizationLoading } = useSWR<
-    Organization | OrganizationExpanded
-  >(`organizations/${orgId}`, { fallbackData: _organization });
+  const {
+    data: organization,
+    error: organizationError,
+    isLoading: organizationLoading,
+  } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
+    fallbackData: _organization,
+  });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
@@ -91,6 +95,14 @@ export default function OrganizationPage({
   } = useTransactions(orgId);
   const [refreshing] = useState(false);
   const { isOnline } = useOffline();
+
+  useEffect(() => {
+    if (organizationError || !organization) {
+      navigation.setOptions({
+        title: "Access Denied",
+      });
+    }
+  }, [organizationError, organization, navigation]);
 
   useEffect(() => {
     if (organization && user) {
@@ -137,20 +149,20 @@ export default function OrganizationPage({
         });
 
         if (!organization.playground_mode) {
-          if (Device.brand === "Apple" && Device.modelId) {
-            const modelNumber = parseInt(
-              Device.modelId.replace("iPhone", "").split(",")[0],
-              10,
-            );
-            // iPhone XS starts at iPhone11,2 (Commented out for now)
-            if (modelNumber >= 11) {
-              menuActions.push({
-                id: "donation",
-                title: "Collect Donations",
-                image: "dollarsign.circle",
-              });
-            }
-          }
+          // if (Device.brand === "Apple" && Device.modelId) {
+          //   const modelNumber = parseInt(
+          //     Device.modelId.replace("iPhone", "").split(",")[0],
+          //     10,
+          //   );
+          //   // iPhone XS starts at iPhone11,2 (Commented out for now)
+          //   if (modelNumber >= 11) {
+          //     menuActions.push({
+          //       id: "donation",
+          //       title: "Collect Donations",
+          //       image: "dollarsign.circle",
+          //     });
+          //   }
+          // }
           if (Platform.OS === "android") {
             menuActions.push({
               id: "donation",
@@ -260,6 +272,90 @@ export default function OrganizationPage({
 
   if (organizationLoading || userLoading) {
     return <LoadingSkeleton />;
+  }
+
+  if (organizationError || !organization) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 20,
+            padding: 32,
+            width: "100%",
+            maxWidth: 400,
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <View
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              backgroundColor: `${palette.primary}15`,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 32,
+            }}
+          >
+            <Ionicons name="lock-closed" size={48} color={palette.primary} />
+          </View>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 28,
+              fontWeight: "700",
+              marginBottom: 16,
+              textAlign: "center",
+              letterSpacing: -0.5,
+            }}
+          >
+            Access Denied
+          </Text>
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 17,
+              lineHeight: 24,
+              textAlign: "center",
+              marginBottom: 32,
+              paddingHorizontal: 8,
+            }}
+          >
+            You don't have permission to view this organization. Please contact
+            the organization's manager for access.
+          </Text>
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: themeColors.primary,
+              borderRadius: 12,
+              height: 50,
+            }}
+            color="#fff"
+            onPress={() => navigation.goBack()}
+          >
+            Go Back
+          </Button>
+        </View>
+      </View>
+    );
   }
 
   return (

@@ -153,7 +153,17 @@ function InnerAppContent({
           Receipts: "my/inbox",
         },
       },
-      getStateFromPath,
+      getStateFromPath: (path, options) => {
+        if (
+          path.startsWith("/branding") ||
+          path.startsWith("/security") ||
+          path.startsWith("/roles")
+        ) {
+          Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
+          return undefined;
+        }
+        return getStateFromPath(path, options);
+      },
       getInitialURL: async () => {
         if (isUniversalLinkingEnabled === null) {
           await new Promise((resolve) => {
