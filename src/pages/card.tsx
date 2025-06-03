@@ -735,6 +735,7 @@ export default function CardPage({
                     flexDirection: "row",
                     alignItems: "center",
                     marginBottom: 15,
+                    paddingRight: 90,
                   }}
                 >
                   <UserAvatar
@@ -742,13 +743,15 @@ export default function CardPage({
                     size={40}
                     style={{ marginRight: 10 }}
                   />
-                  <View>
+                  <View style={{ flex: 1, flexShrink: 1 }}>
                     <Text
                       style={{
                         fontSize: 18,
                         fontWeight: "600",
                         color: themeColors.text,
                       }}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
                     >
                       {cardName}
                     </Text>
@@ -771,6 +774,7 @@ export default function CardPage({
                     flexDirection: "row",
                     alignItems: "center",
                     marginBottom: 15,
+                    paddingRight: 90,
                   }}
                 >
                   <View
