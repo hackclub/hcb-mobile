@@ -686,7 +686,7 @@ export default function CardPage({
                     }}
                     color="#186177"
                     iconColor="#186177"
-                    icon="snow"
+                    icon="freeze"
                     onPress={() => toggleCardFrozen()}
                     loading={isUpdatingStatus}
                   >
@@ -703,7 +703,7 @@ export default function CardPage({
                     }}
                     color="white"
                     iconColor="white"
-                    icon={detailsRevealed ? "eye-off" : "eye"}
+                    icon={detailsRevealed ? "private-fill" : "view"}
                     onPress={toggleCardDetails}
                     loading={detailsLoading}
                   >
