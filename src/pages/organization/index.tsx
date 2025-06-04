@@ -26,7 +26,7 @@ import MockTransaction, {
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
-import TapToPayBanner from "../../components/organizations/TapToPayBanner";
+// import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
@@ -89,7 +89,7 @@ export default function OrganizationPage({
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
-  const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
+  // const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
 
   const {
     transactions: _transactions,
@@ -124,10 +124,10 @@ export default function OrganizationPage({
     checkTapToPayBanner();
   }, []);
 
-  const handleDismissTapToPayBanner = async () => {
-    await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
-    setShowTapToPayBanner(false);
-  };
+  // const handleDismissTapToPayBanner = async () => {
+  //   await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
+  //   setShowTapToPayBanner(false);
+  // };
 
   useEffect(() => {
     if (organization && user) {
@@ -401,12 +401,12 @@ export default function OrganizationPage({
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
-              {showTapToPayBanner && (
+              {/* {showTapToPayBanner && (
                 <TapToPayBanner
                   onDismiss={handleDismissTapToPayBanner}
                   orgId={orgId}
                 />
-              )}
+              )} */}
               {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{
