@@ -19,6 +19,7 @@ import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
+import Organization from "../lib/types/Organization";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
@@ -29,7 +30,6 @@ export default function CardsPage({ navigation }: Props) {
     "user/card_grants"
   );
   const { data: user } = useSWR("user");
-
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
@@ -75,7 +75,7 @@ export default function CardsPage({ navigation }: Props) {
             size={24}
             color={palette.primary}
             iconStyle={{ marginRight: 0 }}
-            onPress={() => navigation.navigate("OrderCard", { user, organizations: [] })}
+            onPress={() => navigation.navigate("OrderCard", { user, organizations: organizations?.filter((org: Organization) => org.playground_mode === false) })}
             underlayColor={"transparent"}
           />
         </View>

@@ -1,31 +1,129 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Haptics from "expo-haptics";
 import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Linking } from "react-native";
-
-import { CardsStackParamList } from "../lib/NavigatorParamList";
-import { palette } from "../theme";
+import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Linking, Alert } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import CardIcon from "../components/cards/CardIcon";
 import RepIcon from "../components/cards/RepIcon";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { CardsStackParamList } from "../lib/NavigatorParamList";
+import Organization from "../lib/types/Organization";
+import { palette } from "../theme";
+import { Toast } from "react-native-alert-notification";
+import { ALERT_TYPE } from "react-native-alert-notification";
+import useClient from "../lib/client";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "OrderCard">;
 
 export default function OrderCardScreen({ navigation, route }: Props) {
   const { colors: themeColors } = useTheme();
   const { user, organizations } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Form state variables
-  const [cardType, setCardType] = useState("virtual"); // 'virtual' or 'plastic'
-  const [organization, setOrganization] = useState(organizations?.[0] || "");
+  const [cardType, setCardType] = useState("virtual"); 
+  const [organizationId, setOrganizationId] = useState<string>("");
   const [shippingName, setShippingName] = useState(user?.name || "");
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [city, setCity] = useState("");
-  const [stateProvince, setStateProvince] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [addressLine1, setAddressLine1] = useState(user?.shipping_address?.address_line1 || "");
+  const [addressLine2, setAddressLine2] = useState(user?.shipping_address?.address_line2 || "");
+  const [city, setCity] = useState(user?.shipping_address?.city || "");
+  const [stateProvince, setStateProvince] = useState(user?.shipping_address?.state || "");
+  const [zipCode, setZipCode] = useState(user?.shipping_address?.postal_code || "");
+  const hcb = useClient();
+
+  console.log(user);
+
+  const validateFields = () => {
+    if (!organizationId) {
+      Alert.alert("Error", "Please select an organization");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return false;
+    }
+
+    if (cardType === "plastic") {
+      if (!shippingName.trim()) {
+        Alert.alert("Error", "Please enter a shipping name");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return false;
+      }
+      if (!addressLine1.trim()) {
+        Alert.alert("Error", "Please enter an address");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return false;
+      }
+      if (!city.trim()) {
+        Alert.alert("Error", "Please enter a city");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return false;
+      }
+      if (!stateProvince.trim()) {
+        Alert.alert("Error", "Please enter a state/province");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return false;
+      }
+      if (!zipCode.trim()) {
+        Alert.alert("Error", "Please enter a ZIP code");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleCreateCard = async () => {
+    if (!validateFields()) return;
+
+    setIsLoading(true);
+    console.log(organizationId);
+    console.log(cardType);
+    console.log(shippingName);
+    console.log(city);
+    console.log(addressLine1);
+    console.log(addressLine2);
+    console.log(stateProvince);
+    console.log(zipCode);
+    try {
+        const response = await hcb.post("cards", {
+
+        json: {
+          card: {
+            organization_id: organizationId,
+            card_type: cardType,
+            shipping_name: shippingName,
+            shipping_address_city: city,
+            shipping_address_line1: addressLine1,
+            shipping_address_line2: addressLine2,
+            shipping_address_postal_code: zipCode,
+            shipping_address_state: stateProvince,
+            shipping_address_country: "US",
+            birthday: user?.birthday
+          }
+        }
+      });
+
+      if (response.ok) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: "Card created!",
+          textBody: "Your card has been created successfully.",
+        });
+        navigation.goBack()
+      } else {
+        const data = await response.json();
+        Alert.alert("Error", data.error || "Failed to create card");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (err) {
+      console.error("Error creating card:", err);
+      Alert.alert("Error", "Failed to create card. Please try again later.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
@@ -46,9 +144,9 @@ export default function OrderCardScreen({ navigation, route }: Props) {
           <Text
             style={{
               color: themeColors.text,
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: "bold",
-              marginBottom: 20,
+              marginBottom: 30,
             }}
           >
             Order a card
@@ -58,28 +156,54 @@ export default function OrderCardScreen({ navigation, route }: Props) {
             style={{
               color: palette.smoke,
               fontSize: 16,
-              marginBottom: 10,
+              fontWeight: "500",
+              marginBottom: 12,
             }}
           >
             Which organization?
           </Text>
 
-          <View
+          <RNPickerSelect
+            onValueChange={(value) => setOrganizationId(value)}
+            items={(organizations as unknown as Organization[])?.map(org => ({
+              label: org.name,
+              value: org.id,
+            })) || []}
+            value={organizationId}
             style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 10,
-              padding: 15,
-              marginBottom: 20,
+              inputIOS: {
+                backgroundColor: themeColors.card,
+                color: themeColors.text,
+                borderRadius: 12,
+                padding: 12,
+                marginBottom: 24,
+                fontSize: 15,
+              },
+              inputAndroid: {
+                backgroundColor: themeColors.card,
+                color: themeColors.text,
+                borderRadius: 12,
+                padding: 12,
+                marginBottom: 24,
+                fontSize: 15,
+              },
+              placeholder: {
+                color: palette.muted,
+              },
             }}
-          >
-            <Text style={{ color: themeColors.text }}>TampaHacks</Text>
-          </View>
+            placeholder={{
+              label: 'Select an organization...',
+              value: null,
+            }}
+            useNativeAndroidPickerStyle={false}
+          />
 
           <Text
             style={{
               color: palette.smoke,
               fontSize: 16,
-              marginBottom: 10,
+              fontWeight: "500",
+              marginBottom: 12,
             }}
           >
             What type of card?
@@ -89,13 +213,14 @@ export default function OrderCardScreen({ navigation, route }: Props) {
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
+              marginBottom: 24,
             }}
           >
             <TouchableOpacity
               style={{
                 backgroundColor: "#2A424E",
-                borderRadius: 10,
-                padding: 15,
+                borderRadius: 12,
+                padding: 20,
                 width: "48%",
                 alignItems: "center",
                 justifyContent: "flex-end",
@@ -108,8 +233,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               <Text
                 style={{
                   color: themeColors.text,
-                  fontWeight: "bold",
-                  marginBottom: 5,
+                  fontWeight: "600",
+                  marginTop: 12,
+                  marginBottom: 6,
+                  fontSize: 16,
                 }}
               >
                 Virtual
@@ -117,7 +244,8 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               <Text
                 style={{
                   color: palette.smoke,
-                  fontSize: 12,
+                  fontSize: 13,
+                  textAlign: "center",
                 }}
               >
                 Online-only, instant
@@ -127,8 +255,8 @@ export default function OrderCardScreen({ navigation, route }: Props) {
             <TouchableOpacity
               style={{
                 backgroundColor: "#2A424E",
-                borderRadius: 10,
-                padding: 15,
+                borderRadius: 12,
+                padding: 20,
                 width: "48%",
                 alignItems: "center",
                 justifyContent: "flex-end",
@@ -137,12 +265,14 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               }}
               onPress={() => setCardType("plastic")}
             >
-            <CardIcon />
+              <CardIcon />
               <Text
                 style={{
                   color: themeColors.text,
-                  fontWeight: "bold",
-                  marginBottom: 5,
+                  fontWeight: "600",
+                  marginTop: 12,
+                  marginBottom: 6,
+                  fontSize: 16,
                 }}
               >
                 Plastic
@@ -150,31 +280,23 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               <Text
                 style={{
                   color: palette.smoke,
-                  fontSize: 12,
+                  fontSize: 13,
+                  textAlign: "center",
                 }}
               >
                 Mailed, 10-12 biz. days
               </Text>
             </TouchableOpacity>
-
           </View>
-          <Text
-              style={{
-                  color: palette.smoke,
-                  fontSize: 12,
-                  marginTop: 10,
-                  marginBottom: 20,
-                  }}
-              >
-                  Physical cards can only be shipped within the US.
-              </Text>
+
           {cardType === "plastic" && (
             <>
               <Text
                 style={{
                   color: palette.smoke,
                   fontSize: 16,
-                  marginBottom: 10,
+                  fontWeight: "500",
+                  marginBottom: 12,
                 }}
               >
                 Shipping info
@@ -187,9 +309,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 10,
-                  padding: 10,
-                  marginBottom: 10,
+                  borderRadius: 12,
+                  padding: 12,
+                  marginBottom: 16,
+                  fontSize: 15,
                 }}
               />
               <TextInput
@@ -200,9 +323,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 10,
-                  padding: 10,
-                  marginBottom: 10,
+                  borderRadius: 12,
+                  padding: 12,
+                  marginBottom: 16,
+                  fontSize: 15,
                 }}
               />
               <TextInput
@@ -213,9 +337,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 10,
-                  padding: 10,
-                  marginBottom: 10,
+                  borderRadius: 12,
+                  padding: 12,
+                  marginBottom: 16,
+                  fontSize: 15,
                 }}
               />
 
@@ -223,7 +348,7 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginBottom: 10,
+                  marginBottom: 16,
                 }}
               >
                 <TextInput
@@ -234,9 +359,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
-                    borderRadius: 10,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 12,
                     width: "48%",
+                    fontSize: 15,
                   }}
                 />
                 <TextInput
@@ -247,9 +373,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
-                    borderRadius: 10,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 12,
                     width: "48%",
+                    fontSize: 15,
                   }}
                 />
               </View>
@@ -258,7 +385,7 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginBottom: 10,
+                  marginBottom: 24,
                 }}
               >
                 <TextInput
@@ -269,22 +396,21 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
-                    borderRadius: 10,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 12,
                     width: "48%",
+                    fontSize: 15,
                   }}
                 />
                 <TextInput
-                  placeholder="Country"
-                  placeholderTextColor={palette.muted}
-                  value={country}
-                  onChangeText={setCountry}
+                  value={"United States"}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
-                    borderRadius: 10,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 12,
                     width: "48%",
+                    fontSize: 15,
                   }}
                 />
               </View>
@@ -294,8 +420,8 @@ export default function OrderCardScreen({ navigation, route }: Props) {
           <Text
             style={{
               color: palette.muted,
-              fontSize: 12,
-              marginBottom: 10,
+              fontSize: 13,
+              marginBottom: 12,
             }}
           >
             Plastic cards can only be shipped within the US.
@@ -304,8 +430,9 @@ export default function OrderCardScreen({ navigation, route }: Props) {
           <Text
             style={{
               color: palette.muted,
-              fontSize: 12,
-              marginBottom: 20,
+              fontSize: 13,
+              marginBottom: 24,
+              lineHeight: 18,
             }}
           >
             By submitting, you agree to Stripe's{' '}
@@ -322,14 +449,21 @@ export default function OrderCardScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={{
               backgroundColor: "#007bff",
-              padding: 15,
-              borderRadius: 10,
+              padding: 16,
+              borderRadius: 12,
               alignItems: "center",
+              marginBottom: 20,
+              opacity: isLoading ? 0.7 : 1,
             }}
-            onPress={() => navigation.goBack()}
+            onPress={handleCreateCard}
+            disabled={isLoading}
           >
-            <Text style={{ color: themeColors.text, fontWeight: "bold" }}>
-              Issue my card
+            <Text style={{ 
+              color: themeColors.text, 
+              fontWeight: "600",
+              fontSize: 16,
+            }}>
+              {isLoading ? "Creating card..." : "Issue my card"}
             </Text>
           </TouchableOpacity>
         </ScrollView>
