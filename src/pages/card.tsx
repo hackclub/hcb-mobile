@@ -13,6 +13,8 @@ import {
   RefreshControl,
   Animated,
   Alert,
+  Modal,
+  TextInput,
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
@@ -49,6 +51,9 @@ export default function CardPage({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [last4, setLast4] = useState("");
+  const [activating, setActivating] = useState(false);
 
   const {
     details,
@@ -256,6 +261,37 @@ export default function CardPage({
   };
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
+
+  const handleActivate = async () => {
+    if (!last4 || last4.length !== 4) {
+      Alert.alert("Error", "Please enter the last 4 digits of your card");
+      return;
+    }
+
+    setActivating(true);
+    try {
+      const response = await hcb.patch(`cards/${card.id}`, {
+        json: { status: "active", last4 },
+      });
+
+      if (response.ok) {
+        onSuccessfulStatusChange("active");
+        setShowActivateModal(false);
+        setLast4("");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        const data = (await response.json()) as { error?: string };
+        Alert.alert("Error", data.error || "Failed to activate card");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (err) {
+      console.error("Error activating card:", err);
+      Alert.alert("Error", "Failed to activate card. Please try again later.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setActivating(false);
+    }
+  };
 
   if (!card && !cardLoaded && !cardError) {
     return (
@@ -676,22 +712,45 @@ export default function CardPage({
                 }}
               >
                 {card.status !== "expired" && !isGrantCard && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      backgroundColor: "#71C5E7",
-                      borderTopWidth: 0,
-                      borderRadius: 12,
-                    }}
-                    color="#186177"
-                    iconColor="#186177"
-                    icon="freeze"
-                    onPress={() => toggleCardFrozen()}
-                    loading={isUpdatingStatus}
-                  >
-                    {card.status == "active" ? "Freeze card" : "Defrost card"}
-                  </Button>
+                  <>
+                    {card.type === "physical" && card.status === "inactive" ? (
+                      <Button
+                        style={{
+                          flexBasis: 0,
+                          flexGrow: 1,
+                          backgroundColor: palette.primary,
+                          borderTopWidth: 0,
+                          borderRadius: 12,
+                        }}
+                        color="white"
+                        iconColor="white"
+                        iconSize={32}
+                        icon="rep"
+                        onPress={() => setShowActivateModal(true)}
+                      >
+                        Activate card
+                      </Button>
+                    ) : (
+                      <Button
+                        style={{
+                          flexBasis: 0,
+                          flexGrow: 1,
+                          backgroundColor: "#71C5E7",
+                          borderTopWidth: 0,
+                          borderRadius: 12,
+                        }}
+                        color="#186177"
+                        iconColor="#186177"
+                        icon="freeze"
+                        onPress={() => toggleCardFrozen()}
+                        loading={isUpdatingStatus}
+                      >
+                        {card.status == "active"
+                          ? "Freeze card"
+                          : "Defrost card"}
+                      </Button>
+                    )}
+                  </>
                 )}
                 {_card.type == "virtual" && _card.status != "canceled" && (
                   <Button
@@ -1088,6 +1147,94 @@ export default function CardPage({
           </>
         )}
       </ScrollView>
+
+      {/* Add the activation modal */}
+      <Modal
+        visible={showActivateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowActivateModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 15,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: themeColors.text,
+                marginBottom: 10,
+              }}
+            >
+              Activate Physical Card
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+              }}
+            >
+              Please enter the last 4 digits of your card to activate it.
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+                fontFamily: "JetBrains Mono",
+              }}
+              placeholder="Last 4 digits"
+              placeholderTextColor={palette.muted}
+              keyboardType="number-pad"
+              maxLength={4}
+              value={last4}
+              onChangeText={setLast4}
+              autoFocus
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                color={themeColors.text}
+                onPress={() => {
+                  setShowActivateModal(false);
+                  setLast4("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                style={{ flex: 1 }}
+                onPress={handleActivate}
+                loading={activating}
+              >
+                Activate
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Animated.View>
   );
 }
