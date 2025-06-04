@@ -174,20 +174,20 @@ export default function OrganizationPage({
         });
 
         if (!organization.playground_mode) {
-          if (Device.brand === "Apple" && Device.modelId) {
-            const modelNumber = parseInt(
-              Device.modelId.replace("iPhone", "").split(",")[0],
-              10,
-            );
-            // iPhone XS starts at iPhone11,2 (Commented out for now)
-            if (modelNumber >= 11) {
-              menuActions.push({
-                id: "donation",
-                title: "Collect Donations",
-                image: "dollarsign.circle",
-              });
-            }
-          }
+          // if (Device.brand === "Apple" && Device.modelId) {
+          //   const modelNumber = parseInt(
+          //     Device.modelId.replace("iPhone", "").split(",")[0],
+          //     10,
+          //   );
+          //   // iPhone XS starts at iPhone11,2 (Commented out for now)
+          //   if (modelNumber >= 11) {
+          //     menuActions.push({
+          //       id: "donation",
+          //       title: "Collect Donations",
+          //       image: "dollarsign.circle",
+          //     });
+          //   }
+          // }
           if (Platform.OS === "android") {
             menuActions.push({
               id: "donation",
