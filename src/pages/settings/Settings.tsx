@@ -96,6 +96,7 @@ export default function SettingsPage({ navigation }: Props) {
       "pinnedOrgs",
       "frozenCardsShown",
       "ttpDidOnboarding",
+      "hasSeenTapToPayBanner",
     ]);
     cache.clear();
     setTokens(null);
