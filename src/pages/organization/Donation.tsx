@@ -9,19 +9,20 @@ import {
   StripeTerminalProvider,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import ExpoTtpEdu from "expo-ttp-edu";
 import { useEffect, useRef, useState } from "react";
 import {
+  Platform,
   ActivityIndicator,
   Linking,
   Text,
   View,
   Alert,
   TextInput,
-  Platform,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
+
+const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
