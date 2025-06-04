@@ -34,24 +34,6 @@ import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
-// Add initially_activated to Card type
-type Card = {
-  id: string;
-  name: string;
-  status: string;
-  type: "virtual" | "physical";
-  initially_activated?: boolean;
-  last4?: string;
-  user?: {
-    id: string;
-    name: string;
-  };
-  organization?: {
-    id: string;
-  };
-  total_spent_cents?: number;
-};
-
 export default function CardPage({
   route: {
     params: { card: _card },
@@ -69,7 +51,7 @@ export default function CardPage({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
-  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(true);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
 
