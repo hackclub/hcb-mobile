@@ -51,7 +51,7 @@ export default function CardPage({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
-  const [showActivateModal, setShowActivateModal] = useState(true);
+  const [showActivateModal, setShowActivateModal] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
 
