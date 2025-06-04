@@ -1,13 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { showTapToPayEducation } from "expo-ttp-edu";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 
 export default function Tutorials() {
   const { colors } = useTheme();
 
   const handleTapToPayEducation = async () => {
-    await showTapToPayEducation();
+    await ExpoTtpEdu.showTapToPayEducation();
   };
 
   return (
