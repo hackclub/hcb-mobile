@@ -15,7 +15,6 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
-  ScrollView,
   RefreshControl,
 } from "react-native";
 import useSWR, { preload, useSWRConfig } from "swr";
@@ -395,122 +394,103 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollView
+    <FlatList
       style={{ flex: 1, flexGrow: 1 }}
+      scrollIndicatorInsets={{ bottom: tabBarHeight }}
+      contentContainerStyle={{
+        padding: 20,
+        paddingBottom: tabBarHeight,
+      }}
       contentInsetAdjustmentBehavior="automatic"
+      data={sortedOrgs}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-    >
-      {organizations && (
-        <FlatList
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: tabBarHeight,
-          }}
-          contentInsetAdjustmentBehavior="automatic"
-          data={sortedOrgs}
-          style={{ flex: 1 }}
-          // refreshing={isValidating}
-          // onRefresh={() => {
-          //   mutate(
-          //     (key: string) =>
-          //       key?.startsWith("/organizations/") ||
-          //       key == "/user/organizations",
-          //   );
-          // }}
-          ListHeaderComponent={() =>
-            invitations &&
-            invitations.length > 0 && (
-              <View
-                style={{
-                  marginTop: 10,
-                  marginBottom: 20,
-                  borderRadius: 10,
-                }}
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                  }}
-                >
-                  Pending invitations
-                </Text>
-                {invitations.map((invitation) => (
-                  <Event
-                    key={invitation.id}
-                    invitation={invitation}
-                    style={{
-                      borderWidth: 2,
-                      borderColor:
-                        scheme == "dark" ? palette.primary : palette.muted,
-                    }}
-                    event={invitation.organization}
-                    onPress={() =>
-                      navigation.navigate("Invitation", {
-                        inviteId: invitation.id,
-                        invitation,
-                      })
-                    }
-                    hideBalance
-                  />
-                  // <TouchableHighlight key={invitation.id}>
-                  //   <Text
-                  //     style={{
-                  //       color: palette.smoke,
-                  //       backgroundColor: palette.darkless,
-                  //       padding: 10,
-                  //       borderRadius: 10,
-                  //       overflow: "hidden",
-                  //     }}
-                  //   >
-                  //     {invitation.organization.name}
-                  //   </Text>
-                  // </TouchableHighlight>
-                ))}
-              </View>
-            )
-          }
-          renderItem={({ item: organization }) => (
-            <Event
-              event={organization}
-              showTransactions={
-                organizations.length <= 2 || organization.pinned
-              }
-              pinned={organization.pinned}
-              onPress={() =>
-                navigation.navigate("Event", {
-                  orgId: organization.id,
-                  organization,
-                })
-              }
-              onHold={() => {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success,
-                );
-                togglePinnedOrg(organization.id);
+      ListHeaderComponent={() =>
+        invitations &&
+        invitations.length > 0 && (
+          <View
+            style={{
+              marginTop: 10,
+              marginBottom: 20,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              style={{
+                color: palette.muted,
+                fontSize: 12,
+                textTransform: "uppercase",
+                marginBottom: 10,
               }}
-            />
-          )}
-          ListFooterComponent={() =>
-            organizations.length > 2 && (
-              <Text
+            >
+              Pending invitations
+            </Text>
+            {invitations.map((invitation) => (
+              <Event
+                key={invitation.id}
+                invitation={invitation}
                 style={{
-                  color: palette.muted,
-                  textAlign: "center",
-                  marginTop: 10,
+                  borderWidth: 2,
+                  borderColor:
+                    scheme == "dark" ? palette.primary : palette.muted,
                 }}
-              >
-                Tap and hold to pin an organization
-              </Text>
-            )
+                event={invitation.organization}
+                onPress={() =>
+                  navigation.navigate("Invitation", {
+                    inviteId: invitation.id,
+                    invitation,
+                  })
+                }
+                hideBalance
+              />
+              // <TouchableHighlight key={invitation.id}>
+              //   <Text
+              //     style={{
+              //       color: palette.smoke,
+              //       backgroundColor: palette.darkless,
+              //       padding: 10,
+              //       borderRadius: 10,
+              //       overflow: "hidden",
+              //     }}
+              //   >
+              //     {invitation.organization.name}
+              //   </Text>
+              // </TouchableHighlight>
+            ))}
+          </View>
+        )
+      }
+      renderItem={({ item: organization }) => (
+        <Event
+          event={organization}
+          showTransactions={organizations.length <= 2 || organization.pinned}
+          pinned={organization.pinned}
+          onPress={() =>
+            navigation.navigate("Event", {
+              orgId: organization.id,
+              organization,
+            })
           }
+          onHold={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            togglePinnedOrg(organization.id);
+          }}
         />
       )}
-    </ScrollView>
+      ListFooterComponent={() =>
+        organizations.length > 2 && (
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              marginTop: 10,
+            }}
+          >
+            Tap and hold to pin an organization
+          </Text>
+        )
+      }
+    />
   );
 }
