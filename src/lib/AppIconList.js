@@ -3,26 +3,14 @@
 const appIcons = [
   {
     name: "Default",
-    ios: "./assets/app-icon.png",
+    ios: {
+      light: "./assets/app-icon.png",
+      dark: "./assets/icons/default-dark.png",
+      tinted: "./assets/app-icon.png",
+    },
     android: {
       foregroundImage: "./assets/app-icon-foreground.png",
       backgroundColor: "#EC3750",
-    },
-  },
-  {
-    name: "Artskillz",
-    ios: "./assets/icons/art-skillz.png",
-    android: {
-      foregroundImage: "./assets/icons/art-skillz-foreground.png",
-      backgroundColor: "#FF2500",
-    },
-  },
-  {
-    name: "Dev",
-    ios: "./assets/icons/dev.png",
-    android: {
-      foregroundImage: "./assets/icons/dev-foreground.png",
-      backgroundColor: "#33D6A6",
     },
   },
   {
@@ -48,6 +36,30 @@ const appIcons = [
       foregroundImage: "./assets/icons/testflight.png",
       backgroundColor: "#FFD700",
     },
+  },
+  {
+    name: "Admin",
+    ios: {
+      light: "./assets/icons/admin.png",
+      dark: "./assets/icons/admin-dark.png",
+      tinted: "./assets/icons/admin.png",
+    },
+  },
+  {
+    name: "Platinum",
+    ios: "./assets/icons/platinum.png",
+  },
+  {
+    name: "Hackathongrant",
+    ios: "./assets/icons/hackathongrant.png",
+  },
+  {
+    name: "Christmas",
+    ios: "./assets/icons/christmas.png",
+  },
+  {
+    name: "FRC",
+    ios: "./assets/icons/frc.png",
   },
 ];
 
