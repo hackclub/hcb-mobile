@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
@@ -108,21 +108,21 @@ export default function OrganizationPage({
     }
   }, [organizationError, organization, navigation]);
 
-  useEffect(() => {
-    const checkTapToPayBanner = async () => {
-      const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
-      if (!hasSeenBanner && Platform.OS === "ios") {
-        const [major, minor] = (Device.osVersion ?? "0.0")
-          .split(".")
-          .map(Number);
-        // iOS 16.4 and later
-        if (major > 16 || (major === 16 && minor >= 4)) {
-          setShowTapToPayBanner(true);
-        }
-      }
-    };
-    checkTapToPayBanner();
-  }, []);
+  // useEffect(() => {
+  //   const checkTapToPayBanner = async () => {
+  //     const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+  //     if (!hasSeenBanner && Platform.OS === "ios") {
+  //       const [major, minor] = (Device.osVersion ?? "0.0")
+  //         .split(".")
+  //         .map(Number);
+  //       // iOS 16.4 and later
+  //       if (major > 16 || (major === 16 && minor >= 4)) {
+  //         setShowTapToPayBanner(true);
+  //       }
+  //     }
+  //   };
+  //   checkTapToPayBanner();
+  // }, []);
 
   // const handleDismissTapToPayBanner = async () => {
   //   await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
