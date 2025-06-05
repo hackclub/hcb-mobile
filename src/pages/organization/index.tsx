@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
@@ -26,7 +26,7 @@ import MockTransaction, {
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
-import TapToPayBanner from "../../components/organizations/TapToPayBanner";
+// import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
@@ -89,7 +89,7 @@ export default function OrganizationPage({
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
-  const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
+  // const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
 
   const {
     transactions: _transactions,
@@ -108,26 +108,26 @@ export default function OrganizationPage({
     }
   }, [organizationError, organization, navigation]);
 
-  useEffect(() => {
-    const checkTapToPayBanner = async () => {
-      const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
-      if (!hasSeenBanner && Platform.OS === "ios") {
-        const [major, minor] = (Device.osVersion ?? "0.0")
-          .split(".")
-          .map(Number);
-        // iOS 16.4 and later
-        if (major > 16 || (major === 16 && minor >= 4)) {
-          setShowTapToPayBanner(true);
-        }
-      }
-    };
-    checkTapToPayBanner();
-  }, []);
+  // useEffect(() => {
+  //   const checkTapToPayBanner = async () => {
+  //     const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+  //     if (!hasSeenBanner && Platform.OS === "ios") {
+  //       const [major, minor] = (Device.osVersion ?? "0.0")
+  //         .split(".")
+  //         .map(Number);
+  //       // iOS 16.4 and later
+  //       if (major > 16 || (major === 16 && minor >= 4)) {
+  //         setShowTapToPayBanner(true);
+  //       }
+  //     }
+  //   };
+  //   checkTapToPayBanner();
+  // }, []);
 
-  const handleDismissTapToPayBanner = async () => {
-    await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
-    setShowTapToPayBanner(false);
-  };
+  // const handleDismissTapToPayBanner = async () => {
+  //   await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
+  //   setShowTapToPayBanner(false);
+  // };
 
   useEffect(() => {
     if (organization && user) {
@@ -401,12 +401,12 @@ export default function OrganizationPage({
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
-              {showTapToPayBanner && (
+              {/* {showTapToPayBanner && (
                 <TapToPayBanner
                   onDismiss={handleDismissTapToPayBanner}
                   orgId={orgId}
                 />
-              )}
+              )} */}
               {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{

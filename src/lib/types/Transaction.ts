@@ -45,6 +45,7 @@ export interface CardCharge {
     name: string;
     smart_name?: string;
     country: string;
+    network_id: string;
   };
   charge_method?: "keyed_in" | "swipe" | "chip" | "contactless" | "online";
   spent_at: string;
@@ -64,6 +65,15 @@ export interface Donation {
     email: string;
     recurring_donor_id?: string;
   };
+  attribution: {
+    referrer?: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_term?: string;
+    utm_content?: string;
+  };
+  message?: string;
   donated_at: string;
   refunded: boolean;
 }
@@ -119,9 +129,10 @@ export interface AchTransfer {
   recipient_name: string;
   recipient_email?: string;
   bank_name: string;
-  account_number_last4: string;
-  description: string;
-  sender: User;
+  account_number_last4?: string;
+  routing_number?: string;
+  payment_for: string;
+  sender?: User;
 }
 
 export interface TransactionAchTransfer extends TransactionBase {
@@ -129,9 +140,10 @@ export interface TransactionAchTransfer extends TransactionBase {
   ach_transfer: AchTransfer;
 }
 
-export interface Invoice extends HcbApiObject<"inv"> {
+export interface Invoice {
+  id: string;
   amount_cents: number;
-  send_at: string;
+  sent_at: string;
   paid_at?: string;
   description: string;
   due_date: string;
