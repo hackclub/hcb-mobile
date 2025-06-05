@@ -3,10 +3,19 @@ import { useTheme } from "@react-navigation/native";
 import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image, useColorScheme } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  Image,
+  useColorScheme,
+} from "react-native";
 import useSWR from "swr";
 
-const icons: { [key: string]: number | { light: number; dark: number } | null } = {
+const icons: {
+  [key: string]: number | { light: number; dark: number } | null;
+} = {
   default: {
     light: require("../../../assets/app-icon.png"),
     dark: require("../../../assets/icons/default-dark.png"),
@@ -42,8 +51,8 @@ const iconKeyMap: { [key: string]: string } = {
   frc: "frc",
   admin: "admin",
   platinum: "platinum",
-  // testflight: "testflight",
-  "hackathon_grant": "hackathongrant"
+  testflight: "testflight",
+  hackathon_grant: "hackathongrant",
 };
 
 const getDisplayName = (key: string) => {
@@ -66,7 +75,9 @@ export default function AppIconSelector() {
   const { colors } = useTheme();
   const [currentIcon, setCurrentIcon] = useState<string>("default");
   const colorScheme = useColorScheme();
-  const { data: availableIcons } = useSWR<Record<string, boolean>>("user/available_icons");
+  const { data: availableIcons } = useSWR<Record<string, boolean>>(
+    "user/available_icons",
+  );
 
   useEffect(() => {
     const iconName = getAppIconName() || "default";
@@ -79,10 +90,10 @@ export default function AppIconSelector() {
   };
 
   const getIconSource = (value: number | { light: number; dark: number }) => {
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return value;
     }
-    return colorScheme === 'dark' ? value.dark : value.light;
+    return colorScheme === "dark" ? value.dark : value.light;
   };
 
   const getAvailableIcons = () => {
@@ -90,35 +101,37 @@ export default function AppIconSelector() {
       return Object.entries(icons)
         .filter(([key, value]) => {
           if (value === null) return false;
-          if (key === 'christmas') return isChristmasSeason();
+          if (key === "christmas") return isChristmasSeason();
           return true;
         })
         .map(([key, value]) => ({
           key,
-          value: value as number | { light: number; dark: number }
+          value: value as number | { light: number; dark: number },
         }));
     }
 
     return Object.entries(icons)
       .filter(([key, value]) => {
         if (value === null) return false;
-        if (key === 'default') return true;
-        if (key === 'christmas') return isChristmasSeason();
-        
-        const apiKey = Object.entries(iconKeyMap).find(([_, localKey]) => localKey === key)?.[0];
+        if (key === "default") return true;
+        if (key === "christmas") return isChristmasSeason();
+
+        const apiKey = Object.entries(iconKeyMap).find(
+          ([_, localKey]) => localKey === key,
+        )?.[0];
         if (!apiKey) return true;
         return availableIcons[apiKey];
       })
       .map(([key, value]) => ({
         key,
-        value: value as number | { light: number; dark: number }
+        value: value as number | { light: number; dark: number },
       }));
   };
 
   const iconList = getAvailableIcons();
 
   return (
-    <ScrollView 
+    <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
     >

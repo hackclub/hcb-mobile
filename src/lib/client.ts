@@ -10,7 +10,10 @@ export default function useClient() {
 
   return useMemo(() => {
     const pendingRetries = new Set();
-    let refreshPromise: Promise<{ success: boolean; newTokens?: AuthTokens }> | null = null;
+    let refreshPromise: Promise<{
+      success: boolean;
+      newTokens?: AuthTokens;
+    }> | null = null;
 
     const client = ky.create({
       prefixUrl: process.env.EXPO_PUBLIC_API_BASE,
@@ -53,7 +56,8 @@ export default function useClient() {
             console.log("Received 401 response, attempting token refresh...");
 
             try {
-              const refreshResult = refreshPromise || (refreshPromise = refreshAccessToken());
+              const refreshResult =
+                refreshPromise || (refreshPromise = refreshAccessToken());
               const result = await refreshResult;
               refreshPromise = null;
 
@@ -66,7 +70,9 @@ export default function useClient() {
                 console.log("Token refreshed, retrying request with new token");
                 pendingRetries.add(requestKey);
 
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, RETRY_DELAY),
+                );
 
                 try {
                   const url = request.url.toString();
@@ -94,11 +100,15 @@ export default function useClient() {
                     body: request.body,
                   });
 
-                  console.log(`Retry succeeded with status: ${newResponse.status}`);
+                  console.log(
+                    `Retry succeeded with status: ${newResponse.status}`,
+                  );
                   pendingRetries.delete(requestKey);
                   return newResponse;
                 } catch (innerError) {
-                  console.error(`Inner retry request failed: ${innerError.message}`);
+                  console.error(
+                    `Inner retry request failed: ${innerError.message}`,
+                  );
                   pendingRetries.delete(requestKey);
                   return response;
                 }

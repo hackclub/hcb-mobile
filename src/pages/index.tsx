@@ -464,9 +464,7 @@ export default function App({ navigation }: Props) {
       renderItem={({ item: organization }) => (
         <Event
           event={organization}
-          showTransactions={
-            organizations.length <= 2 || organization.pinned
-          }
+          showTransactions={organizations.length <= 2 || organization.pinned}
           pinned={organization.pinned}
           onPress={() =>
             navigation.navigate("Event", {
@@ -475,9 +473,7 @@ export default function App({ navigation }: Props) {
             })
           }
           onHold={() => {
-            Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Success,
-            );
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             togglePinnedOrg(organization.id);
           }}
         />
