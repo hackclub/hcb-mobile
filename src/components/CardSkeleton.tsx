@@ -263,4 +263,4 @@ export default function CardSkeleton({ onRefresh }: CardSkeletonProps) {
       </View>
     </View>
   );
-} 
+}
