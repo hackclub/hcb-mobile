@@ -142,21 +142,6 @@ export default function PaymentCard({
           }}
         >
           <SvgXml xml={patternForMeasurements} width="100%" height="100%" />
-          {card.status == "frozen" && (
-            <Image
-              source={require("../../assets/card-frost.png")}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                bottom: 0,
-                width: "100%",
-                height: "100%",
-                resizeMode: "cover",
-                opacity: 0.32,
-              }}
-            />
-          )}
         </View>
       )}
 
@@ -166,9 +151,24 @@ export default function PaymentCard({
         </View>
       )}
       {card.status == "frozen" && (
-        <View style={{ top: 25, left: 25, position: "absolute" }}>
-          <CardFrozen />
-        </View>
+        <>
+          <Image
+            source={require("../../assets/card-frost.png")}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: width * 0.86,
+              height: (width * 0.86) / 1.588,
+              resizeMode: "cover",
+              opacity: 0.32,
+              borderRadius: 15,
+            }}
+          />
+          <View style={{ top: 25, left: 25, position: "absolute" }}>
+            <CardFrozen />
+          </View>
+        </>
       )}
 
       {card.type == "physical" && <CardChip />}
