@@ -295,7 +295,7 @@ export default function CardPage({
   };
 
   if (!card && !cardLoaded && !cardError) {
-    return <CardSkeleton onRefresh={onRefresh} />;
+    return <CardSkeleton />;
   }
 
   const renderCardStatus = () => {

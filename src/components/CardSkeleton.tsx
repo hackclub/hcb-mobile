@@ -1,15 +1,8 @@
-import { Animated, View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
-import Button from "./Button";
-import { palette } from "../theme";
+import { Animated, View, Text } from "react-native";
 
-interface CardSkeletonProps {
-  onRefresh: () => void;
-}
-
-export default function CardSkeleton({ onRefresh }: CardSkeletonProps) {
+export default function CardSkeleton() {
   const { colors: themeColors } = useTheme();
   const skeletonAnim = useRef(new Animated.Value(0)).current;
 
