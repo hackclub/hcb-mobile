@@ -14,7 +14,7 @@ const TOKEN_CREATED_AT_KEY = "auth_token_created_at";
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
 let lastSuccessfulRefreshTime = 0;
-const MIN_REFRESH_INTERVAL_MS = 5000;
+const MIN_REFRESH_INTERVAL_MS = 1000;
 
 let refreshPromise: Promise<{
   success: boolean;
@@ -154,16 +154,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const tokenAge = now - (tokens.createdAt || 0);
 
-      const isTokenExpired = tokens.expiresAt <= now + 5 * 60 * 1000;
+      const isTokenExpired = tokens.expiresAt <= now + 2 * 60 * 1000;
 
-      if (tokenAge < 10000 && !isTokenExpired) {
+      if (tokenAge < 5000 && !isTokenExpired) {
         console.log(
           `Token was just created ${tokenAge}ms ago and isn't expired, skipping refresh`,
         );
         return { success: true, newTokens: tokens };
       }
 
-      if (tokens.expiresAt > now + 5 * 60 * 1000) {
+      if (tokens.expiresAt > now + 2 * 60 * 1000) {
         console.log("Token is still valid, no need to refresh");
         return { success: true, newTokens: tokens };
       }
