@@ -1,8 +1,9 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, View, Text, Linking } from "react-native";
-import useSWR from "swr";
+import { useState } from "react";
+import { ScrollView, View, Text, Linking, RefreshControl } from "react-native";
+import useSWR, { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
@@ -33,6 +34,8 @@ export default function TransactionPage({
   },
   navigation,
 }: Props) {
+  const [refreshing, setRefreshing] = useState(false);
+  const { mutate: globalMutate } = useSWRConfig();
   const { data: transaction, isLoading } = useSWR<
     Transaction & { organization?: Organization }
   >(
@@ -51,6 +54,42 @@ export default function TransactionPage({
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        mutate(
+          orgId
+            ? `organizations/${orgId}/transactions/${transactionId}`
+            : `transactions/${transactionId}`,
+          undefined,
+          { revalidate: true },
+        ),
+        mutate(
+          `organizations/${
+            orgId || transaction!.organization!.id
+          }/transactions/${transactionId}/comments`,
+          undefined,
+          { revalidate: true },
+        ),
+        mutate(
+          `organizations/${
+            orgId || transaction!.organization!.id
+          }/transactions/${transactionId}/receipts`,
+          undefined,
+          { revalidate: true },
+        ),
+        globalMutate(
+          (key) =>
+            typeof key === "string" &&
+            key.startsWith(`organizations/${orgId}/transactions`),
+        ),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (!transaction || isLoading) {
     return <TransactionSkeleton />;
   }
@@ -64,6 +103,9 @@ export default function TransactionPage({
     <ScrollView
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <AdminTools
         style={{ marginBottom: 20 }}
