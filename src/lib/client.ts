@@ -11,7 +11,10 @@ export default function useClient() {
   return useMemo(() => {
     const pendingRetries = new Set();
     let refreshInProgress = false;
-    let refreshPromise: Promise<{ success: boolean; newTokens?: AuthTokens }> | null = null;
+    let refreshPromise: Promise<{
+      success: boolean;
+      newTokens?: AuthTokens;
+    }> | null = null;
     let queuedRequests: Array<() => Promise<KyResponse>> = [];
 
     const processQueuedRequests = async () => {
@@ -25,7 +28,7 @@ export default function useClient() {
             console.error("Failed to process queued request:", error);
             throw error;
           }
-        })
+        }),
       );
     };
 

@@ -117,7 +117,7 @@ function InnerAppContent({
       console.log("Token state updated - user is authenticated");
       const now = Date.now();
       if (tokens.expiresAt <= now + 5 * 60 * 1000) {
-        refreshAccessToken().catch(error => {
+        refreshAccessToken().catch((error) => {
           console.error("Failed to preemptively refresh token:", error);
         });
       }
