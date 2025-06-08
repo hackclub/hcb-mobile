@@ -6,6 +6,7 @@ import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 
 import { TransactionViewProps } from "./TransactionViewProps";
+import ReceiptList from "../ReceiptList";
 
 export default function BankAccountTransaction({
   transaction,
@@ -33,6 +34,7 @@ export default function BankAccountTransaction({
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />
+      <ReceiptList transaction={transaction} />
     </View>
   );
 }
