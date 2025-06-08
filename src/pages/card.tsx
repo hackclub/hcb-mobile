@@ -701,9 +701,7 @@ export default function CardPage({
                     >
                       {detailsRevealed && details
                         ? renderCardNumber(details.number)
-                        : redactedCardNumber(
-                            card?.last4,
-                          )}
+                        : redactedCardNumber(card?.last4)}
                     </Text>
                   )}
                 </View>
