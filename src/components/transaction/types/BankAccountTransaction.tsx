@@ -2,11 +2,11 @@ import { Text, View } from "react-native";
 
 import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
+import ReceiptList from "../ReceiptList";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 
 import { TransactionViewProps } from "./TransactionViewProps";
-import ReceiptList from "../ReceiptList";
 
 export default function BankAccountTransaction({
   transaction,
