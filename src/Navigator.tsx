@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet } from "react-native";
@@ -60,22 +61,24 @@ export default function Navigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: React.ComponentProps<typeof Ionicons>["name"];
+        tabBarIcon: ({ color, size }) => {
+          let iconName: React.ComponentProps<typeof Icon>["glyph"];
 
           if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
+            iconName = "home";
+            size = 30;
           } else if (route.name === "Cards") {
-            iconName = focused ? "card" : "card-outline";
+            iconName = "card";
+            size = 28;
           } else if (route.name === "Receipts") {
-            iconName = focused ? "receipt" : "receipt-outline";
+            iconName = "payment-docs";
+            size = 28;
           } else if (route.name === "Settings") {
-            iconName = focused ? "settings" : "settings-outline";
-          } else {
-            throw new Error("unknown route name");
+            iconName = "settings";
+            size = 36;
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Icon glyph={iconName} size={size} color={color} />;
         },
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,

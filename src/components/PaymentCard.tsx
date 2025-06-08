@@ -1,4 +1,5 @@
 import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,8 +20,6 @@ import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, normalizeSvg } from "../util";
 
 import CardChip from "./cards/CardChip";
-import CardFrozen from "./cards/CardFrozen";
-import CardHCB from "./cards/CardHCB";
 
 export default function PaymentCard({
   card,
@@ -147,7 +146,7 @@ export default function PaymentCard({
 
       {card.type == "physical" && (
         <View style={{ top: 5, right: 5, position: "absolute" }}>
-          <CardHCB />
+          <Icon glyph="bank-account" size={64} color="white" />
         </View>
       )}
       {card.status == "frozen" && (
@@ -166,7 +165,7 @@ export default function PaymentCard({
             }}
           />
           <View style={{ top: 25, left: 25, position: "absolute" }}>
-            <CardFrozen />
+            <Icon glyph="freeze" size={32} color="white" opacity={0.5} />
           </View>
         </>
       )}
