@@ -93,7 +93,7 @@ export default function SettingsPage({ navigation }: Props) {
     resetTheme();
     await AsyncStorage.multiRemove([
       THEME_KEY,
-      "pinnedOrgs",
+      "organizationOrder",
       "frozenCardsShown",
       "ttpDidOnboarding",
       "hasSeenTapToPayBanner",
