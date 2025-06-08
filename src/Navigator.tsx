@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet } from "react-native";
@@ -36,7 +37,6 @@ import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
-import Icon from "@thedev132/hackclub-icons-rn";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
 
