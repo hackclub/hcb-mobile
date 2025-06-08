@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -223,7 +224,7 @@ function InnerAppContent({
   }
 
   return (
-    <>
+    <GestureHandlerRootView>
       <StatusBar
         barStyle={
           themePref === "dark" || (themePref === "system" && scheme == "dark")
@@ -253,6 +254,6 @@ function InnerAppContent({
           </ActionSheetProvider>
         </SafeAreaProvider>
       </SWRConfig>
-    </>
+    </GestureHandlerRootView>
   );
 }

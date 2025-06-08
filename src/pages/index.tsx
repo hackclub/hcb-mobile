@@ -7,7 +7,6 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useEffect, useState, useRef } from "react";
 import {
-  FlatList,
   Text,
   View,
   ActivityIndicator,
@@ -17,18 +16,22 @@ import {
   useColorScheme,
   RefreshControl,
 } from "react-native";
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import Transaction from "../components/Transaction";
 import { StackParamList } from "../lib/NavigatorParamList";
-import usePinnedOrgs from "../lib/organization/usePinnedOrgs";
+import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
-import { orgColor, renderMoney } from "../util";
+import { orgColor, organizationOrderEqual, renderMoney } from "../util";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -61,19 +64,19 @@ function Event({
   event,
   hideBalance = false,
   onPress,
-  onHold,
+  drag,
+  isActive,
   style,
   invitation,
   showTransactions = false,
-  pinned = false,
 }: ViewProps & {
   event: Organization;
   hideBalance?: boolean;
   showTransactions?: boolean;
-  pinned?: boolean;
   invitation?: Invitation;
   onPress?: () => void;
-  onHold?: () => void;
+  drag?: () => void;
+  isActive?: boolean;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
@@ -90,32 +93,20 @@ function Event({
   return (
     <TouchableHighlight
       onPress={onPress}
-      onLongPress={onHold}
-      underlayColor={themeColors.background}
-      activeOpacity={0.7}
+      onLongPress={drag}
+      disabled={isActive}
+      underlayColor={isActive ? "transparent" : themeColors.background}
+      activeOpacity={isActive ? 1 : 0.7}
     >
       <View
         style={StyleSheet.compose(
           {
             backgroundColor: themeColors.card,
-            marginBottom: 16,
             borderRadius: 10,
           },
           style,
         )}
       >
-        {pinned && (
-          <Text
-            style={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              fontSize: 20,
-            }}
-          >
-            📌
-          </Text>
-        )}
         <View
           style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
         >
@@ -236,6 +227,8 @@ function Event({
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
+// Helper function to compare org arrays by id
+
 export default function App({ navigation }: Props) {
   const lastErrorTime = useRef<number>(0);
   const ERROR_DEBOUNCE_MS = 5000;
@@ -287,7 +280,7 @@ export default function App({ navigation }: Props) {
     },
   });
 
-  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations || []);
+  const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } = useSWR<Invitation[]>(
     isOnline ? "user/invitations" : null,
     {
@@ -394,8 +387,17 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <FlatList
-      style={{ flex: 1, flexGrow: 1 }}
+    <DraggableFlatList
+      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+      onDragBegin={() => {
+        Haptics.selectionAsync();
+        setSortedOrgs([...sortedOrgs]);
+      }}
+      onDragEnd={({ data }) => {
+        if (!organizationOrderEqual(data, sortedOrgs)) {
+          setSortedOrgs(data);
+        }
+      }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
       contentContainerStyle={{
         padding: 20,
@@ -461,22 +463,27 @@ export default function App({ navigation }: Props) {
           </View>
         )
       }
-      renderItem={({ item: organization }) => (
-        <Event
-          event={organization}
-          showTransactions={organizations.length <= 2 || organization.pinned}
-          pinned={organization.pinned}
-          onPress={() =>
-            navigation.navigate("Event", {
-              orgId: organization.id,
-              organization,
-            })
-          }
-          onHold={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            togglePinnedOrg(organization.id);
-          }}
-        />
+      renderItem={({
+        item: organization,
+        drag,
+        isActive,
+      }: RenderItemParams<Organization>) => (
+        <View style={{ backgroundColor: "transparent" }}>
+          <ScaleDecorator activeScale={0.95}>
+            <Event
+              event={organization}
+              drag={drag}
+              isActive={isActive}
+              showTransactions={organizations.length <= 2}
+              onPress={() =>
+                navigation.navigate("Event", {
+                  orgId: organization.id,
+                  organization,
+                })
+              }
+            />
+          </ScaleDecorator>
+        </View>
       )}
       ListFooterComponent={() =>
         organizations.length > 2 && (
@@ -491,6 +498,7 @@ export default function App({ navigation }: Props) {
           </Text>
         )
       }
+      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
     />
   );
 }
