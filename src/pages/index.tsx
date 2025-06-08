@@ -494,7 +494,7 @@ export default function App({ navigation }: Props) {
               marginTop: 10,
             }}
           >
-            Tap and hold to pin an organization
+            Drag to reorder organizations
           </Text>
         )
       }
