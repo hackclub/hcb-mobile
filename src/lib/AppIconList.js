@@ -44,22 +44,42 @@ const appIcons = [
       dark: "./assets/icons/admin-dark.png",
       tinted: "./assets/icons/admin.png",
     },
+    android: {
+      foregroundImage: "./assets/icons/admin.png",
+      backgroundColor: "#EC3750",
+    },
   },
   {
     name: "Platinum",
     ios: "./assets/icons/platinum.png",
+    android: {
+      foregroundImage: "./assets/icons/platinum.png",
+      backgroundColor: "#EC3750",
+    },
   },
   {
     name: "Hackathongrant",
     ios: "./assets/icons/hackathongrant.png",
+    android: {
+      foregroundImage: "./assets/icons/hackathongrant.png",
+      backgroundColor: "#EC3750",
+    },
   },
   {
     name: "Christmas",
     ios: "./assets/icons/christmas.png",
+    android: {
+      foregroundImage: "./assets/icons/christmas.png",
+      backgroundColor: "#EC3750",
+    },
   },
   {
     name: "FRC",
     ios: "./assets/icons/frc.png",
+    android: {
+      foregroundImage: "./assets/icons/frc.png",
+      backgroundColor: "#EC3750",
+    },
   },
 ];
 

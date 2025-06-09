@@ -2,14 +2,11 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { NavigationContainer, LinkingOptions } from "@react-navigation/native";
 import * as Linking from "expo-linking";
-import { useContext, useEffect, useMemo } from "react";
-import {
-  StatusBar,
-  ColorSchemeName,
-  View,
-  Text,
-  ActivityIndicator,
-} from "react-native";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -86,22 +83,14 @@ function OfflineBanner() {
     </View>
   );
 }
+SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+  duration: 500,
+  fade: true,
+});
 
 export default function AppContent({
-  scheme,
-  cache,
-}: {
-  scheme: ColorSchemeName;
-  cache: CacheProvider;
-}) {
-  return (
-    <LinkingProvider>
-      <InnerAppContent scheme={scheme} cache={cache} />
-    </LinkingProvider>
-  );
-}
-
-function InnerAppContent({
   scheme,
   cache,
 }: {
@@ -112,6 +101,22 @@ function InnerAppContent({
   const hcb = useClient();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (tokens?.accessToken) {
+        const result = await LocalAuthentication.authenticateAsync();
+        setIsAuthenticated(result.success);
+      } else {
+        setIsAuthenticated(true);
+      }
+      setAppIsReady(true);
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     if (tokens) {
@@ -125,7 +130,13 @@ function InnerAppContent({
     } else {
       console.log("Token state updated - user is logged out");
     }
-  }, [tokens]);
+  }, [refreshAccessToken, tokens]);
+
+  const onLayoutRootView = useCallback(() => {
+    if (appIsReady) {
+      SplashScreen.hide();
+    }
+  }, [appIsReady]);
 
   const linking: LinkingOptions<TabParamList> = useMemo(
     () => ({
@@ -223,37 +234,50 @@ function InnerAppContent({
     return <ActivityIndicator color="white" />;
   }
 
-  return (
-    <GestureHandlerRootView>
-      <StatusBar
-        barStyle={
-          themePref === "dark" || (themePref === "system" && scheme == "dark")
-            ? "light-content"
-            : "dark-content"
-        }
-        backgroundColor={palette.background}
-      />
+  if (!appIsReady) {
+    return null;
+  }
 
-      <SWRConfig
-        value={{
-          provider: () => cache,
-          fetcher,
-          revalidateOnFocus: true,
-          revalidateOnReconnect: true,
-          dedupingInterval: 2000,
-        }}
-      >
-        <SafeAreaProvider>
-          <ActionSheetProvider>
-            <AlertNotificationRoot>
-              <NavigationContainer theme={navTheme} linking={linking}>
-                <OfflineBanner />
-                {tokens?.accessToken ? <Navigator /> : <Login />}
-              </NavigationContainer>
-            </AlertNotificationRoot>
-          </ActionSheetProvider>
-        </SafeAreaProvider>
-      </SWRConfig>
-    </GestureHandlerRootView>
+  return (
+    <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+      <LinkingProvider>
+        <GestureHandlerRootView>
+          <StatusBar
+            style={
+              themePref === "dark" ||
+              (themePref === "system" && scheme == "dark")
+                ? "light"
+                : "dark"
+            }
+            backgroundColor={navTheme.colors.background}
+          />
+
+          <SWRConfig
+            value={{
+              provider: () => cache,
+              fetcher,
+              revalidateOnFocus: true,
+              revalidateOnReconnect: true,
+              dedupingInterval: 2000,
+            }}
+          >
+            <SafeAreaProvider>
+              <ActionSheetProvider>
+                <AlertNotificationRoot>
+                  <NavigationContainer theme={navTheme} linking={linking}>
+                    <OfflineBanner />
+                    {tokens?.accessToken && isAuthenticated ? (
+                      <Navigator />
+                    ) : (
+                      <Login />
+                    )}
+                  </NavigationContainer>
+                </AlertNotificationRoot>
+              </ActionSheetProvider>
+            </SafeAreaProvider>
+          </SWRConfig>
+        </GestureHandlerRootView>
+      </LinkingProvider>
+    </View>
   );
 }
