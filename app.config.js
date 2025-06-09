@@ -1,5 +1,5 @@
 import appIcons from "./src/lib/AppIconList";
-const IS_DEV = process.env.APP_VARIANT === "development";
+const IS_DEV = process.env.EXPO_PUBLIC_APP_VARIANT === "development";
 
 export default {
   expo: {
@@ -13,7 +13,7 @@ export default {
     userInterfaceStyle: "automatic",
     splash: {
       image: "./assets/splash.png",
-      resizeMode: "contain",
+      resizeMode: "cover",
       backgroundColor: "#EC3750",
     },
     assetBundlePatterns: ["**/*"],
@@ -101,6 +101,15 @@ export default {
           organization: "hcb-mobile",
           project: "hcb-mobile",
           url: "https://sentry.io/",
+        },
+      ],
+      [
+        "react-native-edge-to-edge",
+        {
+          android: {
+            parentTheme: "Default",
+            enforceNavigationBarContrast: false,
+          },
         },
       ],
     ],

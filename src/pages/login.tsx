@@ -30,6 +30,8 @@ const redirectUri = makeRedirectUri({ scheme: "hcb" });
 export default function Login() {
   const scheme = useColorScheme();
   const theme = scheme == "dark" ? darkTheme : lightTheme;
+  const [isProcessing, setIsProcessing] = useState(false);
+  const processedResponseRef = useRef<string | null>(null);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -51,7 +53,16 @@ export default function Login() {
   const { setTokens } = useContext(AuthContext);
 
   useEffect(() => {
-    if (response?.type == "success") {
+    if (!response || isProcessing) return;
+
+    const responseKey =
+      response.type +
+      (response.type === "success" ? response.params?.code : "");
+    if (processedResponseRef.current === responseKey) return;
+
+    if (response.type === "success") {
+      processedResponseRef.current = responseKey;
+      setIsProcessing(true);
       setLoading(true);
       exchangeCodeAsync(
         {
@@ -62,7 +73,7 @@ export default function Login() {
         },
         discovery,
       )
-        .then((r) => {
+        .then(async (r) => {
           console.log("Token exchange successful");
 
           if (!r.refreshToken) {
@@ -71,22 +82,33 @@ export default function Login() {
 
           const expiresAt = Date.now() + (r.expiresIn || 7200) * 1000;
 
-          setTokens({
+          const tokens = {
             accessToken: r.accessToken,
             refreshToken: r.refreshToken || "",
             expiresAt,
             createdAt: Date.now(),
             codeVerifier: request?.codeVerifier,
-          });
+          };
 
+          setTokens(tokens);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setLoading(false);
+          setIsProcessing(false);
         })
         .catch((error) => {
           console.error("Error exchanging code for token:", error);
           setLoading(false);
+          setIsProcessing(false);
+          processedResponseRef.current = null;
         });
     }
-  }, [response, request, setTokens]);
+
+    return () => {
+      if (response.type === "success") {
+        processedResponseRef.current = responseKey;
+      }
+    };
+  }, [response, request, setTokens, isProcessing]);
 
   const animation = useRef(new Animated.Value(0)).current;
 

@@ -492,6 +492,7 @@ export default function App({ navigation }: Props) {
               color: palette.muted,
               textAlign: "center",
               marginTop: 10,
+              marginBottom: 10,
             }}
           >
             Drag to reorder organizations

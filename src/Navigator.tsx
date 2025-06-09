@@ -89,6 +89,7 @@ export default function Navigator() {
             tint={isDark ? "dark" : "light"}
             intensity={100}
             style={StyleSheet.absoluteFill}
+            experimentalBlurMethod="dimezisBlurView"
           />
         ),
       })}
