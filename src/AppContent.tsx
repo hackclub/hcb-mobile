@@ -109,6 +109,10 @@ export default function AppContent({
       if (tokens?.accessToken) {
         const result = await LocalAuthentication.authenticateAsync();
         setIsAuthenticated(result.success);
+        if (process.env.EXPO_PUBLIC_APP_VARIANT === "development") {
+          // bypass auth for development
+          setIsAuthenticated(true);
+        }
       } else {
         setIsAuthenticated(true);
       }

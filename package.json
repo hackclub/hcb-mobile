@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "APP_VARIANT=development expo run:ios",
+    "android": "EXPO_PUBLIC_APP_VARIANT=development expo run:android",
+    "ios": "EXPO_PUBLIC_APP_VARIANT=development expo run:ios",
     "web": "expo start --web",
     "lint": "eslint App.tsx src/",
     "lint:fix": "eslint App.tsx src/ --fix",
