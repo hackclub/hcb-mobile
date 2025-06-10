@@ -58,7 +58,9 @@ export default function CardListSkeleton() {
                 opacity: shimmerOpacity,
               }}
             />
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+            >
               <Animated.View
                 style={{
                   width: 180,
@@ -85,4 +87,4 @@ export default function CardListSkeleton() {
       ))}
     </View>
   );
-} 
+}
