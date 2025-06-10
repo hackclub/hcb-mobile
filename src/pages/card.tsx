@@ -3,6 +3,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ScrollView,
@@ -31,7 +32,12 @@ import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
-import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
+import {
+  normalizeSvg,
+  redactedCardNumber,
+  renderCardNumber,
+  renderMoney,
+} from "../util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -55,6 +61,11 @@ export default function CardPage({
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
+  const [pattern, setPattern] = useState<string>();
+  const [patternDimensions, setPatternDimensions] = useState<{
+    width: number;
+    height: number;
+  }>();
 
   const {
     details,
@@ -294,6 +305,38 @@ export default function CardPage({
     }
   };
 
+  useEffect(() => {
+    const generateCardPattern = async () => {
+      if (!card || card.type !== "virtual") return;
+
+      try {
+        const patternData = await generate({
+          input: card.id,
+          grayScale:
+            card.status !== "active"
+              ? card.status === "frozen"
+                ? 0.23
+                : 1
+              : 0,
+        });
+        const normalizedPattern = normalizeSvg(
+          patternData.toSVG(),
+          patternData.width,
+          patternData.height,
+        );
+        setPattern(normalizedPattern);
+        setPatternDimensions({
+          width: patternData.width,
+          height: patternData.height,
+        });
+      } catch (error) {
+        console.error("Error generating pattern for card:", card.id, error);
+      }
+    };
+
+    generateCardPattern();
+  }, [card]);
+
   if (!card && !cardLoaded && !cardError) {
     return <CardSkeleton />;
   }
@@ -466,6 +509,8 @@ export default function CardPage({
                 card={card}
                 onCardLoad={() => setCardLoaded(true)}
                 style={{ marginBottom: 10 }}
+                pattern={pattern}
+                patternDimensions={patternDimensions}
               />
 
               {isGrantCard && (
