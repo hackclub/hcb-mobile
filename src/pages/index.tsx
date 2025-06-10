@@ -2,10 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackScreenProps,
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import {
   Text,
   View,
@@ -16,10 +19,9 @@ import {
   useColorScheme,
   RefreshControl,
 } from "react-native";
-import DraggableFlatList, {
-  RenderItemParams,
-  ScaleDecorator,
-} from "react-native-draggable-flatlist";
+import ReorderableList, {
+  useReorderableDrag,
+} from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import Transaction from "../components/Transaction";
@@ -75,8 +77,8 @@ function Event({
   showTransactions?: boolean;
   invitation?: Invitation;
   onPress?: () => void;
-  drag?: () => void;
   isActive?: boolean;
+  drag?: () => void;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
@@ -89,7 +91,6 @@ function Event({
 
   const color = orgColor(event.id);
   const isDark = useIsDark();
-
   return (
     <TouchableHighlight
       onPress={onPress}
@@ -113,7 +114,7 @@ function Event({
           {event.icon ? (
             <Image
               source={{ uri: event.icon }}
-              cachePolicy="disk"
+              cachePolicy="memory-disk"
               style={{
                 width: 40,
                 height: 40,
@@ -352,6 +353,34 @@ export default function App({ navigation }: Props) {
     }
   });
 
+  const EventItem = memo(
+    ({
+      organization,
+      navigation,
+    }: {
+      organization: Organization;
+      navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
+    }) => {
+      const drag = useReorderableDrag();
+      return (
+        <Event
+          event={organization}
+          drag={drag}
+          isActive={false}
+          showTransactions={organizations ? organizations.length <= 2 : false}
+          onPress={() =>
+            navigation.navigate("Event", {
+              orgId: organization.id,
+              organization,
+            })
+          }
+        />
+      );
+    },
+  );
+
+  EventItem.displayName = "EventItem";
+
   // Show cached data even if there's an error
   if (error && !organizations?.length) {
     return (
@@ -387,15 +416,15 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <DraggableFlatList
+    <ReorderableList
       keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
-      onDragBegin={() => {
+      onReorder={({ from, to }) => {
         Haptics.selectionAsync();
-        setSortedOrgs([...sortedOrgs]);
-      }}
-      onDragEnd={({ data }) => {
-        if (!organizationOrderEqual(data, sortedOrgs)) {
-          setSortedOrgs(data);
+        const newOrgs = [...sortedOrgs];
+        const [removed] = newOrgs.splice(from, 1);
+        newOrgs.splice(to, 0, removed);
+        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+          setSortedOrgs(newOrgs);
         }
       }}
       scrollIndicatorInsets={{ bottom: tabBarHeight }}
@@ -463,27 +492,8 @@ export default function App({ navigation }: Props) {
           </View>
         )
       }
-      renderItem={({
-        item: organization,
-        drag,
-        isActive,
-      }: RenderItemParams<Organization>) => (
-        <View style={{ backgroundColor: "transparent" }}>
-          <ScaleDecorator activeScale={0.95}>
-            <Event
-              event={organization}
-              drag={drag}
-              isActive={isActive}
-              showTransactions={organizations.length <= 2}
-              onPress={() =>
-                navigation.navigate("Event", {
-                  orgId: organization.id,
-                  organization,
-                })
-              }
-            />
-          </ScaleDecorator>
-        </View>
+      renderItem={({ item: organization }) => (
+        <EventItem organization={organization} navigation={navigation} />
       )}
       ListFooterComponent={() =>
         organizations.length > 2 && (

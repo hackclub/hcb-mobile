@@ -5,12 +5,12 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useState } from "react";
+import { generate } from "hcb-geo-pattern";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Pressable, Text, useColorScheme, View } from "react-native";
-import DraggableFlatList, {
-  RenderItemParams,
-  ScaleDecorator,
-} from "react-native-draggable-flatlist";
+import ReorderableList, {
+  useReorderableDrag,
+} from "react-native-reorderable-list";
 import useSWR from "swr";
 
 import CardListSkeleton from "../components/CardListSkeleton";
@@ -19,8 +19,44 @@ import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
+import { normalizeSvg } from "../util";
+
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
+
+type CardItemProps = {
+  item: (Card & Required<Pick<Card, "last4">>) | GrantCard;
+  isActive: boolean;
+  onPress: (card: (Card & Required<Pick<Card, "last4">>) | GrantCard) => void;
+  pattern?: string;
+  patternDimensions?: { width: number; height: number };
+};
+
+const CardItem = memo(
+  ({ item, isActive, onPress, pattern, patternDimensions }: CardItemProps) => {
+    const drag = useReorderableDrag();
+    return (
+      <Pressable
+        onPress={() => onPress(item)}
+        onLongPress={drag}
+        disabled={isActive}
+      >
+        <PaymentCard
+          card={item}
+          style={{ marginHorizontal: 20, marginVertical: 8 }}
+          pattern={pattern}
+          patternDimensions={patternDimensions}
+        />
+      </Pressable>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.pattern === nextProps.pattern,
+);
+
+CardItem.displayName = "CardItem";
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
@@ -29,6 +65,60 @@ export default function CardsPage({ navigation }: Props) {
     useSWR<GrantCard[]>("user/card_grants");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+
+  // Cache for card patterns
+  const [patternCache, setPatternCache] = useState<
+    Record<
+      string,
+      { pattern: string; dimensions: { width: number; height: number } }
+    >
+  >({});
+
+  useEffect(() => {
+    const generatePatterns = async () => {
+      if (!cards && !grantCards) return;
+
+      const allCards = [...(cards || []), ...(grantCards || [])];
+      const newPatternCache: Record<
+        string,
+        { pattern: string; dimensions: { width: number; height: number } }
+      > = {};
+
+      for (const card of allCards) {
+        if (card.type !== "virtual") continue;
+
+        try {
+          const patternData = await generate({
+            input: card.id,
+            grayScale:
+              card.status !== "active"
+                ? card.status == "frozen"
+                  ? 0.23
+                  : 1
+                : 0,
+          });
+          const normalizedPattern = normalizeSvg(
+            patternData.toSVG(),
+            patternData.width,
+            patternData.height,
+          );
+          newPatternCache[card.id] = {
+            pattern: normalizedPattern,
+            dimensions: {
+              width: patternData.width,
+              height: patternData.height,
+            },
+          };
+        } catch (error) {
+          console.error("Error generating pattern for card:", card.id, error);
+        }
+      }
+
+      setPatternCache(newPatternCache);
+    };
+
+    generatePatterns();
+  }, [cards, grantCards]);
 
   useFocusEffect(() => {
     reloadCards();
@@ -178,19 +268,20 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-      <DraggableFlatList
+      <ReorderableList
         data={
           canceledCardsShown
             ? sortedCards
             : sortedCards.filter((c) => c.status == "active")
         }
         keyExtractor={(item) => item.id}
-        onDragBegin={() => {
+        onReorder={({ from, to }) => {
           Haptics.selectionAsync();
-        }}
-        onDragEnd={({ data }) => {
-          setSortedCards(data);
-          saveCardOrder(data);
+          const newCards = [...sortedCards];
+          const [removed] = newCards.splice(from, 1);
+          newCards.splice(to, 0, removed);
+          setSortedCards(newCards);
+          saveCardOrder(newCards);
         }}
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,
@@ -200,29 +291,14 @@ export default function CardsPage({ navigation }: Props) {
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         onRefresh={onRefresh}
         refreshing={refreshing}
-        renderItem={({
-          item,
-          drag,
-          isActive,
-        }: RenderItemParams<
-          (Card & Required<Pick<Card, "last4">>) | GrantCard
-        >) => (
-          <ScaleDecorator activeScale={0.95}>
-            <Pressable
-              onPress={() =>
-                navigation.navigate("Card", {
-                  card: item,
-                })
-              }
-              onLongPress={drag}
-              disabled={isActive}
-            >
-              <PaymentCard
-                card={item}
-                style={{ marginHorizontal: 20, marginVertical: 8 }}
-              />
-            </Pressable>
-          </ScaleDecorator>
+        renderItem={({ item }) => (
+          <CardItem
+            item={item}
+            isActive={false}
+            onPress={(card) => navigation.navigate("Card", { card })}
+            pattern={patternCache[item.id]?.pattern}
+            patternDimensions={patternCache[item.id]?.dimensions}
+          />
         )}
         ListFooterComponent={() =>
           sortedCards.length > 2 && (

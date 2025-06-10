@@ -11,11 +11,6 @@ export default {
     orientation: "portrait",
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
-    splash: {
-      image: "./assets/splash.png",
-      resizeMode: "cover",
-      backgroundColor: "#EC3750",
-    },
     assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: false,
@@ -112,6 +107,21 @@ export default {
           },
         },
       ],
+      [
+        "expo-splash-screen",
+        {
+          "ios": {
+            "backgroundColor": "#EC3750",
+            "image": "./assets/splash-ios.png",
+            "enableFullScreenImage_legacy": true,
+          },
+          "android": {
+            "backgroundColor": "#EC3750",
+            "image": "./assets/splash-android.png",
+            "resizeMode": "cover"
+          }
+        }
+      ]
     ],
   },
 };
