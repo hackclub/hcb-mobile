@@ -1,6 +1,5 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { generate } from "hcb-geo-pattern";
 import { useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -17,7 +16,7 @@ import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
-import { redactedCardNumber, renderCardNumber, normalizeSvg } from "../util";
+import { redactedCardNumber, renderCardNumber } from "../util";
 
 import CardChip from "./cards/CardChip";
 
@@ -25,6 +24,8 @@ export default function PaymentCard({
   card,
   details,
   onCardLoad,
+  pattern,
+  patternDimensions,
   ...props
 }: ViewProps & {
   card: Card;
@@ -33,13 +34,10 @@ export default function PaymentCard({
     cardId: string,
     dimensions: { width: number; height: number },
   ) => void;
+  pattern?: string;
+  patternDimensions?: { width: number; height: number };
 }) {
   const { colors: themeColors, dark } = useTheme();
-  const [svgWidth, setSvgWidth] = useState(500);
-  const [svgHeight, setSvgHeight] = useState(500);
-  const [patternForMeasurements, setPatternForMeasurements] = useState<
-    string | null
-  >(null);
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
@@ -47,39 +45,10 @@ export default function PaymentCard({
   const isCardDataValid = card && card.id;
 
   useEffect(() => {
-    const fetchCardPattern = async () => {
-      try {
-        if (!isCardDataValid) return;
-
-        const patternData = await generate({
-          input: card.id,
-          grayScale:
-            card.status !== "active" ? (card.status == "frozen" ? 0.23 : 1) : 0,
-        });
-        const normalizedPattern = normalizeSvg(
-          patternData.toSVG(),
-          patternData.width,
-          patternData.height,
-        );
-        setSvgHeight(patternData.height);
-        setSvgWidth(patternData.width);
-        setPatternForMeasurements(normalizedPattern);
-      } catch (error) {
-        console.error("Error generating card pattern:", error);
-      }
-    };
-    fetchCardPattern();
-  }, [card?.id, card?.status, isCardDataValid]);
-
-  if ((card as GrantCard)?.amount_cents) {
-    card.type = "virtual";
-  }
-
-  useEffect(() => {
-    if (onCardLoad && isCardDataValid) {
-      onCardLoad(card.id, { width: svgWidth, height: svgHeight });
+    if (onCardLoad && isCardDataValid && patternDimensions) {
+      onCardLoad(card.id, patternDimensions);
     }
-  }, [card?.id, onCardLoad, svgHeight, svgWidth, isCardDataValid]);
+  }, [card?.id, onCardLoad, patternDimensions, isCardDataValid]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -92,6 +61,10 @@ export default function PaymentCard({
 
     return () => subscription.remove();
   }, []);
+
+  if ((card as GrantCard)?.amount_cents) {
+    card.type = "virtual";
+  }
 
   if (!isCardDataValid) {
     return (
@@ -130,7 +103,7 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-      {card.type == "virtual" && patternForMeasurements && (
+      {card.type == "virtual" && pattern && (
         <View
           style={{
             position: "absolute",
@@ -140,7 +113,7 @@ export default function PaymentCard({
             height: (width * 0.86) / 1.5,
           }}
         >
-          <SvgXml xml={patternForMeasurements} width="100%" height="100%" />
+          <SvgXml xml={pattern} width="100%" height="100%" />
         </View>
       )}
 
