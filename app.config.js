@@ -110,18 +110,18 @@ export default {
       [
         "expo-splash-screen",
         {
-          "ios": {
-            "backgroundColor": "#EC3750",
-            "image": "./assets/splash-ios.png",
-            "enableFullScreenImage_legacy": true,
+          ios: {
+            backgroundColor: "#EC3750",
+            image: "./assets/splash-ios.png",
+            enableFullScreenImage_legacy: true,
           },
-          "android": {
-            "backgroundColor": "#EC3750",
-            "image": "./assets/splash-android.png",
-            "resizeMode": "cover"
-          }
-        }
-      ]
+          android: {
+            backgroundColor: "#EC3750",
+            image: "./assets/splash-android.png",
+            resizeMode: "cover",
+          },
+        },
+      ],
     ],
   },
 };

@@ -21,7 +21,6 @@ import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
 import { normalizeSvg } from "../util";
 
-
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
 type CardItemProps = {
