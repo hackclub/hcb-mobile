@@ -94,9 +94,10 @@ export default function SettingsPage({ navigation }: Props) {
     await AsyncStorage.multiRemove([
       THEME_KEY,
       "organizationOrder",
-      "frozenCardsShown",
+      "canceledCardsShown",
       "ttpDidOnboarding",
       "hasSeenTapToPayBanner",
+      "cardOrder",
     ]);
     cache.clear();
     setTokens(null);

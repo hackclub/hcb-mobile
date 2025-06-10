@@ -107,8 +107,7 @@ export default function AppContent({
   useEffect(() => {
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if (await process.env.EXPO_PUBLIC_APP_VARIANT === "development") {
-          console.log(process.env.EXPO_PUBLIC_APP_VARIANT);
+        if ((await process.env.EXPO_PUBLIC_APP_VARIANT) === "development") {
           // bypass auth for development
           setIsAuthenticated(true);
           setAppIsReady(true);
