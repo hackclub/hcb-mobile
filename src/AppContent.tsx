@@ -107,12 +107,15 @@ export default function AppContent({
   useEffect(() => {
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        const result = await LocalAuthentication.authenticateAsync();
-        setIsAuthenticated(result.success);
-        if (process.env.EXPO_PUBLIC_APP_VARIANT === "development") {
+        if (await process.env.EXPO_PUBLIC_APP_VARIANT === "development") {
+          console.log(process.env.EXPO_PUBLIC_APP_VARIANT);
           // bypass auth for development
           setIsAuthenticated(true);
+          setAppIsReady(true);
+          return;
         }
+        const result = await LocalAuthentication.authenticateAsync();
+        setIsAuthenticated(result.success);
       } else {
         setIsAuthenticated(true);
       }
