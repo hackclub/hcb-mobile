@@ -5,15 +5,10 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  useColorScheme,
-  View,
-} from "react-native";
+import { FlatList, Pressable, useColorScheme, View } from "react-native";
 import useSWR from "swr";
 
+import CardListSkeleton from "../components/CardListSkeleton";
 import PaymentCard from "../components/PaymentCard";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
@@ -174,7 +169,7 @@ export default function CardsPage({ navigation }: Props) {
   } else {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={palette.primary} />
+        <CardListSkeleton />
       </View>
     );
   }
