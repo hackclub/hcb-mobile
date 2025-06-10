@@ -4,8 +4,13 @@ import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, useColorScheme, View } from "react-native";
+import { Pressable, Text, useColorScheme, View } from "react-native";
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
 import useSWR from "swr";
 
 import CardListSkeleton from "../components/CardListSkeleton";
@@ -30,8 +35,10 @@ export default function CardsPage({ navigation }: Props) {
     reloadGrantCards();
   });
 
-  const [frozenCardsShown, setFrozenCardsShown] = useState(true);
+  const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [allCards, setAllCards] =
+    useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
+  const [sortedCards, setSortedCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [refreshing] = useState(false);
 
@@ -42,16 +49,16 @@ export default function CardsPage({ navigation }: Props) {
           actions={[
             {
               id: "showFrozenCards",
-              title: "Show inactive cards",
-              state: frozenCardsShown ? "on" : "off",
+              title: "Show canceled cards",
+              state: canceledCardsShown ? "on" : "off",
             },
           ]}
           onPressAction={({ nativeEvent: { event } }) => {
             if (event == "showFrozenCards") {
-              setFrozenCardsShown(!frozenCardsShown);
+              setCanceledCardsShown(!canceledCardsShown);
               AsyncStorage.setItem(
-                "frozenCardsShown",
-                (!frozenCardsShown).toString(),
+                "canceledCardsShown",
+                (!canceledCardsShown).toString(),
               );
             }
           }}
@@ -67,7 +74,7 @@ export default function CardsPage({ navigation }: Props) {
         </MenuView>
       ),
     });
-  }, [navigation, frozenCardsShown, scheme]);
+  }, [navigation, canceledCardsShown, scheme]);
 
   const combineCards = useCallback(() => {
     // Transform grantCards
@@ -75,7 +82,7 @@ export default function CardsPage({ navigation }: Props) {
       ?.map((grantCard) => ({
         ...grantCard,
         grant_id: grantCard.id, // Move original id to grant_id
-        id: grantCard.card_id, // Repl`ace id with card_id
+        id: grantCard.card_id, // Replace id with card_id
       }))
       .filter(
         (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet
@@ -111,12 +118,13 @@ export default function CardsPage({ navigation }: Props) {
 
   useEffect(() => {
     const fetchFrozenCardsShown = async () => {
-      const isFrozenCardsShown = await AsyncStorage.getItem("frozenCardsShown");
-      if (isFrozenCardsShown) {
-        setFrozenCardsShown(isFrozenCardsShown === "true");
+      const isCanceledCardsShown =
+        await AsyncStorage.getItem("canceledCardsShown");
+      if (isCanceledCardsShown) {
+        setCanceledCardsShown(isCanceledCardsShown === "true");
         await AsyncStorage.setItem(
-          "frozenCardsShown",
-          (isFrozenCardsShown === "true").toString(),
+          "canceledCardsShown",
+          (isCanceledCardsShown === "true").toString(),
         );
       }
     };
@@ -128,42 +136,108 @@ export default function CardsPage({ navigation }: Props) {
     }
   }, [cards, grantCards, combineCards]);
 
+  // Load and apply saved order when allCards changes
+  useEffect(() => {
+    const loadSavedOrder = async () => {
+      if (!allCards) return;
+
+      const savedOrder = await AsyncStorage.getItem("cardOrder");
+      if (savedOrder) {
+        const orderMap = JSON.parse(savedOrder);
+        const sorted = [...allCards].sort((a, b) => {
+          const orderA = orderMap[a.id] ?? Number.MAX_SAFE_INTEGER;
+          const orderB = orderMap[b.id] ?? Number.MAX_SAFE_INTEGER;
+          return orderA - orderB;
+        });
+        setSortedCards(sorted);
+      } else {
+        setSortedCards(allCards);
+      }
+    };
+
+    loadSavedOrder();
+  }, [allCards]);
+
   const onRefresh = async () => {
     await reloadCards();
     await reloadGrantCards();
   };
 
-  if (allCards) {
+  const saveCardOrder = async (
+    newOrder: ((Card & Required<Pick<Card, "last4">>) | GrantCard)[],
+  ) => {
+    const orderMap = newOrder.reduce(
+      (acc, card, index) => {
+        acc[card.id] = index;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+    await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
+  };
+
+  if (sortedCards) {
     return (
-      <FlatList
+      <DraggableFlatList
         data={
-          frozenCardsShown
-            ? allCards
-            : allCards.filter((c) => c.status == "active")
+          canceledCardsShown
+            ? sortedCards
+            : sortedCards.filter((c) => c.status == "active")
         }
+        keyExtractor={(item) => item.id}
+        onDragBegin={() => {
+          Haptics.selectionAsync();
+        }}
+        onDragEnd={({ data }) => {
+          setSortedCards(data);
+          saveCardOrder(data);
+        }}
         contentContainerStyle={{
           paddingBottom: tabBarHeight + 20,
           paddingTop: 20,
           alignItems: "center",
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        overScrollMode="never"
-        onRefresh={() => onRefresh()}
+        onRefresh={onRefresh}
         refreshing={refreshing}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() =>
-              navigation.navigate("Card", {
-                card: item,
-              })
-            }
-          >
-            <PaymentCard
-              card={item}
-              style={{ marginHorizontal: 20, marginVertical: 8 }}
-            />
-          </Pressable>
+        renderItem={({
+          item,
+          drag,
+          isActive,
+        }: RenderItemParams<
+          (Card & Required<Pick<Card, "last4">>) | GrantCard
+        >) => (
+          <ScaleDecorator activeScale={0.95}>
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Card", {
+                  card: item,
+                })
+              }
+              onLongPress={drag}
+              disabled={isActive}
+            >
+              <PaymentCard
+                card={item}
+                style={{ marginHorizontal: 20, marginVertical: 8 }}
+              />
+            </Pressable>
+          </ScaleDecorator>
         )}
+        ListFooterComponent={() =>
+          sortedCards.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder cards
+            </Text>
+          )
+        }
       />
     );
   } else {
