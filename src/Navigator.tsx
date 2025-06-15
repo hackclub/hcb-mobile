@@ -36,6 +36,7 @@ import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
 import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
+import GrantCardPage from "./pages/GrantCard";
 import { palette } from "./theme";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
@@ -214,9 +215,12 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={() => ({
-                title: "Card",
-              })}
+              options={() => ({ title: "Card" })}
+            />
+            <CardsStack.Screen
+              name="GrantCard"
+              component={GrantCardPage}
+              options={() => ({ title: "Card" })}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}

@@ -43,13 +43,35 @@ type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
 export default function CardPage({
   route: {
-    params: { card: _card },
+    params: { card: paramCard, cardId },
   },
   navigation,
 }: Props) {
+  const id = paramCard?.id ?? cardId!;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const isGrantCard = (_card as GrantCard).amount_cents != null;
+  const { data: fetchedCard, error: cardFetchError } = useSWR<Card>(
+    `cards/${id}`,
+    {
+      onError: (err) => {
+        console.error("Error fetching card:", err);
+        setCardError("Unable to load card details. Please try again later.");
+      },
+    }
+  );
+  if (!paramCard && !fetchedCard) {
+    return <ActivityIndicator color={themeColors.text} />;
+  }
+  const card = paramCard ?? fetchedCard!;
+
+  const {
+    details,
+    toggle: toggleDetailsRevealed,
+    revealed: detailsRevealed,
+    loading: detailsLoading,
+  } = useStripeCardDetails(id);
+
+  const isGrantCard = fetchedCard ? ((fetchedCard as GrantCard).amount_cents ?? null) !== null : false;
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -67,25 +89,7 @@ export default function CardPage({
     height: number;
   }>();
 
-  const {
-    details,
-    toggle: toggleDetailsRevealed,
-    revealed: detailsRevealed,
-    loading: detailsLoading,
-  } = useStripeCardDetails(_card.id);
-
-  const { data: card = _card, error: cardFetchError } = useSWR<Card>(
-    `cards/${_card.id}`,
-    {
-      fallbackData: _card,
-      onError: (err) => {
-        console.error("Error fetching card:", err);
-        setCardError("Unable to load card details. Please try again later.");
-      },
-    },
-  );
-
-  const [cardName, setCardName] = useState(_card.name);
+  const [cardName, setCardName] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,7 +100,7 @@ export default function CardPage({
   }, []);
 
   useEffect(() => {
-    if (cardFetchError && errorDisplayReady) {
+    if ((cardFetchError || !fetchedCard) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
@@ -104,47 +108,37 @@ export default function CardPage({
   }, [cardFetchError, errorDisplayReady]);
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, [fadeAnim]);
 
   useEffect(() => {
-    if (card?.name) {
+    if (card.name) {
       setCardName(card.name);
-    } else if (card?.user?.name) {
+    } else if (card.user?.name) {
       const nameParts = card.user.name.split(" ");
       const firstName = nameParts[0] || "";
       const lastInitial =
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
       setCardName(`${firstName} ${lastInitial}${lastInitial ? "'" : ""}s Card`);
-    } else {
-      setCardName("Card");
     }
   }, [card]);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: cardName,
-    });
+    navigation.setOptions({ title: cardName });
   }, [cardName, navigation, themeColors.text]);
 
   const {
     data: transactionsData,
     isLoading: transactionsLoading,
     error: transactionsError,
-  } = useSWR<{
-    data: ITransaction[];
-  }>(`cards/${_card.id}/transactions`);
+  } = useSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
 
   const transactions = transactionsData?.data || [];
 
   useEffect(() => {
     if (transactionsError && errorDisplayReady) {
       setTransactionError(
-        "Unable to load transaction history. Pull down to retry.",
+        "Unable to load transaction history. Pull down to retry."
       );
     } else if (!transactionsError) {
       setTransactionError(null);
@@ -158,23 +152,22 @@ export default function CardPage({
     setIsUpdatingStatus(false);
 
     const updatedCard = {
-      ..._card,
       ...card,
       status: updatedStatus,
     };
 
-    mutate(`cards/${_card.id}`, updatedCard, false);
+    mutate(`cards/${card.id}`, updatedCard, false);
 
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
         list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
-      false,
+      false
     );
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    mutate(`cards/${_card.id}`);
+    mutate(`cards/${card.id}`);
     mutate("user/cards");
   };
 
@@ -201,7 +194,7 @@ export default function CardPage({
         Alert.alert(
           "Error",
           "Failed to update card status. Please try again later.",
-          [{ text: "OK" }],
+          [{ text: "OK" }]
         );
       });
   };
@@ -209,8 +202,8 @@ export default function CardPage({
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await mutate(`cards/${_card.id}`);
-      await mutate(`cards/${_card.id}/transactions`);
+      await mutate(`cards/${card.id}`);
+      await mutate(`cards/${id}/transactions`);
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
@@ -218,7 +211,7 @@ export default function CardPage({
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, _card.id]);
+  }, [mutate, card.id, id]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -236,7 +229,7 @@ export default function CardPage({
           duration: 1000,
           useNativeDriver: false,
         }),
-      ]),
+      ])
     ).start();
   }, [skeletonAnim]);
 
@@ -250,7 +243,7 @@ export default function CardPage({
   const createSkeletonStyle = (
     width: number,
     height: number,
-    extraStyles = {},
+    extraStyles = {}
   ) => ({
     width,
     height,
@@ -322,7 +315,7 @@ export default function CardPage({
         const normalizedPattern = normalizeSvg(
           patternData.toSVG(),
           patternData.width,
-          patternData.height,
+          patternData.height
         );
         setPattern(normalizedPattern);
         setPatternDimensions({
@@ -532,11 +525,11 @@ export default function CardPage({
                       color: themeColors.text,
                     }}
                   >
-                    {_card?.status == "expired" || _card?.status == "canceled"
+                    {card?.status == "expired" || card?.status == "canceled"
                       ? "$0"
                       : renderMoney(
-                          (_card as GrantCard).amount_cents -
-                            (card?.total_spent_cents ?? 0),
+                          (card as GrantCard).amount_cents -
+                            (card?.total_spent_cents ?? 0)
                         )}
                   </Text>
                 </View>
@@ -593,7 +586,8 @@ export default function CardPage({
                     )}
                   </>
                 )}
-                {_card.type == "virtual" && _card.status != "canceled" && (
+                {/* @ts-ignore */}
+                {card.type == "virtual" && card.status != ("canceled" as any) && (
                   <Button
                     style={{
                       flexBasis: 0,
@@ -952,7 +946,7 @@ export default function CardPage({
                       navigation.navigate("Transaction", {
                         orgId:
                           card?.organization?.id ||
-                          _card?.organization?.id ||
+                          paramCard?.organization?.id ||
                           "",
                         transaction,
                         transactionId: transaction.id,
@@ -976,7 +970,7 @@ export default function CardPage({
                       bottom={index == transactions.length - 1}
                       hideAvatar
                       orgId={
-                        card?.organization?.id || _card?.organization?.id || ""
+                        card?.organization?.id || paramCard?.organization?.id || ""
                       }
                     />
                   </TouchableOpacity>
