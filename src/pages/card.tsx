@@ -1,7 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -30,6 +33,7 @@ import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
+import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import {
@@ -39,30 +43,34 @@ import {
   renderMoney,
 } from "../util";
 
-type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
+type CardPageProps = {
+  cardId?: string;
+  grantId?: string;
+  card?: Card;
+  navigation: NativeStackNavigationProp<CardsStackParamList>;
+};
 
-export default function CardPage({
-  route: {
-    params: { card: paramCard, cardId },
-  },
-  navigation,
-}: Props) {
-  const id = paramCard?.id ?? cardId!;
+export default function CardPage(
+  props: CardPageProps | NativeStackScreenProps<CardsStackParamList, "Card">,
+) {
+  const cardId = "route" in props ? props.route.params.cardId : props.cardId;
+  const _card = "route" in props ? props.route.params.card : props.card;
+  const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const { data: fetchedCard, error: cardFetchError } = useSWR<Card>(
-    `cards/${id}`,
-    {
-      onError: (err) => {
-        console.error("Error fetching card:", err);
-        setCardError("Unable to load card details. Please try again later.");
-      },
-    }
+  const grantId = (props as CardPageProps)?.grantId;
+
+  const { data: grantCard = _card as GrantCard } = useSWR<GrantCard>(
+    grantId ? `card_grants/${grantId}` : null,
   );
-  if (!paramCard && !fetchedCard) {
-    return <ActivityIndicator color={themeColors.text} />;
-  }
-  const card = paramCard ?? fetchedCard!;
+  const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
+  const { data: card, error: cardFetchError } = useSWR<Card>(`cards/${id}`, {
+    onError: (err) => {
+      console.error("Error fetching card:", err);
+      setCardError("Unable to load card details. Please try again later.");
+    },
+  });
+  const { data: user } = useSWR<User>(`user`);
 
   const {
     details,
@@ -71,7 +79,10 @@ export default function CardPage({
     loading: detailsLoading,
   } = useStripeCardDetails(id);
 
-  const isGrantCard = fetchedCard ? ((fetchedCard as GrantCard).amount_cents ?? null) !== null : false;
+  const isGrantCard =
+    (_card as GrantCard)?.amount_cents != null ||
+    (props as CardPageProps)?.grantId != null;
+  const isCardholder = user?.id == card?.user?.id;
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -100,7 +111,7 @@ export default function CardPage({
   }, []);
 
   useEffect(() => {
-    if ((cardFetchError || !fetchedCard) && errorDisplayReady) {
+    if ((cardFetchError || !card) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
@@ -108,18 +119,26 @@ export default function CardPage({
   }, [cardFetchError, errorDisplayReady]);
 
   useEffect(() => {
-    Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   }, [fadeAnim]);
 
   useEffect(() => {
-    if (card.name) {
+    if (card?.name) {
       setCardName(card.name);
-    } else if (card.user?.name) {
-      const nameParts = card.user.name.split(" ");
+    } else if (card?.user?.name) {
+      const nameParts = card?.user?.name.split(" ");
       const firstName = nameParts[0] || "";
       const lastInitial =
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
-      setCardName(`${firstName} ${lastInitial}${lastInitial ? "'" : ""}s Card`);
+      setCardName(
+        lastInitial
+          ? `${firstName} ${lastInitial}'s Card`
+          : `${firstName}'s Card`,
+      );
     }
   }, [card]);
 
@@ -138,7 +157,7 @@ export default function CardPage({
   useEffect(() => {
     if (transactionsError && errorDisplayReady) {
       setTransactionError(
-        "Unable to load transaction history. Pull down to retry."
+        "Unable to load transaction history. Pull down to retry.",
       );
     } else if (!transactionsError) {
       setTransactionError(null);
@@ -156,18 +175,18 @@ export default function CardPage({
       status: updatedStatus,
     };
 
-    mutate(`cards/${card.id}`, updatedCard, false);
+    mutate(`cards/${card?.id}`, updatedCard, false);
 
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
         list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
-      false
+      false,
     );
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    mutate(`cards/${card.id}`);
+    mutate(`cards/${card?.id}`);
     mutate("user/cards");
   };
 
@@ -194,7 +213,7 @@ export default function CardPage({
         Alert.alert(
           "Error",
           "Failed to update card status. Please try again later.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       });
   };
@@ -202,7 +221,7 @@ export default function CardPage({
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await mutate(`cards/${card.id}`);
+      await mutate(`cards/${card?.id}`);
       await mutate(`cards/${id}/transactions`);
       setCardError(null);
       setTransactionError(null);
@@ -211,7 +230,7 @@ export default function CardPage({
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card.id, id]);
+  }, [mutate, card?.id, id]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -229,7 +248,7 @@ export default function CardPage({
           duration: 1000,
           useNativeDriver: false,
         }),
-      ])
+      ]),
     ).start();
   }, [skeletonAnim]);
 
@@ -243,7 +262,7 @@ export default function CardPage({
   const createSkeletonStyle = (
     width: number,
     height: number,
-    extraStyles = {}
+    extraStyles = {},
   ) => ({
     width,
     height,
@@ -275,7 +294,7 @@ export default function CardPage({
 
     setActivating(true);
     try {
-      const response = await hcb.patch(`cards/${card.id}`, {
+      const response = await hcb.patch(`cards/${card?.id}`, {
         json: { status: "active", last4 },
       });
 
@@ -315,7 +334,7 @@ export default function CardPage({
         const normalizedPattern = normalizeSvg(
           patternData.toSVG(),
           patternData.width,
-          patternData.height
+          patternData.height,
         );
         setPattern(normalizedPattern);
         setPatternDimensions({
@@ -335,7 +354,7 @@ export default function CardPage({
   }
 
   const renderCardStatus = () => {
-    if (card.status === "active") {
+    if (card?.status === "active") {
       return (
         <View
           style={{
@@ -363,7 +382,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "frozen") {
+    } else if (card?.status === "frozen") {
       return (
         <View
           style={{
@@ -391,7 +410,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "canceled") {
+    } else if (card?.status === "canceled") {
       return (
         <View
           style={{
@@ -419,7 +438,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "expired") {
+    } else if (card?.status === "expired") {
       return (
         <View
           style={{
@@ -499,7 +518,7 @@ export default function CardPage({
             >
               <PaymentCard
                 details={details}
-                card={card}
+                card={card as Card}
                 onCardLoad={() => setCardLoaded(true)}
                 style={{ marginBottom: 10 }}
                 pattern={pattern}
@@ -528,15 +547,15 @@ export default function CardPage({
                     {card?.status == "expired" || card?.status == "canceled"
                       ? "$0"
                       : renderMoney(
-                          (card as GrantCard).amount_cents -
-                            (card?.total_spent_cents ?? 0)
+                          grantCard?.amount_cents -
+                            (card?.total_spent_cents ?? 0),
                         )}
                   </Text>
                 </View>
               )}
             </TouchableOpacity>
 
-            {card.status != "canceled" && (
+            {card?.status != "canceled" && (
               <View
                 style={{
                   flexDirection: "row",
@@ -545,9 +564,10 @@ export default function CardPage({
                   gap: 20,
                 }}
               >
-                {card.status !== "expired" && !isGrantCard && (
+                {card?.status !== "expired" && !isGrantCard && (
                   <>
-                    {card.type === "physical" && card.status === "inactive" ? (
+                    {card?.type === "physical" &&
+                    card?.status === "inactive" ? (
                       <Button
                         style={{
                           flexBasis: 0,
@@ -579,31 +599,32 @@ export default function CardPage({
                         onPress={() => toggleCardFrozen()}
                         loading={isUpdatingStatus}
                       >
-                        {card.status == "active"
+                        {card?.status == "active"
                           ? "Freeze card"
                           : "Defrost card"}
                       </Button>
                     )}
                   </>
                 )}
-                {/* @ts-ignore */}
-                {card.type == "virtual" && card.status != ("canceled" as any) && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      borderRadius: 12,
-                      backgroundColor: palette.primary,
-                    }}
-                    color="white"
-                    iconColor="white"
-                    icon={detailsRevealed ? "private-fill" : "view"}
-                    onPress={toggleCardDetails}
-                    loading={detailsLoading}
-                  >
-                    {detailsRevealed ? "Hide details" : "Reveal details"}
-                  </Button>
-                )}
+                {card?.type == "virtual" &&
+                  (card?.status as Card["status"]) !== "canceled" &&
+                  isCardholder && (
+                    <Button
+                      style={{
+                        flexBasis: 0,
+                        flexGrow: 1,
+                        borderRadius: 12,
+                        backgroundColor: palette.primary,
+                      }}
+                      color="white"
+                      iconColor="white"
+                      icon={detailsRevealed ? "private-fill" : "view"}
+                      onPress={toggleCardDetails}
+                      loading={detailsLoading}
+                    >
+                      {detailsRevealed ? "Hide details" : "Reveal details"}
+                    </Button>
+                  )}
               </View>
             )}
 
@@ -656,7 +677,7 @@ export default function CardPage({
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -697,7 +718,7 @@ export default function CardPage({
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -740,7 +761,7 @@ export default function CardPage({
                     >
                       {detailsRevealed && details
                         ? renderCardNumber(details.number)
-                        : redactedCardNumber(card?.last4)}
+                        : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
                     </Text>
                   )}
                 </View>
@@ -841,7 +862,7 @@ export default function CardPage({
               >
                 Transaction History
               </Text>
-              {card.total_spent_cents != null && (
+              {card?.total_spent_cents != null && (
                 <View style={{ alignItems: "flex-end" }}>
                   <Text
                     style={{
@@ -859,7 +880,7 @@ export default function CardPage({
                       color: themeColors.text,
                     }}
                   >
-                    {renderMoney(card.total_spent_cents)}
+                    {renderMoney(card?.total_spent_cents)}
                   </Text>
                 </View>
               )}
@@ -945,9 +966,7 @@ export default function CardPage({
                     onPress={() => {
                       navigation.navigate("Transaction", {
                         orgId:
-                          card?.organization?.id ||
-                          paramCard?.organization?.id ||
-                          "",
+                          card?.organization?.id || _card?.organization?.id,
                         transaction,
                         transactionId: transaction.id,
                       });
@@ -970,7 +989,7 @@ export default function CardPage({
                       bottom={index == transactions.length - 1}
                       hideAvatar
                       orgId={
-                        card?.organization?.id || paramCard?.organization?.id || ""
+                        card?.organization?.id || _card?.organization?.id || ""
                       }
                     />
                   </TouchableOpacity>

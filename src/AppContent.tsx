@@ -17,7 +17,7 @@ import { SWRConfig } from "swr";
 
 import AuthContext from "./auth";
 import { CacheProvider } from "./cacheProvider";
-import { getStateFromPath as customGetStateFromPath } from "./getStateFromPath";
+import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
 import { TabParamList } from "./lib/NavigatorParamList";
 import { useOffline } from "./lib/useOffline";
@@ -147,8 +147,6 @@ export default function AppContent({
   const linking: LinkingOptions<TabParamList> = useMemo(
     () => ({
       prefixes: [
-        "hcb://",
-        "exp+hcb-mobile://",
         Linking.createURL("/"),
         "https://bank.hackclub.com",
         "https://hcb.hackclub.com",
@@ -196,7 +194,7 @@ export default function AppContent({
           Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
           return undefined;
         }
-        return customGetStateFromPath(path, options);
+        return getStateFromPath(path, options);
       },
       getInitialURL: async () => {
         if (isUniversalLinkingEnabled === null) {

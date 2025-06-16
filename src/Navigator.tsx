@@ -20,6 +20,7 @@ import Invitation from "./lib/types/Invitation";
 import { useIsDark } from "./lib/useColorScheme";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
+import GrantCardPage from "./pages/GrantCard";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
@@ -36,7 +37,6 @@ import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
 import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
-import GrantCardPage from "./pages/GrantCard";
 import { palette } from "./theme";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
