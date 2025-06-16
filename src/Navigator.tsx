@@ -20,6 +20,7 @@ import Invitation from "./lib/types/Invitation";
 import { useIsDark } from "./lib/useColorScheme";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
+import GrantCardPage from "./pages/GrantCard";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
@@ -214,9 +215,12 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={() => ({
-                title: "Card",
-              })}
+              options={() => ({ title: "Card" })}
+            />
+            <CardsStack.Screen
+              name="GrantCard"
+              component={GrantCardPage}
+              options={() => ({ title: "Card" })}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}

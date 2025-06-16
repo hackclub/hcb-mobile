@@ -137,13 +137,13 @@ export default function CardsPage({ navigation }: Props) {
         <MenuView
           actions={[
             {
-              id: "showFrozenCards",
+              id: "showCanceledCards",
               title: "Show canceled cards",
               state: canceledCardsShown ? "on" : "off",
             },
           ]}
           onPressAction={({ nativeEvent: { event } }) => {
-            if (event == "showFrozenCards") {
+            if (event == "showCanceledCards") {
               setCanceledCardsShown(!canceledCardsShown);
               AsyncStorage.setItem(
                 "canceledCardsShown",
@@ -206,7 +206,7 @@ export default function CardsPage({ navigation }: Props) {
   }, [cards, grantCards]);
 
   useEffect(() => {
-    const fetchFrozenCardsShown = async () => {
+    const fetchCanceledCardsShown = async () => {
       const isCanceledCardsShown =
         await AsyncStorage.getItem("canceledCardsShown");
       if (isCanceledCardsShown) {
@@ -218,7 +218,7 @@ export default function CardsPage({ navigation }: Props) {
       }
     };
 
-    fetchFrozenCardsShown();
+    fetchCanceledCardsShown();
 
     if (cards && grantCards) {
       combineCards();
@@ -271,7 +271,9 @@ export default function CardsPage({ navigation }: Props) {
         data={
           canceledCardsShown
             ? sortedCards
-            : sortedCards.filter((c) => c.status == "active")
+            : sortedCards.filter(
+                (c) => c.status != "canceled" && c.status != "expired",
+              )
         }
         keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {

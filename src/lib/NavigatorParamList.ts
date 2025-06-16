@@ -30,7 +30,8 @@ export type StackParamList = {
 
 export type CardsStackParamList = {
   CardList: undefined;
-  Card: { card: Card };
+  Card: { card?: Card; cardId?: string };
+  GrantCard: { grantId: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];

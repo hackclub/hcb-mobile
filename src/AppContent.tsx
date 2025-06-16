@@ -172,6 +172,14 @@ export default function AppContent({
             initialRouteName: "CardList",
             screens: {
               CardList: "my/cards",
+              Card: {
+                path: "stripe_cards/:cardId",
+                parse: { cardId: (id: string) => id },
+              },
+              GrantCard: {
+                path: "grants/:grantId",
+                parse: { grantId: (id: string) => id },
+              },
             },
           },
           Receipts: "my/inbox",
