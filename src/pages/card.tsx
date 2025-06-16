@@ -1,7 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -30,6 +33,7 @@ import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import ITransaction from "../lib/types/Transaction";
+import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import {
@@ -39,17 +43,46 @@ import {
   renderMoney,
 } from "../util";
 
-type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
+type CardPageProps = {
+  cardId?: string;
+  grantId?: string;
+  card?: Card;
+  navigation: NativeStackNavigationProp<CardsStackParamList>;
+};
 
-export default function CardPage({
-  route: {
-    params: { card: _card },
-  },
-  navigation,
-}: Props) {
+export default function CardPage(
+  props: CardPageProps | NativeStackScreenProps<CardsStackParamList, "Card">,
+) {
+  const cardId = "route" in props ? props.route.params.cardId : props.cardId;
+  const _card = "route" in props ? props.route.params.card : props.card;
+  const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const isGrantCard = (_card as GrantCard).amount_cents != null;
+  const grantId = (props as CardPageProps)?.grantId;
+
+  const { data: grantCard = _card as GrantCard } = useSWR<GrantCard>(
+    grantId ? `card_grants/${grantId}` : null,
+  );
+  const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
+  const { data: card, error: cardFetchError } = useSWR<Card>(`cards/${id}`, {
+    onError: (err) => {
+      console.error("Error fetching card:", err);
+      setCardError("Unable to load card details. Please try again later.");
+    },
+  });
+  const { data: user } = useSWR<User>(`user`);
+
+  const {
+    details,
+    toggle: toggleDetailsRevealed,
+    revealed: detailsRevealed,
+    loading: detailsLoading,
+  } = useStripeCardDetails(id);
+
+  const isGrantCard =
+    (_card as GrantCard)?.amount_cents != null ||
+    (props as CardPageProps)?.grantId != null;
+  const isCardholder = user?.id == card?.user?.id;
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -67,25 +100,7 @@ export default function CardPage({
     height: number;
   }>();
 
-  const {
-    details,
-    toggle: toggleDetailsRevealed,
-    revealed: detailsRevealed,
-    loading: detailsLoading,
-  } = useStripeCardDetails(_card.id);
-
-  const { data: card = _card, error: cardFetchError } = useSWR<Card>(
-    `cards/${_card.id}`,
-    {
-      fallbackData: _card,
-      onError: (err) => {
-        console.error("Error fetching card:", err);
-        setCardError("Unable to load card details. Please try again later.");
-      },
-    },
-  );
-
-  const [cardName, setCardName] = useState(_card.name);
+  const [cardName, setCardName] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,7 +111,7 @@ export default function CardPage({
   }, []);
 
   useEffect(() => {
-    if (cardFetchError && errorDisplayReady) {
+    if ((cardFetchError || !card) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
@@ -115,29 +130,27 @@ export default function CardPage({
     if (card?.name) {
       setCardName(card.name);
     } else if (card?.user?.name) {
-      const nameParts = card.user.name.split(" ");
+      const nameParts = card?.user?.name.split(" ");
       const firstName = nameParts[0] || "";
       const lastInitial =
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
-      setCardName(`${firstName} ${lastInitial}${lastInitial ? "'" : ""}s Card`);
-    } else {
-      setCardName("Card");
+      setCardName(
+        lastInitial
+          ? `${firstName} ${lastInitial}'s Card`
+          : `${firstName}'s Card`,
+      );
     }
   }, [card]);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: cardName,
-    });
+    navigation.setOptions({ title: cardName });
   }, [cardName, navigation, themeColors.text]);
 
   const {
     data: transactionsData,
     isLoading: transactionsLoading,
     error: transactionsError,
-  } = useSWR<{
-    data: ITransaction[];
-  }>(`cards/${_card.id}/transactions`);
+  } = useSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
 
   const transactions = transactionsData?.data || [];
 
@@ -158,12 +171,11 @@ export default function CardPage({
     setIsUpdatingStatus(false);
 
     const updatedCard = {
-      ..._card,
       ...card,
       status: updatedStatus,
     };
 
-    mutate(`cards/${_card.id}`, updatedCard, false);
+    mutate(`cards/${card?.id}`, updatedCard, false);
 
     mutate(
       "user/cards",
@@ -174,7 +186,7 @@ export default function CardPage({
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    mutate(`cards/${_card.id}`);
+    mutate(`cards/${card?.id}`);
     mutate("user/cards");
   };
 
@@ -209,8 +221,8 @@ export default function CardPage({
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await mutate(`cards/${_card.id}`);
-      await mutate(`cards/${_card.id}/transactions`);
+      await mutate(`cards/${card?.id}`);
+      await mutate(`cards/${id}/transactions`);
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
@@ -218,7 +230,7 @@ export default function CardPage({
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, _card.id]);
+  }, [mutate, card?.id, id]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -282,7 +294,7 @@ export default function CardPage({
 
     setActivating(true);
     try {
-      const response = await hcb.patch(`cards/${card.id}`, {
+      const response = await hcb.patch(`cards/${card?.id}`, {
         json: { status: "active", last4 },
       });
 
@@ -342,7 +354,7 @@ export default function CardPage({
   }
 
   const renderCardStatus = () => {
-    if (card.status === "active") {
+    if (card?.status === "active") {
       return (
         <View
           style={{
@@ -370,7 +382,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "frozen") {
+    } else if (card?.status === "frozen") {
       return (
         <View
           style={{
@@ -398,7 +410,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "canceled") {
+    } else if (card?.status === "canceled") {
       return (
         <View
           style={{
@@ -426,7 +438,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "expired") {
+    } else if (card?.status === "expired") {
       return (
         <View
           style={{
@@ -506,7 +518,7 @@ export default function CardPage({
             >
               <PaymentCard
                 details={details}
-                card={card}
+                card={card as Card}
                 onCardLoad={() => setCardLoaded(true)}
                 style={{ marginBottom: 10 }}
                 pattern={pattern}
@@ -532,10 +544,10 @@ export default function CardPage({
                       color: themeColors.text,
                     }}
                   >
-                    {_card?.status == "expired" || _card?.status == "canceled"
+                    {card?.status == "expired" || card?.status == "canceled"
                       ? "$0"
                       : renderMoney(
-                          (_card as GrantCard).amount_cents -
+                          grantCard?.amount_cents -
                             (card?.total_spent_cents ?? 0),
                         )}
                   </Text>
@@ -543,7 +555,7 @@ export default function CardPage({
               )}
             </TouchableOpacity>
 
-            {card.status != "canceled" && (
+            {card?.status != "canceled" && (
               <View
                 style={{
                   flexDirection: "row",
@@ -552,9 +564,10 @@ export default function CardPage({
                   gap: 20,
                 }}
               >
-                {card.status !== "expired" && !isGrantCard && (
+                {card?.status !== "expired" && !isGrantCard && (
                   <>
-                    {card.type === "physical" && card.status === "inactive" ? (
+                    {card?.type === "physical" &&
+                    card?.status === "inactive" ? (
                       <Button
                         style={{
                           flexBasis: 0,
@@ -586,30 +599,32 @@ export default function CardPage({
                         onPress={() => toggleCardFrozen()}
                         loading={isUpdatingStatus}
                       >
-                        {card.status == "active"
+                        {card?.status == "active"
                           ? "Freeze card"
                           : "Defrost card"}
                       </Button>
                     )}
                   </>
                 )}
-                {_card.type == "virtual" && _card.status != "canceled" && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      borderRadius: 12,
-                      backgroundColor: palette.primary,
-                    }}
-                    color="white"
-                    iconColor="white"
-                    icon={detailsRevealed ? "private-fill" : "view"}
-                    onPress={toggleCardDetails}
-                    loading={detailsLoading}
-                  >
-                    {detailsRevealed ? "Hide details" : "Reveal details"}
-                  </Button>
-                )}
+                {card?.type == "virtual" &&
+                  (card?.status as Card["status"]) !== "canceled" &&
+                  isCardholder && (
+                    <Button
+                      style={{
+                        flexBasis: 0,
+                        flexGrow: 1,
+                        borderRadius: 12,
+                        backgroundColor: palette.primary,
+                      }}
+                      color="white"
+                      iconColor="white"
+                      icon={detailsRevealed ? "private-fill" : "view"}
+                      onPress={toggleCardDetails}
+                      loading={detailsLoading}
+                    >
+                      {detailsRevealed ? "Hide details" : "Reveal details"}
+                    </Button>
+                  )}
               </View>
             )}
 
@@ -662,7 +677,7 @@ export default function CardPage({
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -703,7 +718,7 @@ export default function CardPage({
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -746,7 +761,7 @@ export default function CardPage({
                     >
                       {detailsRevealed && details
                         ? renderCardNumber(details.number)
-                        : redactedCardNumber(card?.last4)}
+                        : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
                     </Text>
                   )}
                 </View>
@@ -847,7 +862,7 @@ export default function CardPage({
               >
                 Transaction History
               </Text>
-              {card.total_spent_cents != null && (
+              {card?.total_spent_cents != null && (
                 <View style={{ alignItems: "flex-end" }}>
                   <Text
                     style={{
@@ -865,7 +880,7 @@ export default function CardPage({
                       color: themeColors.text,
                     }}
                   >
-                    {renderMoney(card.total_spent_cents)}
+                    {renderMoney(card?.total_spent_cents)}
                   </Text>
                 </View>
               )}
@@ -951,9 +966,7 @@ export default function CardPage({
                     onPress={() => {
                       navigation.navigate("Transaction", {
                         orgId:
-                          card?.organization?.id ||
-                          _card?.organization?.id ||
-                          "",
+                          card?.organization?.id || _card?.organization?.id,
                         transaction,
                         transactionId: transaction.id,
                       });
