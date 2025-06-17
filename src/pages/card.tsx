@@ -32,7 +32,6 @@ import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
-import { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
@@ -81,7 +80,7 @@ export default function CardPage(
   } = useStripeCardDetails(id);
 
   const isGrantCard =
-    (_card as GrantCard)?.amount_cents != null ||
+    grantCard?.amount_cents != null ||
     (props as CardPageProps)?.grantId != null;
   const isCardholder = user?.id == card?.user?.id;
   const [refreshing, setRefreshing] = useState(false);
@@ -100,7 +99,6 @@ export default function CardPage(
     width: number;
     height: number;
   }>();
-  const [isOrgManager, setIsOrgManager] = useState(false);
 
   const [cardName, setCardName] = useState("");
 
@@ -294,8 +292,8 @@ export default function CardPage(
       return;
     }
     Alert.alert(
-      `${isOrgManager ? "Cancel and return" : "Return"} ${renderMoney(
-        (_card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0),
+      `${!isCardholder ? "Cancel and return" : "Return"} ${renderMoney(
+        grantCard.amount_cents - (card?.total_spent_cents ?? 0),
       )} to ${card.organization.name}?`,
       "Caution, returning this grant will render it unusable.",
       [
@@ -310,7 +308,7 @@ export default function CardPage(
             try {
               setisReturningGrant(true);
               await hcb.post(
-                `card_grants/${(_card as GrantCard).grant_id}/cancel`,
+                `card_grants/${grantCard.grant_id}/cancel`,
               );
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success,
@@ -395,26 +393,6 @@ export default function CardPage(
 
     generateCardPattern();
   }, [card]);
-
-  const { data: organization } = useSWR<OrganizationExpanded>(
-    isGrantCard && card?.status !== "canceled" && card?.organization?.id
-      ? `organizations/${card.organization.id}`
-      : null,
-  );
-  useEffect(() => {
-    if (isGrantCard && card?.status !== "canceled" && organization?.users) {
-      const matchingOrgUser = organization.users.find(
-        (orgUser) => orgUser.id === card?.user.id,
-      );
-      if (matchingOrgUser) {
-        setIsOrgManager(matchingOrgUser.role === "manager");
-      } else {
-        setIsOrgManager(false);
-      }
-    } else {
-      setIsOrgManager(false);
-    }
-  }, [isGrantCard, organization, card]);
 
   if (!card && !cardLoaded && !cardError) {
     return <CardSkeleton />;
@@ -631,7 +609,7 @@ export default function CardPage(
                   gap: 20,
                 }}
               >
-                {card?.status !== "expired" && !isGrantCard && (
+                {card?.status !== "expired" && (!isGrantCard || !isCardholder) && (
                   <>
                     {card?.type === "physical" &&
                     card?.status === "inactive" ? (
@@ -698,17 +676,17 @@ export default function CardPage(
                     style={{
                       flexBasis: 0,
                       flexGrow: 1,
-                      backgroundColor: isOrgManager ? "#db1530" : "#3097ed",
+                      backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
                       borderTopWidth: 0,
                       borderRadius: 12,
                     }}
                     color="white"
                     iconColor="white"
-                    icon={isOrgManager ? "reply" : "support"}
+                    icon={!isCardholder ? "reply" : "support"}
                     onPress={returnGrant}
-                    loading={detailsLoading || isReturningGrant}
+                    loading={isReturningGrant}
                   >
-                    {isOrgManager ? "Cancel Grant" : "Return Grant"}
+                    {!isCardholder ? "Cancel Grant" : "Return Grant"}
                   </Button>
                 )}
               </View>
