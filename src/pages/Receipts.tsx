@@ -1,10 +1,8 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { formatDistanceToNow } from "date-fns";
-import * as ImagePicker from "expo-image-picker";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,10 +12,9 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 
-import AuthContext from "../auth";
+import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import { TransactionCardCharge } from "../lib/types/Transaction";
@@ -32,109 +29,23 @@ function Transaction({
   transaction: TransactionCardCharge & { organization: Organization };
   onComplete: () => void;
 }) {
-  const { tokens } = useContext(AuthContext);
-
   const { colors: themeColors } = useTheme();
-
   const [loading, setLoading] = useState(false);
 
-  const { showActionSheetWithOptions } = useActionSheet();
-  const uploadReceipt = async (
-    selectedImage: {
-      uri: string;
-      fileName?: string;
-    } | null,
-  ) => {
-    const body = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-
-    body.append("file", {
-      uri: selectedImage?.uri,
-      name: selectedImage?.fileName || "skibidi.jpg",
-      type: "image/jpeg",
-    });
-
-    try {
-      await fetch(
-        process.env.EXPO_PUBLIC_API_BASE +
-          `/organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${tokens?.accessToken}`,
-          },
-          body,
-        },
-      );
-      mutate(
-        `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
-      );
+  const { handleActionSheet, isOnline } = useReceiptActionSheet({
+    orgId: transaction.organization.id,
+    transactionId: transaction.id,
+    onUploadComplete: () => {
       setLoading(false);
       onComplete();
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: "Reciept Uploaded!",
-        textBody: "Your reciept has been uploaded successfully.",
-      });
-    } catch (e) {
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Error",
-        textBody: "An error occurred while uploading the reciept.",
-      });
-      setLoading(false);
-    }
-  };
-
-  const handleActionSheet = () => {
-    const options = ["Camera", "Photo Library", "Cancel"];
-    const cancelButtonIndex = 2;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      async (buttonIndex) => {
-        if (buttonIndex === 0) {
-          // Take a photo
-          ImagePicker.requestCameraPermissionsAsync();
-          const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: "images",
-            allowsEditing: true,
-            quality: 1,
-          });
-          if (!result.canceled) {
-            setLoading(true);
-            await uploadReceipt({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || undefined,
-            });
-          }
-        } else if (buttonIndex === 1) {
-          // Pick from photo library
-          ImagePicker.requestMediaLibraryPermissionsAsync();
-          const result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            quality: 1,
-          });
-          if (!result.canceled) {
-            setLoading(true);
-            await uploadReceipt({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || undefined,
-            });
-          }
-        }
-      },
-    );
-  };
+    },
+  });
 
   return (
     <TouchableHighlight
       underlayColor={themeColors.background}
       onPress={handleActionSheet}
+      disabled={!isOnline}
     >
       <View
         style={{
