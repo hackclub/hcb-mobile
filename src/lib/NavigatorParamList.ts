@@ -30,7 +30,8 @@ export type StackParamList = {
 
 export type CardsStackParamList = {
   CardList: undefined;
-  Card: { card: Card };
+  Card: { card?: Card; cardId?: string };
+  GrantCard: { grantId: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
@@ -48,4 +49,12 @@ export type TabParamList = {
   Cards: NavigatorScreenParams<CardsStackParamList>;
   Receipts: undefined;
   Settings: undefined;
+};
+
+export type SettingsStackParamList = {
+  SettingsMain: undefined;
+  AppIconSelector: undefined;
+  DeepLinkingSettings: undefined;
+  Tutorials: undefined;
+  About: undefined;
 };

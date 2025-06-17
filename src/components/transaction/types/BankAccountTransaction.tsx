@@ -2,6 +2,7 @@ import { Text, View } from "react-native";
 
 import { palette } from "../../../theme";
 import { renderDate, renderMoney } from "../../../util";
+import ReceiptList from "../ReceiptList";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 
@@ -33,6 +34,7 @@ export default function BankAccountTransaction({
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />
+      <ReceiptList transaction={transaction} />
     </View>
   );
 }

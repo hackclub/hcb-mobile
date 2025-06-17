@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Icon from "@thedev132/hackclub-icons-rn";
 import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
@@ -19,12 +19,14 @@ import {
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
-// import OrganizationTitle from "../../components/organizations/OrganizationTitle";
 import Button from "../../components/Button";
 import MockTransaction, {
   MockTransactionType,
 } from "../../components/MockTransaction";
+import { EmptyState } from "../../components/organizations/EmptyState";
+import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
+// import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
@@ -77,12 +79,18 @@ export default function OrganizationPage({
   navigation,
 }: Props) {
   const scheme = useColorScheme();
-  const { data: organization, isLoading: organizationLoading } = useSWR<
-    Organization | OrganizationExpanded
-  >(`organizations/${orgId}`, { fallbackData: _organization });
+  const {
+    data: organization,
+    error: organizationError,
+    isLoading: organizationLoading,
+  } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
+    fallbackData: _organization,
+  });
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
+  // const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
+
   const {
     transactions: _transactions,
     isLoadingMore,
@@ -91,6 +99,35 @@ export default function OrganizationPage({
   } = useTransactions(orgId);
   const [refreshing] = useState(false);
   const { isOnline } = useOffline();
+
+  useEffect(() => {
+    if (organizationError || !organization) {
+      navigation.setOptions({
+        title: "Access Denied",
+      });
+    }
+  }, [organizationError, organization, navigation]);
+
+  // useEffect(() => {
+  //   const checkTapToPayBanner = async () => {
+  //     const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+  //     if (!hasSeenBanner && Platform.OS === "ios") {
+  //       const [major, minor] = (Device.osVersion ?? "0.0")
+  //         .split(".")
+  //         .map(Number);
+  //       // iOS 16.4 and later
+  //       if (major > 16 || (major === 16 && minor >= 4)) {
+  //         setShowTapToPayBanner(true);
+  //       }
+  //     }
+  //   };
+  //   checkTapToPayBanner();
+  // }, []);
+
+  // const handleDismissTapToPayBanner = async () => {
+  //   await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
+  //   setShowTapToPayBanner(false);
+  // };
 
   useEffect(() => {
     if (organization && user) {
@@ -143,13 +180,13 @@ export default function OrganizationPage({
           //     10,
           //   );
           //   // iPhone XS starts at iPhone11,2 (Commented out for now)
-          // //   if (modelNumber >= 11) {
-          // //     menuActions.push({
-          // //       id: "donation",
-          // //       title: "Collect Donations",
-          // //       image: "dollarsign.circle",
-          // //     });
-          // //   }
+          //   if (modelNumber >= 11) {
+          //     menuActions.push({
+          //       id: "donation",
+          //       title: "Collect Donations",
+          //       image: "dollarsign.circle",
+          //     });
+          //   }
           // }
           if (Platform.OS === "android") {
             menuActions.push({
@@ -259,34 +296,117 @@ export default function OrganizationPage({
   };
 
   if (organizationLoading || userLoading) {
-    return <ActivityIndicator />;
+    return <LoadingSkeleton />;
+  }
+
+  if (organizationError || !organization) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 20,
+            padding: 32,
+            width: "100%",
+            maxWidth: 400,
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+        >
+          <View
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              backgroundColor: `${palette.primary}15`,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 32,
+            }}
+          >
+            <Ionicons name="lock-closed" size={48} color={palette.primary} />
+          </View>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 28,
+              fontWeight: "700",
+              marginBottom: 16,
+              textAlign: "center",
+              letterSpacing: -0.5,
+            }}
+          >
+            Access Denied
+          </Text>
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 17,
+              lineHeight: 24,
+              textAlign: "center",
+              marginBottom: 32,
+              paddingHorizontal: 8,
+            }}
+          >
+            You don't have permission to view this organization. Please contact
+            the organization's manager for access.
+          </Text>
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: themeColors.primary,
+              borderRadius: 12,
+              height: 50,
+            }}
+            color="#fff"
+            onPress={() => navigation.goBack()}
+          >
+            Go Back
+          </Button>
+        </View>
+      </View>
+    );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "center",
-      }}
-    >
+    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
       {organization !== undefined ? (
         <SectionList
-          initialNumToRender={30}
+          initialNumToRender={20}
           ListFooterComponent={() =>
-            isLoadingMore &&
-            !isLoading &&
-            !organization.playground_mode && (
-              <ActivityIndicator style={{ marginTop: 20 }} />
-            )
+            isLoadingMore && !isLoading && !organization.playground_mode ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="small" color={themeColors.primary} />
+              </View>
+            ) : null
           }
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.2}
           onEndReached={() => loadMore()}
           refreshing={refreshing}
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
+              {/* {showTapToPayBanner && (
+                <TapToPayBanner
+                  onDismiss={handleDismissTapToPayBanner}
+                  orgId={orgId}
+                />
+              )} */}
               {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{
@@ -328,55 +448,9 @@ export default function OrganizationPage({
                 )}
               </View>
 
-              {isLoading && <ActivityIndicator />}
+              {isLoading && <LoadingSkeleton />}
               {!isLoading && sections.length === 0 && !showMockData && (
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  {!isOnline ? (
-                    <>
-                      <Ionicons
-                        name="cloud-offline"
-                        size={24}
-                        color={palette.muted}
-                        style={{ alignSelf: "center" }}
-                      />
-                      <Text
-                        style={{
-                          textAlign: "center",
-                          color: palette.muted,
-                          fontSize: 16,
-                        }}
-                      >
-                        Offline
-                      </Text>
-                    </>
-                  ) : (
-                    <>
-                      <Icon
-                        glyph="sad"
-                        color={palette.muted}
-                        size={24}
-                        style={{ alignSelf: "center" }}
-                      />
-                      <Text
-                        style={{
-                          textAlign: "center",
-                          color: palette.muted,
-                          fontSize: 16,
-                        }}
-                      >
-                        No Transactions
-                      </Text>
-                    </>
-                  )}
-                </View>
+                <EmptyState isOnline={isOnline} />
               )}
             </View>
           )}
@@ -444,7 +518,7 @@ export default function OrganizationPage({
           }
         />
       ) : (
-        <ActivityIndicator />
+        <LoadingSkeleton />
       )}
     </View>
   );

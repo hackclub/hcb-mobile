@@ -1,19 +1,15 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import {
-  ActivityIndicator,
-  ScrollView,
-  View,
-  Text,
-  Linking,
-} from "react-native";
-import useSWR from "swr";
+import { useState } from "react";
+import { ScrollView, View, Text, Linking, RefreshControl } from "react-native";
+import useSWR, { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
+import TransactionSkeleton from "../components/transaction/TransactionSkeleton";
 import AchTransferTransaction from "../components/transaction/types/AchTransferTransaction";
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
 import BankFeeTransaction from "../components/transaction/types/BankFeeTransaction";
@@ -38,7 +34,9 @@ export default function TransactionPage({
   },
   navigation,
 }: Props) {
-  const { data: transaction } = useSWR<
+  const [refreshing, setRefreshing] = useState(false);
+  const { mutate: globalMutate } = useSWRConfig();
+  const { data: transaction, isLoading } = useSWR<
     Transaction & { organization?: Organization }
   >(
     orgId
@@ -55,12 +53,45 @@ export default function TransactionPage({
 
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
-  if (!transaction) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator />
-      </View>
-    );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        mutate(
+          orgId
+            ? `organizations/${orgId}/transactions/${transactionId}`
+            : `transactions/${transactionId}`,
+          undefined,
+          { revalidate: true },
+        ),
+        mutate(
+          `organizations/${
+            orgId || transaction!.organization!.id
+          }/transactions/${transactionId}/comments`,
+          undefined,
+          { revalidate: true },
+        ),
+        mutate(
+          `organizations/${
+            orgId || transaction!.organization!.id
+          }/transactions/${transactionId}/receipts`,
+          undefined,
+          { revalidate: true },
+        ),
+        globalMutate(
+          (key) =>
+            typeof key === "string" &&
+            key.startsWith(`organizations/${orgId}/transactions`),
+        ),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (!transaction || isLoading) {
+    return <TransactionSkeleton />;
   }
 
   const transactionViewProps: Omit<TransactionViewProps, "transaction"> = {
@@ -72,6 +103,9 @@ export default function TransactionPage({
     <ScrollView
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <AdminTools
         style={{ marginBottom: 20 }}

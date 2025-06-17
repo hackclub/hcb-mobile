@@ -1,5 +1,5 @@
 import appIcons from "./src/lib/AppIconList";
-const IS_DEV = process.env.APP_VARIANT === "development";
+const IS_DEV = process.env.EXPO_PUBLIC_APP_VARIANT === "development";
 
 export default {
   expo: {
@@ -11,11 +11,6 @@ export default {
     orientation: "portrait",
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
-    splash: {
-      image: "./assets/splash.png",
-      resizeMode: "contain",
-      backgroundColor: "#EC3750",
-    },
     assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: false,
@@ -101,6 +96,30 @@ export default {
           organization: "hcb-mobile",
           project: "hcb-mobile",
           url: "https://sentry.io/",
+        },
+      ],
+      [
+        "react-native-edge-to-edge",
+        {
+          android: {
+            parentTheme: "Default",
+            enforceNavigationBarContrast: false,
+          },
+        },
+      ],
+      [
+        "expo-splash-screen",
+        {
+          ios: {
+            backgroundColor: "#EC3750",
+            image: "./assets/splash-ios.png",
+            enableFullScreenImage_legacy: true,
+          },
+          android: {
+            backgroundColor: "#EC3750",
+            image: "./assets/splash-android.png",
+            resizeMode: "cover",
+          },
         },
       ],
     ],

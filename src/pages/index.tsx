@@ -2,12 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackScreenProps,
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import {
-  FlatList,
   Text,
   View,
   ActivityIndicator,
@@ -15,20 +17,23 @@ import {
   ViewProps,
   StyleSheet,
   useColorScheme,
-  ScrollView,
   RefreshControl,
 } from "react-native";
+import ReorderableList, {
+  useReorderableDrag,
+} from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import Transaction from "../components/Transaction";
 import { StackParamList } from "../lib/NavigatorParamList";
-import usePinnedOrgs from "../lib/organization/usePinnedOrgs";
+import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
+import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
-import { orgColor, renderMoney } from "../util";
+import { orgColor, organizationOrderEqual, renderMoney } from "../util";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -61,19 +66,19 @@ function Event({
   event,
   hideBalance = false,
   onPress,
-  onHold,
+  drag,
+  isActive,
   style,
   invitation,
   showTransactions = false,
-  pinned = false,
 }: ViewProps & {
   event: Organization;
   hideBalance?: boolean;
   showTransactions?: boolean;
-  pinned?: boolean;
   invitation?: Invitation;
   onPress?: () => void;
-  onHold?: () => void;
+  isActive?: boolean;
+  drag?: () => void;
 }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
@@ -83,46 +88,33 @@ function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  const scheme = useColorScheme();
 
   const color = orgColor(event.id);
-
+  const isDark = useIsDark();
   return (
     <TouchableHighlight
       onPress={onPress}
-      onLongPress={onHold}
-      underlayColor={themeColors.background}
-      activeOpacity={0.7}
+      onLongPress={drag}
+      disabled={isActive}
+      underlayColor={isActive ? "transparent" : themeColors.background}
+      activeOpacity={isActive ? 1 : 0.7}
     >
       <View
         style={StyleSheet.compose(
           {
             backgroundColor: themeColors.card,
-            marginBottom: 16,
             borderRadius: 10,
           },
           style,
         )}
       >
-        {pinned && (
-          <Text
-            style={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              fontSize: 20,
-            }}
-          >
-            📌
-          </Text>
-        )}
         <View
           style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
         >
           {event.icon ? (
             <Image
               source={{ uri: event.icon }}
-              cachePolicy="disk"
+              cachePolicy="memory-disk"
               style={{
                 width: 40,
                 height: 40,
@@ -168,7 +160,7 @@ function Event({
             {data?.playground_mode && (
               <View
                 style={{
-                  backgroundColor: scheme == "dark" ? "#283140" : "#348EDA",
+                  backgroundColor: isDark ? "#283140" : "#348EDA",
                   paddingVertical: 4,
                   paddingHorizontal: 12,
                   borderRadius: 20,
@@ -178,7 +170,7 @@ function Event({
               >
                 <Text
                   style={{
-                    color: scheme == "dark" ? "#248EDA" : "white",
+                    color: isDark ? "#248EDA" : "white",
                     fontSize: 12,
                     fontWeight: "bold",
                   }}
@@ -236,6 +228,8 @@ function Event({
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
+// Helper function to compare org arrays by id
+
 export default function App({ navigation }: Props) {
   const lastErrorTime = useRef<number>(0);
   const ERROR_DEBOUNCE_MS = 5000;
@@ -287,7 +281,7 @@ export default function App({ navigation }: Props) {
     },
   });
 
-  const [sortedOrgs, togglePinnedOrg] = usePinnedOrgs(organizations || []);
+  const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
   const { data: invitations, mutate: reloadInvitations } = useSWR<Invitation[]>(
     isOnline ? "user/invitations" : null,
     {
@@ -359,6 +353,34 @@ export default function App({ navigation }: Props) {
     }
   });
 
+  const EventItem = memo(
+    ({
+      organization,
+      navigation,
+    }: {
+      organization: Organization;
+      navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
+    }) => {
+      const drag = useReorderableDrag();
+      return (
+        <Event
+          event={organization}
+          drag={drag}
+          isActive={false}
+          showTransactions={organizations ? organizations.length <= 2 : false}
+          onPress={() =>
+            navigation.navigate("Event", {
+              orgId: organization.id,
+              organization,
+            })
+          }
+        />
+      );
+    },
+  );
+
+  EventItem.displayName = "EventItem";
+
   // Show cached data even if there's an error
   if (error && !organizations?.length) {
     return (
@@ -394,122 +416,100 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, flexGrow: 1 }}
+    <ReorderableList
+      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+      onReorder={({ from, to }) => {
+        Haptics.selectionAsync();
+        const newOrgs = [...sortedOrgs];
+        const [removed] = newOrgs.splice(from, 1);
+        newOrgs.splice(to, 0, removed);
+        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+          setSortedOrgs(newOrgs);
+        }
+      }}
+      scrollIndicatorInsets={{ bottom: tabBarHeight }}
+      contentContainerStyle={{
+        padding: 20,
+        paddingBottom: tabBarHeight,
+      }}
       contentInsetAdjustmentBehavior="automatic"
+      data={sortedOrgs}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-    >
-      {organizations && (
-        <FlatList
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: tabBarHeight,
-          }}
-          contentInsetAdjustmentBehavior="automatic"
-          data={sortedOrgs}
-          style={{ flex: 1 }}
-          // refreshing={isValidating}
-          // onRefresh={() => {
-          //   mutate(
-          //     (key: string) =>
-          //       key?.startsWith("/organizations/") ||
-          //       key == "/user/organizations",
-          //   );
-          // }}
-          ListHeaderComponent={() =>
-            invitations &&
-            invitations.length > 0 && (
-              <View
-                style={{
-                  marginTop: 10,
-                  marginBottom: 20,
-                  borderRadius: 10,
-                }}
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                  }}
-                >
-                  Pending invitations
-                </Text>
-                {invitations.map((invitation) => (
-                  <Event
-                    key={invitation.id}
-                    invitation={invitation}
-                    style={{
-                      borderWidth: 2,
-                      borderColor:
-                        scheme == "dark" ? palette.primary : palette.muted,
-                    }}
-                    event={invitation.organization}
-                    onPress={() =>
-                      navigation.navigate("Invitation", {
-                        inviteId: invitation.id,
-                        invitation,
-                      })
-                    }
-                    hideBalance
-                  />
-                  // <TouchableHighlight key={invitation.id}>
-                  //   <Text
-                  //     style={{
-                  //       color: palette.smoke,
-                  //       backgroundColor: palette.darkless,
-                  //       padding: 10,
-                  //       borderRadius: 10,
-                  //       overflow: "hidden",
-                  //     }}
-                  //   >
-                  //     {invitation.organization.name}
-                  //   </Text>
-                  // </TouchableHighlight>
-                ))}
-              </View>
-            )
-          }
-          renderItem={({ item: organization }) => (
-            <Event
-              event={organization}
-              showTransactions={
-                organizations.length <= 2 || organization.pinned
-              }
-              pinned={organization.pinned}
-              onPress={() =>
-                navigation.navigate("Event", {
-                  orgId: organization.id,
-                  organization,
-                })
-              }
-              onHold={() => {
-                Haptics.notificationAsync(
-                  Haptics.NotificationFeedbackType.Success,
-                );
-                togglePinnedOrg(organization.id);
+      ListHeaderComponent={() =>
+        invitations &&
+        invitations.length > 0 && (
+          <View
+            style={{
+              marginTop: 10,
+              marginBottom: 20,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              style={{
+                color: palette.muted,
+                fontSize: 12,
+                textTransform: "uppercase",
+                marginBottom: 10,
               }}
-            />
-          )}
-          ListFooterComponent={() =>
-            organizations.length > 2 && (
-              <Text
+            >
+              Pending invitations
+            </Text>
+            {invitations.map((invitation) => (
+              <Event
+                key={invitation.id}
+                invitation={invitation}
                 style={{
-                  color: palette.muted,
-                  textAlign: "center",
-                  marginTop: 10,
+                  borderWidth: 2,
+                  borderColor:
+                    scheme == "dark" ? palette.primary : palette.muted,
                 }}
-              >
-                Tap and hold to pin an organization
-              </Text>
-            )
-          }
-        />
+                event={invitation.organization}
+                onPress={() =>
+                  navigation.navigate("Invitation", {
+                    inviteId: invitation.id,
+                    invitation,
+                  })
+                }
+                hideBalance
+              />
+              // <TouchableHighlight key={invitation.id}>
+              //   <Text
+              //     style={{
+              //       color: palette.smoke,
+              //       backgroundColor: palette.darkless,
+              //       padding: 10,
+              //       borderRadius: 10,
+              //       overflow: "hidden",
+              //     }}
+              //   >
+              //     {invitation.organization.name}
+              //   </Text>
+              // </TouchableHighlight>
+            ))}
+          </View>
+        )
+      }
+      renderItem={({ item: organization }) => (
+        <EventItem organization={organization} navigation={navigation} />
       )}
-    </ScrollView>
+      ListFooterComponent={() =>
+        organizations.length > 2 && (
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+          >
+            Drag to reorder organizations
+          </Text>
+        )
+      }
+      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+    />
   );
 }

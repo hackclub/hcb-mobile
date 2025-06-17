@@ -1,5 +1,6 @@
 import words from "lodash/words";
 
+import Organization from "./lib/types/Organization";
 import { palette } from "./theme";
 
 export function renderMoney(cents: number) {
@@ -67,3 +68,11 @@ export const normalizeSvg = (
     `<svg preserveAspectRatio="xMinYMin slice" viewBox="0 0 ${width / scaleFactor} ${height / scaleFactor}"`,
   );
 };
+
+export function organizationOrderEqual(a: Organization[], b: Organization[]) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i].id !== b[i].id) return false;
+  }
+  return true;
+}

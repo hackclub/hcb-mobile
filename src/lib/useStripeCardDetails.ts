@@ -1,4 +1,3 @@
-import * as LocalAuthentication from "expo-local-authentication";
 import ky from "ky";
 import { useEffect, useState } from "react";
 
@@ -64,16 +63,6 @@ export default function useStripeCardDetails(cardId: string) {
     details,
     revealed,
     loading,
-    toggle: async () => {
-      if (revealed) {
-        setRevealed(false);
-      } else {
-        const result = await LocalAuthentication.authenticateAsync();
-
-        if (result.success) {
-          setRevealed(true);
-        }
-      }
-    },
+    toggle: () => setRevealed(!revealed),
   };
 }

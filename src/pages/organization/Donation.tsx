@@ -9,24 +9,25 @@ import {
   StripeTerminalProvider,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import ExpoTtpEdu from "expo-ttp-edu";
 import { useEffect, useRef, useState } from "react";
 import {
+  Platform,
   ActivityIndicator,
   Linking,
   Text,
   View,
   Alert,
   TextInput,
-  useColorScheme,
-  Platform,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
 
+const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
+
 import Button from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
+import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
 import { palette } from "../../theme";
 
@@ -48,7 +49,7 @@ export default function OrganizationDonationPage({
   navigation,
 }: Props) {
   const { fetcher } = useSWRConfig();
-  const scheme = useColorScheme();
+  const isDark = useIsDark();
   const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
 
   const fetchTokenProvider = async () => {
@@ -64,7 +65,7 @@ export default function OrganizationDonationPage({
       if (didOnboarding !== "true") {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         ExpoTtpEdu.showTapToPayEducation({
-          uiMode: scheme === "dark" ? "dark" : "light",
+          uiMode: isDark ? "dark" : "light",
         });
         await AsyncStorage.setItem("ttpDidOnboarding", "true");
       }
@@ -73,7 +74,7 @@ export default function OrganizationDonationPage({
     if (Platform.OS === "ios") {
       getDidOnboarding();
     }
-  }, []);
+  }, [isDark]);
 
   return (
     <StripeTerminalProvider

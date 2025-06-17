@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   ScrollView,
@@ -13,10 +17,13 @@ import {
   RefreshControl,
   Animated,
   Alert,
+  Modal,
+  TextInput,
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import Button from "../components/Button";
+import CardSkeleton from "../components/CardSkeleton";
 import Divider from "../components/Divider";
 import PaymentCard from "../components/PaymentCard";
 import Transaction from "../components/Transaction";
@@ -25,23 +32,58 @@ import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
+import { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
+import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
-import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
-import { OrganizationExpanded } from "../lib/types/Organization";
+import {
+  normalizeSvg,
+  redactedCardNumber,
+  renderCardNumber,
+  renderMoney,
+} from "../util";
 
-type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
+type CardPageProps = {
+  cardId?: string;
+  grantId?: string;
+  card?: Card;
+  navigation: NativeStackNavigationProp<CardsStackParamList>;
+};
 
-export default function CardPage({
-  route: {
-    params: { card: _card },
-  },
-  navigation,
-}: Props) {
+export default function CardPage(
+  props: CardPageProps | NativeStackScreenProps<CardsStackParamList, "Card">,
+) {
+  const cardId = "route" in props ? props.route.params.cardId : props.cardId;
+  const _card = "route" in props ? props.route.params.card : props.card;
+  const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const isGrantCard = (_card as GrantCard).amount_cents != null;
+  const grantId = (props as CardPageProps)?.grantId;
+
+  const { data: grantCard = _card as GrantCard } = useSWR<GrantCard>(
+    grantId ? `card_grants/${grantId}` : null,
+  );
+  const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
+  const { data: card, error: cardFetchError } = useSWR<Card>(`cards/${id}`, {
+    onError: (err) => {
+      console.error("Error fetching card:", err);
+      setCardError("Unable to load card details. Please try again later.");
+    },
+  });
+  const { data: user } = useSWR<User>(`user`);
+
+  const {
+    details,
+    toggle: toggleDetailsRevealed,
+    revealed: detailsRevealed,
+    loading: detailsLoading,
+  } = useStripeCardDetails(id);
+
+  const isGrantCard =
+    (_card as GrantCard)?.amount_cents != null ||
+    (props as CardPageProps)?.grantId != null;
+  const isCardholder = user?.id == card?.user?.id;
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -50,26 +92,17 @@ export default function CardPage({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
+  const [last4, setLast4] = useState("");
+  const [activating, setActivating] = useState(false);
+  const [pattern, setPattern] = useState<string>();
+  const [patternDimensions, setPatternDimensions] = useState<{
+    width: number;
+    height: number;
+  }>();
+  const [isOrgManager, setIsOrgManager] = useState(false);
 
-  const {
-    details,
-    toggle: toggleDetailsRevealed,
-    revealed: detailsRevealed,
-    loading: detailsLoading,
-  } = useStripeCardDetails(_card.id);
-
-  const { data: card = _card, error: cardFetchError } = useSWR<Card>(
-    `cards/${_card.id}`,
-    {
-      fallbackData: _card,
-      onError: (err) => {
-        console.error("Error fetching card:", err);
-        setCardError("Unable to load card details. Please try again later.");
-      },
-    },
-  );
-
-  const [cardName, setCardName] = useState(_card.name);
+  const [cardName, setCardName] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,7 +113,7 @@ export default function CardPage({
   }, []);
 
   useEffect(() => {
-    if (cardFetchError && errorDisplayReady) {
+    if ((cardFetchError || !card) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
@@ -99,29 +132,27 @@ export default function CardPage({
     if (card?.name) {
       setCardName(card.name);
     } else if (card?.user?.name) {
-      const nameParts = card.user.name.split(" ");
+      const nameParts = card?.user?.name.split(" ");
       const firstName = nameParts[0] || "";
       const lastInitial =
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
-      setCardName(`${firstName} ${lastInitial}${lastInitial ? "'" : ""}s Card`);
-    } else {
-      setCardName("Card");
+      setCardName(
+        lastInitial
+          ? `${firstName} ${lastInitial}'s Card`
+          : `${firstName}'s Card`,
+      );
     }
   }, [card]);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: cardName,
-    });
+    navigation.setOptions({ title: cardName });
   }, [cardName, navigation, themeColors.text]);
 
   const {
     data: transactionsData,
     isLoading: transactionsLoading,
     error: transactionsError,
-  } = useSWR<{
-    data: ITransaction[];
-  }>(`cards/${_card.id}/transactions`);
+  } = useSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
 
   const transactions = transactionsData?.data || [];
 
@@ -142,12 +173,11 @@ export default function CardPage({
     setIsUpdatingStatus(false);
 
     const updatedCard = {
-      ..._card,
       ...card,
       status: updatedStatus,
     };
 
-    mutate(`cards/${_card.id}`, updatedCard, false);
+    mutate(`cards/${card?.id}`, updatedCard, false);
 
     mutate(
       "user/cards",
@@ -158,7 +188,7 @@ export default function CardPage({
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    mutate(`cards/${_card.id}`);
+    mutate(`cards/${card?.id}`);
     mutate("user/cards");
   };
 
@@ -193,8 +223,8 @@ export default function CardPage({
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await mutate(`cards/${_card.id}`);
-      await mutate(`cards/${_card.id}/transactions`);
+      await mutate(`cards/${card?.id}`);
+      await mutate(`cards/${id}/transactions`);
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
@@ -202,7 +232,7 @@ export default function CardPage({
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, _card.id]);
+  }, [mutate, card?.id, id]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -264,7 +294,7 @@ export default function CardPage({
       return;
     }
     Alert.alert(
-      `Return ${renderMoney(
+      `${isOrgManager ? "Cancel and return" : "Return"} ${renderMoney(
         (_card as GrantCard).amount_cents - (card?.total_spent_cents ?? 0),
       )} to ${card.organization.name}?`,
       "Caution, returning this grant will render it unusable.",
@@ -303,218 +333,95 @@ export default function CardPage({
       ],
     );
   };
+  const handleActivate = async () => {
+    if (!last4 || last4.length !== 4) {
+      Alert.alert("Error", "Please enter the last 4 digits of your card");
+      return;
+    }
+
+    setActivating(true);
+    try {
+      const response = await hcb.patch(`cards/${card?.id}`, {
+        json: { status: "active", last4 },
+      });
+
+      if (response.ok) {
+        onSuccessfulStatusChange("active");
+        setShowActivateModal(false);
+        setLast4("");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        const data = (await response.json()) as { error?: string };
+        Alert.alert("Error", data.error || "Failed to activate card");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (err) {
+      console.error("Error activating card:", err);
+      Alert.alert("Error", "Failed to activate card. Please try again later.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setActivating(false);
+    }
+  };
+
+  useEffect(() => {
+    const generateCardPattern = async () => {
+      if (!card || card.type !== "virtual") return;
+
+      try {
+        const patternData = await generate({
+          input: card.id,
+          grayScale:
+            card.status !== "active"
+              ? card.status === "frozen"
+                ? 0.23
+                : 1
+              : 0,
+        });
+        const normalizedPattern = normalizeSvg(
+          patternData.toSVG(),
+          patternData.width,
+          patternData.height,
+        );
+        setPattern(normalizedPattern);
+        setPatternDimensions({
+          width: patternData.width,
+          height: patternData.height,
+        });
+      } catch (error) {
+        console.error("Error generating pattern for card:", card.id, error);
+      }
+    };
+
+    generateCardPattern();
+  }, [card]);
+
+  const { data: organization } = useSWR<OrganizationExpanded>(
+    isGrantCard && card?.status !== "canceled" && card?.organization?.id
+      ? `organizations/${card.organization.id}`
+      : null,
+  );
+  useEffect(() => {
+    if (isGrantCard && card?.status !== "canceled" && organization?.users) {
+      const matchingOrgUser = organization.users.find(
+        (orgUser) => orgUser.id === card?.user.id,
+      );
+      if (matchingOrgUser) {
+        setIsOrgManager(matchingOrgUser.role === "manager");
+      } else {
+        setIsOrgManager(false);
+      }
+    } else {
+      setIsOrgManager(false);
+    }
+  }, [isGrantCard, organization, card]);
 
   if (!card && !cardLoaded && !cardError) {
-    return (
-      <View style={{ flex: 1, padding: 20 }}>
-        {/* Card preview skeleton */}
-        <Animated.View
-          style={{
-            height: 200,
-            borderRadius: 16,
-            marginBottom: 20,
-            backgroundColor: skeletonBackground,
-            overflow: "hidden",
-          }}
-        >
-          <View
-            style={{
-              position: "absolute",
-              bottom: 20,
-              left: 20,
-              width: "70%",
-            }}
-          >
-            <Animated.View
-              style={createSkeletonStyle(120, 16, { marginBottom: 10 })}
-            />
-            <Animated.View style={createSkeletonStyle(180, 26)} />
-          </View>
-        </Animated.View>
-
-        <View
-          style={{
-            marginBottom: 24,
-            padding: 20,
-            borderRadius: 15,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.07,
-            shadowRadius: 8,
-            elevation: 4,
-            backgroundColor: themeColors.card,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Animated.View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: skeletonBackground,
-                marginRight: 16,
-              }}
-            />
-            <View>
-              <Animated.View
-                style={createSkeletonStyle(140, 20, { marginBottom: 8 })}
-              />
-              <Animated.View style={createSkeletonStyle(90, 14)} />
-            </View>
-          </View>
-
-          <Divider />
-
-          <View style={{ marginTop: 16, gap: 16 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: themeColors.text,
-                }}
-              >
-                Card number
-              </Text>
-              <Animated.View style={createSkeletonStyle(140, 22)} />
-            </View>
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: themeColors.text,
-                }}
-              >
-                Expires
-              </Text>
-              <Animated.View style={createSkeletonStyle(70, 22)} />
-            </View>
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: themeColors.text,
-                }}
-              >
-                CVC
-              </Text>
-              <Animated.View style={createSkeletonStyle(50, 22)} />
-            </View>
-          </View>
-        </View>
-
-        <View
-          style={{
-            marginBottom: 28,
-            flexDirection: "row",
-            justifyContent: "center",
-            gap: 16,
-          }}
-        >
-          <Animated.View
-            style={{
-              flexBasis: 0,
-              flexGrow: 1,
-              height: 50,
-              backgroundColor: skeletonBackground,
-              borderRadius: 12,
-            }}
-          />
-          <Animated.View
-            style={{
-              flexBasis: 0,
-              flexGrow: 1,
-              height: 50,
-              backgroundColor: skeletonBackground,
-              borderRadius: 12,
-            }}
-          />
-        </View>
-
-        <View style={{ marginBottom: 20 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <Animated.View style={createSkeletonStyle(160, 22)} />
-            <Animated.View style={createSkeletonStyle(80, 22)} />
-          </View>
-
-          <View style={{ gap: 12 }}>
-            {[1, 2, 3].map((_, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                  padding: 16,
-                  borderRadius: 12,
-                }}
-              >
-                <Animated.View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: skeletonBackground,
-                    marginRight: 16,
-                  }}
-                />
-                <View style={{ flex: 1 }}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Animated.View style={createSkeletonStyle(120, 16)} />
-                    <Animated.View style={createSkeletonStyle(70, 16)} />
-                  </View>
-                  <Animated.View style={createSkeletonStyle(100, 12)} />
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      </View>
-    );
+    return <CardSkeleton />;
   }
 
   const renderCardStatus = () => {
-    if (card.status === "active") {
+    if (card?.status === "active") {
       return (
         <View
           style={{
@@ -542,7 +449,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "frozen") {
+    } else if (card?.status === "frozen") {
       return (
         <View
           style={{
@@ -570,7 +477,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "canceled") {
+    } else if (card?.status === "canceled") {
       return (
         <View
           style={{
@@ -598,7 +505,7 @@ export default function CardPage({
           </Text>
         </View>
       );
-    } else if (card.status === "expired") {
+    } else if (card?.status === "expired") {
       return (
         <View
           style={{
@@ -629,32 +536,6 @@ export default function CardPage({
     }
     return null;
   };
-
-  const [hasOrgAttributes, setHasOrgAttributes] = useState(false);
-  const { data: organization } = useSWR<OrganizationExpanded>(
-  isGrantCard && card.status !== "canceled" && card?.organization?.id
-    ? `organizations/${card.organization.id}`
-    : null
-);
-useEffect(() => {
-  if (
-    isGrantCard &&
-    card.status !== "canceled" &&
-    organization?.users
-  ) {
-    console.log('og: ' + organization)
-    const matchingOrgUser = organization.users.find(
-      (orgUser) => orgUser.id === card.user.id
-    );
-    if (matchingOrgUser) {
-      setHasOrgAttributes(matchingOrgUser.role === "manager");
-    } else {
-      setHasOrgAttributes(false);
-    }
-  } else {
-    setHasOrgAttributes(false);
-  }
-}, [isGrantCard]);
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -704,9 +585,11 @@ useEffect(() => {
             >
               <PaymentCard
                 details={details}
-                card={card}
+                card={card as Card}
                 onCardLoad={() => setCardLoaded(true)}
                 style={{ marginBottom: 10 }}
+                pattern={pattern}
+                patternDimensions={patternDimensions}
               />
 
               {isGrantCard && (
@@ -728,10 +611,10 @@ useEffect(() => {
                       color: themeColors.text,
                     }}
                   >
-                    {_card?.status == "expired" || _card?.status == "canceled"
+                    {card?.status == "expired" || card?.status == "canceled"
                       ? "$0"
                       : renderMoney(
-                          (_card as GrantCard).amount_cents -
+                          grantCard?.amount_cents -
                             (card?.total_spent_cents ?? 0),
                         )}
                   </Text>
@@ -739,7 +622,7 @@ useEffect(() => {
               )}
             </TouchableOpacity>
 
-            {card.status != "canceled" && (
+            {card?.status != "canceled" && (
               <View
                 style={{
                   flexDirection: "row",
@@ -748,58 +631,84 @@ useEffect(() => {
                   gap: 20,
                 }}
               >
-                {card.status !== "expired" && !isGrantCard && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      backgroundColor: "#71C5E7",
-                      borderTopWidth: 0,
-                      borderRadius: 12,
-                    }}
-                    color="#186177"
-                    iconColor="#186177"
-                    icon="snow"
-                    onPress={() => toggleCardFrozen()}
-                    loading={isUpdatingStatus}
-                  >
-                    {card.status == "active" ? "Freeze card" : "Defrost card"}
-                  </Button>
+                {card?.status !== "expired" && !isGrantCard && (
+                  <>
+                    {card?.type === "physical" &&
+                    card?.status === "inactive" ? (
+                      <Button
+                        style={{
+                          flexBasis: 0,
+                          flexGrow: 1,
+                          backgroundColor: palette.primary,
+                          borderTopWidth: 0,
+                          borderRadius: 12,
+                        }}
+                        color="white"
+                        iconColor="white"
+                        iconSize={32}
+                        icon="rep"
+                        onPress={() => setShowActivateModal(true)}
+                      >
+                        Activate card
+                      </Button>
+                    ) : (
+                      <Button
+                        style={{
+                          flexBasis: 0,
+                          flexGrow: 1,
+                          backgroundColor: "#71C5E7",
+                          borderTopWidth: 0,
+                          borderRadius: 12,
+                        }}
+                        color="#186177"
+                        iconColor="#186177"
+                        icon="freeze"
+                        onPress={() => toggleCardFrozen()}
+                        loading={isUpdatingStatus}
+                      >
+                        {card?.status == "active"
+                          ? "Freeze card"
+                          : "Defrost card"}
+                      </Button>
+                    )}
+                  </>
                 )}
-                {_card.type == "virtual" && _card.status != "canceled" && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      borderRadius: 12,
-                      backgroundColor: palette.primary,
-                    }}
-                    color="white"
-                    iconColor="white"
-                    icon={detailsRevealed ? "eye-off" : "eye"}
-                    onPress={toggleCardDetails}
-                    loading={detailsLoading}
-                  >
-                    {detailsRevealed ? "Hide details" : "Reveal details"}
-                  </Button>
-                )}
+                {card?.type == "virtual" &&
+                  (card?.status as Card["status"]) !== "canceled" &&
+                  isCardholder && (
+                    <Button
+                      style={{
+                        flexBasis: 0,
+                        flexGrow: 1,
+                        borderRadius: 12,
+                        backgroundColor: palette.primary,
+                      }}
+                      color="white"
+                      iconColor="white"
+                      icon={detailsRevealed ? "private-fill" : "view"}
+                      onPress={toggleCardDetails}
+                      loading={detailsLoading}
+                    >
+                      {detailsRevealed ? "Hide details" : "Reveal details"}
+                    </Button>
+                  )}
 
-                {isGrantCard && _card.status != "canceled" && (
+                {isGrantCard && _card?.status != "canceled" && (
                   <Button
                     style={{
                       flexBasis: 0,
                       flexGrow: 1,
-                      backgroundColor: "#3097ed",
+                      backgroundColor: isOrgManager ? "#db1530" : "#3097ed",
                       borderTopWidth: 0,
                       borderRadius: 12,
                     }}
                     color="white"
                     iconColor="white"
-                    icon="heart-circle"
+                    icon={isOrgManager ? "reply" : "support"}
                     onPress={returnGrant}
                     loading={detailsLoading || isReturningGrant}
                   >
-                    {hasOrgAttributes ? "Cancel Grant" : "Return Grant"}
+                    {isOrgManager ? "Cancel Grant" : "Return Grant"}
                   </Button>
                 )}
               </View>
@@ -827,6 +736,7 @@ useEffect(() => {
                     flexDirection: "row",
                     alignItems: "center",
                     marginBottom: 15,
+                    paddingRight: 90,
                   }}
                 >
                   <UserAvatar
@@ -834,13 +744,15 @@ useEffect(() => {
                     size={40}
                     style={{ marginRight: 10 }}
                   />
-                  <View>
+                  <View style={{ flex: 1, flexShrink: 1 }}>
                     <Text
                       style={{
                         fontSize: 18,
                         fontWeight: "600",
                         color: themeColors.text,
                       }}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
                     >
                       {cardName}
                     </Text>
@@ -851,7 +763,7 @@ useEffect(() => {
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -863,6 +775,7 @@ useEffect(() => {
                     flexDirection: "row",
                     alignItems: "center",
                     marginBottom: 15,
+                    paddingRight: 90,
                   }}
                 >
                   <View
@@ -891,7 +804,7 @@ useEffect(() => {
                         marginTop: 2,
                       }}
                     >
-                      {card.type === "virtual"
+                      {card?.type === "virtual"
                         ? "Virtual Card"
                         : "Physical Card"}
                     </Text>
@@ -912,11 +825,12 @@ useEffect(() => {
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   Card number
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
@@ -933,9 +847,7 @@ useEffect(() => {
                     >
                       {detailsRevealed && details
                         ? renderCardNumber(details.number)
-                        : redactedCardNumber(
-                            isGrantCard ? _card.last4 : card?.last4,
-                          )}
+                        : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
                     </Text>
                   )}
                 </View>
@@ -952,11 +864,12 @@ useEffect(() => {
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   Expires
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
@@ -990,11 +903,12 @@ useEffect(() => {
                   style={{
                     fontSize: 16,
                     color: themeColors.text,
+                    flexShrink: 1,
                   }}
                 >
                   CVC
                 </Text>
-                <View>
+                <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
                   cardDetailsLoading ||
                   (detailsRevealed && !details) ? (
@@ -1034,7 +948,7 @@ useEffect(() => {
               >
                 Transaction History
               </Text>
-              {card.total_spent_cents != null && (
+              {card?.total_spent_cents != null && (
                 <View style={{ alignItems: "flex-end" }}>
                   <Text
                     style={{
@@ -1052,7 +966,7 @@ useEffect(() => {
                       color: themeColors.text,
                     }}
                   >
-                    {renderMoney(card.total_spent_cents)}
+                    {renderMoney(card?.total_spent_cents)}
                   </Text>
                 </View>
               )}
@@ -1138,9 +1052,7 @@ useEffect(() => {
                     onPress={() => {
                       navigation.navigate("Transaction", {
                         orgId:
-                          card?.organization?.id ||
-                          _card?.organization?.id ||
-                          "",
+                          card?.organization?.id || _card?.organization?.id,
                         transaction,
                         transactionId: transaction.id,
                       });
@@ -1173,6 +1085,94 @@ useEffect(() => {
           </>
         )}
       </ScrollView>
+
+      {/* Add the activation modal */}
+      <Modal
+        visible={showActivateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowActivateModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 15,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: themeColors.text,
+                marginBottom: 10,
+              }}
+            >
+              Activate Physical Card
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+              }}
+            >
+              Please enter the last 4 digits of your card to activate it.
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+                fontFamily: "JetBrains Mono",
+              }}
+              placeholder="Last 4 digits"
+              placeholderTextColor={palette.muted}
+              keyboardType="number-pad"
+              maxLength={4}
+              value={last4}
+              onChangeText={setLast4}
+              autoFocus
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                color={themeColors.text}
+                onPress={() => {
+                  setShowActivateModal(false);
+                  setLast4("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                style={{ flex: 1 }}
+                onPress={handleActivate}
+                loading={activating}
+              >
+                Activate
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Animated.View>
   );
 }

@@ -2,22 +2,25 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
-// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
   StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
   TabParamList,
+  SettingsStackParamList,
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
+import { useIsDark } from "./lib/useColorScheme";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
+import GrantCardPage from "./pages/GrantCard";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
@@ -28,13 +31,20 @@ import OrganizationSettingsPage from "./pages/organization/Settings";
 import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
-import SettingsPage from "./pages/Settings";
+import About from "./pages/settings/About";
+import AppIconSelector from "./pages/settings/AppIconSelector";
+import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
+import SettingsPage from "./pages/settings/Settings";
+import Tutorials from "./pages/settings/Tutorials";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
+
+// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
 const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
+const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -44,30 +54,32 @@ export default function Navigator() {
   );
   const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
 
-  const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
+  const isDark = useIsDark();
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: React.ComponentProps<typeof Ionicons>["name"];
+        tabBarIcon: ({ color, size }) => {
+          let iconName: React.ComponentProps<typeof Icon>["glyph"];
 
           if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
+            iconName = "home";
+            size = 30;
           } else if (route.name === "Cards") {
-            iconName = focused ? "card" : "card-outline";
+            iconName = "card";
+            size = 28;
           } else if (route.name === "Receipts") {
-            iconName = focused ? "receipt" : "receipt-outline";
+            iconName = "payment-docs";
+            size = 28;
           } else if (route.name === "Settings") {
-            iconName = focused ? "settings" : "settings-outline";
-          } else {
-            throw new Error("unknown route name");
+            iconName = "settings";
+            size = 36;
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Icon glyph={iconName} size={size} color={color} />;
         },
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
@@ -75,9 +87,10 @@ export default function Navigator() {
         tabBarHideOnKeyboard: true,
         tabBarBackground: () => (
           <BlurView
-            tint={scheme == "dark" ? "dark" : "light"}
+            tint={isDark ? "dark" : "light"}
             intensity={100}
             style={StyleSheet.absoluteFill}
+            experimentalBlurMethod="dimezisBlurView"
           />
         ),
       })}
@@ -202,9 +215,12 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={() => ({
-                title: "Card",
-              })}
+              options={() => ({ title: "Card" })}
+            />
+            <CardsStack.Screen
+              name="GrantCard"
+              component={GrantCardPage}
+              options={() => ({ title: "Card" })}
             />
             <Stack.Screen
               options={{ headerBackTitle: "Back" }}
@@ -238,11 +254,37 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen
-        name="Settings"
-        options={{ headerShown: true }}
-        component={SettingsPage}
-      />
+      <Tab.Screen name="Settings" options={{ headerShown: false }}>
+        {() => (
+          <SettingsStack.Navigator>
+            <SettingsStack.Screen
+              name="SettingsMain"
+              component={SettingsPage}
+              options={{ title: "Settings" }}
+            />
+            <SettingsStack.Screen
+              name="AppIconSelector"
+              component={AppIconSelector}
+              options={{ title: "App Icon" }}
+            />
+            <SettingsStack.Screen
+              name="DeepLinkingSettings"
+              component={DeepLinkingSettings}
+              options={{ title: "Deep Linking" }}
+            />
+            <SettingsStack.Screen
+              name="Tutorials"
+              component={Tutorials}
+              options={{ title: "Tutorials" }}
+            />
+            <SettingsStack.Screen
+              name="About"
+              component={About}
+              options={{ title: "About" }}
+            />
+          </SettingsStack.Navigator>
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
