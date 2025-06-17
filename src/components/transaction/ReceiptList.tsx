@@ -11,7 +11,9 @@ import useSWR from "swr";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
-import Transaction, { TransactionCardCharge } from "../../lib/types/Transaction";
+import Transaction, {
+  TransactionCardCharge,
+} from "../../lib/types/Transaction";
 import { palette } from "../../theme";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
 
@@ -41,8 +43,12 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
-  const orgId = params.orgId || (transaction as TransactionCardCharge).card_charge?.card?.organization?.id || "";
-  
+  const orgId =
+    params.orgId ||
+    (transaction as TransactionCardCharge).card_charge?.card?.organization
+      ?.id ||
+    "";
+
   const {
     data: receipts,
     isLoading,

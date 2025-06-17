@@ -12,7 +12,11 @@ interface ReceiptActionSheetProps {
   onUploadComplete?: () => void;
 }
 
-export function useReceiptActionSheet({ orgId, transactionId, onUploadComplete }: ReceiptActionSheetProps) {
+export function useReceiptActionSheet({
+  orgId,
+  transactionId,
+  onUploadComplete,
+}: ReceiptActionSheetProps) {
   const { showActionSheetWithOptions } = useActionSheet();
   const { isOnline, withOfflineCheck } = useOffline();
   const hcb = useClient();
@@ -58,9 +62,14 @@ export function useReceiptActionSheet({ orgId, transactionId, onUploadComplete }
   );
 
   const uploadMultipleFiles = withOfflineCheck(
-    async (files: (ImagePicker.ImagePickerAsset | DocumentPicker.DocumentPickerAsset)[]) => {
+    async (
+      files: (
+        | ImagePicker.ImagePickerAsset
+        | DocumentPicker.DocumentPickerAsset
+      )[],
+    ) => {
       for (const file of files) {
-        const fileName = 'name' in file ? file.name : file.fileName;
+        const fileName = "name" in file ? file.name : file.fileName;
         await uploadFile({
           uri: file.uri,
           fileName: fileName || undefined,
@@ -123,4 +132,4 @@ export function useReceiptActionSheet({ orgId, transactionId, onUploadComplete }
     handleActionSheet,
     isOnline,
   };
-} 
+}
