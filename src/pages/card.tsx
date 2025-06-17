@@ -307,9 +307,7 @@ export default function CardPage(
           onPress: async () => {
             try {
               setisReturningGrant(true);
-              await hcb.post(
-                `card_grants/${grantCard.grant_id}/cancel`,
-              );
+              await hcb.post(`card_grants/${grantCard.grant_id}/cancel`);
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success,
               );
@@ -609,48 +607,49 @@ export default function CardPage(
                   gap: 20,
                 }}
               >
-                {card?.status !== "expired" && (!isGrantCard || !isCardholder) && (
-                  <>
-                    {card?.type === "physical" &&
-                    card?.status === "inactive" ? (
-                      <Button
-                        style={{
-                          flexBasis: 0,
-                          flexGrow: 1,
-                          backgroundColor: palette.primary,
-                          borderTopWidth: 0,
-                          borderRadius: 12,
-                        }}
-                        color="white"
-                        iconColor="white"
-                        iconSize={32}
-                        icon="rep"
-                        onPress={() => setShowActivateModal(true)}
-                      >
-                        Activate card
-                      </Button>
-                    ) : (
-                      <Button
-                        style={{
-                          flexBasis: 0,
-                          flexGrow: 1,
-                          backgroundColor: "#71C5E7",
-                          borderTopWidth: 0,
-                          borderRadius: 12,
-                        }}
-                        color="#186177"
-                        iconColor="#186177"
-                        icon="freeze"
-                        onPress={() => toggleCardFrozen()}
-                        loading={isUpdatingStatus}
-                      >
-                        {card?.status == "active"
-                          ? "Freeze card"
-                          : "Defrost card"}
-                      </Button>
-                    )}
-                  </>
-                )}
+                {card?.status !== "expired" &&
+                  (!isGrantCard || !isCardholder) && (
+                    <>
+                      {card?.type === "physical" &&
+                      card?.status === "inactive" ? (
+                        <Button
+                          style={{
+                            flexBasis: 0,
+                            flexGrow: 1,
+                            backgroundColor: palette.primary,
+                            borderTopWidth: 0,
+                            borderRadius: 12,
+                          }}
+                          color="white"
+                          iconColor="white"
+                          iconSize={32}
+                          icon="rep"
+                          onPress={() => setShowActivateModal(true)}
+                        >
+                          Activate card
+                        </Button>
+                      ) : (
+                        <Button
+                          style={{
+                            flexBasis: 0,
+                            flexGrow: 1,
+                            backgroundColor: "#71C5E7",
+                            borderTopWidth: 0,
+                            borderRadius: 12,
+                          }}
+                          color="#186177"
+                          iconColor="#186177"
+                          icon="freeze"
+                          onPress={() => toggleCardFrozen()}
+                          loading={isUpdatingStatus}
+                        >
+                          {card?.status == "active"
+                            ? "Freeze card"
+                            : "Defrost card"}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 {card?.type == "virtual" &&
                   (card?.status as Card["status"]) !== "canceled" &&
                   isCardholder && (
