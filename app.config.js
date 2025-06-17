@@ -122,6 +122,12 @@ export default {
           },
         },
       ],
+      [
+        "expo-document-picker",
+        {
+          iCloudContainerEnvironment: "Production",
+        },
+      ],
     ],
   },
 };

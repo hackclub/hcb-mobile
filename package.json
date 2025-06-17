@@ -46,6 +46,7 @@
     "expo-crypto": "~14.0.1",
     "expo-dev-client": "~5.0.20",
     "expo-device": "~7.0.3",
+    "expo-document-picker": "^13.1.5",
     "expo-haptics": "~14.0.0",
     "expo-image": "~2.0.7",
     "expo-image-picker": "~16.0.6",

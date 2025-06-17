@@ -1,25 +1,21 @@
-import {
-  connectActionSheet,
-  useActionSheet,
-} from "@expo/react-native-action-sheet";
+import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR from "swr";
 
-import AuthContext from "../../auth";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
-import Transaction from "../../lib/types/Transaction";
-import { useOffline } from "../../lib/useOffline";
+import Transaction, {
+  TransactionCardCharge,
+} from "../../lib/types/Transaction";
 import { palette } from "../../theme";
+import { useReceiptActionSheet } from "../ReceiptActionSheet";
 
 function ZoomAndFadeIn() {
   "worklet";
@@ -47,107 +43,28 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
+  const orgId =
+    params.orgId ||
+    (transaction as TransactionCardCharge).card_charge?.card?.organization
+      ?.id ||
+    "";
+
   const {
     data: receipts,
     isLoading,
     mutate,
   } = useSWR<Receipt[]>(
-    `organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
+    `organizations/${orgId}/transactions/${transaction.id}/receipts`,
   );
 
   const { colors: themeColors } = useTheme();
-  const { tokens } = useContext(AuthContext);
-  const { isOnline, withOfflineCheck } = useOffline();
-
-  const { showActionSheetWithOptions } = useActionSheet();
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
 
-  const uploadReceipt = withOfflineCheck(
-    async (
-      selectedImage: {
-        uri: string;
-        fileName?: string;
-      } | null,
-    ) => {
-      const body = new FormData();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-
-      body.append("file", {
-        uri: selectedImage?.uri,
-        name: selectedImage?.fileName || "skibidi",
-        type: "image/jpeg",
-      });
-
-      try {
-        await fetch(
-          process.env.EXPO_PUBLIC_API_BASE +
-            `/organizations/${params.orgId}/transactions/${transaction.id}/receipts`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${tokens?.accessToken}`,
-            },
-            body,
-          },
-        );
-        mutate();
-        Toast.show({
-          type: ALERT_TYPE.SUCCESS,
-          title: "Receipt Uploaded!",
-          textBody: "Your receipt has been uploaded successfully.",
-        });
-      } catch (e) {
-        Toast.show({
-          type: ALERT_TYPE.DANGER,
-          title: "Failed to upload receipt",
-          textBody: "Please try again later.",
-        });
-      }
-    },
-  );
-
-  const handleActionSheet = withOfflineCheck(() => {
-    const options = ["Camera", "Photo Library", "Cancel"];
-    const cancelButtonIndex = 2;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      async (buttonIndex) => {
-        if (buttonIndex === 0) {
-          // Take a photo
-          ImagePicker.requestCameraPermissionsAsync();
-          const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: "images",
-            allowsEditing: true,
-            quality: 1,
-          });
-          if (!result.canceled) {
-            await uploadReceipt({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || undefined,
-            });
-          }
-        } else if (buttonIndex === 1) {
-          // Pick from photo library
-          ImagePicker.requestMediaLibraryPermissionsAsync();
-          const result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            quality: 1,
-          });
-          if (!result.canceled) {
-            await uploadReceipt({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || undefined,
-            });
-          }
-        }
-      },
-    );
+  const { handleActionSheet, isOnline } = useReceiptActionSheet({
+    orgId,
+    transactionId: transaction.id,
+    onUploadComplete: mutate,
   });
 
   return (
