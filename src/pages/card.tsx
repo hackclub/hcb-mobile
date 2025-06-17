@@ -80,7 +80,7 @@ export default function CardPage(
   } = useStripeCardDetails(id);
 
   const isGrantCard =
-    (_card as GrantCard)?.amount_cents != null ||
+    grantCard?.amount_cents != null ||
     (props as CardPageProps)?.grantId != null;
   const isCardholder = user?.id == card?.user?.id;
   const [refreshing, setRefreshing] = useState(false);
@@ -285,7 +285,50 @@ export default function CardPage(
   };
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
-
+  const [isReturningGrant, setisReturningGrant] = useState(false);
+  const returnGrant = async () => {
+    if (!card || !card.id) {
+      Alert.alert("Error", "Cannot update card status. Please try again.");
+      return;
+    }
+    Alert.alert(
+      `${!isCardholder ? "Cancel and return" : "Return"} ${renderMoney(
+        grantCard.amount_cents - (card?.total_spent_cents ?? 0),
+      )} to ${card.organization.name}?`,
+      "Caution, returning this grant will render it unusable.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "I understand",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setisReturningGrant(true);
+              await hcb.post(`card_grants/${grantCard.grant_id}/cancel`);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              await mutate("user/cards");
+              navigation.goBack();
+            } catch (err) {
+              console.error("Error returning grant:", err);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              Alert.alert(
+                "Error",
+                "Failed to return grant. Please try again later.",
+                [{ text: "OK" }],
+              );
+            } finally {
+              setisReturningGrant(false);
+            }
+          },
+        },
+      ],
+    );
+  };
   const handleActivate = async () => {
     if (!last4 || last4.length !== 4) {
       Alert.alert("Error", "Please enter the last 4 digits of your card");
@@ -564,48 +607,49 @@ export default function CardPage(
                   gap: 20,
                 }}
               >
-                {card?.status !== "expired" && !isGrantCard && (
-                  <>
-                    {card?.type === "physical" &&
-                    card?.status === "inactive" ? (
-                      <Button
-                        style={{
-                          flexBasis: 0,
-                          flexGrow: 1,
-                          backgroundColor: palette.primary,
-                          borderTopWidth: 0,
-                          borderRadius: 12,
-                        }}
-                        color="white"
-                        iconColor="white"
-                        iconSize={32}
-                        icon="rep"
-                        onPress={() => setShowActivateModal(true)}
-                      >
-                        Activate card
-                      </Button>
-                    ) : (
-                      <Button
-                        style={{
-                          flexBasis: 0,
-                          flexGrow: 1,
-                          backgroundColor: "#71C5E7",
-                          borderTopWidth: 0,
-                          borderRadius: 12,
-                        }}
-                        color="#186177"
-                        iconColor="#186177"
-                        icon="freeze"
-                        onPress={() => toggleCardFrozen()}
-                        loading={isUpdatingStatus}
-                      >
-                        {card?.status == "active"
-                          ? "Freeze card"
-                          : "Defrost card"}
-                      </Button>
-                    )}
-                  </>
-                )}
+                {card?.status !== "expired" &&
+                  (!isGrantCard || !isCardholder) && (
+                    <>
+                      {card?.type === "physical" &&
+                      card?.status === "inactive" ? (
+                        <Button
+                          style={{
+                            flexBasis: 0,
+                            flexGrow: 1,
+                            backgroundColor: palette.primary,
+                            borderTopWidth: 0,
+                            borderRadius: 12,
+                          }}
+                          color="white"
+                          iconColor="white"
+                          iconSize={32}
+                          icon="rep"
+                          onPress={() => setShowActivateModal(true)}
+                        >
+                          Activate card
+                        </Button>
+                      ) : (
+                        <Button
+                          style={{
+                            flexBasis: 0,
+                            flexGrow: 1,
+                            backgroundColor: "#71C5E7",
+                            borderTopWidth: 0,
+                            borderRadius: 12,
+                          }}
+                          color="#186177"
+                          iconColor="#186177"
+                          icon="freeze"
+                          onPress={() => toggleCardFrozen()}
+                          loading={isUpdatingStatus}
+                        >
+                          {card?.status == "active"
+                            ? "Freeze card"
+                            : "Defrost card"}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 {card?.type == "virtual" &&
                   (card?.status as Card["status"]) !== "canceled" &&
                   isCardholder && (
@@ -625,6 +669,25 @@ export default function CardPage(
                       {detailsRevealed ? "Hide details" : "Reveal details"}
                     </Button>
                   )}
+
+                {isGrantCard && _card?.status != "canceled" && (
+                  <Button
+                    style={{
+                      flexBasis: 0,
+                      flexGrow: 1,
+                      backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
+                      borderTopWidth: 0,
+                      borderRadius: 12,
+                    }}
+                    color="white"
+                    iconColor="white"
+                    icon={!isCardholder ? "reply" : "support"}
+                    onPress={returnGrant}
+                    loading={isReturningGrant}
+                  >
+                    {!isCardholder ? "Cancel Grant" : "Return Grant"}
+                  </Button>
+                )}
               </View>
             )}
 
