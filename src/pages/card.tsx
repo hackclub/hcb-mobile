@@ -7,7 +7,7 @@ import {
 } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
   ScrollView,
   View,
@@ -32,6 +32,7 @@ import useClient from "../lib/client";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
+import { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
@@ -71,6 +72,9 @@ export default function CardPage(
     },
   });
   const { data: user } = useSWR<User>(`user`);
+  const { data: organization } = useSWR<OrganizationExpanded>(
+    `organizations/${card?.organization.id}`,
+  );
 
   const {
     details,
@@ -83,6 +87,10 @@ export default function CardPage(
     grantCard?.amount_cents != null ||
     (props as CardPageProps)?.grantId != null;
   const isCardholder = user?.id == card?.user?.id;
+  const isManagerOrAdmin =
+    organization?.users.some(
+      (orgUser) => orgUser.id === user?.id && orgUser.role === "manager",
+    ) || user?.admin;
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -92,6 +100,9 @@ export default function CardPage(
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
+  const [showTopupModal, setShowTopupModal] = useState(false);
+  const [topupAmount, setTopupAmount] = useState("");
+  const [isToppingUp, setIsToppingUp] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
   const [pattern, setPattern] = useState<string>();
@@ -392,6 +403,191 @@ export default function CardPage(
     generateCardPattern();
   }, [card]);
 
+  const handleTopup = async () => {
+    if (!grantCard || !grantCard.grant_id) {
+      Alert.alert("Error", "Cannot top up card. Please try again.");
+      return;
+    }
+
+    const amountCents = Math.round(parseFloat(topupAmount) * 100);
+    if (isNaN(amountCents) || amountCents <= 0) {
+      Alert.alert("Error", "Please enter a valid amount.");
+      return;
+    }
+
+    setIsToppingUp(true);
+    try {
+      await hcb.post(`card_grants/${grantCard.grant_id}/topup`, {
+        json: { amount_cents: amountCents },
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await mutate(`card_grants/${grantCard.grant_id}`);
+      setShowTopupModal(false);
+      setTopupAmount("");
+    } catch (err) {
+      console.error("Error topping up card:", err);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Error", "Failed to top up card. Please try again later.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setIsToppingUp(false);
+    }
+  };
+
+  const isValidCardStatus = (
+    status: string | undefined,
+  ): status is Card["status"] => {
+    return (
+      status === "inactive" ||
+      status === "frozen" ||
+      status === "active" ||
+      status === "canceled" ||
+      status === "expired"
+    );
+  };
+
+  const canTopupCard = (card: Card | undefined) => {
+    if (!card || !card.status) return false;
+    return (
+      isValidCardStatus(card.status) &&
+      card.status !== "canceled" &&
+      card.status !== "expired"
+    );
+  };
+
+  function getCardActionButtons() {
+    const buttons = [];
+
+    // Add activate/freeze button
+    if (!isGrantCard || isManagerOrAdmin) {
+      if (card?.type === "physical" && card?.status === "inactive") {
+        buttons.push(
+          <Button
+            key="activate"
+            style={{
+              backgroundColor: palette.primary,
+              borderTopWidth: 0,
+              borderRadius: 12,
+            }}
+            color="white"
+            iconColor="white"
+            iconSize={32}
+            icon="rep"
+            onPress={() => setShowActivateModal(true)}
+          >
+            Activate card
+          </Button>,
+        );
+      } else if (isCardholder || isManagerOrAdmin) {
+        buttons.push(
+          <Button
+            key="freeze"
+            style={{
+              backgroundColor: "#71C5E7",
+              borderTopWidth: 0,
+              borderRadius: 12,
+            }}
+            color="#186177"
+            iconColor="#186177"
+            icon="freeze"
+            onPress={() => toggleCardFrozen()}
+            loading={!!isUpdatingStatus}
+          >
+            {card?.status == "active" ? "Freeze card" : "Defrost card"}
+          </Button>,
+        );
+      }
+    }
+
+    // Add top up button
+    if (isGrantCard && isManagerOrAdmin && canTopupCard(card)) {
+      buttons.push(
+        <Button
+          key="topup"
+          style={{
+            backgroundColor: "#3499EE",
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="white"
+          iconColor="white"
+          icon="plus"
+          onPress={() => setShowTopupModal(true)}
+        >
+          Top up
+        </Button>,
+      );
+    }
+
+    // Add reveal details button
+    if (
+      card?.type == "virtual" &&
+      (card?.status as Card["status"]) !== "canceled" &&
+      isCardholder
+    ) {
+      buttons.push(
+        <Button
+          key="details"
+          style={{
+            borderRadius: 12,
+            backgroundColor: palette.primary,
+          }}
+          color="white"
+          iconColor="white"
+          icon={detailsRevealed ? "private-fill" : "view"}
+          onPress={toggleCardDetails}
+          loading={!!detailsLoading}
+        >
+          {detailsRevealed ? "Hide details" : "Reveal details"}
+        </Button>,
+      );
+    }
+
+    // Add grant button
+    if (isGrantCard && _card?.status != "canceled") {
+      buttons.push(
+        <Button
+          key="grant"
+          style={{
+            backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="white"
+          iconColor="white"
+          icon={!isCardholder ? "reply" : "support"}
+          onPress={returnGrant}
+          loading={!!isReturningGrant}
+        >
+          {!isCardholder ? "Cancel grant" : "Return grant"}
+        </Button>,
+      );
+    }
+
+    if (buttons.length === 0) return null;
+
+    const rows = [];
+    for (let i = 0; i < buttons.length; i += 2) {
+      const rowButtons = buttons.slice(i, i + 2);
+      rows.push(rowButtons);
+    }
+
+    return (
+      <View style={{ marginBottom: 20, gap: 15 }}>
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={{ flexDirection: "row", gap: 15 }}>
+            {row.map((button) =>
+              cloneElement(button, {
+                style: { ...button.props.style, flex: 1 },
+              }),
+            )}
+          </View>
+        ))}
+      </View>
+    );
+  }
+
   if (!card && !cardLoaded && !cardError) {
     return <CardSkeleton />;
   }
@@ -598,99 +794,7 @@ export default function CardPage(
               )}
             </TouchableOpacity>
 
-            {card?.status != "canceled" && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginBottom: 20,
-                  justifyContent: "center",
-                  gap: 20,
-                }}
-              >
-                {card?.status !== "expired" &&
-                  (!isGrantCard || !isCardholder) && (
-                    <>
-                      {card?.type === "physical" &&
-                      card?.status === "inactive" ? (
-                        <Button
-                          style={{
-                            flexBasis: 0,
-                            flexGrow: 1,
-                            backgroundColor: palette.primary,
-                            borderTopWidth: 0,
-                            borderRadius: 12,
-                          }}
-                          color="white"
-                          iconColor="white"
-                          iconSize={32}
-                          icon="rep"
-                          onPress={() => setShowActivateModal(true)}
-                        >
-                          Activate card
-                        </Button>
-                      ) : (
-                        <Button
-                          style={{
-                            flexBasis: 0,
-                            flexGrow: 1,
-                            backgroundColor: "#71C5E7",
-                            borderTopWidth: 0,
-                            borderRadius: 12,
-                          }}
-                          color="#186177"
-                          iconColor="#186177"
-                          icon="freeze"
-                          onPress={() => toggleCardFrozen()}
-                          loading={isUpdatingStatus}
-                        >
-                          {card?.status == "active"
-                            ? "Freeze card"
-                            : "Defrost card"}
-                        </Button>
-                      )}
-                    </>
-                  )}
-                {card?.type == "virtual" &&
-                  (card?.status as Card["status"]) !== "canceled" &&
-                  isCardholder && (
-                    <Button
-                      style={{
-                        flexBasis: 0,
-                        flexGrow: 1,
-                        borderRadius: 12,
-                        backgroundColor: palette.primary,
-                      }}
-                      color="white"
-                      iconColor="white"
-                      icon={detailsRevealed ? "private-fill" : "view"}
-                      onPress={toggleCardDetails}
-                      loading={detailsLoading}
-                    >
-                      {detailsRevealed ? "Hide details" : "Reveal details"}
-                    </Button>
-                  )}
-
-                {isGrantCard && _card?.status != "canceled" && (
-                  <Button
-                    style={{
-                      flexBasis: 0,
-                      flexGrow: 1,
-                      backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
-                      borderTopWidth: 0,
-                      borderRadius: 12,
-                    }}
-                    color="white"
-                    iconColor="white"
-                    icon={!isCardholder ? "reply" : "support"}
-                    onPress={returnGrant}
-                    loading={isReturningGrant}
-                  >
-                    {!isCardholder ? "Cancel grant" : "Return grant"}
-                  </Button>
-                )}
-              </View>
-            )}
-
+            {card?.status != "canceled" && getCardActionButtons()}
             {/* Card Details Section */}
             <View
               style={{
@@ -1145,6 +1249,102 @@ export default function CardPage(
                 loading={activating}
               >
                 Activate
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add the top-up modal */}
+      <Modal
+        visible={showTopupModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowTopupModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 15,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: themeColors.text,
+                marginBottom: 10,
+              }}
+            >
+              Topup Grant
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 8,
+                fontWeight: "500",
+              }}
+            >
+              Amount
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+                fontFamily: "JetBrains Mono",
+              }}
+              placeholder="500.00"
+              placeholderTextColor={themeColors.text + "80"}
+              keyboardType="decimal-pad"
+              value={topupAmount}
+              onChangeText={setTopupAmount}
+              autoFocus
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                style={{
+                  flex: 1,
+                  borderRadius: 15,
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                color={themeColors.text}
+                onPress={() => {
+                  setShowTopupModal(false);
+                  setTopupAmount("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                style={{
+                  flex: 1,
+                  backgroundColor: "#3499EE",
+                  borderRadius: 15,
+                  paddingVertical: 14,
+                }}
+                color="white"
+                onPress={handleTopup}
+                loading={isToppingUp}
+                disabled={!topupAmount || parseFloat(topupAmount) <= 0}
+              >
+                Topup
               </Button>
             </View>
           </View>
