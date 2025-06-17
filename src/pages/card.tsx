@@ -576,10 +576,7 @@ export default function CardPage(
     return (
       <View style={{ marginBottom: 20, gap: 15 }}>
         {rows.map((row, rowIndex) => (
-          <View
-            key={rowIndex}
-            style={{ flexDirection: "row", gap: 15 }}
-          >
+          <View key={rowIndex} style={{ flexDirection: "row", gap: 15 }}>
             {row.map((button) =>
               cloneElement(button, {
                 style: { ...button.props.style, flex: 1 },
@@ -797,8 +794,7 @@ export default function CardPage(
               )}
             </TouchableOpacity>
 
-            {card?.status != "canceled" &&
-              getCardActionButtons()}
+            {card?.status != "canceled" && getCardActionButtons()}
             {/* Card Details Section */}
             <View
               style={{
