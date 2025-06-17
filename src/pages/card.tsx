@@ -685,7 +685,7 @@ export default function CardPage(
                     onPress={returnGrant}
                     loading={isReturningGrant}
                   >
-                    {!isCardholder ? "Cancel Grant" : "Return Grant"}
+                    {!isCardholder ? "Cancel grant" : "Return grant"}
                   </Button>
                 )}
               </View>
