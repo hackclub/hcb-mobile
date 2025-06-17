@@ -29,6 +29,7 @@ import ITransaction from "../lib/types/Transaction";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import { redactedCardNumber, renderCardNumber, renderMoney } from "../util";
+import { OrganizationExpanded } from "../lib/types/Organization";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "Card">;
 
@@ -629,6 +630,32 @@ export default function CardPage({
     return null;
   };
 
+  const [hasOrgAttributes, setHasOrgAttributes] = useState(false);
+  const { data: organization } = useSWR<OrganizationExpanded>(
+  isGrantCard && card.status !== "canceled" && card?.organization?.id
+    ? `organizations/${card.organization.id}`
+    : null
+);
+useEffect(() => {
+  if (
+    isGrantCard &&
+    card.status !== "canceled" &&
+    organization?.users
+  ) {
+    console.log('og: ' + organization)
+    const matchingOrgUser = organization.users.find(
+      (orgUser) => orgUser.id === card.user.id
+    );
+    if (matchingOrgUser) {
+      setHasOrgAttributes(matchingOrgUser.role === "manager");
+    } else {
+      setHasOrgAttributes(false);
+    }
+  } else {
+    setHasOrgAttributes(false);
+  }
+}, [isGrantCard]);
+
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
       <ScrollView
@@ -772,7 +799,7 @@ export default function CardPage({
                     onPress={returnGrant}
                     loading={detailsLoading || isReturningGrant}
                   >
-                    Return Grant
+                    {hasOrgAttributes ? "Cancel Grant" : "Return Grant"}
                   </Button>
                 )}
               </View>
