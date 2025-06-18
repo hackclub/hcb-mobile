@@ -168,9 +168,9 @@ export default function OrganizationPage({
         }
 
         menuActions.push({
-          id: "settings",
-          title: "Manage Organization",
-          image: "gearshape",
+          id: "team",
+          title: "Manage Team",
+          image: "person.2.badge.gearshape",
         });
 
         if (!organization.playground_mode) {
@@ -207,8 +207,8 @@ export default function OrganizationPage({
                   navigation.navigate("AccountNumber", {
                     orgId: organization.id,
                   });
-                } else if (event == "settings") {
-                  navigation.navigate("OrganizationSettings", {
+                } else if (event == "team") {
+                  navigation.navigate("OrganizationTeam", {
                     orgId: organization.id,
                   });
                 } else if (event == "donation") {
