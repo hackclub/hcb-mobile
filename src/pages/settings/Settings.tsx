@@ -66,7 +66,6 @@ export default function SettingsPage({ navigation }: Props) {
   useEffect(() => {
     (async () => {
       const storedTheme = await AsyncStorage.getItem(THEME_KEY);
-      console.log(storedTheme);
       if (
         storedTheme === "light" ||
         storedTheme === "dark" ||

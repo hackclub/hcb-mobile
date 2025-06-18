@@ -13,7 +13,7 @@ import { OrganizationExpanded } from "../../lib/types/Organization";
 import { OrgUser } from "../../lib/types/User";
 import { palette } from "../../theme";
 
-type Props = NativeStackScreenProps<StackParamList, "OrganizationSettings">;
+type Props = NativeStackScreenProps<StackParamList, "OrganizationTeam">;
 
 function MemberRole(props: { role: OrgUser["role"] }) {
   return (
@@ -29,7 +29,7 @@ function MemberRole(props: { role: OrgUser["role"] }) {
   );
 }
 
-export default function OrganizationSettingsPage({
+export default function OrganizationTeamPage({
   route: {
     params: { orgId },
   },

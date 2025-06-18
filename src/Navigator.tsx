@@ -27,7 +27,7 @@ import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
 import OrganizationDonationPage from "./pages/organization/Donation";
 import ProcessDonationPage from "./pages/organization/ProcessDonation";
-import OrganizationSettingsPage from "./pages/organization/Settings";
+import OrganizationTeamPage from "./pages/organization/Team";
 import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
@@ -160,8 +160,8 @@ export default function Navigator() {
               options={{ presentation: "modal", title: "Account Details" }}
             />
             <Stack.Screen
-              name="OrganizationSettings"
-              component={OrganizationSettingsPage}
+              name="OrganizationTeam"
+              component={OrganizationTeamPage}
               options={{
                 headerBackTitle: "Back",
                 title: "Manage Organization",
