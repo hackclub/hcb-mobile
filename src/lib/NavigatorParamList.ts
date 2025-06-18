@@ -17,7 +17,7 @@ export type StackParamList = {
     name: string;
     email: string;
   };
-  OrganizationSettings: { orgId: Organization["id"] };
+  OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
   Transaction: {
     transactionId: Transaction["id"];
