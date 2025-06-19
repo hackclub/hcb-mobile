@@ -84,6 +84,7 @@ export default function OrganizationDonationPage({
       <PageWrapper
         orgId={orgId}
         orgName={organization?.name}
+        orgSlug={organization?.slug}
         navigation={navigation}
       />
     </StripeTerminalProvider>
@@ -93,10 +94,12 @@ export default function OrganizationDonationPage({
 function PageWrapper({
   orgId,
   orgName,
+  orgSlug,
   navigation,
 }: {
   orgId: `org_${string}`;
   orgName?: string;
+  orgSlug?: string;
   navigation: NavigationProp<StackParamList>;
 }) {
   const { initialize, isInitialized } = useStripeTerminal({});
@@ -119,7 +122,12 @@ function PageWrapper({
     );
 
   return (
-    <PageContent orgId={orgId} orgName={orgName} navigation={navigation} />
+    <PageContent
+      orgId={orgId}
+      orgName={orgName}
+      orgSlug={orgSlug}
+      navigation={navigation}
+    />
   );
 }
 
@@ -156,10 +164,12 @@ const SectionHeader = ({
 function PageContent({
   orgId,
   orgName,
+  orgSlug,
   navigation,
 }: {
   orgId: `org_${string}`;
   orgName?: string;
+  orgSlug?: string;
   navigation: NavigationProp<StackParamList>;
 }) {
   const { colors } = useTheme();
@@ -304,6 +314,7 @@ function PageContent({
         },
         name,
         email,
+        slug: orgSlug || "",
       });
 
       return paymentIntent;
