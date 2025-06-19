@@ -16,6 +16,7 @@ export type StackParamList = {
     collectPayment: () => Promise<boolean>;
     name: string;
     email: string;
+    slug: string;
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
