@@ -257,8 +257,8 @@ export default function CardPage({
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
 
-  const { canAddToWallet, error: walletError, ephemeralKey, card: walletCard, details: walletDetails } = useDigitalWallet(_card.id);
-  console.log(canAddToWallet, walletError, ephemeralKey, walletCard, walletDetails);
+  const { canAddToWallet, error: walletError, ephemeralKey, card: walletCard } = useDigitalWallet(_card.id);
+  console.log(canAddToWallet, walletError, ephemeralKey, walletCard);
 
   if (!card && !cardLoaded && !cardError) {
     return (
@@ -586,7 +586,7 @@ export default function CardPage({
   };
 
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
+    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!} merchantIdentifier="merchant.com.hackclub.hcb">
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         <ScrollView
           contentContainerStyle={{
@@ -728,10 +728,11 @@ export default function CardPage({
                     testEnv={true}
                     iOSButtonStyle="onLightBackground"
                     cardDetails={{
-                      name: "Mohamad Mortada",
-                      primaryAccountIdentifier: walletCard?.wallets?.primary_account_identifier ,
+                      name: walletCard.cardholder.name,
+                      primaryAccountIdentifier: walletCard?.wallets?.primary_account_identifier || null,
                       lastFour: walletCard?.last4 || "0966",
-                      description: 'Added by HCB',
+                      description: 'HCB Card',
+                      brand: 'Visa',
                     }}
                     ephemeralKey={ephemeralKey}
                     onComplete={({error}) => {

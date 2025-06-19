@@ -104,6 +104,11 @@ export default {
           url: "https://sentry.io/",
         },
       ],
+      ["@stripe/stripe-react-native",
+        {
+          merchantIdentifier: "merchant.com.hackclub.hcb",
+        }
+      ],
     ],
   },
 };

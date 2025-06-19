@@ -7,14 +7,13 @@ import useClient from './client';
 interface StripeCard {
   id: string;
   last4: string;
+  cardholder?: {
+    name: string;
+  };
   wallets?: {
     primary_account_identifier?: string;
+    token?: GooglePayCardToken;
   };
-}
-
-interface WalletDetails {
-  token?: GooglePayCardToken;
-  status?: string;
 }
 
 export interface DigitalWalletState {
@@ -31,13 +30,13 @@ export default function useDigitalWallet(cardId: string) {
     error: null,
   });
   const [ephemeralKey, setEphemeralKey] = useState<{
+    ephemeralKeyExpires: number;
+    ephemeralKeyCreated: number;
     ephemeralKeyId: string;
     ephemeralKeySecret: string;
     stripe_id: string;
   } | null>(null);
   const [card, setCard] = useState<StripeCard | null>(null);
-  const [details, setDetails] = useState<WalletDetails | null>(null);
-  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     fetchCardDetails();
@@ -46,33 +45,25 @@ export default function useDigitalWallet(cardId: string) {
   const fetchCardDetails = async () => {
     try {
       // Fetch ephemeral key
-      const { private_nonce, public_nonce } = await ky
-        .post('https://api.stripe.com/v1/ephemeral_key_nonces', {
-          headers: {
-            Authorization: `Bearer ${process.env.EXPO_PUBLIC_STRIPE_API_KEY}`,
-          },
-        })
-        .json<{ private_nonce: string; public_nonce: string }>();
+
 
       const ephemeralKeyResponse = await hcb(
-        `cards/${cardId}/ephemeral_keys?nonce=${public_nonce}`,
-      ).json<{ ephemeralKeyId: string; ephemeralKeySecret: string; stripe_id: string }>();
-
+        `cards/${cardId}/ephemeral_keys`,
+        {
+          headers: {
+            "Stripe-Version": "2020-03-02",
+          },
+        }
+      ).json<{ ephemeralKeyId: string; ephemeralKeySecret: string; stripe_id: string; ephemeralKeyExpires: number; ephemeralKeyCreated: number }>();
+      setEphemeralKey(ephemeralKeyResponse);
       if (!ephemeralKeyResponse) {
         throw new Error('Failed to get ephemeral key');
       }
-
-      setEphemeralKey(ephemeralKeyResponse);
 
       // Fetch card details using the ephemeral key
       const cardData = await ky(
         `https://api.stripe.com/v1/issuing/cards/${ephemeralKeyResponse.stripe_id}`,
         {
-          searchParams: {
-            "expand[0]": "number",
-            "expand[1]": "cvc",
-            ephemeral_key_private_nonce: private_nonce,
-          },
           headers: {
             Authorization: `Bearer ${ephemeralKeyResponse.ephemeralKeySecret}`,
             "Stripe-Version": "2020-03-02",
@@ -87,10 +78,6 @@ export default function useDigitalWallet(cardId: string) {
         primaryAccountIdentifier: cardData?.wallets?.primary_account_identifier ?? null,
         cardLastFour: cardData.last4,
       });
-
-      console.log(canAddCard, walletDetails, walletError);
-      setDetails(walletDetails ?? null);
-      setError(walletError?.message ?? null);
 
       if (walletError) {
         setState(prev => ({ ...prev, error: walletError.message }));
@@ -110,21 +97,19 @@ export default function useDigitalWallet(cardId: string) {
   return {
     ...state,
     ephemeralKey: ephemeralKey ? {
-      id: ephemeralKey.ephemeralKeyId,
-      object: "ephemeral_key",
-      associated_objects: [
+      "id": ephemeralKey.ephemeralKeyId,
+      "object": "ephemeral_key",
+      "associated_objects": [
         {
-          id: ephemeralKey.stripe_id,
-          type: "issuing.card"
+          "id": ephemeralKey.stripe_id,
+          "type": "issuing.card"
         }
       ],
-      livemode: true,
-      created: 1586556828,
-      expires: 1586560428,
-      secret: ephemeralKey.ephemeralKeySecret
+      "created": ephemeralKey.ephemeralKeyCreated,
+      "expires": ephemeralKey.ephemeralKeyExpires,
+      "livemode": true,
+      "secret": ephemeralKey.ephemeralKeySecret
     } : null,
     card,
-    error,
-    details,
   };
 } 
