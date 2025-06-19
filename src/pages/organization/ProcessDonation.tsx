@@ -15,7 +15,7 @@ type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 export default function ProcessDonationPage({
   navigation,
   route: {
-    params: { payment, collectPayment, email, name },
+    params: { payment, collectPayment, email, name, slug },
   },
 }: Props) {
   const [status, setStatus] = useState<
@@ -24,7 +24,7 @@ export default function ProcessDonationPage({
   const [showQR, setShowQR] = useState(false);
   const theme = useTheme();
 
-  const donationUrl = `https://hcb.hackclub.com/donations/start/cider?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
+  const donationUrl = `https://hcb.hackclub.com/donations/start/${slug}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
 
   useEffect(() => {
     if (showQR) {
