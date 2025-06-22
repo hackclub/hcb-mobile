@@ -257,8 +257,7 @@ export default function AppContent({
       <GestureHandlerRootView>
         <StatusBar
           style={
-            themePref === "dark" ||
-            (themePref === "system" && scheme == "dark")
+            themePref === "dark" || (themePref === "system" && scheme == "dark")
               ? "light"
               : "dark"
           }
