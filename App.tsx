@@ -8,6 +8,7 @@ import { useColorScheme } from "react-native";
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
+import { LinkingProvider } from "./src/LinkingContext";
 import { ThemeProvider } from "./src/ThemeContext";
 
 function App() {
@@ -38,7 +39,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent scheme={scheme} cache={cache} />
+        <LinkingProvider>
+          <AppContent scheme={scheme} cache={cache} />
+        </LinkingProvider>
       </AuthProvider>
     </ThemeProvider>
   );

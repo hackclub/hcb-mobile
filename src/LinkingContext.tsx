@@ -2,10 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const LinkingContext = createContext<{
-  enabled: boolean;
+  enabled: boolean | null;
   setEnabled: (val: boolean) => void;
 }>({
-  enabled: true,
+  enabled: null,
   setEnabled: () => {},
 });
 
@@ -14,7 +14,7 @@ export const LinkingProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -25,7 +25,9 @@ export const LinkingProvider = ({
   }, []);
 
   useEffect(() => {
-    AsyncStorage.setItem("linking-enabled", enabled ? "true" : "false");
+    if (enabled !== null) {
+      AsyncStorage.setItem("linking-enabled", enabled ? "true" : "false");
+    }
   }, [enabled]);
 
   return (

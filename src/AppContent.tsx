@@ -21,7 +21,7 @@ import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
 import { TabParamList } from "./lib/NavigatorParamList";
 import { useOffline } from "./lib/useOffline";
-import { LinkingProvider, useLinkingPref } from "./LinkingContext";
+import { useLinkingPref } from "./LinkingContext";
 import Navigator from "./Navigator";
 import Login from "./pages/login";
 import { lightTheme, palette, theme } from "./theme";
@@ -254,44 +254,42 @@ export default function AppContent({
 
   return (
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-      <LinkingProvider>
-        <GestureHandlerRootView>
-          <StatusBar
-            style={
-              themePref === "dark" ||
-              (themePref === "system" && scheme == "dark")
-                ? "light"
-                : "dark"
-            }
-            backgroundColor={navTheme.colors.background}
-          />
+      <GestureHandlerRootView>
+        <StatusBar
+          style={
+            themePref === "dark" ||
+            (themePref === "system" && scheme == "dark")
+              ? "light"
+              : "dark"
+          }
+          backgroundColor={navTheme.colors.background}
+        />
 
-          <SWRConfig
-            value={{
-              provider: () => cache,
-              fetcher,
-              revalidateOnFocus: true,
-              revalidateOnReconnect: true,
-              dedupingInterval: 2000,
-            }}
-          >
-            <SafeAreaProvider>
-              <ActionSheetProvider>
-                <AlertNotificationRoot>
-                  <NavigationContainer theme={navTheme} linking={linking}>
-                    <OfflineBanner />
-                    {tokens?.accessToken && isAuthenticated ? (
-                      <Navigator />
-                    ) : (
-                      <Login />
-                    )}
-                  </NavigationContainer>
-                </AlertNotificationRoot>
-              </ActionSheetProvider>
-            </SafeAreaProvider>
-          </SWRConfig>
-        </GestureHandlerRootView>
-      </LinkingProvider>
+        <SWRConfig
+          value={{
+            provider: () => cache,
+            fetcher,
+            revalidateOnFocus: true,
+            revalidateOnReconnect: true,
+            dedupingInterval: 2000,
+          }}
+        >
+          <SafeAreaProvider>
+            <ActionSheetProvider>
+              <AlertNotificationRoot>
+                <NavigationContainer theme={navTheme} linking={linking}>
+                  <OfflineBanner />
+                  {tokens?.accessToken && isAuthenticated ? (
+                    <Navigator />
+                  ) : (
+                    <Login />
+                  )}
+                </NavigationContainer>
+              </AlertNotificationRoot>
+            </ActionSheetProvider>
+          </SafeAreaProvider>
+        </SWRConfig>
+      </GestureHandlerRootView>
     </View>
   );
 }
