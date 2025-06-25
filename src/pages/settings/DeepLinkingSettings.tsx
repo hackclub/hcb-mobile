@@ -1,5 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import { Switch, View, Text } from "react-native";
+import { Switch, View, Text, ActivityIndicator } from "react-native";
 
 import { useLinkingPref } from "../../LinkingContext";
 import { palette } from "../../theme";
@@ -43,13 +43,17 @@ export default function DeepLinkingSettings() {
             >
               Open links in app
             </Text>
-            <Switch
-              trackColor={{ false: "#767577", true: palette.primary }}
-              thumbColor="#f4f3f4"
-              ios_backgroundColor="#3e3e3e"
-              onValueChange={() => setEnabled(!enabled)}
-              value={enabled}
-            />
+            {enabled === null ? (
+              <ActivityIndicator size="small" color={palette.primary} />
+            ) : (
+              <Switch
+                trackColor={{ false: "#767577", true: palette.primary }}
+                thumbColor="#f4f3f4"
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={() => setEnabled(!enabled)}
+                value={enabled}
+              />
+            )}
           </View>
           <Text
             style={{
