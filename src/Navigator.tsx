@@ -201,6 +201,11 @@ export default function Navigator() {
                 title: "Send Transfer",
               }}
             />
+            <Stack.Screen
+              name="GrantCard"
+              component={GrantCardPage}
+              options={() => ({ title: "Grant Card" })}
+            />
           </Stack.Navigator>
         )}
       </Tab.Screen>
