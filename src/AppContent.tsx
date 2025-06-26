@@ -4,10 +4,10 @@ import { NavigationContainer, LinkingOptions } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
+import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaProvider,
@@ -118,6 +118,7 @@ export default function AppContent({
       } else {
         setIsAuthenticated(true);
       }
+      setIsAuthenticated(true);
       setAppIsReady(true);
     };
 
@@ -186,6 +187,9 @@ export default function AppContent({
         },
       },
       getStateFromPath: (path, options) => {
+        if (path.includes("dataUrl=hcbShareKey")) {
+          return undefined;
+        }
         if (
           path.startsWith("/branding") ||
           path.startsWith("/security") ||
@@ -255,13 +259,9 @@ export default function AppContent({
   return (
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
       <GestureHandlerRootView>
-        <StatusBar
-          style={
-            themePref === "dark" || (themePref === "system" && scheme == "dark")
-              ? "light"
-              : "dark"
-          }
-          backgroundColor={navTheme.colors.background}
+        <SystemBars
+          hidden={true}
+          style={themePref === "dark" ? "light" : "dark"}
         />
 
         <SWRConfig

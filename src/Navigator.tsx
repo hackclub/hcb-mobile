@@ -36,6 +36,7 @@ import AppIconSelector from "./pages/settings/AppIconSelector";
 import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
 import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
+import ShareIntentModal from "./pages/ShareIntentModal";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
 
@@ -206,6 +207,16 @@ export default function Navigator() {
               component={GrantCardPage}
               options={() => ({ title: "Grant Card" })}
             />
+            <Stack.Screen
+              name="ShareIntentModal"
+              component={ShareIntentModal}
+              options={{
+                presentation: "modal",
+                title: "Assign Receipts",
+                headerShown: false,
+                animation: "slide_from_bottom",
+              }}
+            />
           </Stack.Navigator>
         )}
       </Tab.Screen>
@@ -227,12 +238,12 @@ export default function Navigator() {
               component={GrantCardPage}
               options={() => ({ title: "Card" })}
             />
-            <Stack.Screen
+            <CardsStack.Screen
               options={{ headerBackTitle: "Back" }}
               name="Transaction"
               component={TransactionPage}
             />
-            <Stack.Screen
+            <CardsStack.Screen
               name="RenameTransaction"
               component={RenameTransactionPage}
               options={{

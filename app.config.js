@@ -128,6 +128,15 @@ export default {
           iCloudContainerEnvironment: "Production",
         },
       ],
+      [
+        "expo-share-intent",
+        {
+          iosActivationRules: {
+            NSExtensionActivationSupportsImageWithMaxCount: 5,
+          },
+          androidIntentFilters: ["image/*"],
+        },
+      ],
     ],
   },
 };

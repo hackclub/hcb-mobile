@@ -8,7 +8,9 @@ import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { memo, useCallback, useEffect, useState } from "react";
 import { Pressable, Text, useColorScheme, View } from "react-native";
-import ReorderableList, {
+import {
+  NestedReorderableList,
+  ScrollViewContainer,
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import useSWR from "swr";
@@ -267,55 +269,57 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-      <ReorderableList
-        data={
-          canceledCardsShown
-            ? sortedCards
-            : sortedCards.filter(
-                (c) => c.status != "canceled" && c.status != "expired",
-              )
-        }
-        keyExtractor={(item) => item.id}
-        onReorder={({ from, to }) => {
-          Haptics.selectionAsync();
-          const newCards = [...sortedCards];
-          const [removed] = newCards.splice(from, 1);
-          newCards.splice(to, 0, removed);
-          setSortedCards(newCards);
-          saveCardOrder(newCards);
-        }}
-        contentContainerStyle={{
-          paddingBottom: tabBarHeight + 20,
-          paddingTop: 20,
-          alignItems: "center",
-        }}
-        scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        onRefresh={onRefresh}
-        refreshing={refreshing}
-        renderItem={({ item }) => (
-          <CardItem
-            item={item}
-            isActive={false}
-            onPress={(card) => navigation.navigate("Card", { card })}
-            pattern={patternCache[item.id]?.pattern}
-            patternDimensions={patternCache[item.id]?.dimensions}
-          />
-        )}
-        ListFooterComponent={() =>
-          sortedCards.length > 2 && (
-            <Text
-              style={{
-                color: palette.muted,
-                textAlign: "center",
-                marginTop: 10,
-                marginBottom: 10,
-              }}
-            >
-              Drag to reorder cards
-            </Text>
-          )
-        }
-      />
+      <ScrollViewContainer>
+        <NestedReorderableList
+          data={
+            canceledCardsShown
+              ? sortedCards
+              : sortedCards.filter(
+                  (c) => c.status != "canceled" && c.status != "expired",
+                )
+          }
+          keyExtractor={(item) => item.id}
+          onReorder={({ from, to }) => {
+            Haptics.selectionAsync();
+            const newCards = [...sortedCards];
+            const [removed] = newCards.splice(from, 1);
+            newCards.splice(to, 0, removed);
+            setSortedCards(newCards);
+            saveCardOrder(newCards);
+          }}
+          contentContainerStyle={{
+            paddingBottom: tabBarHeight + 20,
+            paddingTop: 20,
+            alignItems: "center",
+          }}
+          scrollIndicatorInsets={{ bottom: tabBarHeight }}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          renderItem={({ item }) => (
+            <CardItem
+              item={item}
+              isActive={false}
+              onPress={(card) => navigation.navigate("Card", { card })}
+              pattern={patternCache[item.id]?.pattern}
+              patternDimensions={patternCache[item.id]?.dimensions}
+            />
+          )}
+          ListFooterComponent={() =>
+            sortedCards.length > 2 && (
+              <Text
+                style={{
+                  color: palette.muted,
+                  textAlign: "center",
+                  marginTop: 10,
+                  marginBottom: 10,
+                }}
+              >
+                Drag to reorder cards
+              </Text>
+            )
+          }
+        />
+      </ScrollViewContainer>
     );
   } else {
     return (

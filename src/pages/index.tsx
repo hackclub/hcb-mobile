@@ -8,6 +8,7 @@ import {
 } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
+import { useShareIntentContext } from "expo-share-intent";
 import { useEffect, useState, useRef, memo } from "react";
 import {
   Text,
@@ -18,8 +19,11 @@ import {
   StyleSheet,
   useColorScheme,
   RefreshControl,
+  Alert,
 } from "react-native";
-import ReorderableList, {
+import {
+  NestedReorderableList,
+  ScrollViewContainer,
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
@@ -228,14 +232,61 @@ function Event({
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
-// Helper function to compare org arrays by id
-
 export default function App({ navigation }: Props) {
   const lastErrorTime = useRef<number>(0);
   const ERROR_DEBOUNCE_MS = 5000;
   const [isOnline, setIsOnline] = useState(true);
   const lastFetchTime = useRef<number>(0);
-  const FETCH_COOLDOWN_MS = 10000; // Only attempt to fetch every 10 seconds
+  const FETCH_COOLDOWN_MS = 10000;
+  const { hasShareIntent, shareIntent, resetShareIntent } =
+    useShareIntentContext();
+
+  const { data: missingReceiptData } = useSWR<{
+    data: (ITransaction & { organization: Organization })[];
+  }>(hasShareIntent ? "user/transactions/missing_receipt" : null);
+
+  useEffect(() => {
+    if (hasShareIntent && shareIntent && missingReceiptData) {
+      console.log("Share intent received:", shareIntent);
+
+      const imageUrls =
+        (shareIntent as { files?: Array<{ path: string }> }).files?.map(
+          (file) => file.path,
+        ) || [];
+
+      if (imageUrls.length > 0 && missingReceiptData.data.length > 0) {
+        navigation.navigate("ShareIntentModal", {
+          images: imageUrls,
+          missingTransactions: missingReceiptData.data,
+        });
+      } else if (imageUrls.length > 0) {
+        Alert.alert(
+          "No Missing Receipts",
+          "You don't have any transactions that need receipts at the moment.",
+          [{ text: "OK" }],
+        );
+      }
+
+      resetShareIntent();
+    }
+  }, [
+    hasShareIntent,
+    shareIntent,
+    missingReceiptData,
+    navigation,
+    resetShareIntent,
+  ]);
+
+  // Cleanup share intent on unmount or when component reinitializes
+  useEffect(() => {
+    return () => {
+      // Reset share intent when component unmounts to prevent conflicts
+      if (hasShareIntent) {
+        console.log("Cleaning up share intent on unmount");
+        resetShareIntent();
+      }
+    };
+  }, [hasShareIntent, resetShareIntent]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
@@ -416,100 +467,103 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ReorderableList
-      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
-      onReorder={({ from, to }) => {
-        Haptics.selectionAsync();
-        const newOrgs = [...sortedOrgs];
-        const [removed] = newOrgs.splice(from, 1);
-        newOrgs.splice(to, 0, removed);
-        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
-          setSortedOrgs(newOrgs);
+    <ScrollViewContainer>
+      <NestedReorderableList
+        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        onReorder={({ from, to }) => {
+          Haptics.selectionAsync();
+          const newOrgs = [...sortedOrgs];
+          const [removed] = newOrgs.splice(from, 1);
+          newOrgs.splice(to, 0, removed);
+          if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+            setSortedOrgs(newOrgs);
+          }
+        }}
+        scrollEnabled={false}
+        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: tabBarHeight,
+        }}
+        contentInsetAdjustmentBehavior="automatic"
+        data={sortedOrgs}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-      }}
-      scrollIndicatorInsets={{ bottom: tabBarHeight }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingBottom: tabBarHeight,
-      }}
-      contentInsetAdjustmentBehavior="automatic"
-      data={sortedOrgs}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      ListHeaderComponent={() =>
-        invitations &&
-        invitations.length > 0 && (
-          <View
-            style={{
-              marginTop: 10,
-              marginBottom: 20,
-              borderRadius: 10,
-            }}
-          >
+        ListHeaderComponent={() =>
+          invitations &&
+          invitations.length > 0 && (
+            <View
+              style={{
+                marginTop: 10,
+                marginBottom: 20,
+                borderRadius: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 12,
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}
+              >
+                Pending invitations
+              </Text>
+              {invitations.map((invitation) => (
+                <Event
+                  key={invitation.id}
+                  invitation={invitation}
+                  style={{
+                    borderWidth: 2,
+                    borderColor:
+                      scheme == "dark" ? palette.primary : palette.muted,
+                  }}
+                  event={invitation.organization}
+                  onPress={() =>
+                    navigation.navigate("Invitation", {
+                      inviteId: invitation.id,
+                      invitation,
+                    })
+                  }
+                  hideBalance
+                />
+                // <TouchableHighlight key={invitation.id}>
+                //   <Text
+                //     style={{
+                //       color: palette.smoke,
+                //       backgroundColor: palette.darkless,
+                //       padding: 10,
+                //       borderRadius: 10,
+                //       overflow: "hidden",
+                //     }}
+                //   >
+                //     {invitation.organization.name}
+                //   </Text>
+                // </TouchableHighlight>
+              ))}
+            </View>
+          )
+        }
+        renderItem={({ item: organization }) => (
+          <EventItem organization={organization} navigation={navigation} />
+        )}
+        ListFooterComponent={() =>
+          organizations.length > 2 && (
             <Text
               style={{
                 color: palette.muted,
-                fontSize: 12,
-                textTransform: "uppercase",
+                textAlign: "center",
+                marginTop: 10,
                 marginBottom: 10,
               }}
             >
-              Pending invitations
+              Drag to reorder organizations
             </Text>
-            {invitations.map((invitation) => (
-              <Event
-                key={invitation.id}
-                invitation={invitation}
-                style={{
-                  borderWidth: 2,
-                  borderColor:
-                    scheme == "dark" ? palette.primary : palette.muted,
-                }}
-                event={invitation.organization}
-                onPress={() =>
-                  navigation.navigate("Invitation", {
-                    inviteId: invitation.id,
-                    invitation,
-                  })
-                }
-                hideBalance
-              />
-              // <TouchableHighlight key={invitation.id}>
-              //   <Text
-              //     style={{
-              //       color: palette.smoke,
-              //       backgroundColor: palette.darkless,
-              //       padding: 10,
-              //       borderRadius: 10,
-              //       overflow: "hidden",
-              //     }}
-              //   >
-              //     {invitation.organization.name}
-              //   </Text>
-              // </TouchableHighlight>
-            ))}
-          </View>
-        )
-      }
-      renderItem={({ item: organization }) => (
-        <EventItem organization={organization} navigation={navigation} />
-      )}
-      ListFooterComponent={() =>
-        organizations.length > 2 && (
-          <Text
-            style={{
-              color: palette.muted,
-              textAlign: "center",
-              marginTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            Drag to reorder organizations
-          </Text>
-        )
-      }
-      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-    />
+          )
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+      />
+    </ScrollViewContainer>
   );
 }
