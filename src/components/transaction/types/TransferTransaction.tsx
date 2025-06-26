@@ -26,6 +26,15 @@ export default function TransferTransaction({
   const userInToOrg =
     user?.admin || userOrgs?.some((org) => org.id == transfer.to.id);
 
+  const handleGrantCardNavigation = () => {
+    if (transfer.card_grant_id) {
+      // Navigate to the GrantCard screen in the same stack
+      navigation.navigate("GrantCard", {
+        grantId: transfer.card_grant_id,
+      });
+    }
+  };
+
   return (
     <View>
       <TransactionTitle
@@ -55,6 +64,15 @@ export default function TransferTransaction({
                 {
                   label: "Transferred by",
                   value: <UserMention user={transfer.sender} />,
+                },
+              ]
+            : []),
+          ...(transfer.card_grant_id
+            ? [
+                {
+                  label: "Grant Card",
+                  value: "View Grant Card",
+                  onPress: handleGrantCardNavigation,
                 },
               ]
             : []),
