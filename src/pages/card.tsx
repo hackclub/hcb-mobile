@@ -5,7 +5,9 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { Merchant, Category } from "@thedev132/yellowpages";
 import * as Haptics from "expo-haptics";
+import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -20,6 +22,7 @@ import {
   Modal,
   TextInput,
 } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { useSWRConfig } from "swr";
 
 import Button from "../components/Button";
@@ -101,6 +104,10 @@ export default function CardPage(
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [showTopupModal, setShowTopupModal] = useState(false);
+  const [showPurposeModal, setShowPurposeModal] = useState(false);
+  const [purposeText, setPurposeText] = useState("");
+  const [isSettingPurpose, setIsSettingPurpose] = useState(false);
+  const [isOneTimeUse, setIsOneTimeUse] = useState(false);
   const [topupAmount, setTopupAmount] = useState("");
   const [isToppingUp, setIsToppingUp] = useState(false);
   const [last4, setLast4] = useState("");
@@ -110,8 +117,16 @@ export default function CardPage(
     width: number;
     height: number;
   }>();
-
   const [cardName, setCardName] = useState("");
+  const [isMerchantInitialized, setIsMerchantInitialized] = useState(false);
+  const [isCategoryInitialized, setIsCategoryInitialized] = useState(false);
+
+  useEffect(() => {
+    Merchant.initialize();
+    Category.initialize();
+    setIsMerchantInitialized(true);
+    setIsCategoryInitialized(true);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,8 +162,8 @@ export default function CardPage(
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
       setCardName(
         lastInitial
-          ? `${firstName} ${lastInitial}'s Card`
-          : `${firstName}'s Card`,
+          ? `${firstName} ${lastInitial}'s card`
+          : `${firstName}'s card`,
       );
     }
   }, [card]);
@@ -234,6 +249,7 @@ export default function CardPage(
     try {
       await mutate(`cards/${card?.id}`);
       await mutate(`cards/${id}/transactions`);
+      await mutate(`card_grants/${grantId}`);
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
@@ -404,34 +420,83 @@ export default function CardPage(
   }, [card]);
 
   const handleTopup = async () => {
-    if (!grantCard || !grantCard.grant_id) {
-      Alert.alert("Error", "Cannot top up card. Please try again.");
-      return;
-    }
+    if (!topupAmount || !card) return;
 
-    const amountCents = Math.round(parseFloat(topupAmount) * 100);
-    if (isNaN(amountCents) || amountCents <= 0) {
-      Alert.alert("Error", "Please enter a valid amount.");
+    const amount = parseFloat(topupAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert(
+        "Invalid Amount",
+        "Please enter a valid amount greater than 0.",
+      );
       return;
     }
 
     setIsToppingUp(true);
     try {
-      await hcb.post(`card_grants/${grantCard.grant_id}/topup`, {
-        json: { amount_cents: amountCents },
+      await hcb.post(`cards/${card.id}/topup`, {
+        json: { amount_cents: Math.round(amount * 100) },
       });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      await mutate(`card_grants/${grantCard.grant_id}`);
-      setShowTopupModal(false);
+
       setTopupAmount("");
-    } catch (err) {
-      console.error("Error topping up card:", err);
+      setShowTopupModal(false);
+      mutate(`cards/${card.id}`);
+      mutate("user/cards");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Topup error:", error);
+      Alert.alert("Error", "Failed to top up card. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Error", "Failed to top up card. Please try again later.", [
-        { text: "OK" },
-      ]);
     } finally {
       setIsToppingUp(false);
+    }
+  };
+
+  const handleSetPurpose = async () => {
+    if (!card) return;
+
+    setIsSettingPurpose(true);
+    try {
+      await hcb.patch(`card_grants/${grantId}`, {
+        json: { purpose: purposeText },
+      });
+
+      setPurposeText("");
+      setShowPurposeModal(false);
+      mutate(`cards/${card.id}`);
+      mutate(`grant_cards/${grantId}`);
+      mutate("user/cards");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Set purpose error:", error);
+      Alert.alert("Error", "Failed to set purpose. Please try again.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsSettingPurpose(false);
+    }
+  };
+
+  const handleOneTimeUse = async () => {
+    if (!card) return;
+    setIsOneTimeUse(true);
+    try {
+      await hcb.patch(`card_grants/${grantId}`, {
+        json: { one_time_use: !grantCard.one_time_use },
+      });
+      mutate(`card_grants/${grantId}`);
+      mutate("user/cards");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({
+        title: grantCard.one_time_use
+          ? "One time use disabled"
+          : "One time use enabled",
+        type: ALERT_TYPE.SUCCESS,
+      });
+    } catch (error) {
+      console.error("One time use error:", error);
+      Alert.alert("Error", "Failed to set one time use. Please try again.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsOneTimeUse(false);
     }
   };
 
@@ -454,6 +519,59 @@ export default function CardPage(
       card.status !== "canceled" &&
       card.status !== "expired"
     );
+  };
+
+  const formatMerchantNames = (merchantIds: string[] | undefined) => {
+    if (!merchantIds || merchantIds.length === 0) {
+      return "All";
+    }
+
+    const merchantNames: string[] = [];
+    const validIds = merchantIds.filter((id): id is string => !!id);
+    const unnamedCount = validIds.filter((id) => {
+      const merchant = Merchant.lookup({ networkId: id });
+      if (merchant.inDataset()) {
+        const name = merchant.getName();
+        if (name && !merchantNames.includes(name)) {
+          merchantNames.push(name);
+        }
+        return false;
+      }
+      return true;
+    }).length;
+
+    // Add unnamed merchants count if any
+    if (unnamedCount > 0) {
+      merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
+    }
+
+    return merchantNames.join(", ");
+  };
+
+  const formatCategoryNames = (categoryIds: string[] | undefined) => {
+    if (!categoryIds || categoryIds.length === 0) {
+      return "All";
+    }
+
+    const categoryNames: string[] = [];
+    const validIds = categoryIds.filter((id): id is string => !!id);
+    const unnamedCount = validIds.filter((id) => {
+      const category = Category.lookup({ key: id });
+      if (category.inDataset()) {
+        const name = category.getName();
+        if (name && !categoryNames.includes(name)) {
+          categoryNames.push(name);
+        }
+        return false;
+      }
+      return true;
+    }).length;
+
+    if (unnamedCount > 0) {
+      categoryNames.push(`Unnamed Categories (${unnamedCount})`);
+    }
+
+    return categoryNames.join(", ");
   };
 
   function getCardActionButtons() {
@@ -515,7 +633,7 @@ export default function CardPage(
           icon="plus"
           onPress={() => setShowTopupModal(true)}
         >
-          Top up
+          Topup
         </Button>,
       );
     }
@@ -540,6 +658,42 @@ export default function CardPage(
           loading={!!detailsLoading}
         >
           {detailsRevealed ? "Hide details" : "Reveal details"}
+        </Button>,
+      );
+    }
+
+    // Add one time button
+    if (isGrantCard && (isCardholder || isManagerOrAdmin)) {
+      buttons.push(
+        <Button
+          icon="private"
+          key="one-time"
+          style={{
+            backgroundColor: "#415E84",
+          }}
+          onPress={handleOneTimeUse}
+          loading={isOneTimeUse}
+        >
+          One time use
+        </Button>,
+      );
+    }
+
+    if (isGrantCard && (isCardholder || isManagerOrAdmin)) {
+      buttons.push(
+        <Button
+          icon="edit"
+          key="edit-purpose"
+          color="#114F3D"
+          style={{
+            backgroundColor: "#50ECC0",
+          }}
+          onPress={() => {
+            setPurposeText("");
+            setShowPurposeModal(true);
+          }}
+        >
+          Set purpose
         </Button>,
       );
     }
@@ -708,6 +862,8 @@ export default function CardPage(
     }
     return null;
   };
+
+  console.log(grantCard);
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -1009,6 +1165,155 @@ export default function CardPage(
                   )}
                 </View>
               </View>
+              {isGrantCard && (
+                <>
+                  <Divider />
+
+                  <View>
+                    {grantCard?.user?.email && !isCardholder && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          marginBottom: 12,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            color: themeColors.text,
+                            flexShrink: 1,
+                          }}
+                        >
+                          Grant sent to
+                        </Text>
+                        <Text
+                          style={{
+                            color: palette.muted,
+                            fontSize: 16,
+                            fontWeight: "500",
+                            fontFamily: "JetBrains Mono",
+                          }}
+                          onPress={() =>
+                            Linking.openURL(`mailto:${grantCard?.user?.email}`)
+                          }
+                        >
+                          {grantCard?.user?.email}
+                        </Text>
+                      </View>
+                    )}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginBottom: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: themeColors.text,
+                        }}
+                      >
+                        Allowed Merchants
+                      </Text>
+                      <Text
+                        style={{
+                          color: palette.muted,
+                          fontSize: 16,
+                          fontWeight: "500",
+                          fontFamily: "JetBrains Mono",
+                        }}
+                      >
+                        {isMerchantInitialized
+                          ? formatMerchantNames(grantCard?.allowed_merchants)
+                          : "Loading..."}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginBottom: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: themeColors.text,
+                          flexShrink: 1,
+                        }}
+                      >
+                        Allowed Categories
+                      </Text>
+                      <Text
+                        style={{
+                          color: palette.muted,
+                          fontSize: 16,
+                          fontWeight: "500",
+                          fontFamily: "JetBrains Mono",
+                        }}
+                      >
+                        {isCategoryInitialized
+                          ? formatCategoryNames(grantCard?.allowed_categories)
+                          : "Loading..."}
+                      </Text>
+                    </View>
+                    {grantCard?.purpose && (
+                      <>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            color: themeColors.text,
+                            flexShrink: 1,
+                          }}
+                        >
+                          Purpose
+                        </Text>
+                        <Text
+                          style={{
+                            color: palette.muted,
+                            fontSize: 16,
+                            fontWeight: "500",
+                            fontFamily: "JetBrains Mono",
+                          }}
+                        >
+                          {grantCard?.purpose}
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: themeColors.text,
+                        flexShrink: 1,
+                      }}
+                    >
+                      One time use?
+                    </Text>
+                    <Text
+                      style={{
+                        color: palette.muted,
+                        fontSize: 16,
+                        fontWeight: "500",
+                        fontFamily: "JetBrains Mono",
+                      }}
+                    >
+                      {grantCard?.one_time_use ? "Yes" : "No"}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
 
             {/* Transactions Section */}
@@ -1345,6 +1650,104 @@ export default function CardPage(
                 disabled={!topupAmount || parseFloat(topupAmount) <= 0}
               >
                 Topup
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add the purpose modal */}
+      <Modal
+        visible={showPurposeModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPurposeModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 15,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: themeColors.text,
+                marginBottom: 10,
+              }}
+            >
+              Set Grant Purpose
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 8,
+                fontWeight: "500",
+              }}
+            >
+              Purpose
+            </Text>
+            <TextInput
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+                fontFamily: "JetBrains Mono",
+                minHeight: 80,
+                textAlignVertical: "top",
+              }}
+              placeholder="Describe the purpose of this grant..."
+              placeholderTextColor={themeColors.text + "80"}
+              multiline
+              numberOfLines={4}
+              value={purposeText}
+              onChangeText={setPurposeText}
+              autoFocus
+            />
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Button
+                style={{
+                  flex: 1,
+                  borderRadius: 15,
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                color={themeColors.text}
+                onPress={() => {
+                  setShowPurposeModal(false);
+                  setPurposeText("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                style={{
+                  flex: 1,
+                  backgroundColor: "#50ECC0",
+                  borderRadius: 15,
+                  paddingVertical: 14,
+                }}
+                color="#114F3D"
+                onPress={handleSetPurpose}
+                loading={isSettingPurpose}
+              >
+                Set Purpose
               </Button>
             </View>
           </View>

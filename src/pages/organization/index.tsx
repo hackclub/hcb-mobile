@@ -496,11 +496,21 @@ export default function OrganizationPage({
                   "users" in organization &&
                   organization.users.some((u) => u.id === user?.id)
                     ? () => {
-                        navigation.navigate("Transaction", {
-                          transactionId: item.id!,
-                          orgId,
-                          transaction: item as ITransaction,
-                        });
+                        if (
+                          item.code === TransactionType.Disbursement &&
+                          "transfer" in item &&
+                          item.transfer?.card_grant_id
+                        ) {
+                          navigation.navigate("GrantCard", {
+                            grantId: item.transfer.card_grant_id,
+                          });
+                        } else {
+                          navigation.navigate("Transaction", {
+                            transactionId: item.id!,
+                            orgId,
+                            transaction: item as ITransaction,
+                          });
+                        }
                       }
                     : undefined
                 }

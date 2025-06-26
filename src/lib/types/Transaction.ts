@@ -118,6 +118,7 @@ export interface Transfer extends HcbApiObject<"xfr"> {
   status: "pending" | "completed" | "rejected";
   amount_cents: number;
   transaction_id: TransactionBase["id"];
+  card_grant_id?: string;
 }
 
 export interface TransactionTransfer extends TransactionBase {

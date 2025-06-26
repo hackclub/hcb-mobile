@@ -27,6 +27,7 @@ export type StackParamList = {
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
+  GrantCard: { grantId: string };
 };
 
 export type CardsStackParamList = {
