@@ -479,7 +479,6 @@ export default function App({ navigation }: Props) {
             setSortedOrgs(newOrgs);
           }
         }}
-        scrollEnabled={false}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         contentContainerStyle={{
           padding: 20,
