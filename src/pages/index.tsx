@@ -9,7 +9,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, useRef, memo } from "react";
+import { useEffect, useState, useRef, memo, useMemo } from "react";
 import {
   Text,
   View,
@@ -21,7 +21,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import {
+import ReorderableList, {
   NestedReorderableList,
   ScrollViewContainer,
   useReorderableDrag,
@@ -38,6 +38,7 @@ import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, organizationOrderEqual, renderMoney } from "../util";
+import { Gesture } from "react-native-gesture-handler";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -354,6 +355,9 @@ export default function App({ navigation }: Props) {
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+  const usePanGesture = () =>
+    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = usePanGesture();
 
   useEffect(() => {
     if (!shouldFetch()) return;
@@ -467,8 +471,7 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollViewContainer>
-      <NestedReorderableList
+      <ReorderableList
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
@@ -489,6 +492,7 @@ export default function App({ navigation }: Props) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        panGesture={panGesture}
         ListHeaderComponent={() =>
           invitations &&
           invitations.length > 0 && (
@@ -563,6 +567,5 @@ export default function App({ navigation }: Props) {
         }
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       />
-    </ScrollViewContainer>
   );
 }
