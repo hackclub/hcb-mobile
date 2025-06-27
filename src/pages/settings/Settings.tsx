@@ -4,6 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import * as SystemUI from "expo-system-ui";
 import { useContext, useEffect, useRef } from "react";
 import {
   Linking,
@@ -12,6 +13,7 @@ import {
   Pressable,
   ScrollView,
   Animated,
+  useColorScheme,
 } from "react-native";
 import useSWR from "swr";
 
@@ -62,6 +64,8 @@ export default function SettingsPage({ navigation }: Props) {
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
+  const scheme = useColorScheme();
+  const isDark = useIsDark();
 
   useEffect(() => {
     (async () => {
@@ -83,8 +87,12 @@ export default function SettingsPage({ navigation }: Props) {
       useNativeDriver: true,
     }).start();
   }, [animation]);
-
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
+    await SystemUI.setBackgroundColorAsync(
+      value == "dark" || (value == "system" && scheme == "dark")
+        ? "#252429"
+        : "white",
+    );
     setTheme(value);
   };
 
@@ -102,7 +110,6 @@ export default function SettingsPage({ navigation }: Props) {
     setTokens(null);
   };
 
-  const isDark = useIsDark();
   const dividerColor = isDark ? palette.slate : colors.border;
   const showTutorials = isTapToPaySupported();
 

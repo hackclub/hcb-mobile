@@ -99,15 +99,6 @@ export default {
         },
       ],
       [
-        "react-native-edge-to-edge",
-        {
-          android: {
-            parentTheme: "Default",
-            enforceNavigationBarContrast: false,
-          },
-        },
-      ],
-      [
         "expo-splash-screen",
         {
           ios: {

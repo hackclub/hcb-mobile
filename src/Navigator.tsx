@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import {
@@ -86,14 +86,15 @@ export default function Navigator() {
         headerShown: false,
         tabBarStyle: { position: "absolute" },
         tabBarHideOnKeyboard: true,
-        tabBarBackground: () => (
-          <BlurView
-            tint={isDark ? "dark" : "light"}
-            intensity={100}
-            style={StyleSheet.absoluteFill}
-            experimentalBlurMethod="dimezisBlurView"
-          />
-        ),
+        tabBarBackground: () =>
+          Platform.OS === "ios" ? (
+            <BlurView
+              tint={isDark ? "dark" : "light"}
+              intensity={100}
+              style={StyleSheet.absoluteFill}
+              experimentalBlurMethod="dimezisBlurView"
+            />
+          ) : null,
       })}
     >
       <Tab.Screen
@@ -238,12 +239,12 @@ export default function Navigator() {
               component={GrantCardPage}
               options={() => ({ title: "Card" })}
             />
-            <CardsStack.Screen
+            <Stack.Screen
               options={{ headerBackTitle: "Back" }}
               name="Transaction"
               component={TransactionPage}
             />
-            <CardsStack.Screen
+            <Stack.Screen
               name="RenameTransaction"
               component={RenameTransactionPage}
               options={{
