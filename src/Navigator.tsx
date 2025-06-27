@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import {
@@ -36,6 +36,7 @@ import AppIconSelector from "./pages/settings/AppIconSelector";
 import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
 import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
+import ShareIntentModal from "./pages/ShareIntentModal";
 import TransactionPage from "./pages/Transaction";
 import { palette } from "./theme";
 
@@ -85,14 +86,15 @@ export default function Navigator() {
         headerShown: false,
         tabBarStyle: { position: "absolute" },
         tabBarHideOnKeyboard: true,
-        tabBarBackground: () => (
-          <BlurView
-            tint={isDark ? "dark" : "light"}
-            intensity={100}
-            style={StyleSheet.absoluteFill}
-            experimentalBlurMethod="dimezisBlurView"
-          />
-        ),
+        tabBarBackground: () =>
+          Platform.OS === "ios" ? (
+            <BlurView
+              tint={isDark ? "dark" : "light"}
+              intensity={100}
+              style={StyleSheet.absoluteFill}
+              experimentalBlurMethod="dimezisBlurView"
+            />
+          ) : null,
       })}
     >
       <Tab.Screen
@@ -205,6 +207,16 @@ export default function Navigator() {
               name="GrantCard"
               component={GrantCardPage}
               options={() => ({ title: "Grant Card" })}
+            />
+            <Stack.Screen
+              name="ShareIntentModal"
+              component={ShareIntentModal}
+              options={{
+                presentation: "modal",
+                title: "Assign Receipts",
+                headerShown: false,
+                animation: "slide_from_bottom",
+              }}
             />
           </Stack.Navigator>
         )}

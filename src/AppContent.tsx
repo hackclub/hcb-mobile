@@ -5,6 +5,7 @@ import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
@@ -20,6 +21,7 @@ import { CacheProvider } from "./cacheProvider";
 import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
 import { TabParamList } from "./lib/NavigatorParamList";
+import { useIsDark } from "./lib/useColorScheme";
 import { useOffline } from "./lib/useOffline";
 import { useLinkingPref } from "./LinkingContext";
 import Navigator from "./Navigator";
@@ -103,8 +105,13 @@ export default function AppContent({
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
+  const isDark = useIsDark();
 
   useEffect(() => {
+    const setStatusBar = async () => {
+      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#F6F6F6");
+    };
+    setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
         if ((await process.env.EXPO_PUBLIC_APP_VARIANT) === "development") {
@@ -118,6 +125,7 @@ export default function AppContent({
       } else {
         setIsAuthenticated(true);
       }
+      setIsAuthenticated(true);
       setAppIsReady(true);
     };
 
@@ -186,6 +194,9 @@ export default function AppContent({
         },
       },
       getStateFromPath: (path, options) => {
+        if (path.includes("dataUrl=hcbShareKey")) {
+          return undefined;
+        }
         if (
           path.startsWith("/branding") ||
           path.startsWith("/security") ||
@@ -256,12 +267,7 @@ export default function AppContent({
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
       <GestureHandlerRootView>
         <StatusBar
-          style={
-            themePref === "dark" || (themePref === "system" && scheme == "dark")
-              ? "light"
-              : "dark"
-          }
-          backgroundColor={navTheme.colors.background}
+          backgroundColor={themePref === "dark" ? "#252429" : "white"}
         />
 
         <SWRConfig
@@ -275,7 +281,7 @@ export default function AppContent({
         >
           <SafeAreaProvider>
             <ActionSheetProvider>
-              <AlertNotificationRoot>
+              <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                 <NavigationContainer theme={navTheme} linking={linking}>
                   <OfflineBanner />
                   {tokens?.accessToken && isAuthenticated ? (

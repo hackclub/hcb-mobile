@@ -537,6 +537,7 @@ function PageContent({
             autoComplete="off"
             autoCorrect={false}
             placeholder={"Full name"}
+            placeholderTextColor={colors.text}
             returnKeyType="next"
             onSubmitEditing={() => {
               emailRef.current?.focus();
@@ -568,6 +569,7 @@ function PageContent({
             autoFocus
             clearButtonMode="while-editing"
             placeholder="Email"
+            placeholderTextColor={colors.text}
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}

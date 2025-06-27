@@ -28,6 +28,10 @@ export type StackParamList = {
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
   GrantCard: { grantId: string };
+  ShareIntentModal: {
+    images: string[];
+    missingTransactions: (Transaction & { organization: Organization })[];
+  };
 };
 
 export type CardsStackParamList = {
