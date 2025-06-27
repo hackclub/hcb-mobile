@@ -268,9 +268,11 @@ export default function ShareIntentModal({
           ) : (
             <Ionicons name="cloud-upload-outline" color="white" size={20} />
           )}
-          <Text style={{ color: "white", fontWeight: "600" }}>
-            {uploading ? "Uploading..." : "Upload"}
-          </Text>
+          {!uploading && (
+            <Text style={{ color: "white", fontWeight: "600" }}>
+              Upload
+            </Text>
+          ) }
         </TouchableOpacity>
       </View>
 
