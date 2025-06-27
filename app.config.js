@@ -99,15 +99,6 @@ export default {
         },
       ],
       [
-        "react-native-edge-to-edge",
-        {
-          android: {
-            parentTheme: "Default",
-            enforceNavigationBarContrast: false,
-          },
-        },
-      ],
-      [
         "expo-splash-screen",
         {
           ios: {
@@ -126,6 +117,15 @@ export default {
         "expo-document-picker",
         {
           iCloudContainerEnvironment: "Production",
+        },
+      ],
+      [
+        "expo-share-intent",
+        {
+          iosActivationRules: {
+            NSExtensionActivationSupportsImageWithMaxCount: 5,
+          },
+          androidIntentFilters: ["image/*"],
         },
       ],
     ],
