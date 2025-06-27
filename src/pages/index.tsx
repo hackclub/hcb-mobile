@@ -9,7 +9,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, useRef, memo } from "react";
+import { useEffect, useState, useRef, memo, useMemo } from "react";
 import {
   Text,
   View,
@@ -21,9 +21,8 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import {
-  NestedReorderableList,
-  ScrollViewContainer,
+import { Gesture } from "react-native-gesture-handler";
+import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
@@ -354,6 +353,9 @@ export default function App({ navigation }: Props) {
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+  const usePanGesture = () =>
+    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = usePanGesture();
 
   useEffect(() => {
     if (!shouldFetch()) return;
@@ -467,102 +469,101 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollViewContainer>
-      <NestedReorderableList
-        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
-        onReorder={({ from, to }) => {
-          Haptics.selectionAsync();
-          const newOrgs = [...sortedOrgs];
-          const [removed] = newOrgs.splice(from, 1);
-          newOrgs.splice(to, 0, removed);
-          if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
-            setSortedOrgs(newOrgs);
-          }
-        }}
-        scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: tabBarHeight,
-        }}
-        contentInsetAdjustmentBehavior="automatic"
-        data={sortedOrgs}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    <ReorderableList
+      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+      onReorder={({ from, to }) => {
+        Haptics.selectionAsync();
+        const newOrgs = [...sortedOrgs];
+        const [removed] = newOrgs.splice(from, 1);
+        newOrgs.splice(to, 0, removed);
+        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+          setSortedOrgs(newOrgs);
         }
-        ListHeaderComponent={() =>
-          invitations &&
-          invitations.length > 0 && (
-            <View
-              style={{
-                marginTop: 10,
-                marginBottom: 20,
-                borderRadius: 10,
-              }}
-            >
-              <Text
-                style={{
-                  color: palette.muted,
-                  fontSize: 12,
-                  textTransform: "uppercase",
-                  marginBottom: 10,
-                }}
-              >
-                Pending invitations
-              </Text>
-              {invitations.map((invitation) => (
-                <Event
-                  key={invitation.id}
-                  invitation={invitation}
-                  style={{
-                    borderWidth: 2,
-                    borderColor:
-                      scheme == "dark" ? palette.primary : palette.muted,
-                  }}
-                  event={invitation.organization}
-                  onPress={() =>
-                    navigation.navigate("Invitation", {
-                      inviteId: invitation.id,
-                      invitation,
-                    })
-                  }
-                  hideBalance
-                />
-                // <TouchableHighlight key={invitation.id}>
-                //   <Text
-                //     style={{
-                //       color: palette.smoke,
-                //       backgroundColor: palette.darkless,
-                //       padding: 10,
-                //       borderRadius: 10,
-                //       overflow: "hidden",
-                //     }}
-                //   >
-                //     {invitation.organization.name}
-                //   </Text>
-                // </TouchableHighlight>
-              ))}
-            </View>
-          )
-        }
-        renderItem={({ item: organization }) => (
-          <EventItem organization={organization} navigation={navigation} />
-        )}
-        ListFooterComponent={() =>
-          organizations.length > 2 && (
+      }}
+      scrollIndicatorInsets={{ bottom: tabBarHeight }}
+      contentContainerStyle={{
+        padding: 20,
+        paddingBottom: tabBarHeight,
+      }}
+      contentInsetAdjustmentBehavior="automatic"
+      data={sortedOrgs}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      panGesture={panGesture}
+      ListHeaderComponent={() =>
+        invitations &&
+        invitations.length > 0 && (
+          <View
+            style={{
+              marginTop: 10,
+              marginBottom: 20,
+              borderRadius: 10,
+            }}
+          >
             <Text
               style={{
                 color: palette.muted,
-                textAlign: "center",
-                marginTop: 10,
+                fontSize: 12,
+                textTransform: "uppercase",
                 marginBottom: 10,
               }}
             >
-              Drag to reorder organizations
+              Pending invitations
             </Text>
-          )
-        }
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
-    </ScrollViewContainer>
+            {invitations.map((invitation) => (
+              <Event
+                key={invitation.id}
+                invitation={invitation}
+                style={{
+                  borderWidth: 2,
+                  borderColor:
+                    scheme == "dark" ? palette.primary : palette.muted,
+                }}
+                event={invitation.organization}
+                onPress={() =>
+                  navigation.navigate("Invitation", {
+                    inviteId: invitation.id,
+                    invitation,
+                  })
+                }
+                hideBalance
+              />
+              // <TouchableHighlight key={invitation.id}>
+              //   <Text
+              //     style={{
+              //       color: palette.smoke,
+              //       backgroundColor: palette.darkless,
+              //       padding: 10,
+              //       borderRadius: 10,
+              //       overflow: "hidden",
+              //     }}
+              //   >
+              //     {invitation.organization.name}
+              //   </Text>
+              // </TouchableHighlight>
+            ))}
+          </View>
+        )
+      }
+      renderItem={({ item: organization }) => (
+        <EventItem organization={organization} navigation={navigation} />
+      )}
+      ListFooterComponent={() =>
+        organizations.length > 2 && (
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+          >
+            Drag to reorder organizations
+          </Text>
+        )
+      }
+      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+    />
   );
 }
