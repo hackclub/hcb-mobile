@@ -281,7 +281,7 @@ export default function AppContent({
         >
           <SafeAreaProvider>
             <ActionSheetProvider>
-              <AlertNotificationRoot theme={isDark ? 'dark' : 'light'}>
+              <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                 <NavigationContainer theme={navTheme} linking={linking}>
                   <OfflineBanner />
                   {tokens?.accessToken && isAuthenticated ? (
