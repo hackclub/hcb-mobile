@@ -34,7 +34,7 @@
     "@sentry/cli": "^2.44.0",
     "@sentry/react-native": "~6.10.0",
     "@stripe/stripe-terminal-react-native": "^0.0.1-beta.24",
-    "@thedev132/hackclub-icons-rn": "^0.0.14",
+    "@thedev132/hackclub-icons-rn": "^0.0.15",
     "@thedev132/yellowpages": "^1.0.0",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
