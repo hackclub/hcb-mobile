@@ -90,12 +90,12 @@ export default function SettingsPage({ navigation }: Props) {
   }, [animation]);
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     if (Platform.OS === "android") {
-    await SystemUI.setBackgroundColorAsync(
-      value == "dark" || (value == "system" && scheme == "dark")
-        ? "#252429"
-        : "white",
-    );
-  }
+      await SystemUI.setBackgroundColorAsync(
+        value == "dark" || (value == "system" && scheme == "dark")
+          ? "#252429"
+          : "white",
+      );
+    }
     setTheme(value);
   };
 
