@@ -122,10 +122,20 @@ export default function CardPage(
   const [isCategoryInitialized, setIsCategoryInitialized] = useState(false);
 
   useEffect(() => {
-    Merchant.initialize();
-    Category.initialize();
-    setIsMerchantInitialized(true);
-    setIsCategoryInitialized(true);
+    const initializeLibraries = async () => {
+      try {
+        await Promise.all([Merchant.initialize(), Category.initialize()]);
+        setIsMerchantInitialized(true);
+        setIsCategoryInitialized(true);
+      } catch (error) {
+        console.error("Error initializing libraries:", error);
+        // Set flags to true even on error to prevent infinite loading
+        setIsMerchantInitialized(true);
+        setIsCategoryInitialized(true);
+      }
+    };
+
+    initializeLibraries();
   }, []);
 
   useEffect(() => {
@@ -526,26 +536,31 @@ export default function CardPage(
       return "All";
     }
 
-    const merchantNames: string[] = [];
-    const validIds = merchantIds.filter((id): id is string => !!id);
-    const unnamedCount = validIds.filter((id) => {
-      const merchant = Merchant.lookup({ networkId: id });
-      if (merchant.inDataset()) {
-        const name = merchant.getName();
-        if (name && !merchantNames.includes(name)) {
-          merchantNames.push(name);
+    try {
+      const merchantNames: string[] = [];
+      const validIds = merchantIds.filter((id): id is string => !!id);
+      const unnamedCount = validIds.filter((id) => {
+        const merchant = Merchant.lookup({ networkId: id });
+        if (merchant.inDataset()) {
+          const name = merchant.getName();
+          if (name && !merchantNames.includes(name)) {
+            merchantNames.push(name);
+          }
+          return false;
         }
-        return false;
+        return true;
+      }).length;
+
+      // Add unnamed merchants count if any
+      if (unnamedCount > 0) {
+        merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
       }
-      return true;
-    }).length;
 
-    // Add unnamed merchants count if any
-    if (unnamedCount > 0) {
-      merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
+      return merchantNames.join(", ");
+    } catch (error) {
+      console.error("Error formatting merchant names:", error);
+      return "Loading...";
     }
-
-    return merchantNames.join(", ");
   };
 
   const formatCategoryNames = (categoryIds: string[] | undefined) => {
@@ -553,25 +568,30 @@ export default function CardPage(
       return "All";
     }
 
-    const categoryNames: string[] = [];
-    const validIds = categoryIds.filter((id): id is string => !!id);
-    const unnamedCount = validIds.filter((id) => {
-      const category = Category.lookup({ key: id });
-      if (category.inDataset()) {
-        const name = category.getName();
-        if (name && !categoryNames.includes(name)) {
-          categoryNames.push(name);
+    try {
+      const categoryNames: string[] = [];
+      const validIds = categoryIds.filter((id): id is string => !!id);
+      const unnamedCount = validIds.filter((id) => {
+        const category = Category.lookup({ key: id });
+        if (category.inDataset()) {
+          const name = category.getName();
+          if (name && !categoryNames.includes(name)) {
+            categoryNames.push(name);
+          }
+          return false;
         }
-        return false;
+        return true;
+      }).length;
+
+      if (unnamedCount > 0) {
+        categoryNames.push(`Unnamed Categories (${unnamedCount})`);
       }
-      return true;
-    }).length;
 
-    if (unnamedCount > 0) {
-      categoryNames.push(`Unnamed Categories (${unnamedCount})`);
+      return categoryNames.join(", ");
+    } catch (error) {
+      console.error("Error formatting category names:", error);
+      return "Loading...";
     }
-
-    return categoryNames.join(", ");
   };
 
   function getCardActionButtons() {
