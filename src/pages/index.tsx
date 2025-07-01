@@ -467,7 +467,7 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ScrollViewContainer>
+    <ScrollViewContainer contentInsetAdjustmentBehavior="automatic">
       <NestedReorderableList
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
         onReorder={({ from, to }) => {
