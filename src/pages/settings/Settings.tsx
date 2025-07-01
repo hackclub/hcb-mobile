@@ -14,6 +14,7 @@ import {
   ScrollView,
   Animated,
   useColorScheme,
+  Platform,
 } from "react-native";
 import useSWR from "swr";
 
@@ -88,11 +89,13 @@ export default function SettingsPage({ navigation }: Props) {
     }).start();
   }, [animation]);
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
-    await SystemUI.setBackgroundColorAsync(
-      value == "dark" || (value == "system" && scheme == "dark")
-        ? "#252429"
-        : "white",
-    );
+    if (Platform.OS === "android") {
+      await SystemUI.setBackgroundColorAsync(
+        value == "dark" || (value == "system" && scheme == "dark")
+          ? "#252429"
+          : "white",
+      );
+    }
     setTheme(value);
   };
 

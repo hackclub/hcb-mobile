@@ -291,8 +291,8 @@ export default function OrganizationPage({
     }, [mockTransactions]);
 
   const onRefresh = () => {
-    mutate("organizations");
     mutate(`organizations/${orgId}`);
+    mutate(`organizations/${orgId}/transactions`);
   };
 
   if (organizationLoading || userLoading) {
