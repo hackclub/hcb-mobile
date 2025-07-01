@@ -102,7 +102,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             try {
               setDeletingReceiptId(receipt.id);
               await hcb.delete(
-                `organizations/${orgId}/transactions/${transaction.id}/receipts/${receipt.id}`,
+                `organizations/${orgId}/transactions/${transaction.id}/receipts/${receipt.id.replace("rct_", "")}`,
               );
 
               Toast.show({
@@ -172,12 +172,13 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                 <TouchableOpacity
                   style={{
                     position: "absolute",
-                    top: 4,
-                    right: 4,
+                    top: 6,
+                    right: 6,
                     padding: 4,
                     backgroundClip: "padding-box",
                     borderRadius: 100,
                     backgroundColor: isDark ? "#26181F" : "#ECE0E2",
+                    opacity: 0.8,
                   }}
                   onPress={() => handleDeleteReceipt(receipt)}
                   disabled={deletingReceiptId === receipt.id || !isOnline}
