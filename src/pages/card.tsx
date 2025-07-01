@@ -124,14 +124,11 @@ export default function CardPage(
   useEffect(() => {
     const initializeLibraries = async () => {
       try {
-        await Promise.all([
-          Merchant.initialize(),
-          Category.initialize()
-        ]);
+        await Promise.all([Merchant.initialize(), Category.initialize()]);
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
       } catch (error) {
-        console.error('Error initializing libraries:', error);
+        console.error("Error initializing libraries:", error);
         // Set flags to true even on error to prevent infinite loading
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
@@ -561,7 +558,7 @@ export default function CardPage(
 
       return merchantNames.join(", ");
     } catch (error) {
-      console.error('Error formatting merchant names:', error);
+      console.error("Error formatting merchant names:", error);
       return "Loading...";
     }
   };
@@ -592,7 +589,7 @@ export default function CardPage(
 
       return categoryNames.join(", ");
     } catch (error) {
-      console.error('Error formatting category names:', error);
+      console.error("Error formatting category names:", error);
       return "Loading...";
     }
   };
