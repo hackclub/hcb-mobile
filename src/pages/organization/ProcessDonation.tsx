@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button, ActivityIndicator } from "react-native";
+import { View, Text, StatusBar, Button, ActivityIndicator, Platform } from "react-native";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
 
@@ -93,7 +93,7 @@ export default function ProcessDonationPage({
               width: "100%",
             }}
           >
-            Use Tap to Pay
+            {Platform.OS === "ios" ? "Use Tap to Pay on iPhone" : "Use Tap to Pay"}
           </StyledButton>
         </View>
       ) : status == "success" ? (
