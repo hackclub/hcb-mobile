@@ -2,8 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { formatDistanceToNow } from "date-fns";
-import * as Clipboard from "expo-clipboard";
+import { formatDistanceToNow, formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useMemo, useLayoutEffect } from "react";
 import {
@@ -13,21 +12,23 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Alert,
+  Image,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
+import UploadIcon from "../components/icons/UploadIcon";
 import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
+import { useIsDark } from "../lib/useColorScheme";
 import Organization from "../lib/types/Organization";
+import Receipt from "../lib/types/Receipt";
 import { TransactionCardCharge } from "../lib/types/Transaction";
 import p from "../palette";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { da } from "date-fns/locale";
 
 function Transaction({
   transaction,
@@ -104,7 +105,7 @@ function Transaction({
             {loading ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
-              <Icon glyph="download" size={24} color="white" />
+              <UploadIcon size={26} color="white" />
             )}
           </TouchableOpacity>
           
@@ -196,9 +197,12 @@ export default function ReceiptsPage({ navigation }: Props) {
   const { data, mutate, isLoading } = useSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
   }>("user/transactions/missing_receipt");
-
-  const [emailAddress, setEmailAddress] = useState("turtle.1451@hcb.gg");
+  const { data: receipts } = useSWR<Receipt[]>("user/receipt_bin");
+  const [ImageViewerIndex, setImageViewerIndex] = useState(0);
+  const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const isDark = useIsDark();
+  console.log(receipts);
 
   // Set navigation title
   useLayoutEffect(() => {
@@ -236,28 +240,9 @@ export default function ReceiptsPage({ navigation }: Props) {
     setRefreshing(false);
   };
 
-  const copyToClipboard = async (text: string) => {
-    await Clipboard.setStringAsync(text);
-    Toast.show({
-      type: ALERT_TYPE.SUCCESS,
-      title: "Copied!",
-      textBody: "Email address copied to clipboard.",
-    });
-  };
-
-  const refreshEmailAddress = () => {
-    const randomNum = Math.floor(Math.random() * 10000);
-    setEmailAddress(`turtle.${randomNum}@hcb.gg`);
-    Toast.show({
-      type: ALERT_TYPE.SUCCESS,
-      title: "Email Refreshed!",
-      textBody: "A new email address has been generated.",
-    });
-  };
-
-  const { handleActionSheet, isOnline } = useReceiptActionSheet({
+  const { handleActionSheet } = useReceiptActionSheet({
     orgId: data?.data[0]?.organization?.id || "",
-    transactionId: null,
+    transactionId: data?.data[0]?.id || "",
   });
   const handleTransactionUpload = async (transaction: TransactionCardCharge & { organization: Organization }) => {
     try {
@@ -283,13 +268,11 @@ export default function ReceiptsPage({ navigation }: Props) {
     }
   };
 
-  const handleTransactionSelect = (_transaction: TransactionCardCharge & { organization: Organization }) => {
-    // This would open a receipt bin modal in the future
-    Alert.alert(
-      "Receipt Bin",
-      "Receipt bin functionality will be available soon. Use the upload option to add new receipts.",
-      [{ text: "OK" }]
-    );
+  const handleTransactionSelect = (transaction: TransactionCardCharge & { organization: Organization }) => {
+    // Navigate to ReceiptSelectionModal
+    (navigation as any).navigate("ReceiptSelectionModal", {
+      transaction,
+    });
   };
 
   if (isLoading) {
@@ -365,54 +348,70 @@ export default function ReceiptsPage({ navigation }: Props) {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Email Upload Section */}
-        <View style={{ marginBottom: 24 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
-            <Icon glyph="email" size={20} color={themeColors.text} />
-            <Text
-              style={{
-                marginLeft: 8,
-                fontSize: 18,
-                fontWeight: "600",
-                color: themeColors.text,
-              }}
-            >
-              Send in via email
-            </Text>
-          </View>
-          <Text style={{ color: palette.muted, marginBottom: 12, fontSize: 14 }}>
-            Send from in-store terminals, or forward emails later.
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: themeColors.card,
-              borderRadius: 8,
-              padding: 12,
+        {/* Receipts */}
+        <ScrollView horizontal style={{ marginBottom: 20 }} >
+        {receipts?.map((receipt) => (
+          <TouchableOpacity
+            key={receipt.id}
+            onPress={() => {
+              setImageViewerIndex(receipts.indexOf(receipt));
+              setIsImageViewerVisible(true);
             }}
           >
-            <Text
-              style={{
-                flex: 1,
-                color: themeColors.text,
-                fontSize: 16,
-                fontFamily: "JetBrainsMono-Regular",
-              }}
-            >
-              {emailAddress}
-            </Text>
-            <TouchableOpacity 
-              onPress={refreshEmailAddress}
-              style={{ marginRight: 12 }}
-            >
-              <Ionicons name="refresh-outline" size={20} color={p.sky["500"]} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => copyToClipboard(emailAddress)}>
-              <Ionicons name="copy-outline" size={20} color={p.sky["500"]} />
-            </TouchableOpacity>
-          </View>
-        </View>
+            <View key={receipt.id}>
+              <View style={{ position: "relative" }}>
+                <Image
+                  source={{ uri: receipt.preview_url }}
+                  style={{
+                    width: 150,
+                    height: 200,
+                    backgroundColor: themeColors.card,
+                    borderRadius: 8,
+                  }}
+                />
+                <TouchableOpacity
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    padding: 4,
+                    backgroundClip: "padding-box",
+                    borderRadius: 100,
+                    backgroundColor: isDark ? "#26181F" : "#ECE0E2",
+                    opacity: 0.8,
+                  }}
+                  onPress={() => {}}
+                >
+                    <Icon glyph="view-close" size={20} color="red" />
+                </TouchableOpacity>
+              </View>
+              <Text
+                style={{ color: palette.muted, fontSize: 12, marginTop: 5 }}
+              >
+                Added {formatDistanceToNowStrict(parseISO(receipt.created_at))}{" "}
+                ago
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        </ScrollView>
+        <ImageView
+          images={
+            receipts?.map((receipt) => {
+              const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(
+                receipt.url || "",
+              );
+              return { uri: isImage ? receipt.url : receipt.preview_url };
+            }) || []
+          }
+          imageIndex={ImageViewerIndex}
+          visible={isImageViewerVisible}
+          onRequestClose={() => setIsImageViewerVisible(false)}
+        />
+
+
+
+
 
         {/* Upload Section */}
         <View
@@ -437,7 +436,7 @@ export default function ReceiptsPage({ navigation }: Props) {
             }}
             onPress={handleActionSheet}
           >
-            <Icon glyph="upload" size={20} color="white" />
+            <UploadIcon size={28} color="white" />
             <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
               Upload receipt
             </Text>

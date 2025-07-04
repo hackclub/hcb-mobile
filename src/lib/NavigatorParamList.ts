@@ -48,6 +48,9 @@ export type CardsStackParamList = {
 
 export type ReceiptsStackParamList = {
   MissingReceiptList: undefined;
+  ReceiptSelectionModal: {
+    transaction: Transaction & { organization: Organization };
+  };
 };
 
 export type TabParamList = {

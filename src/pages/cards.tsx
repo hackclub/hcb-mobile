@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { memo, useCallback, useEffect, useState } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Pressable, RefreshControl, Text, useColorScheme, View } from "react-native";
 import {
   NestedReorderableList,
   ScrollViewContainer,
@@ -33,7 +33,7 @@ type CardItemProps = {
   patternDimensions?: { width: number; height: number };
 };
 
-const CardItem = memo(
+const CardItem =
   ({ item, isActive, onPress, pattern, patternDimensions }: CardItemProps) => {
     const drag = useReorderableDrag();
     return (
@@ -50,14 +50,7 @@ const CardItem = memo(
         />
       </Pressable>
     );
-  },
-  (prevProps, nextProps) =>
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.isActive === nextProps.isActive &&
-    prevProps.pattern === nextProps.pattern,
-);
-
-CardItem.displayName = "CardItem";
+  };
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
@@ -87,6 +80,9 @@ export default function CardsPage({ navigation }: Props) {
 
       for (const card of allCards) {
         if (card.type !== "virtual") continue;
+
+        // Debug logging
+        console.log(`Card ${card.id} status: ${card.status}`);
 
         try {
           const patternData = await generate({
@@ -121,10 +117,16 @@ export default function CardsPage({ navigation }: Props) {
     generatePatterns();
   }, [cards, grantCards]);
 
-  useFocusEffect(() => {
-    reloadCards();
-    reloadGrantCards();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      // Reload data when screen comes into focus
+      const refreshData = async () => {
+        await reloadCards();
+        await reloadGrantCards();
+      };
+      refreshData();
+    }, [reloadCards, reloadGrantCards])
+  );
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [allCards, setAllCards] =
@@ -269,7 +271,7 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-      <ScrollViewContainer>
+      <ScrollViewContainer refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <NestedReorderableList
           data={
             canceledCardsShown
@@ -292,8 +294,7 @@ export default function CardsPage({ navigation }: Props) {
             paddingTop: 20,
             alignItems: "center",
           }}
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
-          onRefresh={onRefresh}
+          showsVerticalScrollIndicator={false}
           refreshing={refreshing}
           renderItem={({ item }) => (
             <CardItem

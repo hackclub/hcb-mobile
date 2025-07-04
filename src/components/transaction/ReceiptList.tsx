@@ -28,7 +28,7 @@ import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
 
-function ZoomAndFadeIn() {
+export function ZoomAndFadeIn() {
   "worklet";
   const animations = {
     opacity: withTiming(1, { duration: 300 }),

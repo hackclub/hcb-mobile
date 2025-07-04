@@ -30,6 +30,7 @@ import ProcessDonationPage from "./pages/organization/ProcessDonation";
 import OrganizationTeamPage from "./pages/organization/Team";
 import TransferPage from "./pages/organization/transfer";
 import ReceiptsPage from "./pages/Receipts";
+import ReceiptSelectionModal from "./pages/ReceiptSelectionModal";
 import RenameTransactionPage from "./pages/RenameTransaction";
 import About from "./pages/settings/About";
 import AppIconSelector from "./pages/settings/AppIconSelector";
@@ -267,6 +268,16 @@ export default function Navigator() {
               name="MissingReceiptList"
               options={{ title: "Missing Receipts" }}
               component={ReceiptsPage}
+            />
+            <ReceiptsStack.Screen
+              name="ReceiptSelectionModal"
+              component={ReceiptSelectionModal}
+              options={{
+                presentation: "modal",
+                title: "Select Receipts",
+                headerShown: false,
+                animation: "slide_from_bottom",
+              }}
             />
           </ReceiptsStack.Navigator>
         )}

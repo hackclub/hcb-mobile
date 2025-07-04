@@ -186,8 +186,12 @@ export default function CardPage(
       status: updatedStatus,
     };
 
+    console.log(`Updating card ${card?.id} status to: ${updatedStatus}`);
+
+    // Update the specific card cache
     mutate(`cards/${card?.id}`, updatedCard, false);
 
+    // Update the user/cards list cache
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
@@ -195,10 +199,24 @@ export default function CardPage(
       false,
     );
 
+    // Also update grant cards if this is a grant card
+    if (grantId) {
+      mutate(
+        "user/card_grants",
+        (list: GrantCard[] | undefined) =>
+          list?.map((c) => (c.card_id === updatedCard.id ? { ...c, status: updatedStatus } : c)),
+        false,
+      );
+    }
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+    // Force revalidation
     mutate(`cards/${card?.id}`);
     mutate("user/cards");
+    if (grantId) {
+      mutate("user/card_grants");
+    }
   };
 
   const toggleCardFrozen = () => {
