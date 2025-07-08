@@ -14,6 +14,7 @@ import {
   View,
   Image,
 } from "react-native";
+import Animated from "react-native-reanimated";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +30,7 @@ import { TransactionCardCharge } from "../lib/types/Transaction";
 import p from "../palette";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
+import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
 
 function Transaction({
   transaction,
@@ -351,6 +353,7 @@ export default function ReceiptsPage({ navigation }: Props) {
         {/* Receipts */}
         <ScrollView horizontal style={{ marginBottom: 20 }} >
         {receipts?.map((receipt) => (
+          <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
           <TouchableOpacity
             key={receipt.id}
             onPress={() => {
@@ -393,6 +396,7 @@ export default function ReceiptsPage({ navigation }: Props) {
               </Text>
             </View>
           </TouchableOpacity>
+          </Animated.View>
         ))}
         </ScrollView>
         <ImageView

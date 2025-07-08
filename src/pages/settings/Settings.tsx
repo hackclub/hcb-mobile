@@ -89,6 +89,7 @@ export default function SettingsPage({ navigation }: Props) {
     }).start();
   }, [animation]);
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
+    setTheme(value);
     if (Platform.OS === "android") {
       await SystemUI.setBackgroundColorAsync(
         value == "dark" || (value == "system" && scheme == "dark")
@@ -96,7 +97,6 @@ export default function SettingsPage({ navigation }: Props) {
           : "white",
       );
     }
-    setTheme(value);
   };
 
   const handleSignOut = async () => {

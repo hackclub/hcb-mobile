@@ -6,9 +6,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, RefreshControl, Text, useColorScheme, View } from "react-native";
-import {
+import ReorderableList, {
   NestedReorderableList,
   ScrollViewContainer,
   useReorderableDrag,
@@ -22,6 +22,7 @@ import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
 import { normalizeSvg } from "../util";
+import { Gesture } from "react-native-gesture-handler";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
@@ -81,9 +82,6 @@ export default function CardsPage({ navigation }: Props) {
       for (const card of allCards) {
         if (card.type !== "virtual") continue;
 
-        // Debug logging
-        console.log(`Card ${card.id} status: ${card.status}`);
-
         try {
           const patternData = await generate({
             input: card.id,
@@ -134,6 +132,9 @@ export default function CardsPage({ navigation }: Props) {
   const [sortedCards, setSortedCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [refreshing] = useState(false);
+  const usePanGesture = () =>
+    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = usePanGesture();
 
   useEffect(() => {
     navigation.setOptions({
@@ -271,8 +272,7 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-      <ScrollViewContainer refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <NestedReorderableList
+        <ReorderableList
           data={
             canceledCardsShown
               ? sortedCards
@@ -295,7 +295,8 @@ export default function CardsPage({ navigation }: Props) {
             alignItems: "center",
           }}
           showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          panGesture={panGesture}
           renderItem={({ item }) => (
             <CardItem
               item={item}
@@ -320,7 +321,6 @@ export default function CardsPage({ navigation }: Props) {
             )
           }
         />
-      </ScrollViewContainer>
     );
   } else {
     return (

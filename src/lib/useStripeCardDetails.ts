@@ -34,6 +34,8 @@ export default function useStripeCardDetails(cardId: string) {
             `cards/${cardId}/ephemeral_keys?nonce=${public_nonce}`,
           ).json<{ ephemeralKeySecret: string; stripe_id: string }>();
 
+          console.log(stripeId)
+
           const { number, cvc, exp_month, exp_year } = await ky(
             `https://api.stripe.com/v1/issuing/cards/${stripeId}`,
             {

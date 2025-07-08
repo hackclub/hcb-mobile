@@ -5,6 +5,7 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import useClient from "../lib/client";
 import { useOffline } from "../lib/useOffline";
+import { useIsDark } from "../lib/useColorScheme";
 
 interface ReceiptActionSheetProps {
   orgId: string;
@@ -20,6 +21,7 @@ export function useReceiptActionSheet({
   const { showActionSheetWithOptions } = useActionSheet();
   const { isOnline, withOfflineCheck } = useOffline();
   const hcb = useClient();
+  const isDark = useIsDark();
 
   const uploadFile = withOfflineCheck(
     async (
@@ -87,6 +89,7 @@ export function useReceiptActionSheet({
       {
         options,
         cancelButtonIndex,
+        userInterfaceStyle: isDark ? "dark" : "light",
       },
       async (buttonIndex) => {
         if (buttonIndex === 0) {
