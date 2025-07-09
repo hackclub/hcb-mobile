@@ -16,7 +16,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Animated,
-  Alert,
   Modal,
   TextInput,
 } from "react-native";
@@ -28,6 +27,7 @@ import Divider from "../../components/Divider";
 import PaymentCard from "../../components/PaymentCard";
 import Transaction from "../../components/Transaction";
 import UserAvatar from "../../components/UserAvatar";
+import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
@@ -223,7 +223,7 @@ export default function CardPage(
 
   const toggleCardFrozen = () => {
     if (!card || !card.id) {
-      Alert.alert("Error", "Cannot update card status. Please try again.");
+      showAlert("Error", "Cannot update card status. Please try again.");
       return;
     }
 
@@ -241,7 +241,7 @@ export default function CardPage(
         console.error("Error updating card status:", err);
         setIsUpdatingStatus(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        Alert.alert(
+        showAlert(
           "Error",
           "Failed to update card status. Please try again later.",
           [{ text: "OK" }],
@@ -319,10 +319,10 @@ export default function CardPage(
   const [isReturningGrant, setisReturningGrant] = useState(false);
   const returnGrant = async () => {
     if (!card || !card.id) {
-      Alert.alert("Error", "Cannot update card status. Please try again.");
+      showAlert("Error", "Cannot update card status. Please try again.");
       return;
     }
-    Alert.alert(
+    showAlert(
       `${!isCardholder ? "Cancel and return" : "Return"} ${renderMoney(
         grantCard.amount_cents - (card?.total_spent_cents ?? 0),
       )} to ${card.organization.name}?`,
@@ -347,7 +347,7 @@ export default function CardPage(
             } catch (err) {
               console.error("Error returning grant:", err);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert(
+              showAlert(
                 "Error",
                 "Failed to return grant. Please try again later.",
                 [{ text: "OK" }],
@@ -362,7 +362,7 @@ export default function CardPage(
   };
   const handleActivate = async () => {
     if (!last4 || last4.length !== 4) {
-      Alert.alert("Error", "Please enter the last 4 digits of your card");
+      showAlert("Error", "Please enter the last 4 digits of your card");
       return;
     }
 
@@ -379,12 +379,12 @@ export default function CardPage(
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
         const data = (await response.json()) as { error?: string };
-        Alert.alert("Error", data.error || "Failed to activate card");
+        showAlert("Error", data.error || "Failed to activate card");
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
       console.error("Error activating card:", err);
-      Alert.alert("Error", "Failed to activate card. Please try again later.");
+      showAlert("Error", "Failed to activate card. Please try again later.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setActivating(false);
@@ -425,13 +425,13 @@ export default function CardPage(
 
   const handleTopup = async () => {
     if (!grantCard || !grantCard.grant_id) {
-      Alert.alert("Error", "Cannot top up card. Please try again.");
+      showAlert("Error", "Cannot top up card. Please try again.");
       return;
     }
 
     const amountCents = Math.round(parseFloat(topupAmount) * 100);
     if (isNaN(amountCents) || amountCents <= 0) {
-      Alert.alert("Error", "Please enter a valid amount.");
+      showAlert("Error", "Please enter a valid amount.");
       return;
     }
 
@@ -447,7 +447,7 @@ export default function CardPage(
     } catch (err) {
       console.error("Error topping up card:", err);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Error", "Failed to top up card. Please try again later.", [
+      showAlert("Error", "Failed to top up card. Please try again later.", [
         { text: "OK" },
       ]);
     } finally {

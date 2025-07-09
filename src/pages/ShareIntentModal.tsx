@@ -8,13 +8,13 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   Platform,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
@@ -102,7 +102,7 @@ export default function ShareIntentModal({
 
     if (validImages.length === 0) {
       console.warn("No valid images provided to ShareIntentModal");
-      Alert.alert(
+      showAlert(
         "Invalid Share Intent",
         "No valid images were provided. Please try sharing again.",
         [{ text: "OK", onPress: () => navigation.goBack() }],
@@ -224,7 +224,7 @@ export default function ShareIntentModal({
       transactionAssignments.length === 0 &&
       receiptBinAssignments.length === 0
     ) {
-      Alert.alert(
+      showAlert(
         "No Assignments",
         "Please assign at least one image to a transaction or receipt bin before uploading.",
       );

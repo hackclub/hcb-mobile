@@ -313,9 +313,7 @@ export default function AppContent({
   return (
     <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
       <GestureHandlerRootView>
-        <StatusBar
-          backgroundColor={themePref === "dark" ? "#252429" : "white"}
-        />
+        <StatusBar style={isDark ? "light" : "dark"} />
 
         <SWRConfig
           value={{

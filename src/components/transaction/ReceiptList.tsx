@@ -5,18 +5,13 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import { useState } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR from "swr";
 
+import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
@@ -87,7 +82,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     });
 
   const handleDeleteReceipt = withOfflineCheck(async (receipt: Receipt) => {
-    Alert.alert(
+    showAlert(
       "Delete Receipt",
       "Are you sure you want to delete this receipt? This action cannot be undone.",
       [

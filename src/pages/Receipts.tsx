@@ -11,7 +11,6 @@ import * as ImagePicker from "expo-image-picker";
 import { useState, useMemo, useLayoutEffect } from "react";
 import {
   ActivityIndicator,
-  Alert,
   RefreshControl,
   ScrollView,
   Text,
@@ -28,6 +27,7 @@ import useSWR from "swr";
 import UploadIcon from "../components/icons/UploadIcon";
 import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
 import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
+import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
@@ -292,7 +292,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   };
 
   const handleDeleteReceipt = async (receiptId: string) => {
-    Alert.alert(
+    showAlert(
       "Delete Receipt",
       "Are you sure you want to delete this receipt? This action cannot be undone.",
       [

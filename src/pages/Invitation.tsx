@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import {
   View,
   Text,
-  Alert,
   StatusBar,
   TouchableHighlight,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import Button from "../components/Button";
+import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Invitation from "../lib/types/Invitation";
@@ -69,10 +69,10 @@ export default function InvitationPage({
         });
         mutate(`user/organizations`);
       },
-      onError: (error: Error) => {
-        Alert.alert(
-          "Failed to Accept Invitation. You may have to sign the contract.",
-          error.message,
+      onError: () => {
+        showAlert(
+          "Failed to Accept Invitation",
+          "You may have to sign the contract. Please contact HCB support if you believe this is an error.",
           [
             {
               text: "OK",
@@ -159,7 +159,7 @@ export default function InvitationPage({
             <Button
               style={{ minWidth: 100 }}
               onPress={() =>
-                Alert.alert(
+                showAlert(
                   "Are you sure you want to decline this invitation?",
                   undefined,
                   [
