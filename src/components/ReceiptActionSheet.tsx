@@ -15,7 +15,7 @@ interface ReceiptActionSheetProps {
 
 export function useReceiptActionSheet({
   orgId,
-  transactionId,
+  transactionId = "",
   onUploadComplete,
 }: ReceiptActionSheetProps) {
   const { showActionSheetWithOptions } = useActionSheet();
@@ -40,9 +40,13 @@ export function useReceiptActionSheet({
         type: file?.mimeType || "image/jpeg",
       });
 
+      if (transactionId) {
+        body.append("transaction_id", transactionId)
+      }
+
       try {
         await hcb.post(
-          `organizations/${orgId}/transactions/${transactionId}/receipts`,
+          `receipts`,
           {
             body,
           },

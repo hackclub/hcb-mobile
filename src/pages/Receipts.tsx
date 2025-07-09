@@ -7,6 +7,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useState, useMemo, useLayoutEffect } from "react";
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   Text,
@@ -14,23 +15,24 @@ import {
   View,
   Image,
 } from "react-native";
-import Animated from "react-native-reanimated";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ImageView from "react-native-image-viewing";
+import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import UploadIcon from "../components/icons/UploadIcon";
 import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
+import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
+import useClient from "../lib/client";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
-import { useIsDark } from "../lib/useColorScheme";
 import Organization from "../lib/types/Organization";
 import Receipt from "../lib/types/Receipt";
 import { TransactionCardCharge } from "../lib/types/Transaction";
+import { useIsDark } from "../lib/useColorScheme";
 import p from "../palette";
 import { palette } from "../theme";
 import { renderMoney } from "../util";
-import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
 
 function Transaction({
   transaction,
@@ -199,11 +201,13 @@ export default function ReceiptsPage({ navigation }: Props) {
   const { data, mutate, isLoading } = useSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
   }>("user/transactions/missing_receipt");
-  const { data: receipts } = useSWR<Receipt[]>("user/receipt_bin");
+  const { data: receipts, mutate: refreshReceipts } = useSWR<Receipt[]>("receipts");
   const [ImageViewerIndex, setImageViewerIndex] = useState(0);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [deletingReceiptId, setDeletingReceiptId] = useState<string | null>(null);
   const isDark = useIsDark();
+  const hcb = useClient();
   console.log(receipts);
 
   // Set navigation title
@@ -239,13 +243,63 @@ export default function ReceiptsPage({ navigation }: Props) {
   const onRefresh = async () => {
     setRefreshing(true);
     await mutate();
+    await refreshReceipts();
     setRefreshing(false);
   };
 
   const { handleActionSheet } = useReceiptActionSheet({
-    orgId: data?.data[0]?.organization?.id || "",
-    transactionId: data?.data[0]?.id || "",
+    orgId: "",
+    transactionId: "",
+    onUploadComplete: () => {
+      refreshReceipts();
+    },
   });
+
+  const handleReceiptUpload = () => {
+    handleActionSheet();
+  }
+
+  const handleDeleteReceipt = async (receiptId: string) => {
+    Alert.alert(
+      "Delete Receipt",
+      "Are you sure you want to delete this receipt? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeletingReceiptId(receiptId);
+              await hcb.delete(`receipts/${receiptId.replace("rct_", "")}`);
+              
+              Toast.show({
+                type: ALERT_TYPE.SUCCESS,
+                title: "Receipt Deleted",
+                textBody: "The receipt has been successfully deleted.",
+              });
+
+              // Refresh the receipts list
+              refreshReceipts();
+            } catch (error) {
+              console.error("Error deleting receipt:", error);
+              Toast.show({
+                type: ALERT_TYPE.DANGER,
+                title: "Delete Failed",
+                textBody: "Failed to delete receipt. Please try again later.",
+              });
+            } finally {
+              setDeletingReceiptId(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleTransactionUpload = async (transaction: TransactionCardCharge & { organization: Organization }) => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -272,7 +326,7 @@ export default function ReceiptsPage({ navigation }: Props) {
 
   const handleTransactionSelect = (transaction: TransactionCardCharge & { organization: Organization }) => {
     // Navigate to ReceiptSelectionModal
-    (navigation as any).navigate("ReceiptSelectionModal", {
+    navigation.navigate("ReceiptSelectionModal", {
       transaction,
     });
   };
@@ -287,61 +341,6 @@ export default function ReceiptsPage({ navigation }: Props) {
     );
   }
 
-  if (!data?.data || data.data.length === 0) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
-        <ScrollView
-          contentContainerStyle={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <View style={{ alignItems: "center", marginBottom: 20 }}>
-            <View style={{ position: "relative" }}>
-              <Ionicons name="receipt-outline" color={palette.muted} size={60} />
-              <View
-                style={{
-                  position: "absolute",
-                  top: -8,
-                  right: -8,
-                  backgroundColor: p.emerald["400"],
-                  borderRadius: 12,
-                  width: 24,
-                  height: 24,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Ionicons name="checkmark" color="white" size={16} />
-              </View>
-            </View>
-          </View>
-          <Text style={{ 
-            color: themeColors.text, 
-            fontSize: 18, 
-            fontWeight: "600",
-            marginBottom: 8,
-          }}>
-            Receipt Bin is empty
-          </Text>
-          <Text style={{ 
-            color: palette.muted, 
-            textAlign: "center",
-            lineHeight: 20,
-          }}>
-            All your transactions have receipts attached.{"\n"}
-            Great job staying organized!
-          </Text>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
   return (
       <ScrollView
         style={{ flex: 1 }}
@@ -351,8 +350,8 @@ export default function ReceiptsPage({ navigation }: Props) {
         }
       >
         {/* Receipts */}
-        <ScrollView horizontal style={{ marginBottom: 20 }} >
-        {receipts?.map((receipt) => (
+        <ScrollView horizontal style={{ marginBottom: 20, gap: 20 }} contentContainerStyle={{ gap: 20 }} showsHorizontalScrollIndicator={false}>
+        {receipts?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((receipt) => (
           <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
           <TouchableOpacity
             key={receipt.id}
@@ -383,9 +382,14 @@ export default function ReceiptsPage({ navigation }: Props) {
                     backgroundColor: isDark ? "#26181F" : "#ECE0E2",
                     opacity: 0.8,
                   }}
-                  onPress={() => {}}
+                  onPress={() => handleDeleteReceipt(receipt.id)}
+                  disabled={deletingReceiptId === receipt.id}
                 >
+                  {deletingReceiptId === receipt.id ? (
+                    <ActivityIndicator size={20} color="red" />
+                  ) : (
                     <Icon glyph="view-close" size={20} color="red" />
+                  )}
                 </TouchableOpacity>
               </View>
               <Text
@@ -438,7 +442,7 @@ export default function ReceiptsPage({ navigation }: Props) {
               gap: 8,
               marginBottom: 12,
             }}
-            onPress={handleActionSheet}
+            onPress={handleReceiptUpload}
           >
             <UploadIcon size={28} color="white" />
             <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
@@ -451,6 +455,7 @@ export default function ReceiptsPage({ navigation }: Props) {
         </View>
 
         {/* Transactions Section */}
+        {groupedTransactions.length > 0 && (
         <View style={{ marginBottom: 20 }}>
           <View
             style={{
@@ -485,9 +490,50 @@ export default function ReceiptsPage({ navigation }: Props) {
               onComplete={() => mutate()}
               onUpload={handleTransactionUpload}
               onSelect={handleTransactionSelect}
-            />
-          ))}
-        </View>
+              />
+            ))}
+          </View>
+        )}
+        {groupedTransactions.length === 0 && (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", marginTop: 20 }}>
+                    <View style={{ alignItems: "center", marginBottom: 20 }}>
+                    <View style={{ position: "relative" }}>
+                      <Ionicons name="receipt-outline" color={palette.muted} size={60} />
+                      <View
+                        style={{
+                          position: "absolute",
+                          top: -8,
+                          right: -8,
+                          backgroundColor: p.emerald["400"],
+                          borderRadius: 12,
+                          width: 24,
+                          height: 24,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Ionicons name="checkmark" color="white" size={16} />
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ 
+                    color: themeColors.text, 
+                    fontSize: 18, 
+                    fontWeight: "600",
+                    marginBottom: 8,
+                  }}>
+                    Receipt Bin is empty
+                  </Text>
+                  <Text style={{ 
+                    color: palette.muted, 
+                    textAlign: "center",
+                    lineHeight: 20,
+                  }}>
+                    All your transactions have receipts attached.{"\n"}
+                    Great job staying organized!
+                  </Text>
+                </View>
+          )}
       </ScrollView>
   );
 }

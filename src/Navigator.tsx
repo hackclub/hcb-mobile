@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
+import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
@@ -18,6 +19,7 @@ import {
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
 import { useIsDark } from "./lib/useColorScheme";
+import { navRef } from "./navigationRef";
 import CardPage from "./pages/card";
 import CardsPage from "./pages/cards";
 import GrantCardPage from "./pages/GrantCard";
@@ -39,9 +41,8 @@ import SettingsPage from "./pages/settings/Settings";
 import Tutorials from "./pages/settings/Tutorials";
 import ShareIntentModal from "./pages/ShareIntentModal";
 import TransactionPage from "./pages/Transaction";
+import { useShareIntentContext } from "./ShareIntentContext";
 import { palette } from "./theme";
-
-// import OrganizationTitle from "./components/organizations/OrganizationTitle";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -60,6 +61,18 @@ export default function Navigator() {
 
   const { mutate } = useSWRConfig();
   const isDark = useIsDark();
+
+  const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } = useShareIntentContext();
+
+  useEffect(() => {
+    if (hasPendingShareIntent && pendingShareIntent && navRef.current && navRef.current.isReady()) {
+      navRef.current.navigate("Home", {
+        screen: "ShareIntentModal",
+        params: pendingShareIntent as StackParamList["ShareIntentModal"],
+      });
+      clearPendingShareIntent();
+    }
+  }, [hasPendingShareIntent, pendingShareIntent, clearPendingShareIntent]);
 
   return (
     <Tab.Navigator

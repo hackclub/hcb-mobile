@@ -17,6 +17,8 @@ import {
 import AuthContext from "../auth";
 import Button from "../components/Button";
 import { lightTheme, palette, theme as darkTheme } from "../theme";
+import * as SystemUI from "expo-system-ui";
+import { useIsDark } from "../lib/useColorScheme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -29,7 +31,6 @@ const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
 export default function Login() {
   const scheme = useColorScheme();
-  const theme = scheme == "dark" ? darkTheme : lightTheme;
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
 
@@ -51,8 +52,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const { setTokens } = useContext(AuthContext);
+  const isDark = useIsDark();
+  const theme = isDark ? darkTheme : lightTheme;
 
   useEffect(() => {
+    const setStatusBar = async () => {
+      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#F6F6F6");
+    };
+    setStatusBar();
     if (!response || isProcessing) return;
 
     const responseKey =
@@ -133,9 +140,7 @@ export default function Login() {
       >
         <Animated.Image
           source={
-            scheme == "dark"
-              ? require("../../assets/icon.png")
-              : require("../../assets/icon-light.png")
+            isDark ? require("../../assets/icon.png") : require("../../assets/icon-light.png")
           }
           style={{
             width: 100,

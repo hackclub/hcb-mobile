@@ -1,12 +1,12 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { NavigationContainer, LinkingOptions } from "@react-navigation/native";
+import { NavigationContainer, LinkingOptions, NavigationContainerRef } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -24,6 +24,7 @@ import { TabParamList } from "./lib/NavigatorParamList";
 import { useIsDark } from "./lib/useColorScheme";
 import { useOffline } from "./lib/useOffline";
 import { useLinkingPref } from "./LinkingContext";
+import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
 import Login from "./pages/login";
 import { lightTheme, palette, theme } from "./theme";
@@ -106,6 +107,15 @@ export default function AppContent({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
+  const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
+  
+  useEffect(() => {
+    navRef.current = navigationRef.current;
+  }, [navigationRef.current]);
+
+  const onNavigationReady = useCallback(() => {
+    navRef.current = navigationRef.current;
+  }, []);
 
   useEffect(() => {
     const setStatusBar = async () => {
@@ -120,12 +130,39 @@ export default function AppContent({
           setAppIsReady(true);
           return;
         }
-        const result = await LocalAuthentication.authenticateAsync();
-        setIsAuthenticated(result.success);
+        try {          
+          // Check if biometric authentication is available
+          const hasHardware = await LocalAuthentication.hasHardwareAsync();
+          const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+          
+          if (!hasHardware || !isEnrolled) {
+            console.log("Biometric authentication not available, bypassing...");
+            setIsAuthenticated(true);
+            setAppIsReady(true);
+            return;
+          }
+          
+          const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Authenticate to access HCB",
+            cancelLabel: "Cancel",
+            fallbackLabel: "Use passcode",
+            disableDeviceFallback: false,
+          });
+          
+          if (result.success) {
+            setIsAuthenticated(true);
+          } else {
+            console.log("Biometric authentication failed:", result.error);
+            setIsAuthenticated(false);
+          }
+        } catch (error) {
+          console.error("Biometric authentication error:", error);
+          setIsAuthenticated(false);
+        }
       } else {
+        console.log("No access token, skipping biometric authentication");
         setIsAuthenticated(true);
       }
-      setIsAuthenticated(true);
       setAppIsReady(true);
     };
 
@@ -134,7 +171,6 @@ export default function AppContent({
 
   useEffect(() => {
     if (tokens) {
-      console.log("Token state updated - user is authenticated");
       const now = Date.now();
       if (tokens.expiresAt <= now + 5 * 60 * 1000) {
         refreshAccessToken().catch((error) => {
@@ -282,7 +318,7 @@ export default function AppContent({
           <SafeAreaProvider>
             <ActionSheetProvider>
               <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                <NavigationContainer theme={navTheme} linking={linking}>
+                <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking} onReady={onNavigationReady}>
                   <OfflineBanner />
                   {tokens?.accessToken && isAuthenticated ? (
                     <Navigator />

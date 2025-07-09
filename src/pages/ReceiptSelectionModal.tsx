@@ -36,7 +36,7 @@ export default function ReceiptSelectionModal({
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   
-  const { data: receipts } = useSWR<Receipt[]>("user/receipt_bin");
+  const { data: receipts } = useSWR<Receipt[]>("receipts");
   const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
   const [deletingReceipts, setDeletingReceipts] = useState<Set<string>>(new Set());
@@ -51,8 +51,12 @@ export default function ReceiptSelectionModal({
       type: "image/jpeg",
     });
 
+    if (transaction) {
+      body.append("transaction_id", transaction.id)
+    }
+
     await hcb.post(
-      `organizations/${transaction.organization.id}/transactions/${transaction.id}/receipts`,
+      `receipts`,
       {
         body,
       },
@@ -60,7 +64,7 @@ export default function ReceiptSelectionModal({
   };
 
   const deleteReceipt = async (receiptId: string) => {
-    await hcb.delete(`user/receipt_bin/${receiptId}`);
+    await hcb.delete(`receipts/${receiptId.replace("rct_", "")}`);
   };
 
   const handleUpload = async () => {

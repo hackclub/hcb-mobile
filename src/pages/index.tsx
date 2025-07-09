@@ -9,7 +9,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, useRef, memo, useMemo } from "react";
+import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
 import {
   Text,
   View,
@@ -19,7 +19,7 @@ import {
   StyleSheet,
   useColorScheme,
   RefreshControl,
-  Alert,
+  Platform,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
@@ -37,6 +37,7 @@ import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, organizationOrderEqual, renderMoney } from "../util";
+import { runOnJS } from "react-native-reanimated";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -240,12 +241,34 @@ export default function App({ navigation }: Props) {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
 
-  const { data: missingReceiptData } = useSWR<{
+  const { data: missingReceiptData, error: missingReceiptError, mutate: refetchMissingReceipts } = useSWR<{
     data: (ITransaction & { organization: Organization })[];
   }>(hasShareIntent ? "user/transactions/missing_receipt" : null);
 
+  const [refreshEnabled, setRefreshEnabled] = useState(true);
+  const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
+  const [refreshing] = useState(false);
+
+const handleDragStart = useCallback(() => {
+  'worklet';
+
+  // NOTE: If it's refreshing we don't want the refresh control to disappear
+  // and we can keep it enabled since it won't conflict with the drag.
+  if (Platform.OS === 'android' && !refreshing) {
+    runOnJS(setRefreshEnabled)(false);
+  }
+}, [refreshing]);
+
+const handleDragEnd = useCallback(() => {
+  'worklet';
+
+  if (Platform.OS === 'android') {
+    runOnJS(setRefreshEnabled)(true);
+  }
+}, []);
+
   useEffect(() => {
-    if (hasShareIntent && shareIntent && missingReceiptData) {
+    if (hasShareIntent && shareIntent && !shareIntentProcessed) {
       console.log("Share intent received:", shareIntent);
 
       const imageUrls =
@@ -253,28 +276,56 @@ export default function App({ navigation }: Props) {
           (file) => file.path,
         ) || [];
 
-      if (imageUrls.length > 0 && missingReceiptData.data.length > 0) {
-        navigation.navigate("ShareIntentModal", {
-          images: imageUrls,
-          missingTransactions: missingReceiptData.data,
-        });
-      } else if (imageUrls.length > 0) {
-        Alert.alert(
-          "No Missing Receipts",
-          "You don't have any transactions that need receipts at the moment.",
-          [{ text: "OK" }],
-        );
+      if (imageUrls.length > 0) {
+        // If we have missing receipt data, show the modal with transactions
+        if (missingReceiptData?.data && missingReceiptData.data.length > 0) {
+          navigation.navigate("ShareIntentModal", {
+            images: imageUrls,
+            missingTransactions: missingReceiptData.data,
+          });
+          setShareIntentProcessed(true);
+          resetShareIntent();
+        } 
+        // If we don't have missing receipt data yet, but also no error, wait a bit more
+        else if (!missingReceiptError && !missingReceiptData) {
+          console.log("Waiting for missing receipt data to load...");
+          // Don't process yet, wait for data to load
+        }
+        // If we have an error or no missing receipts, still show the modal for receipt bin upload
+        else {
+          if (missingReceiptError) {
+            console.log("Error fetching missing receipts, retrying...");
+            // Retry fetching missing receipts
+            refetchMissingReceipts();
+          } else {
+            // No missing receipts, but still show modal for receipt bin upload
+            navigation.navigate("ShareIntentModal", {
+              images: imageUrls,
+              missingTransactions: [],
+            });
+            setShareIntentProcessed(true);
+            resetShareIntent();
+          }
+        }
       }
-
-      resetShareIntent();
     }
   }, [
     hasShareIntent,
     shareIntent,
     missingReceiptData,
+    missingReceiptError,
     navigation,
     resetShareIntent,
+    shareIntentProcessed,
+    refetchMissingReceipts,
   ]);
+
+  // Reset share intent processed flag when share intent changes
+  useEffect(() => {
+    if (hasShareIntent) {
+      setShareIntentProcessed(false);
+    }
+  }, [hasShareIntent]);
 
   // Cleanup share intent on unmount or when component reinitializes
   useEffect(() => {
@@ -349,7 +400,6 @@ export default function App({ navigation }: Props) {
     },
   );
 
-  const [refreshing] = useState(false);
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
@@ -488,9 +538,11 @@ export default function App({ navigation }: Props) {
       contentInsetAdjustmentBehavior="automatic"
       data={sortedOrgs}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} enabled={refreshEnabled} />
       }
       panGesture={panGesture}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       ListHeaderComponent={() =>
         invitations &&
         invitations.length > 0 && (

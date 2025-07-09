@@ -102,7 +102,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             try {
               setDeletingReceiptId(receipt.id);
               await hcb.delete(
-                `organizations/${orgId}/transactions/${transaction.id}/receipts/${receipt.id.replace("rct_", "")}`,
+                `receipts/${receipt.id.replace("rct_", "")}`,
               );
 
               Toast.show({
