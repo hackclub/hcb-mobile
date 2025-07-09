@@ -90,6 +90,12 @@ export function useReceiptActionSheet({
         options,
         cancelButtonIndex,
         userInterfaceStyle: isDark ? "dark" : "light",
+        containerStyle: {
+          backgroundColor: isDark ? "#252429" : "white",
+        },
+        textStyle: {
+          color: isDark ? "white" : "black",
+        },
       },
       async (buttonIndex) => {
         if (buttonIndex === 0) {

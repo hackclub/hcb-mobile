@@ -6,12 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth";
+import { showAlert } from "../../../lib/alertUtils";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../theme";
@@ -35,19 +35,19 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
     if (!chosenOrg) {
-      Alert.alert("Error", "Please select an organization to transfer to.");
+      showAlert("Error", "Please select an organization to transfer to.");
       return false;
     }
     if (numericAmount <= 0 || isNaN(numericAmount)) {
-      Alert.alert("Error", "Please enter a valid amount greater than $0.");
+      showAlert("Error", "Please enter a valid amount greater than $0.");
       return false;
     }
     if (numericAmount * 100 > organization.balance_cents) {
-      Alert.alert("Error", "Insufficient balance for this transfer.");
+      showAlert("Error", "Insufficient balance for this transfer.");
       return false;
     }
     if (!reason.trim()) {
-      Alert.alert("Error", "Please provide a reason for the transfer.");
+      showAlert("Error", "Please provide a reason for the transfer.");
       return false;
     }
     return true;
@@ -79,19 +79,19 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        Alert.alert(
+        showAlert(
           "Error",
           errorData.message ||
             "Failed to complete the transfer. Please try again.",
         );
       } else {
-        Alert.alert("Success", "Transfer completed successfully!");
+        showAlert("Success", "Transfer completed successfully!");
         setOrganization("");
         setAmount("$0.00");
         setReason("");
       }
     } catch (error) {
-      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+      showAlert("Error", "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
