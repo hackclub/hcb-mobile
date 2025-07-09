@@ -15,6 +15,7 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { mutate } from "swr";
 
+import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
