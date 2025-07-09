@@ -8,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   Platform,
 } from "react-native";
@@ -69,7 +68,7 @@ export default function ReceiptSelectionModal({
 
   const handleUpload = async () => {
     if (selectedReceipts.size === 0) {
-      Alert.alert(
+      showAlert(
         "No Receipts Selected",
         "Please select at least one receipt to upload.",
       );

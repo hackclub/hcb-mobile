@@ -9,6 +9,7 @@ import { useColorScheme } from "react-native";
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
+import { CustomAlertProvider } from "./src/components/CustomAlertProvider";
 import { LinkingProvider } from "./src/LinkingContext";
 import { ShareIntentProvider } from "./src/ShareIntentContext";
 import { ThemeProvider } from "./src/ThemeContext";
@@ -44,7 +45,9 @@ function App() {
         <AuthProvider>
           <ShareIntentProvider>
             <LinkingProvider>
-              <AppContent scheme={scheme} cache={cache} />
+              <CustomAlertProvider>
+                <AppContent scheme={scheme} cache={cache} />
+              </CustomAlertProvider>
             </LinkingProvider>
           </ShareIntentProvider>
         </AuthProvider>

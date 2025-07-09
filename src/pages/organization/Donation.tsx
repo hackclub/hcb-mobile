@@ -16,7 +16,6 @@ import {
   Linking,
   Text,
   View,
-  Alert,
   TextInput,
 } from "react-native";
 import * as Progress from "react-native-progress";
@@ -25,6 +24,7 @@ import useSWR, { useSWRConfig } from "swr";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "../../components/Button";
+import { showAlert } from "../../lib/alertUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -271,7 +271,7 @@ function PageContent({
             simulated: false,
           });
         }
-        Alert.alert("There wass an error connecting, please try again");
+        showAlert("There wass an error connecting, please try again");
         return false;
       }
 
@@ -320,7 +320,7 @@ function PageContent({
       return paymentIntent;
     } catch (error) {
       console.log(error);
-      Alert.alert("Error creating payment intent", error.message);
+      showAlert("Error creating payment intent", error.message);
     } finally {
       // setLoadingCreatePayment(false);
     }
@@ -340,7 +340,7 @@ function PageContent({
       if (error) {
         console.log("Error collecting payment", error);
         if (error.code != "Canceled") {
-          Alert.alert("Error collecting payment", error.message);
+          showAlert("Error collecting payment", error.message);
         }
         return false;
       }
@@ -383,7 +383,7 @@ function PageContent({
 
   useEffect(() => {
     if (accessDenied) {
-      Alert.alert(
+      showAlert(
         "Access to location",
         "To use the app, you need to allow the use of your device location.",
         [
@@ -582,7 +582,7 @@ function PageContent({
         <Button
           onPress={async () => {
             if (!email.includes("@") || !email.includes(".")) {
-              Alert.alert("Please provide a valid email address");
+              showAlert("Please provide a valid email address");
               return;
             }
             const donation_id = await createDonation();
