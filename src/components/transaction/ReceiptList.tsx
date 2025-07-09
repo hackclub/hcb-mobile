@@ -101,9 +101,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           onPress: async () => {
             try {
               setDeletingReceiptId(receipt.id);
-              await hcb.delete(
-                `receipts/${receipt.id.replace("rct_", "")}`,
-              );
+              await hcb.delete(`receipts/${receipt.id.replace("rct_", "")}`);
 
               Toast.show({
                 type: ALERT_TYPE.SUCCESS,

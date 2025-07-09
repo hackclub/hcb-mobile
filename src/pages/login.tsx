@@ -5,6 +5,7 @@ import {
   DiscoveryDocument,
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
+import * as SystemUI from "expo-system-ui";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -16,9 +17,8 @@ import {
 
 import AuthContext from "../auth";
 import Button from "../components/Button";
-import { lightTheme, palette, theme as darkTheme } from "../theme";
-import * as SystemUI from "expo-system-ui";
 import { useIsDark } from "../lib/useColorScheme";
+import { lightTheme, palette, theme as darkTheme } from "../theme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -115,7 +115,7 @@ export default function Login() {
         processedResponseRef.current = responseKey;
       }
     };
-  }, [response, request, setTokens, isProcessing]);
+  }, [response, request, setTokens, isProcessing, isDark]);
 
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -140,7 +140,9 @@ export default function Login() {
       >
         <Animated.Image
           source={
-            isDark ? require("../../assets/icon.png") : require("../../assets/icon-light.png")
+            isDark
+              ? require("../../assets/icon.png")
+              : require("../../assets/icon-light.png")
           }
           style={{
             width: 100,

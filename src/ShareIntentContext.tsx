@@ -1,5 +1,11 @@
 import { useShareIntentContext as useExpoShareIntentContext } from "expo-share-intent";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import useSWR from "swr";
 
 import AuthContext from "./auth";
@@ -17,11 +23,15 @@ interface ShareIntentContextType {
   hasPendingShareIntent: boolean;
 }
 
-const ShareIntentContext = createContext<ShareIntentContextType | undefined>(undefined);
+const ShareIntentContext = createContext<ShareIntentContextType | undefined>(
+  undefined,
+);
 
 export function ShareIntentProvider({ children }: { children: ReactNode }) {
-  const { hasShareIntent, shareIntent, resetShareIntent } = useExpoShareIntentContext();
-  const [pendingShareIntent, setPendingShareIntent] = useState<ShareIntentData | null>(null);
+  const { hasShareIntent, shareIntent, resetShareIntent } =
+    useExpoShareIntentContext();
+  const [pendingShareIntent, setPendingShareIntent] =
+    useState<ShareIntentData | null>(null);
   const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const { tokens } = useContext(AuthContext);
@@ -29,7 +39,11 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
   // Fetch missing receipt data only when authenticated and has pending images
   const { data: missingReceiptData, error: missingReceiptError } = useSWR<{
     data: (Transaction & { organization: Organization })[];
-  }>(tokens?.accessToken && pendingImages.length > 0 ? "user/transactions/missing_receipt" : null);
+  }>(
+    tokens?.accessToken && pendingImages.length > 0
+      ? "user/transactions/missing_receipt"
+      : null,
+  );
 
   // Add timeout to show modal if missing receipt data takes too long
   useEffect(() => {
@@ -65,7 +79,13 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-  }, [hasShareIntent, shareIntent, shareIntentProcessed, resetShareIntent, tokens?.accessToken]);
+  }, [
+    hasShareIntent,
+    shareIntent,
+    shareIntentProcessed,
+    resetShareIntent,
+    tokens?.accessToken,
+  ]);
 
   // Handle missing receipt data when it loads
   useEffect(() => {
@@ -93,7 +113,12 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
         setPendingImages([]);
       }
     }
-  }, [pendingImages, missingReceiptData, missingReceiptError, tokens?.accessToken]);
+  }, [
+    pendingImages,
+    missingReceiptData,
+    missingReceiptError,
+    tokens?.accessToken,
+  ]);
 
   // Reset share intent processed flag when share intent changes
   useEffect(() => {
@@ -122,7 +147,9 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
 export function useShareIntentContext() {
   const context = useContext(ShareIntentContext);
   if (context === undefined) {
-    throw new Error("useShareIntentContext must be used within a ShareIntentProvider");
+    throw new Error(
+      "useShareIntentContext must be used within a ShareIntentProvider",
+    );
   }
   return context;
-} 
+}

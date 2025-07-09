@@ -62,10 +62,16 @@ export default function Navigator() {
   const { mutate } = useSWRConfig();
   const isDark = useIsDark();
 
-  const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } = useShareIntentContext();
+  const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } =
+    useShareIntentContext();
 
   useEffect(() => {
-    if (hasPendingShareIntent && pendingShareIntent && navRef.current && navRef.current.isReady()) {
+    if (
+      hasPendingShareIntent &&
+      pendingShareIntent &&
+      navRef.current &&
+      navRef.current.isReady()
+    ) {
       navRef.current.navigate("Home", {
         screen: "ShareIntentModal",
         params: pendingShareIntent as StackParamList["ShareIntentModal"],

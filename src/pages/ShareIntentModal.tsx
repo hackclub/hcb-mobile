@@ -175,30 +175,28 @@ export default function ShareIntentModal({
       name: file.fileName || "receipt.jpg",
       type: file.mimeType || "image/jpeg",
     });
-    
+
     // Only append transaction_id if it's provided (for receipt bin uploads, it won't be)
     if (transactionId && transactionId.trim() !== "") {
-      body.append("transaction_id", transactionId)
+      body.append("transaction_id", transactionId);
     }
 
-    await hcb.post(
-      `receipts`,
-      {
-        body,
-      },
-    );
+    await hcb.post(`receipts`, {
+      body,
+    });
   };
 
   const handleUpload = async () => {
     const transactionAssignments = assignments.filter(
       (a) => a.transactionId && a.orgId && !a.isReceiptBin,
     );
-    const receiptBinAssignments = assignments.filter(
-      (a) => a.isReceiptBin,
-    );
+    const receiptBinAssignments = assignments.filter((a) => a.isReceiptBin);
 
     // If no assignments at all, show error
-    if (transactionAssignments.length === 0 && receiptBinAssignments.length === 0) {
+    if (
+      transactionAssignments.length === 0 &&
+      receiptBinAssignments.length === 0
+    ) {
       Alert.alert(
         "No Assignments",
         "Please assign at least one image to a transaction or receipt bin before uploading.",
@@ -237,7 +235,8 @@ export default function ShareIntentModal({
         );
       }
 
-      const totalUploaded = transactionAssignments.length + receiptBinAssignments.length;
+      const totalUploaded =
+        transactionAssignments.length + receiptBinAssignments.length;
       const transactionCount = transactionAssignments.length;
       const receiptBinCount = receiptBinAssignments.length;
 
@@ -274,7 +273,8 @@ export default function ShareIntentModal({
   };
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
-    if (assignment.isReceiptBin) return { memo: "Receipt Bin", id: "receipt-bin" };
+    if (assignment.isReceiptBin)
+      return { memo: "Receipt Bin", id: "receipt-bin" };
     if (!assignment.transactionId) return null;
     return validTransactions.find((t) => t.id === assignment.transactionId);
   };
@@ -489,7 +489,8 @@ export default function ShareIntentModal({
                 {selectedImageIndex !== null && (
                   <Text style={{ color: palette.primary, fontSize: 14 }}>
                     {" "}
-                    • Tap a transaction or receipt bin to assign the selected image
+                    • Tap a transaction or receipt bin to assign the selected
+                    image
                   </Text>
                 )}
                 {validImages.length >= 2 && (
@@ -512,7 +513,9 @@ export default function ShareIntentModal({
 
           {/* Receipt Bin Option - Always shown */}
           {(() => {
-            const receiptBinAssignments = assignments.filter((a) => a.isReceiptBin);
+            const receiptBinAssignments = assignments.filter(
+              (a) => a.isReceiptBin,
+            );
             const isSelected = selectedImageIndex !== null;
             const showSelectAll = validImages.length >= 2;
 

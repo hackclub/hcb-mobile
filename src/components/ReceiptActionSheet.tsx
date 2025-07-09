@@ -4,8 +4,8 @@ import * as ImagePicker from "expo-image-picker";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import useClient from "../lib/client";
-import { useOffline } from "../lib/useOffline";
 import { useIsDark } from "../lib/useColorScheme";
+import { useOffline } from "../lib/useOffline";
 
 interface ReceiptActionSheetProps {
   orgId: string;
@@ -14,7 +14,6 @@ interface ReceiptActionSheetProps {
 }
 
 export function useReceiptActionSheet({
-  orgId,
   transactionId = "",
   onUploadComplete,
 }: ReceiptActionSheetProps) {
@@ -41,16 +40,13 @@ export function useReceiptActionSheet({
       });
 
       if (transactionId) {
-        body.append("transaction_id", transactionId)
+        body.append("transaction_id", transactionId);
       }
 
       try {
-        await hcb.post(
-          `receipts`,
-          {
-            body,
-          },
-        );
+        await hcb.post(`receipts`, {
+          body,
+        });
         onUploadComplete?.();
         Toast.show({
           type: ALERT_TYPE.SUCCESS,

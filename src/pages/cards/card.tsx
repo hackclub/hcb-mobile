@@ -204,7 +204,9 @@ export default function CardPage(
       mutate(
         "user/card_grants",
         (list: GrantCard[] | undefined) =>
-          list?.map((c) => (c.card_id === updatedCard.id ? { ...c, status: updatedStatus } : c)),
+          list?.map((c) =>
+            c.card_id === updatedCard.id ? { ...c, status: updatedStatus } : c,
+          ),
         false,
       );
     }

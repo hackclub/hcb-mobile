@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
-  Modal,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,13 +18,13 @@ import useSWR, { mutate } from "swr";
 
 import useClient from "../lib/client";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
-import Organization from "../lib/types/Organization";
-import { TransactionCardCharge } from "../lib/types/Transaction";
 import Receipt from "../lib/types/Receipt";
 import { palette } from "../theme";
-import { renderMoney } from "../util";
 
-type Props = NativeStackScreenProps<ReceiptsStackParamList, "ReceiptSelectionModal">;
+type Props = NativeStackScreenProps<
+  ReceiptsStackParamList,
+  "ReceiptSelectionModal"
+>;
 
 export default function ReceiptSelectionModal({
   route: {
@@ -35,11 +34,15 @@ export default function ReceiptSelectionModal({
 }: Props) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  
+
   const { data: receipts } = useSWR<Receipt[]>("receipts");
-  const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(new Set());
+  const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(
+    new Set(),
+  );
   const [uploading, setUploading] = useState(false);
-  const [deletingReceipts, setDeletingReceipts] = useState<Set<string>>(new Set());
+  const [deletingReceipts, setDeletingReceipts] = useState<Set<string>>(
+    new Set(),
+  );
 
   const uploadFile = async (receipt: Receipt) => {
     const body = new FormData();
@@ -52,15 +55,12 @@ export default function ReceiptSelectionModal({
     });
 
     if (transaction) {
-      body.append("transaction_id", transaction.id)
+      body.append("transaction_id", transaction.id);
     }
 
-    await hcb.post(
-      `receipts`,
-      {
-        body,
-      },
-    );
+    await hcb.post(`receipts`, {
+      body,
+    });
   };
 
   const deleteReceipt = async (receiptId: string) => {
@@ -79,9 +79,8 @@ export default function ReceiptSelectionModal({
     setUploading(true);
 
     try {
-      const selectedReceiptList = receipts?.filter(receipt => 
-        selectedReceipts.has(receipt.id)
-      ) || [];
+      const selectedReceiptList =
+        receipts?.filter((receipt) => selectedReceipts.has(receipt.id)) || [];
 
       // Upload all selected receipts
       for (const receipt of selectedReceiptList) {
@@ -90,7 +89,7 @@ export default function ReceiptSelectionModal({
 
       // Delete all uploaded receipts from receipt bin
       setDeletingReceipts(new Set(selectedReceipts));
-      
+
       for (const receiptId of selectedReceipts) {
         await deleteReceipt(receiptId);
       }
@@ -131,7 +130,7 @@ export default function ReceiptSelectionModal({
 
   const selectAllReceipts = () => {
     if (receipts) {
-      setSelectedReceipts(new Set(receipts.map(receipt => receipt.id)));
+      setSelectedReceipts(new Set(receipts.map((receipt) => receipt.id)));
     }
   };
 
@@ -141,24 +140,38 @@ export default function ReceiptSelectionModal({
 
   if (!receipts || receipts.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: themeColors.background }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
           <Ionicons name="receipt-outline" color={palette.muted} size={60} />
-          <Text style={{ 
-            color: themeColors.text, 
-            fontSize: 18, 
-            fontWeight: "600",
-            marginTop: 16,
-            marginBottom: 8,
-          }}>
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 18,
+              fontWeight: "600",
+              marginTop: 16,
+              marginBottom: 8,
+            }}
+          >
             Receipt Bin is Empty
           </Text>
-          <Text style={{ 
-            color: palette.muted, 
-            textAlign: "center",
-            lineHeight: 20,
-          }}>
-            No receipts available in your receipt bin to upload to this transaction.
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              lineHeight: 20,
+            }}
+          >
+            No receipts available in your receipt bin to upload to this
+            transaction.
           </Text>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -223,7 +236,10 @@ export default function ReceiptSelectionModal({
           onPress={handleUpload}
           disabled={uploading || selectedReceipts.size === 0}
           style={{
-            backgroundColor: uploading || selectedReceipts.size === 0 ? palette.muted : palette.primary,
+            backgroundColor:
+              uploading || selectedReceipts.size === 0
+                ? palette.muted
+                : palette.primary,
             paddingHorizontal: 20,
             paddingVertical: 10,
             borderRadius: 8,
@@ -327,7 +343,7 @@ export default function ReceiptSelectionModal({
                     }}
                     contentFit="cover"
                   />
-                  
+
                   {/* Selection indicator */}
                   {isSelected && (
                     <View
@@ -366,7 +382,7 @@ export default function ReceiptSelectionModal({
                     </View>
                   )}
                 </View>
-                
+
                 <Text
                   style={{
                     color: palette.muted,
@@ -385,4 +401,4 @@ export default function ReceiptSelectionModal({
       </ScrollView>
     </SafeAreaView>
   );
-} 
+}

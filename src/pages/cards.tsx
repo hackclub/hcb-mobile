@@ -6,11 +6,16 @@ import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, RefreshControl, Text, useColorScheme, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Pressable,
+  RefreshControl,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
+import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
-  NestedReorderableList,
-  ScrollViewContainer,
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import useSWR from "swr";
@@ -22,7 +27,6 @@ import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { palette } from "../theme";
 import { normalizeSvg } from "../util";
-import { Gesture } from "react-native-gesture-handler";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
@@ -34,24 +38,29 @@ type CardItemProps = {
   patternDimensions?: { width: number; height: number };
 };
 
-const CardItem =
-  ({ item, isActive, onPress, pattern, patternDimensions }: CardItemProps) => {
-    const drag = useReorderableDrag();
-    return (
-      <Pressable
-        onPress={() => onPress(item)}
-        onLongPress={drag}
-        disabled={isActive}
-      >
-        <PaymentCard
-          card={item}
-          style={{ marginHorizontal: 20, marginVertical: 8 }}
-          pattern={pattern}
-          patternDimensions={patternDimensions}
-        />
-      </Pressable>
-    );
-  };
+const CardItem = ({
+  item,
+  isActive,
+  onPress,
+  pattern,
+  patternDimensions,
+}: CardItemProps) => {
+  const drag = useReorderableDrag();
+  return (
+    <Pressable
+      onPress={() => onPress(item)}
+      onLongPress={drag}
+      disabled={isActive}
+    >
+      <PaymentCard
+        card={item}
+        style={{ marginHorizontal: 20, marginVertical: 8 }}
+        pattern={pattern}
+        patternDimensions={patternDimensions}
+      />
+    </Pressable>
+  );
+};
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
@@ -123,7 +132,7 @@ export default function CardsPage({ navigation }: Props) {
         await reloadGrantCards();
       };
       refreshData();
-    }, [reloadCards, reloadGrantCards])
+    }, [reloadCards, reloadGrantCards]),
   );
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
@@ -272,55 +281,57 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-        <ReorderableList
-          data={
-            canceledCardsShown
-              ? sortedCards
-              : sortedCards.filter(
-                  (c) => c.status != "canceled" && c.status != "expired",
-                )
-          }
-          keyExtractor={(item) => item.id}
-          onReorder={({ from, to }) => {
-            Haptics.selectionAsync();
-            const newCards = [...sortedCards];
-            const [removed] = newCards.splice(from, 1);
-            newCards.splice(to, 0, removed);
-            setSortedCards(newCards);
-            saveCardOrder(newCards);
-          }}
-          contentContainerStyle={{
-            paddingBottom: tabBarHeight + 20,
-            paddingTop: 20,
-            alignItems: "center",
-          }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          panGesture={panGesture}
-          renderItem={({ item }) => (
-            <CardItem
-              item={item}
-              isActive={false}
-              onPress={(card) => navigation.navigate("Card", { card })}
-              pattern={patternCache[item.id]?.pattern}
-              patternDimensions={patternCache[item.id]?.dimensions}
-            />
-          )}
-          ListFooterComponent={() =>
-            sortedCards.length > 2 && (
-              <Text
-                style={{
-                  color: palette.muted,
-                  textAlign: "center",
-                  marginTop: 10,
-                  marginBottom: 10,
-                }}
-              >
-                Drag to reorder cards
-              </Text>
-            )
-          }
-        />
+      <ReorderableList
+        data={
+          canceledCardsShown
+            ? sortedCards
+            : sortedCards.filter(
+                (c) => c.status != "canceled" && c.status != "expired",
+              )
+        }
+        keyExtractor={(item) => item.id}
+        onReorder={({ from, to }) => {
+          Haptics.selectionAsync();
+          const newCards = [...sortedCards];
+          const [removed] = newCards.splice(from, 1);
+          newCards.splice(to, 0, removed);
+          setSortedCards(newCards);
+          saveCardOrder(newCards);
+        }}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight + 20,
+          paddingTop: 20,
+          alignItems: "center",
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        panGesture={panGesture}
+        renderItem={({ item }) => (
+          <CardItem
+            item={item}
+            isActive={false}
+            onPress={(card) => navigation.navigate("Card", { card })}
+            pattern={patternCache[item.id]?.pattern}
+            patternDimensions={patternCache[item.id]?.dimensions}
+          />
+        )}
+        ListFooterComponent={() =>
+          sortedCards.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder cards
+            </Text>
+          )
+        }
+      />
     );
   } else {
     return (

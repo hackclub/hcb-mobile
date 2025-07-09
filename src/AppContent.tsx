@@ -1,12 +1,23 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { NavigationContainer, LinkingOptions, NavigationContainerRef } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  LinkingOptions,
+  NavigationContainerRef,
+} from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import { useRef, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -108,7 +119,7 @@ export default function AppContent({
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
-  
+
   useEffect(() => {
     navRef.current = navigationRef.current;
   }, [navigationRef.current]);
@@ -130,25 +141,25 @@ export default function AppContent({
           setAppIsReady(true);
           return;
         }
-        try {          
+        try {
           // Check if biometric authentication is available
           const hasHardware = await LocalAuthentication.hasHardwareAsync();
           const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-          
+
           if (!hasHardware || !isEnrolled) {
             console.log("Biometric authentication not available, bypassing...");
             setIsAuthenticated(true);
             setAppIsReady(true);
             return;
           }
-          
+
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate to access HCB",
             cancelLabel: "Cancel",
             fallbackLabel: "Use passcode",
             disableDeviceFallback: false,
           });
-          
+
           if (result.success) {
             setIsAuthenticated(true);
           } else {
@@ -318,7 +329,12 @@ export default function AppContent({
           <SafeAreaProvider>
             <ActionSheetProvider>
               <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking} onReady={onNavigationReady}>
+                <NavigationContainer
+                  ref={navigationRef}
+                  theme={navTheme}
+                  linking={linking}
+                  onReady={onNavigationReady}
+                >
                   <OfflineBanner />
                   {tokens?.accessToken && isAuthenticated ? (
                     <Navigator />

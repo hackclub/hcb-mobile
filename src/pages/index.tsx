@@ -22,6 +22,7 @@ import {
   Platform,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
@@ -37,7 +38,6 @@ import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, organizationOrderEqual, renderMoney } from "../util";
-import { runOnJS } from "react-native-reanimated";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -241,7 +241,11 @@ export default function App({ navigation }: Props) {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
 
-  const { data: missingReceiptData, error: missingReceiptError, mutate: refetchMissingReceipts } = useSWR<{
+  const {
+    data: missingReceiptData,
+    error: missingReceiptError,
+    mutate: refetchMissingReceipts,
+  } = useSWR<{
     data: (ITransaction & { organization: Organization })[];
   }>(hasShareIntent ? "user/transactions/missing_receipt" : null);
 
@@ -249,23 +253,23 @@ export default function App({ navigation }: Props) {
   const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
   const [refreshing] = useState(false);
 
-const handleDragStart = useCallback(() => {
-  'worklet';
+  const handleDragStart = useCallback(() => {
+    "worklet";
 
-  // NOTE: If it's refreshing we don't want the refresh control to disappear
-  // and we can keep it enabled since it won't conflict with the drag.
-  if (Platform.OS === 'android' && !refreshing) {
-    runOnJS(setRefreshEnabled)(false);
-  }
-}, [refreshing]);
+    // NOTE: If it's refreshing we don't want the refresh control to disappear
+    // and we can keep it enabled since it won't conflict with the drag.
+    if (Platform.OS === "android" && !refreshing) {
+      runOnJS(setRefreshEnabled)(false);
+    }
+  }, [refreshing]);
 
-const handleDragEnd = useCallback(() => {
-  'worklet';
+  const handleDragEnd = useCallback(() => {
+    "worklet";
 
-  if (Platform.OS === 'android') {
-    runOnJS(setRefreshEnabled)(true);
-  }
-}, []);
+    if (Platform.OS === "android") {
+      runOnJS(setRefreshEnabled)(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {
@@ -285,7 +289,7 @@ const handleDragEnd = useCallback(() => {
           });
           setShareIntentProcessed(true);
           resetShareIntent();
-        } 
+        }
         // If we don't have missing receipt data yet, but also no error, wait a bit more
         else if (!missingReceiptError && !missingReceiptData) {
           console.log("Waiting for missing receipt data to load...");
@@ -426,7 +430,7 @@ const handleDragEnd = useCallback(() => {
         logError("Error preloading data:", err);
       }
     }
-  }, [organizations, fetcher, isOnline]);
+  }, [organizations, fetcher, isOnline, shouldFetch]);
 
   const onRefresh = () => {
     if (!shouldFetch()) return;
@@ -538,7 +542,11 @@ const handleDragEnd = useCallback(() => {
       contentInsetAdjustmentBehavior="automatic"
       data={sortedOrgs}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} enabled={refreshEnabled} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          enabled={refreshEnabled}
+        />
       }
       panGesture={panGesture}
       onDragStart={handleDragStart}
