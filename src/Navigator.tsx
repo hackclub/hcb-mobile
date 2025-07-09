@@ -104,9 +104,19 @@ export default function Navigator() {
         },
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
-        ...(Platform.OS === "android" && {
-          tabBarStyle: { position: "absolute", paddingBottom: 5, height: 50 },
-        }),
+        ...(Platform.OS === "android"
+          ? {
+              tabBarStyle: {
+                position: "absolute",
+                paddingBottom: 5,
+                height: 50,
+              },
+            }
+          : {
+              tabBarStyle: {
+                position: "absolute",
+              },
+            }),
         tabBarHideOnKeyboard: true,
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
