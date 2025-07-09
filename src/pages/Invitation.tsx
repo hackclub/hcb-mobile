@@ -74,10 +74,10 @@ export default function InvitationPage({
           "Failed to Accept Invitation. You may have to sign the contract.",
           error.message,
           [
-            { 
+            {
               text: "OK",
-            }
-          ]
+            },
+          ],
         );
       },
     },

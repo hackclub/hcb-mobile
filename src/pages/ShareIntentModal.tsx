@@ -42,9 +42,11 @@ export default function ShareIntentModal({
 
   const validImages =
     images?.filter((img) => img && typeof img === "string") || [];
-  
-  const transactionsRef = useRef<Array<Transaction & { organization: Organization }>>([]);
-  
+
+  const transactionsRef = useRef<
+    Array<Transaction & { organization: Organization }>
+  >([]);
+
   useEffect(() => {
     if (missingTransactions && missingTransactions.length > 0) {
       transactionsRef.current = missingTransactions.filter((t) => t && t.id);
@@ -71,14 +73,14 @@ export default function ShareIntentModal({
     if (validImages.length > 0 && assignments.length !== validImages.length) {
       console.log("Syncing assignments array with validImages:", {
         validImagesLength: validImages.length,
-        assignmentsLength: assignments.length
+        assignmentsLength: assignments.length,
       });
       setAssignments(
         validImages.map((uri) => ({
           imageUri: uri,
           transactionId: null,
           orgId: null,
-        }))
+        })),
       );
     }
   }, [validImages, assignments.length]);
@@ -123,7 +125,7 @@ export default function ShareIntentModal({
           : assignment,
       ),
     );
-    setSelectedImageIndex(null); 
+    setSelectedImageIndex(null);
   };
 
   const handleSelectAll = (
@@ -137,7 +139,7 @@ export default function ShareIntentModal({
         isReceiptBin: false,
       })),
     );
-    setSelectedImageIndex(null); 
+    setSelectedImageIndex(null);
   };
 
   const handleReceiptBinSelect = (imageIndex: number) => {
@@ -153,7 +155,7 @@ export default function ShareIntentModal({
           : assignment,
       ),
     );
-    setSelectedImageIndex(null); 
+    setSelectedImageIndex(null);
   };
 
   const handleReceiptBinSelectAll = () => {
@@ -299,7 +301,9 @@ export default function ShareIntentModal({
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
     if (!assignment) {
-      console.warn("getTransactionForAssignment called with undefined assignment");
+      console.warn(
+        "getTransactionForAssignment called with undefined assignment",
+      );
       return null;
     }
     if (assignment.isReceiptBin)
@@ -405,15 +409,16 @@ export default function ShareIntentModal({
           >
             {validImages.map((imageUri, index) => {
               const assignment = getAssignmentForImage(imageUri);
-              
+
               if (!assignment) {
-                console.warn(`No assignment found for image ${index}: ${imageUri}`);
+                console.warn(
+                  `No assignment found for image ${index}: ${imageUri}`,
+                );
                 return null;
               }
-              
-              const assignedTransaction = getTransactionForAssignment(
-                assignment,
-              );
+
+              const assignedTransaction =
+                getTransactionForAssignment(assignment);
               const isSelected = selectedImageIndex === index;
 
               return (
