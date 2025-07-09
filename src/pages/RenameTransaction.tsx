@@ -73,6 +73,7 @@ export default function RenameTransactionPage({
           padding: 10,
           borderRadius: 8,
         }}
+        placeholderTextColor={palette.muted}
         selectTextOnFocus
         autoFocus
         enablesReturnKeyAutomatically
