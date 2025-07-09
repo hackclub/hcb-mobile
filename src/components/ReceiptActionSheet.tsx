@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import useClient from "../lib/client";
+import { useIsDark } from "../lib/useColorScheme";
 import { useOffline } from "../lib/useOffline";
 
 interface ReceiptActionSheetProps {
@@ -13,13 +14,13 @@ interface ReceiptActionSheetProps {
 }
 
 export function useReceiptActionSheet({
-  orgId,
-  transactionId,
+  transactionId = "",
   onUploadComplete,
 }: ReceiptActionSheetProps) {
   const { showActionSheetWithOptions } = useActionSheet();
   const { isOnline, withOfflineCheck } = useOffline();
   const hcb = useClient();
+  const isDark = useIsDark();
 
   const uploadFile = withOfflineCheck(
     async (
@@ -38,13 +39,14 @@ export function useReceiptActionSheet({
         type: file?.mimeType || "image/jpeg",
       });
 
+      if (transactionId) {
+        body.append("transaction_id", transactionId);
+      }
+
       try {
-        await hcb.post(
-          `organizations/${orgId}/transactions/${transactionId}/receipts`,
-          {
-            body,
-          },
-        );
+        await hcb.post(`receipts`, {
+          body,
+        });
         onUploadComplete?.();
         Toast.show({
           type: ALERT_TYPE.SUCCESS,
@@ -87,6 +89,7 @@ export function useReceiptActionSheet({
       {
         options,
         cancelButtonIndex,
+        userInterfaceStyle: isDark ? "dark" : "light",
       },
       async (buttonIndex) => {
         if (buttonIndex === 0) {

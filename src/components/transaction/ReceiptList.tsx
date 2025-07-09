@@ -28,7 +28,7 @@ import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
 
-function ZoomAndFadeIn() {
+export function ZoomAndFadeIn() {
   "worklet";
   const animations = {
     opacity: withTiming(1, { duration: 300 }),
@@ -101,9 +101,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           onPress: async () => {
             try {
               setDeletingReceiptId(receipt.id);
-              await hcb.delete(
-                `organizations/${orgId}/transactions/${transaction.id}/receipts/${receipt.id.replace("rct_", "")}`,
-              );
+              await hcb.delete(`receipts/${receipt.id.replace("rct_", "")}`);
 
               Toast.show({
                 type: ALERT_TYPE.SUCCESS,

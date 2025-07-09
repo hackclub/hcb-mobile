@@ -28,6 +28,7 @@ interface ImageAssignment {
   imageUri: string;
   transactionId: string | null;
   orgId: string | null;
+  isReceiptBin?: boolean;
 }
 
 export default function ShareIntentModal({
@@ -108,9 +109,53 @@ export default function ShareIntentModal({
         imageUri: assignment.imageUri,
         transactionId: transaction.id,
         orgId: transaction.organization.id,
+        isReceiptBin: false,
       })),
     );
     setSelectedImageIndex(null); // Close selection mode
+  };
+
+  const handleReceiptBinSelect = (imageIndex: number) => {
+    setAssignments((prev) =>
+      prev.map((assignment, index) =>
+        index === imageIndex
+          ? {
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: true,
+            }
+          : assignment,
+      ),
+    );
+    setSelectedImageIndex(null); // Close selection mode
+  };
+
+  const handleReceiptBinSelectAll = () => {
+    setAssignments((prev) =>
+      prev.map((assignment) => ({
+        imageUri: assignment.imageUri,
+        transactionId: null,
+        orgId: null,
+        isReceiptBin: true,
+      })),
+    );
+    setSelectedImageIndex(null); // Close selection mode
+  };
+
+  const handleUnassignImage = (imageIndex: number) => {
+    setAssignments((prev) =>
+      prev.map((assignment, index) =>
+        index === imageIndex
+          ? {
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: false,
+            }
+          : assignment,
+      ),
+    );
   };
 
   const uploadFile = async (
@@ -131,23 +176,30 @@ export default function ShareIntentModal({
       type: file.mimeType || "image/jpeg",
     });
 
-    await hcb.post(
-      `organizations/${orgId}/transactions/${transactionId}/receipts`,
-      {
-        body,
-      },
-    );
+    // Only append transaction_id if it's provided (for receipt bin uploads, it won't be)
+    if (transactionId && transactionId.trim() !== "") {
+      body.append("transaction_id", transactionId);
+    }
+
+    await hcb.post(`receipts`, {
+      body,
+    });
   };
 
   const handleUpload = async () => {
-    const validAssignments = assignments.filter(
-      (a) => a.transactionId && a.orgId,
+    const transactionAssignments = assignments.filter(
+      (a) => a.transactionId && a.orgId && !a.isReceiptBin,
     );
+    const receiptBinAssignments = assignments.filter((a) => a.isReceiptBin);
 
-    if (validAssignments.length === 0) {
+    // If no assignments at all, show error
+    if (
+      transactionAssignments.length === 0 &&
+      receiptBinAssignments.length === 0
+    ) {
       Alert.alert(
         "No Assignments",
-        "Please assign at least one image to a transaction before uploading.",
+        "Please assign at least one image to a transaction or receipt bin before uploading.",
       );
       return;
     }
@@ -155,7 +207,8 @@ export default function ShareIntentModal({
     setUploading(true);
 
     try {
-      for (const assignment of validAssignments) {
+      // Upload to transactions
+      for (const assignment of transactionAssignments) {
         if (!assignment.transactionId || !assignment.orgId) continue;
 
         await uploadFile(
@@ -169,10 +222,37 @@ export default function ShareIntentModal({
         );
       }
 
+      // Upload to receipt bin
+      for (const assignment of receiptBinAssignments) {
+        await uploadFile(
+          {
+            uri: assignment.imageUri,
+            fileName: `receipt_${Date.now()}.jpg`,
+            mimeType: "image/jpeg",
+          },
+          "", // No org ID for receipt bin upload
+          "", // No transaction ID for receipt bin upload
+        );
+      }
+
+      const totalUploaded =
+        transactionAssignments.length + receiptBinAssignments.length;
+      const transactionCount = transactionAssignments.length;
+      const receiptBinCount = receiptBinAssignments.length;
+
+      let message = `Successfully uploaded ${totalUploaded} receipt(s).`;
+      if (transactionCount > 0 && receiptBinCount > 0) {
+        message = `Successfully uploaded ${transactionCount} receipt(s) to transactions and ${receiptBinCount} receipt(s) to receipt bin.`;
+      } else if (transactionCount > 0) {
+        message = `Successfully uploaded ${transactionCount} receipt(s) to transactions.`;
+      } else if (receiptBinCount > 0) {
+        message = `Successfully uploaded ${receiptBinCount} receipt(s) to receipt bin.`;
+      }
+
       Toast.show({
         type: ALERT_TYPE.SUCCESS,
         title: "Receipts Uploaded!",
-        textBody: `Successfully uploaded ${validAssignments.length} receipt(s).`,
+        textBody: message,
       });
 
       navigation.goBack();
@@ -193,6 +273,8 @@ export default function ShareIntentModal({
   };
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
+    if (assignment.isReceiptBin)
+      return { memo: "Receipt Bin", id: "receipt-bin" };
     if (!assignment.transactionId) return null;
     return validTransactions.find((t) => t.id === assignment.transactionId);
   };
@@ -310,6 +392,10 @@ export default function ShareIntentModal({
                   onPress={() => {
                     if (isSelected) {
                       setSelectedImageIndex(null);
+                    } else if (assignedTransaction) {
+                      // If image is already assigned, unassign it and select it
+                      handleUnassignImage(index);
+                      setSelectedImageIndex(index);
                     } else {
                       setSelectedImageIndex(index);
                     }
@@ -324,7 +410,7 @@ export default function ShareIntentModal({
                         borderRadius: 8,
                         backgroundColor: themeColors.card,
                         borderWidth: isSelected ? 3 : 0,
-                        borderColor: palette.primary,
+                        borderColor: isSelected ? "#ef4444" : palette.primary,
                       }}
                       contentFit="cover"
                     />
@@ -351,7 +437,7 @@ export default function ShareIntentModal({
                           position: "absolute",
                           top: 5,
                           left: 5,
-                          backgroundColor: palette.primary,
+                          backgroundColor: "#ef4444",
                           borderRadius: 12,
                           width: 24,
                           height: 24,
@@ -397,21 +483,165 @@ export default function ShareIntentModal({
               marginBottom: 15,
             }}
           >
-            Missing Receipts ({validTransactions.length})
-            {selectedImageIndex !== null && (
-              <Text style={{ color: palette.primary, fontSize: 14 }}>
-                {" "}
-                • Tap a transaction to assign the selected image
-              </Text>
-            )}
-            {validImages.length >= 2 && (
-              <Text style={{ color: palette.info, fontSize: 14 }}>
-                {" "}
-                • Use "Select All" to assign all images to one transaction
-              </Text>
+            {validTransactions.length > 0 ? (
+              <>
+                Missing Receipts ({validTransactions.length})
+                {selectedImageIndex !== null && (
+                  <Text style={{ color: palette.primary, fontSize: 14 }}>
+                    {" "}
+                    • Tap a transaction or receipt bin to assign the selected
+                    image
+                  </Text>
+                )}
+                {validImages.length >= 2 && (
+                  <Text style={{ color: palette.info, fontSize: 14 }}>
+                    {" "}
+                    • Use "Select All" to assign all images to one transaction
+                  </Text>
+                )}
+              </>
+            ) : (
+              <>
+                Receipt Bin Upload
+                <Text style={{ color: palette.info, fontSize: 14 }}>
+                  {" "}
+                  • Images will be uploaded to your receipt bin
+                </Text>
+              </>
             )}
           </Text>
 
+          {/* Receipt Bin Option - Always shown */}
+          {(() => {
+            const receiptBinAssignments = assignments.filter(
+              (a) => a.isReceiptBin,
+            );
+            const isSelected = selectedImageIndex !== null;
+            const showSelectAll = validImages.length >= 2;
+
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  if (isSelected && selectedImageIndex !== null) {
+                    handleReceiptBinSelect(selectedImageIndex);
+                  }
+                }}
+                disabled={!isSelected}
+                style={{
+                  opacity: isSelected ? 1 : 0.7,
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: themeColors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor:
+                      receiptBinAssignments.length > 0
+                        ? palette.success
+                        : themeColors.border,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        color: themeColors.text,
+                        fontSize: 16,
+                        fontWeight: "600",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Receipt Bin
+                    </Text>
+                    <Text style={{ color: palette.muted, fontSize: 14 }}>
+                      Upload to receipt bin
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    {receiptBinAssignments.length > 0 && (
+                      <View
+                        style={{
+                          backgroundColor: palette.success,
+                          borderRadius: 12,
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "white",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          {receiptBinAssignments.length} receipt
+                          {receiptBinAssignments.length > 1 ? "s" : ""}
+                        </Text>
+                      </View>
+                    )}
+
+                    {showSelectAll && (
+                      <TouchableOpacity
+                        onPress={() => handleReceiptBinSelectAll()}
+                        style={{
+                          backgroundColor: palette.info,
+                          borderRadius: 8,
+                          paddingHorizontal: 12,
+                          paddingVertical: 6,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "white",
+                            fontSize: 12,
+                            fontWeight: "600",
+                          }}
+                        >
+                          Select All
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+
+                {receiptBinAssignments.length > 0 && (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ marginTop: 8, marginBottom: 12 }}
+                  >
+                    {receiptBinAssignments.map((assignment) => (
+                      <Image
+                        key={assignment.imageUri}
+                        source={{ uri: assignment.imageUri }}
+                        style={{
+                          width: 60,
+                          height: 80,
+                          borderRadius: 6,
+                          marginRight: 8,
+                          backgroundColor: themeColors.background,
+                        }}
+                        contentFit="cover"
+                      />
+                    ))}
+                  </ScrollView>
+                )}
+              </TouchableOpacity>
+            );
+          })()}
+
+          {/* Regular Transactions */}
           {validTransactions.map((transaction) => {
             const assignedImages = assignments.filter(
               (a) => a.transactionId === transaction.id,

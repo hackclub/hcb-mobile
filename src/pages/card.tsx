@@ -152,7 +152,7 @@ export default function CardPage(
     } else if (!cardFetchError) {
       setCardError(null);
     }
-  }, [cardFetchError, errorDisplayReady]);
+  }, [cardFetchError, errorDisplayReady, card]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -267,7 +267,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, id]);
+  }, [mutate, card?.id, id, grantId]);
 
   const tabBarHeight = useBottomTabBarHeight();
 

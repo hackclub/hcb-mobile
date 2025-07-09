@@ -6,11 +6,16 @@ import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
-import { memo, useCallback, useEffect, useState } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  NestedReorderableList,
-  ScrollViewContainer,
+  Pressable,
+  RefreshControl,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
+import { Gesture } from "react-native-gesture-handler";
+import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import useSWR from "swr";
@@ -33,31 +38,29 @@ type CardItemProps = {
   patternDimensions?: { width: number; height: number };
 };
 
-const CardItem = memo(
-  ({ item, isActive, onPress, pattern, patternDimensions }: CardItemProps) => {
-    const drag = useReorderableDrag();
-    return (
-      <Pressable
-        onPress={() => onPress(item)}
-        onLongPress={drag}
-        disabled={isActive}
-      >
-        <PaymentCard
-          card={item}
-          style={{ marginHorizontal: 20, marginVertical: 8 }}
-          pattern={pattern}
-          patternDimensions={patternDimensions}
-        />
-      </Pressable>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.isActive === nextProps.isActive &&
-    prevProps.pattern === nextProps.pattern,
-);
-
-CardItem.displayName = "CardItem";
+const CardItem = ({
+  item,
+  isActive,
+  onPress,
+  pattern,
+  patternDimensions,
+}: CardItemProps) => {
+  const drag = useReorderableDrag();
+  return (
+    <Pressable
+      onPress={() => onPress(item)}
+      onLongPress={drag}
+      disabled={isActive}
+    >
+      <PaymentCard
+        card={item}
+        style={{ marginHorizontal: 20, marginVertical: 8 }}
+        pattern={pattern}
+        patternDimensions={patternDimensions}
+      />
+    </Pressable>
+  );
+};
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
@@ -121,10 +124,16 @@ export default function CardsPage({ navigation }: Props) {
     generatePatterns();
   }, [cards, grantCards]);
 
-  useFocusEffect(() => {
-    reloadCards();
-    reloadGrantCards();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      // Reload data when screen comes into focus
+      const refreshData = async () => {
+        await reloadCards();
+        await reloadGrantCards();
+      };
+      refreshData();
+    }, [reloadCards, reloadGrantCards]),
+  );
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [allCards, setAllCards] =
@@ -132,6 +141,9 @@ export default function CardsPage({ navigation }: Props) {
   const [sortedCards, setSortedCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [refreshing] = useState(false);
+  const usePanGesture = () =>
+    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = usePanGesture();
 
   useEffect(() => {
     navigation.setOptions({
@@ -269,57 +281,57 @@ export default function CardsPage({ navigation }: Props) {
 
   if (sortedCards) {
     return (
-      <ScrollViewContainer>
-        <NestedReorderableList
-          data={
-            canceledCardsShown
-              ? sortedCards
-              : sortedCards.filter(
-                  (c) => c.status != "canceled" && c.status != "expired",
-                )
-          }
-          keyExtractor={(item) => item.id}
-          onReorder={({ from, to }) => {
-            Haptics.selectionAsync();
-            const newCards = [...sortedCards];
-            const [removed] = newCards.splice(from, 1);
-            newCards.splice(to, 0, removed);
-            setSortedCards(newCards);
-            saveCardOrder(newCards);
-          }}
-          contentContainerStyle={{
-            paddingBottom: tabBarHeight + 20,
-            paddingTop: 20,
-            alignItems: "center",
-          }}
-          scrollIndicatorInsets={{ bottom: tabBarHeight }}
-          onRefresh={onRefresh}
-          refreshing={refreshing}
-          renderItem={({ item }) => (
-            <CardItem
-              item={item}
-              isActive={false}
-              onPress={(card) => navigation.navigate("Card", { card })}
-              pattern={patternCache[item.id]?.pattern}
-              patternDimensions={patternCache[item.id]?.dimensions}
-            />
-          )}
-          ListFooterComponent={() =>
-            sortedCards.length > 2 && (
-              <Text
-                style={{
-                  color: palette.muted,
-                  textAlign: "center",
-                  marginTop: 10,
-                  marginBottom: 10,
-                }}
-              >
-                Drag to reorder cards
-              </Text>
-            )
-          }
-        />
-      </ScrollViewContainer>
+      <ReorderableList
+        data={
+          canceledCardsShown
+            ? sortedCards
+            : sortedCards.filter(
+                (c) => c.status != "canceled" && c.status != "expired",
+              )
+        }
+        keyExtractor={(item) => item.id}
+        onReorder={({ from, to }) => {
+          Haptics.selectionAsync();
+          const newCards = [...sortedCards];
+          const [removed] = newCards.splice(from, 1);
+          newCards.splice(to, 0, removed);
+          setSortedCards(newCards);
+          saveCardOrder(newCards);
+        }}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight + 20,
+          paddingTop: 20,
+          alignItems: "center",
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        panGesture={panGesture}
+        renderItem={({ item }) => (
+          <CardItem
+            item={item}
+            isActive={false}
+            onPress={(card) => navigation.navigate("Card", { card })}
+            pattern={patternCache[item.id]?.pattern}
+            patternDimensions={patternCache[item.id]?.dimensions}
+          />
+        )}
+        ListFooterComponent={() =>
+          sortedCards.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder cards
+            </Text>
+          )
+        }
+      />
     );
   } else {
     return (
