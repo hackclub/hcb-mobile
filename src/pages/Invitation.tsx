@@ -18,7 +18,7 @@ import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Invitation from "../lib/types/Invitation";
 import palette from "../palette";
-import { palette as p } from "../theme";
+import { palette as themePalette } from "../theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Invitation">;
 
@@ -69,6 +69,17 @@ export default function InvitationPage({
         });
         mutate(`user/organizations`);
       },
+      onError: (error: Error) => {
+        Alert.alert(
+          "Failed to Accept Invitation. You may have to sign the contract.",
+          error.message,
+          [
+            {
+              text: "OK",
+            },
+          ],
+        );
+      },
     },
   );
 
@@ -105,14 +116,14 @@ export default function InvitationPage({
         style={{ position: "absolute", top: 16, right: 16 }}
         underlayColor={themeColors.background}
       >
-        <Ionicons name="close-circle" color={p.muted} size={30} />
+        <Ionicons name="close-circle" color={themePalette.muted} size={30} />
       </TouchableHighlight>
 
       {invitation ? (
         <>
           <Text
             style={{
-              color: p.muted,
+              color: themePalette.muted,
               fontSize: 12,
               textTransform: "uppercase",
               marginBottom: 8,

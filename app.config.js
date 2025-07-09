@@ -35,6 +35,7 @@ export default {
         backgroundColor: "#EC3750",
       },
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
+      versionCode: 2,
     },
     web: {
       bundler: "metro",

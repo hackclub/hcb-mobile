@@ -19,6 +19,8 @@ bun.lockb
 .env*.local
 
 build-*.ipa
+build-*.apk
+build-*.aab
 
 ios/
 android/

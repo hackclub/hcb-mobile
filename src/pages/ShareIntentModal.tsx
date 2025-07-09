@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -40,10 +40,21 @@ export default function ShareIntentModal({
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  // Validate params to prevent errors from invalid state
   const validImages =
     images?.filter((img) => img && typeof img === "string") || [];
-  const validTransactions = missingTransactions?.filter((t) => t && t.id) || [];
+
+  const transactionsRef = useRef<
+    Array<Transaction & { organization: Organization }>
+  >([]);
+
+  useEffect(() => {
+    if (missingTransactions && missingTransactions.length > 0) {
+      transactionsRef.current = missingTransactions.filter((t) => t && t.id);
+      setTransactionsInitialized(true);
+    }
+  }, [missingTransactions]);
+
+  const validTransactions = transactionsRef.current;
 
   const [assignments, setAssignments] = useState<ImageAssignment[]>(
     validImages.map((uri) => ({
@@ -56,14 +67,31 @@ export default function ShareIntentModal({
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   );
+  const [transactionsInitialized, setTransactionsInitialized] = useState(false);
 
-  // Debug logging
+  useEffect(() => {
+    if (validImages.length > 0 && assignments.length !== validImages.length) {
+      console.log("Syncing assignments array with validImages:", {
+        validImagesLength: validImages.length,
+        assignmentsLength: assignments.length,
+      });
+      setAssignments(
+        validImages.map((uri) => ({
+          imageUri: uri,
+          transactionId: null,
+          orgId: null,
+        })),
+      );
+    }
+  }, [validImages, assignments.length]);
+
   useEffect(() => {
     console.log("=== SHARE INTENT MODAL DEBUG ===");
     console.log("Modal opened with params:", {
       imagesCount: validImages.length,
       images: validImages,
       missingTransactionsCount: validTransactions.length,
+      transactionsInitialized: transactionsInitialized,
       missingTransactions: validTransactions.map((t) => ({
         id: t.id,
         memo: t.memo,
@@ -72,7 +100,6 @@ export default function ShareIntentModal({
       })),
     });
 
-    // Handle invalid state
     if (validImages.length === 0) {
       console.warn("No valid images provided to ShareIntentModal");
       Alert.alert(
@@ -81,7 +108,7 @@ export default function ShareIntentModal({
         [{ text: "OK", onPress: () => navigation.goBack() }],
       );
     }
-  }, [validImages, validTransactions, navigation]);
+  }, [validImages, validTransactions, navigation, transactionsInitialized]);
 
   const handleImageSelect = (
     imageIndex: number,
@@ -98,7 +125,7 @@ export default function ShareIntentModal({
           : assignment,
       ),
     );
-    setSelectedImageIndex(null); // Close selection mode
+    setSelectedImageIndex(null);
   };
 
   const handleSelectAll = (
@@ -112,7 +139,7 @@ export default function ShareIntentModal({
         isReceiptBin: false,
       })),
     );
-    setSelectedImageIndex(null); // Close selection mode
+    setSelectedImageIndex(null);
   };
 
   const handleReceiptBinSelect = (imageIndex: number) => {
@@ -128,7 +155,7 @@ export default function ShareIntentModal({
           : assignment,
       ),
     );
-    setSelectedImageIndex(null); // Close selection mode
+    setSelectedImageIndex(null);
   };
 
   const handleReceiptBinSelectAll = () => {
@@ -140,7 +167,7 @@ export default function ShareIntentModal({
         isReceiptBin: true,
       })),
     );
-    setSelectedImageIndex(null); // Close selection mode
+    setSelectedImageIndex(null);
   };
 
   const handleUnassignImage = (imageIndex: number) => {
@@ -273,13 +300,18 @@ export default function ShareIntentModal({
   };
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
+    if (!assignment) {
+      console.warn(
+        "getTransactionForAssignment called with undefined assignment",
+      );
+      return null;
+    }
     if (assignment.isReceiptBin)
       return { memo: "Receipt Bin", id: "receipt-bin" };
     if (!assignment.transactionId) return null;
     return validTransactions.find((t) => t.id === assignment.transactionId);
   };
 
-  // Early return if no valid images
   if (validImages.length === 0) {
     return (
       <View
@@ -377,9 +409,16 @@ export default function ShareIntentModal({
           >
             {validImages.map((imageUri, index) => {
               const assignment = getAssignmentForImage(imageUri);
-              const assignedTransaction = getTransactionForAssignment(
-                assignment!,
-              );
+
+              if (!assignment) {
+                console.warn(
+                  `No assignment found for image ${index}: ${imageUri}`,
+                );
+                return null;
+              }
+
+              const assignedTransaction =
+                getTransactionForAssignment(assignment);
               const isSelected = selectedImageIndex === index;
 
               return (
