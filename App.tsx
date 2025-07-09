@@ -3,13 +3,14 @@ import "expo-dev-client";
 import * as Sentry from "@sentry/react-native";
 import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import { useFonts } from "expo-font";
-import { ShareIntentProvider } from "expo-share-intent";
+import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import { useColorScheme } from "react-native";
 
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
 import { LinkingProvider } from "./src/LinkingContext";
+import { ShareIntentProvider } from "./src/ShareIntentContext";
 import { ThemeProvider } from "./src/ThemeContext";
 
 function App() {
@@ -38,15 +39,17 @@ function App() {
   }
 
   return (
-    <ShareIntentProvider>
+    <ExpoShareIntentProvider>
       <ThemeProvider>
         <AuthProvider>
-          <LinkingProvider>
-            <AppContent scheme={scheme} cache={cache} />
-          </LinkingProvider>
+          <ShareIntentProvider>
+            <LinkingProvider>
+              <AppContent scheme={scheme} cache={cache} />
+            </LinkingProvider>
+          </ShareIntentProvider>
         </AuthProvider>
       </ThemeProvider>
-    </ShareIntentProvider>
+    </ExpoShareIntentProvider>
   );
 }
 
