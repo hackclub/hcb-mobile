@@ -257,7 +257,7 @@ export default function CardPage({
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
 
-  const { canAddToWallet, error: walletError, ephemeralKey, card: walletCard } = useDigitalWallet(_card.id);
+  const { canAddToWallet, error: walletError, ephemeralKey, card: walletCard, androidCardToken } = useDigitalWallet(_card.id);
   console.log(canAddToWallet, walletError, ephemeralKey, walletCard);
 
   if (!card && !cardLoaded && !cardError) {
@@ -720,6 +720,7 @@ export default function CardPage({
                 <View style={{ marginBottom: 20 }}>
                   {/* @ts-expect-error */}
                   <AddToWalletButton
+                    token={androidCardToken}
                     androidAssetSource={require('../../assets/google-wallet.png')}
                     style={{
                       height: 48,

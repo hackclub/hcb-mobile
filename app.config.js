@@ -92,6 +92,7 @@ export default {
                 "org/bouncycastle/x509/CertPathReviewerMessages*",
               ],
             },
+            kotlinVersion: "1.7.20",
           },
         },
       ],
@@ -103,11 +104,6 @@ export default {
           project: "hcb-mobile",
           url: "https://sentry.io/",
         },
-      ],
-      ["@stripe/stripe-react-native",
-        {
-          merchantIdentifier: "merchant.com.hackclub.hcb",
-        }
       ],
     ],
   },
