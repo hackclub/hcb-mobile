@@ -6,7 +6,6 @@ import {
   ConnectTapToPayParams,
   PaymentIntent,
   Reader,
-  StripeTerminalProvider,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -48,16 +47,7 @@ export default function OrganizationDonationPage({
   },
   navigation,
 }: Props) {
-  const { fetcher } = useSWRConfig();
   const isDark = useIsDark();
-  const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
-
-  const fetchTokenProvider = async () => {
-    const result = await fetcher!("stripe_terminal_connection_token");
-    const token = (result as { terminal_connection_token: { secret: string } })
-      .terminal_connection_token;
-    return token.secret;
-  };
 
   useEffect(() => {
     const getDidOnboarding = async () => {
@@ -76,59 +66,17 @@ export default function OrganizationDonationPage({
     }
   }, [isDark]);
 
-  return (
-    <StripeTerminalProvider
-      logLevel="verbose"
-      tokenProvider={fetchTokenProvider}
-    >
-      <PageWrapper
-        orgId={orgId}
-        orgName={organization?.name}
-        orgSlug={organization?.slug}
-        navigation={navigation}
-      />
-    </StripeTerminalProvider>
-  );
+  return <PageWrapper orgId={orgId} navigation={navigation} />;
 }
 
 function PageWrapper({
   orgId,
-  orgName,
-  orgSlug,
   navigation,
 }: {
   orgId: `org_${string}`;
-  orgName?: string;
-  orgSlug?: string;
   navigation: NavigationProp<StackParamList>;
 }) {
-  const { initialize, isInitialized } = useStripeTerminal({});
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
-
-  if (!isInitialized)
-    return (
-      <View
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flex: 1,
-        }}
-      >
-        <ActivityIndicator size="large" color={palette.primary} />
-      </View>
-    );
-
-  return (
-    <PageContent
-      orgId={orgId}
-      orgName={orgName}
-      orgSlug={orgSlug}
-      navigation={navigation}
-    />
-  );
+  return <PageContent orgId={orgId} navigation={navigation} />;
 }
 
 const SectionHeader = ({
@@ -163,224 +111,79 @@ const SectionHeader = ({
 
 function PageContent({
   orgId,
-  orgName,
-  orgSlug,
   navigation,
 }: {
   orgId: `org_${string}`;
-  orgName?: string;
-  orgSlug?: string;
   navigation: NavigationProp<StackParamList>;
 }) {
   const { colors } = useTheme();
-
-  // const { data: organization } = useSWR<OrganizationExpanded>(
-  //   `organizations/${orgId}?avatar_size=50`,
-  //   { fallbackData: cache.get(`organizations/${orgId}`)?.data },
-  // );
-
-  // if (!organization) return null;
-
+  const { data: organization, isLoading: organizationLoading } =
+    useSWR<Organization>(`organizations/${orgId}`);
   const { accessDenied } = useLocation();
-  // const { location, accessDenied } = useLocation();
-
   const [amount, setAmount] = useState("$");
-
   const { fetcher } = useSWRConfig();
-
   const value = parseFloat(amount.replace("$", "0"));
-
   const [reader, setReader] = useState<Reader.Type | undefined>(undefined);
-  // const [payment, setPayment] = useState<PaymentIntent | undefined>(undefined);
-  // const [loadingCreatePayment, setLoadingCreatePayment] = useState(false);
-  // const [loadingCollectPayment, setLoadingCollectPayment] = useState(false);
-  // const [loadingConfirmPayment, setLoadingConfirmPayment] = useState(false);
+  const readerRef = useRef<Reader.Type | undefined>(reader);
+  useEffect(() => {
+    readerRef.current = reader;
+  }, [reader]);
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
   const [currentProgress, setCurrentProgress] = useState<string | null>(null);
-  // const [donation, setDonation] = useState<string | undefined>(undefined);
-
   const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
-
   const {
     discoverReaders,
     connectReader: connectReaderTapToPay,
+    disconnectReader,
     createPaymentIntent,
     collectPaymentMethod,
     confirmPaymentIntent,
     connectedReader,
   } = useStripeTerminal({
-    onUpdateDiscoveredReaders: (readers: Reader.Type[], ...stuff) => {
-      console.log("DISCOVERED READERSS", readers, stuff);
+    onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
       setReader(readers[0]);
     },
     onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
       setCurrentProgress(progress);
     },
   });
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const emailRef = useRef<TextInput>(null);
+  const [orgCheckLoading, setOrgCheckLoading] = useState(true);
 
-  const createDonation = async () => {
-    const { id } = (await fetcher!(`organizations/${orgId}/donations`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount_cents: value * 100,
-        name,
-        email,
-      }),
-    })) as { id: string };
-
-    // setDonation(id);
-    return id;
-  };
-
-  console.log("discovery", discoverReaders);
-
+  // Disconnect the reader as soon as the page loads if the last connected org id is different from the current org id
   useEffect(() => {
-    discoverReaders({
-      discoveryMethod: "tapToPay",
-      simulated: false,
-    });
+    (async () => {
+      const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
+      if (connectedReader && storedOrgId !== orgId) {
+        try {
+          setLoadingConnectingReader(false);
+          setCurrentProgress(null);
+          await disconnectReader();
+        } catch (e) {
+          console.log("Error disconnecting reader on page load", e);
+        }
+      }
+      setOrgCheckLoading(false);
+    })();
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // useEffect for discoverReaders (must be before early return)
+  useEffect(() => {
+    (async () => {
+      await discoverReaders({
+        discoveryMethod: "tapToPay",
+      });
+    })();
   }, [discoverReaders]);
 
-  async function connectReader(selectedReader: Reader.Type) {
-    console.log("orgName", orgName);
-    setLoadingConnectingReader(true);
-    try {
-      const { error } = await connectReaderTapToPay(
-        {
-          reader: selectedReader,
-          locationId: locationIdStripeMock,
-          merchantDisplayName: orgName,
-        } as ConnectTapToPayParams,
-        "tapToPay",
-      );
-
-      setCurrentProgress(null);
-
-      if (error) {
-        console.log("connectLocalMobileReader error:", error);
-        if (error.message == "You must provide a reader object") {
-          discoverReaders({
-            discoveryMethod: "tapToPay",
-            simulated: false,
-          });
-        }
-        showAlert("There wass an error connecting, please try again");
-        return false;
-      }
-
-      setCurrentProgress(null);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoadingConnectingReader(false);
-    }
-  }
-
-  async function paymentIntent({ donation_id }: { donation_id: string }) {
-    // setLoadingCreatePayment(true);
-    try {
-      const { error, paymentIntent } = await createPaymentIntent({
-        amount: Number((value * 100).toFixed()),
-        currency: "usd",
-        paymentMethodTypes: ["card_present"],
-        offlineBehavior: "prefer_online",
-        captureMethod: "automatic",
-        metadata: {
-          donation_id,
-          donation: "true",
-        },
-        statementDescriptor: `HCB* ${orgName || "DONATION"}`.substring(0, 22),
-      });
-
-      if (error) {
-        console.log("Error creating payment intent", error);
-        return false;
-      }
-
-      // setPayment(paymentIntent);
-
-      navigation.navigate("ProcessDonation", {
-        orgId,
-        payment: paymentIntent,
-        collectPayment: async () => {
-          return await collectPayment(paymentIntent);
-        },
-        name,
-        email,
-        slug: orgSlug || "",
-      });
-
-      return paymentIntent;
-    } catch (error) {
-      console.log(error);
-      showAlert("Error creating payment intent", error.message);
-    } finally {
-      // setLoadingCreatePayment(false);
-    }
-  }
-
-  async function collectPayment(
-    localPayment: PaymentIntent.Type,
-  ): Promise<boolean> {
-    // setLoadingCollectPayment(true);
-    console.log(localPayment);
-    let output: boolean;
-    try {
-      const { error } = await collectPaymentMethod({
-        paymentIntent: localPayment,
-      });
-
-      if (error) {
-        console.log("Error collecting payment", error);
-        if (error.code != "Canceled") {
-          showAlert("Error collecting payment", error.message);
-        }
-        return false;
-      }
-      output = (await confirmPayment(localPayment)) ?? false;
-    } catch (error) {
-      console.log(error);
-      output = false;
-    } finally {
-      // setLoadingCollectPayment(false);
-    }
-
-    return output;
-  }
-
-  async function confirmPayment(localPayment: PaymentIntent.Type) {
-    // setLoadingConfirmPayment(true);
-    let success;
-    try {
-      const { error } = await confirmPaymentIntent({
-        paymentIntent: localPayment,
-      });
-      if (error) {
-        console.log("Error confirm payment", error);
-        return;
-      }
-      // setPayment(undefined);
-      success = true;
-    } catch (error) {
-      console.log(error);
-      success = false;
-    } finally {
-      // setLoadingConfirmPayment(false);
-    }
-    return success;
-  }
-
+  // useEffect for accessDenied (must be before early return)
   async function handleRequestLocation() {
     await Linking.openSettings();
   }
-
   useEffect(() => {
     if (accessDenied) {
       showAlert(
@@ -396,7 +199,139 @@ function PageContent({
     }
   }, [accessDenied]);
 
-  if (!connectedReader) {
+  // Block UI until organization is loaded
+  if (organizationLoading || !organization) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={palette.primary} />
+      </View>
+    );
+  }
+
+  const orgName = organization.name;
+  const orgSlug = organization.slug;
+
+  const createDonation = async () => {
+    const { id } = (await fetcher!(`organizations/${orgId}/donations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount_cents: value * 100,
+        name,
+        email,
+      }),
+    })) as { id: string };
+    return id;
+  };
+
+  async function connectReader(selectedReader: Reader.Type) {
+    setLoadingConnectingReader(true);
+    try {
+      const { error } = await connectReaderTapToPay(
+        {
+          reader: selectedReader,
+          locationId: locationIdStripeMock,
+          merchantDisplayName: orgName,
+        } as ConnectTapToPayParams,
+        "tapToPay",
+      );
+      setCurrentProgress(null);
+      if (error) {
+        if (error.message == "You must provide a reader object") {
+          discoverReaders({
+            discoveryMethod: "tapToPay",
+            simulated: false,
+          });
+        }
+        return false;
+      }
+      // Update AsyncStorage with the new org id after successful connection
+      await AsyncStorage.setItem("lastConnectedOrgId", orgId);
+      setCurrentProgress(null);
+    } catch (error) {
+      // Log error for debugging
+      console.log("connectReader error", error);
+    } finally {
+      setLoadingConnectingReader(false);
+    }
+  }
+
+  async function paymentIntent({ donation_id }: { donation_id: string }) {
+    try {
+      const { error, paymentIntent } = await createPaymentIntent({
+        amount: Number((value * 100).toFixed()),
+        currency: "usd",
+        paymentMethodTypes: ["card_present"],
+        offlineBehavior: "prefer_online",
+        captureMethod: "automatic",
+        metadata: {
+          donation_id,
+          donation: "true",
+        },
+        statementDescriptor: `HCB* ${orgName || "DONATION"}`.substring(0, 22),
+      });
+      if (error) {
+        return false;
+      }
+      navigation.navigate("ProcessDonation", {
+        orgId,
+        payment: paymentIntent,
+        collectPayment: async () => {
+          return await collectPayment(paymentIntent);
+        },
+        name,
+        email,
+        slug: orgSlug || "",
+      });
+      return paymentIntent;
+    } catch (error) {
+      // Log error for debugging
+      console.log("paymentIntent error", error);
+    }
+  }
+
+  async function collectPayment(
+    localPayment: PaymentIntent.Type,
+  ): Promise<boolean> {
+    let output: boolean;
+    try {
+      const { error } = await collectPaymentMethod({
+        paymentIntent: localPayment,
+      });
+      if (error) {
+        if (error.code != "Canceled") {
+          showAlert("Error collecting payment", error.message);
+        }
+        return false;
+      }
+      output = (await confirmPayment(localPayment)) ?? false;
+    } catch (error) {
+      console.log("collectPayment error", error);
+      output = false;
+    }
+    return output;
+  }
+
+  async function confirmPayment(localPayment: PaymentIntent.Type) {
+    let success;
+    try {
+      const { error } = await confirmPaymentIntent({
+        paymentIntent: localPayment,
+      });
+      if (error) {
+        return;
+      }
+      success = true;
+    } catch (error) {
+      console.log("confirmPayment error", error);
+      success = false;
+    }
+    return success;
+  }
+
+  if (!connectedReader || orgCheckLoading) {
     // centered view that says "connect reader"
     return (
       <View
@@ -453,28 +388,53 @@ function PageContent({
                 height={20}
               />
             </View>
-          ) : loadingConnectingReader ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <View style={{ width: 36, height: 36 }} />
-          )}
+          ) : null}
 
           <Button
             onPress={async () => {
-              if (!connectedReader) {
-                if (reader) {
-                  return await connectReader(reader);
+              setLoadingConnectingReader(true);
+              const waitForReader = async (
+                timeoutMs = 10000,
+                pollInterval = 300,
+              ) => {
+                const maxAttempts = Math.ceil(timeoutMs / pollInterval);
+                let attempts = 0;
+                while (attempts < maxAttempts) {
+                  await new Promise((res) => setTimeout(res, pollInterval));
+                  if (readerRef.current) {
+                    return true;
+                  }
+                  attempts++;
                 }
+                return false;
+              };
+              if (reader) {
+                await connectReader(reader);
+                setLoadingConnectingReader(false);
+                return;
               }
+              // Discover readers once, then wait for a reader to appear
+              await discoverReaders({
+                discoveryMethod: "tapToPay",
+              });
+              const found = await waitForReader();
+              if (found && readerRef.current) {
+                await connectReader(readerRef.current);
+              } else {
+                showAlert(
+                  "No reader found",
+                  "No Tap to Pay reader was found nearby. Please make sure your device is ready.",
+                );
+              }
+              setLoadingConnectingReader(false);
             }}
             style={{
               marginBottom: 10,
               position: "absolute",
               bottom: 72,
-
               width: "100%",
             }}
-            loading={!reader}
+            loading={loadingConnectingReader}
           >
             Collect donations
           </Button>
@@ -537,7 +497,7 @@ function PageContent({
             autoComplete="off"
             autoCorrect={false}
             placeholder={"Full name"}
-            placeholderTextColor={colors.text}
+            placeholderTextColor={palette.muted}
             returnKeyType="next"
             onSubmitEditing={() => {
               emailRef.current?.focus();
@@ -566,10 +526,9 @@ function PageContent({
               flex: 1,
             }}
             selectTextOnFocus
-            autoFocus
             clearButtonMode="while-editing"
             placeholder="Email"
-            placeholderTextColor={colors.text}
+            placeholderTextColor={palette.muted}
             autoCapitalize="none"
             value={email}
             onChangeText={setEmail}
@@ -585,8 +544,13 @@ function PageContent({
               showAlert("Please provide a valid email address");
               return;
             }
-            const donation_id = await createDonation();
-            await paymentIntent({ donation_id });
+            try {
+              const donation_id = await createDonation();
+              await paymentIntent({ donation_id });
+            } catch (error) {
+              console.log("createDonation error", error);
+              showAlert("Error creating donation", "Please try again.");
+            }
           }}
           style={{
             width: "100%",
@@ -597,7 +561,7 @@ function PageContent({
         </Button>
       ) : (
         <Button onPress={() => reader && connectReader(reader)}>
-          Reconnect reader reader
+          Reconnect reader
         </Button>
       )}
 

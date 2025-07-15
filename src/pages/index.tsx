@@ -6,6 +6,7 @@ import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
+import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useShareIntentContext } from "expo-share-intent";
@@ -92,7 +93,10 @@ function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-
+  const { initialize } = useStripeTerminal({});
+  useEffect(() => {
+    initialize();
+  }, []);
   const color = orgColor(event.id);
   const isDark = useIsDark();
   return (
@@ -273,8 +277,6 @@ export default function App({ navigation }: Props) {
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {
-      console.log("Share intent received:", shareIntent);
-
       const imageUrls =
         (shareIntent as { files?: Array<{ path: string }> }).files?.map(
           (file) => file.path,

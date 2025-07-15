@@ -1,7 +1,6 @@
 import "expo-dev-client";
 
 import * as Sentry from "@sentry/react-native";
-import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import { useFonts } from "expo-font";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import { useColorScheme } from "react-native";
@@ -24,7 +23,6 @@ function App() {
 
   const scheme = useColorScheme();
   const cache = useCache();
-  useStripeTerminal();
 
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
