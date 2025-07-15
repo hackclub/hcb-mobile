@@ -121,7 +121,9 @@ export default function AppContent({
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
   const fetchTokenProvider = async () => {
-    const token = await hcb.get("stripe_terminal_connection_token").json() as {
+    const token = (await hcb
+      .get("stripe_terminal_connection_token")
+      .json()) as {
       terminal_connection_token: {
         secret: string;
       };

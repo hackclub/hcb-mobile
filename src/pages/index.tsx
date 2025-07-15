@@ -277,7 +277,6 @@ export default function App({ navigation }: Props) {
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {
-
       const imageUrls =
         (shareIntent as { files?: Array<{ path: string }> }).files?.map(
           (file) => file.path,
