@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
@@ -26,7 +27,7 @@ import MockTransaction, {
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
-// import TapToPayBanner from "../../components/organizations/TapToPayBanner";
+import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import Transaction from "../../components/Transaction";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
@@ -89,7 +90,11 @@ export default function OrganizationPage({
 
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
-  // const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
+  const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
+  const terminal = useStripeTerminal();
+  const [supportsTapToPay, setSupportsTapToPay] = useState(false);
+
+  const [terminalInitialized, setTerminalInitialized] = useState(false);
 
   const {
     transactions: _transactions,
@@ -108,26 +113,57 @@ export default function OrganizationPage({
     }
   }, [organizationError, organization, navigation]);
 
-  // useEffect(() => {
-  //   const checkTapToPayBanner = async () => {
-  //     const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
-  //     if (!hasSeenBanner && Platform.OS === "ios") {
-  //       const [major, minor] = (Device.osVersion ?? "0.0")
-  //         .split(".")
-  //         .map(Number);
-  //       // iOS 16.4 and later
-  //       if (major > 16 || (major === 16 && minor >= 4)) {
-  //         setShowTapToPayBanner(true);
-  //       }
-  //     }
-  //   };
-  //   checkTapToPayBanner();
-  // }, []);
+  useEffect(() => {
+    const checkTapToPayBanner = async () => {
+      const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+      if (!hasSeenBanner && Platform.OS === "ios") {
+        const [major, minor] = (Device.osVersion ?? "0.0")
+          .split(".")
+          .map(Number);
+        // iOS 16.4 and later
+        if (major > 16 || (major === 16 && minor >= 4)) {
+          setShowTapToPayBanner(true);
+        }
+      }
+    };
+    checkTapToPayBanner();
+  }, []);
 
-  // const handleDismissTapToPayBanner = async () => {
-  //   await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
-  //   setShowTapToPayBanner(false);
-  // };
+  useEffect(() => {
+    // Reset initialization when organization changes
+    setTerminalInitialized(false);
+  }, [organization]);
+
+  useEffect(() => {
+    (async () => {
+      if (
+        organization &&
+        !organization.playground_mode &&
+        !terminalInitialized
+      ) {
+        try {
+          await terminal.initialize();
+          setTerminalInitialized(true);
+          // Only call supportsReadersOfType if initialize did not throw
+          const supported = await terminal.supportsReadersOfType({
+            deviceType: "tapToPay",
+            discoveryMethod: "tapToPay",
+          });
+          setSupportsTapToPay(!!supported);
+        } catch (error) {
+          console.error("Stripe Terminal initialization error:", error);
+          setSupportsTapToPay(false);
+        }
+      } else if (!organization || organization.playground_mode) {
+        setSupportsTapToPay(false);
+      }
+    })();
+  }, [organization, terminal, terminalInitialized]);
+
+  const handleDismissTapToPayBanner = async () => {
+    await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
+    setShowTapToPayBanner(false);
+  };
 
   useEffect(() => {
     if (organization && user) {
@@ -173,28 +209,12 @@ export default function OrganizationPage({
           image: "person.2.badge.gearshape",
         });
 
-        if (!organization.playground_mode) {
-          // if (Device.brand === "Apple" && Device.modelId) {
-          //   const modelNumber = parseInt(
-          //     Device.modelId.replace("iPhone", "").split(",")[0],
-          //     10,
-          //   );
-          //   // iPhone XS starts at iPhone11,2 (Commented out for now)
-          //   if (modelNumber >= 11) {
-          //     menuActions.push({
-          //       id: "donation",
-          //       title: "Collect Donations",
-          //       image: "dollarsign.circle",
-          //     });
-          //   }
-          // }
-          if (Platform.OS === "android") {
-            menuActions.push({
-              id: "donation",
-              title: "Collect Donations",
-              image: "dollarsign.circle",
-            });
-          }
+        if (!organization.playground_mode && supportsTapToPay) {
+          menuActions.push({
+            id: "donation",
+            title: "Collect Donations",
+            image: "dollarsign.circle",
+          });
         }
 
         navigation.setOptions({
@@ -212,29 +232,18 @@ export default function OrganizationPage({
                     orgId: organization.id,
                   });
                 } else if (event == "donation") {
-                  if (Platform.OS === "android") {
+                  if (supportsTapToPay) {
                     navigation.navigate("OrganizationDonation", {
                       orgId: organization.id,
                     });
-                  } else if (Platform.OS === "ios") {
-                    const [major, minor] = (Device.osVersion ?? "0.0")
-                      .split(".")
-                      .map(Number);
-
-                    // iOS 16.4 and later
-                    if (major > 16 || (major === 16 && minor >= 4)) {
-                      navigation.navigate("OrganizationDonation", {
-                        orgId: organization.id,
-                      });
-                    } else {
-                      Dialog.show({
-                        type: ALERT_TYPE.DANGER,
-                        title: "Unsupported iOS Version",
-                        textBody:
-                          "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
-                        button: "Ok",
-                      });
-                    }
+                  } else {
+                    Dialog.show({
+                      type: ALERT_TYPE.DANGER,
+                      title: "Unsupported Device",
+                      textBody:
+                        "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                      button: "Ok",
+                    });
                   }
                 } else if (event == "transfer") {
                   navigation.navigate("Transfer", {
@@ -255,7 +264,7 @@ export default function OrganizationPage({
         });
       }
     }
-  }, [organization, scheme, navigation, user]);
+  }, [organization, scheme, navigation, user, supportsTapToPay]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -401,12 +410,12 @@ export default function OrganizationPage({
           onRefresh={() => onRefresh()}
           ListHeaderComponent={() => (
             <View>
-              {/* {showTapToPayBanner && (
+              {showTapToPayBanner && (
                 <TapToPayBanner
                   onDismiss={handleDismissTapToPayBanner}
                   orgId={orgId}
                 />
-              )} */}
+              )}
               {organization?.playground_mode && <PlaygroundBanner />}
               <View
                 style={{

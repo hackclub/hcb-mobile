@@ -5,6 +5,7 @@ import {
   LinkingOptions,
   NavigationContainerRef,
 } from "@react-navigation/native";
+import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SplashScreen from "expo-splash-screen";
@@ -112,14 +113,23 @@ export default function AppContent({
   cache: CacheProvider;
 }) {
   const { tokens, refreshAccessToken } = useContext(AuthContext);
-  const hcb = useClient();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
-
+  const hcb = useClient();
+  const fetchTokenProvider = async () => {
+    const token = (await hcb
+      .get("stripe_terminal_connection_token")
+      .json()) as {
+      terminal_connection_token: {
+        secret: string;
+      };
+    };
+    return token.terminal_connection_token.secret;
+  };
   useEffect(() => {
     navRef.current = navigationRef.current;
   }, [navigationRef.current]);
@@ -311,40 +321,42 @@ export default function AppContent({
   }
 
   return (
-    <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-      <GestureHandlerRootView>
-        <StatusBar style={isDark ? "light" : "dark"} />
+    <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
+      <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+        <GestureHandlerRootView>
+          <StatusBar style={isDark ? "light" : "dark"} />
 
-        <SWRConfig
-          value={{
-            provider: () => cache,
-            fetcher,
-            revalidateOnFocus: true,
-            revalidateOnReconnect: true,
-            dedupingInterval: 2000,
-          }}
-        >
-          <SafeAreaProvider>
-            <ActionSheetProvider>
-              <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                <NavigationContainer
-                  ref={navigationRef}
-                  theme={navTheme}
-                  linking={linking}
-                  onReady={onNavigationReady}
-                >
-                  <OfflineBanner />
-                  {tokens?.accessToken && isAuthenticated ? (
-                    <Navigator />
-                  ) : (
-                    <Login />
-                  )}
-                </NavigationContainer>
-              </AlertNotificationRoot>
-            </ActionSheetProvider>
-          </SafeAreaProvider>
-        </SWRConfig>
-      </GestureHandlerRootView>
-    </View>
+          <SWRConfig
+            value={{
+              provider: () => cache,
+              fetcher,
+              revalidateOnFocus: true,
+              revalidateOnReconnect: true,
+              dedupingInterval: 2000,
+            }}
+          >
+            <SafeAreaProvider>
+              <ActionSheetProvider>
+                <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
+                  <NavigationContainer
+                    ref={navigationRef}
+                    theme={navTheme}
+                    linking={linking}
+                    onReady={onNavigationReady}
+                  >
+                    <OfflineBanner />
+                    {tokens?.accessToken && isAuthenticated ? (
+                      <Navigator />
+                    ) : (
+                      <Login />
+                    )}
+                  </NavigationContainer>
+                </AlertNotificationRoot>
+              </ActionSheetProvider>
+            </SafeAreaProvider>
+          </SWRConfig>
+        </GestureHandlerRootView>
+      </View>
+    </StripeTerminalProvider>
   );
 }
