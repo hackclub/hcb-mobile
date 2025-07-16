@@ -4,6 +4,7 @@ import * as SecureStore from "expo-secure-store";
 import React, { useState, useEffect } from "react";
 
 import AuthContext, { AuthTokens } from "./auth";
+import { logCriticalError, logError } from "./lib/errorUtils";
 
 const ACCESS_TOKEN_KEY = "auth_access_token";
 const REFRESH_TOKEN_KEY = "auth_refresh_token";
@@ -49,7 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        console.error("Failed to load auth tokens:", error);
+        logCriticalError("Failed to load auth tokens", error, {
+          action: "token_load",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -90,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setTokensState(null);
       }
     } catch (error) {
-      console.error("Failed to save auth tokens:", error);
+      logCriticalError("Failed to save auth tokens", error, {
+        action: "token_save",
+      });
     }
   };
 
@@ -109,7 +114,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lastSuccessfulRefreshTime = 0;
       refreshPromise = null;
     } catch (error) {
-      console.error("Error during forced logout:", error);
+      logError("Error during forced logout", error, {
+        context: { action: "forced_logout" },
+      });
     }
   };
 
@@ -133,8 +140,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate client ID
       if (!process.env.EXPO_PUBLIC_CLIENT_ID) {
-        console.error(
+        logCriticalError(
           "Cannot refresh token: EXPO_PUBLIC_CLIENT_ID environment variable is not set",
+          new Error("Missing CLIENT_ID"),
+          { action: "token_refresh", missing_env: "EXPO_PUBLIC_CLIENT_ID" },
         );
         await forceLogout();
         return { success: false };
@@ -189,13 +198,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             const errorBody = await response.text();
-            console.error(
-              `Token refresh failed with status ${response.status}: ${errorBody}`,
+            logCriticalError(
+              `Token refresh failed with status ${response.status}`,
+              new Error(errorBody),
+              { action: "token_refresh", status: response.status, errorBody },
             );
 
             try {
               const errorJson = JSON.parse(errorBody);
-              console.error("Error details:", errorJson);
+              logCriticalError(
+                "Token refresh error details",
+                new Error(errorJson.error),
+                {
+                  action: "token_refresh",
+                  errorDetails: errorJson,
+                },
+              );
 
               if (errorJson.error === "invalid_grant") {
                 console.log(
@@ -216,7 +234,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = await response.json();
 
           if (!data.access_token || !data.refresh_token) {
-            console.error("Invalid token response:", data);
+            logCriticalError(
+              "Invalid token response from server",
+              new Error("Missing tokens"),
+              {
+                action: "token_refresh",
+                response_data: data,
+              },
+            );
             throw new Error("Invalid token response from server");
           }
 
@@ -238,7 +263,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           return { success: true, newTokens };
         } catch (error) {
-          console.error("Token refresh failed:", error);
+          logCriticalError("Token refresh failed", error, {
+            action: "token_refresh",
+          });
           await forceLogout();
           return { success: false };
         } finally {
@@ -248,7 +275,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return refreshPromise;
     } catch (error) {
-      console.error("Error initiating token refresh:", error);
+      logCriticalError("Error initiating token refresh", error, {
+        action: "token_refresh_init",
+      });
       refreshPromise = null;
       await forceLogout();
       return { success: false };

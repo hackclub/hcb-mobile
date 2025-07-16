@@ -17,6 +17,7 @@ import {
 
 import AuthContext from "../auth";
 import Button from "../components/Button";
+import { logCriticalError } from "../lib/errorUtils";
 import { useIsDark } from "../lib/useColorScheme";
 import { lightTheme, palette, theme as darkTheme } from "../theme";
 
@@ -103,7 +104,9 @@ export default function Login() {
           setIsProcessing(false);
         })
         .catch((error) => {
-          console.error("Error exchanging code for token:", error);
+          logCriticalError("Error exchanging code for token", error, {
+            authCode: request?.codeChallenge,
+          });
           setLoading(false);
           setIsProcessing(false);
           processedResponseRef.current = null;

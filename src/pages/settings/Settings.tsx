@@ -21,6 +21,7 @@ import useSWR from "swr";
 import AuthContext from "../../auth";
 import { useCache } from "../../cacheProvider";
 import Button from "../../components/Button";
+import { logError } from "../../lib/errorUtils";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -70,13 +71,19 @@ export default function SettingsPage({ navigation }: Props) {
 
   useEffect(() => {
     (async () => {
-      const storedTheme = await AsyncStorage.getItem(THEME_KEY);
-      if (
-        storedTheme === "light" ||
-        storedTheme === "dark" ||
-        storedTheme === "system"
-      ) {
-        setTheme(storedTheme);
+      try {
+        const storedTheme = await AsyncStorage.getItem(THEME_KEY);
+        if (
+          storedTheme === "light" ||
+          storedTheme === "dark" ||
+          storedTheme === "system"
+        ) {
+          setTheme(storedTheme);
+        }
+      } catch (error) {
+        logError("Error loading theme in settings", error, {
+          context: { action: "settings_theme_load" },
+        });
       }
     })();
   }, [setTheme]);
@@ -91,26 +98,41 @@ export default function SettingsPage({ navigation }: Props) {
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     setTheme(value);
     if (Platform.OS === "android") {
-      await SystemUI.setBackgroundColorAsync(
-        value == "dark" || (value == "system" && scheme == "dark")
-          ? "#252429"
-          : "white",
-      );
+      try {
+        await SystemUI.setBackgroundColorAsync(
+          value == "dark" || (value == "system" && scheme == "dark")
+            ? "#252429"
+            : "white",
+        );
+      } catch (error) {
+        logError("Error setting system UI background color", error, {
+          context: { theme: value },
+        });
+      }
     }
   };
 
   const handleSignOut = async () => {
     resetTheme();
-    await AsyncStorage.multiRemove([
-      THEME_KEY,
-      "organizationOrder",
-      "canceledCardsShown",
-      "ttpDidOnboarding",
-      "hasSeenTapToPayBanner",
-      "cardOrder",
-    ]);
-    cache.clear();
-    setTokens(null);
+    try {
+      await AsyncStorage.multiRemove([
+        THEME_KEY,
+        "organizationOrder",
+        "canceledCardsShown",
+        "ttpDidOnboarding",
+        "hasSeenTapToPayBanner",
+        "cardOrder",
+      ]);
+      cache.clear();
+      setTokens(null);
+    } catch (error) {
+      logError("Error clearing storage during sign out", error, {
+        context: { action: "sign_out" },
+      });
+      // Still clear cache and tokens even if storage clearing fails
+      cache.clear();
+      setTokens(null);
+    }
   };
 
   const dividerColor = isDark ? palette.slate : colors.border;
