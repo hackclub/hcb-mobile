@@ -239,7 +239,10 @@ export default function CardPage(
         onSuccessfulStatusChange(newStatus);
       })
       .catch((err) => {
-        logCriticalError("Error updating card status", err, { cardId: card.id, newStatus });
+        logCriticalError("Error updating card status", err, {
+          cardId: card.id,
+          newStatus,
+        });
         setIsUpdatingStatus(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         showAlert(
@@ -346,7 +349,9 @@ export default function CardPage(
               await mutate("user/cards");
               navigation.goBack();
             } catch (err) {
-              logCriticalError("Error returning grant", err, { cardId: card.id });
+              logCriticalError("Error returning grant", err, {
+                cardId: card.id,
+              });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               showAlert(
                 "Error",
@@ -417,7 +422,9 @@ export default function CardPage(
           height: patternData.height,
         });
       } catch (error) {
-        logError("Error generating pattern for card", error, { context: { cardId: card.id } });
+        logError("Error generating pattern for card", error, {
+          context: { cardId: card.id },
+        });
       }
     };
 

@@ -108,7 +108,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               // Refresh the receipts list
               mutate();
             } catch (error) {
-              logCriticalError("Error deleting receipt", error, { receiptId: receipt.id });
+              logCriticalError("Error deleting receipt", error, {
+                receiptId: receipt.id,
+              });
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",

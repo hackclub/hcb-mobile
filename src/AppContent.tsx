@@ -174,13 +174,19 @@ export default function AppContent({
           if (result.success) {
             setIsAuthenticated(true);
           } else {
-            logError("Biometric authentication failed", new Error(result.error || "Authentication failed"), { 
-              context: { action: "biometric_auth", errorType: result.error } 
-            });
+            logError(
+              "Biometric authentication failed",
+              new Error(result.error || "Authentication failed"),
+              {
+                context: { action: "biometric_auth", errorType: result.error },
+              },
+            );
             setIsAuthenticated(false);
           }
         } catch (error) {
-          logError("Biometric authentication error", error, { context: { action: "biometric_auth" } });
+          logError("Biometric authentication error", error, {
+            context: { action: "biometric_auth" },
+          });
           setIsAuthenticated(false);
         }
       } else {
@@ -284,7 +290,9 @@ export default function AppContent({
         const url = await Linking.getInitialURL();
         if (url && isUniversalLinkingEnabled === false) {
           Linking.openURL(url).catch((err) =>
-            logError("Failed to open URL in browser", err, { context: { url } }),
+            logError("Failed to open URL in browser", err, {
+              context: { url },
+            }),
           );
           return null;
         }
@@ -294,7 +302,9 @@ export default function AppContent({
         const subscription = Linking.addEventListener("url", ({ url }) => {
           if (url && !isUniversalLinkingEnabled) {
             Linking.openURL(url).catch((err) =>
-              logError("Failed to open URL in browser", err, { context: { url } }),
+              logError("Failed to open URL in browser", err, {
+                context: { url },
+              }),
             );
           } else {
             listener(url);

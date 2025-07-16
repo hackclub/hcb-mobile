@@ -62,7 +62,9 @@ export default function OrganizationDonationPage({
           await AsyncStorage.setItem("ttpDidOnboarding", "true");
         }
       } catch (error) {
-        logError("Error in tap-to-pay onboarding", error, { context: { action: "ttp_onboarding" } });
+        logError("Error in tap-to-pay onboarding", error, {
+          context: { action: "ttp_onboarding" },
+        });
       }
     };
 
@@ -167,7 +169,9 @@ function PageContent({
           setCurrentProgress(null);
           await disconnectReader();
         } catch (e) {
-          logError("Error disconnecting reader on page load", e, { context: { orgId, action: "disconnect_reader" } });
+          logError("Error disconnecting reader on page load", e, {
+            context: { orgId, action: "disconnect_reader" },
+          });
         }
       }
       setOrgCheckLoading(false);
@@ -231,7 +235,10 @@ function PageContent({
       })) as { id: string };
       return id;
     } catch (error) {
-              logCriticalError("Error creating donation", error, { orgId, amount: value * 100 });
+      logCriticalError("Error creating donation", error, {
+        orgId,
+        amount: value * 100,
+      });
       throw error; // Re-throw to let calling code handle it
     }
   };
@@ -261,7 +268,9 @@ function PageContent({
       await AsyncStorage.setItem("lastConnectedOrgId", orgId);
       setCurrentProgress(null);
     } catch (error) {
-      logError("connectReader error", error, { context: { orgId, action: "connect_reader" } });
+      logError("connectReader error", error, {
+        context: { orgId, action: "connect_reader" },
+      });
     } finally {
       setLoadingConnectingReader(false);
     }
@@ -296,7 +305,9 @@ function PageContent({
       });
       return paymentIntent;
     } catch (error) {
-      logError("paymentIntent error", error, { context: { orgId, donation_id, action: "payment_intent" } });
+      logError("paymentIntent error", error, {
+        context: { orgId, donation_id, action: "payment_intent" },
+      });
     }
   }
 
@@ -316,7 +327,9 @@ function PageContent({
       }
       output = (await confirmPayment(localPayment)) ?? false;
     } catch (error) {
-      logError("collectPayment error", error, { context: { orgId, action: "collect_payment" } });
+      logError("collectPayment error", error, {
+        context: { orgId, action: "collect_payment" },
+      });
       output = false;
     }
     return output;
@@ -333,7 +346,9 @@ function PageContent({
       }
       success = true;
     } catch (error) {
-      logError("confirmPayment error", error, { context: { orgId, action: "confirm_payment" } });
+      logError("confirmPayment error", error, {
+        context: { orgId, action: "confirm_payment" },
+      });
       success = false;
     }
     return success;
@@ -556,7 +571,13 @@ function PageContent({
               const donation_id = await createDonation();
               await paymentIntent({ donation_id });
             } catch (error) {
-              logError("createDonation error", error, { context: { orgId, amount: value * 100, action: "create_donation" } });
+              logError("createDonation error", error, {
+                context: {
+                  orgId,
+                  amount: value * 100,
+                  action: "create_donation",
+                },
+              });
               showAlert("Error creating donation", "Please try again.");
             }
           }}

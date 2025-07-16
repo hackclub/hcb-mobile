@@ -12,31 +12,32 @@ export interface LogErrorOptions {
 }
 
 export const logError = (
-  message: string, 
-  error: unknown, 
-  options: LogErrorOptions = {}
+  message: string,
+  error: unknown,
+  options: LogErrorOptions = {},
 ) => {
   const {
     context,
     shouldReportToSentry = false,
     tags = {},
-    level = 'error'
+    level = "error",
   } = options;
 
   // Always log to console for debugging
   console.error(message, error);
-  
+
   // Only send to Sentry for critical errors
   if (shouldReportToSentry) {
-    const sentryError = error instanceof Error ? error : new Error(String(error));
-    
+    const sentryError =
+      error instanceof Error ? error : new Error(String(error));
+
     Sentry.captureException(sentryError, {
-      tags: { 
+      tags: {
         context: message,
-        ...tags 
+        ...tags,
       },
       extra: context,
-      level
+      level,
     });
   }
 };
@@ -46,36 +47,36 @@ export const logCriticalError = (
   message: string,
   error: unknown,
   context?: ErrorContext,
-  tags?: SentryTags
+  tags?: SentryTags,
 ) => {
   logError(message, error, {
     context,
     shouldReportToSentry: true,
     tags,
-    level: 'fatal'
+    level: "fatal",
   });
 };
 
 export const logWarning = (
   message: string,
   error: unknown,
-  context?: ErrorContext
+  context?: ErrorContext,
 ) => {
   logError(message, error, {
     context,
     shouldReportToSentry: false,
-    level: 'warning'
+    level: "warning",
   });
 };
 
 export const logInfo = (
   message: string,
   error: unknown,
-  context?: ErrorContext
+  context?: ErrorContext,
 ) => {
   logError(message, error, {
     context,
     shouldReportToSentry: false,
-    level: 'info'
+    level: "info",
   });
 };

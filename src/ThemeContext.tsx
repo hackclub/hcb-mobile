@@ -40,7 +40,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
           setThemeState(storedTheme);
         }
       } catch (error) {
-        logError("Error loading theme from storage", error, { context: { action: "theme_load" } });
+        logError("Error loading theme from storage", error, {
+          context: { action: "theme_load" },
+        });
         // Default to system theme on error
         setThemeState("system");
       }
@@ -52,7 +54,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AsyncStorage.setItem(THEME_KEY, newTheme);
     } catch (error) {
-      logError("Error saving theme to storage", error, { context: { newTheme } });
+      logError("Error saving theme to storage", error, {
+        context: { newTheme },
+      });
     }
   };
 
@@ -61,7 +65,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AsyncStorage.setItem(THEME_KEY, "system");
     } catch (error) {
-      logError("Error resetting theme in storage", error, { context: { action: "theme_reset" } });
+      logError("Error resetting theme in storage", error, {
+        context: { action: "theme_reset" },
+      });
     }
   };
 

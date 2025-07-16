@@ -104,7 +104,9 @@ export default function Login() {
           setIsProcessing(false);
         })
         .catch((error) => {
-          logCriticalError("Error exchanging code for token", error, { authCode: request?.codeChallenge });
+          logCriticalError("Error exchanging code for token", error, {
+            authCode: request?.codeChallenge,
+          });
           setLoading(false);
           setIsProcessing(false);
           processedResponseRef.current = null;

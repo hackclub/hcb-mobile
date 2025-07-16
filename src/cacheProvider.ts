@@ -48,7 +48,9 @@ export class CacheProvider implements Cache<CacheValue> {
       }
       this.isInitialized = true;
     } catch (error) {
-      logError("Error initializing cache", error, { context: { cacheSize: this.map.size } });
+      logError("Error initializing cache", error, {
+        context: { cacheSize: this.map.size },
+      });
     }
   }
 
@@ -61,7 +63,9 @@ export class CacheProvider implements Cache<CacheValue> {
         });
       }
     } catch (error) {
-      logError("Error ensuring cache directory", error, { context: { cacheDir: this.cacheDir } });
+      logError("Error ensuring cache directory", error, {
+        context: { cacheDir: this.cacheDir },
+      });
       throw error; // Re-throw as this is critical for cache functionality
     }
   }
@@ -81,7 +85,9 @@ export class CacheProvider implements Cache<CacheValue> {
         );
       }
     } catch (error) {
-      logError("Error saving cache", error, { context: { cacheSize: this.map.size } });
+      logError("Error saving cache", error, {
+        context: { cacheSize: this.map.size },
+      });
     }
   }
 

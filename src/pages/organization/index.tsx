@@ -117,7 +117,9 @@ export default function OrganizationPage({
   useEffect(() => {
     const checkTapToPayBanner = async () => {
       try {
-        const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+        const hasSeenBanner = await AsyncStorage.getItem(
+          "hasSeenTapToPayBanner",
+        );
         if (!hasSeenBanner && Platform.OS === "ios") {
           const [major, minor] = (Device.osVersion ?? "0.0")
             .split(".")
@@ -128,7 +130,9 @@ export default function OrganizationPage({
           }
         }
       } catch (error) {
-        logError("Error checking tap to pay banner status", error, { context: { action: "check_ttp_banner" } });
+        logError("Error checking tap to pay banner status", error, {
+          context: { action: "check_ttp_banner" },
+        });
       }
     };
     checkTapToPayBanner();
@@ -156,7 +160,9 @@ export default function OrganizationPage({
           });
           setSupportsTapToPay(!!supported);
         } catch (error) {
-          logError("Stripe Terminal initialization error", error, { context: { organizationId: organization?.id } });
+          logError("Stripe Terminal initialization error", error, {
+            context: { organizationId: organization?.id },
+          });
           setSupportsTapToPay(false);
         }
       } else if (!organization || organization.playground_mode) {
@@ -170,7 +176,9 @@ export default function OrganizationPage({
       await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
       setShowTapToPayBanner(false);
     } catch (error) {
-      logError("Error saving tap to pay banner dismiss status", error, { context: { action: "dismiss_ttp_banner" } });
+      logError("Error saving tap to pay banner dismiss status", error, {
+        context: { action: "dismiss_ttp_banner" },
+      });
       // Still hide the banner even if saving fails
       setShowTapToPayBanner(false);
     }

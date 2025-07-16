@@ -30,8 +30,8 @@ function App() {
       debug: false,
       integrations: [Sentry.reactNativeTracingIntegration()],
       sendDefaultPii: true,
-        tracesSampleRate: 1.0,
-        profilesSampleRate: 1.0,
+      tracesSampleRate: 1.0,
+      profilesSampleRate: 1.0,
     });
   }
 

@@ -129,7 +129,9 @@ export default function CardPage(
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
       } catch (error) {
-        logError("Error initializing libraries", error, { context: { libraries: ["Merchant", "Category"] } });
+        logError("Error initializing libraries", error, {
+          context: { libraries: ["Merchant", "Category"] },
+        });
         // Set flags to true even on error to prevent infinite loading
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
@@ -244,7 +246,10 @@ export default function CardPage(
         onSuccessfulStatusChange(newStatus);
       })
       .catch((err) => {
-        logCriticalError("Error updating card status", err, { cardId: card.id, newStatus });
+        logCriticalError("Error updating card status", err, {
+          cardId: card.id,
+          newStatus,
+        });
         setIsUpdatingStatus(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         showAlert(
@@ -352,7 +357,9 @@ export default function CardPage(
               await mutate("user/cards");
               navigation.goBack();
             } catch (err) {
-              logCriticalError("Error returning grant", err, { cardId: card.id });
+              logCriticalError("Error returning grant", err, {
+                cardId: card.id,
+              });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               showAlert(
                 "Error",
@@ -423,7 +430,9 @@ export default function CardPage(
           height: patternData.height,
         });
       } catch (error) {
-        logError("Error generating pattern for card", error, { context: { cardId: card.id } });
+        logError("Error generating pattern for card", error, {
+          context: { cardId: card.id },
+        });
       }
     };
 
@@ -454,7 +463,10 @@ export default function CardPage(
       mutate("user/cards");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      logCriticalError("Topup error", error, { cardId: card.id, amount: topupAmount });
+      logCriticalError("Topup error", error, {
+        cardId: card.id,
+        amount: topupAmount,
+      });
       showAlert("Error", "Failed to top up card. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -478,7 +490,10 @@ export default function CardPage(
       mutate("user/cards");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      logCriticalError("Set purpose error", error, { cardId: card.id, purpose: purposeText });
+      logCriticalError("Set purpose error", error, {
+        cardId: card.id,
+        purpose: purposeText,
+      });
       showAlert("Error", "Failed to set purpose. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -503,7 +518,9 @@ export default function CardPage(
         type: ALERT_TYPE.SUCCESS,
       });
     } catch (error) {
-      logCriticalError("One time use error", error, { cardId: card?.id || grantCard?.card_id });
+      logCriticalError("One time use error", error, {
+        cardId: card?.id || grantCard?.card_id,
+      });
       showAlert("Error", "Failed to set one time use. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -559,7 +576,9 @@ export default function CardPage(
 
       return merchantNames.join(", ");
     } catch (error) {
-      logError("Error formatting merchant names", error, { context: { transactionCount: transactions.length } });
+      logError("Error formatting merchant names", error, {
+        context: { transactionCount: transactions.length },
+      });
       return "Loading...";
     }
   };
@@ -590,7 +609,9 @@ export default function CardPage(
 
       return categoryNames.join(", ");
     } catch (error) {
-      logError("Error formatting category names", error, { context: { transactionCount: transactions.length } });
+      logError("Error formatting category names", error, {
+        context: { transactionCount: transactions.length },
+      });
       return "Loading...";
     }
   };

@@ -81,7 +81,9 @@ export default function SettingsPage({ navigation }: Props) {
           setTheme(storedTheme);
         }
       } catch (error) {
-        logError("Error loading theme in settings", error, { context: { action: "settings_theme_load" } });
+        logError("Error loading theme in settings", error, {
+          context: { action: "settings_theme_load" },
+        });
       }
     })();
   }, [setTheme]);
@@ -103,7 +105,9 @@ export default function SettingsPage({ navigation }: Props) {
             : "white",
         );
       } catch (error) {
-        logError("Error setting system UI background color", error, { context: { theme: value } });
+        logError("Error setting system UI background color", error, {
+          context: { theme: value },
+        });
       }
     }
   };
@@ -122,7 +126,9 @@ export default function SettingsPage({ navigation }: Props) {
       cache.clear();
       setTokens(null);
     } catch (error) {
-      logError("Error clearing storage during sign out", error, { context: { action: "sign_out" } });
+      logError("Error clearing storage during sign out", error, {
+        context: { action: "sign_out" },
+      });
       // Still clear cache and tokens even if storage clearing fails
       cache.clear();
       setTokens(null);

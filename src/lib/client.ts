@@ -27,7 +27,9 @@ export default function useClient() {
           try {
             return await retry();
           } catch (error) {
-            logCriticalError("Failed to process queued request", error, { context: "queue_processing" });
+            logCriticalError("Failed to process queued request", error, {
+              context: "queue_processing",
+            });
             throw error;
           }
         }),
@@ -70,7 +72,11 @@ export default function useClient() {
                     });
                     return newResponse;
                   } catch (error) {
-                    logCriticalError("Failed to process queued request", error, { context: "auth_retry" });
+                    logCriticalError(
+                      "Failed to process queued request",
+                      error,
+                      { context: "auth_retry" },
+                    );
                     throw error;
                   }
                 });
@@ -124,7 +130,11 @@ export default function useClient() {
                       });
                       return newResponse;
                     } catch (error) {
-                      logCriticalError("Failed to process queued request", error, { context: "token_refresh_retry" });
+                      logCriticalError(
+                        "Failed to process queued request",
+                        error,
+                        { context: "token_refresh_retry" },
+                      );
                       throw error;
                     }
                   });
@@ -181,7 +191,7 @@ export default function useClient() {
                       logCriticalError(
                         "Inner retry request failed",
                         innerError,
-                        { context: "inner_retry" }
+                        { context: "inner_retry" },
                       );
                       pendingRetries.delete(requestKey);
                       return response;
@@ -192,7 +202,7 @@ export default function useClient() {
                 logCriticalError(
                   "Error during token refresh - user will be logged out",
                   refreshError,
-                  { context: "token_refresh" }
+                  { context: "token_refresh" },
                 );
               } finally {
                 refreshInProgress = false;

@@ -298,7 +298,11 @@ export default function App({ navigation }: Props) {
         // If we have an error or no missing receipts, still show the modal for receipt bin upload
         else {
           if (missingReceiptError) {
-            logError("Error fetching missing receipts, retrying", missingReceiptError, { context: { action: "missing_receipts_fetch" } });
+            logError(
+              "Error fetching missing receipts, retrying",
+              missingReceiptError,
+              { context: { action: "missing_receipts_fetch" } },
+            );
             // Retry fetching missing receipts
             refetchMissingReceipts();
           } else {

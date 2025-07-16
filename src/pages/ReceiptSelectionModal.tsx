@@ -107,7 +107,10 @@ export default function ReceiptSelectionModal({
 
       navigation.goBack();
     } catch (error) {
-      logCriticalError("Upload error", error, { transactionId: transaction.id, receiptCount: selectedReceipts.size });
+      logCriticalError("Upload error", error, {
+        transactionId: transaction.id,
+        receiptCount: selectedReceipts.size,
+      });
       Toast.show({
         type: ALERT_TYPE.DANGER,
         title: "Upload Failed",

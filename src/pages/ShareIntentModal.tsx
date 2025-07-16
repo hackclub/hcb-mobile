@@ -285,7 +285,9 @@ export default function ShareIntentModal({
 
       navigation.goBack();
     } catch (error) {
-      logCriticalError("Upload error", error, { action: "share_intent_upload" });
+      logCriticalError("Upload error", error, {
+        action: "share_intent_upload",
+      });
       Toast.show({
         type: ALERT_TYPE.DANGER,
         title: "Upload Failed",
@@ -302,9 +304,13 @@ export default function ShareIntentModal({
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
     if (!assignment) {
-      logError("getTransactionForAssignment called with undefined assignment", new Error("Undefined assignment"), { 
-        context: { action: "transaction_assignment" } 
-      });
+      logError(
+        "getTransactionForAssignment called with undefined assignment",
+        new Error("Undefined assignment"),
+        {
+          context: { action: "transaction_assignment" },
+        },
+      );
       return null;
     }
     if (assignment.isReceiptBin)

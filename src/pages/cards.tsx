@@ -114,9 +114,11 @@ export default function CardsPage({ navigation }: Props) {
               height: patternData.height,
             },
           };
-              } catch (error) {
-        logError("Error generating pattern for card", error, { context: { cardId: card.id } });
-      }
+        } catch (error) {
+          logError("Error generating pattern for card", error, {
+            context: { cardId: card.id },
+          });
+        }
       }
 
       setPatternCache(newPatternCache);
@@ -233,7 +235,9 @@ export default function CardsPage({ navigation }: Props) {
           );
         }
       } catch (error) {
-        logError("Error fetching canceled cards shown status", error, { context: { action: "fetch_canceled_cards_status" } });
+        logError("Error fetching canceled cards shown status", error, {
+          context: { action: "fetch_canceled_cards_status" },
+        });
       }
     };
 
@@ -263,7 +267,9 @@ export default function CardsPage({ navigation }: Props) {
           setSortedCards(allCards);
         }
       } catch (error) {
-        logError("Error loading saved card order", error, { context: { action: "load_card_order" } });
+        logError("Error loading saved card order", error, {
+          context: { action: "load_card_order" },
+        });
         setSortedCards(allCards);
       }
     };
@@ -276,7 +282,9 @@ export default function CardsPage({ navigation }: Props) {
       await reloadCards();
       await reloadGrantCards();
     } catch (error) {
-      logError("Error refreshing cards", error, { context: { action: "refresh_cards" } });
+      logError("Error refreshing cards", error, {
+        context: { action: "refresh_cards" },
+      });
     }
   };
 
@@ -293,7 +301,9 @@ export default function CardsPage({ navigation }: Props) {
       );
       await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
     } catch (error) {
-      logError("Error saving card order", error, { context: { action: "save_card_order" } });
+      logError("Error saving card order", error, {
+        context: { action: "save_card_order" },
+      });
     }
   };
 

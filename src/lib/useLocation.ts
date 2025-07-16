@@ -29,7 +29,9 @@ export function useLocation() {
 
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      logError("Location permission error", err, { context: { platform: Platform.OS } });
+      logError("Location permission error", err, {
+        context: { platform: Platform.OS },
+      });
       return false; // Return false when permission request fails
     }
   }
@@ -52,7 +54,9 @@ export function useLocation() {
         setLocation(coordinates);
       },
       (error: GeolocationError) => {
-        logError("Error getting location", error, { context: { action: "get_location" } });
+        logError("Error getting location", error, {
+          context: { action: "get_location" },
+        });
       },
       { enableHighAccuracy: true },
     );
@@ -75,7 +79,9 @@ export function useLocation() {
 
       setLocation(coordinates);
     } catch (error) {
-      logError("Error getting iOS location", error, { context: { action: "get_ios_location" } });
+      logError("Error getting iOS location", error, {
+        context: { action: "get_ios_location" },
+      });
       setAccessDenied(true); // Set access denied on error
     }
   }, []);
@@ -92,7 +98,9 @@ export function useLocation() {
       };
 
       getLocation().catch((err) => {
-        logError("Location access error", err, { context: { platform: Platform.OS } });
+        logError("Location access error", err, {
+          context: { platform: Platform.OS },
+        });
       });
     }, [getAndroidLocation, getIosLocation]),
   );
