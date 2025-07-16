@@ -32,6 +32,7 @@ import AuthContext from "./auth";
 import { CacheProvider } from "./cacheProvider";
 import { getStateFromPath } from "./getStateFromPath";
 import useClient from "./lib/client";
+import { logError } from "./lib/errorUtils";
 import { TabParamList } from "./lib/NavigatorParamList";
 import { useIsDark } from "./lib/useColorScheme";
 import { useOffline } from "./lib/useOffline";
@@ -173,11 +174,13 @@ export default function AppContent({
           if (result.success) {
             setIsAuthenticated(true);
           } else {
-            console.log("Biometric authentication failed:", result.error);
+            logError("Biometric authentication failed", new Error(result.error || "Authentication failed"), { 
+              context: { action: "biometric_auth", errorType: result.error } 
+            });
             setIsAuthenticated(false);
           }
         } catch (error) {
-          console.error("Biometric authentication error:", error);
+          logError("Biometric authentication error", error, { context: { action: "biometric_auth" } });
           setIsAuthenticated(false);
         }
       } else {
@@ -195,7 +198,9 @@ export default function AppContent({
       const now = Date.now();
       if (tokens.expiresAt <= now + 5 * 60 * 1000) {
         refreshAccessToken().catch((error) => {
-          console.error("Failed to preemptively refresh token:", error);
+          logError("Failed to preemptively refresh token", error, {
+            shouldReportToSentry: true,
+          });
         });
       }
     } else {
@@ -279,7 +284,7 @@ export default function AppContent({
         const url = await Linking.getInitialURL();
         if (url && isUniversalLinkingEnabled === false) {
           Linking.openURL(url).catch((err) =>
-            console.error("Failed to open URL in browser:", err),
+            logError("Failed to open URL in browser", err, { context: { url } }),
           );
           return null;
         }
@@ -289,7 +294,7 @@ export default function AppContent({
         const subscription = Linking.addEventListener("url", ({ url }) => {
           if (url && !isUniversalLinkingEnabled) {
             Linking.openURL(url).catch((err) =>
-              console.error("Failed to open URL in browser:", err),
+              logError("Failed to open URL in browser", err, { context: { url } }),
             );
           } else {
             listener(url);

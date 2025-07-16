@@ -29,6 +29,7 @@ import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton"
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import Transaction from "../../components/Transaction";
+import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
@@ -115,15 +116,19 @@ export default function OrganizationPage({
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
-      const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
-      if (!hasSeenBanner && Platform.OS === "ios") {
-        const [major, minor] = (Device.osVersion ?? "0.0")
-          .split(".")
-          .map(Number);
-        // iOS 16.4 and later
-        if (major > 16 || (major === 16 && minor >= 4)) {
-          setShowTapToPayBanner(true);
+      try {
+        const hasSeenBanner = await AsyncStorage.getItem("hasSeenTapToPayBanner");
+        if (!hasSeenBanner && Platform.OS === "ios") {
+          const [major, minor] = (Device.osVersion ?? "0.0")
+            .split(".")
+            .map(Number);
+          // iOS 16.4 and later
+          if (major > 16 || (major === 16 && minor >= 4)) {
+            setShowTapToPayBanner(true);
+          }
         }
+      } catch (error) {
+        logError("Error checking tap to pay banner status", error, { context: { action: "check_ttp_banner" } });
       }
     };
     checkTapToPayBanner();
@@ -151,7 +156,7 @@ export default function OrganizationPage({
           });
           setSupportsTapToPay(!!supported);
         } catch (error) {
-          console.error("Stripe Terminal initialization error:", error);
+          logError("Stripe Terminal initialization error", error, { context: { organizationId: organization?.id } });
           setSupportsTapToPay(false);
         }
       } else if (!organization || organization.playground_mode) {
@@ -161,8 +166,14 @@ export default function OrganizationPage({
   }, [organization, terminal, terminalInitialized]);
 
   const handleDismissTapToPayBanner = async () => {
-    await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
-    setShowTapToPayBanner(false);
+    try {
+      await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
+      setShowTapToPayBanner(false);
+    } catch (error) {
+      logError("Error saving tap to pay banner dismiss status", error, { context: { action: "dismiss_ttp_banner" } });
+      // Still hide the banner even if saving fails
+      setShowTapToPayBanner(false);
+    }
   };
 
   useEffect(() => {

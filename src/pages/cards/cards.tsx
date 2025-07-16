@@ -15,6 +15,7 @@ import useSWR from "swr";
 
 import CardListSkeleton from "../../components/cards/CardListSkeleton";
 import PaymentCard from "../../components/PaymentCard";
+import { logError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
@@ -108,9 +109,9 @@ export default function CardsPage({ navigation }: Props) {
               height: patternData.height,
             },
           };
-        } catch (error) {
-          console.error("Error generating pattern for card:", card.id, error);
-        }
+              } catch (error) {
+        logError("Error generating pattern for card", error, { context: { cardId: card.id } });
+      }
       }
 
       setPatternCache(newPatternCache);
@@ -207,14 +208,18 @@ export default function CardsPage({ navigation }: Props) {
 
   useEffect(() => {
     const fetchCanceledCardsShown = async () => {
-      const isCanceledCardsShown =
-        await AsyncStorage.getItem("canceledCardsShown");
-      if (isCanceledCardsShown) {
-        setCanceledCardsShown(isCanceledCardsShown === "true");
-        await AsyncStorage.setItem(
-          "canceledCardsShown",
-          (isCanceledCardsShown === "true").toString(),
-        );
+      try {
+        const isCanceledCardsShown =
+          await AsyncStorage.getItem("canceledCardsShown");
+        if (isCanceledCardsShown) {
+          setCanceledCardsShown(isCanceledCardsShown === "true");
+          await AsyncStorage.setItem(
+            "canceledCardsShown",
+            (isCanceledCardsShown === "true").toString(),
+          );
+        }
+      } catch (error) {
+        logError("Error fetching canceled cards shown status", error, { context: { action: "fetch_canceled_cards_status" } });
       }
     };
 
@@ -230,16 +235,21 @@ export default function CardsPage({ navigation }: Props) {
     const loadSavedOrder = async () => {
       if (!allCards) return;
 
-      const savedOrder = await AsyncStorage.getItem("cardOrder");
-      if (savedOrder) {
-        const orderMap = JSON.parse(savedOrder);
-        const sorted = [...allCards].sort((a, b) => {
-          const orderA = orderMap[a.id] ?? Number.MAX_SAFE_INTEGER;
-          const orderB = orderMap[b.id] ?? Number.MAX_SAFE_INTEGER;
-          return orderA - orderB;
-        });
-        setSortedCards(sorted);
-      } else {
+      try {
+        const savedOrder = await AsyncStorage.getItem("cardOrder");
+        if (savedOrder) {
+          const orderMap = JSON.parse(savedOrder);
+          const sorted = [...allCards].sort((a, b) => {
+            const orderA = orderMap[a.id] ?? Number.MAX_SAFE_INTEGER;
+            const orderB = orderMap[b.id] ?? Number.MAX_SAFE_INTEGER;
+            return orderA - orderB;
+          });
+          setSortedCards(sorted);
+        } else {
+          setSortedCards(allCards);
+        }
+      } catch (error) {
+        logError("Error loading saved card order", error, { context: { action: "load_card_order" } });
         setSortedCards(allCards);
       }
     };
@@ -248,21 +258,29 @@ export default function CardsPage({ navigation }: Props) {
   }, [allCards]);
 
   const onRefresh = async () => {
-    await reloadCards();
-    await reloadGrantCards();
+    try {
+      await reloadCards();
+      await reloadGrantCards();
+    } catch (error) {
+      logError("Error refreshing cards", error, { context: { action: "refresh_cards" } });
+    }
   };
 
   const saveCardOrder = async (
     newOrder: ((Card & Required<Pick<Card, "last4">>) | GrantCard)[],
   ) => {
-    const orderMap = newOrder.reduce(
-      (acc, card, index) => {
-        acc[card.id] = index;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-    await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
+    try {
+      const orderMap = newOrder.reduce(
+        (acc, card, index) => {
+          acc[card.id] = index;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+      await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
+    } catch (error) {
+      logError("Error saving card order", error, { context: { action: "save_card_order" } });
+    }
   };
 
   if (sortedCards) {

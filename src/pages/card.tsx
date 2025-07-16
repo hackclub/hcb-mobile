@@ -32,6 +32,7 @@ import Transaction from "../components/Transaction";
 import UserAvatar from "../components/UserAvatar";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
+import { logError, logCriticalError } from "../lib/errorUtils";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
@@ -70,7 +71,7 @@ export default function CardPage(
   const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
   const { data: card, error: cardFetchError } = useSWR<Card>(`cards/${id}`, {
     onError: (err) => {
-      console.error("Error fetching card:", err);
+      logError("Error fetching card", err, { context: { cardId: id } });
       setCardError("Unable to load card details. Please try again later.");
     },
   });
@@ -128,7 +129,7 @@ export default function CardPage(
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
       } catch (error) {
-        console.error("Error initializing libraries:", error);
+        logError("Error initializing libraries", error, { context: { libraries: ["Merchant", "Category"] } });
         // Set flags to true even on error to prevent infinite loading
         setIsMerchantInitialized(true);
         setIsCategoryInitialized(true);
@@ -243,7 +244,7 @@ export default function CardPage(
         onSuccessfulStatusChange(newStatus);
       })
       .catch((err) => {
-        console.error("Error updating card status:", err);
+        logCriticalError("Error updating card status", err, { cardId: card.id, newStatus });
         setIsUpdatingStatus(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         showAlert(
@@ -263,7 +264,7 @@ export default function CardPage(
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
-      console.error("Refresh error:", err);
+      logError("Refresh error", err, { context: { cardId: card?.id } });
     } finally {
       setRefreshing(false);
     }
@@ -351,7 +352,7 @@ export default function CardPage(
               await mutate("user/cards");
               navigation.goBack();
             } catch (err) {
-              console.error("Error returning grant:", err);
+              logCriticalError("Error returning grant", err, { cardId: card.id });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
               showAlert(
                 "Error",
@@ -389,7 +390,7 @@ export default function CardPage(
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
-      console.error("Error activating card:", err);
+      logCriticalError("Error activating card", err, { cardId: card?.id });
       showAlert("Error", "Failed to activate card. Please try again later.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -422,7 +423,7 @@ export default function CardPage(
           height: patternData.height,
         });
       } catch (error) {
-        console.error("Error generating pattern for card:", card.id, error);
+        logError("Error generating pattern for card", error, { context: { cardId: card.id } });
       }
     };
 
@@ -453,7 +454,7 @@ export default function CardPage(
       mutate("user/cards");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      console.error("Topup error:", error);
+      logCriticalError("Topup error", error, { cardId: card.id, amount: topupAmount });
       showAlert("Error", "Failed to top up card. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -477,7 +478,7 @@ export default function CardPage(
       mutate("user/cards");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      console.error("Set purpose error:", error);
+      logCriticalError("Set purpose error", error, { cardId: card.id, purpose: purposeText });
       showAlert("Error", "Failed to set purpose. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -502,7 +503,7 @@ export default function CardPage(
         type: ALERT_TYPE.SUCCESS,
       });
     } catch (error) {
-      console.error("One time use error:", error);
+      logCriticalError("One time use error", error, { cardId: card?.id || grantCard?.card_id });
       showAlert("Error", "Failed to set one time use. Please try again.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -558,7 +559,7 @@ export default function CardPage(
 
       return merchantNames.join(", ");
     } catch (error) {
-      console.error("Error formatting merchant names:", error);
+      logError("Error formatting merchant names", error, { context: { transactionCount: transactions.length } });
       return "Loading...";
     }
   };
@@ -589,7 +590,7 @@ export default function CardPage(
 
       return categoryNames.join(", ");
     } catch (error) {
-      console.error("Error formatting category names:", error);
+      logError("Error formatting category names", error, { context: { transactionCount: transactions.length } });
       return "Loading...";
     }
   };

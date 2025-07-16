@@ -7,6 +7,8 @@ import * as Location from "expo-location";
 import { useCallback, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 
+import { logError } from "./errorUtils";
+
 export function useLocation() {
   const [accessDenied, setAccessDenied] = useState<boolean>(false);
   const [location, setLocation] = useState<{
@@ -27,7 +29,8 @@ export function useLocation() {
 
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      console.error(err);
+      logError("Location permission error", err, { context: { platform: Platform.OS } });
+      return false; // Return false when permission request fails
     }
   }
 
@@ -49,27 +52,32 @@ export function useLocation() {
         setLocation(coordinates);
       },
       (error: GeolocationError) => {
-        console.error("Error getting location:", error);
+        logError("Error getting location", error, { context: { action: "get_location" } });
       },
       { enableHighAccuracy: true },
     );
   }, []);
 
   const getIosLocation = useCallback(async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (status !== "granted") {
-      setAccessDenied(true);
-      return;
+      if (status !== "granted") {
+        setAccessDenied(true);
+        return;
+      }
+      const location = await Location.getCurrentPositionAsync();
+
+      const coordinates = {
+        latitude: location.coords.latitude.toString(),
+        longitude: location.coords.longitude.toString(),
+      };
+
+      setLocation(coordinates);
+    } catch (error) {
+      logError("Error getting iOS location", error, { context: { action: "get_ios_location" } });
+      setAccessDenied(true); // Set access denied on error
     }
-    const location = await Location.getCurrentPositionAsync();
-
-    const coordinates = {
-      latitude: location.coords.latitude.toString(),
-      longitude: location.coords.longitude.toString(),
-    };
-
-    setLocation(coordinates);
   }, []);
 
   useFocusEffect(
@@ -84,7 +92,7 @@ export function useLocation() {
       };
 
       getLocation().catch((err) => {
-        console.error(err);
+        logError("Location access error", err, { context: { platform: Platform.OS } });
       });
     }, [getAndroidLocation, getIosLocation]),
   );

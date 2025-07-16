@@ -24,6 +24,7 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
+import { logError, logCriticalError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -51,13 +52,17 @@ export default function OrganizationDonationPage({
 
   useEffect(() => {
     const getDidOnboarding = async () => {
-      const didOnboarding = await AsyncStorage.getItem("ttpDidOnboarding");
-      if (didOnboarding !== "true") {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        ExpoTtpEdu.showTapToPayEducation({
-          uiMode: isDark ? "dark" : "light",
-        });
-        await AsyncStorage.setItem("ttpDidOnboarding", "true");
+      try {
+        const didOnboarding = await AsyncStorage.getItem("ttpDidOnboarding");
+        if (didOnboarding !== "true") {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          ExpoTtpEdu.showTapToPayEducation({
+            uiMode: isDark ? "dark" : "light",
+          });
+          await AsyncStorage.setItem("ttpDidOnboarding", "true");
+        }
+      } catch (error) {
+        logError("Error in tap-to-pay onboarding", error, { context: { action: "ttp_onboarding" } });
       }
     };
 
@@ -162,7 +167,7 @@ function PageContent({
           setCurrentProgress(null);
           await disconnectReader();
         } catch (e) {
-          console.log("Error disconnecting reader on page load", e);
+          logError("Error disconnecting reader on page load", e, { context: { orgId, action: "disconnect_reader" } });
         }
       }
       setOrgCheckLoading(false);
@@ -212,18 +217,23 @@ function PageContent({
   const orgSlug = organization.slug;
 
   const createDonation = async () => {
-    const { id } = (await fetcher!(`organizations/${orgId}/donations`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount_cents: value * 100,
-        name,
-        email,
-      }),
-    })) as { id: string };
-    return id;
+    try {
+      const { id } = (await fetcher!(`organizations/${orgId}/donations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount_cents: value * 100,
+          name,
+          email,
+        }),
+      })) as { id: string };
+      return id;
+    } catch (error) {
+              logCriticalError("Error creating donation", error, { orgId, amount: value * 100 });
+      throw error; // Re-throw to let calling code handle it
+    }
   };
 
   async function connectReader(selectedReader: Reader.Type) {
@@ -251,8 +261,7 @@ function PageContent({
       await AsyncStorage.setItem("lastConnectedOrgId", orgId);
       setCurrentProgress(null);
     } catch (error) {
-      // Log error for debugging
-      console.log("connectReader error", error);
+      logError("connectReader error", error, { context: { orgId, action: "connect_reader" } });
     } finally {
       setLoadingConnectingReader(false);
     }
@@ -287,8 +296,7 @@ function PageContent({
       });
       return paymentIntent;
     } catch (error) {
-      // Log error for debugging
-      console.log("paymentIntent error", error);
+      logError("paymentIntent error", error, { context: { orgId, donation_id, action: "payment_intent" } });
     }
   }
 
@@ -308,7 +316,7 @@ function PageContent({
       }
       output = (await confirmPayment(localPayment)) ?? false;
     } catch (error) {
-      console.log("collectPayment error", error);
+      logError("collectPayment error", error, { context: { orgId, action: "collect_payment" } });
       output = false;
     }
     return output;
@@ -325,7 +333,7 @@ function PageContent({
       }
       success = true;
     } catch (error) {
-      console.log("confirmPayment error", error);
+      logError("confirmPayment error", error, { context: { orgId, action: "confirm_payment" } });
       success = false;
     }
     return success;
@@ -548,7 +556,7 @@ function PageContent({
               const donation_id = await createDonation();
               await paymentIntent({ donation_id });
             } catch (error) {
-              console.log("createDonation error", error);
+              logError("createDonation error", error, { context: { orgId, amount: value * 100, action: "create_donation" } });
               showAlert("Error creating donation", "Please try again.");
             }
           }}

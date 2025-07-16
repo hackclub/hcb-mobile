@@ -16,6 +16,7 @@ import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../theme";
 import { renderMoney } from "../../../util";
+import { logError } from "../../../lib/errorUtils";
 
 type DisbursementScreenProps = {
   organization: OrganizationExpanded;
@@ -91,6 +92,14 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         setReason("");
       }
     } catch (error) {
+      logError("Transfer operation failed", error, { 
+        context: { 
+          organizationId: organization.id, 
+          targetOrgId: chosenOrg, 
+          amount: amount,
+          action: "organization_transfer" 
+        } 
+      });
       showAlert("Error", "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);

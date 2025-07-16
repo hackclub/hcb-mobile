@@ -24,14 +24,16 @@ function App() {
   const scheme = useColorScheme();
   const cache = useCache();
 
-  Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    debug: false,
-    integrations: [Sentry.reactNativeTracingIntegration()],
-    sendDefaultPii: true,
-    tracesSampleRate: 1.0,
-    profilesSampleRate: 1.0,
-  });
+  if (process.env.NODE_ENV === "production") {
+    Sentry.init({
+      dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+      debug: false,
+      integrations: [Sentry.reactNativeTracingIntegration()],
+      sendDefaultPii: true,
+        tracesSampleRate: 1.0,
+        profilesSampleRate: 1.0,
+    });
+  }
 
   if (!fontsLoaded) {
     return null;
