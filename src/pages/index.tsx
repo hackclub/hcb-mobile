@@ -30,6 +30,7 @@ import ReorderableList, {
 import useSWR, { preload, useSWRConfig } from "swr";
 
 import Transaction from "../components/Transaction";
+import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
@@ -237,8 +238,6 @@ function Event({
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 export default function App({ navigation }: Props) {
-  const lastErrorTime = useRef<number>(0);
-  const ERROR_DEBOUNCE_MS = 5000;
   const [isOnline, setIsOnline] = useState(true);
   const lastFetchTime = useRef<number>(0);
   const FETCH_COOLDOWN_MS = 10000;
@@ -294,13 +293,16 @@ export default function App({ navigation }: Props) {
         }
         // If we don't have missing receipt data yet, but also no error, wait a bit more
         else if (!missingReceiptError && !missingReceiptData) {
-          console.log("Waiting for missing receipt data to load...");
           // Don't process yet, wait for data to load
         }
         // If we have an error or no missing receipts, still show the modal for receipt bin upload
         else {
           if (missingReceiptError) {
-            console.log("Error fetching missing receipts, retrying...");
+            logError(
+              "Error fetching missing receipts, retrying",
+              missingReceiptError,
+              { context: { action: "missing_receipts_fetch" } },
+            );
             // Retry fetching missing receipts
             refetchMissingReceipts();
           } else {
@@ -338,7 +340,6 @@ export default function App({ navigation }: Props) {
     return () => {
       // Reset share intent when component unmounts to prevent conflicts
       if (hasShareIntent) {
-        console.log("Cleaning up share intent on unmount");
         resetShareIntent();
       }
     };
@@ -353,14 +354,6 @@ export default function App({ navigation }: Props) {
       unsubscribe();
     };
   }, []);
-
-  const logError = (message: string, error: Error | unknown) => {
-    const now = Date.now();
-    if (now - lastErrorTime.current > ERROR_DEBOUNCE_MS) {
-      console.error(message, error);
-      lastErrorTime.current = now;
-    }
-  };
 
   const shouldFetch = () => {
     const now = Date.now();

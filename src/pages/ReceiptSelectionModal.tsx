@@ -17,6 +17,7 @@ import useSWR, { mutate } from "swr";
 
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
+import { logCriticalError } from "../lib/errorUtils";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
 import { palette } from "../theme";
@@ -106,7 +107,10 @@ export default function ReceiptSelectionModal({
 
       navigation.goBack();
     } catch (error) {
-      console.error("Upload error:", error);
+      logCriticalError("Upload error", error, {
+        transactionId: transaction.id,
+        receiptCount: selectedReceipts.size,
+      });
       Toast.show({
         type: ALERT_TYPE.DANGER,
         title: "Upload Failed",
