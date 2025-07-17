@@ -574,6 +574,7 @@ export default function App({ navigation }: Props) {
                   borderWidth: 2,
                   borderColor:
                     scheme == "dark" ? palette.primary : palette.muted,
+                  marginBottom: 10,
                 }}
                 event={invitation.organization}
                 onPress={() =>
