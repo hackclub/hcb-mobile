@@ -35,7 +35,7 @@ export default {
         backgroundColor: "#EC3750",
       },
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      versionCode: 2,
+      versionCode: 3,
     },
     web: {
       bundler: "metro",
@@ -127,6 +127,13 @@ export default {
             NSExtensionActivationSupportsImageWithMaxCount: 5,
           },
           androidIntentFilters: ["image/*"],
+        },
+      ],
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission:
+            "Allow HCB to use your location for payments.",
         },
       ],
     ],
