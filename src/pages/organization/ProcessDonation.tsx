@@ -157,8 +157,7 @@ export default function ProcessDonationPage({
                 {email}
               </Text>
             </>
-          )}{" "}
-          : null
+          )}
           <StyledButton
             onPress={navigation.goBack}
             style={{
