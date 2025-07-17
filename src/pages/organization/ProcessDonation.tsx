@@ -126,7 +126,7 @@ export default function ProcessDonationPage({
               color: theme.colors.text,
             }}
           >
-            Thank you, {name}!
+            {name ? `Thank you, ${name}!` : "Thank you!"}
           </Text>
           <Text
             style={{
@@ -137,24 +137,28 @@ export default function ProcessDonationPage({
             {"$" + (payment?.amount / 100).toFixed(2)} donation completed
             successfully
           </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.colors.text,
-              marginTop: 10,
-            }}
-          >
-            A receipt has been sent to the email address:
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.colors.text,
-            }}
-          >
-            {email}
-          </Text>
-
+          {email && (
+            <>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: theme.colors.text,
+                  marginTop: 10,
+                }}
+              >
+                A receipt has been sent to the email address:
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: theme.colors.text,
+                }}
+              >
+                {email}
+              </Text>
+            </>
+          )}{" "}
+          : null
           <StyledButton
             onPress={navigation.goBack}
             style={{

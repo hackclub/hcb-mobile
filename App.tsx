@@ -28,7 +28,10 @@ function App() {
     Sentry.init({
       dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
       debug: false,
-      integrations: [Sentry.reactNativeTracingIntegration()],
+      integrations: [
+        Sentry.reactNativeTracingIntegration(),
+        Sentry.reactNativeErrorHandlersIntegration(),
+      ],
       sendDefaultPii: true,
       tracesSampleRate: 1.0,
       profilesSampleRate: 1.0,
