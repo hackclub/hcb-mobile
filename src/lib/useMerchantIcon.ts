@@ -1,4 +1,4 @@
-import { Merchant } from "@thedev132/yellowpages";
+import { Category, Merchant } from "@thedev132/yellowpages";
 import { useEffect, useState } from "react";
 
 import { logError } from "./errorUtils";
@@ -17,6 +17,7 @@ async function initializeMerchant() {
   initializationPromise = (async () => {
     try {
       await Merchant.initialize();
+      await Category.initialize();
       isInitialized = true;
     } catch (error) {
       logError("Error initializing merchant library", error, {

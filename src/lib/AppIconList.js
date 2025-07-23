@@ -2,7 +2,7 @@
 
 const appIcons = [
   {
-    name: "Default Light",
+    name: "Default",
     ios: "./assets/app-icon.png",
     android: {
       foregroundImage: "./assets/app-icon-foreground.png",
@@ -10,7 +10,7 @@ const appIcons = [
     },
   },
   {
-    name: "Default Dark",
+    name: "DefaultDark",
     ios: "./assets/icons/default-dark.png",
     android: {
       foregroundImage: "./assets/app-icon-foreground.png",
@@ -42,7 +42,7 @@ const appIcons = [
     },
   },
   {
-    name: "Admin Light",
+    name: "Admin",
     ios: "./assets/icons/admin.png",
     android: {
       foregroundImage: "./assets/icons/admin.png",
@@ -50,7 +50,7 @@ const appIcons = [
     },
   },
   {
-    name: "Admin Dark",
+    name: "AdminDark",
     ios: "./assets/icons/admin-dark.png",
     android: {
       foregroundImage: "./assets/icons/admin.png",
