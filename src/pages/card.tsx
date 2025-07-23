@@ -119,27 +119,6 @@ export default function CardPage(
     height: number;
   }>();
   const [cardName, setCardName] = useState("");
-  const [isMerchantInitialized, setIsMerchantInitialized] = useState(false);
-  const [isCategoryInitialized, setIsCategoryInitialized] = useState(false);
-
-  useEffect(() => {
-    const initializeLibraries = async () => {
-      try {
-        await Promise.all([Merchant.initialize(), Category.initialize()]);
-        setIsMerchantInitialized(true);
-        setIsCategoryInitialized(true);
-      } catch (error) {
-        logError("Error initializing libraries", error, {
-          context: { libraries: ["Merchant", "Category"] },
-        });
-        // Set flags to true even on error to prevent infinite loading
-        setIsMerchantInitialized(true);
-        setIsCategoryInitialized(true);
-      }
-    };
-
-    initializeLibraries();
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1268,9 +1247,7 @@ export default function CardPage(
                           fontFamily: "JetBrains Mono",
                         }}
                       >
-                        {isMerchantInitialized
-                          ? formatMerchantNames(grantCard?.allowed_merchants)
-                          : "Loading..."}
+                        {formatMerchantNames(grantCard?.allowed_merchants)}
                       </Text>
                     </View>
                     <View
@@ -1298,9 +1275,7 @@ export default function CardPage(
                           fontFamily: "JetBrains Mono",
                         }}
                       >
-                        {isCategoryInitialized
-                          ? formatCategoryNames(grantCard?.allowed_categories)
-                          : "Loading..."}
+                        {formatCategoryNames(grantCard?.allowed_categories)}
                       </Text>
                     </View>
                     {grantCard?.purpose && (
@@ -1499,6 +1474,7 @@ export default function CardPage(
                   >
                     <Transaction
                       transaction={transaction}
+                      showMerchantIcon={true}
                       top={index == 0}
                       bottom={index == transactions.length - 1}
                       hideAvatar

@@ -18,6 +18,7 @@ import {
   TextInput,
   Keyboard as RNKeyboard,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
@@ -258,6 +259,9 @@ function PageContent({
       );
       setCurrentProgress(null);
       if (error) {
+        logCriticalError("connectReader error", error, {
+          context: { orgId, action: "connect_reader" },
+        });
         if (error.message == "You must provide a reader object") {
           discoverReaders({
             discoveryMethod: "tapToPay",
@@ -444,15 +448,22 @@ function PageContent({
                 await connectReader(reader);
                 setLoadingConnectingReader(false);
                 return;
+              } else {
+                logCriticalError("No reader found " + JSON.stringify(reader), {
+                  context: { orgId, action: "connect_reader" },
+                });
               }
               // Discover readers once, then wait for a reader to appear
-              await discoverReaders({
+              const readers = await discoverReaders({
                 discoveryMethod: "tapToPay",
               });
               const found = await waitForReader();
               if (found && readerRef.current) {
                 await connectReader(readerRef.current);
               } else {
+                logCriticalError("No reader found " + JSON.stringify(readers), {
+                  context: { orgId, action: "connect_reader" },
+                });
                 showAlert(
                   "No reader found",
                   "No Tap to Pay reader was found nearby. Please make sure your device is ready.",
@@ -476,6 +487,7 @@ function PageContent({
   }
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
+      <ScrollView style={{ flex: 1 }} bounces={false}>
       <View
         style={{
           padding: 20,
@@ -569,7 +581,9 @@ function PageContent({
             />
           </View>
         </View>
-        <Keyboard amount={amount} setAmount={setAmount} />
+        <View style={{ flex: 1, width: "100%", marginVertical: 15 }}>
+          <Keyboard amount={amount} setAmount={setAmount} />
+        </View>
 
         {connectedReader ? (
           <Button
@@ -599,14 +613,8 @@ function PageContent({
             Reconnect reader
           </Button>
         )}
-
-        <View
-          style={{
-            height: 72,
-            width: "100%",
-          }}
-        />
       </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -693,7 +701,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
       <Text
         style={{
           color: error ? palette.primary : theme.colors.text,
-          paddingBottom: 0,
+          paddingBottom: 10,
           paddingHorizontal: 10,
           fontSize: 72,
           textTransform: "uppercase",
