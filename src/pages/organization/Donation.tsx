@@ -8,7 +8,7 @@ import {
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import {
   Platform,
   ActivityIndicator,
@@ -19,9 +19,12 @@ import {
   Keyboard as RNKeyboard,
   TouchableWithoutFeedback,
   ScrollView,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import * as Progress from "react-native-progress";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
+import Checkbox from 'expo-checkbox';
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
@@ -33,6 +36,7 @@ import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
 import { palette } from "../../theme";
+import useClient from "../../lib/client";
 
 // interface PaymentIntent {
 //   id: string;
@@ -119,6 +123,70 @@ const SectionHeader = ({
   );
 };
 
+const SettingsModal = ({
+  visible,
+  onClose,
+  isTaxDeductable,
+  setIsTaxDeductable,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  isTaxDeductable: boolean;
+  setIsTaxDeductable: (value: boolean) => void;
+}) => {
+  const { colors } = useTheme();
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: 20,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+            Donation Settings
+          </Text>
+          <TouchableOpacity onPress={onClose}>
+            <Text style={{ fontSize: 16, color: palette.primary }}>Done</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={{ flex: 1, padding: 20, marginHorizontal: 10, alignItems: "center" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
+          <View>
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              I'm receiving goods for this donation.
+            </Text>
+          <Text style={{ color: palette.muted, fontSize: 14, marginTop: 8 }}>
+            Check this if the donor is receiving goods or services in exchange for their donation.
+          </Text>
+          </View>
+
+          <Checkbox 
+              color={colors.primary}
+              style={{ borderRadius: 5, width: 25, height: 25, marginHorizontal: 10 }} 
+              value={isTaxDeductable} 
+              onValueChange={setIsTaxDeductable} 
+            />
+                      </View>
+
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 function PageContent({
   orgId,
   navigation,
@@ -131,7 +199,6 @@ function PageContent({
     useSWR<Organization>(`organizations/${orgId}`);
   const { accessDenied } = useLocation();
   const [amount, setAmount] = useState("$");
-  const { fetcher } = useSWRConfig();
   const value = parseFloat(amount.replace("$", "0"));
   const [reader, setReader] = useState<Reader.Type | undefined>(undefined);
   const readerRef = useRef<Reader.Type | undefined>(reader);
@@ -159,8 +226,58 @@ function PageContent({
   });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isTaxDeductable, setIsTaxDeductable] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const emailRef = useRef<TextInput>(null);
   const [orgCheckLoading, setOrgCheckLoading] = useState(true);
+  const hcb = useClient();
+
+  // Load tax deductible setting from AsyncStorage
+  useEffect(() => {
+    const loadTaxDeductibleSetting = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('donationTaxDeductible');
+        if (saved !== null) {
+          setIsTaxDeductable(JSON.parse(saved));
+        }
+      } catch (error) {
+        logError("Error loading tax deductible setting", error);
+      }
+    };
+    loadTaxDeductibleSetting();
+  }, []);
+
+  // Save tax deductible setting to AsyncStorage when it changes
+  useEffect(() => {
+    const saveTaxDeductibleSetting = async () => {
+      try {
+        await AsyncStorage.setItem('donationTaxDeductible', JSON.stringify(isTaxDeductable));
+      } catch (error) {
+        logError("Error saving tax deductible setting", error);
+      }
+    };
+    saveTaxDeductibleSetting();
+  }, [isTaxDeductable]);
+
+  // Set up navigation header with settings icon when connected
+  useLayoutEffect(() => {
+    if (connectedReader && !orgCheckLoading) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => setShowSettingsModal(true)}
+            style={{ padding: 4 }}
+          >
+            <Ionicons name="settings-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: undefined,
+      });
+    }
+  }, [navigation, connectedReader, orgCheckLoading, colors.text]);
 
   // Disconnect the reader as soon as the page loads if the last connected org id is different from the current org id
   useEffect(() => {
@@ -225,18 +342,16 @@ function PageContent({
 
   const createDonation = async () => {
     try {
-      const { id } = (await fetcher!(`organizations/${orgId}/donations`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await hcb.post(`organizations/${orgId}/donations`, {
+        json: {
           amount_cents: value * 100,
           name,
           email,
-        }),
-      })) as { id: string };
-      return id;
+          tax_deductable: isTaxDeductable,
+        },
+      });
+      const data = (await response.json()) as { id: string };
+      return data.id;
     } catch (error) {
       logCriticalError("Error creating donation", error, {
         orgId,
@@ -614,6 +729,12 @@ function PageContent({
             </Button>
           )}
         </View>
+        <SettingsModal
+          visible={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          isTaxDeductable={isTaxDeductable}
+          setIsTaxDeductable={setIsTaxDeductable}
+        />
       </ScrollView>
     </TouchableWithoutFeedback>
   );
