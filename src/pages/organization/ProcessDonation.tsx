@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -9,6 +11,7 @@ import {
   Button,
   ActivityIndicator,
   Platform,
+  Alert,
 } from "react-native";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
@@ -66,43 +69,137 @@ export default function ProcessDonationPage({
       <StatusBar barStyle="light-content" />
 
       {status == "ready" ? (
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-            paddingBottom: 40,
-          }}
-        >
-          <Text style={{ color: palette.muted, fontSize: 24 }}>
-            Donation amount
-          </Text>
-          <Text
+        showQR ? (
+          <View
             style={{
-              fontSize: 50,
-              color: theme.colors.text,
-            }}
-          >
-            ${(payment?.amount / 100).toFixed(2)}
-          </Text>
-
-          <StyledButton
-            onPress={async () => {
-              setStatus("loading");
-              const success = await collectPayment();
-              setStatus(success ? "success" : "error");
-            }}
-            style={{
-              marginBottom: 10,
-              position: "absolute",
-              bottom: 30,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
               width: "100%",
             }}
           >
-            Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : null}
-          </StyledButton>
-        </View>
+            <View
+              style={{
+                marginBottom: 0,
+                alignItems: "center",
+                backgroundColor: theme.colors.card,
+                padding: 20,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <QRCodeStyled
+                data={donationUrl}
+                style={{ backgroundColor: theme.colors.card }}
+                padding={20}
+                pieceSize={5}
+                pieceCornerType="rounded"
+                isPiecesGlued={true}
+                pieceBorderRadius={1}
+                color={theme.colors.text}
+              />
+              <Text
+                style={{
+                  color: theme.colors.text,
+                  marginTop: 15,
+                  textAlign: "center",
+                  fontSize: 14,
+                  opacity: 0.8,
+                }}
+              >
+                Scan to complete donation
+              </Text>
+            </View>
+            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
+              <StyledButton
+                onPress={async () => {
+                  await Clipboard.setStringAsync(donationUrl);
+                  Alert.alert("Copied!", "Donation link copied to clipboard.");
+                }}
+                style={{
+                  marginTop: 10,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
+                Copy Link
+              </StyledButton>
+              <StyledButton
+                onPress={() => setShowQR(false)}
+                style={{
+                  marginTop: 20,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
+                Back
+              </StyledButton>
+            </View>
+          </View>
+        ) : (
+          <View
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+              paddingBottom: 40,
+            }}
+          >
+            <Text style={{ color: palette.muted, fontSize: 24 }}>
+              Donation amount
+            </Text>
+            <Text
+              style={{
+                fontSize: 50,
+                color: theme.colors.text,
+              }}
+            >
+              ${(payment?.amount / 100).toFixed(2)}
+            </Text>
+            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
+              <StyledButton
+                onPress={() => setShowQR(true)}
+                style={{
+                  marginTop: 10,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
+                Show Donation QR Code
+              </StyledButton>
+              <StyledButton
+                onPress={async () => {
+                  setStatus("loading");
+                  const success = await collectPayment();
+                  setStatus(success ? "success" : "error");
+                  Haptics.notificationAsync(
+                    success
+                      ? Haptics.NotificationFeedbackType.Success
+                      : Haptics.NotificationFeedbackType.Error,
+                  );
+                }}
+                style={{
+                  marginBottom: 10,
+                  marginTop: 20,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
+                Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : null}
+              </StyledButton>
+            </View>
+          </View>
+        )
       ) : status == "success" ? (
         <View
           style={{
@@ -293,6 +390,21 @@ export default function ProcessDonationPage({
           </View>
 
           <View style={{ width: "100%", position: "absolute", bottom: 30 }}>
+            <StyledButton
+              onPress={async () => {
+                setStatus("loading");
+                const success = await collectPayment();
+                setStatus(success ? "success" : "error");
+                Haptics.notificationAsync(
+                  success
+                    ? Haptics.NotificationFeedbackType.Success
+                    : Haptics.NotificationFeedbackType.Error,
+                );
+              }}
+              style={{ marginBottom: 10 }}
+            >
+              Retry
+            </StyledButton>
             {!showQR && (
               <StyledButton
                 onPress={() => setShowQR(true)}
