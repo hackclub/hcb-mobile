@@ -3,23 +3,12 @@ import { useTheme } from "@react-navigation/native";
 import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Image,
-  useColorScheme,
-} from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import useSWR from "swr";
 
-const icons: {
-  [key: string]: number | { light: number; dark: number } | null;
-} = {
-  default: {
-    light: require("../../../assets/app-icon.png"),
-    dark: require("../../../assets/icons/default-dark.png"),
-  },
+const icons: { [key: string]: number | null } = {
+  "default light": require("../../../assets/app-icon.png"),
+  "default dark": require("../../../assets/icons/default-dark.png"),
   cashmoney: require("../../../assets/icons/cash-money.png"),
   testflight: Constants.platform?.ios
     ? require("../../../assets/icons/testflight.png")
@@ -27,11 +16,11 @@ const icons: {
   hacknight: Constants.platform?.ios
     ? require("../../../assets/icons/hack-night.png")
     : null,
-  admin: Constants.platform?.ios
-    ? {
-        light: require("../../../assets/icons/admin.png"),
-        dark: require("../../../assets/icons/admin-dark.png"),
-      }
+  "admin light": Constants.platform?.ios
+    ? require("../../../assets/icons/admin.png")
+    : null,
+  "admin dark": Constants.platform?.ios
+    ? require("../../../assets/icons/admin-dark.png")
     : null,
   platinum: Constants.platform?.ios
     ? require("../../../assets/icons/platinum.png")
@@ -49,7 +38,7 @@ const icons: {
 
 const iconKeyMap: { [key: string]: string } = {
   frc: "frc",
-  admin: "admin",
+  admin: "admin light", // Map the old admin key to admin light for backwards compatibility
   platinum: "platinum",
   testflight: "testflight",
   hackathon_grant: "hackathongrant",
@@ -57,43 +46,62 @@ const iconKeyMap: { [key: string]: string } = {
 
 const getDisplayName = (key: string) => {
   const nameMap: { [key: string]: string } = {
+    "default light": "Default",
+    "default dark": "Dark",
     hackathongrant: "Hackathon Grant",
     cashmoney: "Cash Money",
     christmas: "Christmas",
     frc: "FRC",
+    "admin light": "Admin",
+    "admin dark": "Admin Dark",
+    platinum: "Platinum",
+    testflight: "Testflight",
+    hacknight: "Hacknight",
   };
+
   return nameMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
 };
 
 const isChristmasSeason = () => {
   const now = new Date();
   const month = now.getMonth();
-  return month === 11;
+  return month === 11; // December
 };
 
 export default function AppIconSelector() {
   const { colors } = useTheme();
-  const [currentIcon, setCurrentIcon] = useState<string>("default");
-  const colorScheme = useColorScheme();
+  const [currentIcon, setCurrentIcon] = useState<string>("default light");
   const { data: availableIcons } = useSWR<Record<string, boolean>>(
     "user/available_icons",
   );
 
   useEffect(() => {
     const iconName = getAppIconName() || "default";
-    setCurrentIcon(iconName.toLowerCase());
+    // Convert the icon name to match our new naming scheme
+    if (iconName.toLowerCase() === "default") {
+      setCurrentIcon("default light");
+    } else {
+      setCurrentIcon(iconName.toLowerCase());
+    }
   }, []);
 
   const handleSelect = (iconName: string) => {
-    setAlternateAppIcon(iconName.charAt(0).toUpperCase() + iconName.slice(1));
-    setCurrentIcon(iconName);
-  };
-
-  const getIconSource = (value: number | { light: number; dark: number }) => {
-    if (typeof value === "number") {
-      return value;
+    // Convert display name back to the format expected by expo-alternate-app-icons
+    let configIconName = iconName;
+    if (iconName === "default light") {
+      configIconName = "Default Light";
+    } else if (iconName === "default dark") {
+      configIconName = "Default Dark";
+    } else if (iconName === "admin light") {
+      configIconName = "Admin Light";
+    } else if (iconName === "admin dark") {
+      configIconName = "Admin Dark";
+    } else {
+      configIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
     }
-    return colorScheme === "dark" ? value.dark : value.light;
+
+    setAlternateAppIcon(configIconName);
+    setCurrentIcon(iconName);
   };
 
   const getAvailableIcons = () => {
@@ -102,29 +110,35 @@ export default function AppIconSelector() {
         .filter(([key, value]) => {
           if (value === null) return false;
           if (key === "christmas") return isChristmasSeason();
+          if (key === "admin light" || key === "admin dark") return false;
           return true;
         })
         .map(([key, value]) => ({
           key,
-          value: value as number | { light: number; dark: number },
+          value: value as number,
         }));
     }
 
     return Object.entries(icons)
       .filter(([key, value]) => {
         if (value === null) return false;
-        if (key === "default") return true;
+        if (key.startsWith("default")) return true;
         if (key === "christmas") return isChristmasSeason();
 
-        const apiKey = Object.entries(iconKeyMap).find(
+        if (key === "admin light" || key === "admin dark") {
+          return availableIcons["admin"];
+        }
+
+        const mappedApiKey = Object.entries(iconKeyMap).find(
           ([_, localKey]) => localKey === key,
         )?.[0];
-        if (!apiKey) return true;
-        return availableIcons[apiKey];
+
+        if (!mappedApiKey) return true;
+        return availableIcons[mappedApiKey];
       })
       .map(([key, value]) => ({
         key,
-        value: value as number | { light: number; dark: number },
+        value: value as number,
       }));
   };
 
@@ -164,7 +178,7 @@ export default function AppIconSelector() {
               onPress={() => handleSelect(key)}
             >
               <Image
-                source={getIconSource(value)}
+                source={value}
                 style={{
                   width: 40,
                   height: 40,

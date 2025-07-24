@@ -18,6 +18,7 @@ import {
   TextInput,
   Keyboard as RNKeyboard,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR, { useSWRConfig } from "swr";
@@ -258,6 +259,9 @@ function PageContent({
       );
       setCurrentProgress(null);
       if (error) {
+        logCriticalError("connectReader error", error, {
+          context: { orgId, action: "connect_reader" },
+        });
         if (error.message == "You must provide a reader object") {
           discoverReaders({
             discoveryMethod: "tapToPay",
@@ -444,15 +448,22 @@ function PageContent({
                 await connectReader(reader);
                 setLoadingConnectingReader(false);
                 return;
+              } else {
+                logCriticalError("No reader found " + JSON.stringify(reader), {
+                  context: { orgId, action: "connect_reader" },
+                });
               }
               // Discover readers once, then wait for a reader to appear
-              await discoverReaders({
+              const readers = await discoverReaders({
                 discoveryMethod: "tapToPay",
               });
               const found = await waitForReader();
               if (found && readerRef.current) {
                 await connectReader(readerRef.current);
               } else {
+                logCriticalError("No reader found " + JSON.stringify(readers), {
+                  context: { orgId, action: "connect_reader" },
+                });
                 showAlert(
                   "No reader found",
                   "No Tap to Pay reader was found nearby. Please make sure your device is ready.",
@@ -476,137 +487,134 @@ function PageContent({
   }
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
-      <View
-        style={{
-          padding: 20,
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          flex: 1,
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <SectionHeader
-          title="Capture Donation"
-          subtitle="Collect donations for your organization right from your mobile device."
-        />
-
+      <ScrollView style={{ flex: 1 }} bounces={false}>
         <View
           style={{
-            flexDirection: "column",
+            padding: 20,
             display: "flex",
             alignItems: "flex-start",
-            justifyContent: "center",
-            marginBottom: 10,
+            justifyContent: "space-between",
+            flex: 1,
+            width: "100%",
+            height: "100%",
           }}
         >
+          <SectionHeader
+            title="Capture Donation"
+            subtitle="Collect donations for your organization right from your mobile device."
+          />
+
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: 20,
+              flexDirection: "column",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              marginBottom: 10,
             }}
           >
-            <View style={{ flexBasis: 70 }}>
-              <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
-            </View>
-            <TextInput
+            <View
               style={{
-                color: colors.text,
-                backgroundColor: colors.card,
-                padding: 12,
-                borderRadius: 8,
-                fontSize: 16,
-                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: 20,
               }}
-              selectTextOnFocus
-              autoFocus
-              clearButtonMode="while-editing"
-              value={name}
-              autoCapitalize="words"
-              onChangeText={setName}
-              autoComplete="off"
-              autoCorrect={false}
-              placeholder={"Full name (optional)"}
-              placeholderTextColor={palette.muted}
-              returnKeyType="next"
-              onSubmitEditing={() => {
-                emailRef.current?.focus();
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: 20,
-              marginTop: 10,
-            }}
-          >
-            <View style={{ flexBasis: 70 }}>
-              <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+            >
+              <View style={{ flexBasis: 70 }}>
+                <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
+              </View>
+              <TextInput
+                style={{
+                  color: colors.text,
+                  backgroundColor: colors.card,
+                  padding: 12,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  flex: 1,
+                }}
+                selectTextOnFocus
+                autoFocus
+                clearButtonMode="while-editing"
+                value={name}
+                autoCapitalize="words"
+                onChangeText={setName}
+                autoComplete="off"
+                autoCorrect={false}
+                placeholder={"Full name (optional)"}
+                placeholderTextColor={palette.muted}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  emailRef.current?.focus();
+                }}
+              />
             </View>
-            <TextInput
+            <View
               style={{
-                color: colors.text,
-                backgroundColor: colors.card,
-                padding: 12,
-                borderRadius: 8,
-                fontSize: 16,
-                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: 20,
+                marginTop: 10,
               }}
-              selectTextOnFocus
-              clearButtonMode="while-editing"
-              placeholder="Email (optional)"
-              placeholderTextColor={palette.muted}
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              ref={emailRef}
-            />
+            >
+              <View style={{ flexBasis: 70 }}>
+                <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
+              </View>
+              <TextInput
+                style={{
+                  color: colors.text,
+                  backgroundColor: colors.card,
+                  padding: 12,
+                  borderRadius: 8,
+                  fontSize: 16,
+                  flex: 1,
+                }}
+                selectTextOnFocus
+                clearButtonMode="while-editing"
+                placeholder="Email (optional)"
+                placeholderTextColor={palette.muted}
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+                ref={emailRef}
+              />
+            </View>
           </View>
+          <View style={{ flex: 1, width: "100%", marginVertical: 15 }}>
+            <Keyboard amount={amount} setAmount={setAmount} />
+          </View>
+
+          {connectedReader ? (
+            <Button
+              onPress={async () => {
+                try {
+                  const donation_id = await createDonation();
+                  await paymentIntent({ donation_id });
+                } catch (error) {
+                  logCriticalError("createDonation error", error, {
+                    context: {
+                      orgId,
+                      amount: value * 100,
+                      action: "create_donation",
+                    },
+                  });
+                  showAlert("Error creating donation", "Please try again.");
+                }
+              }}
+              style={{
+                width: "100%",
+              }}
+            >
+              Create donation
+            </Button>
+          ) : (
+            <Button onPress={() => reader && connectReader(reader)}>
+              Reconnect reader
+            </Button>
+          )}
         </View>
-        <Keyboard amount={amount} setAmount={setAmount} />
-
-        {connectedReader ? (
-          <Button
-            onPress={async () => {
-              try {
-                const donation_id = await createDonation();
-                await paymentIntent({ donation_id });
-              } catch (error) {
-                logCriticalError("createDonation error", error, {
-                  context: {
-                    orgId,
-                    amount: value * 100,
-                    action: "create_donation",
-                  },
-                });
-                showAlert("Error creating donation", "Please try again.");
-              }
-            }}
-            style={{
-              width: "100%",
-            }}
-          >
-            Create donation
-          </Button>
-        ) : (
-          <Button onPress={() => reader && connectReader(reader)}>
-            Reconnect reader
-          </Button>
-        )}
-
-        <View
-          style={{
-            height: 72,
-            width: "100%",
-          }}
-        />
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -693,7 +701,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
       <Text
         style={{
           color: error ? palette.primary : theme.colors.text,
-          paddingBottom: 0,
+          paddingBottom: 10,
           paddingHorizontal: 10,
           fontSize: 72,
           textTransform: "uppercase",

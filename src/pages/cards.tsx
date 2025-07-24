@@ -189,6 +189,7 @@ export default function CardsPage({ navigation }: Props) {
         ...grantCard,
         grant_id: grantCard.id, // Move original id to grant_id
         id: grantCard.card_id, // Replace id with card_id
+        last4: cards?.find((card) => card.id === grantCard.card_id)?.last4, // add last4 from card as doesn't show in grantCard
       }))
       .filter(
         (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet

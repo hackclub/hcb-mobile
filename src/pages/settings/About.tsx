@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { View, Text, Platform, ScrollView } from "react-native";
 
 import { useThemeContext } from "../../ThemeContext";
-
 function isTapToPayEnabled() {
   if (Constants.platform?.ios && Device.osVersion) {
     return parseInt(Device.osVersion, 10) >= 17;
@@ -45,11 +45,12 @@ export default function About() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: 60 }}
+      contentContainerStyle={{ paddingBottom: 80 }}
+      showsVerticalScrollIndicator={false}
     >
       <View style={{ padding: 24 }}>
         <View style={{ alignItems: "center", marginBottom: 40 }}>
-          <Ionicons name="card" size={48} color={colors.primary} />
+          <Icon glyph="card" size={48} color={colors.primary} />
           <Text
             style={{
               color: colors.text,
