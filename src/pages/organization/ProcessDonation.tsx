@@ -118,28 +118,27 @@ export default function ProcessDonationPage({
               >
                 Scan to complete donation
               </Text>
-
             </View>
-            <View style={{position: 'absolute', bottom: 30, width: '100%'}}>
-            <StyledButton
+            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
+              <StyledButton
                 onPress={async () => {
                   await Clipboard.setStringAsync(donationUrl);
                   Alert.alert("Copied!", "Donation link copied to clipboard.");
                 }}
-                style={{ 
+                style={{
                   marginTop: 10,
-                  alignSelf: 'center',
-                  width: '100%'
+                  alignSelf: "center",
+                  width: "100%",
                 }}
               >
                 Copy Link
               </StyledButton>
               <StyledButton
                 onPress={() => setShowQR(false)}
-                style={{ 
+                style={{
                   marginTop: 20,
-                  alignSelf: 'center',
-                  width: '100%'
+                  alignSelf: "center",
+                  width: "100%",
                 }}
               >
                 Back
@@ -167,32 +166,35 @@ export default function ProcessDonationPage({
             >
               ${(payment?.amount / 100).toFixed(2)}
             </Text>
-            <View style={{position: 'absolute', bottom: 30, width: '100%'}}>
-
-            <StyledButton
-              onPress={() => setShowQR(true)}
-              style={{
-                marginTop: 10,
-                alignSelf: 'center',
-                width: "100%",
-              }}
-            >
-              Show Donation QR Code
-            </StyledButton>
-            <StyledButton
-              onPress={async () => {
-                setStatus("loading");
-                const success = await collectPayment();
-                setStatus(success ? "success" : "error");
-                Haptics.notificationAsync(success ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error);              
-              }}
-              style={{
-                marginBottom: 10,
-                marginTop: 20,
-                alignSelf: 'center',
-                width: "100%",
-              }}
-            >
+            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
+              <StyledButton
+                onPress={() => setShowQR(true)}
+                style={{
+                  marginTop: 10,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
+                Show Donation QR Code
+              </StyledButton>
+              <StyledButton
+                onPress={async () => {
+                  setStatus("loading");
+                  const success = await collectPayment();
+                  setStatus(success ? "success" : "error");
+                  Haptics.notificationAsync(
+                    success
+                      ? Haptics.NotificationFeedbackType.Success
+                      : Haptics.NotificationFeedbackType.Error,
+                  );
+                }}
+                style={{
+                  marginBottom: 10,
+                  marginTop: 20,
+                  alignSelf: "center",
+                  width: "100%",
+                }}
+              >
                 Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : null}
               </StyledButton>
             </View>
@@ -389,12 +391,15 @@ export default function ProcessDonationPage({
 
           <View style={{ width: "100%", position: "absolute", bottom: 30 }}>
             <StyledButton
-              
               onPress={async () => {
                 setStatus("loading");
                 const success = await collectPayment();
                 setStatus(success ? "success" : "error");
-                Haptics.notificationAsync(success ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error);
+                Haptics.notificationAsync(
+                  success
+                    ? Haptics.NotificationFeedbackType.Success
+                    : Haptics.NotificationFeedbackType.Error,
+                );
               }}
               style={{ marginBottom: 10 }}
             >

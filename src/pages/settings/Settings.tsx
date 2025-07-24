@@ -29,6 +29,7 @@ import { palette } from "../../theme";
 import { useThemeContext } from "../../ThemeContext";
 
 const TOS_URL = "https://hcb.hackclub.com/tos";
+const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
 
 const THEME_KEY = "app_theme";
 
@@ -86,6 +87,7 @@ export default function SettingsPage({ navigation }: Props) {
         });
       }
     })();
+    console.log(user);
   }, [setTheme]);
 
   useEffect(() => {
@@ -408,6 +410,39 @@ export default function SettingsPage({ navigation }: Props) {
             />
             <Text style={{ color: colors.text, fontSize: 16 }}>
               Terms & Conditions
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => Linking.openURL(PRIVACY_URL)}
+          >
+            <Ionicons
+              name="shield-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              Privacy Policy
             </Text>
             <Ionicons
               name="chevron-forward"

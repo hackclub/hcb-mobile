@@ -41,7 +41,8 @@ export default function PaymentCard({
   const appState = useRef(AppState.currentState);
   const [isAppInBackground, setisAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
-
+  const [logoWidth, setLogoWidth] = useState(80);
+  const [logoHeight, setLogoHeight] = useState(40);
   const isCardDataValid = card && card.id;
 
   useEffect(() => {
@@ -51,6 +52,12 @@ export default function PaymentCard({
   }, [card?.id, onCardLoad, patternDimensions, isCardDataValid]);
 
   useEffect(() => {
+    if (card.personalization?.logo_url) {
+      Image.getSize(card.personalization.logo_url, (width, height) => {
+        setLogoWidth(width);
+        setLogoHeight(height);
+      });
+    }
     const subscription = AppState.addEventListener(
       "change",
       (nextAppState: AppStateStatus) => {
@@ -88,7 +95,12 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor: card.type == "physical" ? "black" : themeColors.card,
+        backgroundColor:
+          card.type == "physical"
+            ? card.personalization?.color == "black"
+              ? "black"
+              : "white"
+            : themeColors.card,
         padding: 30,
         width: width * 0.86,
         height: (width * 0.86) / 1.588,
@@ -117,11 +129,53 @@ export default function PaymentCard({
         </View>
       )}
 
-      {card.type == "physical" && (
-        <View style={{ top: 5, right: 5, position: "absolute" }}>
-          <Icon glyph="bank-account" size={64} color="white" />
+      {card.type == "physical" && !card.personalization?.logo_url && (
+        <View
+          style={{
+            position: "absolute",
+            top: 15,
+            right: 0,
+            width: 100,
+            height: 40,
+            alignItems: "flex-end",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          <Icon
+            glyph="bank-account"
+            size={40}
+            color={card.personalization?.color == "black" ? "white" : "black"}
+          />
         </View>
       )}
+
+      {card.type == "physical" && card.personalization?.logo_url && (
+        <View
+          style={{
+            position: "absolute",
+            top: 15,
+            right: 15,
+            width: "100%",
+            height: 40,
+            overflow: "hidden",
+            alignItems: "flex-end",
+          }}
+        >
+          <Image
+            resizeMode="contain"
+            source={{ uri: card.personalization?.logo_url }}
+            style={{
+              width: "auto",
+              height: 40,
+              tintColor:
+                card.personalization?.color == "black" ? "white" : undefined,
+              aspectRatio: logoWidth / logoHeight,
+            }}
+          />
+        </View>
+      )}
+
       {card.status == "frozen" && (
         <>
           <Image
@@ -138,7 +192,12 @@ export default function PaymentCard({
             }}
           />
           <View style={{ top: 25, left: 25, position: "absolute" }}>
-            <Icon glyph="freeze" size={32} color="white" opacity={0.5} />
+            <Icon
+              glyph="freeze"
+              size={32}
+              color={card.personalization?.color == "black" ? "white" : "black"}
+              opacity={0.5}
+            />
           </View>
         </>
       )}
@@ -146,7 +205,7 @@ export default function PaymentCard({
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: "white",
+          color: card.personalization?.color == "white" ? "black" : "white",
           fontSize: 18,
           marginBottom: 4,
           fontFamily: "Consolas-Bold",
@@ -160,7 +219,7 @@ export default function PaymentCard({
         <View>
           <Text
             style={{
-              color: "white",
+              color: card.personalization?.color == "white" ? "black" : "white",
               fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
@@ -175,7 +234,7 @@ export default function PaymentCard({
         <View style={{ position: "absolute", right: 0 }}>
           <Text
             style={{
-              color: "white",
+              color: card.personalization?.color == "white" ? "black" : "white",
               fontSize: 14,
               fontFamily: "Consolas-Bold",
               fontWeight: 700,

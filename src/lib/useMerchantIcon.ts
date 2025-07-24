@@ -30,7 +30,9 @@ async function initializeMerchant() {
   await initializationPromise;
 }
 
-export function useMerchantIcon(networkId: string | undefined): string | undefined {
+export function useMerchantIcon(
+  networkId: string | undefined,
+): string | undefined {
   const [icon, setIcon] = useState<string | undefined>(() => {
     if (!networkId) return undefined;
     return iconCache.get(networkId);
@@ -50,7 +52,7 @@ export function useMerchantIcon(networkId: string | undefined): string | undefin
 
     const getMerchantIcon = async () => {
       await initializeMerchant();
-      
+
       if (!isInitialized) {
         iconCache.set(networkId, undefined);
         setIcon(undefined);
@@ -60,7 +62,7 @@ export function useMerchantIcon(networkId: string | undefined): string | undefin
       try {
         const merchant = Merchant.lookup({ networkId });
         const merchantIcon = await merchant.getIcon();
-        
+
         iconCache.set(networkId, merchantIcon);
         setIcon(merchantIcon);
       } catch (error) {
@@ -76,4 +78,4 @@ export function useMerchantIcon(networkId: string | undefined): string | undefin
   }, [networkId]);
 
   return icon;
-} 
+}

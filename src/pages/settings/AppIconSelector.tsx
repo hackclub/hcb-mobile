@@ -3,13 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Image,
-} from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import useSWR from "swr";
 
 const icons: { [key: string]: number | null } = {
@@ -64,7 +58,7 @@ const getDisplayName = (key: string) => {
     testflight: "Testflight",
     hacknight: "Hacknight",
   };
-  
+
   return nameMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
 };
 
@@ -105,7 +99,7 @@ export default function AppIconSelector() {
     } else {
       configIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
     }
-    
+
     setAlternateAppIcon(configIconName);
     setCurrentIcon(iconName);
   };
@@ -134,11 +128,11 @@ export default function AppIconSelector() {
         if (key === "admin light" || key === "admin dark") {
           return availableIcons["admin"];
         }
-        
+
         const mappedApiKey = Object.entries(iconKeyMap).find(
           ([_, localKey]) => localKey === key,
         )?.[0];
-        
+
         if (!mappedApiKey) return true;
         return availableIcons[mappedApiKey];
       })

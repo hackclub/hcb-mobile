@@ -5,7 +5,6 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import { Merchant, Category } from "@thedev132/yellowpages";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
@@ -42,6 +41,8 @@ import User from "../lib/types/User";
 import useStripeCardDetails from "../lib/useStripeCardDetails";
 import { palette } from "../theme";
 import {
+  formatCategoryNames,
+  formatMerchantNames,
   normalizeSvg,
   redactedCardNumber,
   renderCardNumber,
@@ -528,73 +529,6 @@ export default function CardPage(
     );
   };
 
-  const formatMerchantNames = (merchantIds: string[] | undefined) => {
-    if (!merchantIds || merchantIds.length === 0) {
-      return "All";
-    }
-
-    try {
-      const merchantNames: string[] = [];
-      const validIds = merchantIds.filter((id): id is string => !!id);
-      const unnamedCount = validIds.filter((id) => {
-        const merchant = Merchant.lookup({ networkId: id });
-        if (merchant.inDataset()) {
-          const name = merchant.getName();
-          if (name && !merchantNames.includes(name)) {
-            merchantNames.push(name);
-          }
-          return false;
-        }
-        return true;
-      }).length;
-
-      // Add unnamed merchants count if any
-      if (unnamedCount > 0) {
-        merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
-      }
-
-      return merchantNames.join(", ");
-    } catch (error) {
-      logError("Error formatting merchant names", error, {
-        context: { transactionCount: transactions.length },
-      });
-      return "Loading...";
-    }
-  };
-
-  const formatCategoryNames = (categoryIds: string[] | undefined) => {
-    if (!categoryIds || categoryIds.length === 0) {
-      return "All";
-    }
-
-    try {
-      const categoryNames: string[] = [];
-      const validIds = categoryIds.filter((id): id is string => !!id);
-      const unnamedCount = validIds.filter((id) => {
-        const category = Category.lookup({ key: id });
-        if (category.inDataset()) {
-          const name = category.getName();
-          if (name && !categoryNames.includes(name)) {
-            categoryNames.push(name);
-          }
-          return false;
-        }
-        return true;
-      }).length;
-
-      if (unnamedCount > 0) {
-        categoryNames.push(`Unnamed Categories (${unnamedCount})`);
-      }
-
-      return categoryNames.join(", ");
-    } catch (error) {
-      logError("Error formatting category names", error, {
-        context: { transactionCount: transactions.length },
-      });
-      return "Loading...";
-    }
-  };
-
   function getCardActionButtons() {
     const buttons = [];
 
@@ -684,7 +618,7 @@ export default function CardPage(
     }
 
     // Add one time button
-    if (isGrantCard && (isCardholder || isManagerOrAdmin)) {
+    if (isGrantCard && isManagerOrAdmin) {
       buttons.push(
         <Button
           icon="private"
@@ -700,7 +634,7 @@ export default function CardPage(
       );
     }
 
-    if (isGrantCard && (isCardholder || isManagerOrAdmin)) {
+    if (isGrantCard && isManagerOrAdmin) {
       buttons.push(
         <Button
           icon="edit"

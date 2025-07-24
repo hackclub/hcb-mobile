@@ -4,7 +4,8 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
-import { View, Text, ViewProps, StyleSheet, Image } from "react-native";
+import { View, Text, ViewProps, StyleSheet } from "react-native";
+import { SvgXml } from "react-native-svg";
 import { match } from "ts-pattern";
 
 import {
@@ -18,7 +19,6 @@ import { palette } from "../theme";
 import { renderMoney } from "../util";
 
 import UserAvatar from "./UserAvatar";
-import { SvgXml } from "react-native-svg";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
@@ -130,15 +130,14 @@ function Transaction({
 }) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
-  
-  const networkId = transaction.code === TransactionType.StripeCard 
-    ? (transaction as TransactionCardCharge).card_charge?.merchant?.network_id
-    : undefined;
+
+  const networkId =
+    transaction.code === TransactionType.StripeCard
+      ? (transaction as TransactionCardCharge).card_charge?.merchant?.network_id
+      : undefined;
   const autoMerchantIcon = useMerchantIcon(networkId);
-  
+
   const finalMerchantIcon = showMerchantIcon ? autoMerchantIcon : null;
-
-
 
   return (
     <View>
@@ -184,18 +183,18 @@ function Transaction({
         )}
 
         {finalMerchantIcon ? (
-          <SvgXml 
-            xml={finalMerchantIcon} 
-            width={20} 
+          <SvgXml
+            xml={finalMerchantIcon}
+            width={20}
             height={20}
             fill={palette.muted}
           />
         ) : (
           <TransactionIcon
-          transaction={transaction}
-          hideAvatar={hideAvatar}
-          hideIcon={hideIcon}
-        />
+            transaction={transaction}
+            hideAvatar={hideAvatar}
+            hideIcon={hideIcon}
+          />
         )}
 
         {!hidePendingLabel && (transaction.declined || transaction.pending) && (
