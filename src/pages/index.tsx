@@ -221,15 +221,15 @@ function Event({
       activeOpacity={isActive ? 1 : 0.7}
     >
       {event.background_image ? (
-        <ImageBackground
+        <Image
           source={{ uri: event.background_image }}
+          cachePolicy="memory-disk"
           style={{
             backgroundColor: themeColors.card,
             borderRadius: 10,
             overflow: "hidden",
           }}
-          imageStyle={{ borderRadius: 10 }}
-          resizeMode="cover"
+          contentFit="cover"
         >
           <View
             style={{
@@ -241,7 +241,7 @@ function Event({
           >
             {contentView}
           </View>
-        </ImageBackground>
+        </Image>
       ) : (
         <View
           style={StyleSheet.compose(

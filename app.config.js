@@ -15,7 +15,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "1.0.0.17",
+      buildNumber: "15",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -94,9 +94,9 @@ export default {
       [
         "@sentry/react-native/expo",
         {
-          organization: "hcb-mobile",
-          project: "hcb-mobile",
           url: "https://sentry.io/",
+          project: "hcb-mobile",
+          organization: "hack-club-hcb",
         },
       ],
       [
