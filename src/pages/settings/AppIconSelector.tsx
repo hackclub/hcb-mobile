@@ -7,7 +7,7 @@ import { View, Text, Pressable, ScrollView, Image } from "react-native";
 import useSWR from "swr";
 
 const icons: { [key: string]: number | null } = {
-  "default light": require("../../../assets/app-icon.png"),
+  default: require("../../../assets/icons/default.png"),
   "default dark": require("../../../assets/icons/default-dark.png"),
   cashmoney: require("../../../assets/icons/cash-money.png"),
   testflight: Constants.platform?.ios
@@ -38,7 +38,7 @@ const icons: { [key: string]: number | null } = {
 
 const iconKeyMap: { [key: string]: string } = {
   frc: "frc",
-  admin: "admin light", // Map the old admin key to admin light for backwards compatibility
+  admin: "admin light",
   platinum: "platinum",
   testflight: "testflight",
   hackathon_grant: "hackathongrant",
@@ -46,13 +46,13 @@ const iconKeyMap: { [key: string]: string } = {
 
 const getDisplayName = (key: string) => {
   const nameMap: { [key: string]: string } = {
-    "default light": "Default",
-    "default dark": "Dark",
+    default: "Default",
+    "default dark": "Default Dark",
     hackathongrant: "Hackathon Grant",
     cashmoney: "Cash Money",
     christmas: "Christmas",
     frc: "FRC",
-    "admin light": "Admin",
+    "admin light": "Admin Light",
     "admin dark": "Admin Dark",
     platinum: "Platinum",
     testflight: "Testflight",
@@ -70,38 +70,50 @@ const isChristmasSeason = () => {
 
 export default function AppIconSelector() {
   const { colors } = useTheme();
-  const [currentIcon, setCurrentIcon] = useState<string>("default light");
+  const [currentIcon, setCurrentIcon] = useState<string>("default");
   const { data: availableIcons } = useSWR<Record<string, boolean>>(
     "user/available_icons",
   );
 
   useEffect(() => {
-    const iconName = getAppIconName() || "default";
-    // Convert the icon name to match our new naming scheme
-    if (iconName.toLowerCase() === "default") {
-      setCurrentIcon("default light");
+    const iconName = getAppIconName();
+
+    if (!iconName || iconName === "Default") {
+      setCurrentIcon("default");
+    } else if (iconName === "DefaultDark") {
+      setCurrentIcon("default dark");
+    } else if (iconName === "Admin") {
+      setCurrentIcon("admin light");
+    } else if (iconName === "AdminDark") {
+      setCurrentIcon("admin dark");
     } else {
       setCurrentIcon(iconName.toLowerCase());
     }
   }, []);
 
-  const handleSelect = (iconName: string) => {
+  const handleSelect = async (iconName: string) => {
     // Convert display name back to the format expected by expo-alternate-app-icons
-    let configIconName = iconName;
-    if (iconName === "default light") {
-      configIconName = "Default Light";
+    let configIconName: string | null = iconName;
+
+    if (iconName === "default") {
+      configIconName = null;
     } else if (iconName === "default dark") {
-      configIconName = "Default Dark";
+      configIconName = "DefaultDark";
     } else if (iconName === "admin light") {
-      configIconName = "Admin Light";
+      configIconName = "Admin";
     } else if (iconName === "admin dark") {
-      configIconName = "Admin Dark";
+      configIconName = "AdminDark";
     } else {
       configIconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
     }
 
-    setAlternateAppIcon(configIconName);
-    setCurrentIcon(iconName);
+    try {
+      await setAlternateAppIcon(configIconName);
+      setCurrentIcon(iconName);
+      console.log(`Successfully set icon to: ${configIconName}`);
+    } catch (error) {
+      console.error(`Failed to set icon:`, error);
+    }
   };
 
   const getAvailableIcons = () => {
