@@ -77,7 +77,7 @@ export default function AppIconSelector() {
 
   useEffect(() => {
     const iconName = getAppIconName();
-    
+
     if (!iconName || iconName === "Default") {
       setCurrentIcon("default");
     } else if (iconName === "DefaultDark") {
@@ -94,7 +94,7 @@ export default function AppIconSelector() {
   const handleSelect = async (iconName: string) => {
     // Convert display name back to the format expected by expo-alternate-app-icons
     let configIconName: string | null = iconName;
-    
+
     if (iconName === "default") {
       configIconName = null;
     } else if (iconName === "default dark") {

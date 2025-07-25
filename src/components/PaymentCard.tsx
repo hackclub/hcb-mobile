@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -11,7 +12,6 @@ import {
   Image as RNImage,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
-import { Image } from "expo-image";
 
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";

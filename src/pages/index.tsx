@@ -21,7 +21,6 @@ import {
   useColorScheme,
   RefreshControl,
   Platform,
-  ImageBackground,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
