@@ -3,7 +3,11 @@
 const appIcons = [
   {
     name: "Default",
-    ios: "./assets/app-icon.png",
+    ios: {
+      light: "./assets/icons/default.png",
+      dark: "./assets/icons/default.png",
+      tinted: "./assets/icons/default.png",
+    },
     android: {
       foregroundImage: "./assets/app-icon-foreground.png",
       backgroundColor: "#EC3750",
@@ -11,7 +15,11 @@ const appIcons = [
   },
   {
     name: "DefaultDark",
-    ios: "./assets/icons/default-dark.png",
+    ios: {
+      light: "./assets/icons/default-dark.png",
+      dark: "./assets/icons/default-dark.png",
+      tinted: "./assets/icons/default-dark.png",
+    },
     android: {
       foregroundImage: "./assets/app-icon-foreground.png",
       backgroundColor: "#EC3750",
@@ -43,7 +51,11 @@ const appIcons = [
   },
   {
     name: "Admin",
-    ios: "./assets/icons/admin.png",
+    ios: {
+      light: "./assets/icons/admin.png",
+      dark: "./assets/icons/admin.png",
+      tinted: "./assets/icons/admin.png",
+    },
     android: {
       foregroundImage: "./assets/icons/admin.png",
       backgroundColor: "#EC3750",
@@ -51,9 +63,13 @@ const appIcons = [
   },
   {
     name: "AdminDark",
-    ios: "./assets/icons/admin-dark.png",
+    ios: {
+      light: "./assets/icons/admin-dark.png",
+      dark: "./assets/icons/admin-dark.png",
+      tinted: "./assets/icons/admin-dark.png",
+    },
     android: {
-      foregroundImage: "./assets/icons/admin.png",
+      foregroundImage: "./assets/icons/admin-dark.png",
       backgroundColor: "#EC3750",
     },
   },

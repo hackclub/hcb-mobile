@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -8,7 +9,7 @@ import {
   type AppStateStatus,
   AppState,
   useWindowDimensions,
-  Image,
+  Image as RNImage,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -53,7 +54,7 @@ export default function PaymentCard({
 
   useEffect(() => {
     if (card.personalization?.logo_url) {
-      Image.getSize(card.personalization.logo_url, (width, height) => {
+      RNImage.getSize(card.personalization.logo_url, (width, height) => {
         setLogoWidth(width);
         setLogoHeight(height);
       });
@@ -163,7 +164,8 @@ export default function PaymentCard({
           }}
         >
           <Image
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
             source={{ uri: card.personalization?.logo_url }}
             style={{
               width: "auto",
