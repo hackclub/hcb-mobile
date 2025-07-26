@@ -8,6 +8,7 @@ import {
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
+import Checkbox from "expo-checkbox";
 import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import {
   Platform,
@@ -24,19 +25,18 @@ import {
 } from "react-native";
 import * as Progress from "react-native-progress";
 import useSWR from "swr";
-import Checkbox from 'expo-checkbox';
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
+import useClient from "../../lib/client";
 import { logError, logCriticalError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
 import { palette } from "../../theme";
-import useClient from "../../lib/client";
 
 // interface PaymentIntent {
 //   id: string;
@@ -161,26 +161,40 @@ const SettingsModal = ({
             <Text style={{ fontSize: 16, color: palette.primary }}>Done</Text>
           </TouchableOpacity>
         </View>
-        
-        <View style={{ flex: 1, padding: 20, marginHorizontal: 10, alignItems: "center" }}>
+
+        <View
+          style={{
+            flex: 1,
+            padding: 20,
+            marginHorizontal: 10,
+            alignItems: "center",
+          }}
+        >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
-          <View>
-            <Text style={{ color: colors.text, fontSize: 16 }}>
-              I'm receiving goods for this donation.
-            </Text>
-          <Text style={{ color: palette.muted, fontSize: 14, marginTop: 8 }}>
-            Check this if the donor is receiving goods or services in exchange for their donation.
-          </Text>
-          </View>
+            <View>
+              <Text style={{ color: colors.text, fontSize: 16 }}>
+                I'm receiving goods for this donation.
+              </Text>
+              <Text
+                style={{ color: palette.muted, fontSize: 14, marginTop: 8 }}
+              >
+                Check this if the donor is receiving goods or services in
+                exchange for their donation.
+              </Text>
+            </View>
 
-          <Checkbox 
+            <Checkbox
               color={colors.primary}
-              style={{ borderRadius: 5, width: 25, height: 25, marginHorizontal: 10 }} 
-              value={isTaxDeductable} 
-              onValueChange={setIsTaxDeductable} 
+              style={{
+                borderRadius: 5,
+                width: 25,
+                height: 25,
+                marginHorizontal: 10,
+              }}
+              value={isTaxDeductable}
+              onValueChange={setIsTaxDeductable}
             />
-                      </View>
-
+          </View>
         </View>
       </View>
     </Modal>
@@ -236,7 +250,7 @@ function PageContent({
   useEffect(() => {
     const loadTaxDeductibleSetting = async () => {
       try {
-        const saved = await AsyncStorage.getItem('donationTaxDeductible');
+        const saved = await AsyncStorage.getItem("donationTaxDeductible");
         if (saved !== null) {
           setIsTaxDeductable(JSON.parse(saved));
         }
@@ -251,7 +265,10 @@ function PageContent({
   useEffect(() => {
     const saveTaxDeductibleSetting = async () => {
       try {
-        await AsyncStorage.setItem('donationTaxDeductible', JSON.stringify(isTaxDeductable));
+        await AsyncStorage.setItem(
+          "donationTaxDeductible",
+          JSON.stringify(isTaxDeductable),
+        );
       } catch (error) {
         logError("Error saving tax deductible setting", error);
       }

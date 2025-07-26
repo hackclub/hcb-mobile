@@ -520,7 +520,7 @@ export default function CardPage(
       Toast.show({
         title: "Card burned",
         type: ALERT_TYPE.SUCCESS,
-      })
+      });
     } catch (error) {
       logCriticalError("Burn card error", error, { cardId: card.id });
       showAlert("Error", "Failed to burn card. Please try again.");
