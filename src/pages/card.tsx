@@ -120,6 +120,7 @@ export default function CardPage(
     height: number;
   }>();
   const [cardName, setCardName] = useState("");
+  const [isBurningCard, setIsBurningCard] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -508,6 +509,27 @@ export default function CardPage(
     }
   };
 
+  const handleBurnCard = async () => {
+    if (!card) return;
+    setIsBurningCard(true);
+    try {
+      await hcb.post(`cards/${card.id}/cancel`);
+      mutate(`cards/${card.id}`);
+      mutate("user/cards");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({
+        title: "Card burned",
+        type: ALERT_TYPE.SUCCESS,
+      });
+    } catch (error) {
+      logCriticalError("Burn card error", error, { cardId: card.id });
+      showAlert("Error", "Failed to burn card. Please try again.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsBurningCard(false);
+    }
+  };
+
   const isValidCardStatus = (
     status: string | undefined,
   ): status is Card["status"] => {
@@ -670,6 +692,20 @@ export default function CardPage(
           loading={!!isReturningGrant}
         >
           {!isCardholder ? "Cancel grant" : "Return grant"}
+        </Button>,
+      );
+    }
+
+    if ((isManagerOrAdmin || isCardholder) && !isGrantCard) {
+      buttons.push(
+        <Button
+          icon="fire"
+          key="fire"
+          style={{ backgroundColor: "#D0152D" }}
+          onPress={handleBurnCard}
+          loading={isBurningCard}
+        >
+          Burn card
         </Button>,
       );
     }
