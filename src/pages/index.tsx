@@ -21,7 +21,6 @@ import {
   useColorScheme,
   RefreshControl,
   Platform,
-  ImageBackground,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -101,6 +100,117 @@ const Event = memo(function Event({
   }, []);
   const color = orgColor(event.id);
   const isDark = useIsDark();
+
+  const contentView = (
+    <>
+      <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
+        {event.icon ? (
+          <Image
+            source={{ uri: event.icon }}
+            cachePolicy="memory-disk"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              marginRight: 16,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              borderRadius: 8,
+              width: 40,
+              height: 40,
+              backgroundColor: color,
+              marginRight: 16,
+            }}
+          ></View>
+        )}
+        <View
+          style={{
+            flexDirection: "column",
+            flex: 1,
+          }}
+        >
+          {invitation && invitation.sender && (
+            <Text style={{ color: palette.muted, marginBottom: 3 }}>
+              <Text style={{ fontWeight: "600" }}>
+                {invitation.sender.name}
+              </Text>{" "}
+              invited you to
+            </Text>
+          )}
+          <Text
+            numberOfLines={2}
+            style={{
+              color: themeColors.text,
+              fontSize: 20,
+              fontWeight: "600",
+            }}
+          >
+            {event.name}
+          </Text>
+          {data?.playground_mode && (
+            <View
+              style={{
+                backgroundColor: isDark ? "#283140" : "#348EDA",
+                paddingVertical: 4,
+                paddingHorizontal: 12,
+                borderRadius: 20,
+                alignSelf: "flex-start",
+                marginVertical: 4,
+              }}
+            >
+              <Text
+                style={{
+                  color: isDark ? "#248EDA" : "white",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Playground Mode
+              </Text>
+            </View>
+          )}
+          {!hideBalance && <EventBalance balance_cents={data?.balance_cents} />}
+        </View>
+        <Ionicons
+          name="chevron-forward-outline"
+          size={24}
+          color={palette.muted}
+        />
+      </View>
+      {transactions?.data && transactions.data.length >= 1 ? (
+        <>
+          {transactions.data.map((tx, index) => (
+            <Transaction
+              transaction={tx}
+              orgId={event.id}
+              key={tx.id}
+              bottom={index == transactions.data.length - 1}
+              hideMissingReceipt
+            />
+          ))}
+          {transactions.has_more && (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: 10,
+              }}
+            >
+              <Text style={{ color: palette.info }}>See more activity</Text>
+              <Ionicons name="chevron-forward" color={palette.info} size={18} />
+            </View>
+          )}
+        </>
+      ) : transactionsIsLoading ? (
+        <ActivityIndicator style={{ marginVertical: 20 }} />
+      ) : null}
+    </>
+  );
+
   return (
     <TouchableHighlight
       onPress={onPress}
@@ -109,129 +219,42 @@ const Event = memo(function Event({
       underlayColor={isActive ? "transparent" : themeColors.background}
       activeOpacity={isActive ? 1 : 0.7}
     >
-      <View
-        style={StyleSheet.compose(
-          {
+      {event.background_image ? (
+        <Image
+          source={{ uri: event.background_image }}
+          cachePolicy="memory-disk"
+          style={{
             backgroundColor: themeColors.card,
             borderRadius: 10,
-          },
-          style,
-        )}
-      >
-        <View
-          style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
+            overflow: "hidden",
+          }}
+          contentFit="cover"
         >
-          {event.icon ? (
-            <Image
-              source={{ uri: event.icon }}
-              cachePolicy="memory-disk"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                marginRight: 16,
-              }}
-            />
-          ) : (
-            <View
-              style={{
-                borderRadius: 8,
-                width: 40,
-                height: 40,
-                backgroundColor: color,
-                marginRight: 16,
-              }}
-            ></View>
-          )}
           <View
             style={{
-              flexDirection: "column",
-              flex: 1,
+              backgroundColor: isDark
+                ? "rgba(37, 36, 41, 0.85)"
+                : "rgba(255, 255, 255, 0.7)",
+              borderRadius: 10,
             }}
           >
-            {invitation && invitation.sender && (
-              <Text style={{ color: palette.muted, marginBottom: 3 }}>
-                <Text style={{ fontWeight: "600" }}>
-                  {invitation.sender.name}
-                </Text>{" "}
-                invited you to
-              </Text>
-            )}
-            <Text
-              numberOfLines={2}
-              style={{
-                color: themeColors.text,
-                fontSize: 20,
-                fontWeight: "600",
-              }}
-            >
-              {event.name}
-            </Text>
-            {data?.playground_mode && (
-              <View
-                style={{
-                  backgroundColor: isDark ? "#283140" : "#348EDA",
-                  paddingVertical: 4,
-                  paddingHorizontal: 12,
-                  borderRadius: 20,
-                  alignSelf: "flex-start",
-                  marginVertical: 4,
-                }}
-              >
-                <Text
-                  style={{
-                    color: isDark ? "#248EDA" : "white",
-                    fontSize: 12,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Playground Mode
-                </Text>
-              </View>
-            )}
-            {!hideBalance && (
-              <EventBalance balance_cents={data?.balance_cents} />
-            )}
+            {contentView}
           </View>
-          <Ionicons
-            name="chevron-forward-outline"
-            size={24}
-            color={palette.muted}
-          />
+        </Image>
+      ) : (
+        <View
+          style={StyleSheet.compose(
+            {
+              backgroundColor: themeColors.card,
+              borderRadius: 10,
+              overflow: "hidden",
+            },
+            style,
+          )}
+        >
+          {contentView}
         </View>
-        {transactions?.data && transactions.data.length >= 1 ? (
-          <>
-            {transactions.data.map((tx, index) => (
-              <Transaction
-                transaction={tx}
-                orgId={event.id}
-                key={tx.id}
-                bottom={index == transactions.data.length - 1}
-                hideMissingReceipt
-              />
-            ))}
-            {transactions.has_more && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: 10,
-                }}
-              >
-                <Text style={{ color: palette.info }}>See more activity</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  color={palette.info}
-                  size={18}
-                />
-              </View>
-            )}
-          </>
-        ) : transactionsIsLoading ? (
-          <ActivityIndicator style={{ marginVertical: 20 }} />
-        ) : null}
-      </View>
+      )}
     </TouchableHighlight>
   );
 });
