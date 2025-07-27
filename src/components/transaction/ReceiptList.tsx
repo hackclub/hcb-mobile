@@ -7,7 +7,6 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import ImageView from "react-native-image-viewing";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
 import useSWR from "swr";
 
@@ -23,6 +22,7 @@ import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
+import ReceiptViewerModal from "../ReceiptViewerModal";
 
 export function ZoomAndFadeIn() {
   "worklet";
@@ -66,7 +66,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
 
   const { colors: themeColors } = useTheme();
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
-  const [ImageViewerIndex, setImageViewerIndex] = useState(0);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [deletingReceiptId, setDeletingReceiptId] = useState<string | null>(
     null,
   );
@@ -149,22 +149,36 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           <TouchableOpacity
             key={receipt.id}
             onPress={() => {
-              setImageViewerIndex(receipts.indexOf(receipt));
+              setSelectedReceipt(receipt);
               setIsImageViewerVisible(true);
             }}
           >
             <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
               <View style={{ position: "relative" }}>
-                <Image
-                  source={receipt.preview_url}
-                  style={{
-                    width: 150,
-                    height: 200,
-                    backgroundColor: themeColors.card,
-                    borderRadius: 8,
-                  }}
-                  contentFit="contain"
-                />
+                {receipt.preview_url ? (
+                  <Image
+                    source={{ uri: receipt.preview_url }}
+                    style={{
+                      width: 150,
+                      height: 200,
+                      backgroundColor: themeColors.card,
+                      borderRadius: 8,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 150,
+                      height: 200,
+                      backgroundColor: themeColors.card,
+                      borderRadius: 8,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Icon glyph="photo" size={52} color={palette.muted} />
+                  </View>
+                )}
                 <TouchableOpacity
                   style={{
                     position: "absolute",
@@ -196,18 +210,13 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           </TouchableOpacity>
         ))}
 
-        <ImageView
-          images={
-            receipts?.map((receipt) => {
-              const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(
-                receipt.url || "",
-              );
-              return { uri: isImage ? receipt.url : receipt.preview_url };
-            }) || []
-          }
-          imageIndex={ImageViewerIndex}
+        <ReceiptViewerModal
+          receipt={selectedReceipt}
           visible={isImageViewerVisible}
-          onRequestClose={() => setIsImageViewerVisible(false)}
+          onRequestClose={() => {
+            setIsImageViewerVisible(false);
+            setSelectedReceipt(null);
+          }}
         />
 
         <TouchableOpacity

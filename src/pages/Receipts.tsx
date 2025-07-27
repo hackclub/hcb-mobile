@@ -19,13 +19,13 @@ import {
   Image,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import ImageView from "react-native-image-viewing";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import UploadIcon from "../components/icons/UploadIcon";
 import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
+import ReceiptViewerModal from "../components/ReceiptViewerModal";
 import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
@@ -222,7 +222,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   }>("user/transactions/missing_receipt");
   const { data: receipts, mutate: refreshReceipts } =
     useSWR<Receipt[]>("receipts");
-  const [ImageViewerIndex, setImageViewerIndex] = useState(0);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [deletingReceiptId, setDeletingReceiptId] = useState<string | null>(
@@ -408,21 +408,36 @@ export default function ReceiptsPage({ navigation }: Props) {
               <TouchableOpacity
                 key={receipt.id}
                 onPress={() => {
-                  setImageViewerIndex(receipts.indexOf(receipt));
+                  setSelectedReceipt(receipt);
                   setIsImageViewerVisible(true);
                 }}
               >
                 <View key={receipt.id}>
                   <View style={{ position: "relative" }}>
-                    <Image
-                      source={{ uri: receipt.preview_url }}
-                      style={{
-                        width: 150,
-                        height: 200,
-                        backgroundColor: themeColors.card,
-                        borderRadius: 8,
-                      }}
-                    />
+                    {receipt.preview_url ? (
+                      <Image
+                        source={{ uri: receipt.preview_url }}
+                        style={{
+                          width: 150,
+                          height: 200,
+                          backgroundColor: themeColors.card,
+                          borderRadius: 8,
+                        }}
+                      />
+                    ) : (
+                      <View
+                        style={{
+                          width: 150,
+                          height: 200,
+                          backgroundColor: themeColors.card,
+                          borderRadius: 8,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Icon glyph="photo" size={52} color={palette.muted} />
+                      </View>
+                    )}
                     <TouchableOpacity
                       style={{
                         position: "absolute",
@@ -456,18 +471,13 @@ export default function ReceiptsPage({ navigation }: Props) {
             </Animated.View>
           ))}
       </ScrollView>
-      <ImageView
-        images={
-          receipts?.map((receipt) => {
-            const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(
-              receipt.url || "",
-            );
-            return { uri: isImage ? receipt.url : receipt.preview_url };
-          }) || []
-        }
-        imageIndex={ImageViewerIndex}
+      <ReceiptViewerModal
+        receipt={selectedReceipt}
         visible={isImageViewerVisible}
-        onRequestClose={() => setIsImageViewerVisible(false)}
+        onRequestClose={() => {
+          setIsImageViewerVisible(false);
+          setSelectedReceipt(null);
+        }}
       />
 
       {/* Upload Section */}
