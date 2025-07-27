@@ -68,7 +68,7 @@ function EventBalance({ balance_cents }: { balance_cents?: number }) {
   );
 }
 
-function Event({
+const Event = memo(function Event({
   event,
   hideBalance = false,
   onPress,
@@ -257,10 +257,11 @@ function Event({
       )}
     </TouchableHighlight>
   );
-}
+});
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
+/* eslint-disable react/prop-types */
 export default function App({ navigation }: Props) {
   const [isOnline, setIsOnline] = useState(true);
   const lastFetchTime = useRef<number>(0);
@@ -479,6 +480,13 @@ export default function App({ navigation }: Props) {
     }
   });
 
+  const renderItem = useCallback(
+    ({ item: organization }: { item: Organization }) => (
+      <EventItem organization={organization} navigation={navigation} />
+    ),
+    [navigation],
+  );
+
   const EventItem = memo(
     ({
       organization,
@@ -488,18 +496,20 @@ export default function App({ navigation }: Props) {
       navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
     }) => {
       const drag = useReorderableDrag();
+      const handlePress = useCallback(() => {
+        navigation.navigate("Event", {
+          orgId: organization.id,
+          organization,
+        });
+      }, [navigation, organization.id, organization]);
+
       return (
         <Event
           event={organization}
           drag={drag}
           isActive={false}
           showTransactions={organizations ? organizations.length <= 2 : false}
-          onPress={() =>
-            navigation.navigate("Event", {
-              orgId: organization.id,
-              organization,
-            })
-          }
+          onPress={handlePress}
         />
       );
     },
@@ -626,9 +636,7 @@ export default function App({ navigation }: Props) {
           </View>
         )
       }
-      renderItem={({ item: organization }) => (
-        <EventItem organization={organization} navigation={navigation} />
-      )}
+      renderItem={renderItem}
       ListFooterComponent={() =>
         organizations.length > 2 && (
           <Text
