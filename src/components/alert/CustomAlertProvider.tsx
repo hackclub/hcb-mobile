@@ -1,8 +1,8 @@
 import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { Platform } from "react-native";
 
-import { setGlobalCustomAlert } from "../lib/alertUtils";
-import { useCustomAlert } from "../lib/useCustomAlert";
+import { setGlobalCustomAlert } from "../../lib/alertUtils";
+import { useCustomAlert } from "../../lib/useCustomAlert";
 
 import { CustomAlert } from "./CustomAlert";
 

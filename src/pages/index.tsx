@@ -29,7 +29,7 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
-import Transaction from "../components/Transaction";
+import Transaction from "../components/transaction/Transaction";
 import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
@@ -108,6 +108,7 @@ const Event = memo(function Event({
           <Image
             source={{ uri: event.icon }}
             cachePolicy="memory-disk"
+            contentFit="scale-down"
             style={{
               width: 40,
               height: 40,

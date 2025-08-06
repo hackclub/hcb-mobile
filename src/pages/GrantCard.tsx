@@ -3,7 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View, Text, Linking } from "react-native";
 import useSWR from "swr";
 
-import CardSkeleton from "../components/CardSkeleton";
+import CardSkeleton from "../components/cards/CardSkeleton";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import GrantCardType from "../lib/types/GrantCard";
 import { palette } from "../theme";

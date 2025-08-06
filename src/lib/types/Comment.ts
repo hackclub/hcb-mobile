@@ -5,4 +5,5 @@ export default interface Comment extends HcbApiObject<"cmt"> {
   content: string;
   user: User;
   admin_only?: boolean;
+  file?: string;
 }

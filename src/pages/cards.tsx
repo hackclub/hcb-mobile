@@ -20,7 +20,7 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR from "swr";
 
-import CardListSkeleton from "../components/CardListSkeleton";
+import CardListSkeleton from "../components/cards/CardListSkeleton";
 import PaymentCard from "../components/PaymentCard";
 import { logError } from "../lib/errorUtils";
 import { CardsStackParamList } from "../lib/NavigatorParamList";

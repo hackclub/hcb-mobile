@@ -12,13 +12,13 @@ import {
   TransactionCardCharge,
   TransactionType,
   TransactionWithoutId,
-} from "../lib/types/Transaction";
-import { useIsDark } from "../lib/useColorScheme";
-import { useMerchantIcon } from "../lib/useMerchantIcon";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
+} from "../../lib/types/Transaction";
+import { useIsDark } from "../../lib/useColorScheme";
+import { useMerchantIcon } from "../../lib/useMerchantIcon";
+import { palette } from "../../theme";
+import { renderMoney } from "../../util";
 
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "../UserAvatar";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {

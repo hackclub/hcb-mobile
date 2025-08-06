@@ -8,7 +8,7 @@ import { useColorScheme } from "react-native";
 import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
-import { CustomAlertProvider } from "./src/components/CustomAlertProvider";
+import { CustomAlertProvider } from "./src/components/alert/CustomAlertProvider";
 import { LinkingProvider } from "./src/LinkingContext";
 import { ShareIntentProvider } from "./src/ShareIntentContext";
 import { ThemeProvider } from "./src/ThemeContext";

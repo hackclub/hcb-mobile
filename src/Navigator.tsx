@@ -128,6 +128,22 @@ export default function Navigator() {
             />
           ) : null,
       })}
+      screenListeners={({ navigation, route }) => ({
+        tabPress: (e) => {
+          if (route.name === "Home") {
+            const state = navigation.getState();
+            const currentTab = state.routes[state.index];
+            
+            if (currentTab.name === "Home" && currentTab.state) {
+              const homeStackState = currentTab.state;
+              if (homeStackState.index > 0 || homeStackState.routes[homeStackState.index].name !== "Organizations") {
+                e.preventDefault();
+                navigation.navigate("Home", { screen: "Organizations" });
+              }
+            }
+          }
+        },
+      })}
     >
       <Tab.Screen
         name="Home"

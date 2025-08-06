@@ -24,10 +24,10 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { useSWRConfig } from "swr";
 
 import Button from "../components/Button";
-import CardSkeleton from "../components/CardSkeleton";
+import CardSkeleton from "../components/cards/CardSkeleton";
 import Divider from "../components/Divider";
 import PaymentCard from "../components/PaymentCard";
-import Transaction from "../components/Transaction";
+import Transaction from "../components/transaction/Transaction";
 import UserAvatar from "../components/UserAvatar";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";

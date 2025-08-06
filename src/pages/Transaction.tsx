@@ -7,6 +7,7 @@ import useSWR, { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
+import CommentField from "../components/comment/CommentField";
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
 import TransactionSkeleton from "../components/transaction/TransactionSkeleton";
@@ -103,6 +104,7 @@ export default function TransactionPage({
     <ScrollView
       contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -138,13 +140,19 @@ export default function TransactionPage({
       {comments && comments.length > 0 && (
         <>
           <Divider />
-          <View style={{ gap: 20 }}>
+          <View style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
             {comments.map((comment) => (
               <Comment comment={comment} key={comment.id} />
             ))}
           </View>
         </>
       )}
+      
+      <Divider />
+      <CommentField 
+        orgId={orgId || transaction.organization!.id} 
+        transactionId={transactionId} 
+      />
     </ScrollView>
   );
 }

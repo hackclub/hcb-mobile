@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 
-import { useIsDark } from "../lib/useColorScheme";
+import { useIsDark } from "../../lib/useColorScheme";
 
 interface AlertButton {
   text: string;

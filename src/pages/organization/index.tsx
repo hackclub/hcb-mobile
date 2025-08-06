@@ -23,12 +23,12 @@ import useSWR, { mutate } from "swr";
 import Button from "../../components/Button";
 import MockTransaction, {
   MockTransactionType,
-} from "../../components/MockTransaction";
+} from "../../components/transaction/MockTransaction";
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
-import Transaction from "../../components/Transaction";
+import Transaction from "../../components/transaction/Transaction";
 import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
