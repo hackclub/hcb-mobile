@@ -7,14 +7,14 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View, FlatList, RefreshControl } from "react-native";
 import useSWR from "swr";
 
-import CardListSkeleton from "../../components/CardListSkeleton";
+import CardListSkeleton from "../../components/cards/CardListSkeleton";
 import PaymentCard from "../../components/PaymentCard";
 import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
-import { palette } from "../../theme";
-import { normalizeSvg } from "../../util";
+import { palette } from "../../utils/theme";
+import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationCards">;
 
