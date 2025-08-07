@@ -20,6 +20,7 @@ export type StackParamList = {
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
+  OrganizationCards: { orgId: Organization["id"] };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
@@ -27,6 +28,7 @@ export type StackParamList = {
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
+  Card: { card?: Card; cardId?: string };
   GrantCard: { grantId: string };
   ShareIntentModal: {
     images: string[];

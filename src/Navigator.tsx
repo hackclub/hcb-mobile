@@ -27,6 +27,7 @@ import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
+import OrganizationCardsPage from "./pages/organization/Cards";
 import OrganizationDonationPage from "./pages/organization/Donation";
 import ProcessDonationPage from "./pages/organization/ProcessDonation";
 import OrganizationTeamPage from "./pages/organization/Team";
@@ -210,6 +211,14 @@ export default function Navigator() {
               }}
             />
             <Stack.Screen
+              name="OrganizationCards"
+              component={OrganizationCardsPage}
+              options={{
+                headerBackTitle: "Back",
+                title: "Organization Cards",
+              }}
+            />
+            <Stack.Screen
               name="ProcessDonation"
               component={ProcessDonationPage}
               options={{ presentation: "modal", title: "Process Donation" }}
@@ -239,6 +248,11 @@ export default function Navigator() {
               name="GrantCard"
               component={GrantCardPage}
               options={() => ({ title: "Grant Card" })}
+            />
+            <Stack.Screen
+              name="Card"
+              component={CardPage}
+              options={() => ({ title: "Card" })}
             />
             <Stack.Screen
               name="ShareIntentModal"

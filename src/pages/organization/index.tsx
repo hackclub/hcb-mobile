@@ -228,6 +228,12 @@ export default function OrganizationPage({
           image: "person.2.badge.gearshape",
         });
 
+        menuActions.push({
+          id: "cards",
+          title: "Organization Cards",
+          image: "creditcard",
+        });
+
         if (!organization.playground_mode && supportsTapToPay) {
           menuActions.push({
             id: "donation",
@@ -248,6 +254,10 @@ export default function OrganizationPage({
                   });
                 } else if (event == "team") {
                   navigation.navigate("OrganizationTeam", {
+                    orgId: organization.id,
+                  });
+                } else if (event == "cards") {
+                  navigation.navigate("OrganizationCards", {
                     orgId: organization.id,
                   });
                 } else if (event == "donation") {
