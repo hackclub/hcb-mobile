@@ -863,6 +863,7 @@ export default function CardPage(
           padding: 20,
           paddingBottom: tabBarHeight + 20,
         }}
+        showsVerticalScrollIndicator={false}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         refreshControl={
           <RefreshControl

@@ -85,6 +85,7 @@ export default function OrganizationPage({
     data: organization,
     error: organizationError,
     isLoading: organizationLoading,
+    mutate: mutateOrganization,
   } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
     fallbackData: _organization,
   });
@@ -151,6 +152,13 @@ export default function OrganizationPage({
         !terminalInitialized
       ) {
         try {
+          const isTapToPayEnabled = await AsyncStorage.getItem(
+            "isTapToPayEnabled",
+          );
+          if (isTapToPayEnabled) {
+            setSupportsTapToPay(true);
+            return;
+          }
           await terminal.initialize();
           setTerminalInitialized(true);
           // Only call supportsReadersOfType if initialize did not throw
@@ -159,6 +167,10 @@ export default function OrganizationPage({
             discoveryMethod: "tapToPay",
           });
           setSupportsTapToPay(!!supported);
+          await AsyncStorage.setItem(
+            "isTapToPayEnabled",
+            supported ? "true" : "false",
+          );
         } catch (error) {
           logError("Stripe Terminal initialization error", error, {
             context: { organizationId: organization?.id },
@@ -285,6 +297,12 @@ export default function OrganizationPage({
     }
   }, [organization, scheme, navigation, user, supportsTapToPay]);
 
+  useEffect(() => {
+    if (organizationError?.status === 401) {
+      mutateOrganization();
+    }
+  }, [organizationError]);
+
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
@@ -323,7 +341,7 @@ export default function OrganizationPage({
     mutate(`organizations/${orgId}/transactions`);
   };
 
-  if (organizationLoading || userLoading) {
+  if (organizationLoading || userLoading || organizationError?.status === 403) {
     return <LoadingSkeleton />;
   }
 
