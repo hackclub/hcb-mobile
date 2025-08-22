@@ -40,6 +40,7 @@ import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, organizationOrderEqual, renderMoney } from "../util";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -94,12 +95,47 @@ const Event = memo(function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  const { initialize } = useStripeTerminal({});
-  useEffect(() => {
-    initialize();
-  }, []);
+  const terminal = useStripeTerminal();
+  const [terminalInitialized, setTerminalInitialized] = useState(false);
+
   const color = orgColor(event.id);
   const isDark = useIsDark();
+  
+  useEffect(() => {
+    (async () => {
+      if (
+        event &&
+        !event.playground_mode &&
+        !terminalInitialized
+      ) {
+        try {
+          const isTapToPayEnabled = await AsyncStorage.getItem(
+            "isTapToPayEnabled",
+          );
+          if (isTapToPayEnabled) {
+            return;
+          }
+          await terminal.initialize();
+          setTerminalInitialized(true);
+          // Only call supportsReadersOfType if initialize did not throw
+          const supported = await terminal.supportsReadersOfType({
+            deviceType: "tapToPay",
+            discoveryMethod: "tapToPay",
+          });
+          await AsyncStorage.setItem(
+            "isTapToPayEnabled",
+            supported ? "true" : "false",
+          );
+        } catch (error) {
+          logError("Stripe Terminal initialization error", error, {
+            context: { organizationId: event?.id },
+          });
+        }
+      } else if (!event || event.playground_mode) {
+        setTerminalInitialized(false);
+      }
+    })();
+  }, [event, terminal, terminalInitialized]);
 
   const contentView = (
     <>
