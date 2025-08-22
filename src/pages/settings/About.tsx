@@ -39,7 +39,9 @@ export default function About() {
 
   useEffect(() => {
     (async () => {
-      const isTapToPayEnabled = await AsyncStorage.getItem("isTapToPayEnabled");
+      const isTapToPayEnabled = await AsyncStorage.getItem(
+        "isTapToPayEnabled",
+      );
       setTapToPayEnabled(isTapToPayEnabled === "true");
     })();
   }, []);

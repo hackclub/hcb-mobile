@@ -4,6 +4,7 @@ import words from "lodash/words";
 import { logError } from "./lib/errorUtils";
 import Organization from "./lib/types/Organization";
 import { palette } from "./theme";
+import Constants from "expo-constants";
 
 export function renderMoney(cents: number) {
   return (
