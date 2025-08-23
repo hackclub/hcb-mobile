@@ -7,9 +7,8 @@ import useSWR, { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
-import CommentField from "../components/transaction/comment/CommentField";
-import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
+import CommentField from "../components/transaction/comment/CommentField";
 import TransactionSkeleton from "../components/transaction/TransactionSkeleton";
 import AchTransferTransaction from "../components/transaction/types/AchTransferTransaction";
 import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
@@ -18,6 +17,7 @@ import CardChargeTransaction from "../components/transaction/types/CardChargeTra
 import CheckDepositTransaction from "../components/transaction/types/CheckDepositTransaction";
 import CheckTransaction from "../components/transaction/types/CheckTransaction";
 import DonationTransaction from "../components/transaction/types/DonationTransaction";
+import ExpensePayoutTransaction from "../components/transaction/types/ExpensePayoutTransaction";
 import InvoiceTransaction from "../components/transaction/types/InvoiceTransaction";
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
@@ -133,23 +133,24 @@ export default function TransactionPage({
           .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction  transaction={tx} {...transactionViewProps} />)
           .with({ check_deposit: P.any },          (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
           .with({ invoice: P.any },                (tx) => <InvoiceTransaction      transaction={tx} {...transactionViewProps} />)
+          .with({ expense_payout: P.any },         (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
           .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction      transaction={tx} {...transactionViewProps} />)
           .otherwise(                              (tx) => <BankAccountTransaction  transaction={tx} {...transactionViewProps} />)
       }
 
       <View style={{ gap: 12 }}>
-      {comments && comments.length > 0 && (
-        <View style={{ flex: 1, gap: 12 }}>
+        {comments && comments.length > 0 && (
+          <View style={{ flex: 1, gap: 12 }}>
             {comments.map((comment) => (
               <Comment comment={comment} key={comment.id} />
             ))}
-        </View>
-      )}
-      
-      <CommentField 
-        orgId={orgId || transaction.organization!.id} 
-        transactionId={transactionId} 
-      />
+          </View>
+        )}
+
+        <CommentField
+          orgId={orgId || transaction.organization!.id}
+          transactionId={transactionId}
+        />
       </View>
     </ScrollView>
   );

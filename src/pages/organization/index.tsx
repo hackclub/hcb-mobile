@@ -21,18 +21,19 @@ import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
 import Button from "../../components/Button";
-import MockTransaction, {
-  MockTransactionType,
-} from "../../components/transaction/MockTransaction";
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
+import MockTransaction, {
+  MockTransactionType,
+} from "../../components/transaction/MockTransaction";
 import Transaction from "../../components/transaction/Transaction";
 import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
+import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -152,9 +153,8 @@ export default function OrganizationPage({
         !terminalInitialized
       ) {
         try {
-          const isTapToPayEnabled = await AsyncStorage.getItem(
-            "isTapToPayEnabled",
-          );
+          const isTapToPayEnabled =
+            await AsyncStorage.getItem("isTapToPayEnabled");
           if (isTapToPayEnabled) {
             setSupportsTapToPay(true);
             return;
@@ -555,6 +555,7 @@ export default function OrganizationPage({
                             transactionId: item.id!,
                             orgId,
                             transaction: item as ITransaction,
+                            title: getTransactionTitle(item as ITransaction),
                           });
                         }
                       }
