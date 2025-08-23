@@ -2,8 +2,8 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 
-import { useIsDark } from "../../lib/useColorScheme";
-import { useOffline } from "../../lib/useOffline";
+import { useIsDark } from "../../../lib/useColorScheme";
+import { useOffline } from "../../../lib/useOffline";
 
 export type SelectedFile = {
   uri: string;

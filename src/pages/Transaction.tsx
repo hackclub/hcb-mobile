@@ -7,7 +7,7 @@ import useSWR, { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
-import CommentField from "../components/comment/CommentField";
+import CommentField from "../components/transaction/comment/CommentField";
 import Divider from "../components/Divider";
 import Comment from "../components/transaction/Comment";
 import TransactionSkeleton from "../components/transaction/TransactionSkeleton";
@@ -137,22 +137,20 @@ export default function TransactionPage({
           .otherwise(                              (tx) => <BankAccountTransaction  transaction={tx} {...transactionViewProps} />)
       }
 
+      <View style={{ gap: 12 }}>
       {comments && comments.length > 0 && (
-        <>
-          <Divider />
-          <View style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
+        <View style={{ flex: 1, gap: 12 }}>
             {comments.map((comment) => (
               <Comment comment={comment} key={comment.id} />
             ))}
-          </View>
-        </>
+        </View>
       )}
       
-      <Divider />
       <CommentField 
         orgId={orgId || transaction.organization!.id} 
         transactionId={transactionId} 
       />
+      </View>
     </ScrollView>
   );
 }

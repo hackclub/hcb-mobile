@@ -5,6 +5,7 @@ import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
 import IComment from "../../lib/types/Comment";
+import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../theme";
 import FileViewerModal from "../FileViewerModal";
 import UserMention from "../UserMention";
@@ -12,6 +13,7 @@ import UserMention from "../UserMention";
 export default function Comment({ comment }: { comment: IComment }) {
   const { colors: themeColors } = useTheme();
   const [fileViewerVisible, setFileViewerVisible] = useState(false);
+  const isDark = useIsDark();
 
   const getFileIcon = (filename: string) => {
     const extension = filename.split('.').pop()?.toLowerCase();
@@ -38,14 +40,14 @@ export default function Comment({ comment }: { comment: IComment }) {
   };
 
   return (
-    <View style={{ marginBottom: 16 }}>
+    <View>
       <View
         style={{
           backgroundColor: themeColors.card,
-          borderRadius: 12,
-          padding: 16,
           borderWidth: 1,
-          borderColor: themeColors.border,
+          borderColor: isDark ? "#3B4858" : "#E0E6ED",
+          borderRadius: 8,
+          padding: 16,
           ...(comment.admin_only && {
             borderColor: "#ff8c37",
             backgroundColor: "#ff8c3708",
@@ -82,6 +84,9 @@ export default function Comment({ comment }: { comment: IComment }) {
           flexDirection: "row",
           alignItems: "center",
           marginBottom: 12,
+          borderBottomWidth: 1,
+          borderColor: isDark ? "#3B4858" : "#E0E6ED",
+          paddingBottom: 12,  
         }}>          
           <View style={{ flex: 1 }}>
             <View style={{

@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import useSWR, { mutate } from "swr";
 
-import useClient from "../../lib/client";
-import User from "../../lib/types/User";
-import { palette } from "../../theme";
+import useClient from "../../../lib/client";
+import User from "../../../lib/types/User";
+import { palette } from "../../../theme";
 
-import Button from "../Button";
+import Button from "../../Button";
 import { useCommentFileActionSheet, SelectedFile } from "./CommentFileActionSheet";
-import UserAvatar from "../UserAvatar";
+import UserAvatar from "../../UserAvatar";
 
 interface CommentFieldProps {
   orgId: string;
@@ -96,9 +96,9 @@ export default function CommentField({ orgId, transactionId }: CommentFieldProps
   }
 
   return (
-    <View style={{ padding: 16, gap: 12 }}>
+    <View style={{ paddingVertical: 16, gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <UserAvatar user={user} size={32} />
+        <UserAvatar user={user} />
         <Text style={{ fontWeight: "500", fontSize: 16, color: themeColors.text }}>
           {user.name}
         </Text>
@@ -161,27 +161,29 @@ export default function CommentField({ orgId, transactionId }: CommentFieldProps
       )}
       
 
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
       <TouchableOpacity 
         style={{
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: "#348EDA",
           borderStyle: "dashed",
           borderRadius: 8,
-          padding: 12,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
           alignItems: "center",
           backgroundColor: "transparent",
         }}
         onPress={selectedFile ? removeFile : pickFile}
       >
-        <Text style={{ color: "#348EDA", fontSize: 16, fontWeight: "500" }}>
+        <Text style={{ color: "#348EDA", fontSize: 14, fontWeight: "500" }}>
           {selectedFile ? "Remove file" : "Choose file"}
         </Text>
       </TouchableOpacity>
       
-      <Text style={{ fontSize: 14, marginTop: -8, color: palette.muted }}>
+      <Text style={{ fontSize: 14, color: palette.muted }}>
         {selectedFile ? selectedFile.name : "No file chosen"}
       </Text>
-
+      </View>
       <Button
         onPress={submitComment}
         disabled={isSubmitting}
