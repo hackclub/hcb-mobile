@@ -5,9 +5,9 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
-import { useIsDark } from "../lib/useColorScheme";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
+import { useIsDark } from "../../lib/useColorScheme";
+import { palette } from "../../theme";
+import { renderMoney } from "../../util";
 
 export interface MockTransactionType {
   amount: {

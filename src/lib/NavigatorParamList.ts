@@ -24,6 +24,7 @@ export type StackParamList = {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
     transaction?: Transaction;
+    title?: string;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
@@ -42,6 +43,7 @@ export type CardsStackParamList = {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
     transaction?: Transaction;
+    title?: string;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
 };

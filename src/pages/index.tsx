@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
@@ -29,7 +30,7 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
-import Transaction from "../components/Transaction";
+import Transaction from "../components/transaction/Transaction";
 import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
@@ -94,12 +95,42 @@ const Event = memo(function Event({
   >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  const { initialize } = useStripeTerminal({});
-  useEffect(() => {
-    initialize();
-  }, []);
+  const terminal = useStripeTerminal();
+  const [terminalInitialized, setTerminalInitialized] = useState(false);
+
   const color = orgColor(event.id);
   const isDark = useIsDark();
+
+  useEffect(() => {
+    (async () => {
+      if (event && !event.playground_mode && !terminalInitialized) {
+        try {
+          const isTapToPayEnabled =
+            await AsyncStorage.getItem("isTapToPayEnabled");
+          if (isTapToPayEnabled) {
+            return;
+          }
+          await terminal.initialize();
+          setTerminalInitialized(true);
+          // Only call supportsReadersOfType if initialize did not throw
+          const supported = await terminal.supportsReadersOfType({
+            deviceType: "tapToPay",
+            discoveryMethod: "tapToPay",
+          });
+          await AsyncStorage.setItem(
+            "isTapToPayEnabled",
+            supported ? "true" : "false",
+          );
+        } catch (error) {
+          logError("Stripe Terminal initialization error", error, {
+            context: { organizationId: event?.id },
+          });
+        }
+      } else if (!event || event.playground_mode) {
+        setTerminalInitialized(false);
+      }
+    })();
+  }, [event, terminal, terminalInitialized]);
 
   const contentView = (
     <>
@@ -108,6 +139,7 @@ const Event = memo(function Event({
           <Image
             source={{ uri: event.icon }}
             cachePolicy="memory-disk"
+            contentFit="scale-down"
             style={{
               width: 40,
               height: 40,

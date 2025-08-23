@@ -24,15 +24,16 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { useSWRConfig } from "swr";
 
 import Button from "../components/Button";
-import CardSkeleton from "../components/CardSkeleton";
+import CardSkeleton from "../components/cards/CardSkeleton";
 import Divider from "../components/Divider";
 import PaymentCard from "../components/PaymentCard";
-import Transaction from "../components/Transaction";
+import Transaction from "../components/transaction/Transaction";
 import UserAvatar from "../components/UserAvatar";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { logError, logCriticalError } from "../lib/errorUtils";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
+import { getTransactionTitle } from "../lib/transactionTitle";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { OrganizationExpanded } from "../lib/types/Organization";
@@ -511,23 +512,42 @@ export default function CardPage(
 
   const handleBurnCard = async () => {
     if (!card) return;
-    setIsBurningCard(true);
-    try {
-      await hcb.post(`cards/${card.id}/cancel`);
-      mutate(`cards/${card.id}`);
-      mutate("user/cards");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        title: "Card burned",
-        type: ALERT_TYPE.SUCCESS,
-      });
-    } catch (error) {
-      logCriticalError("Burn card error", error, { cardId: card.id });
-      showAlert("Error", "Failed to burn card. Please try again.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsBurningCard(false);
-    }
+
+    showAlert(
+      "Are you sure you want to do this?",
+      "Unlike freezing a card, this can't be reversed.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Burn Card",
+          style: "destructive",
+          onPress: async () => {
+            setIsBurningCard(true);
+            try {
+              await hcb.post(`cards/${card.id}/cancel`);
+              mutate(`cards/${card.id}`);
+              mutate("user/cards");
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              Toast.show({
+                title: "Card burned",
+                type: ALERT_TYPE.SUCCESS,
+              });
+            } catch (error) {
+              logCriticalError("Burn card error", error, { cardId: card.id });
+              showAlert("Error", "Failed to burn card. Please try again.");
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            } finally {
+              setIsBurningCard(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const isValidCardStatus = (
@@ -676,7 +696,11 @@ export default function CardPage(
     }
 
     // Add grant button
-    if (isGrantCard && _card?.status != "canceled") {
+    if (
+      isGrantCard &&
+      _card?.status != "canceled" &&
+      (isCardholder || isManagerOrAdmin)
+    ) {
       buttons.push(
         <Button
           key="grant"
@@ -863,6 +887,7 @@ export default function CardPage(
           padding: 20,
           paddingBottom: tabBarHeight + 20,
         }}
+        showsVerticalScrollIndicator={false}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         refreshControl={
           <RefreshControl
@@ -1428,6 +1453,7 @@ export default function CardPage(
                           card?.organization?.id || _card?.organization?.id,
                         transaction,
                         transactionId: transaction.id,
+                        title: getTransactionTitle(transaction),
                       });
                     }}
                     style={[
