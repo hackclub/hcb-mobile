@@ -512,7 +512,7 @@ export default function CardPage(
 
   const handleBurnCard = async () => {
     if (!card) return;
-    
+
     showAlert(
       "Are you sure you want to do this?",
       "Unlike freezing a card, this can't be reversed.",
@@ -530,7 +530,9 @@ export default function CardPage(
               await hcb.post(`cards/${card.id}/cancel`);
               mutate(`cards/${card.id}`);
               mutate("user/cards");
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
               Toast.show({
                 title: "Card burned",
                 type: ALERT_TYPE.SUCCESS,
