@@ -11,35 +11,34 @@ import ImageView from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
-import Receipt from "../lib/types/Receipt";
 import { palette } from "../theme";
 
-interface ReceiptViewerModalProps {
-  receipt: Receipt | null;
+interface FileViewerModalProps {
+  fileUrl: string | null;
+  filename: string | null;
   visible: boolean;
   onRequestClose: () => void;
 }
 
-export default function ReceiptViewerModal({
-  receipt,
+export default function FileViewerModal({
+  fileUrl,
+  filename,
   visible,
   onRequestClose,
-}: ReceiptViewerModalProps) {
+}: FileViewerModalProps) {
   const [webViewLoading, setWebViewLoading] = useState(true);
   const insets = useSafeAreaInsets();
 
-  if (!receipt) {
+  if (!fileUrl) {
     return null;
   }
 
-  const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(
-    receipt.url || "",
-  );
+  const isImage = /\.(jpeg|jpg|png|gif|webp|bmp|tiff)$/i.test(fileUrl);
 
   if (isImage) {
     return (
       <ImageView
-        images={[{ uri: receipt.url }]}
+        images={[{ uri: fileUrl }]}
         imageIndex={0}
         visible={visible}
         onRequestClose={onRequestClose}
@@ -87,7 +86,7 @@ export default function ReceiptViewerModal({
             numberOfLines={1}
             ellipsizeMode="middle"
           >
-            {receipt.filename}
+            {filename || "File"}
           </Text>
 
           <View style={{ width: 28 }} />
@@ -117,13 +116,13 @@ export default function ReceiptViewerModal({
                   fontSize: 16,
                 }}
               >
-                Loading receipt...
+                Loading file...
               </Text>
             </View>
           )}
           <WebView
-            source={{ uri: receipt.url }}
-            style={{ flex: 1 }}
+            source={{ uri: fileUrl }}
+            style={{ flex: 1, backgroundColor: palette.background }}
             onLoadStart={() => setWebViewLoading(true)}
             onLoadEnd={() => setWebViewLoading(false)}
             onError={() => setWebViewLoading(false)}

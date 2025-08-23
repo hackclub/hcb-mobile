@@ -21,18 +21,19 @@ import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 import useSWR, { mutate } from "swr";
 
 import Button from "../../components/Button";
-import MockTransaction, {
-  MockTransactionType,
-} from "../../components/MockTransaction";
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
-import Transaction from "../../components/Transaction";
+import MockTransaction, {
+  MockTransactionType,
+} from "../../components/transaction/MockTransaction";
+import Transaction from "../../components/transaction/Transaction";
 import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
+import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -85,6 +86,7 @@ export default function OrganizationPage({
     data: organization,
     error: organizationError,
     isLoading: organizationLoading,
+    mutate: mutateOrganization,
   } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
     fallbackData: _organization,
   });
@@ -151,6 +153,12 @@ export default function OrganizationPage({
         !terminalInitialized
       ) {
         try {
+          const isTapToPayEnabled =
+            await AsyncStorage.getItem("isTapToPayEnabled");
+          if (isTapToPayEnabled) {
+            setSupportsTapToPay(true);
+            return;
+          }
           await terminal.initialize();
           setTerminalInitialized(true);
           // Only call supportsReadersOfType if initialize did not throw
@@ -159,6 +167,10 @@ export default function OrganizationPage({
             discoveryMethod: "tapToPay",
           });
           setSupportsTapToPay(!!supported);
+          await AsyncStorage.setItem(
+            "isTapToPayEnabled",
+            supported ? "true" : "false",
+          );
         } catch (error) {
           logError("Stripe Terminal initialization error", error, {
             context: { organizationId: organization?.id },
@@ -285,6 +297,12 @@ export default function OrganizationPage({
     }
   }, [organization, scheme, navigation, user, supportsTapToPay]);
 
+  useEffect(() => {
+    if (organizationError?.status === 401) {
+      mutateOrganization();
+    }
+  }, [organizationError]);
+
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
@@ -323,7 +341,7 @@ export default function OrganizationPage({
     mutate(`organizations/${orgId}/transactions`);
   };
 
-  if (organizationLoading || userLoading) {
+  if (organizationLoading || userLoading || organizationError?.status === 403) {
     return <LoadingSkeleton />;
   }
 
@@ -537,6 +555,7 @@ export default function OrganizationPage({
                             transactionId: item.id!,
                             orgId,
                             transaction: item as ITransaction,
+                            title: getTransactionTitle(item as ITransaction),
                           });
                         }
                       }

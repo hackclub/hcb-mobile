@@ -1,21 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import Constants from "expo-constants";
-import * as Device from "expo-device";
+import { useEffect, useState } from "react";
 import { View, Text, Platform, ScrollView } from "react-native";
 
 import { useThemeContext } from "../../ThemeContext";
-function isTapToPayEnabled() {
-  if (Constants.platform?.ios && Device.osVersion) {
-    return parseInt(Device.osVersion, 10) >= 17;
-  }
-  return false;
-}
 
 export default function About() {
   const { colors } = useTheme();
   const { theme } = useThemeContext();
+  const [tapToPayEnabled, setTapToPayEnabled] = useState(false);
   const version = Constants.expoConfig?.version || "1.0.0";
   const buildNumber =
     Constants.expoConfig?.ios?.buildNumber ||
@@ -30,7 +26,6 @@ export default function About() {
   const deviceModel = Constants.deviceName || "Unknown";
   const os = Platform.OS;
   const osVersion = Platform.Version;
-  const tapToPayEnabled = isTapToPayEnabled();
 
   const debugRows = [
     { label: "App Name", value: appName },
@@ -41,6 +36,13 @@ export default function About() {
     { label: "Theme", value: theme },
     { label: "API Base", value: apiBase },
   ];
+
+  useEffect(() => {
+    (async () => {
+      const isTapToPayEnabled = await AsyncStorage.getItem("isTapToPayEnabled");
+      setTapToPayEnabled(isTapToPayEnabled === "true");
+    })();
+  }, []);
 
   return (
     <ScrollView

@@ -21,8 +21,8 @@ import Transaction, {
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../theme";
+import FileViewerModal from "../FileViewerModal";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
-import ReceiptViewerModal from "../ReceiptViewerModal";
 
 export function ZoomAndFadeIn() {
   "worklet";
@@ -210,8 +210,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           </TouchableOpacity>
         ))}
 
-        <ReceiptViewerModal
-          receipt={selectedReceipt}
+        <FileViewerModal
+          fileUrl={selectedReceipt?.url || null}
+          filename={selectedReceipt?.filename || null}
           visible={isImageViewerVisible}
           onRequestClose={() => {
             setIsImageViewerVisible(false);

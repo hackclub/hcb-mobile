@@ -25,12 +25,13 @@ import Button from "../../components/Button";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import Divider from "../../components/Divider";
 import PaymentCard from "../../components/PaymentCard";
-import Transaction from "../../components/Transaction";
+import Transaction from "../../components/transaction/Transaction";
 import UserAvatar from "../../components/UserAvatar";
 import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { logError, logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
@@ -1164,6 +1165,7 @@ export default function CardPage(
                           card?.organization?.id || _card?.organization?.id,
                         transaction,
                         transactionId: transaction.id,
+                        title: getTransactionTitle(transaction),
                       });
                     }}
                     style={[

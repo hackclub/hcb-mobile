@@ -23,9 +23,9 @@ import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
+import FileViewerModal from "../components/FileViewerModal";
 import UploadIcon from "../components/icons/UploadIcon";
 import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
-import ReceiptViewerModal from "../components/ReceiptViewerModal";
 import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
@@ -471,8 +471,9 @@ export default function ReceiptsPage({ navigation }: Props) {
             </Animated.View>
           ))}
       </ScrollView>
-      <ReceiptViewerModal
-        receipt={selectedReceipt}
+      <FileViewerModal
+        fileUrl={selectedReceipt?.url || null}
+        filename={selectedReceipt?.filename || null}
         visible={isImageViewerVisible}
         onRequestClose={() => {
           setIsImageViewerVisible(false);
