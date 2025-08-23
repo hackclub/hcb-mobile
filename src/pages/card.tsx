@@ -512,23 +512,40 @@ export default function CardPage(
 
   const handleBurnCard = async () => {
     if (!card) return;
-    setIsBurningCard(true);
-    try {
-      await hcb.post(`cards/${card.id}/cancel`);
-      mutate(`cards/${card.id}`);
-      mutate("user/cards");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        title: "Card burned",
-        type: ALERT_TYPE.SUCCESS,
-      });
-    } catch (error) {
-      logCriticalError("Burn card error", error, { cardId: card.id });
-      showAlert("Error", "Failed to burn card. Please try again.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsBurningCard(false);
-    }
+    
+    showAlert(
+      "Are you sure you want to do this?",
+      "Unlike freezing a card, this can't be reversed.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Burn Card",
+          style: "destructive",
+          onPress: async () => {
+            setIsBurningCard(true);
+            try {
+              await hcb.post(`cards/${card.id}/cancel`);
+              mutate(`cards/${card.id}`);
+              mutate("user/cards");
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Toast.show({
+                title: "Card burned",
+                type: ALERT_TYPE.SUCCESS,
+              });
+            } catch (error) {
+              logCriticalError("Burn card error", error, { cardId: card.id });
+              showAlert("Error", "Failed to burn card. Please try again.");
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            } finally {
+              setIsBurningCard(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const isValidCardStatus = (
