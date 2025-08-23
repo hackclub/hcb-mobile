@@ -133,10 +133,14 @@ export default function Navigator() {
           if (route.name === "Home") {
             const state = navigation.getState();
             const currentTab = state.routes[state.index];
-            
+
             if (currentTab.name === "Home" && currentTab.state) {
               const homeStackState = currentTab.state;
-              if (homeStackState.index > 0 || homeStackState.routes[homeStackState.index].name !== "Organizations") {
+              if (
+                homeStackState.index > 0 ||
+                homeStackState.routes[homeStackState.index].name !==
+                  "Organizations"
+              ) {
                 e.preventDefault();
                 navigation.navigate("Home", { screen: "Organizations" });
               }
@@ -231,7 +235,10 @@ export default function Navigator() {
               options={{ presentation: "modal", title: "Process Donation" }}
             />
             <Stack.Screen
-              options={{ headerBackTitle: "Back" }}
+              options={({ route }) => ({
+                headerBackTitle: "Back",
+                title: route.params?.title || "Transaction",
+              })}
               name="Transaction"
               component={TransactionPage}
             />
@@ -288,7 +295,10 @@ export default function Navigator() {
               options={() => ({ title: "Card" })}
             />
             <Stack.Screen
-              options={{ headerBackTitle: "Back" }}
+              options={({ route }) => ({
+                headerBackTitle: "Back",
+                title: route.params?.title || "Transaction",
+              })}
               name="Transaction"
               component={TransactionPage}
             />

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
@@ -40,7 +41,6 @@ import ITransaction from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
 import { orgColor, organizationOrderEqual, renderMoney } from "../util";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function EventBalance({ balance_cents }: { balance_cents?: number }) {
   return balance_cents !== undefined ? (
@@ -100,18 +100,13 @@ const Event = memo(function Event({
 
   const color = orgColor(event.id);
   const isDark = useIsDark();
-  
+
   useEffect(() => {
     (async () => {
-      if (
-        event &&
-        !event.playground_mode &&
-        !terminalInitialized
-      ) {
+      if (event && !event.playground_mode && !terminalInitialized) {
         try {
-          const isTapToPayEnabled = await AsyncStorage.getItem(
-            "isTapToPayEnabled",
-          );
+          const isTapToPayEnabled =
+            await AsyncStorage.getItem("isTapToPayEnabled");
           if (isTapToPayEnabled) {
             return;
           }

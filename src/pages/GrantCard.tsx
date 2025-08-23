@@ -27,7 +27,6 @@ export default function GrantCardPage({ route, navigation }: Props) {
         style={{
           flex: 1,
           alignItems: "center",
-          justifyContent: "space-between",
           padding: 20,
         }}
       >
@@ -71,7 +70,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
         </View>
         <View
           style={{
-            marginBottom: 24,
+            marginTop: 24,
             padding: 20,
             borderRadius: 15,
             shadowColor: "#000",
@@ -272,33 +271,6 @@ export default function GrantCardPage({ route, navigation }: Props) {
               </Text>
             </>
           )}
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              color: themeColors.text,
-              flexShrink: 1,
-            }}
-          >
-            One time use?
-          </Text>
-          <Text
-            style={{
-              color: palette.muted,
-              fontSize: 16,
-              fontWeight: "500",
-              fontFamily: "JetBrains Mono",
-            }}
-          >
-            {grant?.one_time_use ? "Yes" : "No"}
-          </Text>
         </View>
       </View>
     );

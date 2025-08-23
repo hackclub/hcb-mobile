@@ -17,7 +17,6 @@ import { useIsDark } from "../../lib/useColorScheme";
 import { useMerchantIcon } from "../../lib/useMerchantIcon";
 import { palette } from "../../theme";
 import { renderMoney } from "../../util";
-
 import UserAvatar from "../UserAvatar";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {

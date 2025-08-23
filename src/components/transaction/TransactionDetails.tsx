@@ -22,14 +22,8 @@ export function descriptionDetail(
   navigation: NativeStackNavigationProp<StackParamList, "Transaction">,
 ): Detail {
   return {
-    label: "Description",
-    value: !transaction.has_custom_memo ? (
-      <Text style={{ color: "#338eda", textAlign: "right", flex: 1 }}>
-        Add Description
-      </Text>
-    ) : (
-      transaction.memo
-    ),
+    label: "Memo",
+    value: transaction.memo ? transaction.memo : "Add Description",
     onPress() {
       navigation.navigate("RenameTransaction", { orgId: org, transaction });
     },

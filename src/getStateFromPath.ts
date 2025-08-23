@@ -30,7 +30,8 @@ export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
     }
   }
 
-  const match = path.match(/([^/]+)\/transactions/) || path.match(/([^/]+)\/ledger/);
+  const match =
+    path.match(/([^/]+)\/transactions/) || path.match(/([^/]+)\/ledger/);
   if (match) {
     const orgId = match[1];
     routes.push({ name: "Organizations" });
