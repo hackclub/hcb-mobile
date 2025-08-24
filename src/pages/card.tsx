@@ -512,7 +512,7 @@ export default function CardPage(
 
   const handleBurnCard = async () => {
     if (!card) return;
-    
+
     showAlert(
       "Are you sure you want to do this?",
       "Unlike freezing a card, this can't be reversed.",
@@ -530,7 +530,9 @@ export default function CardPage(
               await hcb.post(`cards/${card.id}/cancel`);
               mutate(`cards/${card.id}`);
               mutate("user/cards");
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
               Toast.show({
                 title: "Card burned",
                 type: ALERT_TYPE.SUCCESS,
@@ -1092,7 +1094,7 @@ export default function CardPage(
                         color: palette.muted,
                         fontSize: 16,
                         fontWeight: "500",
-                        fontFamily: "JetBrains Mono",
+                        fontFamily: "JetBrainsMono-Regular",
                       }}
                       selectable={detailsRevealed && details ? true : false}
                     >
@@ -1131,7 +1133,7 @@ export default function CardPage(
                         color: palette.muted,
                         fontSize: 16,
                         fontWeight: "500",
-                        fontFamily: "JetBrains Mono",
+                        fontFamily: "JetBrainsMono-Regular",
                       }}
                       selectable={detailsRevealed && details ? true : false}
                     >
@@ -1170,7 +1172,7 @@ export default function CardPage(
                         color: palette.muted,
                         fontSize: 16,
                         fontWeight: "500",
-                        fontFamily: "JetBrains Mono",
+                        fontFamily: "JetBrainsMono-Regular",
                       }}
                       selectable={detailsRevealed && details ? true : false}
                     >
@@ -1206,7 +1208,7 @@ export default function CardPage(
                             color: palette.muted,
                             fontSize: 16,
                             fontWeight: "500",
-                            fontFamily: "JetBrains Mono",
+                            fontFamily: "JetBrainsMono-Regular",
                           }}
                           onPress={() =>
                             Linking.openURL(`mailto:${grantCard?.user?.email}`)
@@ -1237,7 +1239,7 @@ export default function CardPage(
                           color: palette.muted,
                           fontSize: 16,
                           fontWeight: "500",
-                          fontFamily: "JetBrains Mono",
+                          fontFamily: "JetBrainsMono-Regular",
                         }}
                       >
                         {formatMerchantNames(grantCard?.allowed_merchants)}
@@ -1265,7 +1267,7 @@ export default function CardPage(
                           color: palette.muted,
                           fontSize: 16,
                           fontWeight: "500",
-                          fontFamily: "JetBrains Mono",
+                          fontFamily: "JetBrainsMono-Regular",
                         }}
                       >
                         {formatCategoryNames(grantCard?.allowed_categories)}
@@ -1287,7 +1289,7 @@ export default function CardPage(
                             color: palette.muted,
                             fontSize: 16,
                             fontWeight: "500",
-                            fontFamily: "JetBrains Mono",
+                            fontFamily: "JetBrainsMono-Regular",
                           }}
                         >
                           {grantCard?.purpose}
@@ -1316,7 +1318,7 @@ export default function CardPage(
                         color: palette.muted,
                         fontSize: 16,
                         fontWeight: "500",
-                        fontFamily: "JetBrains Mono",
+                        fontFamily: "JetBrainsMono-Regular",
                       }}
                     >
                       {grantCard?.one_time_use ? "Yes" : "No"}
@@ -1536,7 +1538,7 @@ export default function CardPage(
                 fontSize: 16,
                 color: themeColors.text,
                 marginBottom: 20,
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
               placeholder="Last 4 digits"
               placeholderTextColor={palette.muted}
@@ -1625,7 +1627,7 @@ export default function CardPage(
                 fontSize: 16,
                 color: themeColors.text,
                 marginBottom: 20,
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
               placeholder="500.00"
               placeholderTextColor={themeColors.text + "80"}
@@ -1721,7 +1723,7 @@ export default function CardPage(
                 fontSize: 16,
                 color: themeColors.text,
                 marginBottom: 20,
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
                 minHeight: 80,
                 textAlignVertical: "top",
               }}

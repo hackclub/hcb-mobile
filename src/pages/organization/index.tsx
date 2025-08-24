@@ -5,7 +5,6 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
-import * as Device from "expo-device";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -122,14 +121,8 @@ export default function OrganizationPage({
         const hasSeenBanner = await AsyncStorage.getItem(
           "hasSeenTapToPayBanner",
         );
-        if (!hasSeenBanner && Platform.OS === "ios") {
-          const [major, minor] = (Device.osVersion ?? "0.0")
-            .split(".")
-            .map(Number);
-          // iOS 16.4 and later
-          if (major > 16 || (major === 16 && minor >= 4)) {
-            setShowTapToPayBanner(true);
-          }
+        if (!hasSeenBanner && supportsTapToPay && Platform.OS === "ios") {
+          setShowTapToPayBanner(true);
         }
       } catch (error) {
         logError("Error checking tap to pay banner status", error, {
@@ -158,19 +151,18 @@ export default function OrganizationPage({
           );
           if (isTapToPayEnabled) {
             setSupportsTapToPay(true);
-            return;
           }
           await terminal.initialize();
           setTerminalInitialized(true);
-          // Only call supportsReadersOfType if initialize did not throw
+
           const supported = await terminal.supportsReadersOfType({
             deviceType: "tapToPay",
             discoveryMethod: "tapToPay",
           });
-          setSupportsTapToPay(!!supported);
+          setSupportsTapToPay(supported.readerSupportResult);
           await AsyncStorage.setItem(
             "isTapToPayEnabled",
-            supported ? "true" : "false",
+            supported.readerSupportResult ? "true" : "false",
           );
         } catch (error) {
           logError("Stripe Terminal initialization error", error, {
