@@ -39,7 +39,7 @@ function AccountDetail({
         <Text
           style={{
             color: themeColors.text,
-            fontFamily: "JetBrains Mono",
+            fontFamily: "JetBrainsMono-Regular",
             fontSize: 30,
           }}
         >

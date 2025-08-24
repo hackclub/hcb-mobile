@@ -17,6 +17,7 @@ import { useIsDark } from "../../lib/useColorScheme";
 import { useMerchantIcon } from "../../lib/useMerchantIcon";
 import { palette } from "../../theme";
 import { renderMoney } from "../../util";
+import WiseIcon from "../icons/WiseIcon";
 import UserAvatar from "../UserAvatar";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
@@ -58,6 +59,8 @@ function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
       return "web";
     case TransactionType.Paypal:
       return "paypal";
+    case TransactionType.Wise:
+      return "wise";
     case TransactionType.AchTransfer:
       return "payment-transfer";
     default:
@@ -88,6 +91,8 @@ function TransactionIcon({
       return (
         <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
       );
+    } else if (transactionIcon(transaction) == "wise") {
+      return <WiseIcon color={palette.muted} size={20} />;
     } else {
       return (
         <Icon

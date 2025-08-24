@@ -1,4 +1,5 @@
 import { useTheme } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import {
   View,
@@ -8,7 +9,8 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import useSWR, { mutate } from "swr";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import useSWR, { mutate, useSWRConfig } from "swr";
 
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
@@ -38,6 +40,7 @@ export default function CommentField({
   const [adminOnly, setAdminOnly] = useState(false);
   const hcb = useClient();
   const { handleActionSheet } = useCommentFileActionSheet();
+  const { mutate: globalMutate } = useSWRConfig();
 
   const pickFile = async () => {
     try {
@@ -90,7 +93,22 @@ export default function CommentField({
       setSelectedFile(null);
       setAdminOnly(false);
 
-      mutate(`organizations/${orgId}/transactions/${transactionId}/comments`);
+      const commentKey = `organizations/${orgId}/transactions/${transactionId}/comments`;
+      await Promise.all([
+        mutate(commentKey),
+        globalMutate(commentKey),
+        globalMutate(
+          (key) =>
+            typeof key === "string" &&
+            key.includes(`/transactions/${transactionId}/comments`),
+        ),
+      ]);
+
+      Toast.show({
+        title: "Comment added",
+        type: ALERT_TYPE.SUCCESS,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error adding comment:", error);
       Alert.alert("Error", "Failed to add comment");
