@@ -11,6 +11,7 @@ export enum TransactionType {
   AchTransfer = "300",
   Wire = "310",
   Paypal = "350",
+  Wise = "360",
   Check = "400",
   IncreaseCheck = "401",
   CheckDeposit = "402",

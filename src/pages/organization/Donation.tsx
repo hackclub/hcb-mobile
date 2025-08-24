@@ -606,7 +606,7 @@ function PageContent({
             style={{
               marginBottom: 10,
               position: "absolute",
-              bottom: 72,
+              bottom: Platform.OS === "android" ? 80 : 110,
               width: "100%",
             }}
             loading={loadingConnectingReader}
@@ -619,7 +619,14 @@ function PageContent({
   }
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
-      <ScrollView style={{ flex: 1 }} bounces={false}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: Platform.OS === "android" ? 80 : 110,
+        }}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+      >
         <View
           style={{
             padding: 20,
@@ -736,12 +743,18 @@ function PageContent({
               }}
               style={{
                 width: "100%",
+                marginTop: "auto",
               }}
             >
               Create donation
             </Button>
           ) : (
-            <Button onPress={() => reader && connectReader(reader)}>
+            <Button
+              onPress={() => reader && connectReader(reader)}
+              style={{
+                marginTop: "auto",
+              }}
+            >
               Reconnect reader
             </Button>
           )}
@@ -809,7 +822,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
         color: theme.colors.text,
         fontSize: 24,
         textAlign: "center",
-        fontFamily: "JetBrains Mono",
+        fontFamily: "JetBrainsMono-Regular",
         flexGrow: 1,
       }}
       onPress={() => {

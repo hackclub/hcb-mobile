@@ -29,7 +29,6 @@ export default function BankAccountTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          { label: "Memo", value: transaction.memo }, // TODO: use original "raw" transaction memo
           descriptionDetail(props.orgId, transaction, navigation),
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
