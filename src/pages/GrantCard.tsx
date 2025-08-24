@@ -102,7 +102,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
             >
               {grant?.status.charAt(0).toUpperCase() + grant?.status.slice(1)}
@@ -130,7 +130,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
             >
               {grant?.one_time_use ? "Yes" : "No"}
@@ -158,7 +158,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
             >
               {renderMoney(grant?.amount_cents)}
@@ -186,7 +186,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
               onPress={() => Linking.openURL(`mailto:${grant?.user?.email}`)}
             >
@@ -214,7 +214,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
             >
               {formatMerchantNames(grant?.allowed_merchants)}
@@ -242,7 +242,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                 color: palette.muted,
                 fontSize: 16,
                 fontWeight: "500",
-                fontFamily: "JetBrains Mono",
+                fontFamily: "JetBrainsMono-Regular",
               }}
             >
               {formatCategoryNames(grant?.allowed_categories)}
@@ -264,7 +264,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
                   color: palette.muted,
                   fontSize: 16,
                   fontWeight: "500",
-                  fontFamily: "JetBrains Mono",
+                  fontFamily: "JetBrainsMono-Regular",
                 }}
               >
                 {grant?.purpose}

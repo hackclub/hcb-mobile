@@ -30,11 +30,9 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
-import Transaction from "../components/transaction/Transaction";
 import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
-import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
@@ -77,7 +75,7 @@ const Event = memo(function Event({
   isActive,
   style,
   invitation,
-  showTransactions = false,
+  // showTransactions = false,
 }: ViewProps & {
   event: Organization;
   hideBalance?: boolean;
@@ -90,9 +88,9 @@ const Event = memo(function Event({
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
   );
-  const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
-    PaginatedResponse<ITransaction>
-  >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
+  // const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
+  //   PaginatedResponse<ITransaction>
+  // >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
   const terminal = useStripeTerminal();
@@ -212,7 +210,7 @@ const Event = memo(function Event({
           color={palette.muted}
         />
       </View>
-      {transactions?.data && transactions.data.length >= 1 ? (
+      {/* {transactions?.data && transactions.data.length >= 1 ? (
         <>
           {transactions.data.map((tx, index) => (
             <Transaction
@@ -239,7 +237,7 @@ const Event = memo(function Event({
         </>
       ) : transactionsIsLoading ? (
         <ActivityIndicator style={{ marginVertical: 20 }} />
-      ) : null}
+      ) : null} */}
     </>
   );
 
@@ -252,27 +250,41 @@ const Event = memo(function Event({
       activeOpacity={isActive ? 1 : 0.7}
     >
       {event.background_image ? (
-        <Image
-          source={{ uri: event.background_image }}
-          cachePolicy="memory-disk"
+        <View
           style={{
             backgroundColor: themeColors.card,
             borderRadius: 10,
             overflow: "hidden",
+            position: "relative",
           }}
-          contentFit="cover"
         >
+          <Image
+            source={{ uri: event.background_image }}
+            cachePolicy="memory-disk"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: "100%",
+              height: "100%",
+            }}
+            contentFit="cover"
+          />
           <View
             style={{
               backgroundColor: isDark
                 ? "rgba(37, 36, 41, 0.85)"
                 : "rgba(255, 255, 255, 0.7)",
               borderRadius: 10,
+              position: "relative",
+              zIndex: 1,
             }}
           >
             {contentView}
           </View>
-        </Image>
+        </View>
       ) : (
         <View
           style={StyleSheet.compose(

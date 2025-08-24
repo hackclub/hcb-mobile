@@ -4,8 +4,7 @@ import useSWR from "swr";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
-
-import CardPage from "./card";
+import CardPage from "../card";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "GrantCard">;
 
