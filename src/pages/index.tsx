@@ -30,7 +30,6 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR, { preload, useSWRConfig } from "swr";
 
-import Transaction from "../components/transaction/Transaction";
 import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
