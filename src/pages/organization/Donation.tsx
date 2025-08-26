@@ -540,7 +540,7 @@ function PageContent({
               marginBottom: 20,
             }}
           >
-            Receive donations using Tap to Pay
+            Receive donations using Tap to Pay {Platform.OS === "ios" ? "on iPhone" : ""}
           </Text>
 
           {currentProgress ? (
@@ -606,7 +606,7 @@ function PageContent({
             style={{
               marginBottom: 10,
               position: "absolute",
-              bottom: Platform.OS === "android" ? 80 : 110,
+              bottom: 80,
               width: "100%",
             }}
             loading={loadingConnectingReader}

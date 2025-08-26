@@ -146,10 +146,9 @@ export default function OrganizationPage({
         !terminalInitialized
       ) {
         try {
-          const isTapToPayEnabled = await AsyncStorage.getItem(
-            "isTapToPayEnabled",
-          );
-          if (isTapToPayEnabled) {
+          const isTapToPayEnabled =
+            await AsyncStorage.getItem("isTapToPayEnabled");
+          if (isTapToPayEnabled == "true") {
             setSupportsTapToPay(true);
           }
           await terminal.initialize();

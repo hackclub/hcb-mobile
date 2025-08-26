@@ -1,24 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import * as BackgroundTask from 'expo-background-task';
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
+import * as QuickActions from "expo-quick-actions";
 import { useShareIntentContext } from "expo-share-intent";
+import * as TaskManager from 'expo-task-manager';
 import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
 import {
   Text,
   View,
   ActivityIndicator,
-  TouchableHighlight,
-  ViewProps,
-  StyleSheet,
   useColorScheme,
   RefreshControl,
   Platform,
@@ -28,317 +25,46 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import useSWR, { preload, useSWRConfig } from "swr";
+import useSWR, { mutate, preload, useSWRConfig } from "swr";
 
-import { logError } from "../lib/errorUtils";
+import Event from "../components/organizations/Event";
+import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import Invitation from "../lib/types/Invitation";
-import Organization, { OrganizationExpanded } from "../lib/types/Organization";
+import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
-import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../theme";
-import { orgColor, organizationOrderEqual, renderMoney } from "../util";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { organizationOrderEqual } from "../util";
 
-function EventBalance({ balance_cents }: { balance_cents?: number }) {
-  return balance_cents !== undefined ? (
-    <Text style={{ color: palette.muted, fontSize: 16, marginTop: 5 }}>
-      {renderMoney(balance_cents)}
-    </Text>
-  ) : (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 5,
-        gap: 1,
-      }}
-    >
-      <Text style={{ color: palette.muted, fontSize: 16 }}>$</Text>
-      <View
-        style={{
-          backgroundColor: palette.slate,
-          width: 100,
-          height: 12,
-          borderRadius: 4,
-        }}
-      />
-    </View>
-  );
-}
+const BACKGROUND_TASK_IDENTIFIER = 'refresh-data';
 
-const Event = memo(function Event({
-  event,
-  hideBalance = false,
-  onPress,
-  drag,
-  isActive,
-  style,
-  invitation,
-  // showTransactions = false,
-}: ViewProps & {
-  event: Organization;
-  hideBalance?: boolean;
-  showTransactions?: boolean;
-  invitation?: Invitation;
-  onPress?: () => void;
-  isActive?: boolean;
-  drag?: () => void;
-}) {
-  const { data } = useSWR<OrganizationExpanded>(
-    hideBalance ? null : `organizations/${event.id}`,
-  );
-  // const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
-  //   PaginatedResponse<ITransaction>
-  // >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
+TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
+  try {
+    // Only attempt to mutate if we have network connectivity
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) {
+      console.log("Background task skipped: no network connection");
+      return BackgroundTask.BackgroundTaskResult.Success;
+    }
 
-  const { colors: themeColors } = useTheme();
-  const terminal = useStripeTerminal();
-  const [terminalInitialized, setTerminalInitialized] = useState(false);
-
-  const color = orgColor(event.id);
-  const isDark = useIsDark();
-  
-  useEffect(() => {
-    (async () => {
-      if (
-        event &&
-        !event.playground_mode &&
-        !terminalInitialized
-      ) {
-        try {
-          const isTapToPayEnabled = await AsyncStorage.getItem(
-            "isTapToPayEnabled",
-          );
-          if (isTapToPayEnabled) {
-            return;
-          }
-          await terminal.initialize();
-          setTerminalInitialized(true);
-          // Only call supportsReadersOfType if initialize did not throw
-          const supported = await terminal.supportsReadersOfType({
-            deviceType: "tapToPay",
-            discoveryMethod: "tapToPay",
-          });
-          await AsyncStorage.setItem(
-            "isTapToPayEnabled",
-            supported ? "true" : "false",
-          );
-        } catch (error) {
-          logError("Stripe Terminal initialization error", error, {
-            context: { organizationId: event?.id },
-          });
-        }
-      } else if (!event || event.playground_mode) {
-        setTerminalInitialized(false);
-      }
-    })();
-  }, [event, terminal, terminalInitialized]);
-
-  useEffect(() => {
-    (async () => {
-      if (event && !event.playground_mode && !terminalInitialized) {
-        try {
-          const isTapToPayEnabled =
-            await AsyncStorage.getItem("isTapToPayEnabled");
-          if (isTapToPayEnabled) {
-            return;
-          }
-          await terminal.initialize();
-          setTerminalInitialized(true);
-          // Only call supportsReadersOfType if initialize did not throw
-          const supported = await terminal.supportsReadersOfType({
-            deviceType: "tapToPay",
-            discoveryMethod: "tapToPay",
-          });
-          await AsyncStorage.setItem(
-            "isTapToPayEnabled",
-            supported ? "true" : "false",
-          );
-        } catch (error) {
-          logError("Stripe Terminal initialization error", error, {
-            context: { organizationId: event?.id },
-          });
-        }
-      } else if (!event || event.playground_mode) {
-        setTerminalInitialized(false);
-      }
-    })();
-  }, [event, terminal, terminalInitialized]);
-
-  const contentView = (
-    <>
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
-        {event.icon ? (
-          <Image
-            source={{ uri: event.icon }}
-            cachePolicy="memory-disk"
-            contentFit="scale-down"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              marginRight: 16,
-            }}
-          />
-        ) : (
-          <View
-            style={{
-              borderRadius: 8,
-              width: 40,
-              height: 40,
-              backgroundColor: color,
-              marginRight: 16,
-            }}
-          ></View>
-        )}
-        <View
-          style={{
-            flexDirection: "column",
-            flex: 1,
-          }}
-        >
-          {invitation && invitation.sender && (
-            <Text style={{ color: palette.muted, marginBottom: 3 }}>
-              <Text style={{ fontWeight: "600" }}>
-                {invitation.sender.name}
-              </Text>{" "}
-              invited you to
-            </Text>
-          )}
-          <Text
-            numberOfLines={2}
-            style={{
-              color: themeColors.text,
-              fontSize: 20,
-              fontWeight: "600",
-            }}
-          >
-            {event.name}
-          </Text>
-          {data?.playground_mode && (
-            <View
-              style={{
-                backgroundColor: isDark ? "#283140" : "#348EDA",
-                paddingVertical: 4,
-                paddingHorizontal: 12,
-                borderRadius: 20,
-                alignSelf: "flex-start",
-                marginVertical: 4,
-              }}
-            >
-              <Text
-                style={{
-                  color: isDark ? "#248EDA" : "white",
-                  fontSize: 12,
-                  fontWeight: "bold",
-                }}
-              >
-                Playground Mode
-              </Text>
-            </View>
-          )}
-          {!hideBalance && <EventBalance balance_cents={data?.balance_cents} />}
-        </View>
-        <Ionicons
-          name="chevron-forward-outline"
-          size={24}
-          color={palette.muted}
-        />
-      </View>
-      {/* {transactions?.data && transactions.data.length >= 1 ? (
-        <>
-          {transactions.data.map((tx, index) => (
-            <Transaction
-              transaction={tx}
-              orgId={event.id}
-              key={tx.id}
-              bottom={index == transactions.data.length - 1}
-              hideMissingReceipt
-            />
-          ))}
-          {transactions.has_more && (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 10,
-              }}
-            >
-              <Text style={{ color: palette.info }}>See more activity</Text>
-              <Ionicons name="chevron-forward" color={palette.info} size={18} />
-            </View>
-          )}
-        </>
-      ) : transactionsIsLoading ? (
-        <ActivityIndicator style={{ marginVertical: 20 }} />
-      ) : null} */}
-    </>
-  );
-
-  return (
-    <TouchableHighlight
-      onPress={onPress}
-      onLongPress={drag}
-      disabled={isActive}
-      underlayColor={isActive ? "transparent" : themeColors.background}
-      activeOpacity={isActive ? 1 : 0.7}
-    >
-      {event.background_image ? (
-        <View
-          style={{
-            backgroundColor: themeColors.card,
-            borderRadius: 10,
-            overflow: "hidden",
-            position: "relative",
-          }}
-        >
-          <Image
-            source={{ uri: event.background_image }}
-            cachePolicy="memory-disk"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: "100%",
-              height: "100%",
-            }}
-            contentFit="cover"
-          />
-          <View
-            style={{
-              backgroundColor: isDark
-                ? "rgba(37, 36, 41, 0.85)"
-                : "rgba(255, 255, 255, 0.7)",
-              borderRadius: 10,
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            {contentView}
-          </View>
-        </View>
-      ) : (
-        <View
-          style={StyleSheet.compose(
-            {
-              backgroundColor: themeColors.card,
-              borderRadius: 10,
-              overflow: "hidden",
-            },
-            style,
-          )}
-        >
-          {contentView}
-        </View>
-      )}
-    </TouchableHighlight>
-  );
+    await Promise.all([
+      mutate((k) => typeof k === "string" && k.startsWith("organizations/")),
+      mutate((k) => typeof k === "string" && k.startsWith("user/")),
+    ]);
+    
+    return BackgroundTask.BackgroundTaskResult.Success;
+  } catch (error) {
+    logCriticalError('Failed to execute the background task:', error);
+    return BackgroundTask.BackgroundTaskResult.Failed;
+  }
 });
+
+async function registerBackgroundTaskAsync() {
+  return BackgroundTask.registerTaskAsync(BACKGROUND_TASK_IDENTIFIER, {
+    minimumInterval: 60 * 60, // 1 hour in seconds
+  });
+}
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
@@ -379,6 +105,20 @@ export default function App({ navigation }: Props) {
       runOnJS(setRefreshEnabled)(true);
     }
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_IDENTIFIER);
+        if (!isRegistered) {
+          await registerBackgroundTaskAsync();
+        }
+      } catch (error) {
+        logError("Failed to register background task:", error);
+      }
+    })();
+  }, []);
+
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {
@@ -461,13 +201,13 @@ export default function App({ navigation }: Props) {
     };
   }, []);
 
-  const shouldFetch = () => {
+  const shouldFetch = useCallback(() => {
     const now = Date.now();
     if (!isOnline) return false;
     if (now - lastFetchTime.current < FETCH_COOLDOWN_MS) return false;
     lastFetchTime.current = now;
     return true;
-  };
+  }, [isOnline]);
 
   const {
     data: organizations,
@@ -511,6 +251,40 @@ export default function App({ navigation }: Props) {
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
   const panGesture = usePanGesture();
+
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      QuickActions.setItems([
+        ...(sortedOrgs?.[0] ? [{
+          id: `org_${sortedOrgs[0].id}`,
+          title: sortedOrgs[0].name,
+          subtitle: "Open your favorite org 💰",
+          icon: "symbol:dollarsign.bank.building",
+          params: { href: `/${sortedOrgs[0].id}` }
+        }] : []),
+        {
+          id: "cards", 
+          title: "Cards",
+          subtitle: "View your cards 💳",
+          icon: "symbol:creditcard",
+          params: { href: `/cards` }
+        },
+        {
+          id: "receipts", 
+          title: "Upload your receipts",
+          subtitle: "before Leo gets mad 😡",
+          icon: "symbol:text.document",
+          params: { href: `/receipts` }
+        },
+        {
+          id: "settings", 
+          title: "Settings",
+          icon: "symbol:gearshape",
+          params: { href: `/settings` }
+        },
+      ]);
+    }
+  }, [sortedOrgs]);
 
   useEffect(() => {
     if (!shouldFetch()) return;
@@ -582,7 +356,7 @@ export default function App({ navigation }: Props) {
           orgId: organization.id,
           organization,
         });
-      }, [navigation, organization.id, organization]);
+      }, [navigation, organization]);
 
       return (
         <Event

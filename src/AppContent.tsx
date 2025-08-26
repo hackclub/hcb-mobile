@@ -8,6 +8,7 @@ import {
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as QuickActions from "expo-quick-actions";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -133,10 +134,36 @@ export default function AppContent({
   };
   useEffect(() => {
     navRef.current = navigationRef.current;
-  }, [navigationRef.current]);
+  }, []);
 
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
+  }, []);
+
+  // Handle quick action routing
+  useEffect(() => {
+    const subscription = QuickActions.addListener((action) => {
+      if (action?.params?.href && navRef.current) {
+        // Use the navigation reference to navigate to the specified href
+        const href = action.params.href as string;
+        if (href === "/cards") {
+          navRef.current.navigate("Cards", {
+            screen: "CardList",
+          });
+        } else if (href === "/receipts") {
+          navRef.current.navigate("Receipts");
+        } else if (href === "/settings") {
+          navRef.current.navigate("Settings");
+        } else {
+          navRef.current.navigate("Home", {
+            screen: "Event",
+            params: { orgId: href.replace("/", "") as `org_${string}` }
+          });
+        }
+      }
+    });
+
+    return () => subscription?.remove();
   }, []);
 
   useEffect(() => {
