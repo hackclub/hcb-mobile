@@ -68,7 +68,7 @@ export default function PaymentCard({
     );
 
     return () => subscription.remove();
-  }, []);
+  }, [card.personalization?.logo_url]);
 
   if ((card as GrantCard)?.amount_cents) {
     card.type = "virtual";

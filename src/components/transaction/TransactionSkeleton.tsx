@@ -24,7 +24,7 @@ function SkeletonBox({ style }: { style?: StyleProp<ViewStyle> }) {
     );
     animation.start();
     return () => animation.stop();
-  }, []);
+  }, [opacity]);
 
   return (
     <Animated.View

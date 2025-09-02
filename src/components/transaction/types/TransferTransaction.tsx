@@ -58,7 +58,6 @@ export default function TransferTransaction({
       <TransactionDetails
         details={[
           descriptionDetail(props.orgId, transaction, navigation),
-          { label: "Reason", value: transfer.memo },
           ...(transfer.sender
             ? [
                 {

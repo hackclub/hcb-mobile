@@ -6,11 +6,11 @@ import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import * as BackgroundTask from 'expo-background-task';
+import * as BackgroundTask from "expo-background-task";
 import * as Haptics from "expo-haptics";
 import * as QuickActions from "expo-quick-actions";
 import { useShareIntentContext } from "expo-share-intent";
-import * as TaskManager from 'expo-task-manager';
+import * as TaskManager from "expo-task-manager";
 import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
 import {
   Text,
@@ -37,7 +37,7 @@ import ITransaction from "../lib/types/Transaction";
 import { palette } from "../theme";
 import { organizationOrderEqual } from "../util";
 
-const BACKGROUND_TASK_IDENTIFIER = 'refresh-data';
+const BACKGROUND_TASK_IDENTIFIER = "refresh-data";
 
 TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
   try {
@@ -52,10 +52,10 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
       mutate((k) => typeof k === "string" && k.startsWith("organizations/")),
       mutate((k) => typeof k === "string" && k.startsWith("user/")),
     ]);
-    
+
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
-    logCriticalError('Failed to execute the background task:', error);
+    logCriticalError("Failed to execute the background task:", error);
     return BackgroundTask.BackgroundTaskResult.Failed;
   }
 });
@@ -109,7 +109,9 @@ export default function App({ navigation }: Props) {
   useEffect(() => {
     (async () => {
       try {
-        const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_IDENTIFIER);
+        const isRegistered = await TaskManager.isTaskRegisteredAsync(
+          BACKGROUND_TASK_IDENTIFIER,
+        );
         if (!isRegistered) {
           await registerBackgroundTaskAsync();
         }
@@ -118,7 +120,6 @@ export default function App({ navigation }: Props) {
       }
     })();
   }, []);
-
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {
@@ -255,32 +256,36 @@ export default function App({ navigation }: Props) {
   useEffect(() => {
     if (Platform.OS === "ios") {
       QuickActions.setItems([
-        ...(sortedOrgs?.[0] ? [{
-          id: `org_${sortedOrgs[0].id}`,
-          title: sortedOrgs[0].name,
-          subtitle: "Open your favorite org 💰",
-          icon: "symbol:dollarsign.bank.building",
-          params: { href: `/${sortedOrgs[0].id}` }
-        }] : []),
+        ...(sortedOrgs?.[0]
+          ? [
+              {
+                id: `org_${sortedOrgs[0].id}`,
+                title: sortedOrgs[0].name,
+                subtitle: "Open your favorite org 💰",
+                icon: "symbol:dollarsign.bank.building",
+                params: { href: `/${sortedOrgs[0].id}` },
+              },
+            ]
+          : []),
         {
-          id: "cards", 
+          id: "cards",
           title: "Cards",
           subtitle: "View your cards 💳",
           icon: "symbol:creditcard",
-          params: { href: `/cards` }
+          params: { href: `/cards` },
         },
         {
-          id: "receipts", 
+          id: "receipts",
           title: "Upload your receipts",
           subtitle: "before Leo gets mad 😡",
           icon: "symbol:text.document",
-          params: { href: `/receipts` }
+          params: { href: `/receipts` },
         },
         {
-          id: "settings", 
+          id: "settings",
           title: "Settings",
           icon: "symbol:gearshape",
-          params: { href: `/settings` }
+          params: { href: `/settings` },
         },
       ]);
     }
@@ -339,7 +344,7 @@ export default function App({ navigation }: Props) {
     ({ item: organization }: { item: Organization }) => (
       <EventItem organization={organization} navigation={navigation} />
     ),
-    [navigation],
+    [navigation, EventItem],
   );
 
   const EventItem = memo(

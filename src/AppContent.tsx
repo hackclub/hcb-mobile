@@ -157,7 +157,7 @@ export default function AppContent({
         } else {
           navRef.current.navigate("Home", {
             screen: "Event",
-            params: { orgId: href.replace("/", "") as `org_${string}` }
+            params: { orgId: href.replace("/", "") as `org_${string}` },
           });
         }
       }
@@ -224,7 +224,7 @@ export default function AppContent({
     };
 
     checkAuth();
-  }, []);
+  }, [isDark, tokens?.accessToken]);
 
   useEffect(() => {
     if (tokens) {

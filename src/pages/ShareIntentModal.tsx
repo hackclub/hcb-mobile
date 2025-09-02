@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -41,8 +41,10 @@ export default function ShareIntentModal({
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const validImages =
-    images?.filter((img) => img && typeof img === "string") || [];
+  const validImages = useMemo(
+    () => images?.filter((img) => img && typeof img === "string") || [],
+    [images]
+  );
 
   const transactionsRef = useRef<
     Array<Transaction & { organization: Organization }>

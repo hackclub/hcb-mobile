@@ -131,7 +131,7 @@ export default function OrganizationPage({
       }
     };
     checkTapToPayBanner();
-  }, []);
+  }, [supportsTapToPay]);
 
   useEffect(() => {
     // Reset initialization when organization changes
@@ -293,7 +293,7 @@ export default function OrganizationPage({
     if (organizationError?.status === 401) {
       mutateOrganization();
     }
-  }, [organizationError]);
+  }, [organizationError, mutateOrganization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();

@@ -58,7 +58,7 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
 
       return () => clearTimeout(timeout);
     }
-  }, [pendingImages.length, tokens?.accessToken]);
+  }, [pendingImages.length, pendingImages, tokens?.accessToken]);
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {

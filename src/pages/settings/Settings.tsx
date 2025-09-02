@@ -88,7 +88,7 @@ export default function SettingsPage({ navigation }: Props) {
       }
     })();
     console.log(user);
-  }, [setTheme]);
+  }, [setTheme, user]);
 
   useEffect(() => {
     Animated.timing(animation, {

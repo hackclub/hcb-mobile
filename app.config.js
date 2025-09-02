@@ -136,7 +136,7 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
-      "expo-background-task"
+      "expo-background-task",
     ],
   },
 };
