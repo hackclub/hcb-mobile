@@ -7,6 +7,7 @@ import {
   formatDistanceToNowStrict,
   parseISO,
 } from "date-fns";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useMemo, useLayoutEffect } from "react";
 import {
@@ -134,7 +135,10 @@ function Transaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => onSelect(transaction)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              onSelect(transaction);
+            }}
             disabled={!isOnline || loading}
           >
             <Icon glyph="payment-docs" size={24} color="white" />

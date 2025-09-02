@@ -340,13 +340,6 @@ export default function App({ navigation }: Props) {
     }
   });
 
-  const renderItem = useCallback(
-    ({ item: organization }: { item: Organization }) => (
-      <EventItem organization={organization} navigation={navigation} />
-    ),
-    [navigation, EventItem],
-  );
-
   const EventItem = memo(
     ({
       organization,
@@ -376,6 +369,13 @@ export default function App({ navigation }: Props) {
   );
 
   EventItem.displayName = "EventItem";
+
+  const renderItem = useCallback(
+    ({ item: organization }: { item: Organization }) => (
+      <EventItem organization={organization} navigation={navigation} />
+    ),
+    [navigation, EventItem],
+  );
 
   // Show cached data even if there's an error
   if (error && !organizations?.length) {

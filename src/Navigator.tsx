@@ -4,6 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
@@ -102,6 +103,10 @@ export default function Navigator() {
 
           return <Icon glyph={iconName} size={size} color={color} />;
         },
+        tabBarAccessibilityLabel: route.name === "Home" ? "Home tab" :
+                                  route.name === "Cards" ? "Cards tab" :
+                                  route.name === "Receipts" ? "Receipts tab" :
+                                  route.name === "Settings" ? "Settings tab" : undefined,
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         ...(Platform.OS === "android"
@@ -130,6 +135,9 @@ export default function Navigator() {
       })}
       screenListeners={({ navigation, route }) => ({
         tabPress: (e) => {
+          // Add haptic feedback for all tab presses
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          
           if (route.name === "Home") {
             const state = navigation.getState();
             const currentTab = state.routes[state.index];
@@ -151,7 +159,10 @@ export default function Navigator() {
     >
       <Tab.Screen
         name="Home"
-        options={{ tabBarBadge: invitations?.length || undefined }}
+        options={{ 
+          tabBarBadge: invitations?.length || undefined,
+          tabBarLabel: "Home"
+        }}
       >
         {() => (
           <Stack.Navigator
@@ -173,6 +184,9 @@ export default function Navigator() {
                     underlayColor={themeColors.card}
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
+                    accessibilityLabel="Apply for new organization"
+                    accessibilityHint="Opens the HCB application form in browser"
+                    accessibilityRole="button"
                     onPress={() => {
                       WebBrowser.openBrowserAsync(
                         "https://hackclub.com/hcb/apply",
@@ -276,7 +290,10 @@ export default function Navigator() {
           </Stack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Cards" options={{ tabBarLabel: "Cards" }}>
+      <Tab.Screen 
+        name="Cards" 
+        options={{ tabBarLabel: "Cards" }}
+      >
         {() => (
           <CardsStack.Navigator>
             <CardsStack.Screen
@@ -317,6 +334,7 @@ export default function Navigator() {
         name="Receipts"
         options={{
           tabBarBadge: missingReceiptData?.total_count || undefined,
+          tabBarLabel: "Receipts"
         }}
       >
         {() => (
@@ -339,7 +357,13 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Settings" options={{ headerShown: false }}>
+      <Tab.Screen 
+        name="Settings" 
+        options={{ 
+          headerShown: false,
+          tabBarLabel: "Settings"
+        }}
+      >
         {() => (
           <SettingsStack.Navigator>
             <SettingsStack.Screen

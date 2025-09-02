@@ -15,9 +15,11 @@ export default function UserAvatar({
   user,
   size = 25,
   style,
+  accessibilityLabel,
 }: {
   user: User;
   size?: number;
+  accessibilityLabel?: string;
 } & { style?: StyleProp<ImageStyle> & StyleProp<ViewStyle> }) {
   if (user.avatar) {
     return (
@@ -29,6 +31,9 @@ export default function UserAvatar({
           { width: size, height: size, borderRadius: 400 },
           style,
         )}
+        accessible={true}
+        accessibilityRole="image"
+        accessibilityLabel={accessibilityLabel || `${user.name}'s profile picture`}
       />
     );
   } else {
@@ -46,6 +51,9 @@ export default function UserAvatar({
           },
           style,
         )}
+        accessible={true}
+        accessibilityRole="image"
+        accessibilityLabel={accessibilityLabel || `${user.name}'s profile picture with initials ${userInitials(user.name)}`}
       >
         <Text style={{ color: "white", fontSize: size * 0.5 }}>
           {userInitials(user.name)}

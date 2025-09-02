@@ -1,4 +1,5 @@
 import Icon from "@thedev132/hackclub-icons-rn";
+import * as Haptics from "expo-haptics";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
@@ -33,6 +34,9 @@ export interface ButtonProps {
   icon?: React.ComponentProps<typeof Icon>["glyph"];
   iconSize?: number;
   iconOffset?: number;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  hapticFeedback?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -72,8 +76,21 @@ export default function Button(
             }
           : {}),
       }}
-      onPress={() => props.onPress && props.onPress()}
+      onPress={() => {
+        if (props.hapticFeedback !== false) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        props.onPress && props.onPress();
+      }}
       disabled={props.loading || props.disabled}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={props.accessibilityLabel || (typeof props.children === 'string' ? props.children : 'Button')}
+      accessibilityHint={props.accessibilityHint}
+      accessibilityState={{
+        disabled: props.disabled || props.loading,
+        busy: props.loading,
+      }}
     >
       {props.icon && (
         <View

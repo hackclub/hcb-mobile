@@ -8,6 +8,8 @@ type Props = PropsWithChildren<
   {
     icon?: React.ComponentProps<typeof Ionicons>["name"];
     color?: string;
+    accessibilityLabel?: string;
+    accessibilityRole?: "text" | "button";
   } & { style?: ViewStyle }
 >;
 
@@ -16,6 +18,8 @@ export default function Badge({
   icon,
   color = palette.muted,
   style,
+  accessibilityLabel,
+  accessibilityRole = "text",
 }: Props) {
   return (
     <View
@@ -29,6 +33,9 @@ export default function Badge({
         gap: 5,
         ...style,
       }}
+      accessible={true}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel || (typeof children === 'string' ? children : 'Badge')}
     >
       {icon && <Ionicons name={icon} color={color} size={20} />}
       <Text
