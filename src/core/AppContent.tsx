@@ -12,6 +12,7 @@ import * as QuickActions from "expo-quick-actions";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
+import * as Updates from 'expo-updates';
 import {
   useRef,
   useCallback,
@@ -31,7 +32,7 @@ import { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
 import useClient from "../lib/client";
-import { logError } from "../lib/errorUtils";
+import { logCriticalError, logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import { useOffline } from "../lib/useOffline";
@@ -121,6 +122,7 @@ export default function AppContent({
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
+  const [finishedUpdateCheck, setFinishedUpdateCheck] = useState(false);
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
@@ -295,11 +297,36 @@ export default function AppContent({
     }
   }, [refreshAccessToken, tokens]);
 
+  useEffect(() => {
+    const handleUpdates = async () => {
+      try {
+        const availableUpdate = await Updates.checkForUpdateAsync();
+
+        if (availableUpdate.isAvailable) {
+          Updates.fetchUpdateAsync().catch((error) => {
+            logError("Failed to download update in background", error, {
+              shouldReportToSentry: true,
+            });
+          });
+        }
+
+        setFinishedUpdateCheck(true);
+      } catch (error) {
+        logCriticalError(`Error handling updates: ${error}`, error, {
+          context: { action: "handle_updates" },
+        });
+        setFinishedUpdateCheck(true);
+      }
+    };
+
+    handleUpdates();
+  }, []);
+
   const onLayoutRootView = useCallback(() => {
-    if (appIsReady) {
+    if (appIsReady && finishedUpdateCheck) {
       SplashScreen.hide();
     }
-  }, [appIsReady]);
+  }, [appIsReady, finishedUpdateCheck]);
 
   const linking: LinkingOptions<TabParamList> = useMemo(
     () => ({
