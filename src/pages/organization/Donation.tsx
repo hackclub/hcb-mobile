@@ -36,6 +36,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
+import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 
 // interface PaymentIntent {
@@ -212,6 +213,10 @@ function PageContent({
   const { data: organization, isLoading: organizationLoading } =
     useSWR<Organization>(`organizations/${orgId}`);
   const { accessDenied } = useLocation();
+  const { isInitialized: isStripeInitialized, isInitializing: isStripeInitializing, error: stripeInitError } = useStripeTerminalInit({
+    organizationId: orgId,
+    enabled: true,
+  });
   const [amount, setAmount] = useState("$");
   const value = parseFloat(amount.replace("$", "0"));
   const [reader, setReader] = useState<Reader.Type | undefined>(undefined);
@@ -321,7 +326,7 @@ function PageContent({
   useEffect(() => {
     (async () => {
       try {
-        if (discoverReaders) {
+        if (discoverReaders && isStripeInitialized) {
           await discoverReaders({
             discoveryMethod: "tapToPay",
           });
@@ -332,7 +337,7 @@ function PageContent({
         });
       }
     })();
-  }, [discoverReaders, orgId]);
+  }, [discoverReaders, orgId, isStripeInitialized]);
 
   // useEffect for accessDenied (must be before early return)
   async function handleRequestLocation() {
@@ -353,11 +358,37 @@ function PageContent({
     }
   }, [accessDenied]);
 
-  // Block UI until organization is loaded
-  if (organizationLoading || !organization) {
+  // Block UI until organization is loaded and Stripe Terminal is initialized
+  if (organizationLoading || !organization || isStripeInitializing) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={palette.primary} />
+        {isStripeInitializing && (
+          <Text style={{ color: colors.text, marginTop: 10 }}>
+            Initializing payment system...
+          </Text>
+        )}
+      </View>
+    );
+  }
+
+  // Handle Stripe Terminal initialization errors
+  if (stripeInitError) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+        <Ionicons name="warning-outline" size={64} color={palette.primary} />
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600", marginTop: 16, textAlign: "center" }}>
+          Payment System Error
+        </Text>
+        <Text style={{ color: palette.muted, fontSize: 16, marginTop: 8, textAlign: "center" }}>
+          Unable to initialize the payment system. Please try again later.
+        </Text>
+        <Button
+          onPress={() => navigation.goBack()}
+          style={{ marginTop: 20 }}
+        >
+          Go Back
+        </Button>
       </View>
     );
   }
@@ -387,6 +418,14 @@ function PageContent({
   };
 
   async function connectReader(selectedReader: Reader.Type) {
+    if (!isStripeInitialized) {
+      logError("Attempted to connect reader before Stripe Terminal initialization", new Error("Stripe Terminal not initialized"), {
+        context: { orgId, action: "connect_reader" },
+      });
+      showAlert("Payment System Error", "Payment system is not ready. Please try again.");
+      return false;
+    }
+
     setLoadingConnectingReader(true);
     try {
       const { error } = await connectReaderTapToPay(
@@ -403,10 +442,12 @@ function PageContent({
           context: { orgId, action: "connect_reader" },
         });
         if (error.message == "You must provide a reader object") {
-          discoverReaders({
-            discoveryMethod: "tapToPay",
-            simulated: false,
-          });
+          if (isStripeInitialized) {
+            discoverReaders({
+              discoveryMethod: "tapToPay",
+              simulated: false,
+            });
+          }
         }
         return false;
       }
@@ -617,6 +658,13 @@ function PageContent({
                 });
               }
               // Discover readers once, then wait for a reader to appear
+              if (!isStripeInitialized) {
+                logError("Attempted to discover readers before Stripe Terminal initialization", new Error("Stripe Terminal not initialized"), {
+                  context: { orgId, action: "discover_readers" },
+                });
+                showAlert("Payment System Error", "Payment system is not ready. Please try again.");
+                return;
+              }
               const readers = await discoverReaders({
                 discoveryMethod: "tapToPay",
               });

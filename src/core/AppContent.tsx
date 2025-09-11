@@ -35,6 +35,7 @@ import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import { useOffline } from "../lib/useOffline";
+import { resetStripeTerminalInitialization } from "../lib/useStripeTerminalInit";
 import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
@@ -124,10 +125,14 @@ export default function AppContent({
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
   
-  // Rate limiting and error handling for token provider
+  // Reset Stripe Terminal initialization state on app start
+  useEffect(() => {
+    resetStripeTerminalInitialization();
+  }, []);
+  
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
   const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
-  const TOKEN_FETCH_COOLDOWN = 5000; // 5 seconds between attempts
+  const TOKEN_FETCH_COOLDOWN = 5000; 
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
   
   const fetchTokenProvider = async (): Promise<string> => {
