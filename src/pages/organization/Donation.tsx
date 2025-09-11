@@ -36,7 +36,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 // interface PaymentIntent {
 //   id: string;

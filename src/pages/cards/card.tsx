@@ -40,7 +40,7 @@ import { OrganizationExpanded } from "../../lib/types/Organization";
 import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 import {
   formatCategoryNames,
   formatMerchantNames,
@@ -48,7 +48,7 @@ import {
   redactedCardNumber,
   renderCardNumber,
   renderMoney,
-} from "../../util";
+} from "../../utils/util";
 
 type CardPageProps = {
   cardId?: string;
@@ -1455,7 +1455,6 @@ export default function CardPage(
                       });
                     }}
                     style={[
-                      { backgroundColor: "transparent" },
                       index === 0 && {
                         borderTopLeftRadius: 15,
                         borderTopRightRadius: 15,

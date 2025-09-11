@@ -17,8 +17,8 @@ import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Invitation from "../lib/types/Invitation";
-import palette from "../palette";
-import { palette as themePalette } from "../theme";
+import palette from "../styles/palette";
+import { palette as themePalette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Invitation">;
 

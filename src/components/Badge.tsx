@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren } from "react";
 import { View, Text, ViewStyle } from "react-native";
 
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 type Props = PropsWithChildren<
   {

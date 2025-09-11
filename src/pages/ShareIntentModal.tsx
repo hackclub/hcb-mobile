@@ -20,8 +20,8 @@ import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
+import { palette } from "../styles/theme";
+import { renderMoney } from "../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "ShareIntentModal">;
 

@@ -2,8 +2,8 @@ import { format } from "date-fns";
 import { View } from "react-native";
 
 import { TransactionDonation } from "../../../lib/types/Transaction";
-import { palette } from "../../../theme";
-import { renderMoney } from "../../../util";
+import { palette } from "../../../styles/theme";
+import { renderMoney } from "../../../utils/util";
 import Badge from "../../Badge";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";

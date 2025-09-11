@@ -1,7 +1,7 @@
 import ky from "ky";
 import { useContext, useMemo } from "react";
 
-import AuthContext, { AuthTokens } from "../auth";
+import AuthContext, { AuthTokens } from "../auth/auth";
 
 import { logCriticalError } from "./errorUtils";
 

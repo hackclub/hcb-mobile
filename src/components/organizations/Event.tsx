@@ -1,9 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
-import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
 import { Image } from "expo-image";
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import {
   View,
   Text,
@@ -13,14 +11,14 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
-import { logError } from "../../lib/errorUtils";
 import Invitation from "../../lib/types/Invitation";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../theme";
-import { orgColor } from "../../util";
+import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
+import { palette } from "../../styles/theme";
+import { orgColor } from "../../utils/util";
 
 import EventBalance from "./EventBalance";
 
@@ -50,56 +48,16 @@ const Event = memo(function Event({
   // >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  const terminal = useStripeTerminal();
-  const [terminalInitialized, setTerminalInitialized] = useState(false);
+  // Terminal initialization is handled by the useStripeTerminalInit hook but not used in this component
+  useStripeTerminalInit({
+    organizationId: event?.id,
+    enabled: !!(event && !event.playground_mode),
+  });
 
   const color = orgColor(event.id);
   const isDark = useIsDark();
 
-  useEffect(() => {
-    (async () => {
-      if (event && !event.playground_mode && !terminalInitialized) {
-        try {
-          const isTapToPayEnabled =
-            await AsyncStorage.getItem("isTapToPayEnabled");
-          if (isTapToPayEnabled == "true") {
-            return;
-          }
-
-          // Check if terminal is available before initializing
-          if (!terminal) {
-            logError(
-              "Stripe Terminal not available",
-              new Error("Terminal instance is null"),
-              {
-                context: { organizationId: event?.id },
-              },
-            );
-            return;
-          }
-
-          await terminal.initialize();
-          setTerminalInitialized(true);
-          // Only call supportsReadersOfType if initialize did not throw
-          const supported = await terminal.supportsReadersOfType({
-            deviceType: "tapToPay",
-            discoveryMethod: "tapToPay",
-          });
-          await AsyncStorage.setItem(
-            "isTapToPayEnabled",
-            supported ? "true" : "false",
-          );
-        } catch (error) {
-          logError("Stripe Terminal initialization error", error, {
-            context: { organizationId: event?.id },
-          });
-          setTerminalInitialized(false);
-        }
-      } else if (!event || event.playground_mode) {
-        setTerminalInitialized(false);
-      }
-    })();
-  }, [event, terminal, terminalInitialized]);
+  // Terminal initialization is now handled by the useStripeTerminalInit hook
 
   const contentView = (
     <>

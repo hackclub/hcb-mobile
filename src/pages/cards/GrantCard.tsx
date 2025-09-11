@@ -6,8 +6,12 @@ import useSWR from "swr";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
-import { palette } from "../../theme";
-import { renderMoney, formatMerchantNames, formatCategoryNames } from "../../util";
+import { palette } from "../../styles/theme";
+import {
+  renderMoney,
+  formatMerchantNames,
+  formatCategoryNames,
+} from "../../utils/util";
 
 import CardPage from "./card";
 type Props = NativeStackScreenProps<CardsStackParamList, "GrantCard">;

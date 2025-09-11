@@ -15,8 +15,8 @@ import {
 } from "../../lib/types/Transaction";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useMerchantIcon } from "../../lib/useMerchantIcon";
-import { palette } from "../../theme";
-import { renderMoney } from "../../util";
+import { palette } from "../../styles/theme";
+import { renderMoney } from "../../utils/util";
 import WiseIcon from "../icons/WiseIcon";
 import UserAvatar from "../UserAvatar";
 
@@ -144,33 +144,32 @@ function Transaction({
   const finalMerchantIcon = showMerchantIcon ? autoMerchantIcon : null;
 
   return (
-    <View style={{ backgroundColor: "transparent" }}>
-      <View
-        style={StyleSheet.compose(
-          {
-            padding: 10,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 10,
-            backgroundColor:
-              transaction.declined || transaction.amount_cents < 0
+    <View
+      style={StyleSheet.compose(
+        {
+          padding: 10,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          backgroundColor:
+            transaction.declined || transaction.amount_cents < 0
+              ? isDark
+                ? "#351921"
+                : "#F9E3E7"
+              : transaction.amount_cents > 0
                 ? isDark
-                  ? "#351921"
-                  : "#F9E3E7"
-                : transaction.amount_cents > 0
-                  ? isDark
-                    ? "#234740"
-                    : "#d7f7ee"
-                  : themeColors.card,
-            borderTopLeftRadius: top ? 8 : 0,
-            borderTopRightRadius: top ? 8 : 0,
-            borderBottomLeftRadius: bottom ? 8 : 0,
-            borderBottomRightRadius: bottom ? 8 : 0,
-            overflow: "hidden",
-          },
-          style,
-        )}
-      >
+                  ? "#234740"
+                  : "#d7f7ee"
+                : themeColors.card,
+          borderTopLeftRadius: top ? 8 : 0,
+          borderTopRightRadius: top ? 8 : 0,
+          borderBottomLeftRadius: bottom ? 8 : 0,
+          borderBottomRightRadius: bottom ? 8 : 0,
+          overflow: "hidden",
+        },
+        style,
+      )}
+    >
         {transaction.appearance == "hackathon_grant" && (
           <LinearGradient
             colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
@@ -306,7 +305,6 @@ function Transaction({
         >
           {renderMoney(transaction.amount_cents)}
         </Text>
-      </View>
     </View>
   );
 }

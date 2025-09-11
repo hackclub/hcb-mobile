@@ -2,8 +2,8 @@ import { Text, View } from "react-native";
 import useSWR from "swr";
 
 import Organization from "../../../lib/types/Organization";
-import { palette } from "../../../theme";
-import { renderDate, renderMoney } from "../../../util";
+import { palette } from "../../../styles/theme";
+import { renderDate, renderMoney } from "../../../utils/util";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";
 

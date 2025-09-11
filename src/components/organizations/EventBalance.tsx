@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 
-import { palette } from "../../theme";
-import { renderMoney } from "../../util";
+import { palette } from "../../styles/theme";
+import { renderMoney } from "../../utils/util";
 
 export default function EventBalance({
   balance_cents,

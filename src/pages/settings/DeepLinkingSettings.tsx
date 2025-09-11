@@ -1,8 +1,8 @@
 import { useTheme } from "@react-navigation/native";
 import { Switch, View, Text, ActivityIndicator } from "react-native";
 
-import { useLinkingPref } from "../../LinkingContext";
-import { palette } from "../../theme";
+import { useLinkingPref } from "../../providers/LinkingContext";
+import { palette } from "../../styles/theme";
 
 export default function DeepLinkingSettings() {
   const { enabled, setEnabled } = useLinkingPref();

@@ -4,7 +4,7 @@ import { AppState, InteractionManager, Platform } from "react-native";
 import { Cache, State } from "swr";
 import { useDebouncedCallback } from "use-debounce";
 
-import { logError } from "./lib/errorUtils";
+import { logError } from "../lib/errorUtils";
 
 type CacheValue = unknown;
 

@@ -33,7 +33,7 @@ import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization from "../lib/types/Organization";
 import Transaction, { TransactionType } from "../lib/types/Transaction";
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
 

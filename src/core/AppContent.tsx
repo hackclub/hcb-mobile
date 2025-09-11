@@ -29,20 +29,21 @@ import {
 } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
-import AuthContext from "./auth";
-import { CacheProvider } from "./cacheProvider";
-import { getStateFromPath } from "./getStateFromPath";
-import useClient from "./lib/client";
-import { logError } from "./lib/errorUtils";
-import { TabParamList } from "./lib/NavigatorParamList";
-import { useIsDark } from "./lib/useColorScheme";
-import { useOffline } from "./lib/useOffline";
-import { useLinkingPref } from "./LinkingContext";
+import AuthContext from "../auth/auth";
+import useClient from "../lib/client";
+import { logError } from "../lib/errorUtils";
+import { TabParamList } from "../lib/NavigatorParamList";
+import { useIsDark } from "../lib/useColorScheme";
+import { useOffline } from "../lib/useOffline";
+import Login from "../pages/login";
+import { CacheProvider } from "../providers/cacheProvider";
+import { useLinkingPref } from "../providers/LinkingContext";
+import { useThemeContext } from "../providers/ThemeContext";
+import { lightTheme, palette, theme } from "../styles/theme";
+import { getStateFromPath } from "../utils/getStateFromPath";
+
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
-import Login from "./pages/login";
-import { lightTheme, palette, theme } from "./theme";
-import { useThemeContext } from "./ThemeContext";
 
 function OfflineBanner() {
   const insets = useSafeAreaInsets();
@@ -122,15 +123,49 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
-  const fetchTokenProvider = async () => {
-    const token = (await hcb
-      .get("stripe_terminal_connection_token")
-      .json()) as {
-      terminal_connection_token: {
-        secret: string;
+  
+  // Rate limiting and error handling for token provider
+  const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
+  const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
+  const TOKEN_FETCH_COOLDOWN = 5000; // 5 seconds between attempts
+  const MAX_TOKEN_FETCH_ATTEMPTS = 3;
+  
+  const fetchTokenProvider = async (): Promise<string> => {
+    const now = Date.now();
+    
+    if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
+      throw new Error(`Rate limited: Please wait ${Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000)} seconds before retrying`);
+    }
+    
+    if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
+      throw new Error(`Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please restart the app.`);
+    }
+    
+    try {
+      setLastTokenFetch(now);
+      setTokenFetchAttempts(prev => prev + 1);
+      
+      const token = (await hcb
+        .get("stripe_terminal_connection_token")
+        .json()) as {
+        terminal_connection_token: {
+          secret: string;
+        };
       };
-    };
-    return token.terminal_connection_token.secret;
+      
+      setTokenFetchAttempts(0);
+      
+      return token.terminal_connection_token.secret;
+    } catch (error) {
+      console.error('Token fetch failed:', error);
+      
+      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
+        const backoffTime = Math.min(TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts), 30000); // Max 30 seconds
+        throw new Error(`Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`);
+      }
+      
+      throw error;
+    }
   };
   useEffect(() => {
     navRef.current = navigationRef.current;

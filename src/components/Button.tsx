@@ -10,7 +10,7 @@ import {
   ViewProps,
 } from "react-native";
 
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 export interface ButtonProps {
   onPress?: () => void;

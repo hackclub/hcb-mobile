@@ -36,9 +36,9 @@ import Organization from "../lib/types/Organization";
 import Receipt from "../lib/types/Receipt";
 import { TransactionCardCharge } from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
-import p from "../palette";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
+import p from "../styles/palette";
+import { palette } from "../styles/theme";
+import { renderMoney } from "../utils/util";
 
 function Transaction({
   transaction,

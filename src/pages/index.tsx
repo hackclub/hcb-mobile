@@ -34,8 +34,8 @@ import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import Invitation from "../lib/types/Invitation";
 import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
-import { palette } from "../theme";
-import { organizationOrderEqual } from "../util";
+import { palette } from "../styles/theme";
+import { organizationOrderEqual } from "../utils/util";
 
 const BACKGROUND_TASK_IDENTIFIER = "refresh-data";
 
@@ -137,13 +137,9 @@ export default function App({ navigation }: Props) {
           });
           setShareIntentProcessed(true);
           resetShareIntent();
-        }
-
-        else if (!missingReceiptError && !missingReceiptData) {
+        } else if (!missingReceiptError && !missingReceiptData) {
           // Don't process yet, wait for data to load
-        }
-
-        else {
+        } else {
           if (missingReceiptError) {
             logError(
               "Error fetching missing receipts, retrying",

@@ -1,8 +1,8 @@
 import { View } from "react-native";
 
 import { TransactionAchTransfer } from "../../../lib/types/Transaction";
-import { palette } from "../../../theme";
-import { renderDate, renderMoney } from "../../../util";
+import { palette } from "../../../styles/theme";
+import { renderDate, renderMoney } from "../../../utils/util";
 import Badge from "../../Badge";
 import UserMention from "../../UserMention";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";

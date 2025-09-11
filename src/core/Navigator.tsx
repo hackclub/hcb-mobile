@@ -10,40 +10,40 @@ import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import { navRef } from "../core/navigationRef";
 import {
   StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
   TabParamList,
   SettingsStackParamList,
-} from "./lib/NavigatorParamList";
-import { PaginatedResponse } from "./lib/types/HcbApiObject";
-import Invitation from "./lib/types/Invitation";
-import { useIsDark } from "./lib/useColorScheme";
-import { navRef } from "./navigationRef";
-import CardPage from "./pages/cards/card";
-import CardsPage from "./pages/cards/cards";
-import GrantCardPage from "./pages/cards/GrantCard";
-import Home from "./pages/index";
-import InvitationPage from "./pages/Invitation";
-import OrganizationPage from "./pages/organization";
-import AccountNumberPage from "./pages/organization/AccountNumber";
-import OrganizationDonationPage from "./pages/organization/Donation";
-import ProcessDonationPage from "./pages/organization/ProcessDonation";
-import OrganizationTeamPage from "./pages/organization/Team";
-import TransferPage from "./pages/organization/transfer";
-import ReceiptsPage from "./pages/Receipts";
-import ReceiptSelectionModal from "./pages/ReceiptSelectionModal";
-import RenameTransactionPage from "./pages/RenameTransaction";
-import About from "./pages/settings/About";
-import AppIconSelector from "./pages/settings/AppIconSelector";
-import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
-import SettingsPage from "./pages/settings/Settings";
-import Tutorials from "./pages/settings/Tutorials";
-import ShareIntentModal from "./pages/ShareIntentModal";
-import TransactionPage from "./pages/Transaction";
-import { useShareIntentContext } from "./ShareIntentContext";
-import { palette } from "./theme";
+} from "../lib/NavigatorParamList";
+import { PaginatedResponse } from "../lib/types/HcbApiObject";
+import Invitation from "../lib/types/Invitation";
+import { useIsDark } from "../lib/useColorScheme";
+import CardPage from "../pages/cards/card";
+import CardsPage from "../pages/cards/cards";
+import GrantCardPage from "../pages/cards/GrantCard";
+import Home from "../pages/index";
+import InvitationPage from "../pages/Invitation";
+import OrganizationPage from "../pages/organization";
+import AccountNumberPage from "../pages/organization/AccountNumber";
+import OrganizationDonationPage from "../pages/organization/Donation";
+import ProcessDonationPage from "../pages/organization/ProcessDonation";
+import OrganizationTeamPage from "../pages/organization/Team";
+import TransferPage from "../pages/organization/transfer";
+import ReceiptsPage from "../pages/Receipts";
+import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
+import RenameTransactionPage from "../pages/RenameTransaction";
+import About from "../pages/settings/About";
+import AppIconSelector from "../pages/settings/AppIconSelector";
+import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
+import SettingsPage from "../pages/settings/Settings";
+import Tutorials from "../pages/settings/Tutorials";
+import ShareIntentModal from "../pages/ShareIntentModal";
+import TransactionPage from "../pages/Transaction";
+import { useShareIntentContext } from "../providers/ShareIntentContext";
+import { palette } from "../styles/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();

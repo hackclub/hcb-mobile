@@ -26,8 +26,8 @@ import { logError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
-import { palette } from "../../theme";
-import { normalizeSvg } from "../../util";
+import { palette } from "../../styles/theme";
+import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 

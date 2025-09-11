@@ -30,9 +30,11 @@ export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
     }
   }
 
-  const match = path.match(/([^/]+)\/transactions/);
+  const match =
+    path.match(/([^/]+)\/transactions/) || path.match(/([^/]+)\/ledger/);
   if (match) {
     const orgId = match[1];
+    routes.push({ name: "Organizations" });
     routes.push({
       name: "Event",
       params: { orgId },
@@ -46,6 +48,7 @@ export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
           name: "Home",
           state: {
             routes,
+            index: routes.length - 1,
           },
         },
       ],
