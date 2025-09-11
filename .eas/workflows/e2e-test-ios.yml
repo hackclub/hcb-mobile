@@ -2,7 +2,7 @@ name: e2e-test-ios
 
 on:
   pull_request:
-    branches: ['*']
+    branches: ["*"]
 
 jobs:
   build_ios_for_e2e:
@@ -16,4 +16,4 @@ jobs:
     type: maestro
     params:
       build_id: ${{ needs.build_ios_for_e2e.outputs.build_id }}
-      flow_path: ['.maestro/login.yml']
+      flow_path: [".maestro/login.yml"]
