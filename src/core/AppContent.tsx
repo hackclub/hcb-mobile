@@ -12,7 +12,7 @@ import * as QuickActions from "expo-quick-actions";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import * as Updates from 'expo-updates';
+import * as Updates from "expo-updates";
 import {
   useRef,
   useCallback,
