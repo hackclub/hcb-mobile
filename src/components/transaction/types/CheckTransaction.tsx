@@ -2,7 +2,7 @@ import humanizeString from "humanize-string";
 import { View } from "react-native";
 
 import { TransactionCheck } from "../../../lib/types/Transaction";
-import { renderMoney, statusColor } from "../../../util";
+import { renderMoney, statusColor } from "../../../utils/util";
 import Badge from "../../Badge";
 import UserMention from "../../UserMention";
 import CheckComponent from "../Check";
@@ -66,7 +66,6 @@ export default function CheckTransaction({
                 ...(check.payment_for
                   ? [{ label: "Payment Purpose", value: check.payment_for }]
                   : []),
-                { label: "Memo", value: check.memo ?? "" },
                 {
                   label: "Addressed to",
                   value: `${check.address_line1 ?? ""} ${

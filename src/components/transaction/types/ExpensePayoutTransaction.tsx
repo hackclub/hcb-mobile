@@ -1,8 +1,8 @@
 import { Linking, TouchableHighlight, View, Text } from "react-native";
 
 import { TransactionExpensePayout } from "../../../lib/types/Transaction";
-import { palette } from "../../../theme";
-import { renderDate, renderMoney } from "../../../util";
+import { palette } from "../../../styles/theme";
+import { renderDate, renderMoney } from "../../../utils/util";
 import ReceiptList from "../ReceiptList";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
 import TransactionTitle, { Muted } from "../TransactionTitle";

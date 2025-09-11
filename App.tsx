@@ -5,13 +5,13 @@ import { useFonts } from "expo-font";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import { useColorScheme } from "react-native";
 
-import AppContent from "./src/AppContent";
-import { AuthProvider } from "./src/AuthProvider";
-import { useCache } from "./src/cacheProvider";
+import { AuthProvider } from "./src/auth/AuthProvider";
 import { CustomAlertProvider } from "./src/components/alert/CustomAlertProvider";
-import { LinkingProvider } from "./src/LinkingContext";
-import { ShareIntentProvider } from "./src/ShareIntentContext";
-import { ThemeProvider } from "./src/ThemeContext";
+import AppContent from "./src/core/AppContent";
+import { useCache } from "./src/providers/cacheProvider";
+import { LinkingProvider } from "./src/providers/LinkingContext";
+import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
+import { ThemeProvider } from "./src/providers/ThemeContext";
 
 function App() {
   const [fontsLoaded] = useFonts({

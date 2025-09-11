@@ -3,7 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { View, Text } from "react-native";
 
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 interface EmptyStateProps {
   isOnline: boolean;

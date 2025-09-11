@@ -16,7 +16,7 @@ import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import { getKey } from "../lib/organization/useTransactions";
 import Transaction from "../lib/types/Transaction";
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "RenameTransaction">;
 

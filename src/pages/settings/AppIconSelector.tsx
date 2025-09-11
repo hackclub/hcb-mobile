@@ -10,11 +10,17 @@ const icons: { [key: string]: number | null } = {
   default: require("../../../assets/icons/default.png"),
   "default dark": require("../../../assets/icons/default-dark.png"),
   cashmoney: require("../../../assets/icons/cash-money.png"),
+  hacknight: Constants.platform?.ios
+    ? require("../../../assets/icons/hack-night.png")
+    : null,
   testflight: Constants.platform?.ios
     ? require("../../../assets/icons/testflight.png")
     : null,
-  hacknight: Constants.platform?.ios
-    ? require("../../../assets/icons/hack-night.png")
+  premium: Constants.platform?.ios
+    ? require("../../../assets/icons/premium.png")
+    : null,
+  hackathongrant: Constants.platform?.ios
+    ? require("../../../assets/icons/hackathongrant.png")
     : null,
   "admin light": Constants.platform?.ios
     ? require("../../../assets/icons/admin.png")
@@ -24,9 +30,6 @@ const icons: { [key: string]: number | null } = {
     : null,
   platinum: Constants.platform?.ios
     ? require("../../../assets/icons/platinum.png")
-    : null,
-  hackathongrant: Constants.platform?.ios
-    ? require("../../../assets/icons/hackathongrant.png")
     : null,
   christmas: Constants.platform?.ios
     ? require("../../../assets/icons/christmas.png")
@@ -42,6 +45,7 @@ const iconKeyMap: { [key: string]: string } = {
   platinum: "platinum",
   testflight: "testflight",
   hackathon_grant: "hackathongrant",
+  premium: "premium",
 };
 
 const getDisplayName = (key: string) => {
@@ -57,6 +61,7 @@ const getDisplayName = (key: string) => {
     platinum: "Platinum",
     testflight: "Testflight",
     hacknight: "Hacknight",
+    premium: "Premium",
   };
 
   return nameMap[key] || key.charAt(0).toUpperCase() + key.slice(1);
@@ -123,6 +128,7 @@ export default function AppIconSelector() {
           if (value === null) return false;
           if (key === "christmas") return isChristmasSeason();
           if (key === "admin light" || key === "admin dark") return false;
+          if (key === "premium") return false;
           return true;
         })
         .map(([key, value]) => ({
@@ -140,7 +146,9 @@ export default function AppIconSelector() {
         if (key === "admin light" || key === "admin dark") {
           return availableIcons["admin"];
         }
+        if (key === "premium") return availableIcons["premium"];
 
+        if (key === "testflight") return availableIcons["testflight"];
         const mappedApiKey = Object.entries(iconKeyMap).find(
           ([_, localKey]) => localKey === key,
         )?.[0];

@@ -2,7 +2,7 @@ import { useTheme } from "@react-navigation/native";
 import { PropsWithChildren, ReactNode } from "react";
 import { Text, View } from "react-native";
 
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 export function Muted({ children }: PropsWithChildren) {
   return (

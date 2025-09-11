@@ -7,7 +7,7 @@ import {
   ReactNode,
 } from "react";
 
-import { logError } from "./lib/errorUtils";
+import { logError } from "../lib/errorUtils";
 
 export type ThemeType = "light" | "dark" | "system";
 

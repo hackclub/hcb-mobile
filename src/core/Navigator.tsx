@@ -4,45 +4,46 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import { navRef } from "../core/navigationRef";
 import {
   StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
   TabParamList,
   SettingsStackParamList,
-} from "./lib/NavigatorParamList";
-import { PaginatedResponse } from "./lib/types/HcbApiObject";
-import Invitation from "./lib/types/Invitation";
-import { useIsDark } from "./lib/useColorScheme";
-import { navRef } from "./navigationRef";
-import CardPage from "./pages/card";
-import CardsPage from "./pages/cards";
-import GrantCardPage from "./pages/GrantCard";
-import Home from "./pages/index";
-import InvitationPage from "./pages/Invitation";
-import OrganizationPage from "./pages/organization";
-import AccountNumberPage from "./pages/organization/AccountNumber";
-import OrganizationDonationPage from "./pages/organization/Donation";
-import ProcessDonationPage from "./pages/organization/ProcessDonation";
-import OrganizationTeamPage from "./pages/organization/Team";
-import TransferPage from "./pages/organization/transfer";
-import ReceiptsPage from "./pages/Receipts";
-import ReceiptSelectionModal from "./pages/ReceiptSelectionModal";
-import RenameTransactionPage from "./pages/RenameTransaction";
-import About from "./pages/settings/About";
-import AppIconSelector from "./pages/settings/AppIconSelector";
-import DeepLinkingSettings from "./pages/settings/DeepLinkingSettings";
-import SettingsPage from "./pages/settings/Settings";
-import Tutorials from "./pages/settings/Tutorials";
-import ShareIntentModal from "./pages/ShareIntentModal";
-import TransactionPage from "./pages/Transaction";
-import { useShareIntentContext } from "./ShareIntentContext";
-import { palette } from "./theme";
+} from "../lib/NavigatorParamList";
+import { PaginatedResponse } from "../lib/types/HcbApiObject";
+import Invitation from "../lib/types/Invitation";
+import { useIsDark } from "../lib/useColorScheme";
+import CardPage from "../pages/cards/card";
+import CardsPage from "../pages/cards/cards";
+import GrantCardPage from "../pages/cards/GrantCard";
+import Home from "../pages/index";
+import InvitationPage from "../pages/Invitation";
+import OrganizationPage from "../pages/organization";
+import AccountNumberPage from "../pages/organization/AccountNumber";
+import OrganizationDonationPage from "../pages/organization/Donation";
+import ProcessDonationPage from "../pages/organization/ProcessDonation";
+import OrganizationTeamPage from "../pages/organization/Team";
+import TransferPage from "../pages/organization/transfer";
+import ReceiptsPage from "../pages/Receipts";
+import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
+import RenameTransactionPage from "../pages/RenameTransaction";
+import About from "../pages/settings/About";
+import AppIconSelector from "../pages/settings/AppIconSelector";
+import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
+import SettingsPage from "../pages/settings/Settings";
+import Tutorials from "../pages/settings/Tutorials";
+import ShareIntentModal from "../pages/ShareIntentModal";
+import TransactionPage from "../pages/Transaction";
+import { useShareIntentContext } from "../providers/ShareIntentContext";
+import { palette } from "../styles/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -102,6 +103,16 @@ export default function Navigator() {
 
           return <Icon glyph={iconName} size={size} color={color} />;
         },
+        tabBarAccessibilityLabel:
+          route.name === "Home"
+            ? "Home tab"
+            : route.name === "Cards"
+              ? "Cards tab"
+              : route.name === "Receipts"
+                ? "Receipts tab"
+                : route.name === "Settings"
+                  ? "Settings tab"
+                  : undefined,
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         ...(Platform.OS === "android"
@@ -130,6 +141,9 @@ export default function Navigator() {
       })}
       screenListeners={({ navigation, route }) => ({
         tabPress: (e) => {
+          // Add haptic feedback for all tab presses
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
           if (route.name === "Home") {
             const state = navigation.getState();
             const currentTab = state.routes[state.index];
@@ -151,7 +165,10 @@ export default function Navigator() {
     >
       <Tab.Screen
         name="Home"
-        options={{ tabBarBadge: invitations?.length || undefined }}
+        options={{
+          tabBarBadge: invitations?.length || undefined,
+          tabBarLabel: "Home",
+        }}
       >
         {() => (
           <Stack.Navigator
@@ -173,6 +190,9 @@ export default function Navigator() {
                     underlayColor={themeColors.card}
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
+                    accessibilityLabel="Apply for new organization"
+                    accessibilityHint="Opens the HCB application form in browser"
+                    accessibilityRole="button"
                     onPress={() => {
                       WebBrowser.openBrowserAsync(
                         "https://hackclub.com/hcb/apply",
@@ -317,6 +337,7 @@ export default function Navigator() {
         name="Receipts"
         options={{
           tabBarBadge: missingReceiptData?.total_count || undefined,
+          tabBarLabel: "Receipts",
         }}
       >
         {() => (
@@ -339,7 +360,13 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen name="Settings" options={{ headerShown: false }}>
+      <Tab.Screen
+        name="Settings"
+        options={{
+          headerShown: false,
+          tabBarLabel: "Settings",
+        }}
+      >
         {() => (
           <SettingsStack.Navigator>
             <SettingsStack.Screen

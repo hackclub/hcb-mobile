@@ -5,7 +5,7 @@ import useSWR from "swr";
 import Organization from "../../../lib/types/Organization";
 import { TransactionTransfer } from "../../../lib/types/Transaction";
 import User from "../../../lib/types/User";
-import { renderMoney, statusColor } from "../../../util";
+import { renderMoney, statusColor } from "../../../utils/util";
 import Badge from "../../Badge";
 import UserMention from "../../UserMention";
 import TransactionDetails, { descriptionDetail } from "../TransactionDetails";
@@ -58,7 +58,6 @@ export default function TransferTransaction({
       <TransactionDetails
         details={[
           descriptionDetail(props.orgId, transaction, navigation),
-          { label: "Reason", value: transfer.memo },
           ...(transfer.sender
             ? [
                 {

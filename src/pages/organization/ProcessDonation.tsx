@@ -18,7 +18,7 @@ import QRCodeStyled from "react-native-qrcode-styled";
 
 import StyledButton from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 

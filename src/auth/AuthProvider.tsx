@@ -3,8 +3,9 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import React, { useState, useEffect } from "react";
 
+import { logCriticalError, logError } from "../lib/errorUtils";
+
 import AuthContext, { AuthTokens } from "./auth";
-import { logCriticalError, logError } from "./lib/errorUtils";
 
 const ACCESS_TOKEN_KEY = "auth_access_token";
 const REFRESH_TOKEN_KEY = "auth_refresh_token";

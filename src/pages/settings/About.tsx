@@ -6,7 +6,7 @@ import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, Platform, ScrollView } from "react-native";
 
-import { useThemeContext } from "../../ThemeContext";
+import { useThemeContext } from "../../providers/ThemeContext";
 
 export default function About() {
   const { colors } = useTheme();

@@ -1,8 +1,9 @@
+import { Merchant, Category } from "@thedev132/yellowpages";
 import words from "lodash/words";
 
+import { logError } from "../lib/errorUtils";
 import Organization from "../lib/types/Organization";
-
-import { palette } from "./theme";
+import { palette } from "../styles/theme";
 
 export function renderMoney(cents: number) {
   return (
@@ -77,3 +78,70 @@ export function organizationOrderEqual(a: Organization[], b: Organization[]) {
   }
   return true;
 }
+
+export const formatMerchantNames = (merchantIds: string[] | undefined) => {
+  if (!merchantIds || merchantIds.length === 0) {
+    return "All";
+  }
+
+  try {
+    const merchantNames: string[] = [];
+    const validIds = merchantIds.filter((id): id is string => !!id);
+    const unnamedCount = validIds.filter((id) => {
+      const merchant = Merchant.lookup({ networkId: id });
+      if (merchant.inDataset()) {
+        const name = merchant.getName();
+        if (name && !merchantNames.includes(name)) {
+          merchantNames.push(name);
+        }
+        return false;
+      }
+      return true;
+    }).length;
+
+    // Add unnamed merchants count if any
+    if (unnamedCount > 0) {
+      merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
+    }
+
+    return merchantNames.join(", ");
+  } catch (error) {
+    logError("Error formatting merchant names", error, {
+      context: { merchantIds: merchantIds },
+    });
+    return "Loading...";
+  }
+};
+
+export const formatCategoryNames = (categoryIds: string[] | undefined) => {
+  if (!categoryIds || categoryIds.length === 0) {
+    return "All";
+  }
+
+  try {
+    const categoryNames: string[] = [];
+    const validIds = categoryIds.filter((id): id is string => !!id);
+    const unnamedCount = validIds.filter((id) => {
+      const category = Category.lookup({ key: id });
+      if (category.inDataset()) {
+        const name = category.getName();
+        if (name && !categoryNames.includes(name)) {
+          categoryNames.push(name);
+        }
+        return false;
+      }
+      return true;
+    }).length;
+
+    if (unnamedCount > 0) {
+      categoryNames.push(`Unnamed Categories (${unnamedCount})`);
+    }
+
+    return categoryNames.join(", ");
+  } catch (error) {
+    logError("Error formatting category names", error, {
+      context: { categoryIds: categoryIds },
+    });
+    return "Loading...";
+  }
+};

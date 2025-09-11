@@ -6,7 +6,7 @@ import { View, Text, TouchableHighlight } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Transaction from "../../lib/types/Transaction";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 interface Detail {
   label: string;

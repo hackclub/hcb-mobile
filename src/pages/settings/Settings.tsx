@@ -18,15 +18,15 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
-import AuthContext from "../../auth";
-import { useCache } from "../../cacheProvider";
+import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import { logError } from "../../lib/errorUtils";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../theme";
-import { useThemeContext } from "../../ThemeContext";
+import { useCache } from "../../providers/cacheProvider";
+import { useThemeContext } from "../../providers/ThemeContext";
+import { palette } from "../../styles/theme";
 
 const TOS_URL = "https://hcb.hackclub.com/tos";
 const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
@@ -87,8 +87,7 @@ export default function SettingsPage({ navigation }: Props) {
         });
       }
     })();
-    console.log(user);
-  }, [setTheme]);
+  }, [setTheme, user]);
 
   useEffect(() => {
     Animated.timing(animation, {

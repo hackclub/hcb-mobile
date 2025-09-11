@@ -14,7 +14,7 @@ import useSWR, { mutate, useSWRConfig } from "swr";
 
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
-import { palette } from "../../../theme";
+import { palette } from "../../../styles/theme";
 import Button from "../../Button";
 import UserAvatar from "../../UserAvatar";
 
