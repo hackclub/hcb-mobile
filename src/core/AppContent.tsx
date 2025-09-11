@@ -124,32 +124,36 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
-  
+
   // Reset Stripe Terminal initialization state on app start
   useEffect(() => {
     resetStripeTerminalInitialization();
   }, []);
-  
+
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
   const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
-  const TOKEN_FETCH_COOLDOWN = 5000; 
+  const TOKEN_FETCH_COOLDOWN = 5000;
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
-  
+
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
-    
+
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
-      throw new Error(`Rate limited: Please wait ${Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000)} seconds before retrying`);
+      throw new Error(
+        `Rate limited: Please wait ${Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000)} seconds before retrying`,
+      );
     }
-    
+
     if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
-      throw new Error(`Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please restart the app.`);
+      throw new Error(
+        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please restart the app.`,
+      );
     }
-    
+
     try {
       setLastTokenFetch(now);
-      setTokenFetchAttempts(prev => prev + 1);
-      
+      setTokenFetchAttempts((prev) => prev + 1);
+
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
@@ -157,18 +161,28 @@ export default function AppContent({
           secret: string;
         };
       };
-      
+
       setTokenFetchAttempts(0);
-      
+
       return token.terminal_connection_token.secret;
     } catch (error) {
-      console.error('Token fetch failed:', error);
-      
-      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
-        const backoffTime = Math.min(TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts), 30000); // Max 30 seconds
-        throw new Error(`Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`);
+      console.error("Token fetch failed:", error);
+
+      if (
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        error.status === 429
+      ) {
+        const backoffTime = Math.min(
+          TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts),
+          30000,
+        ); // Max 30 seconds
+        throw new Error(
+          `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
+        );
       }
-      
+
       throw error;
     }
   };

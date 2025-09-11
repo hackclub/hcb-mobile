@@ -213,7 +213,11 @@ function PageContent({
   const { data: organization, isLoading: organizationLoading } =
     useSWR<Organization>(`organizations/${orgId}`);
   const { accessDenied } = useLocation();
-  const { isInitialized: isStripeInitialized, isInitializing: isStripeInitializing, error: stripeInitError } = useStripeTerminalInit({
+  const {
+    isInitialized: isStripeInitialized,
+    isInitializing: isStripeInitializing,
+    error: stripeInitError,
+  } = useStripeTerminalInit({
     organizationId: orgId,
     enabled: true,
   });
@@ -375,18 +379,37 @@ function PageContent({
   // Handle Stripe Terminal initialization errors
   if (stripeInitError) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
         <Ionicons name="warning-outline" size={64} color={palette.primary} />
-        <Text style={{ color: colors.text, fontSize: 18, fontWeight: "600", marginTop: 16, textAlign: "center" }}>
+        <Text
+          style={{
+            color: colors.text,
+            fontSize: 18,
+            fontWeight: "600",
+            marginTop: 16,
+            textAlign: "center",
+          }}
+        >
           Payment System Error
         </Text>
-        <Text style={{ color: palette.muted, fontSize: 16, marginTop: 8, textAlign: "center" }}>
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 16,
+            marginTop: 8,
+            textAlign: "center",
+          }}
+        >
           Unable to initialize the payment system. Please try again later.
         </Text>
-        <Button
-          onPress={() => navigation.goBack()}
-          style={{ marginTop: 20 }}
-        >
+        <Button onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
           Go Back
         </Button>
       </View>
@@ -419,10 +442,17 @@ function PageContent({
 
   async function connectReader(selectedReader: Reader.Type) {
     if (!isStripeInitialized) {
-      logError("Attempted to connect reader before Stripe Terminal initialization", new Error("Stripe Terminal not initialized"), {
-        context: { orgId, action: "connect_reader" },
-      });
-      showAlert("Payment System Error", "Payment system is not ready. Please try again.");
+      logError(
+        "Attempted to connect reader before Stripe Terminal initialization",
+        new Error("Stripe Terminal not initialized"),
+        {
+          context: { orgId, action: "connect_reader" },
+        },
+      );
+      showAlert(
+        "Payment System Error",
+        "Payment system is not ready. Please try again.",
+      );
       return false;
     }
 
@@ -659,10 +689,17 @@ function PageContent({
               }
               // Discover readers once, then wait for a reader to appear
               if (!isStripeInitialized) {
-                logError("Attempted to discover readers before Stripe Terminal initialization", new Error("Stripe Terminal not initialized"), {
-                  context: { orgId, action: "discover_readers" },
-                });
-                showAlert("Payment System Error", "Payment system is not ready. Please try again.");
+                logError(
+                  "Attempted to discover readers before Stripe Terminal initialization",
+                  new Error("Stripe Terminal not initialized"),
+                  {
+                    context: { orgId, action: "discover_readers" },
+                  },
+                );
+                showAlert(
+                  "Payment System Error",
+                  "Payment system is not ready. Please try again.",
+                );
                 return;
               }
               const readers = await discoverReaders({

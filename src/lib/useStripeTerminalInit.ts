@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useStripeTerminal } from '@stripe/stripe-terminal-react-native';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-import { logError } from './errorUtils';
+import { logError } from "./errorUtils";
 
 interface UseStripeTerminalInitOptions {
   organizationId?: string;
@@ -26,7 +26,7 @@ let globalInitializationState = {
 
 // Reset function to clear global state on app restart
 export function resetStripeTerminalInitialization() {
-  console.log('Resetting Stripe Terminal initialization state');
+  console.log("Resetting Stripe Terminal initialization state");
   globalInitializationPromise = null;
   globalInitializationState = {
     isInitialized: false,
@@ -36,35 +36,41 @@ export function resetStripeTerminalInitialization() {
 }
 
 export function useStripeTerminalInit(
-  options: UseStripeTerminalInitOptions = {}
+  options: UseStripeTerminalInitOptions = {},
 ): UseStripeTerminalInitResult {
   const { organizationId, enabled = true } = options;
   const terminal = useStripeTerminal();
-  
-  const [isInitialized, setIsInitialized] = useState(globalInitializationState.isInitialized);
+
+  const [isInitialized, setIsInitialized] = useState(
+    globalInitializationState.isInitialized,
+  );
   const [isInitializing, setIsInitializing] = useState(false);
-  const [supportsTapToPay, setSupportsTapToPay] = useState(globalInitializationState.supportsTapToPay);
-  const [error, setError] = useState<Error | null>(globalInitializationState.error);
-  
+  const [supportsTapToPay, setSupportsTapToPay] = useState(
+    globalInitializationState.supportsTapToPay,
+  );
+  const [error, setError] = useState<Error | null>(
+    globalInitializationState.error,
+  );
+
   const initializationAttempted = useRef(false);
 
   const initializeTerminal = useCallback(async (): Promise<boolean> => {
     if (globalInitializationPromise) {
-      console.log('Waiting for existing Stripe Terminal initialization...');
+      console.log("Waiting for existing Stripe Terminal initialization...");
       return await globalInitializationPromise;
     }
 
     if (globalInitializationState.isInitialized) {
-      console.log('Stripe Terminal already initialized, skipping...');
+      console.log("Stripe Terminal already initialized, skipping...");
       return true;
     }
 
-    console.log('Starting new Stripe Terminal initialization...');
+    console.log("Starting new Stripe Terminal initialization...");
     globalInitializationPromise = (async () => {
       try {
         if (!terminal) {
-          const error = new Error('Terminal instance is null');
-          logError('Stripe Terminal not available', error, {
+          const error = new Error("Terminal instance is null");
+          logError("Stripe Terminal not available", error, {
             context: { organizationId },
           });
           globalInitializationState = {
@@ -77,49 +83,53 @@ export function useStripeTerminalInit(
 
         // Always initialize the terminal, even if we have cached results
         // This ensures the SDK is properly initialized on each app launch
-        console.log('Initializing Stripe Terminal SDK...');
+        console.log("Initializing Stripe Terminal SDK...");
         await terminal.initialize();
-        console.log('Stripe Terminal SDK initialized successfully');
-        
+        console.log("Stripe Terminal SDK initialized successfully");
+
         // Check cached results for tap-to-pay support to avoid expensive checks
-        const cachedTapToPayEnabled = await AsyncStorage.getItem('isTapToPayEnabled');
+        const cachedTapToPayEnabled =
+          await AsyncStorage.getItem("isTapToPayEnabled");
         let tapToPaySupported: boolean;
-        
-        if (cachedTapToPayEnabled === 'true') {
+
+        if (cachedTapToPayEnabled === "true") {
           tapToPaySupported = true;
-        } else if (cachedTapToPayEnabled === 'false') {
+        } else if (cachedTapToPayEnabled === "false") {
           tapToPaySupported = false;
         } else {
           // Only check tap-to-pay support if not cached
           const supported = await terminal.supportsReadersOfType({
-            deviceType: 'tapToPay',
-            discoveryMethod: 'tapToPay',
+            deviceType: "tapToPay",
+            discoveryMethod: "tapToPay",
           });
           tapToPaySupported = !!(supported?.readerSupportResult || supported);
           // Cache the result for future use
-          await AsyncStorage.setItem('isTapToPayEnabled', tapToPaySupported ? 'true' : 'false');
+          await AsyncStorage.setItem(
+            "isTapToPayEnabled",
+            tapToPaySupported ? "true" : "false",
+          );
         }
-        
+
         globalInitializationState = {
           isInitialized: true,
           supportsTapToPay: tapToPaySupported,
           error: null,
         };
-        
+
         return true;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        console.error('Stripe Terminal initialization failed:', err);
-        logError('Stripe Terminal initialization error', err, {
+        console.error("Stripe Terminal initialization failed:", err);
+        logError("Stripe Terminal initialization error", err, {
           context: { organizationId },
         });
-        
+
         globalInitializationState = {
           isInitialized: false,
           supportsTapToPay: false,
           error: err,
         };
-        
+
         return false;
       } finally {
         // Clear the global promise so future calls can create a new one
@@ -131,7 +141,7 @@ export function useStripeTerminalInit(
   }, [terminal, organizationId]);
 
   const retry = () => {
-    console.log('Retrying Stripe Terminal initialization...');
+    console.log("Retrying Stripe Terminal initialization...");
     initializationAttempted.current = false;
     setError(null);
     setIsInitialized(false);

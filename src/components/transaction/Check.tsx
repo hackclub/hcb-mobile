@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
+import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import useSWR from "swr";
 import { ToWords } from "to-words";
 
@@ -70,8 +64,9 @@ export default function CheckComponent({
           <View
             style={{
               borderBottomWidth: 2,
-              borderBottomColor:
-                isDark ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             }}
           >
             <Text style={[styles.dateText, styles.handwriting]}>{date}</Text>
@@ -89,8 +84,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                isDark ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -109,8 +105,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                isDark ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -129,8 +126,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                isDark ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -207,12 +205,10 @@ const getStyles = (isDark: boolean) =>
       fontFamily: "Damion",
       fontSize: 16,
       borderBottomWidth: 2,
-      borderBottomColor:
-        isDark ? palette.slate[500] : palette.slate[400],
+      borderBottomColor: isDark ? palette.slate[500] : palette.slate[400],
       paddingRight: 8,
       color: isDark ? "#fff" : "#000",
-      textDecorationColor:
-        isDark ? palette.slate[500] : palette.slate[400],
+      textDecorationColor: isDark ? palette.slate[500] : palette.slate[400],
     },
     amountInput: {
       fontFamily: "Damion",
