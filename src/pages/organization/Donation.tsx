@@ -320,11 +320,19 @@ function PageContent({
   // useEffect for discoverReaders (must be before early return)
   useEffect(() => {
     (async () => {
-      await discoverReaders({
-        discoveryMethod: "tapToPay",
-      });
+      try {
+        if (discoverReaders) {
+          await discoverReaders({
+            discoveryMethod: "tapToPay",
+          });
+        }
+      } catch (error) {
+        logError("Error discovering readers", error, {
+          context: { orgId, action: "discover_readers" },
+        });
+      }
     })();
-  }, [discoverReaders]);
+  }, [discoverReaders, orgId]);
 
   // useEffect for accessDenied (must be before early return)
   async function handleRequestLocation() {
@@ -461,6 +469,17 @@ function PageContent({
   ): Promise<boolean> {
     let output: boolean;
     try {
+      if (!collectPaymentMethod) {
+        logError(
+          "collectPaymentMethod not available",
+          new Error("Method not initialized"),
+          {
+            context: { orgId, action: "collect_payment" },
+          },
+        );
+        return false;
+      }
+
       const { error } = await collectPaymentMethod({
         paymentIntent: localPayment,
       });
@@ -483,6 +502,17 @@ function PageContent({
   async function confirmPayment(localPayment: PaymentIntent.Type) {
     let success;
     try {
+      if (!confirmPaymentIntent) {
+        logError(
+          "confirmPaymentIntent not available",
+          new Error("Method not initialized"),
+          {
+            context: { orgId, action: "confirm_payment" },
+          },
+        );
+        return false;
+      }
+
       const { error } = await confirmPaymentIntent({
         paymentIntent: localPayment,
       });

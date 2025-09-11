@@ -35,7 +35,10 @@ export default function Badge({
       }}
       accessible={true}
       accessibilityRole={accessibilityRole}
-      accessibilityLabel={accessibilityLabel || (typeof children === 'string' ? children : 'Badge')}
+      accessibilityLabel={
+        accessibilityLabel ||
+        (typeof children === "string" ? children : "Badge")
+      }
     >
       {icon && <Ionicons name={icon} color={color} size={20} />}
       <Text

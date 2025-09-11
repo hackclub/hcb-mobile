@@ -138,11 +138,11 @@ export default function App({ navigation }: Props) {
           setShareIntentProcessed(true);
           resetShareIntent();
         }
-        // If we don't have missing receipt data yet, but also no error, wait a bit more
+
         else if (!missingReceiptError && !missingReceiptData) {
           // Don't process yet, wait for data to load
         }
-        // If we have an error or no missing receipts, still show the modal for receipt bin upload
+
         else {
           if (missingReceiptError) {
             logError(
@@ -175,17 +175,14 @@ export default function App({ navigation }: Props) {
     refetchMissingReceipts,
   ]);
 
-  // Reset share intent processed flag when share intent changes
   useEffect(() => {
     if (hasShareIntent) {
       setShareIntentProcessed(false);
     }
   }, [hasShareIntent]);
 
-  // Cleanup share intent on unmount or when component reinitializes
   useEffect(() => {
     return () => {
-      // Reset share intent when component unmounts to prevent conflicts
       if (hasShareIntent) {
         resetShareIntent();
       }

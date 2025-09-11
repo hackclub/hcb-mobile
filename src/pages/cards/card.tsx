@@ -23,24 +23,24 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { useSWRConfig } from "swr";
 
-import Button from "../components/Button";
-import CardSkeleton from "../components/cards/CardSkeleton";
-import Divider from "../components/Divider";
-import PaymentCard from "../components/PaymentCard";
-import Transaction from "../components/transaction/Transaction";
-import UserAvatar from "../components/UserAvatar";
-import { showAlert } from "../lib/alertUtils";
-import useClient from "../lib/client";
-import { logError, logCriticalError } from "../lib/errorUtils";
-import { CardsStackParamList } from "../lib/NavigatorParamList";
-import { getTransactionTitle } from "../lib/transactionTitle";
-import Card from "../lib/types/Card";
-import GrantCard from "../lib/types/GrantCard";
-import { OrganizationExpanded } from "../lib/types/Organization";
-import ITransaction from "../lib/types/Transaction";
-import User from "../lib/types/User";
-import useStripeCardDetails from "../lib/useStripeCardDetails";
-import { palette } from "../theme";
+import Button from "../../components/Button";
+import CardSkeleton from "../../components/cards/CardSkeleton";
+import Divider from "../../components/Divider";
+import PaymentCard from "../../components/PaymentCard";
+import Transaction from "../../components/transaction/Transaction";
+import UserAvatar from "../../components/UserAvatar";
+import { showAlert } from "../../lib/alertUtils";
+import useClient from "../../lib/client";
+import { logError, logCriticalError } from "../../lib/errorUtils";
+import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import { getTransactionTitle } from "../../lib/transactionTitle";
+import Card from "../../lib/types/Card";
+import GrantCard from "../../lib/types/GrantCard";
+import { OrganizationExpanded } from "../../lib/types/Organization";
+import ITransaction from "../../lib/types/Transaction";
+import User from "../../lib/types/User";
+import useStripeCardDetails from "../../lib/useStripeCardDetails";
+import { palette } from "../../theme";
 import {
   formatCategoryNames,
   formatMerchantNames,
@@ -48,7 +48,7 @@ import {
   redactedCardNumber,
   renderCardNumber,
   renderMoney,
-} from "../util";
+} from "../../util";
 
 type CardPageProps = {
   cardId?: string;
@@ -877,8 +877,6 @@ export default function CardPage(
     }
     return null;
   };
-
-  console.log(grantCard);
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>

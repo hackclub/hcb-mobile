@@ -234,7 +234,6 @@ export default function ReceiptsPage({ navigation }: Props) {
   );
   const isDark = useIsDark();
   const hcb = useClient();
-  console.log(receipts);
 
   // Set navigation title
   useLayoutEffect(() => {
@@ -366,7 +365,6 @@ export default function ReceiptsPage({ navigation }: Props) {
   const handleTransactionSelect = (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
-    // Navigate to ReceiptSelectionModal
     navigation.navigate("ReceiptSelectionModal", {
       transaction,
     });

@@ -65,6 +65,19 @@ const Event = memo(function Event({
           if (isTapToPayEnabled == "true") {
             return;
           }
+
+          // Check if terminal is available before initializing
+          if (!terminal) {
+            logError(
+              "Stripe Terminal not available",
+              new Error("Terminal instance is null"),
+              {
+                context: { organizationId: event?.id },
+              },
+            );
+            return;
+          }
+
           await terminal.initialize();
           setTerminalInitialized(true);
           // Only call supportsReadersOfType if initialize did not throw
@@ -80,6 +93,7 @@ const Event = memo(function Event({
           logError("Stripe Terminal initialization error", error, {
             context: { organizationId: event?.id },
           });
+          setTerminalInitialized(false);
         }
       } else if (!event || event.playground_mode) {
         setTerminalInitialized(false);

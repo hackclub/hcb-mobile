@@ -5,6 +5,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import * as Linking from "expo-linking";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -151,6 +152,19 @@ export default function OrganizationPage({
           if (isTapToPayEnabled == "true") {
             setSupportsTapToPay(true);
           }
+
+          if (!terminal) {
+            logError(
+              "Stripe Terminal not available",
+              new Error("Terminal instance is null"),
+              {
+                context: { organizationId: organization?.id },
+              },
+            );
+            setSupportsTapToPay(false);
+            return;
+          }
+
           await terminal.initialize();
           setTerminalInitialized(true);
 
@@ -168,6 +182,7 @@ export default function OrganizationPage({
             context: { organizationId: organization?.id },
           });
           setSupportsTapToPay(false);
+          setTerminalInitialized(false);
         }
       } else if (!organization || organization.playground_mode) {
         setSupportsTapToPay(false);
@@ -410,11 +425,24 @@ export default function OrganizationPage({
               backgroundColor: themeColors.primary,
               borderRadius: 12,
               height: 50,
+              marginBottom: 16,
             }}
             color="#fff"
             onPress={() => navigation.goBack()}
           >
             Go Back
+          </Button>
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: palette.slate,
+              borderRadius: 12,
+              height: 50,
+            }}
+            color="#fff"
+            onPress={() => Linking.openURL(`https://hcb.hackclub.com/${orgId}`)}
+          >
+            View on Website
           </Button>
         </View>
       </View>

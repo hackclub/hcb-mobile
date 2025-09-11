@@ -144,7 +144,7 @@ function Transaction({
   const finalMerchantIcon = showMerchantIcon ? autoMerchantIcon : null;
 
   return (
-    <View>
+    <View style={{ backgroundColor: "transparent" }}>
       <View
         style={StyleSheet.compose(
           {

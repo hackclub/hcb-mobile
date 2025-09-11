@@ -21,9 +21,9 @@ import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
 import { useIsDark } from "./lib/useColorScheme";
 import { navRef } from "./navigationRef";
-import CardPage from "./pages/card";
-import CardsPage from "./pages/cards";
-import GrantCardPage from "./pages/GrantCard";
+import CardPage from "./pages/cards/card";
+import CardsPage from "./pages/cards/cards";
+import GrantCardPage from "./pages/cards/GrantCard";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
 import OrganizationPage from "./pages/organization";
@@ -103,10 +103,16 @@ export default function Navigator() {
 
           return <Icon glyph={iconName} size={size} color={color} />;
         },
-        tabBarAccessibilityLabel: route.name === "Home" ? "Home tab" :
-                                  route.name === "Cards" ? "Cards tab" :
-                                  route.name === "Receipts" ? "Receipts tab" :
-                                  route.name === "Settings" ? "Settings tab" : undefined,
+        tabBarAccessibilityLabel:
+          route.name === "Home"
+            ? "Home tab"
+            : route.name === "Cards"
+              ? "Cards tab"
+              : route.name === "Receipts"
+                ? "Receipts tab"
+                : route.name === "Settings"
+                  ? "Settings tab"
+                  : undefined,
         // headerStyle: { backgroundColor: themeColors.background },
         headerShown: false,
         ...(Platform.OS === "android"
@@ -137,7 +143,7 @@ export default function Navigator() {
         tabPress: (e) => {
           // Add haptic feedback for all tab presses
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          
+
           if (route.name === "Home") {
             const state = navigation.getState();
             const currentTab = state.routes[state.index];
@@ -159,9 +165,9 @@ export default function Navigator() {
     >
       <Tab.Screen
         name="Home"
-        options={{ 
+        options={{
           tabBarBadge: invitations?.length || undefined,
-          tabBarLabel: "Home"
+          tabBarLabel: "Home",
         }}
       >
         {() => (
@@ -290,10 +296,7 @@ export default function Navigator() {
           </Stack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen 
-        name="Cards" 
-        options={{ tabBarLabel: "Cards" }}
-      >
+      <Tab.Screen name="Cards" options={{ tabBarLabel: "Cards" }}>
         {() => (
           <CardsStack.Navigator>
             <CardsStack.Screen
@@ -334,7 +337,7 @@ export default function Navigator() {
         name="Receipts"
         options={{
           tabBarBadge: missingReceiptData?.total_count || undefined,
-          tabBarLabel: "Receipts"
+          tabBarLabel: "Receipts",
         }}
       >
         {() => (
@@ -357,11 +360,11 @@ export default function Navigator() {
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>
-      <Tab.Screen 
-        name="Settings" 
-        options={{ 
+      <Tab.Screen
+        name="Settings"
+        options={{
           headerShown: false,
-          tabBarLabel: "Settings"
+          tabBarLabel: "Settings",
         }}
       >
         {() => (

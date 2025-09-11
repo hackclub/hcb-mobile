@@ -87,7 +87,6 @@ export default function SettingsPage({ navigation }: Props) {
         });
       }
     })();
-    console.log(user);
   }, [setTheme, user]);
 
   useEffect(() => {

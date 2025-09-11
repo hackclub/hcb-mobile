@@ -20,14 +20,14 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import useSWR from "swr";
 
-import CardListSkeleton from "../components/cards/CardListSkeleton";
-import PaymentCard from "../components/PaymentCard";
-import { logError } from "../lib/errorUtils";
-import { CardsStackParamList } from "../lib/NavigatorParamList";
-import Card from "../lib/types/Card";
-import GrantCard from "../lib/types/GrantCard";
-import { palette } from "../theme";
-import { normalizeSvg } from "../util";
+import CardListSkeleton from "../../components/cards/CardListSkeleton";
+import PaymentCard from "../../components/PaymentCard";
+import { logError } from "../../lib/errorUtils";
+import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import Card from "../../lib/types/Card";
+import GrantCard from "../../lib/types/GrantCard";
+import { palette } from "../../theme";
+import { normalizeSvg } from "../../util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 

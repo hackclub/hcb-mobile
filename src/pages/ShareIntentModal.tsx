@@ -43,7 +43,7 @@ export default function ShareIntentModal({
 
   const validImages = useMemo(
     () => images?.filter((img) => img && typeof img === "string") || [],
-    [images]
+    [images],
   );
 
   const transactionsRef = useRef<

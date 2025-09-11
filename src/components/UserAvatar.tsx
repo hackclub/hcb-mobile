@@ -33,7 +33,9 @@ export default function UserAvatar({
         )}
         accessible={true}
         accessibilityRole="image"
-        accessibilityLabel={accessibilityLabel || `${user.name}'s profile picture`}
+        accessibilityLabel={
+          accessibilityLabel || `${user.name}'s profile picture`
+        }
       />
     );
   } else {
@@ -53,7 +55,10 @@ export default function UserAvatar({
         )}
         accessible={true}
         accessibilityRole="image"
-        accessibilityLabel={accessibilityLabel || `${user.name}'s profile picture with initials ${userInitials(user.name)}`}
+        accessibilityLabel={
+          accessibilityLabel ||
+          `${user.name}'s profile picture with initials ${userInitials(user.name)}`
+        }
       >
         <Text style={{ color: "white", fontSize: size * 0.5 }}>
           {userInitials(user.name)}

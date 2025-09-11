@@ -85,7 +85,10 @@ export default function Button(
       disabled={props.loading || props.disabled}
       accessible={true}
       accessibilityRole="button"
-      accessibilityLabel={props.accessibilityLabel || (typeof props.children === 'string' ? props.children : 'Button')}
+      accessibilityLabel={
+        props.accessibilityLabel ||
+        (typeof props.children === "string" ? props.children : "Button")
+      }
       accessibilityHint={props.accessibilityHint}
       accessibilityState={{
         disabled: props.disabled || props.loading,
