@@ -6,7 +6,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 import IComment from "../../lib/types/Comment";
 import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 import FileViewerModal from "../FileViewerModal";
 import UserMention from "../UserMention";
 

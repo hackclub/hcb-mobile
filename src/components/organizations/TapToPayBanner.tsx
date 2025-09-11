@@ -5,7 +5,7 @@ import { View, Text, TouchableOpacity, Pressable } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 type NavigationProp = NativeStackNavigationProp<StackParamList>;
 

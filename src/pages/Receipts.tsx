@@ -7,6 +7,7 @@ import {
   formatDistanceToNowStrict,
   parseISO,
 } from "date-fns";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useState, useMemo, useLayoutEffect } from "react";
 import {
@@ -35,9 +36,9 @@ import Organization from "../lib/types/Organization";
 import Receipt from "../lib/types/Receipt";
 import { TransactionCardCharge } from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
-import p from "../palette";
-import { palette } from "../theme";
-import { renderMoney } from "../util";
+import p from "../styles/palette";
+import { palette } from "../styles/theme";
+import { renderMoney } from "../utils/util";
 
 function Transaction({
   transaction,
@@ -134,7 +135,10 @@ function Transaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => onSelect(transaction)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              onSelect(transaction);
+            }}
             disabled={!isOnline || loading}
           >
             <Icon glyph="payment-docs" size={24} color="white" />
@@ -230,7 +234,6 @@ export default function ReceiptsPage({ navigation }: Props) {
   );
   const isDark = useIsDark();
   const hcb = useClient();
-  console.log(receipts);
 
   // Set navigation title
   useLayoutEffect(() => {
@@ -362,7 +365,6 @@ export default function ReceiptsPage({ navigation }: Props) {
   const handleTransactionSelect = (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
-    // Navigate to ReceiptSelectionModal
     navigation.navigate("ReceiptSelectionModal", {
       transaction,
     });

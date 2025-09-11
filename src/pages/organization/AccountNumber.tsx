@@ -9,7 +9,7 @@ import useSWR from "swr";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 

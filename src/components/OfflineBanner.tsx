@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useOffline } from "../lib/useOffline";
-import { lightTheme, palette, theme } from "../utils/theme";
+import { lightTheme, palette, theme } from "../styles/theme";
 
 export default function OfflineBanner() {
   const insets = useSafeAreaInsets();

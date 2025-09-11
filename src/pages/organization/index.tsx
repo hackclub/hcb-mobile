@@ -4,7 +4,7 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import * as Linking from "expo-linking";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -41,8 +41,9 @@ import ITransaction, {
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
 import { useOffline } from "../../lib/useOffline";
-import { palette } from "../../theme";
-import { renderDate, renderMoney } from "../../util";
+import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
+import { palette } from "../../styles/theme";
+import { renderDate, renderMoney } from "../../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
@@ -93,10 +94,10 @@ export default function OrganizationPage({
   const { data: user, isLoading: userLoading } = useSWR("user");
   const [showMockData, setShowMockData] = useState(false);
   const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
-  const terminal = useStripeTerminal();
-  const [supportsTapToPay, setSupportsTapToPay] = useState(false);
-
-  const [terminalInitialized, setTerminalInitialized] = useState(false);
+  const { supportsTapToPay } = useStripeTerminalInit({
+    organizationId: organization?.id,
+    enabled: !!(organization && !organization.playground_mode),
+  });
 
   const {
     transactions: _transactions,
@@ -131,49 +132,9 @@ export default function OrganizationPage({
       }
     };
     checkTapToPayBanner();
-  }, []);
+  }, [supportsTapToPay]);
 
-  useEffect(() => {
-    // Reset initialization when organization changes
-    setTerminalInitialized(false);
-  }, [organization]);
-
-  useEffect(() => {
-    (async () => {
-      if (
-        organization &&
-        !organization.playground_mode &&
-        !terminalInitialized
-      ) {
-        try {
-          const isTapToPayEnabled =
-            await AsyncStorage.getItem("isTapToPayEnabled");
-          if (isTapToPayEnabled) {
-            setSupportsTapToPay(true);
-          }
-          await terminal.initialize();
-          setTerminalInitialized(true);
-
-          const supported = await terminal.supportsReadersOfType({
-            deviceType: "tapToPay",
-            discoveryMethod: "tapToPay",
-          });
-          setSupportsTapToPay(supported.readerSupportResult);
-          await AsyncStorage.setItem(
-            "isTapToPayEnabled",
-            supported.readerSupportResult ? "true" : "false",
-          );
-        } catch (error) {
-          logError("Stripe Terminal initialization error", error, {
-            context: { organizationId: organization?.id },
-          });
-          setSupportsTapToPay(false);
-        }
-      } else if (!organization || organization.playground_mode) {
-        setSupportsTapToPay(false);
-      }
-    })();
-  }, [organization, terminal, terminalInitialized]);
+  // Terminal initialization is now handled by the useStripeTerminalInit hook
 
   const handleDismissTapToPayBanner = async () => {
     try {
@@ -293,7 +254,7 @@ export default function OrganizationPage({
     if (organizationError?.status === 401) {
       mutateOrganization();
     }
-  }, [organizationError]);
+  }, [organizationError, mutateOrganization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -356,13 +317,6 @@ export default function OrganizationPage({
             width: "100%",
             maxWidth: 400,
             alignItems: "center",
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
-            shadowOpacity: 0.08,
-            shadowRadius: 12,
             elevation: 8,
           }}
         >
@@ -410,11 +364,24 @@ export default function OrganizationPage({
               backgroundColor: themeColors.primary,
               borderRadius: 12,
               height: 50,
+              marginBottom: 16,
             }}
             color="#fff"
             onPress={() => navigation.goBack()}
           >
             Go Back
+          </Button>
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: palette.slate,
+              borderRadius: 12,
+              height: 50,
+            }}
+            color="#fff"
+            onPress={() => Linking.openURL(`https://hcb.hackclub.com/${orgId}`)}
+          >
+            View on Website
           </Button>
         </View>
       </View>

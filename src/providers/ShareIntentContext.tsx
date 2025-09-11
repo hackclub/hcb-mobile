@@ -8,9 +8,9 @@ import {
 } from "react";
 import useSWR from "swr";
 
-import AuthContext from "./auth";
-import Organization from "./lib/types/Organization";
-import Transaction from "./lib/types/Transaction";
+import AuthContext from "../auth/auth";
+import Organization from "../lib/types/Organization";
+import Transaction from "../lib/types/Transaction";
 
 interface ShareIntentData {
   images: string[];
@@ -58,7 +58,7 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
 
       return () => clearTimeout(timeout);
     }
-  }, [pendingImages.length, tokens?.accessToken]);
+  }, [pendingImages.length, pendingImages, tokens?.accessToken]);
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {

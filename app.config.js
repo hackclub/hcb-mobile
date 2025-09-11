@@ -16,6 +16,7 @@ export default {
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       buildNumber: "20",
+      autoIncrement: "buildNumber",
       config: {
         usesNonExemptEncryption: false,
       },
@@ -136,6 +137,7 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
+      "expo-background-task",
     ],
   },
 };

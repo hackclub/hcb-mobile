@@ -105,6 +105,14 @@ const appIcons = [
       backgroundColor: "#EC3750",
     },
   },
+  {
+    name: "Premium",
+    ios: "./assets/icons/premium.png",
+    android: {
+      foregroundImage: "./assets/icons/premium.png",
+      backgroundColor: "#EC3750",
+    },
+  },
 ];
 
 module.exports = appIcons;

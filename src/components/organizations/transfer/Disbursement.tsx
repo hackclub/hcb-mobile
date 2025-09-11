@@ -10,13 +10,13 @@ import {
 import RNPickerSelect from "react-native-picker-select";
 import useSWR from "swr";
 
-import AuthContext from "../../../auth";
+import AuthContext from "../../../auth/auth";
 import { showAlert } from "../../../lib/alertUtils";
 import { logError } from "../../../lib/errorUtils";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useOffline } from "../../../lib/useOffline";
-import { palette } from "../../../theme";
-import { renderMoney } from "../../../util";
+import { palette } from "../../../styles/theme";
+import { renderMoney } from "../../../utils/util";
 
 type DisbursementScreenProps = {
   organization: OrganizationExpanded;

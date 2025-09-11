@@ -16,8 +16,8 @@ import { SvgXml } from "react-native-svg";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import { CardDetails } from "../lib/useStripeCardDetails";
-import { palette } from "../theme";
-import { redactedCardNumber, renderCardNumber } from "../util";
+import { palette } from "../styles/theme";
+import { redactedCardNumber, renderCardNumber } from "../utils/util";
 
 import CardChip from "./cards/CardChip";
 
@@ -68,7 +68,7 @@ export default function PaymentCard({
     );
 
     return () => subscription.remove();
-  }, []);
+  }, [card.personalization?.logo_url]);
 
   if ((card as GrantCard)?.amount_cents) {
     card.type = "virtual";

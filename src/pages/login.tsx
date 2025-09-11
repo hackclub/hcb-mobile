@@ -15,11 +15,11 @@ import {
   useColorScheme,
 } from "react-native";
 
-import AuthContext from "../auth";
+import AuthContext from "../auth/auth";
 import Button from "../components/Button";
 import { logCriticalError } from "../lib/errorUtils";
 import { useIsDark } from "../lib/useColorScheme";
-import { lightTheme, palette, theme as darkTheme } from "../theme";
+import { lightTheme, palette, theme as darkTheme } from "../styles/theme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,

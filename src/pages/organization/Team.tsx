@@ -11,7 +11,7 @@ import UserAvatar from "../../components/UserAvatar";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { OrgUser } from "../../lib/types/User";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationTeam">;
 

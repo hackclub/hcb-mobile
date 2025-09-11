@@ -1,6 +1,6 @@
 import { match } from "ts-pattern";
 
-import { renderMoney } from "../util";
+import { renderMoney } from "../utils/util";
 
 import Transaction, { TransactionType } from "./types/Transaction";
 

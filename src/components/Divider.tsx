@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { useIsDark } from "../lib/useColorScheme";
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 export default function Divider() {
   const isDark = useIsDark();

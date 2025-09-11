@@ -11,7 +11,7 @@ import ImageView from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 interface FileViewerModalProps {
   fileUrl: string | null;

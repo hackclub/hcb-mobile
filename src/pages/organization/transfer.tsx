@@ -12,7 +12,7 @@ import {
 import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import { palette } from "../../theme";
+import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 

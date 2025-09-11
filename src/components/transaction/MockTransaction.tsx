@@ -6,8 +6,8 @@ import { memo } from "react";
 import { View, Text, ViewProps, StyleSheet } from "react-native";
 
 import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../theme";
-import { renderMoney } from "../../util";
+import { palette } from "../../styles/theme";
+import { renderMoney } from "../../utils/util";
 
 export interface MockTransactionType {
   amount: {

@@ -1,16 +1,10 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-  useColorScheme,
-} from "react-native";
+import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import useSWR from "swr";
 import { ToWords } from "to-words";
 
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import palette from "../../palette";
+import { useIsDark } from "../../lib/useColorScheme";
+import palette from "../../styles/palette";
 
 const screenWidth = Dimensions.get("window").width;
 const checkRatio = 3.2 / 6;
@@ -46,7 +40,7 @@ export default function CheckComponent({
     `organizations/${orgId}`,
   );
 
-  const scheme = useColorScheme() || "light"; // Detects the color scheme (light or dark)
+  const isDark = useIsDark();
 
   const renderMoneyAmount = (amount: number): string => `$${amount.toFixed(2)}`;
   const toWords = new ToWords({
@@ -57,9 +51,8 @@ export default function CheckComponent({
     },
   });
   const amountInWords = toWords.convert(amount);
-
   // Dynamic styles based on the color scheme
-  const styles = getStyles(scheme);
+  const styles = getStyles(isDark);
 
   return (
     <View style={styles.container}>
@@ -71,8 +64,9 @@ export default function CheckComponent({
           <View
             style={{
               borderBottomWidth: 2,
-              borderBottomColor:
-                scheme === "dark" ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             }}
           >
             <Text style={[styles.dateText, styles.handwriting]}>{date}</Text>
@@ -90,8 +84,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                scheme === "dark" ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -110,8 +105,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                scheme === "dark" ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -130,8 +126,9 @@ export default function CheckComponent({
             styles.flexGrow,
             {
               borderBottomWidth: 2,
-              borderBottomColor:
-                scheme === "dark" ? palette.slate[500] : palette.slate[400],
+              borderBottomColor: isDark
+                ? palette.slate[500]
+                : palette.slate[400],
             },
           ]}
         >
@@ -156,21 +153,21 @@ export default function CheckComponent({
   );
 }
 
-const getStyles = (scheme: "light" | "dark") =>
+const getStyles = (isDark: boolean) =>
   StyleSheet.create({
     container: {
       width: checkWidth,
       height: checkHeight,
-      backgroundColor: scheme === "dark" ? "#193046" : "#E2ECF5",
+      backgroundColor: isDark ? "#193046" : "#E2ECF5",
       padding: 12,
       marginVertical: 12,
-      shadowColor: scheme === "dark" ? "#000" : "#888",
+      shadowColor: isDark ? "#000" : "#888",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 4,
       elevation: 6,
       borderWidth: 1,
-      borderColor: scheme === "dark" ? "#ccc" : "#bbb",
+      borderColor: isDark ? "#ccc" : "#bbb",
       overflow: "visible",
     },
     headerContainer: {
@@ -184,11 +181,11 @@ const getStyles = (scheme: "light" | "dark") =>
       fontSize: 14,
       textAlign: "right",
       marginBottom: 8,
-      color: scheme === "dark" ? palette.slate[300] : palette.slate[700],
+      color: isDark ? palette.slate[300] : palette.slate[700],
     },
     dateText: {
       fontSize: 16,
-      color: scheme === "dark" ? palette.slate[300] : palette.slate[700],
+      color: isDark ? palette.slate[300] : palette.slate[700],
       fontFamily: "Damion",
     },
     row: {
@@ -202,34 +199,32 @@ const getStyles = (scheme: "light" | "dark") =>
       fontWeight: "bold",
       textTransform: "uppercase",
       marginRight: 4,
-      color: scheme === "dark" ? palette.slate[300] : palette.slate[700],
+      color: isDark ? palette.slate[300] : palette.slate[700],
     },
     handwriting: {
       fontFamily: "Damion",
       fontSize: 16,
       borderBottomWidth: 2,
-      borderBottomColor:
-        scheme === "dark" ? palette.slate[500] : palette.slate[400],
+      borderBottomColor: isDark ? palette.slate[500] : palette.slate[400],
       paddingRight: 8,
-      color: scheme === "dark" ? "#fff" : "#000",
-      textDecorationColor:
-        scheme === "dark" ? palette.slate[500] : palette.slate[400],
+      color: isDark ? "#fff" : "#000",
+      textDecorationColor: isDark ? palette.slate[500] : palette.slate[400],
     },
     amountInput: {
       fontFamily: "Damion",
       fontSize: 18,
       maxWidth: 120,
-      color: scheme === "dark" ? "#fff" : "#000",
+      color: isDark ? "#fff" : "#000",
       textAlign: "right",
     },
     amount: {
       fontFamily: "Damion",
       fontSize: 18,
       maxWidth: 120,
-      color: scheme === "dark" ? "#fff" : "#000",
+      color: isDark ? "#fff" : "#000",
       textAlign: "right",
       borderWidth: 1,
-      borderColor: scheme === "dark" ? palette.slate[500] : palette.slate[400],
+      borderColor: isDark ? palette.slate[500] : palette.slate[400],
       paddingHorizontal: 4,
     },
     memoContainer: {
@@ -243,12 +238,12 @@ const getStyles = (scheme: "light" | "dark") =>
     signature: {
       height: 40,
       width: 60,
-      tintColor: scheme === "dark" ? palette.slate[100] : palette.slate[500],
+      tintColor: isDark ? palette.slate[100] : palette.slate[500],
     },
     accountDetails: {
       fontFamily: "check-font",
       fontSize: 12,
-      color: scheme === "dark" ? palette.slate[300] : palette.slate[700],
+      color: isDark ? palette.slate[300] : palette.slate[700],
       textAlign: "left",
       flex: 1,
     },

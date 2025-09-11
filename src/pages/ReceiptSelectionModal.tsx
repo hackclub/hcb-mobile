@@ -20,7 +20,7 @@ import useClient from "../lib/client";
 import { logCriticalError } from "../lib/errorUtils";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
-import { palette } from "../theme";
+import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<
   ReceiptsStackParamList,
