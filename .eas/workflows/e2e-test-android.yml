@@ -1,0 +1,18 @@
+name: e2e-test-android
+
+on:
+  pull_request:
+    branches: ['*'] # Run the E2E test workflow on every pull request.
+jobs:
+  build_android_for_e2e:
+    type: build
+    params:
+      platform: android
+      profile: e2e-test # your eas build profile for E2E test
+
+  maestro_test:
+    needs: [build_android_for_e2e]
+    type: maestro
+    params:
+      build_id: ${{ needs.build_android_for_e2e.outputs.build_id }}
+      flow_path: ['.maestro/login.yml']

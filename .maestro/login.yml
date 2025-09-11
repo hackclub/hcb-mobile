@@ -1,0 +1,4 @@
+appId: com.hackclub.hcb
+---
+- launchApp
+- assertVisible: 'Welcome to HCB.'

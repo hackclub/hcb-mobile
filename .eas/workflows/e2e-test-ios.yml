@@ -1,0 +1,19 @@
+name: e2e-test-ios
+
+on:
+  pull_request:
+    branches: ['*']
+
+jobs:
+  build_ios_for_e2e:
+    type: build
+    params:
+      platform: ios
+      profile: e2e-test # your eas build profile for E2E test
+
+  maestro_test:
+    needs: [build_ios_for_e2e]
+    type: maestro
+    params:
+      build_id: ${{ needs.build_ios_for_e2e.outputs.build_id }}
+      flow_path: ['.maestro/login.yml']
