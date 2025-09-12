@@ -55,6 +55,11 @@ export default {
     runtimeVersion: {
       policy: "appVersion",
     },
+    experiments: {
+      remoteBuildCache: {
+        provider: "eas",
+      },
+    },
     plugins: [
       [
         "expo-image-picker",

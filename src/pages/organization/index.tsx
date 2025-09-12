@@ -176,7 +176,7 @@ export default function OrganizationPage({
             id: "accountNumber",
             title: "View Account Details",
             image: "creditcard.and.123",
-            imageColor: "white"
+            imageColor: "white",
           });
         }
 
@@ -185,7 +185,7 @@ export default function OrganizationPage({
             id: "transfer",
             title: "Transfer Money",
             image: "dollarsign.circle",
-            imageColor: "white"
+            imageColor: "white",
           });
         }
 
@@ -193,7 +193,7 @@ export default function OrganizationPage({
           id: "team",
           title: "Manage Team",
           image: "person.2.badge.gearshape",
-          imageColor: "white"
+          imageColor: "white",
         });
 
         if (!organization.playground_mode && supportsTapToPay) {
@@ -201,7 +201,7 @@ export default function OrganizationPage({
             id: "donation",
             title: "Collect Donations",
             image: "dollarsign.circle",
-            imageColor: "white"
+            imageColor: "white",
           });
         }
 
