@@ -156,25 +156,33 @@ export default function AppContent({
     // Check if we should actually fetch the token
     // Only fetch if the user is authenticated and has access token
     if (!tokens?.accessToken) {
-      console.log("No access token available, skipping Stripe Terminal token fetch");
+      console.log(
+        "No access token available, skipping Stripe Terminal token fetch",
+      );
       throw new Error("Authentication required for Stripe Terminal connection");
     }
 
     // Check rate limiting
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
-      const waitTime = Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000);
-      console.warn(`Rate limited: Please wait ${waitTime} seconds before retrying`);
+      const waitTime = Math.ceil(
+        (TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000,
+      );
+      console.warn(
+        `Rate limited: Please wait ${waitTime} seconds before retrying`,
+      );
       throw new Error(
         `Rate limited: Please wait ${waitTime} seconds before retrying`,
       );
     }
 
     if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
-      console.error(`Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded`);
+      console.error(
+        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded`,
+      );
       setTimeout(() => {
         setTokenFetchAttempts(0);
         setLastTokenFetch(0);
-      }, 60000); 
+      }, 60000);
       throw new Error(
         `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please wait before retrying.`,
       );
@@ -195,13 +203,15 @@ export default function AppContent({
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
-      
+
       // Cache the token
       setCachedToken(newToken);
       setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
 
-      console.log("Successfully fetched and cached Stripe Terminal connection token");
+      console.log(
+        "Successfully fetched and cached Stripe Terminal connection token",
+      );
       return newToken;
     } catch (error) {
       console.error("Token fetch failed:", error);
@@ -216,7 +226,9 @@ export default function AppContent({
           TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts),
           30000,
         ); // Max 30 seconds
-        console.warn(`Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`);
+        console.warn(
+          `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
+        );
         throw new Error(
           `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
         );
@@ -273,8 +285,10 @@ export default function AppContent({
         //   return;
         // }
         try {
-          const biometricsRequired = await AsyncStorage.getItem("biometrics_required");
-          
+          const biometricsRequired = await AsyncStorage.getItem(
+            "biometrics_required",
+          );
+
           if (biometricsRequired !== "true") {
             console.log("Biometric authentication not required, bypassing...");
             setIsAuthenticated(true);

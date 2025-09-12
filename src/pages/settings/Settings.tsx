@@ -320,7 +320,13 @@ export default function SettingsPage({ navigation }: Props) {
                   justifyContent: "space-between",
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 1,
+                  }}
+                >
                   <Ionicons
                     name="finger-print"
                     size={22}
@@ -331,7 +337,13 @@ export default function SettingsPage({ navigation }: Props) {
                     <Text style={{ color: colors.text, fontSize: 16 }}>
                       Require Biometrics
                     </Text>
-                    <Text style={{ color: palette.muted, fontSize: 14, marginTop: 2 }}>
+                    <Text
+                      style={{
+                        color: palette.muted,
+                        fontSize: 14,
+                        marginTop: 2,
+                      }}
+                    >
                       Use Face ID or Touch ID to unlock the app
                     </Text>
                   </View>
