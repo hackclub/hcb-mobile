@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import useSWRInfinite from "swr/infinite";
+import { useSWRConfig } from "swr";
 
 import { PaginatedResponse } from "../types/HcbApiObject";
 import Transaction from "../types/Transaction";
@@ -23,7 +24,15 @@ export function getKey(orgId: string) {
 }
 
 export default function useTransactions(orgId: string) {
-  const { data, size, setSize, isLoading } = useSWRInfinite(getKey(orgId));
+  const { fetcher } = useSWRConfig();
+  
+  // Create a fetcher specifically for useSWRInfinite that handles the key properly
+  const infiniteFetcher = (url: string | null) => {
+    if (!url) return null;
+    return fetcher(url);
+  };
+  
+  const { data, size, setSize, isLoading } = useSWRInfinite(getKey(orgId), infiniteFetcher);
 
   const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d?.data) || [],
