@@ -4,8 +4,9 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import * as LocalAuthentication from "expo-local-authentication";
 import * as SystemUI from "expo-system-ui";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   Linking,
   Text,
@@ -15,6 +16,7 @@ import {
   Animated,
   useColorScheme,
   Platform,
+  Switch,
 } from "react-native";
 import useSWR from "swr";
 
@@ -32,6 +34,7 @@ const TOS_URL = "https://hcb.hackclub.com/tos";
 const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
 
 const THEME_KEY = "app_theme";
+const BIOMETRICS_KEY = "biometrics_required";
 
 const themeOptions = [
   {
@@ -69,6 +72,8 @@ export default function SettingsPage({ navigation }: Props) {
   const animation = useRef(new Animated.Value(0)).current;
   const scheme = useColorScheme();
   const isDark = useIsDark();
+  const [biometricsRequired, setBiometricsRequired] = useState(false);
+  const [biometricsAvailable, setBiometricsAvailable] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -81,9 +86,16 @@ export default function SettingsPage({ navigation }: Props) {
         ) {
           setTheme(storedTheme);
         }
+
+        const storedBiometrics = await AsyncStorage.getItem(BIOMETRICS_KEY);
+        setBiometricsRequired(storedBiometrics === "true");
+
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        setBiometricsAvailable(hasHardware && isEnrolled);
       } catch (error) {
-        logError("Error loading theme in settings", error, {
-          context: { action: "settings_theme_load" },
+        logError("Error loading settings", error, {
+          context: { action: "settings_load" },
         });
       }
     })();
@@ -113,11 +125,25 @@ export default function SettingsPage({ navigation }: Props) {
     }
   };
 
+  const handleBiometricsToggle = async (value: boolean) => {
+    try {
+      setBiometricsRequired(value);
+      await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
+    } catch (error) {
+      logError("Error saving biometrics setting", error, {
+        context: { action: "biometrics_toggle", value },
+      });
+      // Revert the state if saving fails
+      setBiometricsRequired(!value);
+    }
+  };
+
   const handleSignOut = async () => {
     resetTheme();
     try {
       await AsyncStorage.multiRemove([
         THEME_KEY,
+        BIOMETRICS_KEY,
         "organizationOrder",
         "canceledCardsShown",
         "ttpDidOnboarding",
@@ -265,7 +291,7 @@ export default function SettingsPage({ navigation }: Props) {
           </View>
         </View>
 
-        {/* App Icon & Tutorials Section */}
+        {/* App Settings Section */}
         <Text
           style={{
             fontSize: 20,
@@ -284,6 +310,49 @@ export default function SettingsPage({ navigation }: Props) {
             marginBottom: 24,
           }}
         >
+          {biometricsAvailable && (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 18,
+                  justifyContent: "space-between",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                  <Ionicons
+                    name="finger-print"
+                    size={22}
+                    color={palette.muted}
+                    style={{ marginRight: 12 }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: colors.text, fontSize: 16 }}>
+                      Require Biometrics
+                    </Text>
+                    <Text style={{ color: palette.muted, fontSize: 14, marginTop: 2 }}>
+                      Use Face ID or Touch ID to unlock the app
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  value={biometricsRequired}
+                  onValueChange={handleBiometricsToggle}
+                  trackColor={{ false: palette.muted, true: colors.primary }}
+                  thumbColor={biometricsRequired ? "#fff" : "#f4f3f4"}
+                />
+              </View>
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: dividerColor,
+                  marginLeft: 20,
+                  marginRight: 20,
+                }}
+              />
+            </>
+          )}
           <Pressable
             style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
             onPress={() => navigation.navigate("AppIconSelector")}

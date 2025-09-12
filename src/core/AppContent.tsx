@@ -1,5 +1,6 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   NavigationContainer,
   LinkingOptions,
@@ -127,32 +128,60 @@ export default function AppContent({
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
 
-  // Reset Stripe Terminal initialization state on app start
   useEffect(() => {
     resetStripeTerminalInitialization();
+    setTokenFetchAttempts(0);
+    setLastTokenFetch(0);
+    setCachedToken(null);
+    setTokenExpiry(0);
   }, []);
 
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
   const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
+  const [cachedToken, setCachedToken] = useState<string | null>(null);
+  const [tokenExpiry, setTokenExpiry] = useState<number>(0);
   const TOKEN_FETCH_COOLDOWN = 5000;
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
+  const TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
 
+    // Return cached token if it's still valid
+    if (cachedToken && now < tokenExpiry) {
+      console.log("Using cached Stripe Terminal connection token");
+      return cachedToken;
+    }
+
+    // Check if we should actually fetch the token
+    // Only fetch if the user is authenticated and has access token
+    if (!tokens?.accessToken) {
+      console.log("No access token available, skipping Stripe Terminal token fetch");
+      throw new Error("Authentication required for Stripe Terminal connection");
+    }
+
+    // Check rate limiting
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
+      const waitTime = Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000);
+      console.warn(`Rate limited: Please wait ${waitTime} seconds before retrying`);
       throw new Error(
-        `Rate limited: Please wait ${Math.ceil((TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000)} seconds before retrying`,
+        `Rate limited: Please wait ${waitTime} seconds before retrying`,
       );
     }
 
     if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
+      console.error(`Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded`);
+      setTimeout(() => {
+        setTokenFetchAttempts(0);
+        setLastTokenFetch(0);
+      }, 60000); 
       throw new Error(
-        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please restart the app.`,
+        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please wait before retrying.`,
       );
     }
 
     try {
+      console.log("Fetching new Stripe Terminal connection token...");
       setLastTokenFetch(now);
       setTokenFetchAttempts((prev) => prev + 1);
 
@@ -164,9 +193,16 @@ export default function AppContent({
         };
       };
 
+      const newToken = token.terminal_connection_token.secret;
+      const newExpiry = now + TOKEN_CACHE_DURATION;
+      
+      // Cache the token
+      setCachedToken(newToken);
+      setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
 
-      return token.terminal_connection_token.secret;
+      console.log("Successfully fetched and cached Stripe Terminal connection token");
+      return newToken;
     } catch (error) {
       console.error("Token fetch failed:", error);
 
@@ -180,6 +216,7 @@ export default function AppContent({
           TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts),
           30000,
         ); // Max 30 seconds
+        console.warn(`Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`);
         throw new Error(
           `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
         );
@@ -229,13 +266,22 @@ export default function AppContent({
     setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if ((await process.env.EXPO_PUBLIC_APP_VARIANT) === "development") {
-          // bypass auth for development
-          setIsAuthenticated(true);
-          setAppIsReady(true);
-          return;
-        }
+        // if ((await process.env.EXPO_PUBLIC_APP_VARIANT) === "development") {
+        //   // bypass auth for development
+        //   setIsAuthenticated(true);
+        //   setAppIsReady(true);
+        //   return;
+        // }
         try {
+          const biometricsRequired = await AsyncStorage.getItem("biometrics_required");
+          
+          if (biometricsRequired !== "true") {
+            console.log("Biometric authentication not required, bypassing...");
+            setIsAuthenticated(true);
+            setAppIsReady(true);
+            return;
+          }
+
           // Check if biometric authentication is available
           const hasHardware = await LocalAuthentication.hasHardwareAsync();
           const isEnrolled = await LocalAuthentication.isEnrolledAsync();
@@ -299,6 +345,10 @@ export default function AppContent({
 
   useEffect(() => {
     const handleUpdates = async () => {
+      if (process.env.EXPO_PUBLIC_APP_VARIANT === "development") {
+        setFinishedUpdateCheck(true);
+        return;
+      }
       try {
         const availableUpdate = await Updates.checkForUpdateAsync();
 
