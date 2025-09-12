@@ -38,6 +38,7 @@ export default {
       },
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       versionCode: 3,
+      edgeToEdgeEnabled: true,
     },
     web: {
       bundler: "metro",
@@ -46,11 +47,6 @@ export default {
       eas: {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
       },
-    },
-    updates: {
-      url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
-      runtimeVersion: "appVersion",
-      checkAutomatically: "NEVER",
     },
     runtimeVersion: {
       policy: "appVersion",
