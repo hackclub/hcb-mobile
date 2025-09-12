@@ -33,7 +33,7 @@ import { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
 import useClient from "../lib/client";
-import { logCriticalError, logError } from "../lib/errorUtils";
+import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import { useOffline } from "../lib/useOffline";
