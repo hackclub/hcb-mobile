@@ -185,7 +185,6 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                     top: 6,
                     right: 6,
                     padding: 4,
-                    backgroundClip: "padding-box",
                     borderRadius: 100,
                     backgroundColor: isDark ? "#26181F" : "#ECE0E2",
                     opacity: 0.8,

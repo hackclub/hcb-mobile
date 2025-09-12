@@ -446,7 +446,6 @@ export default function ReceiptsPage({ navigation }: Props) {
                         top: 6,
                         right: 6,
                         padding: 4,
-                        backgroundClip: "padding-box",
                         borderRadius: 100,
                         backgroundColor: isDark ? "#26181F" : "#ECE0E2",
                         opacity: 0.8,
