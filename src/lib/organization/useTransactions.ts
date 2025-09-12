@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import useSWRInfinite from "swr/infinite";
 import { useSWRConfig } from "swr";
+import useSWRInfinite from "swr/infinite";
 
 import { PaginatedResponse } from "../types/HcbApiObject";
 import Transaction from "../types/Transaction";
@@ -26,12 +26,12 @@ export function getKey(orgId: string) {
 export default function useTransactions(orgId: string) {
   const { fetcher } = useSWRConfig();
 
-  const infiniteFetcher = (url: string | null) => {
-    if (!url) return null;
-    return fetcher(url);
+  const infiniteFetcher = (url: string): Promise<PaginatedResponse<Transaction>> => {
+    if (!fetcher) throw new Error('Fetcher not available');
+    return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
-  const { data, size, setSize, isLoading } = useSWRInfinite(
+  const { data, size, setSize, isLoading } = useSWRInfinite<PaginatedResponse<Transaction>>(
     getKey(orgId),
     infiniteFetcher,
   );
