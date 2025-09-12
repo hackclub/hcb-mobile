@@ -12,6 +12,7 @@ export default {
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
     assetBundlePatterns: ["**/*"],
+    newArchEnabled: true,
     ios: {
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
