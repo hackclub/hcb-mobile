@@ -356,7 +356,6 @@ export default function AppContent({
     }
   }, [refreshAccessToken, tokens]);
 
-
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
       SplashScreen.hide();

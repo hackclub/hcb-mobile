@@ -21,7 +21,8 @@
         "EXPO_PUBLIC_API_BASE": "https://hcb.hackclub.com/api/v4",
         "EXPO_PUBLIC_CLIENT_ID": "yt8JHmPDmmYYLUmoEiGtocYwg5fSOGCrcIY3G-vkMRs",
         "EXPO_PUBLIC_STRIPE_API_KEY": "pk_live_UAjIP1Kss29XZ6tW0MFWkjUQ",
-        "EXPO_PUBLIC_SENTRY_DSN": "https://a805efb911be32fadcfe8609a2e709c7@o4509680631087104.ingest.us.sentry.io/4509724351594496"
+        "EXPO_PUBLIC_SENTRY_DSN": "https://a805efb911be32fadcfe8609a2e709c7@o4509680631087104.ingest.us.sentry.io/4509724351594496",
+        "SENTRY_AUTH_TOKEN": "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"
       },
       "android": {
         "buildType": "apk"
