@@ -26,15 +26,16 @@ export function getKey(orgId: string) {
 export default function useTransactions(orgId: string) {
   const { fetcher } = useSWRConfig();
 
-  const infiniteFetcher = (url: string): Promise<PaginatedResponse<Transaction>> => {
-    if (!fetcher) throw new Error('Fetcher not available');
+  const infiniteFetcher = (
+    url: string,
+  ): Promise<PaginatedResponse<Transaction>> => {
+    if (!fetcher) throw new Error("Fetcher not available");
     return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
-  const { data, size, setSize, isLoading } = useSWRInfinite<PaginatedResponse<Transaction>>(
-    getKey(orgId),
-    infiniteFetcher,
-  );
+  const { data, size, setSize, isLoading } = useSWRInfinite<
+    PaginatedResponse<Transaction>
+  >(getKey(orgId), infiniteFetcher);
 
   const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d?.data) || [],
