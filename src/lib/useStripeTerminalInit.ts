@@ -23,11 +23,13 @@ let globalInitializationState = {
   supportsTapToPay: false,
   error: null as Error | null,
 };
+let hasLoggedWaiting = false;
 
 // Reset function to clear global state on app restart
 export function resetStripeTerminalInitialization() {
   console.log("Resetting Stripe Terminal initialization state");
   globalInitializationPromise = null;
+  hasLoggedWaiting = false;
   globalInitializationState = {
     isInitialized: false,
     supportsTapToPay: false,
@@ -56,12 +58,18 @@ export function useStripeTerminalInit(
 
   const initializeTerminal = useCallback(async (): Promise<boolean> => {
     if (globalInitializationPromise) {
-      console.log("Waiting for existing Stripe Terminal initialization...");
+      if (!hasLoggedWaiting) {
+        console.log("Waiting for existing Stripe Terminal initialization...");
+        hasLoggedWaiting = true;
+      }
       return await globalInitializationPromise;
     }
 
     if (globalInitializationState.isInitialized) {
-      console.log("Stripe Terminal already initialized, skipping...");
+      // Only log this once per app session
+      if (!hasLoggedWaiting) {
+        console.log("Stripe Terminal already initialized, skipping...");
+      }
       return true;
     }
 
@@ -143,6 +151,7 @@ export function useStripeTerminalInit(
   const retry = () => {
     console.log("Retrying Stripe Terminal initialization...");
     initializationAttempted.current = false;
+    hasLoggedWaiting = false;
     setError(null);
     setIsInitialized(false);
     setSupportsTapToPay(false);
