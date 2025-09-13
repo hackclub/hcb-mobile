@@ -586,7 +586,6 @@ export default function CardPage({
   };
 
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!} merchantIdentifier="merchant.com.hackclub.hcb">
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         <ScrollView
           contentContainerStyle={{
@@ -1143,6 +1142,5 @@ export default function CardPage({
           )}
         </ScrollView>
       </Animated.View>
-    </StripeProvider>
   );
 }

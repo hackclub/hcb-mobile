@@ -9,6 +9,7 @@ import AppContent from "./src/AppContent";
 import { AuthProvider } from "./src/AuthProvider";
 import { useCache } from "./src/cacheProvider";
 import { ThemeProvider } from "./src/ThemeContext";
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 function App() {
   const [fontsLoaded] = useFonts({
@@ -17,6 +18,8 @@ function App() {
     "Consolas-Bold": require("./assets/fonts/CONSOLAB.ttf"),
     Damion: require("./assets/fonts/Damion-Regular.ttf"),
   });
+
+  console.log("process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY", process.env.EXPO_PUBLIC_STRIPE_API_KEY);
 
   const scheme = useColorScheme();
   const cache = useCache();
@@ -36,11 +39,13 @@ function App() {
   }
 
   return (
+  <StripeProvider publishableKey={"pk_live_UAjIP1Kss29XZ6tW0MFWkjUQ"} merchantIdentifier="merchant.com.hackclub.hcb">
     <ThemeProvider>
       <AuthProvider>
         <AppContent scheme={scheme} cache={cache} />
       </AuthProvider>
     </ThemeProvider>
+    </StripeProvider>
   );
 }
 
