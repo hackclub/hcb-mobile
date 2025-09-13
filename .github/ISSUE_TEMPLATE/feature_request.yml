@@ -1,0 +1,19 @@
+name: Feature request
+description: got a small feature for app devs? let us hear you out
+title: "[Feature Request] feature name here"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Describe the problem
+      description: What problem would this feature request solve?
+      placeholder: Ex. I wish I could have the ability to submit reimbursements.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the feature/solution
+      description: What solution or feature do you have in mind for solving your problem?
+    validations:
+      required: true
