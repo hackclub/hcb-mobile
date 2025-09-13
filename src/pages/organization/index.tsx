@@ -4,7 +4,6 @@ import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
 import groupBy from "lodash/groupBy";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -17,11 +16,13 @@ import {
   Platform,
 } from "react-native";
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 
 import Button from "../../components/Button";
+import AccessDenied from "../../components/organizations/AccessDenied";
 import { EmptyState } from "../../components/organizations/EmptyState";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
+import OfflineNoData from "../../components/organizations/OfflineNoData";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
 import MockTransaction, {
@@ -40,7 +41,9 @@ import ITransaction, {
   TransactionType,
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
+import User from "../../lib/types/User";
 import { useOffline } from "../../lib/useOffline";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 import { renderDate, renderMoney } from "../../utils/util";
@@ -82,16 +85,26 @@ export default function OrganizationPage({
   navigation,
 }: Props) {
   const scheme = useColorScheme();
+  const { isOnline } = useOffline();
+
   const {
     data: organization,
     error: organizationError,
     isLoading: organizationLoading,
     mutate: mutateOrganization,
-  } = useSWR<Organization | OrganizationExpanded>(`organizations/${orgId}`, {
-    fallbackData: _organization,
-  });
+  } = useOfflineSWR<Organization | OrganizationExpanded>(
+    `organizations/${orgId}`,
+    {
+      fallbackData: _organization,
+      onError: (err) => {
+        logError("Error fetching organization:", err, {
+          context: { orgId, isOnline },
+        });
+      },
+    },
+  );
 
-  const { data: user, isLoading: userLoading } = useSWR("user");
+  const { data: user, isLoading: userLoading } = useOfflineSWR<User>("user");
   const [showMockData, setShowMockData] = useState(false);
   const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
   const { supportsTapToPay } = useStripeTerminalInit({
@@ -106,15 +119,30 @@ export default function OrganizationPage({
     isLoading,
   } = useTransactions(orgId);
   const [refreshing] = useState(false);
-  const { isOnline } = useOffline();
 
   useEffect(() => {
-    if (organizationError || !organization) {
+    const isAccessDenied =
+      organizationError &&
+      typeof organizationError === "object" &&
+      "status" in organizationError &&
+      organizationError.status === 403;
+
+    const isOfflineNoData = organizationError && !isOnline && !organization;
+
+    if (isAccessDenied) {
       navigation.setOptions({
         title: "Access Denied",
       });
+    } else if (isOfflineNoData) {
+      navigation.setOptions({
+        title: "Offline",
+      });
+    } else if (organization) {
+      navigation.setOptions({
+        title: organization.name || "Organization",
+      });
     }
-  }, [organizationError, organization, navigation]);
+  }, [organizationError, organization, navigation, isOnline]);
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
@@ -255,7 +283,12 @@ export default function OrganizationPage({
   }, [organization, scheme, navigation, user, supportsTapToPay]);
 
   useEffect(() => {
-    if (organizationError?.status === 401) {
+    if (
+      organizationError &&
+      typeof organizationError === "object" &&
+      "status" in organizationError &&
+      organizationError.status === 401
+    ) {
       mutateOrganization();
     }
   }, [organizationError, mutateOrganization]);
@@ -294,101 +327,47 @@ export default function OrganizationPage({
     }, [mockTransactions]);
 
   const onRefresh = () => {
-    mutate(`organizations/${orgId}`);
-    mutate(`organizations/${orgId}/transactions`);
+    if (isOnline) {
+      mutate(`organizations/${orgId}`);
+      mutate(`organizations/${orgId}/transactions`);
+    }
   };
 
-  if (organizationLoading || userLoading || organizationError?.status === 403) {
+  if (
+    organizationLoading ||
+    userLoading ||
+    (organizationError &&
+      typeof organizationError === "object" &&
+      "status" in organizationError &&
+      organizationError.status === 403)
+  ) {
     return <LoadingSkeleton />;
   }
 
-  if (organizationError || !organization) {
+  // Check for 403 access denied error
+  const isAccessDenied =
+    organizationError &&
+    typeof organizationError === "object" &&
+    "status" in organizationError &&
+    organizationError.status === 403;
+
+  // Check for offline with no cached data
+  const isOfflineNoData = organizationError && !isOnline && !organization;
+
+  if (isAccessDenied) {
+    return <AccessDenied orgId={orgId} onGoBack={() => navigation.goBack()} />;
+  }
+
+  if (isOfflineNoData) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: themeColors.background,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 24,
+      <OfflineNoData
+        onRetry={() => {
+          if (isOnline) {
+            mutateOrganization();
+          }
         }}
-      >
-        <View
-          style={{
-            backgroundColor: themeColors.card,
-            borderRadius: 20,
-            padding: 32,
-            width: "100%",
-            maxWidth: 400,
-            alignItems: "center",
-            elevation: 8,
-          }}
-        >
-          <View
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: 48,
-              backgroundColor: `${palette.primary}15`,
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 32,
-            }}
-          >
-            <Ionicons name="lock-closed" size={48} color={palette.primary} />
-          </View>
-          <Text
-            style={{
-              color: themeColors.text,
-              fontSize: 28,
-              fontWeight: "700",
-              marginBottom: 16,
-              textAlign: "center",
-              letterSpacing: -0.5,
-            }}
-          >
-            Access Denied
-          </Text>
-          <Text
-            style={{
-              color: palette.muted,
-              fontSize: 17,
-              lineHeight: 24,
-              textAlign: "center",
-              marginBottom: 32,
-              paddingHorizontal: 8,
-            }}
-          >
-            You don't have permission to view this organization. Please contact
-            the organization's manager for access.
-          </Text>
-          <Button
-            style={{
-              width: "100%",
-              backgroundColor: themeColors.primary,
-              borderRadius: 12,
-              height: 50,
-              marginBottom: 16,
-            }}
-            color="#fff"
-            onPress={() => navigation.goBack()}
-          >
-            Go Back
-          </Button>
-          <Button
-            style={{
-              width: "100%",
-              backgroundColor: palette.slate,
-              borderRadius: 12,
-              height: 50,
-            }}
-            color="#fff"
-            onPress={() => Linking.openURL(`https://hcb.hackclub.com/${orgId}`)}
-          >
-            View on Website
-          </Button>
-        </View>
-      </View>
+        onGoBack={() => navigation.goBack()}
+      />
     );
   }
 

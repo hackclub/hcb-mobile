@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import useSWR, { mutate, useSWRConfig } from "swr";
+import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "../components/AdminTools";
@@ -33,6 +33,7 @@ import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization from "../lib/types/Organization";
 import Transaction, { TransactionType } from "../lib/types/Transaction";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transaction">;
@@ -45,7 +46,7 @@ export default function TransactionPage({
 }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
-  const { data: transaction, isLoading } = useSWR<
+  const { data: transaction, isLoading } = useOfflineSWR<
     Transaction & { organization?: Organization }
   >(
     orgId
@@ -53,11 +54,10 @@ export default function TransactionPage({
       : `transactions/${transactionId}`,
     { fallbackData: _transaction },
   );
-  const { data: comments } = useSWR<IComment[]>(
-    () =>
-      `organizations/${
-        orgId || transaction!.organization!.id
-      }/transactions/${transactionId}/comments`,
+  const { data: comments } = useOfflineSWR<IComment[]>(
+    `organizations/${
+      orgId || transaction!.organization!.id
+    }/transactions/${transactionId}/comments`,
   );
 
   const tabBarHeight = useBottomTabBarHeight();

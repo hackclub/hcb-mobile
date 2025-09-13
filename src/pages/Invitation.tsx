@@ -9,7 +9,7 @@ import {
   TouchableHighlight,
   ActivityIndicator,
 } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import Button from "../components/Button";
@@ -17,6 +17,7 @@ import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Invitation from "../lib/types/Invitation";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import palette from "../styles/palette";
 import { palette as themePalette } from "../styles/theme";
 
@@ -30,7 +31,7 @@ export default function InvitationPage({
 }: Props) {
   const hcb = useClient();
 
-  const { data: invitation } = useSWR<Invitation>(
+  const { data: invitation } = useOfflineSWR<Invitation>(
     `user/invitations/${inviteId}`,
     { fallbackData: _invitation },
   );

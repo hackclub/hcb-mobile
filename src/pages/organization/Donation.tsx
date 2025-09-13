@@ -24,7 +24,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Progress from "react-native-progress";
-import useSWR from "swr";
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
@@ -36,6 +35,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useLocation } from "../../lib/useLocation";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 
@@ -211,7 +211,7 @@ function PageContent({
 }) {
   const { colors } = useTheme();
   const { data: organization, isLoading: organizationLoading } =
-    useSWR<Organization>(`organizations/${orgId}`);
+    useOfflineSWR<Organization>(`organizations/${orgId}`);
   const { accessDenied } = useLocation();
   const {
     isInitialized: isStripeInitialized,
