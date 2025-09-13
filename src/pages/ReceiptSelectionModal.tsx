@@ -13,13 +13,14 @@ import {
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
 import { logCriticalError } from "../lib/errorUtils";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<
@@ -36,7 +37,7 @@ export default function ReceiptSelectionModal({
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const { data: receipts } = useSWR<Receipt[]>("receipts");
+  const { data: receipts } = useOfflineSWR<Receipt[]>("receipts");
   const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(
     new Set(),
   );

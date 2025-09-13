@@ -25,7 +25,7 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import useSWR, { mutate, preload, useSWRConfig } from "swr";
+import { mutate, preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import { logCriticalError, logError } from "../lib/errorUtils";
@@ -34,6 +34,7 @@ import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import Invitation from "../lib/types/Invitation";
 import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 import { organizationOrderEqual } from "../utils/util";
 
@@ -80,7 +81,7 @@ export default function App({ navigation }: Props) {
     data: missingReceiptData,
     error: missingReceiptError,
     mutate: refetchMissingReceipts,
-  } = useSWR<{
+  } = useOfflineSWR<{
     data: (ITransaction & { organization: Organization })[];
   }>(hasShareIntent ? "user/transactions/missing_receipt" : null);
 
@@ -207,37 +208,28 @@ export default function App({ navigation }: Props) {
     data: organizations,
     error,
     mutate: reloadOrganizations,
-  } = useSWR<Organization[]>(isOnline ? "user/organizations" : null, {
+  } = useOfflineSWR<Organization[]>("user/organizations", {
     fallbackData: [],
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 2000,
-    shouldRetryOnError: false,
-    keepPreviousData: true,
     onError: (err) => {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        logError("Error fetching organizations:", err);
-      }
+      logError("Error fetching organizations:", err);
     },
   });
 
   const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
-  const { data: invitations, mutate: reloadInvitations } = useSWR<Invitation[]>(
-    isOnline ? "user/invitations" : null,
-    {
-      fallbackData: [],
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 2000,
-      shouldRetryOnError: false,
-      keepPreviousData: true,
-      onError: (err) => {
-        if (err.name !== "AbortError" && err.name !== "NetworkError") {
-          logError("Error fetching invitations:", err);
-        }
-      },
+  const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
+    Invitation[]
+  >("user/invitations", {
+    fallbackData: [],
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 2000,
+    onError: (err) => {
+      logError("Error fetching invitations:", err);
     },
-  );
+  });
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();

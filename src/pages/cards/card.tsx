@@ -21,7 +21,7 @@ import {
   TextInput,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
 import CardSkeleton from "../../components/cards/CardSkeleton";
@@ -39,6 +39,7 @@ import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
 import {
@@ -67,18 +68,21 @@ export default function CardPage(
   const hcb = useClient();
   const grantId = (props as CardPageProps)?.grantId;
 
-  const { data: grantCard = _card as GrantCard } = useSWR<GrantCard>(
+  const { data: grantCard = _card as GrantCard } = useOfflineSWR<GrantCard>(
     grantId ? `card_grants/${grantId}` : null,
   );
   const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
-  const { data: card, error: cardFetchError } = useSWR<Card>(`cards/${id}`, {
-    onError: (err) => {
-      logError("Error fetching card", err, { context: { cardId: id } });
-      setCardError("Unable to load card details. Please try again later.");
+  const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
+    `cards/${id}`,
+    {
+      onError: (err) => {
+        logError("Error fetching card", err, { context: { cardId: id } });
+        setCardError("Unable to load card details. Please try again later.");
+      },
     },
-  });
-  const { data: user } = useSWR<User>(`user`);
-  const { data: organization } = useSWR<OrganizationExpanded>(
+  );
+  const { data: user } = useOfflineSWR<User>(`user`);
+  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${card?.organization.id}`,
   );
 
@@ -171,7 +175,7 @@ export default function CardPage(
     data: transactionsData,
     isLoading: transactionsLoading,
     error: transactionsError,
-  } = useSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
+  } = useOfflineSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
 
   const transactions = transactionsData?.data || [];
 
@@ -298,11 +302,12 @@ export default function CardPage(
   });
 
   const toggleCardDetails = async () => {
-    if (!detailsRevealed) {
+    const willReveal = !detailsRevealed;
+    if (willReveal) {
       setCardDetailsLoading(true);
     }
     await toggleDetailsRevealed();
-    if (!detailsRevealed) {
+    if (willReveal) {
       setTimeout(() => setCardDetailsLoading(false), 800);
     } else {
       setCardDetailsLoading(false);
@@ -643,7 +648,7 @@ export default function CardPage(
     ) {
       buttons.push(
         <Button
-          key="details"
+          key={`details-${detailsRevealed}`}
           style={{
             borderRadius: 12,
             backgroundColor: palette.primary,
@@ -652,7 +657,7 @@ export default function CardPage(
           iconColor="white"
           icon={detailsRevealed ? "private-fill" : "view"}
           onPress={toggleCardDetails}
-          loading={!!detailsLoading}
+          loading={!!detailsLoading || !!cardDetailsLoading}
         >
           {detailsRevealed ? "Hide details" : "Reveal details"}
         </Button>,

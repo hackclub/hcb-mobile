@@ -5,10 +5,10 @@ import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, StatusBar, Button } from "react-native";
-import useSWR from "swr";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
@@ -69,7 +69,7 @@ export default function AccountNumberPage({
     params: { orgId },
   },
 }: Props) {
-  const { data: organization } = useSWR<OrganizationExpanded>(
+  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${orgId}`,
   );
 

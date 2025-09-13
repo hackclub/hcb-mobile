@@ -22,7 +22,6 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useSWR from "swr";
 
 import FileViewerModal from "../components/FileViewerModal";
 import UploadIcon from "../components/icons/UploadIcon";
@@ -36,6 +35,7 @@ import Organization from "../lib/types/Organization";
 import Receipt from "../lib/types/Receipt";
 import { TransactionCardCharge } from "../lib/types/Transaction";
 import { useIsDark } from "../lib/useColorScheme";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import p from "../styles/palette";
 import { palette } from "../styles/theme";
 import { renderMoney } from "../utils/util";
@@ -221,11 +221,11 @@ type Props = NativeStackScreenProps<
 
 export default function ReceiptsPage({ navigation }: Props) {
   const { colors: themeColors } = useTheme();
-  const { data, mutate, isLoading } = useSWR<{
+  const { data, mutate, isLoading } = useOfflineSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
   }>("user/transactions/missing_receipt");
   const { data: receipts, mutate: refreshReceipts } =
-    useSWR<Receipt[]>("receipts");
+    useOfflineSWR<Receipt[]>("receipts");
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);

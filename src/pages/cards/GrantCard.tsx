@@ -1,11 +1,11 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { View, Text, Linking } from "react-native";
-import useSWR from "swr";
 
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
 import {
   renderMoney,
@@ -18,7 +18,9 @@ type Props = NativeStackScreenProps<CardsStackParamList, "GrantCard">;
 
 export default function GrantCardPage({ route, navigation }: Props) {
   const { grantId } = route.params;
-  const { data: grant } = useSWR<GrantCardType>(`card_grants/cdg_${grantId}`);
+  const { data: grant } = useOfflineSWR<GrantCardType>(
+    `card_grants/cdg_${grantId}`,
+  );
   const { colors: themeColors } = useTheme();
 
   if (!grant) {

@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
@@ -16,6 +16,7 @@ import useClient from "../lib/client";
 import { StackParamList } from "../lib/NavigatorParamList";
 import { getKey } from "../lib/organization/useTransactions";
 import Transaction from "../lib/types/Transaction";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "RenameTransaction">;
@@ -34,7 +35,7 @@ export default function RenameTransactionPage({
     data: memoSuggestions,
     isLoading,
     isValidating,
-  } = useSWR<string[]>(
+  } = useOfflineSWR<string[]>(
     `organizations/${orgId}/transactions/${transaction.id}/memo_suggestions`,
     { revalidateOnMount: true },
   );

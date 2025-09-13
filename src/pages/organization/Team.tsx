@@ -4,13 +4,14 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { capitalize } from "lodash";
 import { Linking, ScrollView, Text, View } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
 import UserAvatar from "../../components/UserAvatar";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { OrgUser } from "../../lib/types/User";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationTeam">;
@@ -35,7 +36,7 @@ export default function OrganizationTeamPage({
   },
 }: Props) {
   const { cache } = useSWRConfig();
-  const { data: organization } = useSWR<OrganizationExpanded>(
+  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${orgId}?avatar_size=50`,
     { fallbackData: cache.get(`organizations/${orgId}`)?.data },
   );

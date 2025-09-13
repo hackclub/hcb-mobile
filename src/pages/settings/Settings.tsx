@@ -18,7 +18,6 @@ import {
   Platform,
   Switch,
 } from "react-native";
-import useSWR from "swr";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
@@ -26,6 +25,7 @@ import { logError } from "../../lib/errorUtils";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
@@ -65,7 +65,7 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 
 export default function SettingsPage({ navigation }: Props) {
   const { setTokens } = useContext(AuthContext);
-  const { data: user } = useSWR<User>("user");
+  const { data: user } = useOfflineSWR<User>("user");
   const { colors } = useTheme();
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();

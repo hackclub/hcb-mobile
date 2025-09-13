@@ -1,5 +1,4 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   NavigationContainer,
@@ -21,14 +20,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ColorSchemeName, View, Text, ActivityIndicator } from "react-native";
+import { ColorSchemeName, View, ActivityIndicator } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
@@ -36,74 +31,17 @@ import useClient from "../lib/client";
 import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
-import { useOffline } from "../lib/useOffline";
 import { resetStripeTerminalInitialization } from "../lib/useStripeTerminalInit";
 import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
 import { useThemeContext } from "../providers/ThemeContext";
-import { lightTheme, palette, theme } from "../styles/theme";
+import { lightTheme, theme } from "../styles/theme";
 import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
 
-function OfflineBanner() {
-  const insets = useSafeAreaInsets();
-  const { isOnline } = useOffline();
-
-  if (isOnline) return null;
-
-  return (
-    <View
-      style={{
-        position: "absolute",
-        zIndex: 999,
-        width: "100%",
-        alignItems: "center",
-        pointerEvents: "none",
-        top: insets.top + 6,
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: theme.dark
-            ? palette.darkless
-            : lightTheme.colors.card,
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          borderRadius: 20,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 3,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 6,
-        }}
-      >
-        <Ionicons
-          name="cloud-offline-outline"
-          size={18}
-          color={palette.primary}
-        />
-        <Text
-          style={{
-            color: palette.primary,
-            fontWeight: "bold",
-            marginLeft: 8,
-            fontSize: 15,
-          }}
-        >
-          Offline Mode
-        </Text>
-      </View>
-    </View>
-  );
-}
 SplashScreen.preventAutoHideAsync();
 
 SplashScreen.setOptions({
@@ -492,6 +430,10 @@ export default function AppContent({
                   revalidateOnFocus: true,
                   revalidateOnReconnect: true,
                   dedupingInterval: 2000,
+                  shouldRetryOnError: true,
+                  keepPreviousData: true,
+                  errorRetryCount: 3,
+                  errorRetryInterval: 1000,
                 }}
               >
                 <ActionSheetProvider>
@@ -502,7 +444,6 @@ export default function AppContent({
                       linking={linking}
                       onReady={onNavigationReady}
                     >
-                      <OfflineBanner />
                       {tokens?.accessToken && isAuthenticated ? (
                         <Navigator />
                       ) : (
