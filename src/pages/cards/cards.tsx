@@ -18,7 +18,6 @@ import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import useSWR from "swr";
 
 import CardListSkeleton from "../../components/cards/CardListSkeleton";
 import PaymentCard from "../../components/PaymentCard";
@@ -26,6 +25,7 @@ import { logError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
 import { normalizeSvg } from "../../utils/util";
 
@@ -65,9 +65,9 @@ const CardItem = ({
 
 export default function CardsPage({ navigation }: Props) {
   const { data: cards, mutate: reloadCards } =
-    useSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
+    useOfflineSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
   const { data: grantCards, mutate: reloadGrantCards } =
-    useSWR<GrantCard[]>("user/card_grants");
+    useOfflineSWR<GrantCard[]>("user/card_grants");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 

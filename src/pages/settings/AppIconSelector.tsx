@@ -4,7 +4,8 @@ import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Image } from "react-native";
-import useSWR from "swr";
+
+import { useOfflineSWR } from "../../lib/useOfflineSWR";
 
 const icons: { [key: string]: number | null } = {
   default: require("../../../assets/icons/default.png"),
@@ -76,7 +77,7 @@ const isChristmasSeason = () => {
 export default function AppIconSelector() {
   const { colors } = useTheme();
   const [currentIcon, setCurrentIcon] = useState<string>("default");
-  const { data: availableIcons } = useSWR<Record<string, boolean>>(
+  const { data: availableIcons } = useOfflineSWR<Record<string, boolean>>(
     "user/available_icons",
   );
 
