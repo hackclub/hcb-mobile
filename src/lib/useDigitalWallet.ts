@@ -1,4 +1,4 @@
-import { canAddCardToWallet, GooglePayCardToken } from '@stripe/stripe-react-native';
+import { canAddCardToWallet, Constants, GooglePayCardToken } from '@stripe/stripe-react-native';
 import ky from 'ky';
 import { useEffect, useState } from 'react';
 
@@ -48,12 +48,7 @@ export default function useDigitalWallet(cardId: string) {
 
 
       const ephemeralKeyResponse = await hcb(
-        `cards/${cardId}/ephemeral_keys`,
-        {
-          headers: {
-            "Stripe-Version": "2020-03-02",
-          },
-        }
+        `cards/${cardId}/ephemeral_keys?stripe_version=${Constants.API_VERSIONS.ISSUING}`,
       ).json<{ ephemeralKeyId: string; ephemeralKeySecret: string; stripe_id: string; ephemeralKeyExpires: number; ephemeralKeyCreated: number }>();
       setEphemeralKey(ephemeralKeyResponse);
       if (!ephemeralKeyResponse) {
@@ -66,7 +61,7 @@ export default function useDigitalWallet(cardId: string) {
         {
           headers: {
             Authorization: `Bearer ${ephemeralKeyResponse.ephemeralKeySecret}`,
-            "Stripe-Version": "2020-03-02",
+            "Stripe-Version": Constants.API_VERSIONS.ISSUING,
           },
         },
       ).json<StripeCard>();

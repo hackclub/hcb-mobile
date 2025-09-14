@@ -715,9 +715,8 @@ export default function CardPage({
                 </View>
               )}
 
-              {canAddToWallet && (
+              {canAddToWallet && ephemeralKey && (
                 <View style={{ marginBottom: 20 }}>
-                  {/* @ts-expect-error */}
                   <AddToWalletButton
                     token={androidCardToken}
                     androidAssetSource={require('../../assets/google-wallet.png')}
@@ -725,13 +724,13 @@ export default function CardPage({
                       height: 48,
                       width: '100%',
                     }}
-                    testEnv={true}
+                    // testEnv={true}
                     iOSButtonStyle="onLightBackground"
                     cardDetails={{
-                      name: walletCard.cardholder.name,
+                      name: "Mohamad Mortada",
                       primaryAccountIdentifier: walletCard?.wallets?.primary_account_identifier || null,
-                      lastFour: walletCard?.last4 || "0966",
-                      description: 'HCB Card',
+                      lastFour: "4952",
+                      description: 'Added by Stripe',
                       brand: 'Visa',
                     }}
                     ephemeralKey={ephemeralKey}
