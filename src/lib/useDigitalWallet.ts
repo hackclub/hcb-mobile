@@ -44,7 +44,6 @@ export default function useDigitalWallet(cardId: string) {
   const [card, setCard] = useState<StripeCard | null>(null);
   const [isPaired, setIsPaired] = useState(false);
 
-
   useEffect(() => {
     getIsPaired().then((isPaired) => {
       setIsPaired(isPaired);
@@ -95,7 +94,7 @@ export default function useDigitalWallet(cardId: string) {
         primaryAccountIdentifier:
           cardData?.wallets?.primary_account_identifier ?? null,
         cardLastFour: cardData.last4,
-        hasPairedAppleWatch: isPaired || false, 
+        hasPairedAppleWatch: isPaired || false,
       });
 
       if (walletError) {
