@@ -5,6 +5,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { AddToWalletButton } from "@stripe/stripe-react-native";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
@@ -39,6 +40,8 @@ import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
+import { useIsDark } from "../../lib/useColorScheme";
+import useDigitalWallet from "../../lib/useDigitalWallet";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
@@ -83,7 +86,7 @@ export default function CardPage(
   );
   const { data: user } = useOfflineSWR<User>(`user`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${card?.organization.id}`,
+    `organizations/${_card?.organization.id || card?.organization.id}`,
   );
 
   const {
@@ -91,7 +94,7 @@ export default function CardPage(
     toggle: toggleDetailsRevealed,
     revealed: detailsRevealed,
     loading: detailsLoading,
-  } = useStripeCardDetails(id);
+  } = useStripeCardDetails(_card?.id || card?.id || "");
 
   const isGrantCard =
     grantCard?.amount_cents != null ||
@@ -126,6 +129,14 @@ export default function CardPage(
   }>();
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
+  const isDark = useIsDark();
+  const {
+    canAddToWallet,
+    ephemeralKey,
+    card: walletCard,
+    androidCardToken,
+  } = useDigitalWallet(_card?.id || card?.id || "");
+  const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -140,8 +151,9 @@ export default function CardPage(
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
+      setAbleToAddToWallet(canAddToWallet);
     }
-  }, [cardFetchError, errorDisplayReady, card]);
+  }, [cardFetchError, errorDisplayReady, card, canAddToWallet]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -175,7 +187,9 @@ export default function CardPage(
     data: transactionsData,
     isLoading: transactionsLoading,
     error: transactionsError,
-  } = useOfflineSWR<{ data: ITransaction[] }>(`cards/${id}/transactions`);
+  } = useOfflineSWR<{ data: ITransaction[] }>(
+    `cards/${_card?.id || card?.id || ""}/transactions`,
+  );
 
   const transactions = transactionsData?.data || [];
 
@@ -259,7 +273,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, id, grantId]);
+  }, [mutate, card?.id, _card?.id || card?.id || "", grantId]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -970,6 +984,38 @@ export default function CardPage(
             </TouchableOpacity>
 
             {card?.status != "canceled" && getCardActionButtons()}
+            {ableToAddToWallet && ephemeralKey && (
+              <AddToWalletButton
+                token={androidCardToken}
+                androidAssetSource={require("../../../assets/google-wallet.png")}
+                style={{
+                  height: 48,
+                  width: "100%",
+                  marginBottom: 20,
+                }}
+                iOSButtonStyle={
+                  isDark ? "onDarkBackground" : "onLightBackground"
+                }
+                cardDetails={{
+                  name: walletCard?.cardholder?.name || user?.name || "",
+                  primaryAccountIdentifier:
+                    walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
+                  lastFour: walletCard?.last4,
+                  description: "Added by Stripe",
+                }}
+                ephemeralKey={ephemeralKey}
+                onComplete={({ error }) => {
+                  if (error) {
+                    logCriticalError("Error adding card to wallet", error, {
+                      cardId: card?.id,
+                    });
+                  } else {
+                    setAbleToAddToWallet(false);
+                  }
+                }}
+              />
+            )}
+
             {/* Card Details Section */}
             <View
               style={{

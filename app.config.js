@@ -1,5 +1,5 @@
 import appIcons from "./src/lib/AppIconList";
-const IS_DEV = process.env.EXPO_PUBLIC_APP_VARIANT === "development";
+const IS_DEV = false;
 
 export default {
   expo: {
@@ -26,6 +26,7 @@ export default {
         "applinks:bank.hackclub.com",
       ],
       entitlements: {
+        "com.apple.developer.payment-pass-provisioning": true,
         "com.apple.developer.proximity-reader.payment.acceptance": true,
       },
     },

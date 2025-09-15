@@ -1,8 +1,13 @@
-import { canAddCardToWallet, Constants, GooglePayCardToken } from '@stripe/stripe-react-native';
-import ky from 'ky';
-import { useEffect, useState } from 'react';
+import {
+  canAddCardToWallet,
+  Constants,
+  GooglePayCardToken,
+} from "@stripe/stripe-react-native";
+import ky from "ky";
+import { useEffect, useState } from "react";
+import { getIsPaired } from "react-native-watch-connectivity";
 
-import useClient from '../lib/client';
+import useClient from "../lib/client";
 
 interface StripeCard {
   id: string;
@@ -37,7 +42,15 @@ export default function useDigitalWallet(cardId: string) {
     stripe_id: string;
   } | null>(null);
   const [card, setCard] = useState<StripeCard | null>(null);
-  
+  const [isPaired, setIsPaired] = useState(false);
+
+
+  useEffect(() => {
+    getIsPaired().then((isPaired) => {
+      setIsPaired(isPaired);
+    });
+  }, []);
+
   useEffect(() => {
     fetchCardDetails();
   }, [cardId]);
@@ -46,13 +59,18 @@ export default function useDigitalWallet(cardId: string) {
     try {
       // Fetch ephemeral key
 
-
       const ephemeralKeyResponse = await hcb(
         `cards/${cardId}/ephemeral_keys?stripe_version=${Constants.API_VERSIONS.ISSUING}`,
-      ).json<{ ephemeralKeyId: string; ephemeralKeySecret: string; stripe_id: string; ephemeralKeyExpires: number; ephemeralKeyCreated: number }>();
+      ).json<{
+        ephemeralKeyId: string;
+        ephemeralKeySecret: string;
+        stripe_id: string;
+        ephemeralKeyExpires: number;
+        ephemeralKeyCreated: number;
+      }>();
       setEphemeralKey(ephemeralKeyResponse);
       if (!ephemeralKeyResponse) {
-        throw new Error('Failed to get ephemeral key');
+        throw new Error("Failed to get ephemeral key");
       }
 
       // Fetch card details using the ephemeral key
@@ -69,42 +87,57 @@ export default function useDigitalWallet(cardId: string) {
       setCard(cardData);
 
       // Check if card can be added to wallet
-      const { canAddCard, details: walletDetails, error: walletError } = await canAddCardToWallet({
-        primaryAccountIdentifier: cardData?.wallets?.primary_account_identifier ?? null,
+      const {
+        canAddCard,
+        details: walletDetails,
+        error: walletError,
+      } = await canAddCardToWallet({
+        primaryAccountIdentifier:
+          cardData?.wallets?.primary_account_identifier ?? null,
         cardLastFour: cardData.last4,
+        hasPairedAppleWatch: isPaired || false, 
       });
 
       if (walletError) {
-        setState(prev => ({ ...prev, error: walletError.message }));
+        setState((prev) => ({ ...prev, error: walletError.message }));
       } else {
         setState({
           canAddToWallet: canAddCard,
-          androidCardToken: walletDetails?.token?.status === 'TOKEN_STATE_NEEDS_IDENTITY_VERIFICATION' ? walletDetails.token : null,
+          androidCardToken:
+            walletDetails?.token?.status ===
+            "TOKEN_STATE_NEEDS_IDENTITY_VERIFICATION"
+              ? walletDetails.token
+              : null,
           error: null,
         });
       }
     } catch (err) {
-      console.error('Error in fetchCardDetails:', err);
-      setState(prev => ({ ...prev, error: err instanceof Error ? err.message : 'An error occurred' }));
+      console.error("Error in fetchCardDetails:", err);
+      setState((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : "An error occurred",
+      }));
     }
   };
 
   return {
     ...state,
-    ephemeralKey: ephemeralKey ? {
-      "id": ephemeralKey.ephemeralKeyId,
-      "object": "ephemeral_key",
-      "associated_objects": [
-        {
-          "id": ephemeralKey.stripe_id,
-          "type": "issuing.card"
+    ephemeralKey: ephemeralKey
+      ? {
+          id: ephemeralKey.ephemeralKeyId,
+          object: "ephemeral_key",
+          associated_objects: [
+            {
+              id: ephemeralKey.stripe_id,
+              type: "issuing.card",
+            },
+          ],
+          created: ephemeralKey.ephemeralKeyCreated,
+          expires: ephemeralKey.ephemeralKeyExpires,
+          livemode: true,
+          secret: ephemeralKey.ephemeralKeySecret,
         }
-      ],
-      "created": ephemeralKey.ephemeralKeyCreated,
-      "expires": ephemeralKey.ephemeralKeyExpires,
-      "livemode": true,
-      "secret": ephemeralKey.ephemeralKeySecret
-    } : null,
+      : null,
     card,
   };
-} 
+}
