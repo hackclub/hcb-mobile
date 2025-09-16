@@ -15,5 +15,6 @@ export default interface Card extends HcbApiObject<"crd"> {
     logo_url?: string;
   };
   total_spent_cents?: number;
+  balance_available?: number;
   user: User;
 }

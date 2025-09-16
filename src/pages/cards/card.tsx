@@ -1329,28 +1329,29 @@ export default function CardPage(
                   </View>
                 </>
               )}
-            </View>
-
-            {/* Transactions Section */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 15,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: palette.muted,
-                }}
-              >
-                Transaction History
-              </Text>
-              {card?.total_spent_cents != null && (
-                <View style={{ alignItems: "flex-end" }}>
+                                      {card?.total_spent_cents != null && (
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: palette.muted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Spending Limit
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                  >
+                    {renderMoney(card?.balance_available ?? 0)}
+                  </Text>
+                </View>
+                <View>
                   <Text
                     style={{
                       fontSize: 12,
@@ -1370,8 +1371,32 @@ export default function CardPage(
                     {renderMoney(card?.total_spent_cents)}
                   </Text>
                 </View>
-              )}
+              </View>
+            )}
             </View>
+
+
+
+            {/* Transactions Section */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 15,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "600",
+                  color: palette.muted,
+                }}
+              >
+                Transaction History
+              </Text>
+            </View>
+
 
             {transactionError ? (
               <View
