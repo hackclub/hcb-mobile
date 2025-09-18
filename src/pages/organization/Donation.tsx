@@ -38,6 +38,7 @@ import { useLocation } from "../../lib/useLocation";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
+import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
 
 // interface PaymentIntent {
 //   id: string;
@@ -254,6 +255,7 @@ function PageContent({
   const emailRef = useRef<TextInput>(null);
   const [orgCheckLoading, setOrgCheckLoading] = useState(true);
   const hcb = useClient();
+  const tabbarHeight = useBottomTabBarHeight();
 
   // Load tax deductible setting from AsyncStorage
   useEffect(() => {
@@ -738,7 +740,7 @@ function PageContent({
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingBottom: Platform.OS === "android" ? 80 : 110,
+          paddingBottom: Platform.OS === "android" ? 20 + tabbarHeight : 20 + tabbarHeight,
         }}
         bounces={false}
         showsVerticalScrollIndicator={false}
@@ -789,7 +791,6 @@ function PageContent({
                   flex: 1,
                 }}
                 selectTextOnFocus
-                autoFocus
                 clearButtonMode="while-editing"
                 value={name}
                 autoCapitalize="words"

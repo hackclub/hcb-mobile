@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
@@ -50,7 +50,7 @@ const CardsStack = createNativeStackNavigator<CardsStackParamList>();
 const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 
-const Tab = createBottomTabNavigator<TabParamList>();
+const Tab = createNativeBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(

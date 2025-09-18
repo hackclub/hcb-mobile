@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 import { useEffect } from "react";
 import { AppState, InteractionManager, Platform } from "react-native";
 import { Cache, State } from "swr";
@@ -16,8 +16,9 @@ export class CacheProvider implements Cache<CacheValue> {
 
   constructor() {
     this.map = new Map();
-    this.cacheDir = FileSystem.cacheDirectory + "app-cache/";
-    this.cacheFile = `${this.cacheDir}cache.json`;
+    const appCacheDir = new Directory(Paths.cache, "app-cache");
+    this.cacheDir = appCacheDir.uri;
+    this.cacheFile = new File(appCacheDir, "cache.json").uri;
   }
 
   async initialize() {
@@ -35,9 +36,9 @@ export class CacheProvider implements Cache<CacheValue> {
         }
       } else {
         await this.ensureCacheDirectory();
-        const fileInfo = await FileSystem.getInfoAsync(this.cacheFile);
-        if (fileInfo.exists) {
-          const data = await FileSystem.readAsStringAsync(this.cacheFile);
+        const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
+        if (await cacheFile.exists) {
+          const data = await cacheFile.text();
           const entries = JSON.parse(data);
           entries.forEach(
             ([key, value]: [string, State<CacheValue, Error>]) => {
@@ -56,11 +57,9 @@ export class CacheProvider implements Cache<CacheValue> {
 
   private async ensureCacheDirectory() {
     try {
-      const dirInfo = await FileSystem.getInfoAsync(this.cacheDir);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(this.cacheDir, {
-          intermediates: true,
-        });
+      const cacheDir = new Directory(Paths.cache, "app-cache");
+      if (!(await cacheDir.exists)) {
+        await cacheDir.create();
       }
     } catch (error) {
       logError("Error ensuring cache directory", error, {
@@ -79,10 +78,8 @@ export class CacheProvider implements Cache<CacheValue> {
         localStorage.setItem("app-cache", appCache);
       } else {
         await this.ensureCacheDirectory();
-        await FileSystem.writeAsStringAsync(
-          this.cacheFile,
-          JSON.stringify(Array.from(this.map.entries())),
-        );
+        const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
+        await cacheFile.write(JSON.stringify(Array.from(this.map.entries())));
       }
     } catch (error) {
       logError("Error saving cache", error, {

@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import {
   NativeStackNavigationProp,
@@ -50,6 +49,7 @@ import {
   renderCardNumber,
   renderMoney,
 } from "../../utils/util";
+import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
 
 type CardPageProps = {
   cardId?: string;
@@ -83,7 +83,7 @@ export default function CardPage(
   );
   const { data: user } = useOfflineSWR<User>(`user`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${card?.organization.id}`,
+    card?.organization.id ? `organizations/${card.organization.id}` : null,
   );
 
   const {

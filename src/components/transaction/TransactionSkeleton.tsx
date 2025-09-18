@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, StyleProp, ViewStyle } from "react-native";

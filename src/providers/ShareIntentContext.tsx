@@ -5,6 +5,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from "react";
 import useSWR from "swr";
 
@@ -35,6 +36,8 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
   const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const { tokens } = useContext(AuthContext);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutTriggered = useRef<boolean>(false);
 
   // Fetch missing receipt data only when authenticated and has pending images
   const { data: missingReceiptData, error: missingReceiptError } = useSWR<{
@@ -47,18 +50,35 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
 
   // Add timeout to show modal if missing receipt data takes too long
   useEffect(() => {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     if (pendingImages.length > 0 && tokens?.accessToken) {
-      const timeout = setTimeout(() => {
-        setPendingShareIntent({
-          images: pendingImages,
-          missingTransactions: [],
+      const imagesToProcess = [...pendingImages]; // Capture current images
+      timeoutRef.current = setTimeout(() => {
+        setPendingShareIntent((current) => {
+          if (current === null) {
+            return {
+              images: imagesToProcess,
+              missingTransactions: [],
+            };
+          }
+          return current;
         });
         setPendingImages([]);
       }, 5000); // 5 second timeout
-
-      return () => clearTimeout(timeout);
     }
-  }, [pendingImages.length, pendingImages, tokens?.accessToken]);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [pendingImages, tokens?.accessToken]);
 
   useEffect(() => {
     if (hasShareIntent && shareIntent && !shareIntentProcessed) {

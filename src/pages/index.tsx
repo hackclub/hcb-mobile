@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
 import { useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackScreenProps,
@@ -234,9 +234,7 @@ export default function App({ navigation }: Props) {
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
-  const usePanGesture = () =>
-    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
-  const panGesture = usePanGesture();
+  const panGesture = useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
 
   useEffect(() => {
     if (Platform.OS === "ios") {

@@ -82,9 +82,13 @@ export default {
             "This app uses Bluetooth to connect to supported card readers.",
         },
       ],
+      "react-native-bottom-tabs",
       [
         "expo-build-properties",
         {
+          ios: {
+            useFrameworks: "static"
+          },
           android: {
             minSdkVersion: 26,
             packagingOptions: {
