@@ -69,7 +69,6 @@ export default function Button(
   const { variant = "primary" } = props;
 
   const getVariantStyles = () => {
-    // Only apply enhanced styling if a variant is explicitly specified
     if (props.variant) {
       const variantBaseStyle = {
         ...styles.button,
@@ -106,14 +105,12 @@ export default function Button(
       }
     }
     
-    // Return original button style for backward compatibility
     return styles.button;
   };
 
   const getTextColor = () => {
     if (props.color) return props.color;
     
-    // Only use variant-specific colors if variant is explicitly specified
     if (props.variant) {
       switch (variant) {
         case "secondary":
@@ -128,7 +125,6 @@ export default function Button(
       }
     }
     
-    // Return original color for backward compatibility
     return styles.buttonText.color;
   };
 
