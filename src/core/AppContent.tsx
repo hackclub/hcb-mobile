@@ -31,7 +31,10 @@ import useClient from "../lib/client";
 import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
-import { resetStripeTerminalInitialization } from "../lib/useStripeTerminalInit";
+import {
+  resetStripeTerminalInitialization,
+  useStripeTerminalInit,
+} from "../lib/useStripeTerminalInit";
 import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
@@ -64,6 +67,12 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
+
+  useStripeTerminalInit({
+    enabled: !!tokens?.accessToken && isAuthenticated,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: true,
+  });
 
   useEffect(() => {
     resetStripeTerminalInitialization();
