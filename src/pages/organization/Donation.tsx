@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme, NavigationProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -38,7 +39,6 @@ import { useLocation } from "../../lib/useLocation";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
@@ -221,7 +221,7 @@ function PageContent({
   const [amount, setAmount] = useState("$");
   const value = parseFloat(amount.replace("$", "0"));
   const [reader, setReader] = useState<Reader.Type | undefined>(
-    preDiscoveredReaders.length > 0 ? preDiscoveredReaders[0] : undefined
+    preDiscoveredReaders.length > 0 ? preDiscoveredReaders[0] : undefined,
   );
   const readerRef = useRef<Reader.Type | undefined>(reader);
   useEffect(() => {
@@ -229,7 +229,7 @@ function PageContent({
   }, [reader]);
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
   const [currentProgress, setCurrentProgress] = useState<string | null>(
-    softwareUpdateProgress
+    softwareUpdateProgress,
   );
 
   useEffect(() => {
@@ -239,7 +239,9 @@ function PageContent({
   }, [preDiscoveredReaders, reader]);
 
   useEffect(() => {
-    setCurrentProgress(isUpdatingReaderSoftware ? softwareUpdateProgress : null);
+    setCurrentProgress(
+      isUpdatingReaderSoftware ? softwareUpdateProgress : null,
+    );
   }, [softwareUpdateProgress, isUpdatingReaderSoftware]);
   const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
   const {
@@ -282,7 +284,10 @@ function PageContent({
   useEffect(() => {
     const saveSetting = async () => {
       try {
-        await AsyncStorage.setItem("donationTaxDeductible", JSON.stringify(isTaxDeductable));
+        await AsyncStorage.setItem(
+          "donationTaxDeductible",
+          JSON.stringify(isTaxDeductable),
+        );
       } catch (error) {
         logError("Error saving tax deductible setting", error);
       }
@@ -331,7 +336,11 @@ function PageContent({
   useEffect(() => {
     (async () => {
       try {
-        if (discoverReaders && isStripeInitialized && preDiscoveredReaders.length === 0) {
+        if (
+          discoverReaders &&
+          isStripeInitialized &&
+          preDiscoveredReaders.length === 0
+        ) {
           await discoverReaders({ discoveryMethod: "tapToPay" });
         }
       } catch (error) {
@@ -340,7 +349,12 @@ function PageContent({
         });
       }
     })();
-  }, [discoverReaders, orgId, isStripeInitialized, preDiscoveredReaders.length]);
+  }, [
+    discoverReaders,
+    orgId,
+    isStripeInitialized,
+    preDiscoveredReaders.length,
+  ]);
 
   async function handleRequestLocation() {
     await Linking.openSettings();
@@ -466,7 +480,7 @@ function PageContent({
         } as ConnectTapToPayParams,
         "tapToPay",
       );
-      
+
       setCurrentProgress(null);
       if (error) {
         logCriticalError("connectReader error", error, {
@@ -478,7 +492,7 @@ function PageContent({
         );
         return false;
       }
-      
+
       console.log("Successfully connected to Tap to Pay reader");
       // Update AsyncStorage with the new org id after successful connection
       await AsyncStorage.setItem("lastConnectedOrgId", orgId);
@@ -712,7 +726,7 @@ function PageContent({
                 }
                 return false;
               };
-              
+
               if (reader) {
                 await connectReader(reader);
                 setLoadingConnectingReader(false);
@@ -741,7 +755,9 @@ function PageContent({
                 return;
               }
 
-              const readers = await discoverReaders({ discoveryMethod: "tapToPay" });
+              const readers = await discoverReaders({
+                discoveryMethod: "tapToPay",
+              });
               const found = await waitForReader();
               if (found && readerRef.current) {
                 await connectReader(readerRef.current);

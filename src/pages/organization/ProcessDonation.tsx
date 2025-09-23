@@ -24,7 +24,13 @@ import { palette } from "../../styles/theme";
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 
 // Component for QR Code display
-function QRCodeCard({ donationUrl, theme }: { donationUrl: string; theme: ReturnType<typeof useTheme> }) {
+function QRCodeCard({
+  donationUrl,
+  theme,
+}: {
+  donationUrl: string;
+  theme: ReturnType<typeof useTheme>;
+}) {
   return (
     <View
       style={{
@@ -75,16 +81,34 @@ function StatusIcon({ status }: { status: string }) {
 
   switch (status) {
     case "success":
-      return <Ionicons name="checkmark-circle-outline" color={palette.success} {...iconProps} />;
+      return (
+        <Ionicons
+          name="checkmark-circle-outline"
+          color={palette.success}
+          {...iconProps}
+        />
+      );
     case "error":
-      return <Ionicons name="close-circle-outline" color={palette.primary} {...iconProps} />;
+      return (
+        <Ionicons
+          name="close-circle-outline"
+          color={palette.primary}
+          {...iconProps}
+        />
+      );
     default:
       return null;
   }
 }
 
 // Component for button groups
-function ButtonGroup({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
+function ButtonGroup({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: ViewStyle;
+}) {
   return (
     <View
       style={{
@@ -101,20 +125,20 @@ function ButtonGroup({ children, style }: { children: React.ReactNode; style?: V
 }
 
 // Simple wrapper to maintain consistent spacing for ProcessDonation buttons
-function ActionButton({ 
-  onPress, 
-  children, 
-  style, 
-  variant = "primary" 
-}: { 
-  onPress: () => void; 
-  children: React.ReactNode; 
+function ActionButton({
+  onPress,
+  children,
+  style,
+  variant = "primary",
+}: {
+  onPress: () => void;
+  children: React.ReactNode;
   style?: ViewStyle;
   variant?: "primary" | "secondary" | "outline" | "ghost";
 }) {
   return (
-    <StyledButton 
-      onPress={onPress} 
+    <StyledButton
+      onPress={onPress}
       variant={variant}
       style={{
         width: "100%",
@@ -134,7 +158,9 @@ export default function ProcessDonationPage({
     params: { payment, collectPayment, email, name, slug },
   },
 }: Props) {
-  const [status, setStatus] = useState<"ready" | "loading" | "success" | "error">("ready");
+  const [status, setStatus] = useState<
+    "ready" | "loading" | "success" | "error"
+  >("ready");
   const [showQR, setShowQR] = useState(false);
   const theme = useTheme();
 
@@ -146,7 +172,9 @@ export default function ProcessDonationPage({
     const success = await collectPayment();
     setStatus(success ? "success" : "error");
     Haptics.notificationAsync(
-      success ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
+      success
+        ? Haptics.NotificationFeedbackType.Success
+        : Haptics.NotificationFeedbackType.Error,
     );
   };
 
@@ -172,9 +200,18 @@ export default function ProcessDonationPage({
     switch (status) {
       case "loading":
         return (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
             <ActivityIndicator size="large" style={{ margin: 20 }} />
-            <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 10, color: theme.colors.text }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                paddingBottom: 10,
+                color: theme.colors.text,
+              }}
+            >
               Processing
             </Text>
             <Text style={{ fontSize: 16, color: theme.colors.text }}>
@@ -185,26 +222,61 @@ export default function ProcessDonationPage({
 
       case "success":
         return (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingBottom: 100 }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              paddingBottom: 100,
+            }}
+          >
             <StatusIcon status="success" />
-            <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 10, color: theme.colors.text }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                marginBottom: 10,
+                color: theme.colors.text,
+              }}
+            >
               {name ? `Thank you, ${name}!` : "Thank you!"}
             </Text>
-            <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center" }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: theme.colors.text,
+                textAlign: "center",
+              }}
+            >
               {donationAmount} donation completed successfully
             </Text>
             {email && (
               <View style={{ marginTop: 16, alignItems: "center" }}>
-                <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center" }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: theme.colors.text,
+                    textAlign: "center",
+                  }}
+                >
                   A receipt has been sent to:
                 </Text>
-                <Text style={{ fontSize: 16, color: theme.colors.text, fontWeight: "500" }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: theme.colors.text,
+                    fontWeight: "500",
+                  }}
+                >
                   {email}
                 </Text>
               </View>
             )}
             <ButtonGroup>
-              <ActionButton onPress={navigation.goBack} style={{ marginBottom: 0 }}>
+              <ActionButton
+                onPress={navigation.goBack}
+                style={{ marginBottom: 0 }}
+              >
                 Done
               </ActionButton>
             </ButtonGroup>
@@ -214,24 +286,54 @@ export default function ProcessDonationPage({
       case "error":
         return (
           <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               {!showQR && (
                 <>
                   <StatusIcon status="error" />
-                  <Text style={{ fontSize: 20, fontWeight: "600", color: theme.colors.text, marginBottom: 8, textAlign: "center" }}>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "600",
+                      color: theme.colors.text,
+                      marginBottom: 8,
+                      textAlign: "center",
+                    }}
+                  >
                     Error
                   </Text>
-                  <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center", marginBottom: 24, paddingHorizontal: 20 }}>
-                    An error occurred while processing the donation. Please try again.
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: theme.colors.text,
+                      textAlign: "center",
+                      marginBottom: 24,
+                      paddingHorizontal: 20,
+                    }}
+                  >
+                    An error occurred while processing the donation. Please try
+                    again.
                   </Text>
                 </>
               )}
               {showQR && <QRCodeCard donationUrl={donationUrl} theme={theme} />}
             </View>
             <ButtonGroup>
-              <ActionButton onPress={handlePayment} variant="primary">Retry Payment</ActionButton>
+              <ActionButton onPress={handlePayment} variant="primary">
+                Retry Payment
+              </ActionButton>
               {!showQR && (
-                <ActionButton onPress={() => setShowQR(true)} variant="secondary">Show QR Code</ActionButton>
+                <ActionButton
+                  onPress={() => setShowQR(true)}
+                  variant="secondary"
+                >
+                  Show QR Code
+                </ActionButton>
               )}
             </ButtonGroup>
           </View>
@@ -241,11 +343,23 @@ export default function ProcessDonationPage({
       default:
         if (showQR) {
           return (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <QRCodeCard donationUrl={donationUrl} theme={theme} />
               <ButtonGroup>
-                <ActionButton onPress={handleCopyLink} variant="primary">Copy Link</ActionButton>
-                <ActionButton onPress={() => setShowQR(false)} variant="ghost" style={{ marginBottom: 0 }}>
+                <ActionButton onPress={handleCopyLink} variant="primary">
+                  Copy Link
+                </ActionButton>
+                <ActionButton
+                  onPress={() => setShowQR(false)}
+                  variant="ghost"
+                  style={{ marginBottom: 0 }}
+                >
                   Back
                 </ActionButton>
               </ButtonGroup>
@@ -254,18 +368,32 @@ export default function ProcessDonationPage({
         }
 
         return (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text style={{ color: palette.muted, fontSize: 24, marginBottom: 8 }}>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text
+              style={{ color: palette.muted, fontSize: 24, marginBottom: 8 }}
+            >
               Donation amount
             </Text>
-            <Text style={{ fontSize: 50, color: theme.colors.text, fontWeight: "300" }}>
+            <Text
+              style={{
+                fontSize: 50,
+                color: theme.colors.text,
+                fontWeight: "300",
+              }}
+            >
               {donationAmount}
             </Text>
             <ButtonGroup>
               <ActionButton onPress={handlePayment} variant="primary">
                 Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : ""}
               </ActionButton>
-              <ActionButton onPress={() => setShowQR(true)} variant="outline" style={{ marginBottom: 0 }}>
+              <ActionButton
+                onPress={() => setShowQR(true)}
+                variant="outline"
+                style={{ marginBottom: 0 }}
+              >
                 Show QR Code
               </ActionButton>
             </ButtonGroup>

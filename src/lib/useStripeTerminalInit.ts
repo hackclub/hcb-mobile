@@ -1,5 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useStripeTerminal, Reader } from "@stripe/stripe-terminal-react-native";
+import {
+  useStripeTerminal,
+  Reader,
+} from "@stripe/stripe-terminal-react-native";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 import { logError } from "./errorUtils";
@@ -51,32 +54,47 @@ export function resetStripeTerminalInitialization() {
 export function useStripeTerminalInit(
   options: UseStripeTerminalInitOptions = {},
 ): UseStripeTerminalInitResult {
-  const { organizationId, enabled = true, enableReaderPreConnection = false, enableSoftwareUpdates = false } = options;
+  const {
+    organizationId,
+    enabled = true,
+    enableReaderPreConnection = false,
+    enableSoftwareUpdates = false,
+  } = options;
   const terminal = useStripeTerminal({
-    onUpdateDiscoveredReaders: enableReaderPreConnection ? (readers: Reader.Type[]) => {
-      globalInitializationState.discoveredReaders = readers;
-      setDiscoveredReaders(readers);
-    } : undefined,
-    onDidReportReaderSoftwareUpdateProgress: enableSoftwareUpdates ? (progress: string) => {
-      globalInitializationState.updateProgress = progress;
-      setUpdateProgress(progress);
-    } : undefined,
-    onDidReportAvailableUpdate: enableSoftwareUpdates ? async (_update) => {
-      globalInitializationState.isUpdatingReaderSoftware = true;
-      setIsUpdatingReaderSoftware(true);
-      try {
-        await terminal?.installAvailableUpdate();
-      } catch (error) {
-        logError("Failed to install Stripe Terminal software update", error, {
-          context: { organizationId },
-        });
-      } finally {
-        globalInitializationState.isUpdatingReaderSoftware = false;
-        globalInitializationState.updateProgress = null;
-        setIsUpdatingReaderSoftware(false);
-        setUpdateProgress(null);
-      }
-    } : undefined,
+    onUpdateDiscoveredReaders: enableReaderPreConnection
+      ? (readers: Reader.Type[]) => {
+          globalInitializationState.discoveredReaders = readers;
+          setDiscoveredReaders(readers);
+        }
+      : undefined,
+    onDidReportReaderSoftwareUpdateProgress: enableSoftwareUpdates
+      ? (progress: string) => {
+          globalInitializationState.updateProgress = progress;
+          setUpdateProgress(progress);
+        }
+      : undefined,
+    onDidReportAvailableUpdate: enableSoftwareUpdates
+      ? async (_update) => {
+          globalInitializationState.isUpdatingReaderSoftware = true;
+          setIsUpdatingReaderSoftware(true);
+          try {
+            await terminal?.installAvailableUpdate();
+          } catch (error) {
+            logError(
+              "Failed to install Stripe Terminal software update",
+              error,
+              {
+                context: { organizationId },
+              },
+            );
+          } finally {
+            globalInitializationState.isUpdatingReaderSoftware = false;
+            globalInitializationState.updateProgress = null;
+            setIsUpdatingReaderSoftware(false);
+            setUpdateProgress(null);
+          }
+        }
+      : undefined,
   });
 
   const [isInitialized, setIsInitialized] = useState(
@@ -155,12 +173,15 @@ export function useStripeTerminalInit(
 
         if (enableReaderPreConnection && tapToPaySupported) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             await terminal.discoverReaders({
               discoveryMethod: "tapToPay",
             });
           } catch (error) {
-            console.warn("Failed to discover readers during initialization:", error);
+            console.warn(
+              "Failed to discover readers during initialization:",
+              error,
+            );
           }
         }
 
@@ -169,7 +190,8 @@ export function useStripeTerminalInit(
           supportsTapToPay: tapToPaySupported,
           error: null,
           discoveredReaders: globalInitializationState.discoveredReaders,
-          isUpdatingReaderSoftware: globalInitializationState.isUpdatingReaderSoftware,
+          isUpdatingReaderSoftware:
+            globalInitializationState.isUpdatingReaderSoftware,
           updateProgress: globalInitializationState.updateProgress,
         };
 
@@ -225,7 +247,9 @@ export function useStripeTerminalInit(
       setSupportsTapToPay(globalInitializationState.supportsTapToPay);
       setError(globalInitializationState.error);
       setDiscoveredReaders(globalInitializationState.discoveredReaders);
-      setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+      setIsUpdatingReaderSoftware(
+        globalInitializationState.isUpdatingReaderSoftware,
+      );
       setUpdateProgress(globalInitializationState.updateProgress);
       return;
     }
@@ -239,7 +263,9 @@ export function useStripeTerminalInit(
         setSupportsTapToPay(globalInitializationState.supportsTapToPay);
         setError(globalInitializationState.error);
         setDiscoveredReaders(globalInitializationState.discoveredReaders);
-        setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+        setIsUpdatingReaderSoftware(
+          globalInitializationState.isUpdatingReaderSoftware,
+        );
         setUpdateProgress(globalInitializationState.updateProgress);
       })
       .catch((error) => {
@@ -263,20 +289,30 @@ export function useStripeTerminalInit(
         supportsTapToPay !== globalInitializationState.supportsTapToPay ||
         error !== globalInitializationState.error ||
         discoveredReaders !== globalInitializationState.discoveredReaders ||
-        isUpdatingReaderSoftware !== globalInitializationState.isUpdatingReaderSoftware ||
+        isUpdatingReaderSoftware !==
+          globalInitializationState.isUpdatingReaderSoftware ||
         updateProgress !== globalInitializationState.updateProgress
       ) {
         setIsInitialized(globalInitializationState.isInitialized);
         setSupportsTapToPay(globalInitializationState.supportsTapToPay);
         setError(globalInitializationState.error);
         setDiscoveredReaders(globalInitializationState.discoveredReaders);
-        setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+        setIsUpdatingReaderSoftware(
+          globalInitializationState.isUpdatingReaderSoftware,
+        );
         setUpdateProgress(globalInitializationState.updateProgress);
       }
     }, 500);
 
     return () => clearInterval(interval);
-  }, [isInitialized, supportsTapToPay, error, discoveredReaders, isUpdatingReaderSoftware, updateProgress]);
+  }, [
+    isInitialized,
+    supportsTapToPay,
+    error,
+    discoveredReaders,
+    isUpdatingReaderSoftware,
+    updateProgress,
+  ]);
 
   return {
     isInitialized,

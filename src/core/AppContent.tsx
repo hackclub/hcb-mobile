@@ -31,7 +31,10 @@ import useClient from "../lib/client";
 import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
-import { resetStripeTerminalInitialization, useStripeTerminalInit } from "../lib/useStripeTerminalInit";
+import {
+  resetStripeTerminalInitialization,
+  useStripeTerminalInit,
+} from "../lib/useStripeTerminalInit";
 import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
@@ -65,16 +68,8 @@ export default function AppContent({
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
 
-  const {
-    isInitialized: isStripeInitialized,
-    isInitializing: isStripeInitializing,
-    supportsTapToPay,
-    discoveredReaders,
-    isUpdatingReaderSoftware,
-    updateProgress,
-    error: stripeError,
-  } = useStripeTerminalInit({
-    enabled: !!tokens?.accessToken,
+  useStripeTerminalInit({
+    enabled: !!tokens?.accessToken && isAuthenticated,
     enableReaderPreConnection: true,
     enableSoftwareUpdates: true,
   });
@@ -86,7 +81,6 @@ export default function AppContent({
     setCachedToken(null);
     setTokenExpiry(0);
   }, []);
-
 
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
   const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);

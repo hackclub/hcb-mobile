@@ -104,13 +104,13 @@ export default function Button(
           return variantBaseStyle;
       }
     }
-    
+
     return styles.button;
   };
 
   const getTextColor = () => {
     if (props.color) return props.color;
-    
+
     if (props.variant) {
       switch (variant) {
         case "secondary":
@@ -124,7 +124,7 @@ export default function Button(
           return "#FFFFFF";
       }
     }
-    
+
     return styles.buttonText.color;
   };
 
@@ -134,7 +134,7 @@ export default function Button(
       color: getTextColor(),
       fontSize: props.fontSize || styles.buttonText.fontSize,
       fontWeight: props.fontWeight || styles.buttonText.fontWeight,
-      opacity: props.loading ? 0 : (props.variant === "ghost" ? 0.8 : 1),
+      opacity: props.loading ? 0 : props.variant === "ghost" ? 0.8 : 1,
     };
 
     return baseTextStyle;
@@ -193,9 +193,7 @@ export default function Button(
           />
         </View>
       )}
-      <Text style={getTextStyles()}>
-        {props.children}
-      </Text>
+      <Text style={getTextStyles()}>{props.children}</Text>
       {props.loading && (
         <View
           style={{
