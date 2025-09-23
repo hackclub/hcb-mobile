@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  ViewStyle,
 } from "react-native";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
@@ -22,412 +23,261 @@ import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 
+// Component for QR Code display
+function QRCodeCard({ donationUrl, theme }: { donationUrl: string; theme: ReturnType<typeof useTheme> }) {
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        backgroundColor: theme.colors.card,
+        padding: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }}
+    >
+      <QRCodeStyled
+        data={donationUrl}
+        style={{ backgroundColor: theme.colors.card }}
+        padding={20}
+        pieceSize={5}
+        pieceCornerType="rounded"
+        isPiecesGlued={true}
+        pieceBorderRadius={1}
+        color={theme.colors.text}
+      />
+      <Text
+        style={{
+          color: theme.colors.text,
+          marginTop: 15,
+          textAlign: "center",
+          fontSize: 14,
+          opacity: 0.8,
+        }}
+      >
+        Scan to complete donation
+      </Text>
+    </View>
+  );
+}
+
+// Component for status icons
+function StatusIcon({ status }: { status: string }) {
+  const iconProps = {
+    size: 100,
+    style: { marginBottom: 16, alignSelf: "center" as const },
+  };
+
+  switch (status) {
+    case "success":
+      return <Ionicons name="checkmark-circle-outline" color={palette.success} {...iconProps} />;
+    case "error":
+      return <Ionicons name="close-circle-outline" color={palette.primary} {...iconProps} />;
+    default:
+      return null;
+  }
+}
+
+// Component for button groups
+function ButtonGroup({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
+  return (
+    <View
+      style={{
+        width: "100%",
+        position: "absolute",
+        bottom: 30,
+        alignItems: "center",
+        ...style,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
+// Simple wrapper to maintain consistent spacing for ProcessDonation buttons
+function ActionButton({ 
+  onPress, 
+  children, 
+  style, 
+  variant = "primary" 
+}: { 
+  onPress: () => void; 
+  children: React.ReactNode; 
+  style?: ViewStyle;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+}) {
+  return (
+    <StyledButton 
+      onPress={onPress} 
+      variant={variant}
+      style={{
+        width: "100%",
+        alignSelf: "center",
+        marginBottom: 10,
+        ...style,
+      }}
+    >
+      {children}
+    </StyledButton>
+  );
+}
+
 export default function ProcessDonationPage({
   navigation,
   route: {
     params: { payment, collectPayment, email, name, slug },
   },
 }: Props) {
-  const [status, setStatus] = useState<
-    "ready" | "loading" | "success" | "error"
-  >("ready");
+  const [status, setStatus] = useState<"ready" | "loading" | "success" | "error">("ready");
   const [showQR, setShowQR] = useState(false);
   const theme = useTheme();
 
   const donationUrl = `https://hcb.hackclub.com/donations/start/${slug}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
+  const donationAmount = `$${(payment?.amount / 100).toFixed(2)}`;
 
-  useEffect(() => {
-    if (showQR) {
-      navigation.setOptions({
-        title: "Donation Link",
-      });
-    }
-  }, [showQR, navigation]);
+  const handlePayment = async () => {
+    setStatus("loading");
+    const success = await collectPayment();
+    setStatus(success ? "success" : "error");
+    Haptics.notificationAsync(
+      success ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
+    );
+  };
+
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(donationUrl);
+    Alert.alert("Copied!", "Donation link copied to clipboard.");
+  };
 
   useEffect(() => {
     navigation.setOptions({
+      title: showQR ? "Donation Link" : undefined,
       headerLeft: () => (
         <Button
-          title={status == "ready" || status == "loading" ? "Cancel" : "Done"}
+          title={status === "ready" || status === "loading" ? "Cancel" : "Done"}
           color={palette.primary}
           onPress={() => navigation.goBack()}
         />
       ),
     });
-  }, [status, navigation]);
+  }, [showQR, status, navigation]);
 
-  return (
-    <View
-      style={{
-        padding: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: 1,
-      }}
-    >
-      <StatusBar barStyle="light-content" />
+  const renderContent = () => {
+    switch (status) {
+      case "loading":
+        return (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <ActivityIndicator size="large" style={{ margin: 20 }} />
+            <Text style={{ fontSize: 20, fontWeight: "600", paddingBottom: 10, color: theme.colors.text }}>
+              Processing
+            </Text>
+            <Text style={{ fontSize: 16, color: theme.colors.text }}>
+              Please wait...
+            </Text>
+          </View>
+        );
 
-      {status == "ready" ? (
-        showQR ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <View
-              style={{
-                marginBottom: 0,
-                alignItems: "center",
-                backgroundColor: theme.colors.card,
-                padding: 20,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme.colors.border,
-                shadowColor: "#000",
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              <QRCodeStyled
-                data={donationUrl}
-                style={{ backgroundColor: theme.colors.card }}
-                padding={20}
-                pieceSize={5}
-                pieceCornerType="rounded"
-                isPiecesGlued={true}
-                pieceBorderRadius={1}
-                color={theme.colors.text}
-              />
-              <Text
-                style={{
-                  color: theme.colors.text,
-                  marginTop: 15,
-                  textAlign: "center",
-                  fontSize: 14,
-                  opacity: 0.8,
-                }}
-              >
-                Scan to complete donation
-              </Text>
-            </View>
-            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
-              <StyledButton
-                onPress={async () => {
-                  await Clipboard.setStringAsync(donationUrl);
-                  Alert.alert("Copied!", "Donation link copied to clipboard.");
-                }}
-                style={{
-                  marginTop: 10,
-                  alignSelf: "center",
-                  width: "100%",
-                }}
-              >
-                Copy Link
-              </StyledButton>
-              <StyledButton
-                onPress={() => setShowQR(false)}
-                style={{
-                  marginTop: 20,
-                  alignSelf: "center",
-                  width: "100%",
-                }}
-              >
-                Back
-              </StyledButton>
-            </View>
-          </View>
-        ) : (
-          <View
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flex: 1,
-              paddingBottom: 40,
-            }}
-          >
-            <Text style={{ color: palette.muted, fontSize: 24 }}>
-              Donation amount
+      case "success":
+        return (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingBottom: 100 }}>
+            <StatusIcon status="success" />
+            <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 10, color: theme.colors.text }}>
+              {name ? `Thank you, ${name}!` : "Thank you!"}
             </Text>
-            <Text
-              style={{
-                fontSize: 50,
-                color: theme.colors.text,
-              }}
-            >
-              ${(payment?.amount / 100).toFixed(2)}
+            <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center" }}>
+              {donationAmount} donation completed successfully
             </Text>
-            <View style={{ position: "absolute", bottom: 30, width: "100%" }}>
-              <StyledButton
-                onPress={() => setShowQR(true)}
-                style={{
-                  marginTop: 10,
-                  alignSelf: "center",
-                  width: "100%",
-                }}
-              >
-                Show Donation QR Code
-              </StyledButton>
-              <StyledButton
-                onPress={async () => {
-                  setStatus("loading");
-                  const success = await collectPayment();
-                  setStatus(success ? "success" : "error");
-                  Haptics.notificationAsync(
-                    success
-                      ? Haptics.NotificationFeedbackType.Success
-                      : Haptics.NotificationFeedbackType.Error,
-                  );
-                }}
-                style={{
-                  marginBottom: 10,
-                  marginTop: 20,
-                  alignSelf: "center",
-                  width: "100%",
-                }}
-              >
-                Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : null}
-              </StyledButton>
-            </View>
-          </View>
-        )
-      ) : status == "success" ? (
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-            paddingBottom: 100,
-          }}
-        >
-          <Ionicons
-            name="checkmark-circle-outline"
-            size={100}
-            color={palette.success}
-          />
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "600",
-              marginBottom: 10,
-              color: theme.colors.text,
-            }}
-          >
-            {name ? `Thank you, ${name}!` : "Thank you!"}
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.colors.text,
-            }}
-          >
-            {"$" + (payment?.amount / 100).toFixed(2)} donation completed
-            successfully
-          </Text>
-          {email && (
-            <>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: theme.colors.text,
-                  marginTop: 10,
-                }}
-              >
-                A receipt has been sent to the email address:
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: theme.colors.text,
-                }}
-              >
-                {email}
-              </Text>
-            </>
-          )}
-          <StyledButton
-            onPress={navigation.goBack}
-            style={{
-              position: "absolute",
-              bottom: 30,
-              width: "100%",
-            }}
-          >
-            Done
-          </StyledButton>
-        </View>
-      ) : status == "loading" ? (
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-            paddingBottom: 40,
-          }}
-        >
-          <ActivityIndicator
-            size="large"
-            style={{
-              margin: 20,
-            }}
-          />
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "600",
-              paddingBottom: 10,
-              color: theme.colors.text,
-            }}
-          >
-            Processing
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.colors.text,
-            }}
-          >
-            Please wait...
-          </Text>
-        </View>
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            paddingHorizontal: 20,
-            paddingBottom: 30,
-            backgroundColor: theme.colors.background,
-          }}
-        >
-          <View style={{ width: "100%", flex: 1, justifyContent: "center" }}>
-            {!showQR && (
-              <>
-                <Ionicons
-                  name="close-circle-outline"
-                  size={100}
-                  color={palette.warning}
-                  style={{ marginBottom: 16, alignSelf: "center" }}
-                />
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: "600",
-                    color: theme.colors.text,
-                    marginBottom: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Error
+            {email && (
+              <View style={{ marginTop: 16, alignItems: "center" }}>
+                <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center" }}>
+                  A receipt has been sent to:
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: theme.colors.text,
-                    textAlign: "center",
-                    marginBottom: 24,
-                  }}
-                >
-                  An error occurred while processing the donation. Please try
-                  again.
-                </Text>
-              </>
-            )}
-            {showQR ? (
-              <View
-                style={{
-                  marginBottom: 0,
-                  alignItems: "center",
-                  backgroundColor: theme.colors.card,
-                  padding: 20,
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: theme.colors.border,
-                  shadowColor: "#000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 3,
-                }}
-              >
-                <QRCodeStyled
-                  data={donationUrl}
-                  style={{ backgroundColor: theme.colors.card }}
-                  padding={20}
-                  pieceSize={5}
-                  pieceCornerType="rounded"
-                  isPiecesGlued={true}
-                  pieceBorderRadius={1}
-                  color={theme.colors.text}
-                />
-                <Text
-                  style={{
-                    color: theme.colors.text,
-                    marginTop: 15,
-                    textAlign: "center",
-                    fontSize: 14,
-                    opacity: 0.8,
-                  }}
-                >
-                  Scan to complete donation
+                <Text style={{ fontSize: 16, color: theme.colors.text, fontWeight: "500" }}>
+                  {email}
                 </Text>
               </View>
-            ) : null}
-          </View>
-
-          <View style={{ width: "100%", position: "absolute", bottom: 30 }}>
-            <StyledButton
-              onPress={async () => {
-                setStatus("loading");
-                const success = await collectPayment();
-                setStatus(success ? "success" : "error");
-                Haptics.notificationAsync(
-                  success
-                    ? Haptics.NotificationFeedbackType.Success
-                    : Haptics.NotificationFeedbackType.Error,
-                );
-              }}
-              style={{ marginBottom: 10 }}
-            >
-              Retry
-            </StyledButton>
-            {!showQR && (
-              <StyledButton
-                onPress={() => setShowQR(true)}
-                style={{ marginBottom: 10 }}
-              >
-                Show Donation QR Code
-              </StyledButton>
             )}
-            <StyledButton
-              onPress={navigation.goBack}
-              style={{
-                width: "100%",
-                alignSelf: "center",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              Close
-            </StyledButton>
+            <ButtonGroup>
+              <ActionButton onPress={navigation.goBack} style={{ marginBottom: 0 }}>
+                Done
+              </ActionButton>
+            </ButtonGroup>
           </View>
-        </View>
-      )}
-      {/* <Text>{JSON.stringify(payment, null, 2)}</Text> */}
+        );
+
+      case "error":
+        return (
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              {!showQR && (
+                <>
+                  <StatusIcon status="error" />
+                  <Text style={{ fontSize: 20, fontWeight: "600", color: theme.colors.text, marginBottom: 8, textAlign: "center" }}>
+                    Error
+                  </Text>
+                  <Text style={{ fontSize: 16, color: theme.colors.text, textAlign: "center", marginBottom: 24, paddingHorizontal: 20 }}>
+                    An error occurred while processing the donation. Please try again.
+                  </Text>
+                </>
+              )}
+              {showQR && <QRCodeCard donationUrl={donationUrl} theme={theme} />}
+            </View>
+            <ButtonGroup>
+              <ActionButton onPress={handlePayment} variant="primary">Retry Payment</ActionButton>
+              {!showQR && (
+                <ActionButton onPress={() => setShowQR(true)} variant="secondary">Show QR Code</ActionButton>
+              )}
+            </ButtonGroup>
+          </View>
+        );
+
+      case "ready":
+      default:
+        if (showQR) {
+          return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <QRCodeCard donationUrl={donationUrl} theme={theme} />
+              <ButtonGroup>
+                <ActionButton onPress={handleCopyLink} variant="primary">Copy Link</ActionButton>
+                <ActionButton onPress={() => setShowQR(false)} variant="ghost" style={{ marginBottom: 0 }}>
+                  Back
+                </ActionButton>
+              </ButtonGroup>
+            </View>
+          );
+        }
+
+        return (
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Text style={{ color: palette.muted, fontSize: 24, marginBottom: 8 }}>
+              Donation amount
+            </Text>
+            <Text style={{ fontSize: 50, color: theme.colors.text, fontWeight: "300" }}>
+              {donationAmount}
+            </Text>
+            <ButtonGroup>
+              <ActionButton onPress={handlePayment} variant="primary">
+                Use Tap to Pay {Platform.OS === "ios" ? "on iPhone" : ""}
+              </ActionButton>
+              <ActionButton onPress={() => setShowQR(true)} variant="outline" style={{ marginBottom: 0 }}>
+                Show QR Code
+              </ActionButton>
+            </ButtonGroup>
+          </View>
+        );
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 20 }}>
+      <StatusBar barStyle="light-content" />
+      {renderContent()}
     </View>
   );
 }

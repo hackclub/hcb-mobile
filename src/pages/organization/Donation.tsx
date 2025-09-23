@@ -38,6 +38,7 @@ import { useLocation } from "../../lib/useLocation";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
@@ -233,17 +234,12 @@ function PageContent({
 
   useEffect(() => {
     if (preDiscoveredReaders.length > 0 && !reader) {
-      console.log("Using pre-discovered reader from initialization");
       setReader(preDiscoveredReaders[0]);
     }
   }, [preDiscoveredReaders, reader]);
 
   useEffect(() => {
-    if (softwareUpdateProgress) {
-      setCurrentProgress(softwareUpdateProgress);
-    } else if (!isUpdatingReaderSoftware) {
-      setCurrentProgress(null);
-    }
+    setCurrentProgress(isUpdatingReaderSoftware ? softwareUpdateProgress : null);
   }, [softwareUpdateProgress, isUpdatingReaderSoftware]);
   const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
   const {
@@ -256,14 +252,10 @@ function PageContent({
     connectedReader,
   } = useStripeTerminal({
     onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
-      if (!reader && readers.length > 0) {
-        setReader(readers[0]);
-      }
+      if (!reader && readers.length > 0) setReader(readers[0]);
     },
     onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
-      if (!isUpdatingReaderSoftware) {
-        setCurrentProgress(progress);
-      }
+      if (!isUpdatingReaderSoftware) setCurrentProgress(progress);
     },
   });
   const [name, setName] = useState("");
@@ -273,33 +265,29 @@ function PageContent({
   const emailRef = useRef<TextInput>(null);
   const [orgCheckLoading, setOrgCheckLoading] = useState(true);
   const hcb = useClient();
+  const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
-    const loadTaxDeductibleSetting = async () => {
+    const loadSetting = async () => {
       try {
         const saved = await AsyncStorage.getItem("donationTaxDeductible");
-        if (saved !== null) {
-          setIsTaxDeductable(JSON.parse(saved));
-        }
+        if (saved !== null) setIsTaxDeductable(JSON.parse(saved));
       } catch (error) {
         logError("Error loading tax deductible setting", error);
       }
     };
-    loadTaxDeductibleSetting();
+    loadSetting();
   }, []);
 
   useEffect(() => {
-    const saveTaxDeductibleSetting = async () => {
+    const saveSetting = async () => {
       try {
-        await AsyncStorage.setItem(
-          "donationTaxDeductible",
-          JSON.stringify(isTaxDeductable),
-        );
+        await AsyncStorage.setItem("donationTaxDeductible", JSON.stringify(isTaxDeductable));
       } catch (error) {
         logError("Error saving tax deductible setting", error);
       }
     };
-    saveTaxDeductibleSetting();
+    saveSetting();
   }, [isTaxDeductable]);
 
   // Set up navigation header with settings icon when connected
@@ -344,9 +332,7 @@ function PageContent({
     (async () => {
       try {
         if (discoverReaders && isStripeInitialized && preDiscoveredReaders.length === 0) {
-          await discoverReaders({
-            discoveryMethod: "tapToPay",
-          });
+          await discoverReaders({ discoveryMethod: "tapToPay" });
         }
       } catch (error) {
         logError("Error discovering readers", error, {
@@ -431,6 +417,10 @@ function PageContent({
 
   const createDonation = async () => {
     try {
+      if (value <= 0) {
+        showAlert("Error creating donation", "Amount must be greater than 0.");
+        return "";
+      }
       const response = await hcb.post(`organizations/${orgId}/donations`, {
         json: {
           amount_cents: value * 100,
@@ -729,15 +719,12 @@ function PageContent({
                 return;
               }
 
-              // Check pre-discovered readers first
               if (preDiscoveredReaders.length > 0) {
-                console.log("Using pre-discovered reader for connection:", preDiscoveredReaders[0].label || preDiscoveredReaders[0].id);
                 await connectReader(preDiscoveredReaders[0]);
                 setLoadingConnectingReader(false);
                 return;
               }
 
-              // Fallback: Discover readers if none found
               if (!isStripeInitialized) {
                 logError(
                   "Attempted to discover readers before Stripe Terminal initialization",
@@ -754,9 +741,7 @@ function PageContent({
                 return;
               }
 
-              const readers = await discoverReaders({
-                discoveryMethod: "tapToPay",
-              });
+              const readers = await discoverReaders({ discoveryMethod: "tapToPay" });
               const found = await waitForReader();
               if (found && readerRef.current) {
                 await connectReader(readerRef.current);
@@ -790,7 +775,7 @@ function PageContent({
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingBottom: Platform.OS === "android" ? 80 : 110,
+          paddingBottom: tabBarHeight,
         }}
         bounces={false}
         showsVerticalScrollIndicator={false}
