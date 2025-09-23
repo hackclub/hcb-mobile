@@ -39,15 +39,6 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 
-// interface PaymentIntent {
-//   id: string;
-//   amount: number;
-//   created: string;
-//   currency: string;
-//   sdkUuid: string;
-//   paymentMethodId: string;
-// }
-
 type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
 export default function OrganizationDonationPage({
@@ -167,7 +158,7 @@ const SettingsModal = ({
           style={{
             flex: 1,
             padding: 20,
-            marginHorizontal: 10,
+            marginHorizontal: 30,
             alignItems: "center",
           }}
         >
@@ -217,19 +208,43 @@ function PageContent({
     isInitialized: isStripeInitialized,
     isInitializing: isStripeInitializing,
     error: stripeInitError,
+    discoveredReaders: preDiscoveredReaders,
+    isUpdatingReaderSoftware,
+    updateProgress: softwareUpdateProgress,
   } = useStripeTerminalInit({
     organizationId: orgId,
     enabled: true,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: false,
   });
   const [amount, setAmount] = useState("$");
   const value = parseFloat(amount.replace("$", "0"));
-  const [reader, setReader] = useState<Reader.Type | undefined>(undefined);
+  const [reader, setReader] = useState<Reader.Type | undefined>(
+    preDiscoveredReaders.length > 0 ? preDiscoveredReaders[0] : undefined
+  );
   const readerRef = useRef<Reader.Type | undefined>(reader);
   useEffect(() => {
     readerRef.current = reader;
   }, [reader]);
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState<string | null>(null);
+  const [currentProgress, setCurrentProgress] = useState<string | null>(
+    softwareUpdateProgress
+  );
+
+  useEffect(() => {
+    if (preDiscoveredReaders.length > 0 && !reader) {
+      console.log("Using pre-discovered reader from initialization");
+      setReader(preDiscoveredReaders[0]);
+    }
+  }, [preDiscoveredReaders, reader]);
+
+  useEffect(() => {
+    if (softwareUpdateProgress) {
+      setCurrentProgress(softwareUpdateProgress);
+    } else if (!isUpdatingReaderSoftware) {
+      setCurrentProgress(null);
+    }
+  }, [softwareUpdateProgress, isUpdatingReaderSoftware]);
   const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
   const {
     discoverReaders,
@@ -241,10 +256,14 @@ function PageContent({
     connectedReader,
   } = useStripeTerminal({
     onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
-      setReader(readers[0]);
+      if (!reader && readers.length > 0) {
+        setReader(readers[0]);
+      }
     },
     onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
-      setCurrentProgress(progress);
+      if (!isUpdatingReaderSoftware) {
+        setCurrentProgress(progress);
+      }
     },
   });
   const [name, setName] = useState("");
@@ -255,7 +274,6 @@ function PageContent({
   const [orgCheckLoading, setOrgCheckLoading] = useState(true);
   const hcb = useClient();
 
-  // Load tax deductible setting from AsyncStorage
   useEffect(() => {
     const loadTaxDeductibleSetting = async () => {
       try {
@@ -270,7 +288,6 @@ function PageContent({
     loadTaxDeductibleSetting();
   }, []);
 
-  // Save tax deductible setting to AsyncStorage when it changes
   useEffect(() => {
     const saveTaxDeductibleSetting = async () => {
       try {
@@ -305,7 +322,6 @@ function PageContent({
     }
   }, [navigation, connectedReader, orgCheckLoading, colors.text]);
 
-  // Disconnect the reader as soon as the page loads if the last connected org id is different from the current org id
   useEffect(() => {
     (async () => {
       const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
@@ -322,15 +338,12 @@ function PageContent({
       }
       setOrgCheckLoading(false);
     })();
-    // Only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connectedReader, disconnectReader, orgId]);
 
-  // useEffect for discoverReaders (must be before early return)
   useEffect(() => {
     (async () => {
       try {
-        if (discoverReaders && isStripeInitialized) {
+        if (discoverReaders && isStripeInitialized && preDiscoveredReaders.length === 0) {
           await discoverReaders({
             discoveryMethod: "tapToPay",
           });
@@ -341,9 +354,8 @@ function PageContent({
         });
       }
     })();
-  }, [discoverReaders, orgId, isStripeInitialized]);
+  }, [discoverReaders, orgId, isStripeInitialized, preDiscoveredReaders.length]);
 
-  // useEffect for accessDenied (must be before early return)
   async function handleRequestLocation() {
     await Linking.openSettings();
   }
@@ -362,7 +374,6 @@ function PageContent({
     }
   }, [accessDenied]);
 
-  // Block UI until organization is loaded and Stripe Terminal is initialized
   if (organizationLoading || !organization || isStripeInitializing) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -376,7 +387,6 @@ function PageContent({
     );
   }
 
-  // Handle Stripe Terminal initialization errors
   if (stripeInitError) {
     return (
       <View
@@ -462,32 +472,37 @@ function PageContent({
         {
           reader: selectedReader,
           locationId: locationIdStripeMock,
-          merchantDisplayName: orgName,
+          merchantDisplayName: organization?.name || "HCB",
         } as ConnectTapToPayParams,
         "tapToPay",
       );
+      
       setCurrentProgress(null);
       if (error) {
         logCriticalError("connectReader error", error, {
           context: { orgId, action: "connect_reader" },
         });
-        if (error.message == "You must provide a reader object") {
-          if (isStripeInitialized) {
-            discoverReaders({
-              discoveryMethod: "tapToPay",
-              simulated: false,
-            });
-          }
-        }
+        showAlert(
+          "Connection Error",
+          "Failed to connect to Tap to Pay reader. Please try again.",
+        );
         return false;
       }
+      
+      console.log("Successfully connected to Tap to Pay reader");
       // Update AsyncStorage with the new org id after successful connection
       await AsyncStorage.setItem("lastConnectedOrgId", orgId);
       setCurrentProgress(null);
+      return true;
     } catch (error) {
       logError("connectReader error", error, {
         context: { orgId, action: "connect_reader" },
       });
+      showAlert(
+        "Connection Error",
+        "Failed to connect to Tap to Pay reader. Please try again.",
+      );
+      return false;
     } finally {
       setLoadingConnectingReader(false);
     }
@@ -601,7 +616,6 @@ function PageContent({
   }
 
   if (!connectedReader || orgCheckLoading) {
-    // centered view that says "connect reader"
     return (
       <View
         style={{
@@ -645,7 +659,36 @@ function PageContent({
             {Platform.OS === "ios" ? "on iPhone" : ""}
           </Text>
 
-          {currentProgress ? (
+          {isUpdatingReaderSoftware && (
+            <View
+              style={{
+                marginTop: 8,
+                marginBottom: 8,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.text,
+                  marginBottom: 8,
+                  textAlign: "center",
+                }}
+              >
+                Updating reader software...
+              </Text>
+              {currentProgress && (
+                <Progress.Bar
+                  progress={parseFloat(currentProgress)}
+                  color={palette.primary}
+                  width={200}
+                  height={20}
+                />
+              )}
+            </View>
+          )}
+
+          {currentProgress && !isUpdatingReaderSoftware ? (
             <View
               style={{
                 marginTop: 8,
@@ -654,6 +697,7 @@ function PageContent({
             >
               <Progress.Bar
                 progress={parseFloat(currentProgress)}
+                color={palette.primary}
                 width={200}
                 height={20}
               />
@@ -678,16 +722,22 @@ function PageContent({
                 }
                 return false;
               };
+              
               if (reader) {
                 await connectReader(reader);
                 setLoadingConnectingReader(false);
                 return;
-              } else {
-                logCriticalError("No reader found " + JSON.stringify(reader), {
-                  context: { orgId, action: "connect_reader" },
-                });
               }
-              // Discover readers once, then wait for a reader to appear
+
+              // Check pre-discovered readers first
+              if (preDiscoveredReaders.length > 0) {
+                console.log("Using pre-discovered reader for connection:", preDiscoveredReaders[0].label || preDiscoveredReaders[0].id);
+                await connectReader(preDiscoveredReaders[0]);
+                setLoadingConnectingReader(false);
+                return;
+              }
+
+              // Fallback: Discover readers if none found
               if (!isStripeInitialized) {
                 logError(
                   "Attempted to discover readers before Stripe Terminal initialization",
@@ -700,8 +750,10 @@ function PageContent({
                   "Payment System Error",
                   "Payment system is not ready. Please try again.",
                 );
+                setLoadingConnectingReader(false);
                 return;
               }
+
               const readers = await discoverReaders({
                 discoveryMethod: "tapToPay",
               });
@@ -714,7 +766,7 @@ function PageContent({
                 });
                 showAlert(
                   "No reader found",
-                  "No Tap to Pay reader was found nearby. Please make sure your device is ready.",
+                  "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
                 );
               }
               setLoadingConnectingReader(false);
@@ -789,7 +841,6 @@ function PageContent({
                   flex: 1,
                 }}
                 selectTextOnFocus
-                autoFocus
                 clearButtonMode="while-editing"
                 value={name}
                 autoCapitalize="words"

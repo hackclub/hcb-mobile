@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useStripeTerminal } from "@stripe/stripe-terminal-react-native";
+import { useStripeTerminal, Reader } from "@stripe/stripe-terminal-react-native";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 import { logError } from "./errorUtils";
@@ -7,6 +7,8 @@ import { logError } from "./errorUtils";
 interface UseStripeTerminalInitOptions {
   organizationId?: string;
   enabled?: boolean;
+  enableReaderPreConnection?: boolean;
+  enableSoftwareUpdates?: boolean;
 }
 
 interface UseStripeTerminalInitResult {
@@ -15,6 +17,9 @@ interface UseStripeTerminalInitResult {
   supportsTapToPay: boolean;
   error: Error | null;
   retry: () => void;
+  discoveredReaders: Reader.Type[];
+  isUpdatingReaderSoftware: boolean;
+  updateProgress: string | null;
 }
 
 let globalInitializationPromise: Promise<boolean> | null = null;
@@ -22,6 +27,9 @@ let globalInitializationState = {
   isInitialized: false,
   supportsTapToPay: false,
   error: null as Error | null,
+  discoveredReaders: [] as Reader.Type[],
+  isUpdatingReaderSoftware: false,
+  updateProgress: null as string | null,
 };
 let hasLoggedWaiting = false;
 
@@ -34,14 +42,42 @@ export function resetStripeTerminalInitialization() {
     isInitialized: false,
     supportsTapToPay: false,
     error: null,
+    discoveredReaders: [],
+    isUpdatingReaderSoftware: false,
+    updateProgress: null,
   };
 }
 
 export function useStripeTerminalInit(
   options: UseStripeTerminalInitOptions = {},
 ): UseStripeTerminalInitResult {
-  const { organizationId, enabled = true } = options;
-  const terminal = useStripeTerminal();
+  const { organizationId, enabled = true, enableReaderPreConnection = false, enableSoftwareUpdates = false } = options;
+  const terminal = useStripeTerminal({
+    onUpdateDiscoveredReaders: enableReaderPreConnection ? (readers: Reader.Type[]) => {
+      globalInitializationState.discoveredReaders = readers;
+      setDiscoveredReaders(readers);
+    } : undefined,
+    onDidReportReaderSoftwareUpdateProgress: enableSoftwareUpdates ? (progress: string) => {
+      globalInitializationState.updateProgress = progress;
+      setUpdateProgress(progress);
+    } : undefined,
+    onDidReportAvailableUpdate: enableSoftwareUpdates ? async (_update) => {
+      globalInitializationState.isUpdatingReaderSoftware = true;
+      setIsUpdatingReaderSoftware(true);
+      try {
+        await terminal?.installAvailableUpdate();
+      } catch (error) {
+        logError("Failed to install Stripe Terminal software update", error, {
+          context: { organizationId },
+        });
+      } finally {
+        globalInitializationState.isUpdatingReaderSoftware = false;
+        globalInitializationState.updateProgress = null;
+        setIsUpdatingReaderSoftware(false);
+        setUpdateProgress(null);
+      }
+    } : undefined,
+  });
 
   const [isInitialized, setIsInitialized] = useState(
     globalInitializationState.isInitialized,
@@ -52,6 +88,15 @@ export function useStripeTerminalInit(
   );
   const [error, setError] = useState<Error | null>(
     globalInitializationState.error,
+  );
+  const [discoveredReaders, setDiscoveredReaders] = useState<Reader.Type[]>(
+    globalInitializationState.discoveredReaders,
+  );
+  const [isUpdatingReaderSoftware, setIsUpdatingReaderSoftware] = useState(
+    globalInitializationState.isUpdatingReaderSoftware,
+  );
+  const [updateProgress, setUpdateProgress] = useState<string | null>(
+    globalInitializationState.updateProgress,
   );
 
   const initializationAttempted = useRef(false);
@@ -66,14 +111,8 @@ export function useStripeTerminalInit(
     }
 
     if (globalInitializationState.isInitialized) {
-      // Only log this once per app session
-      if (!hasLoggedWaiting) {
-        console.log("Stripe Terminal already initialized, skipping...");
-      }
       return true;
     }
-
-    console.log("Starting new Stripe Terminal initialization...");
     globalInitializationPromise = (async () => {
       try {
         if (!terminal) {
@@ -85,17 +124,15 @@ export function useStripeTerminalInit(
             isInitialized: false,
             supportsTapToPay: false,
             error,
+            discoveredReaders: [],
+            isUpdatingReaderSoftware: false,
+            updateProgress: null,
           };
           return false;
         }
 
-        // Always initialize the terminal, even if we have cached results
-        // This ensures the SDK is properly initialized on each app launch
-        console.log("Initializing Stripe Terminal SDK...");
         await terminal.initialize();
-        console.log("Stripe Terminal SDK initialized successfully");
 
-        // Check cached results for tap-to-pay support to avoid expensive checks
         const cachedTapToPayEnabled =
           await AsyncStorage.getItem("isTapToPayEnabled");
         let tapToPaySupported: boolean;
@@ -105,29 +142,40 @@ export function useStripeTerminalInit(
         } else if (cachedTapToPayEnabled === "false") {
           tapToPaySupported = false;
         } else {
-          // Only check tap-to-pay support if not cached
           const supported = await terminal.supportsReadersOfType({
             deviceType: "tapToPay",
             discoveryMethod: "tapToPay",
           });
           tapToPaySupported = !!(supported?.readerSupportResult || supported);
-          // Cache the result for future use
           await AsyncStorage.setItem(
             "isTapToPayEnabled",
             tapToPaySupported ? "true" : "false",
           );
         }
 
+        if (enableReaderPreConnection && tapToPaySupported) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await terminal.discoverReaders({
+              discoveryMethod: "tapToPay",
+            });
+          } catch (error) {
+            console.warn("Failed to discover readers during initialization:", error);
+          }
+        }
+
         globalInitializationState = {
           isInitialized: true,
           supportsTapToPay: tapToPaySupported,
           error: null,
+          discoveredReaders: globalInitializationState.discoveredReaders,
+          isUpdatingReaderSoftware: globalInitializationState.isUpdatingReaderSoftware,
+          updateProgress: globalInitializationState.updateProgress,
         };
 
         return true;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        console.error("Stripe Terminal initialization failed:", err);
         logError("Stripe Terminal initialization error", err, {
           context: { organizationId },
         });
@@ -136,20 +184,21 @@ export function useStripeTerminalInit(
           isInitialized: false,
           supportsTapToPay: false,
           error: err,
+          discoveredReaders: [],
+          isUpdatingReaderSoftware: false,
+          updateProgress: null,
         };
 
         return false;
       } finally {
-        // Clear the global promise so future calls can create a new one
         globalInitializationPromise = null;
       }
     })();
 
     return await globalInitializationPromise;
-  }, [terminal, organizationId]);
+  }, [terminal, organizationId, enableReaderPreConnection]);
 
   const retry = () => {
-    console.log("Retrying Stripe Terminal initialization...");
     initializationAttempted.current = false;
     hasLoggedWaiting = false;
     setError(null);
@@ -160,6 +209,9 @@ export function useStripeTerminalInit(
       isInitialized: false,
       supportsTapToPay: false,
       error: null,
+      discoveredReaders: [],
+      isUpdatingReaderSoftware: false,
+      updateProgress: null,
     };
   };
 
@@ -172,6 +224,9 @@ export function useStripeTerminalInit(
       setIsInitialized(true);
       setSupportsTapToPay(globalInitializationState.supportsTapToPay);
       setError(globalInitializationState.error);
+      setDiscoveredReaders(globalInitializationState.discoveredReaders);
+      setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+      setUpdateProgress(globalInitializationState.updateProgress);
       return;
     }
 
@@ -183,12 +238,18 @@ export function useStripeTerminalInit(
         setIsInitialized(globalInitializationState.isInitialized);
         setSupportsTapToPay(globalInitializationState.supportsTapToPay);
         setError(globalInitializationState.error);
+        setDiscoveredReaders(globalInitializationState.discoveredReaders);
+        setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+        setUpdateProgress(globalInitializationState.updateProgress);
       })
       .catch((error) => {
         const err = error instanceof Error ? error : new Error(String(error));
         setError(err);
         setIsInitialized(false);
         setSupportsTapToPay(false);
+        setDiscoveredReaders([]);
+        setIsUpdatingReaderSoftware(false);
+        setUpdateProgress(null);
       })
       .finally(() => {
         setIsInitializing(false);
@@ -200,16 +261,22 @@ export function useStripeTerminalInit(
       if (
         isInitialized !== globalInitializationState.isInitialized ||
         supportsTapToPay !== globalInitializationState.supportsTapToPay ||
-        error !== globalInitializationState.error
+        error !== globalInitializationState.error ||
+        discoveredReaders !== globalInitializationState.discoveredReaders ||
+        isUpdatingReaderSoftware !== globalInitializationState.isUpdatingReaderSoftware ||
+        updateProgress !== globalInitializationState.updateProgress
       ) {
         setIsInitialized(globalInitializationState.isInitialized);
         setSupportsTapToPay(globalInitializationState.supportsTapToPay);
         setError(globalInitializationState.error);
+        setDiscoveredReaders(globalInitializationState.discoveredReaders);
+        setIsUpdatingReaderSoftware(globalInitializationState.isUpdatingReaderSoftware);
+        setUpdateProgress(globalInitializationState.updateProgress);
       }
     }, 500);
 
     return () => clearInterval(interval);
-  }, [isInitialized, supportsTapToPay, error]);
+  }, [isInitialized, supportsTapToPay, error, discoveredReaders, isUpdatingReaderSoftware, updateProgress]);
 
   return {
     isInitialized,
@@ -217,5 +284,8 @@ export function useStripeTerminalInit(
     supportsTapToPay,
     error,
     retry,
+    discoveredReaders,
+    isUpdatingReaderSoftware,
+    updateProgress,
   };
 }
