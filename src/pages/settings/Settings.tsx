@@ -23,6 +23,7 @@ import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import { logError } from "../../lib/errorUtils";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
+import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
@@ -66,6 +67,7 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { setTokens } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
+  const { data: beacon } = useOfflineSWR<Beacon>("beacon");
   const { colors } = useTheme();
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
@@ -74,6 +76,22 @@ export default function SettingsPage({ navigation }: Props) {
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
+
+  useEffect(() => {
+    HelpscoutBeacon.init(beaconID || "");
+  }, [beaconID]);
+
+  useEffect(() => {
+    (async () => {
+      const storedBiometrics = await AsyncStorage.getItem(BIOMETRICS_KEY);
+      setBiometricsRequired(storedBiometrics === "true");
+
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      setBiometricsAvailable(hasHardware && isEnrolled);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -87,19 +105,13 @@ export default function SettingsPage({ navigation }: Props) {
           setTheme(storedTheme);
         }
 
-        const storedBiometrics = await AsyncStorage.getItem(BIOMETRICS_KEY);
-        setBiometricsRequired(storedBiometrics === "true");
-
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        setBiometricsAvailable(hasHardware && isEnrolled);
       } catch (error) {
         logError("Error loading settings", error, {
           context: { action: "settings_load" },
         });
       }
     })();
-  }, [setTheme, user]);
+  }, [setTheme]);
 
   useEffect(() => {
     Animated.timing(animation, {
@@ -557,6 +569,42 @@ export default function SettingsPage({ navigation }: Props) {
             <Text style={{ color: colors.text, fontSize: 16 }}>
               Info / About
             </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => HelpscoutBeacon.loginAndOpen(
+              user?.email || "",
+              user?.name || "",
+              user?.id || "",
+              beacon?.signature || ""
+            )}
+          >
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Contact Support</Text>
             <Ionicons
               name="chevron-forward"
               size={20}
