@@ -18,6 +18,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
+import HelpscoutBeacon from "react-native-helpscout-beacon";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
