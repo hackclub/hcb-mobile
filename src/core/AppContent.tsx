@@ -417,7 +417,7 @@ export default function AppContent({
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+      <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1 }}>
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
             <GestureHandlerRootView>

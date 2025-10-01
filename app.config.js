@@ -143,6 +143,8 @@ export default {
         },
       ],
       "expo-background-task",
+      "./plugins/usePrivateSDK.js",
+      "./plugins/androidTSPIntegration.js",
     ],
   },
 };

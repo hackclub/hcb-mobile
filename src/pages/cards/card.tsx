@@ -20,6 +20,7 @@ import {
   Animated,
   Modal,
   TextInput,
+  Platform,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { useSWRConfig } from "swr";
@@ -53,6 +54,7 @@ import {
   renderCardNumber,
   renderMoney,
 } from "../../utils/util";
+import { Image } from "expo-image";
 
 type CardPageProps = {
   cardId?: string;
@@ -115,6 +117,7 @@ export default function CardPage(
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [showTopupModal, setShowTopupModal] = useState(false);
   const [showPurposeModal, setShowPurposeModal] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
   const [purposeText, setPurposeText] = useState("");
   const [isSettingPurpose, setIsSettingPurpose] = useState(false);
   const [isOneTimeUse, setIsOneTimeUse] = useState(false);
@@ -129,6 +132,7 @@ export default function CardPage(
   }>();
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
+  const [cardAddedToWallet, setCardAddedToWallet] = useState(false);
   const isDark = useIsDark();
   const {
     canAddToWallet,
@@ -152,8 +156,9 @@ export default function CardPage(
     } else if (!cardFetchError) {
       setCardError(null);
       setAbleToAddToWallet(canAddToWallet);
+      console.log(canAddToWallet, "ABLE TO ADD TO WALLET")
     }
-  }, [cardFetchError, errorDisplayReady, card, canAddToWallet]);
+  }, [cardFetchError, errorDisplayReady, card, canAddToWallet, walletCard]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -182,6 +187,31 @@ export default function CardPage(
   useEffect(() => {
     navigation.setOptions({ title: cardName });
   }, [cardName, navigation, themeColors.text]);
+
+  // Set up wallet icon in header for Android
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => setShowWalletModal(true)}
+            style={{ padding: 8 }}
+          >
+              <Ionicons 
+                name="wallet-outline" 
+                size={24} 
+                color={themeColors.text} 
+              />
+
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: undefined,
+      });
+    }
+  }, [navigation, ableToAddToWallet, cardAddedToWallet, isDark, themeColors.text]);
 
   const {
     data: transactionsData,
@@ -273,7 +303,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, _card?.id || card?.id || "", grantId]);
+  }, [mutate, card?.id, id, grantId]);
 
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -984,7 +1014,7 @@ export default function CardPage(
             </TouchableOpacity>
 
             {card?.status != "canceled" && getCardActionButtons()}
-            {ableToAddToWallet && ephemeralKey && (
+            {ableToAddToWallet && ephemeralKey && Platform.OS === 'ios' && (
               <AddToWalletButton
                 token={androidCardToken}
                 androidAssetSource={require("../../../assets/google-wallet.png")}
@@ -1006,9 +1036,7 @@ export default function CardPage(
                 ephemeralKey={ephemeralKey}
                 onComplete={({ error }) => {
                   if (error) {
-                    logCriticalError("Error adding card to wallet", error, {
-                      cardId: card?.id,
-                    });
+                    logCriticalError("Error adding card to wallet", error);
                   } else {
                     setAbleToAddToWallet(false);
                   }
@@ -1812,6 +1840,104 @@ export default function CardPage(
                 Set Purpose
               </Button>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add the wallet modal for Android */}
+      <Modal
+        visible={showWalletModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowWalletModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 15,
+              padding: 20,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "600",
+                color: themeColors.text,
+                marginBottom: 10,
+                textAlign: "center",
+              }}
+            >
+              Add to Google Wallet
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColors.text,
+                marginBottom: 20,
+                textAlign: "center",
+                opacity: 0.8,
+              }}
+            >
+              Add your card to Google Wallet for easy payments and quick access.
+            </Text>
+            {cardAddedToWallet && (
+              <Image 
+                source={isDark ? require("../../../assets/gwallet-added-white.png") : require("../../../assets/gwallet-added-black.png")}
+                style={{
+                  marginBottom: 20,
+                }}
+              />
+            )}
+            {ableToAddToWallet && !cardAddedToWallet && (
+              <AddToWalletButton
+                token={androidCardToken}
+                androidAssetSource={require("../../../assets/google-wallet.png")
+                }
+                style={{         
+                  alignSelf: "center",
+                  width: "70%",         
+                  aspectRatio: 199/55,
+                  marginBottom: 20,
+                }}
+                cardDetails={{
+                  name: walletCard?.cardholder?.name || user?.name || "",
+                  primaryAccountIdentifier:
+                    walletCard?.wallets?.primary_account_identifier || null,
+                  lastFour: walletCard?.last4,
+                  description: "HCB Card",
+                }}
+                ephemeralKey={ephemeralKey}
+                onComplete={({ error }) => {
+                  if (error) {
+                    logCriticalError("Error adding card to wallet", error);
+                  } else {
+                    setCardAddedToWallet(true);
+                    setAbleToAddToWallet(false);
+                    }
+                  }}
+                />
+            )}
+            
+            <Button
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+              }}
+              color={themeColors.text}
+              onPress={() => setShowWalletModal(false)}
+            >
+              Cancel
+            </Button>
           </View>
         </View>
       </Modal>

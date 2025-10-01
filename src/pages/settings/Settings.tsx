@@ -18,7 +18,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
-import HelpscoutBeacon from "react-native-helpscout-beacon";
+// import HelpscoutBeacon from "react-native-helpscout-beacon";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
@@ -68,7 +68,7 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { setTokens } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
-  const { data: beacon } = useOfflineSWR<Beacon>("beacon");
+  const { data: beacon } = useOfflineSWR<Beacon>("beacon_config");
   const { colors } = useTheme();
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
@@ -77,11 +77,11 @@ export default function SettingsPage({ navigation }: Props) {
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
-  const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
+  // const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
 
-  useEffect(() => {
-    HelpscoutBeacon.init(beaconID || "");
-  }, [beaconID]);
+  // useEffect(() => {
+  //   HelpscoutBeacon.init(beaconID || "");
+  // }, [beaconID]);
 
   useEffect(() => {
     (async () => {
@@ -592,12 +592,12 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => HelpscoutBeacon.loginAndOpen(
-              user?.email || "",
-              user?.name || "",
-              user?.id || "",
-              beacon?.signature || ""
-            )}
+            // onPress={() => HelpscoutBeacon.loginAndOpen(
+            //   user?.email || "",
+            //   user?.name || "",
+            //   user?.id || "",
+            //   beacon?.signature || ""
+            // )}
           >
             <Ionicons
               name="chatbox-ellipses-outline"
