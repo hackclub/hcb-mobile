@@ -83,12 +83,10 @@ export default {
         },
       ],
       "react-native-bottom-tabs",
+      "expo-web-browser",
       [
         "expo-build-properties",
         {
-          ios: {
-            useFrameworks: "static"
-          },
           android: {
             minSdkVersion: 26,
             packagingOptions: {
@@ -147,6 +145,7 @@ export default {
         },
       ],
       "expo-background-task",
+      "expo-font",
     ],
   },
 };

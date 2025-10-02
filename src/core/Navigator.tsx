@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
@@ -84,7 +84,7 @@ export default function Navigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName: React.ComponentProps<typeof Icon>["glyph"];
 
           if (route.name === "Home") {
@@ -168,6 +168,8 @@ export default function Navigator() {
         options={{
           tabBarBadge: invitations?.length || undefined,
           tabBarLabel: "Home",
+          // For Native Tabs (iOS 26+), prevents JS-driven default switching delays
+          preventsDefault: true,
         }}
       >
         {() => (
