@@ -8,5 +8,10 @@ const config = getSentryExpoConfig(__dirname, {
   annotateReactComponents: true,
 });
 
+config.resolver.extraNodeModules = {
+  '@thedev132/expo-widgets': '..',
+};
+
+
 // eslint-disable-next-line no-undef
 module.exports = config;

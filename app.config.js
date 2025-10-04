@@ -29,6 +29,7 @@ export default {
         "com.apple.developer.payment-pass-provisioning": true,
         "com.apple.developer.proximity-reader.payment.acceptance": true,
       },
+      developmentTeam: "P6PV2R9443",
     },
     android: {
       icon: "./assets/app-icon.png",
@@ -164,6 +165,29 @@ export default {
       ],
       "expo-background-task",
       "./plugins/usePrivateSDK.js",
+      [
+        "@thedev132/expo-widgets",
+        {
+          "ios": {
+            "src": "./widgets/ios",
+            "mode": IS_DEV ? "development" : "production",
+            "devTeamId": "P6PV2R9443",
+            "moduleDependencies": [
+              "MyData.swift",
+              "LogHandler.swift"
+            ],
+          },
+          "android": {
+            "src": "./widgets/android",
+            "widgets": [
+              {
+                "name": "HCBWidget",
+                "resourceName": "@xml/hcb_widget_info"
+              }
+            ]
+          }
+        }
+      ]
     ],
   },
 };
