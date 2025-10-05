@@ -13,6 +13,7 @@ import { useCache } from "./src/providers/cacheProvider";
 import { LinkingProvider } from "./src/providers/LinkingContext";
 import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
 import { ThemeProvider } from "./src/providers/ThemeContext";
+import { WidgetProvider } from "./src/providers/WidgetProvider";
 
 function App() {
   const [fontsLoaded] = useFonts({
@@ -48,13 +49,15 @@ function App() {
       <ExpoShareIntentProvider>
         <ThemeProvider>
           <AuthProvider>
-            <ShareIntentProvider>
-              <LinkingProvider>
-                <CustomAlertProvider>
-                  <AppContent scheme={scheme} cache={cache} />
-                </CustomAlertProvider>
-              </LinkingProvider>
-            </ShareIntentProvider>
+            <WidgetProvider>
+              <ShareIntentProvider>
+                <LinkingProvider>
+                  <CustomAlertProvider>
+                    <AppContent scheme={scheme} cache={cache} />
+                  </CustomAlertProvider>
+                </LinkingProvider>
+              </ShareIntentProvider>
+            </WidgetProvider>
           </AuthProvider>
         </ThemeProvider>
       </ExpoShareIntentProvider>

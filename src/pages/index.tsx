@@ -6,11 +6,15 @@ import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
+import * as ExpoWidgets from "@thedev132/expo-widgets";
+import { format } from "date-fns";
 import * as BackgroundTask from "expo-background-task";
 import * as Haptics from "expo-haptics";
 import * as QuickActions from "expo-quick-actions";
+import * as SecureStore from "expo-secure-store";
 import { useShareIntentContext } from "expo-share-intent";
 import * as TaskManager from "expo-task-manager";
+import ky from "ky";
 import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
 import {
   Text,
@@ -33,12 +37,26 @@ import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
+import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
-import Organization from "../lib/types/Organization";
+import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 import { organizationOrderEqual } from "../utils/util";
+
+interface OrgWidgetData {
+  organizationName: string;
+  organizationSlug: string;
+  organizationId: string;
+  balanceCents: number;
+  iconUrl: string | null;
+  lastUpdated: string;
+  transactionHistory: Array<{
+    date: string;
+    amountCents: number;
+  }>;
+}
 
 const BACKGROUND_TASK_IDENTIFIER = "refresh-data";
 
@@ -51,10 +69,82 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
       return BackgroundTask.BackgroundTaskResult.Success;
     }
 
+    // Update SWR cache
     await Promise.all([
       mutate((k) => typeof k === "string" && k.startsWith("organizations/")),
       mutate((k) => typeof k === "string" && k.startsWith("user/")),
     ]);
+
+    // Update widget data on iOS
+    if (Platform.OS === "ios") {
+      try {
+        const accessToken = await SecureStore.getItemAsync("accessToken");
+        if (accessToken) {
+          
+          // Fetch organizations
+          const organizations = await ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/user/organizations`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }).json<Organization[]>();
+          
+          if (organizations && organizations.length > 0) {
+            const allWidgetData: Record<string, OrgWidgetData> = {};
+            
+            // Fetch data for all organizations
+            await Promise.all(
+              organizations.map(async (org) => {
+                try {
+                  // Fetch organization details and transactions
+                  const [orgDetails, transactionsData] = await Promise.all([
+                    ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}`, {
+                      headers: { Authorization: `Bearer ${accessToken}` },
+                    }).json<OrganizationExpanded>(),
+                    ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}/transactions?limit=30`, {
+                      headers: { Authorization: `Bearer ${accessToken}` },
+                    }).json<PaginatedResponse<ITransaction>>(),
+                  ]);
+                  
+                  // Process transaction history
+                  const transactionHistory = transactionsData?.data
+                    ?.filter((t: ITransaction) => !t.pending && !t.declined)
+                    .slice(0, 15)
+                    .reverse()
+                    .map((t: ITransaction) => ({
+                      date: t.date,
+                      amountCents: t.amount_cents,
+                    })) || [];
+                  
+                  allWidgetData[orgDetails.id] = {
+                    organizationName: orgDetails.name,
+                    organizationSlug: orgDetails.slug,
+                    organizationId: orgDetails.id,
+                    balanceCents: orgDetails.balance_cents || 0,
+                    iconUrl: orgDetails.icon || null,
+                    lastUpdated: format(new Date(), "MMM d, h:mm a"),
+                    transactionHistory,
+                  };
+                } catch (orgError) {
+                  console.error(`Failed to fetch data for org ${org.id}:`, orgError);
+                }
+              })
+            );
+            
+            // Save all data as a single object
+            const widgetPayload = {
+              organizations: organizations.map(org => ({
+                id: org.id,
+                name: org.name,
+              })),
+              data: allWidgetData,
+            };
+            
+            ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload));
+            console.log("Widget data updated in background for all orgs");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to update widget in background:", error);
+      }
+    }
 
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
@@ -65,7 +155,7 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
 
 async function registerBackgroundTaskAsync() {
   return BackgroundTask.registerTaskAsync(BACKGROUND_TASK_IDENTIFIER, {
-    minimumInterval: 60 * 60, // 1 hour in seconds
+    minimumInterval: 15 * 60, // 15 minutes in seconds (was 1 hour)
   });
 }
 

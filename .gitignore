@@ -22,7 +22,7 @@ build-*.ipa
 build-*.apk
 build-*.aab
 
-ios/
-android/
+/ios/
+/android/
 .env.local
 .env

@@ -49,6 +49,7 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
+import { WidgetProvider } from "../providers/WidgetProvider";
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
@@ -461,6 +462,8 @@ export default function AppContent({
                 }}
               >
                 <ActionSheetProvider>
+                <WidgetProvider>
+
                   <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                     <NavigationContainer
                       ref={navigationRef}
@@ -475,6 +478,7 @@ export default function AppContent({
                       )}
                     </NavigationContainer>
                   </AlertNotificationRoot>
+                    </WidgetProvider>
                 </ActionSheetProvider>
               </SWRConfig>
             </GestureHandlerRootView>

@@ -174,7 +174,8 @@ export default {
             "devTeamId": "P6PV2R9443",
             "moduleDependencies": [
               "MyData.swift",
-              "LogHandler.swift"
+              "LogHandler.swift",
+              "SelectOrganizationIntent.swift"
             ],
           },
           "android": {
