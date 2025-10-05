@@ -1,4 +1,4 @@
-import * as ExpoWidgets from '@thedev132/expo-widgets';
+import * as ExpoWidgets from "@thedev132/expo-widgets";
 import { format } from "date-fns";
 import { ReactNode, useContext, useEffect, useState } from "react";
 import { Platform } from "react-native";
@@ -6,9 +6,7 @@ import { useSWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
-import Organization, {
-  OrganizationExpanded,
-} from "../lib/types/Organization";
+import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 
@@ -24,7 +22,6 @@ interface OrgWidgetData {
     amountCents: number;
   }>;
 }
-
 
 export function WidgetProvider({ children }: { children: ReactNode }) {
   const { tokens } = useContext(AuthContext);
@@ -56,26 +53,31 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     const updateWidgets = async () => {
       try {
         const allWidgetData: Record<string, OrgWidgetData> = {};
-        
+
         // Fetch data for all organizations
         await Promise.all(
           organizations.map(async (org) => {
             try {
               // Fetch org details and transactions using SWR fetcher
               const [orgDetails, transactionsData] = await Promise.all([
-                fetcher(`organizations/${org.id}`) as Promise<OrganizationExpanded>,
-                fetcher(`organizations/${org.id}/transactions?limit=30`) as Promise<PaginatedResponse<Transaction>>,
+                fetcher(
+                  `organizations/${org.id}`,
+                ) as Promise<OrganizationExpanded>,
+                fetcher(
+                  `organizations/${org.id}/transactions?limit=30`,
+                ) as Promise<PaginatedResponse<Transaction>>,
               ]);
 
               // Process transactions for the graph
-              const transactionHistory = transactionsData?.data
-                ?.filter(t => !t.pending && !t.declined)
-                .slice(0, 15)
-                .reverse()
-                .map(t => ({
-                  date: t.date,
-                  amountCents: t.amount_cents,
-                })) || [];
+              const transactionHistory =
+                transactionsData?.data
+                  ?.filter((t) => !t.pending && !t.declined)
+                  .slice(0, 15)
+                  .reverse()
+                  .map((t) => ({
+                    date: t.date,
+                    amountCents: t.amount_cents,
+                  })) || [];
 
               allWidgetData[orgDetails.id] = {
                 organizationName: orgDetails.name,
@@ -89,28 +91,33 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
             } catch (error) {
               console.error(`Failed to fetch data for org ${org.id}:`, error);
             }
-          })
+          }),
         );
 
         // Save all data as a single object
         const widgetPayload = {
-          organizations: organizations.map(org => ({
+          organizations: organizations.map((org) => ({
             id: org.id,
             name: org.name,
           })),
           data: allWidgetData,
         };
 
-        console.log(`Saving widget data for ${widgetPayload.organizations.length} organizations`);
-        
+        console.log(
+          `Saving widget data for ${widgetPayload.organizations.length} organizations`,
+        );
+
         if (Platform.OS === "android") {
-          ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload), "com.hackclub.hcb");
+          ExpoWidgets.setWidgetData(
+            JSON.stringify(widgetPayload),
+            "com.hackclub.hcb",
+          );
         } else {
           ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload));
         }
-        
+
         console.log("Widget data saved successfully");
-      setLastUpdate(Date.now());
+        setLastUpdate(Date.now());
       } catch (error) {
         console.error("Failed to update widgets:", error);
       }
@@ -121,4 +128,3 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
-

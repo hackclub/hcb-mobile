@@ -44,12 +44,12 @@ import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
 import { useThemeContext } from "../providers/ThemeContext";
+import { WidgetProvider } from "../providers/WidgetProvider";
 import { lightTheme, theme } from "../styles/theme";
 import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
-import { WidgetProvider } from "../providers/WidgetProvider";
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
@@ -462,23 +462,22 @@ export default function AppContent({
                 }}
               >
                 <ActionSheetProvider>
-                <WidgetProvider>
-
-                  <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                    <NavigationContainer
-                      ref={navigationRef}
-                      theme={navTheme}
-                      linking={linking}
-                      onReady={onNavigationReady}
-                    >
-                      {tokens?.accessToken && isAuthenticated ? (
-                        <Navigator />
-                      ) : (
-                        <Login />
-                      )}
-                    </NavigationContainer>
-                  </AlertNotificationRoot>
-                    </WidgetProvider>
+                  <WidgetProvider>
+                    <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
+                      <NavigationContainer
+                        ref={navigationRef}
+                        theme={navTheme}
+                        linking={linking}
+                        onReady={onNavigationReady}
+                      >
+                        {tokens?.accessToken && isAuthenticated ? (
+                          <Navigator />
+                        ) : (
+                          <Login />
+                        )}
+                      </NavigationContainer>
+                    </AlertNotificationRoot>
+                  </WidgetProvider>
                 </ActionSheetProvider>
               </SWRConfig>
             </GestureHandlerRootView>

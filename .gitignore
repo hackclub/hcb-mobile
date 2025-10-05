@@ -26,3 +26,5 @@ build-*.aab
 /android/
 .env.local
 .env
+
+private-sdk/

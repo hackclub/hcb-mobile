@@ -80,39 +80,51 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
       try {
         const accessToken = await SecureStore.getItemAsync("accessToken");
         if (accessToken) {
-          
           // Fetch organizations
-          const organizations = await ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/user/organizations`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }).json<Organization[]>();
-          
+          const organizations = await ky
+            .get(`${process.env.EXPO_PUBLIC_API_BASE}/user/organizations`, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            })
+            .json<Organization[]>();
+
           if (organizations && organizations.length > 0) {
             const allWidgetData: Record<string, OrgWidgetData> = {};
-            
+
             // Fetch data for all organizations
             await Promise.all(
               organizations.map(async (org) => {
                 try {
                   // Fetch organization details and transactions
                   const [orgDetails, transactionsData] = await Promise.all([
-                    ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}`, {
-                      headers: { Authorization: `Bearer ${accessToken}` },
-                    }).json<OrganizationExpanded>(),
-                    ky.get(`${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}/transactions?limit=30`, {
-                      headers: { Authorization: `Bearer ${accessToken}` },
-                    }).json<PaginatedResponse<ITransaction>>(),
+                    ky
+                      .get(
+                        `${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}`,
+                        {
+                          headers: { Authorization: `Bearer ${accessToken}` },
+                        },
+                      )
+                      .json<OrganizationExpanded>(),
+                    ky
+                      .get(
+                        `${process.env.EXPO_PUBLIC_API_BASE}/organizations/${org.id}/transactions?limit=30`,
+                        {
+                          headers: { Authorization: `Bearer ${accessToken}` },
+                        },
+                      )
+                      .json<PaginatedResponse<ITransaction>>(),
                   ]);
-                  
+
                   // Process transaction history
-                  const transactionHistory = transactionsData?.data
-                    ?.filter((t: ITransaction) => !t.pending && !t.declined)
-                    .slice(0, 15)
-                    .reverse()
-                    .map((t: ITransaction) => ({
-                      date: t.date,
-                      amountCents: t.amount_cents,
-                    })) || [];
-                  
+                  const transactionHistory =
+                    transactionsData?.data
+                      ?.filter((t: ITransaction) => !t.pending && !t.declined)
+                      .slice(0, 15)
+                      .reverse()
+                      .map((t: ITransaction) => ({
+                        date: t.date,
+                        amountCents: t.amount_cents,
+                      })) || [];
+
                   allWidgetData[orgDetails.id] = {
                     organizationName: orgDetails.name,
                     organizationSlug: orgDetails.slug,
@@ -123,20 +135,23 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
                     transactionHistory,
                   };
                 } catch (orgError) {
-                  console.error(`Failed to fetch data for org ${org.id}:`, orgError);
+                  console.error(
+                    `Failed to fetch data for org ${org.id}:`,
+                    orgError,
+                  );
                 }
-              })
+              }),
             );
-            
+
             // Save all data as a single object
             const widgetPayload = {
-              organizations: organizations.map(org => ({
+              organizations: organizations.map((org) => ({
                 id: org.id,
                 name: org.name,
               })),
               data: allWidgetData,
             };
-            
+
             ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload));
             console.log("Widget data updated in background for all orgs");
           }

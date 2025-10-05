@@ -168,27 +168,27 @@ export default {
       [
         "@thedev132/expo-widgets",
         {
-          "ios": {
-            "src": "./widgets/ios",
-            "mode": IS_DEV ? "development" : "production",
-            "devTeamId": "P6PV2R9443",
-            "moduleDependencies": [
+          ios: {
+            src: "./widgets/ios",
+            mode: IS_DEV ? "development" : "production",
+            devTeamId: "P6PV2R9443",
+            moduleDependencies: [
               "MyData.swift",
               "LogHandler.swift",
-              "SelectOrganizationIntent.swift"
+              "SelectOrganizationIntent.swift",
             ],
           },
-          "android": {
-            "src": "./widgets/android",
-            "widgets": [
+          android: {
+            src: "./widgets/android",
+            widgets: [
               {
-                "name": "HCBWidget",
-                "resourceName": "@xml/hcb_widget_info"
-              }
-            ]
-          }
-        }
-      ]
+                name: "HCBWidget",
+                resourceName: "@xml/hcb_widget_info",
+              },
+            ],
+          },
+        },
+      ],
     ],
   },
 };
