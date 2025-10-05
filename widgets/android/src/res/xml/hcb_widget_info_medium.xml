@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/hcb_widget_description_medium"
+    android:initialLayout="@layout/hcb_widget_medium"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:maxWidth="250dp"
+    android:maxHeight="40dp"
+    android:previewImage="@drawable/hcb_widget_preview"
+    android:resizeMode="none"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/hcb_widget_medium" />

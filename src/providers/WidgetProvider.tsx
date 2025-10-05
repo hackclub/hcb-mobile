@@ -42,7 +42,8 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   // Fetch and update widget data for all organizations
   useEffect(() => {
-    if (Platform.OS !== "ios" || !organizations || !fetcher) {
+    if (!organizations || !fetcher) {
+      console.log("No organizations or fetcher found");
       return;
     }
 
@@ -101,9 +102,15 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
         };
 
         console.log(`Saving widget data for ${widgetPayload.organizations.length} organizations`);
-        ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload));
+        
+        if (Platform.OS === "android") {
+          ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload), "com.hackclub.hcb");
+        } else {
+          ExpoWidgets.setWidgetData(JSON.stringify(widgetPayload));
+        }
+        
         console.log("Widget data saved successfully");
-        setLastUpdate(Date.now());
+      setLastUpdate(Date.now());
       } catch (error) {
         console.error("Failed to update widgets:", error);
       }

@@ -1,5 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appwidget_text">EXAMPLE</string>
-    <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">This is an app widget description</string>
+    <string name="hcb_widget_name">HCB Organization</string>
+    <string name="hcb_widget_description">Track your organization\'s balance (Small)</string>
+    <string name="hcb_widget_description_medium">Track your organization\'s balance and recent activity (Medium)</string>
+    <string name="hcb_balance_label">Balance</string>
+    <string name="hcb_recent_activity">Recent Activity</string>
+    <string name="hcb_no_organization">No Organization</string>
+    <string name="hcb_default_balance">$0.00</string>
 </resources>

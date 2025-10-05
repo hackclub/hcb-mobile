@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small widget layout - 2x1 with stacked text -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/hcb_widget_background"
+    android:padding="8dp">
+
+    <!-- Organization name at top -->
+    <TextView
+        android:id="@+id/widget_org_name_small"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="Organization"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:shadowColor="#4D000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4" />
+
+    <!-- Balance amount at bottom -->
+    <TextView
+        android:id="@+id/widget_balance_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="$0.00"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:shadowColor="#4D000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4" />
+
+    <!-- Balance label above amount -->
+    <TextView
+        android:id="@+id/widget_balance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/widget_balance_amount"
+        android:text="Balance"
+        android:textColor="#E6FFFFFF"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-black"
+        android:shadowColor="#4D000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="2" />
+
+</RelativeLayout>

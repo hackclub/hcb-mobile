@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Medium widget layout - 4x1 with stacked text and graph -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/hcb_widget_background"
+    android:padding="8dp">
+
+    <!-- Left side: stacked text (half width) -->
+    <RelativeLayout
+        android:id="@+id/left_container"
+        android:layout_width="117dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="8dp">
+
+        <!-- Organization name at top -->
+        <TextView
+            android:id="@+id/widget_org_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="Organization"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-black"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#4D000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Balance amount at bottom -->
+        <TextView
+            android:id="@+id/widget_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="$0.00"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-black"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:shadowColor="#4D000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Balance label above amount -->
+        <TextView
+            android:id="@+id/widget_balance_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/widget_balance"
+            android:text="Balance"
+            android:textColor="#E6FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-black"
+            android:shadowColor="#4D000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="2" />
+
+    </RelativeLayout>
+
+    <!-- Right side: Transaction graph (fills remaining space) -->
+    <ImageView
+        android:id="@+id/widget_transaction_graph"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@id/left_container"
+        android:scaleType="fitCenter"
+        android:contentDescription="Transaction history graph" />
+
+    <!-- Hide activity label -->
+    <TextView
+        android:id="@+id/widget_activity_label"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+</RelativeLayout>
