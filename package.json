@@ -14,7 +14,6 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@expensify/react-native-wallet": "^0.1.12",
     "@expo/config-plugins": "~10.1.1",
     "@expo/image-utils": "^0.6.3",
     "@expo/ngrok": "^4.1.3",

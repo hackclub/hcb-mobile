@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme } from "@react-navigation/native";
+import { useTheme, useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
@@ -54,7 +55,6 @@ import {
   renderCardNumber,
   renderMoney,
 } from "../../utils/util";
-import { Image } from "expo-image";
 
 type CardPageProps = {
   cardId?: string;
@@ -133,13 +133,16 @@ export default function CardPage(
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
   const [cardAddedToWallet, setCardAddedToWallet] = useState(false);
+  const [cardStatus, setCardStatus] = useState<string | null>(null);
   const isDark = useIsDark();
   const {
     canAddToWallet,
     ephemeralKey,
     card: walletCard,
     androidCardToken,
-  } = useDigitalWallet(_card?.id || card?.id || "");
+    status: walletStatus,
+    refresh: refreshDigitalWallet,
+  } = useDigitalWallet(_card?.id || card?.id || "", _card?.type === "physical");
   const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
 
   useEffect(() => {
@@ -151,14 +154,14 @@ export default function CardPage(
   }, []);
 
   useEffect(() => {
+    setCardStatus(walletStatus);
     if ((cardFetchError || !card) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
       setAbleToAddToWallet(canAddToWallet);
-      console.log(canAddToWallet, "ABLE TO ADD TO WALLET")
     }
-  }, [cardFetchError, errorDisplayReady, card, canAddToWallet, walletCard]);
+  }, [cardFetchError, errorDisplayReady, card, canAddToWallet, walletCard, walletStatus]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -212,6 +215,21 @@ export default function CardPage(
       });
     }
   }, [navigation, ableToAddToWallet, cardAddedToWallet, isDark, themeColors.text]);
+
+  // Retrigger digital wallet data on modal open/close
+  useEffect(() => {
+    refreshDigitalWallet();
+  }, [showWalletModal, refreshDigitalWallet]);
+
+  // Also refresh when the screen regains focus (e.g., after switching apps)
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if modal isn't open to avoid double refresh
+      if (!showWalletModal) {
+        refreshDigitalWallet();
+      }
+    }, [refreshDigitalWallet, showWalletModal])
+  );
 
   const {
     data: transactionsData,
@@ -1014,7 +1032,7 @@ export default function CardPage(
             </TouchableOpacity>
 
             {card?.status != "canceled" && getCardActionButtons()}
-            {ableToAddToWallet && ephemeralKey && Platform.OS === 'ios' && (
+            {ableToAddToWallet && ephemeralKey && Platform.OS === 'ios' && _card?.type !== "physical" && (
               <AddToWalletButton
                 token={androidCardToken}
                 androidAssetSource={require("../../../assets/google-wallet.png")}
@@ -1891,15 +1909,20 @@ export default function CardPage(
             >
               Add your card to Google Wallet for easy payments and quick access.
             </Text>
-            {cardAddedToWallet && (
+
+            {cardStatus === "CARD_ALREADY_EXISTS" && androidCardToken == null && (
+            <View style={{ alignItems: "center" }}>
               <Image 
                 source={isDark ? require("../../../assets/gwallet-added-white.png") : require("../../../assets/gwallet-added-black.png")}
                 style={{
+                  aspectRatio: 1449/326,
+                  width: "90%",
                   marginBottom: 20,
                 }}
               />
+              </View>
             )}
-            {ableToAddToWallet && !cardAddedToWallet && (
+            {((ableToAddToWallet && !cardAddedToWallet) || (androidCardToken)) && ephemeralKey && _card?.type !== "physical" && (
               <AddToWalletButton
                 token={androidCardToken}
                 androidAssetSource={require("../../../assets/google-wallet.png")
@@ -1922,8 +1945,10 @@ export default function CardPage(
                   if (error) {
                     logCriticalError("Error adding card to wallet", error);
                   } else {
+                    setCardStatus("CARD_ALREADY_EXISTS");
                     setCardAddedToWallet(true);
                     setAbleToAddToWallet(false);
+                    setShowWalletModal(false);
                     }
                   }}
                 />

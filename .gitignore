@@ -26,4 +26,3 @@ ios/
 android/
 .env.local
 .env
-private-sdk/

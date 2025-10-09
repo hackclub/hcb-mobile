@@ -10,11 +10,17 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "EXPO_USE_SUBMODULES": "1"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_USE_SUBMODULES": "1"
+      }
     },
     "production": {
       // "env": {
@@ -29,7 +35,10 @@
         "buildType": "apk"
       },
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_USE_SUBMODULES": "1"
+      }
     }
   },
   "submit": {
