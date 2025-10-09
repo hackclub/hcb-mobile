@@ -51,7 +51,7 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
       // Fetch ephemeral key
 
       const ephemeralKeyResponse = await hcb(
-        `cards/${cardId}/ephemeral_keys?stripe_version=${Platform.OS === 'ios' ? Constants.API_VERSIONS.ISSUING : "2020-08-27"}`,
+        `cards/${cardId}/ephemeral_keys?stripe_version=${Platform.OS === "ios" ? Constants.API_VERSIONS.ISSUING : "2020-08-27"}`,
       ).json<{
         ephemeralKeyId: string;
         ephemeralKeySecret: string;
@@ -70,12 +70,15 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
         {
           headers: {
             Authorization: `Bearer ${ephemeralKeyResponse.ephemeralKeySecret}`,
-            "Stripe-Version": Platform.OS === 'ios' ? Constants.API_VERSIONS.ISSUING  : "2020-08-27",
+            "Stripe-Version":
+              Platform.OS === "ios"
+                ? Constants.API_VERSIONS.ISSUING
+                : "2020-08-27",
           },
         },
       ).json<StripeCard>();
 
-      console.log('🔍 Card Data:2', cardData);
+      console.log("🔍 Card Data:2", cardData);
 
       setCard(cardData);
 
@@ -90,11 +93,11 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
         hasPairedAppleWatch: isPaired || false,
       });
 
-      console.log('🔍 Card Data:1', walletDetails);
+      console.log("🔍 Card Data:1", walletDetails);
 
       if (walletError) {
         setState((prev) => ({ ...prev, error: walletError.message }));
-      } else {        
+      } else {
         setState({
           canAddToWallet: canAddCard,
           status: walletDetails?.status || null,
@@ -116,8 +119,8 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
   }, [cardId, hcb, isPaired]);
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {  
-      import('react-native-watch-connectivity').then(({ getIsPaired }) => {
+    if (Platform.OS === "ios") {
+      import("react-native-watch-connectivity").then(({ getIsPaired }) => {
         getIsPaired().then((isPaired) => {
           setIsPaired(isPaired);
         });

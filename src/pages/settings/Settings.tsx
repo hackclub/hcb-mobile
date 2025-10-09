@@ -105,7 +105,6 @@ export default function SettingsPage({ navigation }: Props) {
         ) {
           setTheme(storedTheme);
         }
-
       } catch (error) {
         logError("Error loading settings", error, {
           context: { action: "settings_load" },
@@ -605,7 +604,9 @@ export default function SettingsPage({ navigation }: Props) {
               color={palette.muted}
               style={{ marginRight: 12 }}
             />
-            <Text style={{ color: colors.text, fontSize: 16 }}>Contact Support</Text>
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              Contact Support
+            </Text>
             <Ionicons
               name="chevron-forward"
               size={20}

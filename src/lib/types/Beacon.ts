@@ -1,3 +1,3 @@
 export default interface Beacon {
-    signature: string;
+  signature: string;
 }

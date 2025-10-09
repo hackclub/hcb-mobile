@@ -161,7 +161,14 @@ export default function CardPage(
       setCardError(null);
       setAbleToAddToWallet(canAddToWallet);
     }
-  }, [cardFetchError, errorDisplayReady, card, canAddToWallet, walletCard, walletStatus]);
+  }, [
+    cardFetchError,
+    errorDisplayReady,
+    card,
+    canAddToWallet,
+    walletCard,
+    walletStatus,
+  ]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -193,19 +200,18 @@ export default function CardPage(
 
   // Set up wallet icon in header for Android
   useEffect(() => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
             onPress={() => setShowWalletModal(true)}
             style={{ padding: 8 }}
           >
-              <Ionicons 
-                name="wallet-outline" 
-                size={24} 
-                color={themeColors.text} 
-              />
-
+            <Ionicons
+              name="wallet-outline"
+              size={24}
+              color={themeColors.text}
+            />
           </TouchableOpacity>
         ),
       });
@@ -214,7 +220,13 @@ export default function CardPage(
         headerRight: undefined,
       });
     }
-  }, [navigation, ableToAddToWallet, cardAddedToWallet, isDark, themeColors.text]);
+  }, [
+    navigation,
+    ableToAddToWallet,
+    cardAddedToWallet,
+    isDark,
+    themeColors.text,
+  ]);
 
   // Retrigger digital wallet data on modal open/close
   useEffect(() => {
@@ -228,7 +240,7 @@ export default function CardPage(
       if (!showWalletModal) {
         refreshDigitalWallet();
       }
-    }, [refreshDigitalWallet, showWalletModal])
+    }, [refreshDigitalWallet, showWalletModal]),
   );
 
   const {
@@ -1032,35 +1044,38 @@ export default function CardPage(
             </TouchableOpacity>
 
             {card?.status != "canceled" && getCardActionButtons()}
-            {ableToAddToWallet && ephemeralKey && Platform.OS === 'ios' && _card?.type !== "physical" && (
-              <AddToWalletButton
-                token={androidCardToken}
-                androidAssetSource={require("../../../assets/google-wallet.png")}
-                style={{
-                  height: 48,
-                  width: "100%",
-                  marginBottom: 20,
-                }}
-                iOSButtonStyle={
-                  isDark ? "onDarkBackground" : "onLightBackground"
-                }
-                cardDetails={{
-                  name: walletCard?.cardholder?.name || user?.name || "",
-                  primaryAccountIdentifier:
-                    walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
-                  lastFour: walletCard?.last4,
-                  description: "Added by Stripe",
-                }}
-                ephemeralKey={ephemeralKey}
-                onComplete={({ error }) => {
-                  if (error) {
-                    logCriticalError("Error adding card to wallet", error);
-                  } else {
-                    setAbleToAddToWallet(false);
+            {ableToAddToWallet &&
+              ephemeralKey &&
+              Platform.OS === "ios" &&
+              _card?.type !== "physical" && (
+                <AddToWalletButton
+                  token={androidCardToken}
+                  androidAssetSource={require("../../../assets/google-wallet.png")}
+                  style={{
+                    height: 48,
+                    width: "100%",
+                    marginBottom: 20,
+                  }}
+                  iOSButtonStyle={
+                    isDark ? "onDarkBackground" : "onLightBackground"
                   }
-                }}
-              />
-            )}
+                  cardDetails={{
+                    name: walletCard?.cardholder?.name || user?.name || "",
+                    primaryAccountIdentifier:
+                      walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
+                    lastFour: walletCard?.last4,
+                    description: "Added by Stripe",
+                  }}
+                  ephemeralKey={ephemeralKey}
+                  onComplete={({ error }) => {
+                    if (error) {
+                      logCriticalError("Error adding card to wallet", error);
+                    } else {
+                      setAbleToAddToWallet(false);
+                    }
+                  }}
+                />
+              )}
 
             {/* Card Details Section */}
             <View
@@ -1910,50 +1925,56 @@ export default function CardPage(
               Add your card to Google Wallet for easy payments and quick access.
             </Text>
 
-            {cardStatus === "CARD_ALREADY_EXISTS" && androidCardToken == null && (
-            <View style={{ alignItems: "center" }}>
-              <Image 
-                source={isDark ? require("../../../assets/gwallet-added-white.png") : require("../../../assets/gwallet-added-black.png")}
-                style={{
-                  aspectRatio: 1449/326,
-                  width: "90%",
-                  marginBottom: 20,
-                }}
-              />
-              </View>
-            )}
-            {((ableToAddToWallet && !cardAddedToWallet) || (androidCardToken)) && ephemeralKey && _card?.type !== "physical" && (
-              <AddToWalletButton
-                token={androidCardToken}
-                androidAssetSource={require("../../../assets/google-wallet.png")
-                }
-                style={{         
-                  alignSelf: "center",
-                  width: "70%",         
-                  aspectRatio: 199/55,
-                  marginBottom: 20,
-                }}
-                cardDetails={{
-                  name: walletCard?.cardholder?.name || user?.name || "",
-                  primaryAccountIdentifier:
-                    walletCard?.wallets?.primary_account_identifier || null,
-                  lastFour: walletCard?.last4,
-                  description: "HCB Card",
-                }}
-                ephemeralKey={ephemeralKey}
-                onComplete={({ error }) => {
-                  if (error) {
-                    logCriticalError("Error adding card to wallet", error);
-                  } else {
-                    setCardStatus("CARD_ALREADY_EXISTS");
-                    setCardAddedToWallet(true);
-                    setAbleToAddToWallet(false);
-                    setShowWalletModal(false);
+            {cardStatus === "CARD_ALREADY_EXISTS" &&
+              androidCardToken == null && (
+                <View style={{ alignItems: "center" }}>
+                  <Image
+                    source={
+                      isDark
+                        ? require("../../../assets/gwallet-added-white.png")
+                        : require("../../../assets/gwallet-added-black.png")
+                    }
+                    style={{
+                      aspectRatio: 1449 / 326,
+                      width: "90%",
+                      marginBottom: 20,
+                    }}
+                  />
+                </View>
+              )}
+            {((ableToAddToWallet && !cardAddedToWallet) || androidCardToken) &&
+              ephemeralKey &&
+              _card?.type !== "physical" && (
+                <AddToWalletButton
+                  token={androidCardToken}
+                  androidAssetSource={require("../../../assets/google-wallet.png")}
+                  style={{
+                    alignSelf: "center",
+                    width: "70%",
+                    aspectRatio: 199 / 55,
+                    marginBottom: 20,
+                  }}
+                  cardDetails={{
+                    name: walletCard?.cardholder?.name || user?.name || "",
+                    primaryAccountIdentifier:
+                      walletCard?.wallets?.primary_account_identifier || null,
+                    lastFour: walletCard?.last4,
+                    description: "HCB Card",
+                  }}
+                  ephemeralKey={ephemeralKey}
+                  onComplete={({ error }) => {
+                    if (error) {
+                      logCriticalError("Error adding card to wallet", error);
+                    } else {
+                      setCardStatus("CARD_ALREADY_EXISTS");
+                      setCardAddedToWallet(true);
+                      setAbleToAddToWallet(false);
+                      setShowWalletModal(false);
                     }
                   }}
                 />
-            )}
-            
+              )}
+
             <Button
               style={{
                 backgroundColor: "rgba(0, 0, 0, 0.05)",

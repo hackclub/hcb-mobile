@@ -32,6 +32,7 @@ eas build --platform android --profile preview
 ```
 
 The build will automatically:
+
 1. Configure git authentication using the token
 2. Clone the private submodule
 3. Include the Google Wallet dependencies
@@ -41,6 +42,7 @@ The build will automatically:
 ### Pre-Build Hook (`.eas/hooks/pre-build.sh`)
 
 Runs before `npm install` and:
+
 1. Configures git to use the `GITHUB_TOKEN` for GitHub authentication
 2. Cleans up any incomplete submodule state from the build tarball
 3. Initializes and clones the `private-sdk` submodule
@@ -49,6 +51,7 @@ Runs before `npm install` and:
 ### Post-Build Hook (`.eas/hooks/post-install.sh`)
 
 Runs after `expo prebuild` and:
+
 1. Verifies the private SDK is still accessible
 2. Confirms Google Wallet dependencies are configured in Android build files
 
@@ -65,6 +68,7 @@ Add the token as an EAS secret (see Setup Instructions above).
 ### Build fails with "Google Wallet library NOT found"
 
 The token may not have access to the private repository. Verify:
+
 1. Token has `repo` scope
 2. For fine-grained tokens: repository access is explicitly granted
 3. Token hasn't expired
@@ -77,4 +81,3 @@ The token may not have access to the private repository. Verify:
    keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256
    ```
 3. Register it in the [Google Pay Business Console](https://pay.google.com/business/console)
-
