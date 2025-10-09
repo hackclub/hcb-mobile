@@ -28,6 +28,9 @@ function withPrivateSDK(config) {
         console.warn('⚠️  Private SDK directory not found at:', privateSDKPath);
         console.warn('⚠️  This is expected for EAS builds if submodules are not included.');
         console.warn('⚠️  Make sure to set EXPO_USE_SUBMODULES=1 in your EAS build configuration.');
+        console.warn('⚠️  Current working directory:', process.cwd());
+        console.warn('⚠️  Project root:', projectRoot);
+        console.warn('⚠️  Private SDK path:', privateSDKPath);
         
         // For EAS builds, we should still configure the dependencies but skip the Maven repo setup
         try {
@@ -41,6 +44,9 @@ function withPrivateSDK(config) {
       }
 
       try {
+        console.log('✅ Private SDK found, configuring Maven repositories...');
+        console.log('📦 Private SDK contents:', fs.readdirSync(privateSDKPath));
+        
         // Step 1: Configure root build.gradle to include local Maven repository
         await configureRootBuildGradle(rootBuildGradlePath, privateSDKPath, projectRoot);
         
@@ -65,7 +71,7 @@ function withPrivateSDK(config) {
  * Configure root build.gradle to include local Maven repository for private SDK
  * Following Google's documentation: Add maven { url "file:/path/to/your/repo/m2repository/" }
  */
-async function configureRootBuildGradle(buildGradlePath, privateSDKPath, projectRoot) {
+async function configureRootBuildGradle(buildGradlePath, privateSDKPath, projectRootPath) {
   console.log('📝 Configuring root build.gradle...');
   
   if (!fs.existsSync(buildGradlePath)) {
@@ -82,7 +88,7 @@ async function configureRootBuildGradle(buildGradlePath, privateSDKPath, project
     console.log('⚠️  Private SDK not available - removing private Maven repository from root build.gradle');
     
     // Remove any existing private Maven repository references
-    const privateMavenRegex = /maven\s*\{\s*url\s*file\(['"]\.\.\/private-sdk['"]\)\s*\}\s*\/\/\s*Google Play Services Tap and Pay private SDK[^\n]*\n?/g;
+    const privateMavenRegex = /maven\s*\{\s*url\s*file\(['"][^'"]*private-sdk[^'"]*['"]\)\s*\}\s*\/\/\s*Google Play Services Tap and Pay private SDK[^\n]*\n?/g;
     if (buildGradleContent.match(privateMavenRegex)) {
       buildGradleContent = buildGradleContent.replace(privateMavenRegex, '');
       fs.writeFileSync(buildGradlePath, buildGradleContent);
@@ -291,7 +297,7 @@ async function verifyAppMavenRepository(buildGradlePath, privateSDKPath) {
     console.log('⚠️  Private SDK not available - removing private Maven repository references');
     
     // Remove any existing private Maven repository references
-    const privateMavenRegex = /maven\s*\{\s*url\s*rootProject\.file\(['"]\.\.\/private-sdk['"]\)\s*\}/g;
+    const privateMavenRegex = /maven\s*\{\s*url\s*rootProject\.file\(['"][^'"]*private-sdk[^'"]*['"]\)\s*\}/g;
     if (buildGradleContent.match(privateMavenRegex)) {
       buildGradleContent = buildGradleContent.replace(privateMavenRegex, '');
       fs.writeFileSync(buildGradlePath, buildGradleContent);
@@ -303,13 +309,15 @@ async function verifyAppMavenRepository(buildGradlePath, privateSDKPath) {
   }
   
   // Check if the local Maven repository is already configured in app build.gradle
-  if (buildGradleContent.includes('maven { url rootProject.file(\'../private-sdk\') }')) {
+  if (buildGradleContent.includes('maven { url rootProject.file(') && buildGradleContent.includes('private-sdk')) {
     console.log('✅ Local Maven repository already configured in app build.gradle');
     return;
   }
 
   // Add the repositories block if it doesn't exist, or add to existing one
   const repositoriesBlockRegex = /(repositories\s*\{[\s\S]*?)(\})/;
+  // rootProject.file() is relative to the android/ directory (root Gradle project)
+  // So we need the path from android/ to private-sdk, which is ../private-sdk
   const mavenRepoLine = `    // Ensure local private Maven repo is available to this module\n    maven { url rootProject.file('../private-sdk') }`;
   
   if (repositoriesBlockRegex.test(buildGradleContent)) {

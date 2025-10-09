@@ -1,3 +1,4 @@
 [submodule "private-sdk"]
 	path = private-sdk
 	url = https://github.com/hackclub/hcb-private-sdk.git
+	update = checkout

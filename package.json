@@ -11,7 +11,9 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "ts:check": "tsc",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "eas-build-pre-install": "./.eas/hooks/pre-build.sh",
+    "eas-build-post-install": "./.eas/hooks/post-install.sh"
   },
   "dependencies": {
     "@expo/config-plugins": "~10.1.1",
