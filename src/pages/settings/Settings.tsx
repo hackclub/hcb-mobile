@@ -361,6 +361,7 @@ export default function SettingsPage({ navigation }: Props) {
                   </View>
                 </View>
                 <Switch
+                  style={{ marginRight: 12 }}
                   value={biometricsRequired}
                   onValueChange={handleBiometricsToggle}
                   trackColor={{ false: palette.muted, true: colors.primary }}

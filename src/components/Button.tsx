@@ -1,3 +1,4 @@
+import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import * as Haptics from "expo-haptics";
 import { PropsWithChildren } from "react";
@@ -37,6 +38,7 @@ export interface ButtonProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   hapticFeedback?: boolean;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
 }
 
 const styles = StyleSheet.create({
@@ -63,10 +65,85 @@ const styles = StyleSheet.create({
 export default function Button(
   props: PropsWithChildren<ViewProps & ButtonProps>,
 ) {
+  const theme = useTheme();
+  const { variant = "primary" } = props;
+
+  const getVariantStyles = () => {
+    if (props.variant) {
+      const variantBaseStyle = {
+        ...styles.button,
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+      };
+
+      switch (variant) {
+        case "secondary":
+          return {
+            ...variantBaseStyle,
+            backgroundColor: theme.colors.card,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+          };
+        case "outline":
+          return {
+            ...variantBaseStyle,
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            borderColor: palette.primary,
+          };
+        case "ghost":
+          return {
+            ...variantBaseStyle,
+            backgroundColor: "transparent",
+            borderWidth: 0,
+            borderColor: "transparent",
+          };
+        case "primary":
+        default:
+          return variantBaseStyle;
+      }
+    }
+
+    return styles.button;
+  };
+
+  const getTextColor = () => {
+    if (props.color) return props.color;
+
+    if (props.variant) {
+      switch (variant) {
+        case "secondary":
+          return theme.colors.text;
+        case "outline":
+          return palette.primary;
+        case "ghost":
+          return theme.colors.text;
+        case "primary":
+        default:
+          return "#FFFFFF";
+      }
+    }
+
+    return styles.buttonText.color;
+  };
+
+  const getTextStyles = () => {
+    const baseTextStyle = {
+      ...styles.buttonText,
+      color: getTextColor(),
+      fontSize: props.fontSize || styles.buttonText.fontSize,
+      fontWeight: props.fontWeight || styles.buttonText.fontWeight,
+      opacity: props.loading ? 0 : props.variant === "ghost" ? 0.8 : 1,
+    };
+
+    return baseTextStyle;
+  };
+
   return (
     <Pressable
       style={{
-        ...styles.button,
+        ...getVariantStyles(),
         ...(props.style as object),
         ...(props.disabled
           ? {
@@ -116,17 +193,7 @@ export default function Button(
           />
         </View>
       )}
-      <Text
-        style={{
-          ...styles.buttonText,
-          color: props.color || styles.buttonText.color,
-          fontSize: props.fontSize || styles.buttonText.fontSize,
-          fontWeight: props.fontWeight || styles.buttonText.fontWeight,
-          opacity: props.loading ? 0 : 1,
-        }}
-      >
-        {props.children}
-      </Text>
+      <Text style={getTextStyles()}>{props.children}</Text>
       {props.loading && (
         <View
           style={{
