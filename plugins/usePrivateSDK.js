@@ -31,7 +31,7 @@ function withPrivateSDK(config) {
         
         // For EAS builds, we should still configure the dependencies but skip the Maven repo setup
         try {
-          await verifyAppBuildGradle(appBuildGradlePath);
+          await verifyAppBuildGradle(appBuildGradlePath, privateSDKPath);
           console.log('✅ Configured dependencies for EAS build (without private Maven repo)');
         } catch (error) {
           console.error('❌ Error configuring dependencies for EAS build:', error.message);
@@ -45,7 +45,7 @@ function withPrivateSDK(config) {
         await configureRootBuildGradle(rootBuildGradlePath, privateSDKPath, projectRoot);
         
         // Step 2: Configure app build.gradle with required dependencies
-        await verifyAppBuildGradle(appBuildGradlePath);
+        await verifyAppBuildGradle(appBuildGradlePath, privateSDKPath);
         
         // Step 3: Verify app build.gradle has local Maven repository reference
         await verifyAppMavenRepository(appBuildGradlePath, privateSDKPath);
@@ -123,7 +123,7 @@ async function configureRootBuildGradle(buildGradlePath, privateSDKPath, project
  * Configure app build.gradle with required dependencies for Push Provisioning
  * Adds both Google Play Services Tap and Pay and Stripe Android Issuing Push Provisioning
  */
-async function verifyAppBuildGradle(buildGradlePath) {
+async function verifyAppBuildGradle(buildGradlePath, privateSDKPath) {
   console.log('📝 Configuring app build.gradle dependencies...');
   
   if (!fs.existsSync(buildGradlePath)) {
@@ -135,7 +135,6 @@ async function verifyAppBuildGradle(buildGradlePath) {
   let hasChanges = false;
   
   // Check if private SDK is available (regardless of build environment)
-  const privateSDKPath = path.join(path.dirname(buildGradlePath), '..', '..', 'private-sdk');
   const privateSDKAvailable = fs.existsSync(privateSDKPath);
   
   // Dependencies to add - only add private dependencies if private SDK is available
