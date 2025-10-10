@@ -131,7 +131,7 @@ export default function CardSkeleton() {
                 color: themeColors.text,
               }}
             >
-              Card number
+              Card Number
             </Text>
             <Animated.View style={createSkeletonStyle(140, 22)} />
           </View>

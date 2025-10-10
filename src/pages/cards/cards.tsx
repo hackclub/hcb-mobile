@@ -155,7 +155,7 @@ export default function CardsPage({ navigation }: Props) {
           actions={[
             {
               id: "showCanceledCards",
-              title: "Show canceled cards",
+              title: "Show Canceled Cards",
               state: canceledCardsShown ? "on" : "off",
             },
           ]}

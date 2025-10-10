@@ -238,7 +238,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   // Set navigation title
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "My receipts",
+      title: "Receipts",
     });
   }, [navigation]);
 

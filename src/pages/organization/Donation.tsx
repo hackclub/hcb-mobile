@@ -780,7 +780,7 @@ function PageContent({
             }}
             loading={loadingConnectingReader}
           >
-            Collect donations
+            Collect Donations
           </Button>
         </View>
       </View>
@@ -914,7 +914,7 @@ function PageContent({
                 marginTop: "auto",
               }}
             >
-              Create donation
+              Create Donation
             </Button>
           ) : (
             <Button
