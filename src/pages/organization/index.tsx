@@ -202,7 +202,7 @@ export default function OrganizationPage({
         ) {
           menuActions.push({
             id: "accountNumber",
-            title: "View Account Details",
+            title: "Account Details",
             image: "creditcard.and.123",
             imageColor: "white",
           });
