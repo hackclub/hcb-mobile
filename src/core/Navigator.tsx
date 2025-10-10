@@ -238,7 +238,7 @@ export default function Navigator() {
               component={OrganizationTeamPage}
               options={{
                 headerBackTitle: "Back",
-                title: "Manage Organization",
+                title: "Team",
               }}
             />
             <Stack.Screen
