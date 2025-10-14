@@ -417,7 +417,7 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginRight: 12 }}
             />
             <Text style={{ color: colors.text, fontSize: 16 }}>
-              Deep linking
+              Deep Linking
             </Text>
             <Ionicons
               name="chevron-forward"

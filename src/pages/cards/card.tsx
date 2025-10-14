@@ -188,8 +188,8 @@ export default function CardPage(
         nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
       setCardName(
         lastInitial
-          ? `${firstName} ${lastInitial}'s card`
-          : `${firstName}'s card`,
+          ? `${firstName} ${lastInitial}'s Card`
+          : `${firstName}'s Card`,
       );
     }
   }, [card]);
@@ -670,7 +670,7 @@ export default function CardPage(
             icon="rep"
             onPress={() => setShowActivateModal(true)}
           >
-            Activate card
+            Activate Card
           </Button>,
         );
       } else if (isCardholder || isManagerOrAdmin) {
@@ -688,7 +688,7 @@ export default function CardPage(
             onPress={() => toggleCardFrozen()}
             loading={!!isUpdatingStatus}
           >
-            {card?.status == "active" ? "Freeze card" : "Defrost card"}
+            {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
           </Button>,
         );
       }
@@ -714,7 +714,6 @@ export default function CardPage(
       );
     }
 
-    // Add reveal details button
     if (
       card?.type == "virtual" &&
       (card?.status as Card["status"]) !== "canceled" &&
@@ -733,7 +732,7 @@ export default function CardPage(
           onPress={toggleCardDetails}
           loading={!!detailsLoading || !!cardDetailsLoading}
         >
-          {detailsRevealed ? "Hide details" : "Reveal details"}
+          {detailsRevealed ? "Hide Details" : "Reveal Details"}
         </Button>,
       );
     }
@@ -750,7 +749,7 @@ export default function CardPage(
           onPress={handleOneTimeUse}
           loading={isOneTimeUse}
         >
-          One time use
+          One Time Use
         </Button>,
       );
     }
@@ -769,7 +768,7 @@ export default function CardPage(
             setShowPurposeModal(true);
           }}
         >
-          Set purpose
+          Set Purpose
         </Button>,
       );
     }
@@ -794,7 +793,7 @@ export default function CardPage(
           onPress={returnGrant}
           loading={!!isReturningGrant}
         >
-          {!isCardholder ? "Cancel grant" : "Return grant"}
+          {!isCardholder ? "Cancel Grant" : "Return Grant"}
         </Button>,
       );
     }
@@ -808,7 +807,7 @@ export default function CardPage(
           onPress={handleBurnCard}
           loading={isBurningCard}
         >
-          Burn card
+          Burn Card
         </Button>,
       );
     }
@@ -1191,7 +1190,7 @@ export default function CardPage(
                     flexShrink: 1,
                   }}
                 >
-                  Card number
+                  Card Number
                 </Text>
                 <View style={{ flex: 1, alignItems: "flex-end" }}>
                   {detailsLoading ||
