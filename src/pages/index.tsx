@@ -28,9 +28,11 @@ import ReorderableList, {
 import { mutate, preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
+import GrantInvite from "../components/organizations/GrantInvite";
 import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
+import GrantCard from "../lib/types/GrantCard";
 import Invitation from "../lib/types/Invitation";
 import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
@@ -231,6 +233,26 @@ export default function App({ navigation }: Props) {
     },
   });
 
+  const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<GrantCard[]>(
+    "user/card_grants",
+    {
+      fallbackData: [],
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 2000,
+      onError: (err) => {
+        logError("Error fetching grant cards:", err);
+      },
+    },
+  );
+
+  // Filter grants that are active but don't have a card_id yet (need to create card)
+  const grantInvites = useMemo(() => {
+    return grantCards?.filter(grant => 
+      grant.status === "active" && !grant.card_id
+    ) || [];
+  }, [grantCards]);
+
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
@@ -426,8 +448,7 @@ export default function App({ navigation }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       ListHeaderComponent={() =>
-        invitations &&
-        invitations.length > 0 && (
+        (invitations && invitations.length > 0) || (grantInvites && grantInvites.length > 0) ? (
           <View
             style={{
               marginTop: 10,
@@ -435,51 +456,68 @@ export default function App({ navigation }: Props) {
               borderRadius: 10,
             }}
           >
-            <Text
-              style={{
-                color: palette.muted,
-                fontSize: 12,
-                textTransform: "uppercase",
-                marginBottom: 10,
-              }}
-            >
-              Pending invitations
-            </Text>
-            {invitations.map((invitation) => (
-              <Event
-                key={invitation.id}
-                invitation={invitation}
-                style={{
-                  borderWidth: 2,
-                  borderColor:
-                    scheme == "dark" ? palette.primary : palette.muted,
-                  marginBottom: 10,
-                }}
-                event={invitation.organization}
-                onPress={() =>
-                  navigation.navigate("Invitation", {
-                    inviteId: invitation.id,
-                    invitation,
-                  })
-                }
-                hideBalance
-              />
-              // <TouchableHighlight key={invitation.id}>
-              //   <Text
-              //     style={{
-              //       color: palette.smoke,
-              //       backgroundColor: palette.darkless,
-              //       padding: 10,
-              //       borderRadius: 10,
-              //       overflow: "hidden",
-              //     }}
-              //   >
-              //     {invitation.organization.name}
-              //   </Text>
-              // </TouchableHighlight>
-            ))}
+            {invitations && invitations.length > 0 && (
+              <>
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                    marginBottom: 10,
+                  }}
+                >
+                  Pending invitations
+                </Text>
+                {invitations.map((invitation) => (
+                  <Event
+                    key={invitation.id}
+                    invitation={invitation}
+                    style={{
+                      borderWidth: 2,
+                      borderColor:
+                        scheme == "dark" ? palette.primary : palette.muted,
+                      marginBottom: 10,
+                    }}
+                    event={invitation.organization}
+                    onPress={() =>
+                      navigation.navigate("Invitation", {
+                        inviteId: invitation.id,
+                        invitation,
+                      })
+                    }
+                    hideBalance
+                  />
+                ))}
+              </>
+            )}
+            
+            {grantInvites && grantInvites.length > 0 && (
+              <>
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                    marginBottom: 10,
+                    marginTop: invitations && invitations.length > 0 ? 20 : 0,
+                  }}
+                >
+                  Available grants
+                </Text>
+                {grantInvites.map((grant) => (
+                  <GrantInvite
+                    key={grant.id}
+                    grant={grant}
+                    navigation={navigation}
+                    style={{
+                      marginBottom: 10,
+                    }}
+                  />
+                ))}
+              </>
+            )}
           </View>
-        )
+        ) : null
       }
       renderItem={renderItem}
       ListFooterComponent={() =>

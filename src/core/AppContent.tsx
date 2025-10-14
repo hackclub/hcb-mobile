@@ -20,7 +20,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ColorSchemeName, View, ActivityIndicator } from "react-native";
+import { ColorSchemeName, View, ActivityIndicator, Platform } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -426,7 +426,7 @@ export default function AppContent({
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1 }}>
+      <SafeAreaView edges={Platform.OS == "android" ? ["top", "bottom"]: []} style={{ flex: 1 }}>
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
             <GestureHandlerRootView>

@@ -82,6 +82,7 @@
     "react-native": "0.79.5",
     "react-native-alert-notification": "^0.4.2",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-helpscout-beacon": "^0.6.0",
     "react-native-image-viewing": "^0.2.2",
     "react-native-pager-view": "6.7.1",
     "react-native-picker-select": "^9.3.1",

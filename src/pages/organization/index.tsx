@@ -47,6 +47,7 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 import { renderDate, renderMoney } from "../../utils/util";
+import { useIsDark } from "../../lib/useColorScheme";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
@@ -86,7 +87,8 @@ export default function OrganizationPage({
 }: Props) {
   const scheme = useColorScheme();
   const { isOnline } = useOffline();
-
+  const isDark = useIsDark();
+  
   const {
     data: organization,
     error: organizationError,
@@ -111,6 +113,9 @@ export default function OrganizationPage({
     organizationId: organization?.id,
     enabled: !!(organization && !organization.playground_mode),
   });
+  const userinOrganization = useMemo(() => {
+    return organization && "users" in organization && organization.users.some((u) => u.id === user?.id);
+  }, [organization, user]);
 
   const {
     transactions: _transactions,
@@ -204,7 +209,7 @@ export default function OrganizationPage({
             id: "accountNumber",
             title: "View Account Details",
             image: "creditcard.and.123",
-            imageColor: "white",
+            imageColor: isDark ? "black" : "white",
           });
         }
 
@@ -213,7 +218,7 @@ export default function OrganizationPage({
             id: "transfer",
             title: "Transfer Money",
             image: "dollarsign.circle",
-            imageColor: "white",
+            imageColor: isDark ? "black" : "white",
           });
         }
 
@@ -221,7 +226,7 @@ export default function OrganizationPage({
           id: "team",
           title: "Manage Team",
           image: "person.2.badge.gearshape",
-          imageColor: "white",
+          imageColor: isDark ? "black" : "white",
         });
 
         if (!organization.playground_mode && supportsTapToPay) {
@@ -229,7 +234,7 @@ export default function OrganizationPage({
             id: "donation",
             title: "Collect Donations",
             image: "dollarsign.circle",
-            imageColor: "white",
+            imageColor: isDark ? "black" : "white",
           });
         }
 
@@ -481,8 +486,7 @@ export default function OrganizationPage({
               <TouchableHighlight
                 onPress={
                   item.id &&
-                  "users" in organization &&
-                  organization.users.some((u) => u.id === user?.id)
+                  (userinOrganization || user?.admin || user?.auditor)
                     ? () => {
                         if (
                           item.code === TransactionType.Disbursement &&

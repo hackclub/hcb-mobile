@@ -79,12 +79,14 @@ export function organizationOrderEqual(a: Organization[], b: Organization[]) {
   return true;
 }
 
-export const formatMerchantNames = (merchantIds: string[] | undefined) => {
+export const formatMerchantNames = async (merchantIds: string[] | undefined) => {
   if (!merchantIds || merchantIds.length === 0) {
     return "All";
   }
 
   try {
+    await Merchant.initialize();
+    
     const merchantNames: string[] = [];
     const validIds = merchantIds.filter((id): id is string => !!id);
     const unnamedCount = validIds.filter((id) => {
@@ -113,7 +115,8 @@ export const formatMerchantNames = (merchantIds: string[] | undefined) => {
   }
 };
 
-export const formatCategoryNames = (categoryIds: string[] | undefined) => {
+export const formatCategoryNames = async (categoryIds: string[] | undefined) => {
+  await Category.initialize();
   if (!categoryIds || categoryIds.length === 0) {
     return "All";
   }

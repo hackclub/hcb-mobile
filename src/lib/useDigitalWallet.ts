@@ -78,8 +78,6 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
         },
       ).json<StripeCard>();
 
-      console.log("🔍 Card Data:2", cardData);
-
       setCard(cardData);
 
       const {
@@ -92,8 +90,6 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
         cardLastFour: cardData.last4,
         hasPairedAppleWatch: isPaired || false,
       });
-
-      console.log("🔍 Card Data:1", walletDetails);
 
       if (walletError) {
         setState((prev) => ({ ...prev, error: walletError.message }));
