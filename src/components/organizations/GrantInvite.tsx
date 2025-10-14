@@ -61,7 +61,7 @@ export default function GrantInvite({
       style={[
         {
           backgroundColor: themeColors.card,
-          borderRadius: 12,
+          borderRadius: 10,
           marginBottom: 10,
           borderWidth: 2,
           borderColor: palette.primary,
