@@ -81,7 +81,11 @@ export default function GrantCardPage({ route, navigation }: Props) {
               textAlign: "center",
             }}
           >
-          {grant.status === "canceled" ? "Sorry, this grant was cancelled!" : grant.status == "active" ? "This grant hasn't been accepted yet!" : "Sorry, this grant is not available!"}
+            {grant.status === "canceled"
+              ? "Sorry, this grant was cancelled!"
+              : grant.status == "active"
+                ? "This grant hasn't been accepted yet!"
+                : "Sorry, this grant is not available!"}
           </Text>
           <Text
             style={{
@@ -103,7 +107,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
             $0
           </Text>
         </View>
-                
+
         {/* Show activate button for grants that are active but not yet activated */}
         {grant.status === "active" && (
           <View style={{ marginTop: 20 }}>

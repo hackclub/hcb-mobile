@@ -89,13 +89,9 @@ export default {
             minSdkVersion: 26,
             javaMaxHeapSize: "4g",
             dexOptions: {
-              javaMaxHeapSize: "4g"
+              javaMaxHeapSize: "4g",
             },
-            jvmArgs: [
-              "-Xmx4g",
-              "-XX:+UseG1GC",
-              "-XX:MaxGCPauseMillis=200"
-            ],
+            jvmArgs: ["-Xmx4g", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=200"],
             // Additional build optimizations
             enableProguardInReleaseBuilds: false,
             enableSeparateBuildPerCPUArchitecture: false,
@@ -114,9 +110,9 @@ export default {
                 "META-INF/NOTICE",
                 "META-INF/NOTICE.txt",
                 "META-INF/notice.txt",
-                "META-INF/ASL2.0"
-              ]
-            }
+                "META-INF/ASL2.0",
+              ],
+            },
           },
         },
       ],

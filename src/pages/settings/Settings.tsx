@@ -592,12 +592,14 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => HelpscoutBeacon.loginAndOpen(
-              user?.email || "",
-              user?.name || "",
-              user?.id || "",
-              beacon?.signature || ""
-            )}
+            onPress={() =>
+              HelpscoutBeacon.loginAndOpen(
+                user?.email || "",
+                user?.name || "",
+                user?.id || "",
+                beacon?.signature || "",
+              )
+            }
           >
             <Ionicons
               name="chatbox-ellipses-outline"

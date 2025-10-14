@@ -49,53 +49,36 @@ export default function Comment({ comment }: { comment: IComment }) {
         style={{
           backgroundColor: themeColors.card,
           borderWidth: 1,
-          borderColor: isDark ? "#3B4858" : "#E0E6ED",
+          borderColor: isDark ? "#3B4858" : "rgba(51,142,218,.25)",
           borderRadius: 8,
           padding: 16,
           ...(comment.admin_only && {
             borderColor: "#ff8c37",
-            backgroundColor: "#ff8c3708",
-            borderWidth: 1.5,
+            borderStyle: "dashed",
           }),
         }}
       >
-        {/* Admin Badge */}
-        {comment.admin_only && (
-          <View
-            style={{
-              position: "absolute",
-              top: -6,
-              right: 12,
-              backgroundColor: "#ff8c37",
-              paddingHorizontal: 8,
-              paddingVertical: 2,
-              borderRadius: 4,
-              zIndex: 1,
-            }}
-          >
-            <Text
-              style={{
-                color: "white",
-                fontSize: 10,
-                fontWeight: "600",
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              Admin Only
-            </Text>
-          </View>
-        )}
-
         {/* Header */}
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginBottom: 12,
+            marginBottom: 4,
             borderBottomWidth: 1,
-            borderColor: isDark ? "#3B4858" : "#E0E6ED",
-            paddingBottom: 12,
+            borderColor: isDark ? "#3B4858" : "#EBF4FA",
+            paddingBottom: 8,
+            backgroundColor: comment.admin_only
+              ? isDark
+                ? "#3B2E2A"
+                : "#FFF4EB"
+              : isDark
+                ? "#262F3B"
+                : "#EBF4FA",
+            margin: -16,
+            paddingHorizontal: 16,
+            paddingTop: 6,
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
           }}
         >
           <View style={{ flex: 1 }}>
@@ -106,12 +89,12 @@ export default function Comment({ comment }: { comment: IComment }) {
                 justifyContent: "space-between",
               }}
             >
-              <UserMention user={comment.user} />
+              <UserMention user={comment.user} scale={0.9} />
 
               <Text
                 style={{
                   color: palette.muted,
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: "500",
                 }}
               >
@@ -127,6 +110,7 @@ export default function Comment({ comment }: { comment: IComment }) {
             color: themeColors.text,
             fontSize: 15,
             lineHeight: 22,
+            paddingTop: 4,
             marginBottom: comment.file ? 12 : 0,
           }}
           selectable

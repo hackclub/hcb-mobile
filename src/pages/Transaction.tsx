@@ -55,9 +55,11 @@ export default function TransactionPage({
     { fallbackData: _transaction },
   );
   const { data: comments } = useOfflineSWR<IComment[]>(
-    `organizations/${
-      orgId || transaction!.organization!.id
-    }/transactions/${transactionId}/comments`,
+    orgId
+      ? `organizations/${orgId}/transactions/${transactionId}/comments`
+      : transaction?.organization?.id
+        ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
+        : null,
   );
 
   const tabBarHeight = useBottomTabBarHeight();
@@ -75,16 +77,20 @@ export default function TransactionPage({
           { revalidate: true },
         ),
         mutate(
-          `organizations/${
-            orgId || transaction!.organization!.id
-          }/transactions/${transactionId}/comments`,
+          orgId
+            ? `organizations/${orgId}/transactions/${transactionId}/comments`
+            : transaction?.organization?.id
+              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
+              : null,
           undefined,
           { revalidate: true },
         ),
         mutate(
-          `organizations/${
-            orgId || transaction!.organization!.id
-          }/transactions/${transactionId}/receipts`,
+          orgId
+            ? `organizations/${orgId}/transactions/${transactionId}/receipts`
+            : transaction?.organization?.id
+              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/receipts`
+              : null,
           undefined,
           { revalidate: true },
         ),
@@ -103,8 +109,13 @@ export default function TransactionPage({
     return <TransactionSkeleton />;
   }
 
+  const currentOrgId = orgId || transaction?.organization?.id;
+  if (!currentOrgId) {
+    return <TransactionSkeleton />;
+  }
+
   const transactionViewProps: Omit<TransactionViewProps, "transaction"> = {
-    orgId: orgId || transaction.organization!.id,
+    orgId: currentOrgId,
     navigation,
   };
 
@@ -163,10 +174,7 @@ export default function TransactionPage({
             </View>
           )}
 
-          <CommentField
-            orgId={orgId || transaction.organization!.id}
-            transactionId={transactionId}
-          />
+          <CommentField orgId={currentOrgId} transactionId={transactionId} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -233,24 +233,23 @@ export default function App({ navigation }: Props) {
     },
   });
 
-  const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<GrantCard[]>(
-    "user/card_grants",
-    {
-      fallbackData: [],
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 2000,
-      onError: (err) => {
-        logError("Error fetching grant cards:", err);
-      },
+  const { data: grantCards } = useOfflineSWR<GrantCard[]>("user/card_grants", {
+    fallbackData: [],
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 2000,
+    onError: (err) => {
+      logError("Error fetching grant cards:", err);
     },
-  );
+  });
 
   // Filter grants that are active but don't have a card_id yet (need to create card)
   const grantInvites = useMemo(() => {
-    return grantCards?.filter(grant => 
-      grant.status === "active" && !grant.card_id
-    ) || [];
+    return (
+      grantCards?.filter(
+        (grant) => grant.status === "active" && !grant.card_id,
+      ) || []
+    );
   }, [grantCards]);
 
   const { fetcher, mutate } = useSWRConfig();
@@ -448,7 +447,8 @@ export default function App({ navigation }: Props) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       ListHeaderComponent={() =>
-        (invitations && invitations.length > 0) || (grantInvites && grantInvites.length > 0) ? (
+        (invitations && invitations.length > 0) ||
+        (grantInvites && grantInvites.length > 0) ? (
           <View
             style={{
               marginTop: 10,
@@ -490,7 +490,7 @@ export default function App({ navigation }: Props) {
                 ))}
               </>
             )}
-            
+
             {grantInvites && grantInvites.length > 0 && (
               <>
                 <Text

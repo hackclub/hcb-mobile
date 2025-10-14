@@ -200,7 +200,10 @@ export default function CardPage(
 
   // Set up wallet icon in header for Android
   useEffect(() => {
-    if (Platform.OS === "android" && (card?.status == "active" || card?.status == "frozen")) {
+    if (
+      Platform.OS === "android" &&
+      (card?.status == "active" || card?.status == "frozen")
+    ) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity

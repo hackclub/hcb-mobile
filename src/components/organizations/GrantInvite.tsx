@@ -17,7 +17,11 @@ interface GrantInviteProps {
   style?: object;
 }
 
-export default function GrantInvite({ grant, navigation, style }: GrantInviteProps) {
+export default function GrantInvite({
+  grant,
+  navigation,
+  style,
+}: GrantInviteProps) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   const [isCreatingCard, setIsCreatingCard] = useState(false);
@@ -26,20 +30,25 @@ export default function GrantInvite({ grant, navigation, style }: GrantInvitePro
     setIsCreatingCard(true);
     try {
       const response = await hcb.post(`card_grants/${grant.id}/activate`);
-      
+
       if (response.ok) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        
+
         navigation.navigate("GrantCard", {
           grantId: grant.id,
         });
       } else {
-        const errorData = await response.json() as { error?: string };
-        Alert.alert("Error", errorData.error || "Failed to create card for grant");
+        const errorData = (await response.json()) as { error?: string };
+        Alert.alert(
+          "Error",
+          errorData.error || "Failed to create card for grant",
+        );
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
-      logCriticalError("Error creating card for grant", err, { grantId: grant.id });
+      logCriticalError("Error creating card for grant", err, {
+        grantId: grant.id,
+      });
       Alert.alert("Error", "Failed to create card. Please try again later.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
@@ -65,21 +74,49 @@ export default function GrantInvite({ grant, navigation, style }: GrantInvitePro
       disabled={isCreatingCard}
     >
       <View style={{ padding: 16 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <Text style={{ color: themeColors.text, fontSize: 18, fontWeight: "600", flexShrink: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 18,
+              fontWeight: "600",
+              flexShrink: 1,
+            }}
+          >
             {grant.organization.name} sent you a grant
           </Text>
-          <Text style={{ color: palette.primary, fontSize: 16, fontWeight: "500" }}>
+          <Text
+            style={{ color: palette.primary, fontSize: 16, fontWeight: "500" }}
+          >
             {renderMoney(grant.amount_cents)}
           </Text>
         </View>
-        
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Text style={{ color: palette.muted, fontSize: 14 }}>
             Tap to activate your grant
           </Text>
           {isCreatingCard && (
-            <Text style={{ color: palette.primary, fontSize: 14, fontWeight: "500" }}>
+            <Text
+              style={{
+                color: palette.primary,
+                fontSize: 14,
+                fontWeight: "500",
+              }}
+            >
               Activating grant...
             </Text>
           )}

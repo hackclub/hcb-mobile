@@ -42,12 +42,12 @@ import ITransaction, {
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
+import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 import { renderDate, renderMoney } from "../../utils/util";
-import { useIsDark } from "../../lib/useColorScheme";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
@@ -88,7 +88,7 @@ export default function OrganizationPage({
   const scheme = useColorScheme();
   const { isOnline } = useOffline();
   const isDark = useIsDark();
-  
+
   const {
     data: organization,
     error: organizationError,
@@ -114,7 +114,11 @@ export default function OrganizationPage({
     enabled: !!(organization && !organization.playground_mode),
   });
   const userinOrganization = useMemo(() => {
-    return organization && "users" in organization && organization.users.some((u) => u.id === user?.id);
+    return (
+      organization &&
+      "users" in organization &&
+      organization.users.some((u) => u.id === user?.id)
+    );
   }, [organization, user]);
 
   const {
