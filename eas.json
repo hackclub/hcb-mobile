@@ -12,14 +12,18 @@
       },
       "channel": "development",
       "env": {
-        "EXPO_USE_SUBMODULES": "1"
+        "EXPO_USE_SUBMODULES": "1",
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=4g",
+        "JAVA_OPTS": "-Xmx4g"
       }
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "EXPO_USE_SUBMODULES": "1"
+        "EXPO_USE_SUBMODULES": "1",
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=4g",
+        "JAVA_OPTS": "-Xmx4g"
       }
     },
     "production": {
@@ -37,7 +41,9 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_USE_SUBMODULES": "1"
+        "EXPO_USE_SUBMODULES": "1",
+        "GRADLE_OPTS": "-Xmx4g -XX:MaxMetaspaceSize=4g",
+        "JAVA_OPTS": "-Xmx4g"
       }
     }
   },

@@ -87,12 +87,36 @@ export default {
         {
           android: {
             minSdkVersion: 26,
+            javaMaxHeapSize: "4g",
+            dexOptions: {
+              javaMaxHeapSize: "4g"
+            },
+            jvmArgs: [
+              "-Xmx4g",
+              "-XX:+UseG1GC",
+              "-XX:MaxGCPauseMillis=200"
+            ],
+            // Additional build optimizations
+            enableProguardInReleaseBuilds: false,
+            enableSeparateBuildPerCPUArchitecture: false,
+            universalApk: false,
+            // Reduce memory usage during packaging
             packagingOptions: {
               pickFirst: [
                 "org/bouncycastle/pqc/crypto/picnic/lowmcL*",
                 "org/bouncycastle/x509/CertPathReviewerMessages*",
               ],
-            },
+              exclude: [
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0"
+              ]
+            }
           },
         },
       ],
