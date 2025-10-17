@@ -1069,7 +1069,7 @@ export default function CardPage(
                     primaryAccountIdentifier:
                       walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
                     lastFour: walletCard?.last4,
-                    description: "Added by Stripe",
+                    description: "HCB Card",
                   }}
                   ephemeralKey={ephemeralKey}
                   onComplete={({ error }) => {
