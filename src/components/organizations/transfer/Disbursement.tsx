@@ -168,7 +168,12 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           placeholder={{ label: "Select an organization", value: "" }}
           onValueChange={(itemValue: string) => setOrganization(itemValue)}
           style={{
-            inputIOS: { color: themeColors.text, padding: 15, fontSize: 16, pointerEvents: "none" },
+            inputIOS: {
+              color: themeColors.text,
+              padding: 15,
+              fontSize: 16,
+              pointerEvents: "none",
+            },
             inputAndroid: {
               color: themeColors.text,
               padding: 15,

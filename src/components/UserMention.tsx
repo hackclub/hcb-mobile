@@ -28,7 +28,7 @@ export default function UserMention({
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <UserAvatar user={user} size={avatarSize} />
-        {(user.auditor) && (
+        {user.auditor && (
           <View style={{ marginLeft: -10 }}>
             <Icon glyph="admin-badge" color="#f1c40f" size={badgeSize} />
           </View>

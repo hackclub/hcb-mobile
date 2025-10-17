@@ -42,7 +42,6 @@ import ITransaction, {
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
-import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
@@ -87,7 +86,6 @@ export default function OrganizationPage({
 }: Props) {
   const scheme = useColorScheme();
   const { isOnline } = useOffline();
-  const isDark = useIsDark();
 
   const {
     data: organization,
@@ -489,8 +487,7 @@ export default function OrganizationPage({
             ) : (
               <TouchableHighlight
                 onPress={
-                  item.id &&
-                  (userinOrganization || user?.auditor)
+                  item.id && (userinOrganization || user?.auditor)
                     ? () => {
                         if (
                           item.code === TransactionType.Disbursement &&

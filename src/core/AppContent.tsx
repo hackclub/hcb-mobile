@@ -56,7 +56,7 @@ function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
     enableReaderPreConnection: true,
     enableSoftwareUpdates: true,
   });
-  
+
   return null;
 }
 
@@ -82,7 +82,6 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
-
 
   useEffect(() => {
     resetStripeTerminalInitialization();
@@ -441,7 +440,7 @@ export default function AppContent({
         style={{ flex: 1 }}
       >
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
-          <StripeTerminalInitializer 
+          <StripeTerminalInitializer
             enabled={!!tokens?.accessToken && isAuthenticated}
           />
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>

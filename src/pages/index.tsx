@@ -233,7 +233,9 @@ export default function App({ navigation }: Props) {
     },
   });
 
-  const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<GrantCard[]>("user/card_grants", {
+  const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<
+    GrantCard[]
+  >("user/card_grants", {
     fallbackData: [],
     revalidateOnFocus: false,
     revalidateOnReconnect: false,

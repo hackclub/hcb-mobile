@@ -415,7 +415,9 @@ export default function CardPage(
           onPress: async () => {
             try {
               setisReturningGrant(true);
-              await hcb.post(`card_grants/${grantId || grantCard.grant_id}/cancel`);
+              await hcb.post(
+                `card_grants/${grantId || grantCard.grant_id}/cancel`,
+              );
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success,
               );
