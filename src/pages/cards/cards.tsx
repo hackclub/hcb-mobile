@@ -25,7 +25,6 @@ import { logError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
-import Organization from "../../lib/types/Organization";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
 import { normalizeSvg } from "../../utils/util";
@@ -69,8 +68,6 @@ export default function CardsPage({ navigation }: Props) {
     useOfflineSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
   const { data: grantCards, mutate: reloadGrantCards } =
     useOfflineSWR<GrantCard[]>("user/card_grants");
-  const { data: organizations } =
-    useOfflineSWR<Organization[]>("user/organizations");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
 
@@ -198,17 +195,11 @@ export default function CardsPage({ navigation }: Props) {
         (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet
       );
 
-    const orgIds = new Set((organizations || []).map((o) => o.id));
-
-    // Filter out cards that are also grantCards, and exclude cards from orgs the user is not part of
-    const filteredCards = cards
-      ?.filter(
-        (card) =>
-          !transformedGrantCards?.some((grantCard) => grantCard.id === card.id),
-      )
-      .filter((card) =>
-        organizations ? orgIds.has(card.organization.id) : true,
-      );
+    // Filter out cards that are also grantCards
+    const filteredCards = cards?.filter(
+      (card) =>
+        !transformedGrantCards?.some((grantCard) => grantCard.id === card.id),
+    );
 
     // Combine filtered cards and transformed grantCards
     const combinedCards = [
@@ -230,7 +221,7 @@ export default function CardsPage({ navigation }: Props) {
     // Update state
     // @ts-expect-error both types have the same properties that are used
     setAllCards(combinedCards);
-  }, [cards, grantCards, organizations]);
+  }, [cards, grantCards]);
 
   useEffect(() => {
     const fetchCanceledCardsShown = async () => {
