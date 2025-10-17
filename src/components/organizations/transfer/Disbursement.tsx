@@ -17,6 +17,7 @@ import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useOffline } from "../../../lib/useOffline";
 import { palette } from "../../../styles/theme";
 import { renderMoney } from "../../../utils/util";
+import { useIsDark } from "../../../lib/useColorScheme";
 
 type DisbursementScreenProps = {
   organization: OrganizationExpanded;
@@ -32,6 +33,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     useSWR<OrganizationExpanded[]>("user/organizations");
   const { tokens } = useContext(AuthContext);
   const { isOnline, withOfflineCheck } = useOffline();
+  const isDark = useIsDark();
 
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
@@ -167,6 +169,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         <RNPickerSelect
           placeholder={{ label: "Select an organization", value: "" }}
           onValueChange={(itemValue: string) => setOrganization(itemValue)}
+          darkTheme={isDark}
           style={{
             inputIOS: {
               color: themeColors.text,
