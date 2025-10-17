@@ -295,7 +295,7 @@ export default function AppContent({
     };
 
     checkAuth();
-  }, [isDark, tokens?.accessToken]);
+  }, [tokens?.accessToken]);
 
   useEffect(() => {
     if (tokens) {
