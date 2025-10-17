@@ -1052,8 +1052,7 @@ export default function CardPage(
             {ableToAddToWallet &&
               ephemeralKey &&
               Platform.OS === "ios" &&
-              _card?.type !== "physical" &&
-              card?.status !== "canceled" && (
+              _card?.type !== "physical" && (
                 <AddToWalletButton
                   token={androidCardToken}
                   androidAssetSource={require("../../../assets/google-wallet.png")}
