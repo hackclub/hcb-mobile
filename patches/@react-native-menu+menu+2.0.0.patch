@@ -1,17 +1,82 @@
-diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/results.bin b/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/results.bin
+diff --git a/node_modules/@react-native-menu/menu/android/.classpath b/node_modules/@react-native-menu/menu/android/.classpath
+new file mode 100644
+index 0000000..bbe97e5
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17/"/>
++	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
++	<classpathentry kind="output" path="bin/default"/>
++</classpath>
+diff --git a/node_modules/@react-native-menu/menu/android/.project b/node_modules/@react-native-menu/menu/android/.project
+index 77db2cf..8767edb 100644
+--- a/node_modules/@react-native-menu/menu/android/.project
++++ b/node_modules/@react-native-menu/menu/android/.project
+@@ -5,6 +5,11 @@
+ 	<projects>
+ 	</projects>
+ 	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
+ 		<buildCommand>
+ 			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
+ 			<arguments>
+@@ -12,6 +17,7 @@
+ 		</buildCommand>
+ 	</buildSpec>
+ 	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
+ 		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
+ 	</natures>
+ 	<filteredResources>
+diff --git a/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.buildship.core.prefs b/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.buildship.core.prefs
+new file mode 100644
+index 0000000..68c9fab
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.buildship.core.prefs
+@@ -0,0 +1,2 @@
++connection.project.dir=../../../../android
++eclipse.preferences.version=1
+diff --git a/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.jdt.core.prefs b/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.jdt.core.prefs
+new file mode 100644
+index 0000000..626e0e1
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/.settings/org.eclipse.jdt.core.prefs
+@@ -0,0 +1,4 @@
++eclipse.preferences.version=1
++org.eclipse.jdt.core.compiler.codegen.targetPlatform=17
++org.eclipse.jdt.core.compiler.compliance=17
++org.eclipse.jdt.core.compiler.source=17
+diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/results.bin b/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/results.bin
 new file mode 100644
 index 0000000..0d259dd
 --- /dev/null
-+++ b/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/results.bin
++++ b/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/results.bin
 @@ -0,0 +1 @@
 +o/classes
-diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/transformed/classes/classes_dex/classes.dex b/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/transformed/classes/classes_dex/classes.dex
+diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/transformed/classes/classes_dex/classes.dex b/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/transformed/classes/classes_dex/classes.dex
 new file mode 100644
-index 0000000..a0e1272
-Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/.transforms/d4c431a82569b864218136dfce43a88d/transformed/classes/classes_dex/classes.dex differ
+index 0000000..c755125
+Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/.transforms/8768042c84917c7178af714af6dbb16c/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/results.bin b/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/transformed/classes/classes_dex/classes.dex b/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..c755125
+Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/.transforms/d9bfc7b0ff3e58ae0378e6e6f01bc386/transformed/classes/classes_dex/classes.dex differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/buildConfig/debug/com/reactnativemenu/BuildConfig.java b/node_modules/@react-native-menu/menu/android/build/generated/source/buildConfig/debug/com/reactnativemenu/BuildConfig.java
 new file mode 100644
-index 0000000..94e70ff
+index 0000000..b642426
 --- /dev/null
 +++ b/node_modules/@react-native-menu/menu/android/build/generated/source/buildConfig/debug/com/reactnativemenu/BuildConfig.java
 @@ -0,0 +1,12 @@
@@ -25,8 +90,818 @@ index 0000000..94e70ff
 +  public static final String LIBRARY_PACKAGE_NAME = "com.reactnativemenu";
 +  public static final String BUILD_TYPE = "debug";
 +  // Field from default config.
-+  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = false;
++  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = true;
 +}
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerDelegate.java b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerDelegate.java
+new file mode 100644
+index 0000000..97d3777
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerDelegate.java
+@@ -0,0 +1,49 @@
++/**
++* This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++*
++* Do not edit this file as changes may cause incorrect behavior and will be lost
++* once the code is regenerated.
++*
++* @generated by codegen project: GeneratePropsJavaDelegate.js
++*/
++
++package com.facebook.react.viewmanagers;
++
++import android.view.View;
++import androidx.annotation.Nullable;
++import com.facebook.react.bridge.ReadableArray;
++import com.facebook.react.bridge.ReadableMap;
++import com.facebook.react.uimanager.BaseViewManager;
++import com.facebook.react.uimanager.BaseViewManagerDelegate;
++import com.facebook.react.uimanager.LayoutShadowNode;
++
++public class MenuViewManagerDelegate<T extends View, U extends BaseViewManager<T, ? extends LayoutShadowNode> & MenuViewManagerInterface<T>> extends BaseViewManagerDelegate<T, U> {
++  public MenuViewManagerDelegate(U viewManager) {
++    super(viewManager);
++  }
++  @Override
++  public void setProperty(T view, String propName, @Nullable Object value) {
++    switch (propName) {
++      case "actions":
++        mViewManager.setActions(view, (ReadableArray) value);
++        break;
++      case "actionsHash":
++        mViewManager.setActionsHash(view, value == null ? null : (String) value);
++        break;
++      case "title":
++        mViewManager.setTitle(view, value == null ? null : (String) value);
++        break;
++      case "themeVariant":
++        mViewManager.setThemeVariant(view, value == null ? null : (String) value);
++        break;
++      case "shouldOpenOnLongPress":
++        mViewManager.setShouldOpenOnLongPress(view, value == null ? false : (boolean) value);
++        break;
++      case "hitSlop":
++        mViewManager.setHitSlop(view, (ReadableMap) value);
++        break;
++      default:
++        super.setProperty(view, propName, value);
++    }
++  }
++}
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerInterface.java b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerInterface.java
+new file mode 100644
+index 0000000..7ef810f
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/MenuViewManagerInterface.java
+@@ -0,0 +1,25 @@
++/**
++* This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++*
++* Do not edit this file as changes may cause incorrect behavior and will be lost
++* once the code is regenerated.
++*
++* @generated by codegen project: GeneratePropsJavaInterface.js
++*/
++
++package com.facebook.react.viewmanagers;
++
++import android.view.View;
++import androidx.annotation.Nullable;
++import com.facebook.react.bridge.ReadableArray;
++import com.facebook.react.bridge.ReadableMap;
++import com.facebook.react.uimanager.ViewManagerWithGeneratedInterface;
++
++public interface MenuViewManagerInterface<T extends View> extends ViewManagerWithGeneratedInterface {
++  void setActions(T view, @Nullable ReadableArray value);
++  void setActionsHash(T view, @Nullable String value);
++  void setTitle(T view, @Nullable String value);
++  void setThemeVariant(T view, @Nullable String value);
++  void setShouldOpenOnLongPress(T view, boolean value);
++  void setHitSlop(T view, @Nullable ReadableMap value);
++}
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/CMakeLists.txt b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/CMakeLists.txt
+new file mode 100644
+index 0000000..c098f8e
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/CMakeLists.txt
+@@ -0,0 +1,36 @@
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# This source code is licensed under the MIT license found in the
++# LICENSE file in the root directory of this source tree.
++
++cmake_minimum_required(VERSION 3.13)
++set(CMAKE_VERBOSE_MAKEFILE on)
++
++file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp react/renderer/components/RNMenuViewSpec/*.cpp)
++
++add_library(
++  react_codegen_RNMenuViewSpec
++  OBJECT
++  ${react_codegen_SRCS}
++)
++
++target_include_directories(react_codegen_RNMenuViewSpec PUBLIC . react/renderer/components/RNMenuViewSpec)
++
++target_link_libraries(
++  react_codegen_RNMenuViewSpec
++  fbjni
++  jsi
++  # We need to link different libraries based on whether we are building rncore or not, that's necessary
++  # because we want to break a circular dependency between react_codegen_rncore and reactnative
++  reactnative
++)
++
++target_compile_options(
++  react_codegen_RNMenuViewSpec
++  PRIVATE
++  -DLOG_TAG=\"ReactNative\"
++  -fexceptions
++  -frtti
++  -std=c++20
++  -Wall
++)
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec-generated.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec-generated.cpp
+new file mode 100644
+index 0000000..a89e028
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec-generated.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniCpp.js
++ */
++
++#include "RNMenuViewSpec.h"
++
++namespace facebook::react {
++
++
++
++std::shared_ptr<TurboModule> RNMenuViewSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params) {
++
++  return nullptr;
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec.h
+new file mode 100644
+index 0000000..e3293d1
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/RNMenuViewSpec.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/JavaTurboModule.h>
++#include <ReactCommon/TurboModule.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++
++
++JSI_EXPORT
++std::shared_ptr<TurboModule> RNMenuViewSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params);
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.cpp
+new file mode 100644
+index 0000000..556810a
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorCpp.js
++ */
++
++#include <react/renderer/components/RNMenuViewSpec/ComponentDescriptors.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++void RNMenuViewSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry) {
++registry->add(concreteComponentDescriptorProvider<MenuViewComponentDescriptor>());
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.h
+new file mode 100644
+index 0000000..a3d5a14
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ComponentDescriptors.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNMenuViewSpec/ShadowNodes.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++using MenuViewComponentDescriptor = ConcreteComponentDescriptor<MenuViewShadowNode>;
++
++void RNMenuViewSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry);
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.cpp
+new file mode 100644
+index 0000000..733d6bf
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.cpp
+@@ -0,0 +1,42 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterCpp.js
++ */
++
++#include <react/renderer/components/RNMenuViewSpec/EventEmitters.h>
++
++
++namespace facebook::react {
++
++void MenuViewEventEmitter::onPressAction(OnPressAction $event) const {
++  dispatchEvent("pressAction", [$event=std::move($event)](jsi::Runtime &runtime) {
++    auto $payload = jsi::Object(runtime);
++    $payload.setProperty(runtime, "event", $event.event);
++    return $payload;
++  });
++}
++
++
++void MenuViewEventEmitter::onCloseMenu(OnCloseMenu $event) const {
++  dispatchEvent("closeMenu", [$event=std::move($event)](jsi::Runtime &runtime) {
++    auto $payload = jsi::Object(runtime);
++    $payload.setProperty(runtime, "event", $event.event);
++    return $payload;
++  });
++}
++
++
++void MenuViewEventEmitter::onOpenMenu(OnOpenMenu $event) const {
++  dispatchEvent("openMenu", [$event=std::move($event)](jsi::Runtime &runtime) {
++    auto $payload = jsi::Object(runtime);
++    $payload.setProperty(runtime, "event", $event.event);
++    return $payload;
++  });
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.h
+new file mode 100644
+index 0000000..2e68763
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/EventEmitters.h
+@@ -0,0 +1,37 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewEventEmitter.h>
++
++
++namespace facebook::react {
++class MenuViewEventEmitter : public ViewEventEmitter {
++ public:
++  using ViewEventEmitter::ViewEventEmitter;
++
++  struct OnPressAction {
++      std::string event;
++    };
++
++  struct OnCloseMenu {
++      std::string event;
++    };
++
++  struct OnOpenMenu {
++      std::string event;
++    };
++  void onPressAction(OnPressAction value) const;
++
++  void onCloseMenu(OnCloseMenu value) const;
++
++  void onOpenMenu(OnOpenMenu value) const;
++};
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.cpp
+new file mode 100644
+index 0000000..b397ad0
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.cpp
+@@ -0,0 +1,30 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsCpp.js
++ */
++
++#include <react/renderer/components/RNMenuViewSpec/Props.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/core/propsConversions.h>
++
++namespace facebook::react {
++
++MenuViewProps::MenuViewProps(
++    const PropsParserContext &context,
++    const MenuViewProps &sourceProps,
++    const RawProps &rawProps): ViewProps(context, sourceProps, rawProps),
++
++    actions(convertRawProp(context, rawProps, "actions", sourceProps.actions, {})),
++    actionsHash(convertRawProp(context, rawProps, "actionsHash", sourceProps.actionsHash, {})),
++    title(convertRawProp(context, rawProps, "title", sourceProps.title, {})),
++    themeVariant(convertRawProp(context, rawProps, "themeVariant", sourceProps.themeVariant, {})),
++    shouldOpenOnLongPress(convertRawProp(context, rawProps, "shouldOpenOnLongPress", sourceProps.shouldOpenOnLongPress, {false})),
++    hitSlop(convertRawProp(context, rawProps, "hitSlop", sourceProps.hitSlop, {}))
++      {}
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.h
+new file mode 100644
+index 0000000..5bc14f4
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/Props.h
+@@ -0,0 +1,258 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewProps.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/core/propsConversions.h>
++#include <vector>
++
++namespace facebook::react {
++
++struct MenuViewActionsAttributesStruct {
++  bool destructive{false};
++  bool disabled{false};
++  bool hidden{false};
++};
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, MenuViewActionsAttributesStruct &result) {
++  auto map = (std::unordered_map<std::string, RawValue>)value;
++
++  auto tmp_destructive = map.find("destructive");
++  if (tmp_destructive != map.end()) {
++    fromRawValue(context, tmp_destructive->second, result.destructive);
++  }
++  auto tmp_disabled = map.find("disabled");
++  if (tmp_disabled != map.end()) {
++    fromRawValue(context, tmp_disabled->second, result.disabled);
++  }
++  auto tmp_hidden = map.find("hidden");
++  if (tmp_hidden != map.end()) {
++    fromRawValue(context, tmp_hidden->second, result.hidden);
++  }
++}
++
++static inline std::string toString(const MenuViewActionsAttributesStruct &value) {
++  return "[Object MenuViewActionsAttributesStruct]";
++}
++
++struct MenuViewActionsSubactionsAttributesStruct {
++  bool destructive{false};
++  bool disabled{false};
++  bool hidden{false};
++};
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, MenuViewActionsSubactionsAttributesStruct &result) {
++  auto map = (std::unordered_map<std::string, RawValue>)value;
++
++  auto tmp_destructive = map.find("destructive");
++  if (tmp_destructive != map.end()) {
++    fromRawValue(context, tmp_destructive->second, result.destructive);
++  }
++  auto tmp_disabled = map.find("disabled");
++  if (tmp_disabled != map.end()) {
++    fromRawValue(context, tmp_disabled->second, result.disabled);
++  }
++  auto tmp_hidden = map.find("hidden");
++  if (tmp_hidden != map.end()) {
++    fromRawValue(context, tmp_hidden->second, result.hidden);
++  }
++}
++
++static inline std::string toString(const MenuViewActionsSubactionsAttributesStruct &value) {
++  return "[Object MenuViewActionsSubactionsAttributesStruct]";
++}
++
++struct MenuViewActionsSubactionsStruct {
++  std::string id{};
++  std::string title{};
++  int titleColor{0};
++  std::string subtitle{};
++  std::string state{};
++  std::string image{};
++  int imageColor{0};
++  bool displayInline{false};
++  MenuViewActionsSubactionsAttributesStruct attributes{};
++};
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, MenuViewActionsSubactionsStruct &result) {
++  auto map = (std::unordered_map<std::string, RawValue>)value;
++
++  auto tmp_id = map.find("id");
++  if (tmp_id != map.end()) {
++    fromRawValue(context, tmp_id->second, result.id);
++  }
++  auto tmp_title = map.find("title");
++  if (tmp_title != map.end()) {
++    fromRawValue(context, tmp_title->second, result.title);
++  }
++  auto tmp_titleColor = map.find("titleColor");
++  if (tmp_titleColor != map.end()) {
++    fromRawValue(context, tmp_titleColor->second, result.titleColor);
++  }
++  auto tmp_subtitle = map.find("subtitle");
++  if (tmp_subtitle != map.end()) {
++    fromRawValue(context, tmp_subtitle->second, result.subtitle);
++  }
++  auto tmp_state = map.find("state");
++  if (tmp_state != map.end()) {
++    fromRawValue(context, tmp_state->second, result.state);
++  }
++  auto tmp_image = map.find("image");
++  if (tmp_image != map.end()) {
++    fromRawValue(context, tmp_image->second, result.image);
++  }
++  auto tmp_imageColor = map.find("imageColor");
++  if (tmp_imageColor != map.end()) {
++    fromRawValue(context, tmp_imageColor->second, result.imageColor);
++  }
++  auto tmp_displayInline = map.find("displayInline");
++  if (tmp_displayInline != map.end()) {
++    fromRawValue(context, tmp_displayInline->second, result.displayInline);
++  }
++  auto tmp_attributes = map.find("attributes");
++  if (tmp_attributes != map.end()) {
++    fromRawValue(context, tmp_attributes->second, result.attributes);
++  }
++}
++
++static inline std::string toString(const MenuViewActionsSubactionsStruct &value) {
++  return "[Object MenuViewActionsSubactionsStruct]";
++}
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, std::vector<MenuViewActionsSubactionsStruct> &result) {
++  auto items = (std::vector<RawValue>)value;
++  for (const auto &item : items) {
++    MenuViewActionsSubactionsStruct newItem;
++    fromRawValue(context, item, newItem);
++    result.emplace_back(newItem);
++  }
++}
++
++
++struct MenuViewActionsStruct {
++  std::string id{};
++  std::string title{};
++  int titleColor{0};
++  std::string subtitle{};
++  std::string state{};
++  std::string image{};
++  int imageColor{0};
++  bool displayInline{false};
++  MenuViewActionsAttributesStruct attributes{};
++  std::vector<MenuViewActionsSubactionsStruct> subactions{};
++};
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, MenuViewActionsStruct &result) {
++  auto map = (std::unordered_map<std::string, RawValue>)value;
++
++  auto tmp_id = map.find("id");
++  if (tmp_id != map.end()) {
++    fromRawValue(context, tmp_id->second, result.id);
++  }
++  auto tmp_title = map.find("title");
++  if (tmp_title != map.end()) {
++    fromRawValue(context, tmp_title->second, result.title);
++  }
++  auto tmp_titleColor = map.find("titleColor");
++  if (tmp_titleColor != map.end()) {
++    fromRawValue(context, tmp_titleColor->second, result.titleColor);
++  }
++  auto tmp_subtitle = map.find("subtitle");
++  if (tmp_subtitle != map.end()) {
++    fromRawValue(context, tmp_subtitle->second, result.subtitle);
++  }
++  auto tmp_state = map.find("state");
++  if (tmp_state != map.end()) {
++    fromRawValue(context, tmp_state->second, result.state);
++  }
++  auto tmp_image = map.find("image");
++  if (tmp_image != map.end()) {
++    fromRawValue(context, tmp_image->second, result.image);
++  }
++  auto tmp_imageColor = map.find("imageColor");
++  if (tmp_imageColor != map.end()) {
++    fromRawValue(context, tmp_imageColor->second, result.imageColor);
++  }
++  auto tmp_displayInline = map.find("displayInline");
++  if (tmp_displayInline != map.end()) {
++    fromRawValue(context, tmp_displayInline->second, result.displayInline);
++  }
++  auto tmp_attributes = map.find("attributes");
++  if (tmp_attributes != map.end()) {
++    fromRawValue(context, tmp_attributes->second, result.attributes);
++  }
++  auto tmp_subactions = map.find("subactions");
++  if (tmp_subactions != map.end()) {
++    fromRawValue(context, tmp_subactions->second, result.subactions);
++  }
++}
++
++static inline std::string toString(const MenuViewActionsStruct &value) {
++  return "[Object MenuViewActionsStruct]";
++}
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, std::vector<MenuViewActionsStruct> &result) {
++  auto items = (std::vector<RawValue>)value;
++  for (const auto &item : items) {
++    MenuViewActionsStruct newItem;
++    fromRawValue(context, item, newItem);
++    result.emplace_back(newItem);
++  }
++}
++
++
++struct MenuViewHitSlopStruct {
++  int top{0};
++  int bottom{0};
++  int left{0};
++  int right{0};
++};
++
++static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, MenuViewHitSlopStruct &result) {
++  auto map = (std::unordered_map<std::string, RawValue>)value;
++
++  auto tmp_top = map.find("top");
++  if (tmp_top != map.end()) {
++    fromRawValue(context, tmp_top->second, result.top);
++  }
++  auto tmp_bottom = map.find("bottom");
++  if (tmp_bottom != map.end()) {
++    fromRawValue(context, tmp_bottom->second, result.bottom);
++  }
++  auto tmp_left = map.find("left");
++  if (tmp_left != map.end()) {
++    fromRawValue(context, tmp_left->second, result.left);
++  }
++  auto tmp_right = map.find("right");
++  if (tmp_right != map.end()) {
++    fromRawValue(context, tmp_right->second, result.right);
++  }
++}
++
++static inline std::string toString(const MenuViewHitSlopStruct &value) {
++  return "[Object MenuViewHitSlopStruct]";
++}
++class MenuViewProps final : public ViewProps {
++ public:
++  MenuViewProps() = default;
++  MenuViewProps(const PropsParserContext& context, const MenuViewProps &sourceProps, const RawProps &rawProps);
++
++#pragma mark - Props
++
++  std::vector<MenuViewActionsStruct> actions{};
++  std::string actionsHash{};
++  std::string title{};
++  std::string themeVariant{};
++  bool shouldOpenOnLongPress{false};
++  MenuViewHitSlopStruct hitSlop{};
++};
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI-generated.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI-generated.cpp
+new file mode 100644
+index 0000000..91b9fd9
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI-generated.cpp
+@@ -0,0 +1,17 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleCpp.js
++ */
++
++#include "RNMenuViewSpecJSI.h"
++
++namespace facebook::react {
++
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI.h
+new file mode 100644
+index 0000000..ec16260
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/RNMenuViewSpecJSI.h
+@@ -0,0 +1,19 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/TurboModule.h>
++#include <react/bridging/Bridging.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.cpp
+new file mode 100644
+index 0000000..b9f7add
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.cpp
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeCpp.js
++ */
++
++#include <react/renderer/components/RNMenuViewSpec/ShadowNodes.h>
++
++namespace facebook::react {
++
++extern const char MenuViewComponentName[] = "MenuView";
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.h
+new file mode 100644
+index 0000000..d6d1ce7
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/ShadowNodes.h
+@@ -0,0 +1,32 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNMenuViewSpec/EventEmitters.h>
++#include <react/renderer/components/RNMenuViewSpec/Props.h>
++#include <react/renderer/components/RNMenuViewSpec/States.h>
++#include <react/renderer/components/view/ConcreteViewShadowNode.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++JSI_EXPORT extern const char MenuViewComponentName[];
++
++/*
++ * `ShadowNode` for <MenuView> component.
++ */
++using MenuViewShadowNode = ConcreteViewShadowNode<
++    MenuViewComponentName,
++    MenuViewProps,
++    MenuViewEventEmitter,
++    MenuViewState>;
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.cpp b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.cpp
+new file mode 100644
+index 0000000..b849b61
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateCpp.js
++ */
++#include <react/renderer/components/RNMenuViewSpec/States.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.h b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.h
+new file mode 100644
+index 0000000..6cbe1ee
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/jni/react/renderer/components/RNMenuViewSpec/States.h
+@@ -0,0 +1,29 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateH.js
++ */
++#pragma once
++
++#ifdef ANDROID
++#include <folly/dynamic.h>
++#endif
++
++namespace facebook::react {
++
++class MenuViewState {
++public:
++  MenuViewState() = default;
++
++#ifdef ANDROID
++  MenuViewState(MenuViewState const &previousState, folly::dynamic data){};
++  folly::dynamic getDynamic() const {
++    return {};
++  };
++#endif
++};
++
++} // namespace facebook::react
+\ No newline at end of file
+diff --git a/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/schema.json b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/schema.json
+new file mode 100644
+index 0000000..a33383b
+--- /dev/null
++++ b/node_modules/@react-native-menu/menu/android/build/generated/source/codegen/schema.json
+@@ -0,0 +1 @@
++{"modules":{"MenuView":{"type":"Component","components":{"MenuView":{"extendsProps":[{"type":"ReactNativeBuiltInType","knownTypeName":"ReactNativeCoreViewProps"}],"events":[{"name":"onPressAction","optional":true,"bubblingType":"direct","typeAnnotation":{"type":"EventTypeAnnotation","argument":{"type":"ObjectTypeAnnotation","properties":[{"name":"event","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}}},{"name":"onCloseMenu","optional":true,"bubblingType":"direct","typeAnnotation":{"type":"EventTypeAnnotation","argument":{"type":"ObjectTypeAnnotation","properties":[{"name":"event","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}}},{"name":"onOpenMenu","optional":true,"bubblingType":"direct","typeAnnotation":{"type":"EventTypeAnnotation","argument":{"type":"ObjectTypeAnnotation","properties":[{"name":"event","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}}}],"props":[{"name":"actions","optional":false,"typeAnnotation":{"type":"ArrayTypeAnnotation","elementType":{"type":"ObjectTypeAnnotation","properties":[{"name":"id","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"title","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"titleColor","optional":true,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"subtitle","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"state","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"image","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"imageColor","optional":true,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"displayInline","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"attributes","optional":true,"typeAnnotation":{"type":"ObjectTypeAnnotation","properties":[{"name":"destructive","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"disabled","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"hidden","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}}]}},{"name":"subactions","optional":true,"typeAnnotation":{"type":"ArrayTypeAnnotation","elementType":{"type":"ObjectTypeAnnotation","properties":[{"name":"id","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"title","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"titleColor","optional":true,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"subtitle","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"state","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"image","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"imageColor","optional":true,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"displayInline","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"attributes","optional":true,"typeAnnotation":{"type":"ObjectTypeAnnotation","properties":[{"name":"destructive","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"disabled","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"hidden","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}}]}}]}}}]}}},{"name":"actionsHash","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"title","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"themeVariant","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation","default":null}},{"name":"shouldOpenOnLongPress","optional":true,"typeAnnotation":{"type":"BooleanTypeAnnotation","default":false}},{"name":"hitSlop","optional":false,"typeAnnotation":{"type":"ObjectTypeAnnotation","properties":[{"name":"top","optional":false,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"bottom","optional":false,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"left","optional":false,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}},{"name":"right","optional":false,"typeAnnotation":{"type":"Int32TypeAnnotation","default":0}}]}}],"commands":[]}}}}}
+\ No newline at end of file
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@react-native-menu/menu/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
 new file mode 100644
 index 0000000..cea3359
@@ -88,7 +963,7 @@ index 0000000..9e26dfe
 \ No newline at end of file
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@react-native-menu/menu/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
 new file mode 100644
-index 0000000..514ca61
+index 0000000..e45ce0c
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@react-native-menu/menu/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
 new file mode 100644
@@ -99,11 +974,11 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/@react-native-menu/menu/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
 new file mode 100644
-index 0000000..bb9e30f
+index 0000000..8ba96b5
 --- /dev/null
 +++ b/node_modules/@react-native-menu/menu/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
 @@ -0,0 +1 @@
-+#Fri Sep 12 00:17:13 PDT 2025
++#Thu Sep 25 17:46:37 PDT 2025
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/@react-native-menu/menu/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
 new file mode 100644
 index 0000000..e06b8bf
@@ -144,9 +1019,17 @@ diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/ja
 new file mode 100644
 index 0000000..c998a4c
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/react-native-menu_menu_debug.kotlin_module differ
+diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerDelegate.class b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerDelegate.class
+new file mode 100644
+index 0000000..ff84839
+Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerDelegate.class differ
+diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerInterface.class b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerInterface.class
+new file mode 100644
+index 0000000..e4160ee
+Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/MenuViewManagerInterface.class differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativemenu/BuildConfig.class b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativemenu/BuildConfig.class
 new file mode 100644
-index 0000000..7db60d0
+index 0000000..8c8d66b
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/reactnativemenu/BuildConfig.class differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@react-native-menu/menu/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
 new file mode 100644
@@ -201,7 +1084,7 @@ index 0000000..08f4ebe
 \ No newline at end of file
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@react-native-menu/menu/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
 new file mode 100644
-index 0000000..3c5c680
+index 0000000..027c2a2
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@react-native-menu/menu/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
 new file mode 100644
@@ -216,7 +1099,7 @@ index 0000000..4bb65cc
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
 new file mode 100644
-index 0000000..3ef4064
+index 0000000..318fb25
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
 new file mode 100644
@@ -232,7 +1115,7 @@ index 0000000..5f3e1d7
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
 new file mode 100644
-index 0000000..ce719bb
+index 0000000..43162b4
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
 new file mode 100644
@@ -284,7 +1167,7 @@ index 0000000..eb0b8a0
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
 new file mode 100644
-index 0000000..7c858a2
+index 0000000..f995c0b
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
 new file mode 100644
@@ -312,7 +1195,7 @@ index 0000000..fd5292d
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
 new file mode 100644
-index 0000000..8378eb5
+index 0000000..2120fb4
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
 new file mode 100644
@@ -324,7 +1207,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
 new file mode 100644
-index 0000000..1b9fb2a
+index 0000000..d0d7b5d
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
 new file mode 100644
@@ -340,7 +1223,7 @@ index 0000000..fd5292d
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
 new file mode 100644
-index 0000000..b6aa5f0
+index 0000000..175a442
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
 new file mode 100644
@@ -356,7 +1239,7 @@ index 0000000..c7e3afc
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
 new file mode 100644
-index 0000000..3ef4064
+index 0000000..318fb25
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
 new file mode 100644
@@ -372,7 +1255,7 @@ index 0000000..b93b708
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
 new file mode 100644
-index 0000000..ce719bb
+index 0000000..43162b4
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
 new file mode 100644
@@ -380,27 +1263,27 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
 new file mode 100644
-index 0000000..c558826
+index 0000000..e93cb48
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
 new file mode 100644
-index 0000000..f5a59ac
+index 0000000..8ee43ea
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len
 new file mode 100644
-index 0000000..ce7255c
+index 0000000..60a4017
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len
 new file mode 100644
-index 0000000..9e27f73
+index 0000000..817b326
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
 new file mode 100644
-index 0000000..b6de6f4
+index 0000000..a8eab4a
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
 new file mode 100644
-index 0000000..e9ae602
+index 0000000..d44b0c1
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len
 new file mode 100644
@@ -408,7 +1291,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
 new file mode 100644
-index 0000000..88e21ac
+index 0000000..ba7e78d
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
 new file mode 100644
@@ -424,7 +1307,7 @@ index 0000000..fa606b6
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
 new file mode 100644
-index 0000000..5381c65
+index 0000000..ba5c0f2
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
 new file mode 100644
@@ -449,7 +1332,7 @@ index 0000000..8ab7da5
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
 new file mode 100644
-index 0000000..3ef4064
+index 0000000..318fb25
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
 new file mode 100644
@@ -465,7 +1348,7 @@ index 0000000..6a3671f
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
 new file mode 100644
-index 0000000..ce719bb
+index 0000000..43162b4
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
 new file mode 100644
@@ -489,7 +1372,7 @@ index 0000000..fa606b6
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
 new file mode 100644
-index 0000000..d31690a
+index 0000000..1dcc822
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
 new file mode 100644
@@ -501,27 +1384,27 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab
 new file mode 100644
-index 0000000..fea85c7
+index 0000000..ab9d0c4
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
 new file mode 100644
-index 0000000..b11af19
+index 0000000..8845328
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
 new file mode 100644
-index 0000000..cb43009
+index 0000000..f3fb4df
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
 new file mode 100644
-index 0000000..adb941c
+index 0000000..a8e30a0
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
 new file mode 100644
-index 0000000..8f55c50
+index 0000000..67f2884
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
 new file mode 100644
-index 0000000..3e8d5e4
+index 0000000..f05730e
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
 new file mode 100644
@@ -529,16 +1412,12 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin
 new file mode 100644
-index 0000000..e27f2c0
+index 0000000..8f785b8
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
 new file mode 100644
-index 0000000..d529f5b
+index 0000000..abf30b1
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin differ
-diff --git a/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin
-new file mode 100644
-index 0000000..1acacc6
-Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@react-native-menu/menu/android/build/outputs/logs/manifest-merger-debug-report.txt
 new file mode 100644
 index 0000000..21fd0e8
@@ -563,7 +1442,7 @@ index 0000000..21fd0e8
 +		INJECTED from /Users/ibrahimmortada/hcb-mobile/node_modules/@react-native-menu/menu/android/src/main/AndroidManifestNew.xml
 diff --git a/node_modules/@react-native-menu/menu/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@react-native-menu/menu/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
 new file mode 100644
-index 0000000..d8777fc
+index 0000000..fbef23e
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/META-INF/react-native-menu_menu_debug.kotlin_module b/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/META-INF/react-native-menu_menu_debug.kotlin_module
 new file mode 100644
@@ -607,7 +1486,7 @@ index 0000000..3def1ca
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/com/reactnativemenu/MenuViewManagerBase.class differ
 diff --git a/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/com/reactnativemenu/MenuViewManagerSpec.class b/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/com/reactnativemenu/MenuViewManagerSpec.class
 new file mode 100644
-index 0000000..e55f5b7
+index 0000000..040fb5b
 Binary files /dev/null and b/node_modules/@react-native-menu/menu/android/build/tmp/kotlin-classes/debug/com/reactnativemenu/MenuViewManagerSpec.class differ
 diff --git a/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuView.kt b/node_modules/@react-native-menu/menu/android/src/main/java/com/reactnativemenu/MenuView.kt
 index c45f5cc..16fb994 100644

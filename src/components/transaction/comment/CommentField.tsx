@@ -9,14 +9,13 @@ import {
   Alert,
   Pressable,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useSWR, { mutate, useSWRConfig } from "swr";
 
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
 import { palette } from "../../../styles/theme";
 import Button from "../../Button";
-import UserAvatar from "../../UserAvatar";
+import UserMention from "../../UserMention";
 
 import {
   useCommentFileActionSheet,
@@ -103,11 +102,6 @@ export default function CommentField({
             key.includes(`/transactions/${transactionId}/comments`),
         ),
       ]);
-
-      Toast.show({
-        title: "Comment added",
-        type: ALERT_TYPE.SUCCESS,
-      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -123,83 +117,79 @@ export default function CommentField({
 
   return (
     <View style={{ paddingVertical: 16, gap: 12 }}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <UserAvatar user={user} />
-        <Text
-          style={{ fontWeight: "500", fontSize: 16, color: themeColors.text }}
-        >
-          {user.name}
-        </Text>
+      <View>
+        <UserMention user={user} scale={1.1} />
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            minHeight: 80,
+            fontSize: 16,
+            borderColor: themeColors.border,
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+          }}
+          placeholder="Add a comment..."
+          placeholderTextColor={palette.muted}
+          value={comment}
+          onChangeText={setComment}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
       </View>
 
-      <TextInput
-        style={{
-          borderWidth: 1,
-          borderRadius: 8,
-          padding: 12,
-          minHeight: 80,
-          fontSize: 16,
-          borderColor: themeColors.border,
-          backgroundColor: themeColors.card,
-          color: themeColors.text,
-        }}
-        placeholder="Add a comment..."
-        placeholderTextColor={palette.muted}
-        value={comment}
-        onChangeText={setComment}
-        multiline
-        numberOfLines={3}
-        textAlignVertical="top"
-      />
-
-      {user?.admin && (
-        <Pressable
-          onPress={() => setAdminOnly(!adminOnly)}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderWidth: 1,
-            borderColor: "#ff8c37",
-            borderStyle: "dashed",
-            borderRadius: 8,
-            padding: 16,
-            backgroundColor: "#ff8c3710",
-          }}
-        >
-          <Text
+      {user?.admin ||
+        (user?.auditor && (
+          <Pressable
+            onPress={() => setAdminOnly(!adminOnly)}
             style={{
-              fontSize: 16,
-              fontWeight: "500",
-              color: "#ff8c37",
-              flex: 1,
-            }}
-          >
-            Admin only comment
-          </Text>
-          <View
-            style={{
-              width: 22,
-              height: 22,
-              borderWidth: 2,
-              borderColor: "#ff8c37",
-              borderRadius: 4,
-              backgroundColor: adminOnly ? "#ff8c37" : "transparent",
+              flexDirection: "row",
               alignItems: "center",
-              justifyContent: "center",
-              marginLeft: 12,
+              justifyContent: "space-between",
+              borderWidth: 1,
+              borderColor: "#ff8c37",
+              borderStyle: "dashed",
+              borderRadius: 8,
+              padding: 12,
+              backgroundColor: "#ff8c3710",
             }}
           >
-            {adminOnly && (
-              <Text
-                style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-              >
-                ✓
-              </Text>
-            )}
-          </View>
-        </Pressable>
-      )}
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "500",
+                color: "#ff8c37",
+                flex: 1,
+              }}
+            >
+              Admin only comment
+            </Text>
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderWidth: 2,
+                borderColor: "#ff8c37",
+                borderRadius: 4,
+                backgroundColor: adminOnly ? "#ff8c37" : "transparent",
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: 12,
+              }}
+            >
+              {adminOnly && (
+                <Text
+                  style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
+                >
+                  ✓
+                </Text>
+              )}
+            </View>
+          </Pressable>
+        ))}
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <TouchableOpacity

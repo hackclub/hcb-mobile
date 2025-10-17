@@ -18,7 +18,7 @@ export default function AdminTools(
 ) {
   const { data: user } = useSWR<User>("user");
 
-  if (!user?.admin) return null;
+  if (!user?.auditor) return null;
 
   return (
     <Pressable onPress={props.onPress}>

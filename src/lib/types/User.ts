@@ -5,6 +5,7 @@ export default interface User extends Omit<HcbApiObject<"usr">, "created_at"> {
   email: string;
   avatar?: string;
   admin: boolean;
+  auditor: boolean;
 }
 
 export interface OrgUser extends User {

@@ -499,6 +499,9 @@ function PageContent({
       setCurrentProgress(null);
       return true;
     } catch (error) {
+      if (error.code == "AlreadyConnectedToReader") {
+        return true;
+      }
       logError("connectReader error", error, {
         context: { orgId, action: "connect_reader" },
       });

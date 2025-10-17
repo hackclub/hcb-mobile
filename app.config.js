@@ -1,5 +1,5 @@
 import appIcons from "./src/lib/AppIconList";
-const IS_DEV = process.env.EXPO_PUBLIC_APP_VARIANT === "development";
+const IS_DEV = false;
 
 export default {
   expo: {
@@ -26,6 +26,7 @@ export default {
         "applinks:bank.hackclub.com",
       ],
       entitlements: {
+        "com.apple.developer.payment-pass-provisioning": true,
         "com.apple.developer.proximity-reader.payment.acceptance": true,
       },
     },
@@ -86,10 +87,30 @@ export default {
         {
           android: {
             minSdkVersion: 26,
+            javaMaxHeapSize: "4g",
+            dexOptions: {
+              javaMaxHeapSize: "4g",
+            },
+            jvmArgs: ["-Xmx4g", "-XX:+UseG1GC", "-XX:MaxGCPauseMillis=200"],
+            // Additional build optimizations
+            enableProguardInReleaseBuilds: false,
+            enableSeparateBuildPerCPUArchitecture: false,
+            universalApk: false,
+            // Reduce memory usage during packaging
             packagingOptions: {
               pickFirst: [
                 "org/bouncycastle/pqc/crypto/picnic/lowmcL*",
                 "org/bouncycastle/x509/CertPathReviewerMessages*",
+              ],
+              exclude: [
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
               ],
             },
           },
@@ -142,6 +163,7 @@ export default {
         },
       ],
       "expo-background-task",
+      "./plugins/usePrivateSDK.js",
     ],
   },
 };

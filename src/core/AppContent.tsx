@@ -20,7 +20,12 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ColorSchemeName, View, ActivityIndicator } from "react-native";
+import {
+  ColorSchemeName,
+  View,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -45,6 +50,16 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
 
+function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
+  useStripeTerminalInit({
+    enabled,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: true,
+  });
+
+  return null;
+}
+
 SplashScreen.preventAutoHideAsync();
 
 SplashScreen.setOptions({
@@ -67,12 +82,6 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
-
-  useStripeTerminalInit({
-    enabled: !!tokens?.accessToken && isAuthenticated,
-    enableReaderPreConnection: true,
-    enableSoftwareUpdates: true,
-  });
 
   useEffect(() => {
     resetStripeTerminalInitialization();
@@ -426,8 +435,14 @@ export default function AppContent({
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+      <SafeAreaView
+        edges={Platform.OS == "android" ? ["top", "bottom"] : []}
+        style={{ flex: 1 }}
+      >
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
+          <StripeTerminalInitializer
+            enabled={!!tokens?.accessToken && isAuthenticated}
+          />
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
             <GestureHandlerRootView>
               <StatusBar style={isDark ? "light" : "dark"} />
