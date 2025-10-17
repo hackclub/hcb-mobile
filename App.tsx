@@ -1,6 +1,7 @@
 import "expo-dev-client";
 
 import * as Sentry from "@sentry/react-native";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { useFonts } from "expo-font";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import { useColorScheme } from "react-native";
@@ -43,19 +44,21 @@ function App() {
   }
 
   return (
-    <ExpoShareIntentProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <ShareIntentProvider>
-            <LinkingProvider>
-              <CustomAlertProvider>
-                <AppContent scheme={scheme} cache={cache} />
-              </CustomAlertProvider>
-            </LinkingProvider>
-          </ShareIntentProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </ExpoShareIntentProvider>
+    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_API_KEY}>
+      <ExpoShareIntentProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ShareIntentProvider>
+              <LinkingProvider>
+                <CustomAlertProvider>
+                  <AppContent scheme={scheme} cache={cache} />
+                </CustomAlertProvider>
+              </LinkingProvider>
+            </ShareIntentProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </ExpoShareIntentProvider>
+    </StripeProvider>
   );
 }
 

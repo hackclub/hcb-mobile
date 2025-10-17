@@ -111,6 +111,13 @@ export default function OrganizationPage({
     organizationId: organization?.id,
     enabled: !!(organization && !organization.playground_mode),
   });
+  const userinOrganization = useMemo(() => {
+    return (
+      organization &&
+      "users" in organization &&
+      organization.users.some((u) => u.id === user?.id)
+    );
+  }, [organization, user]);
 
   const {
     transactions: _transactions,
@@ -480,9 +487,7 @@ export default function OrganizationPage({
             ) : (
               <TouchableHighlight
                 onPress={
-                  item.id &&
-                  "users" in organization &&
-                  organization.users.some((u) => u.id === user?.id)
+                  item.id && (userinOrganization || user?.auditor)
                     ? () => {
                         if (
                           item.code === TransactionType.Disbursement &&

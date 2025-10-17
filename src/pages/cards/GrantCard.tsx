@@ -1,8 +1,13 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { View, Text, Linking } from "react-native";
+import * as Haptics from "expo-haptics";
+import { useState } from "react";
+import { View, Text, Alert } from "react-native";
 
+import Button from "../../components/Button";
 import CardSkeleton from "../../components/cards/CardSkeleton";
+import useClient from "../../lib/client";
+import { logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
@@ -18,10 +23,35 @@ type Props = NativeStackScreenProps<CardsStackParamList, "GrantCard">;
 
 export default function GrantCardPage({ route, navigation }: Props) {
   const { grantId } = route.params;
-  const { data: grant } = useOfflineSWR<GrantCardType>(
+  const { data: grant, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
     `card_grants/cdg_${grantId}`,
   );
   const { colors: themeColors } = useTheme();
+  const hcb = useClient();
+  const [isActivating, setIsActivating] = useState(false);
+
+  const handleActivateGrant = async () => {
+    setIsActivating(true);
+    try {
+      const response = await hcb.post(`card_grants/cdg_${grantId}/activate`);
+
+      if (response.ok) {
+        await reloadGrant();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert("Success", "Grant activated successfully!");
+      } else {
+        const data = (await response.json()) as { error?: string };
+        Alert.alert("Error", data.error || "Failed to activate grant");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (err) {
+      logCriticalError("Error activating grant", err, { grantId });
+      Alert.alert("Error", "Failed to activate grant. Please try again later.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsActivating(false);
+    }
+  };
 
   if (!grant) {
     return <CardSkeleton />;
@@ -32,7 +62,6 @@ export default function GrantCardPage({ route, navigation }: Props) {
       <View
         style={{
           flex: 1,
-          alignItems: "center",
           padding: 20,
         }}
       >
@@ -52,7 +81,11 @@ export default function GrantCardPage({ route, navigation }: Props) {
               textAlign: "center",
             }}
           >
-            Sorry, this grant was cancelled!
+            {grant.status === "canceled"
+              ? "Sorry, this grant was cancelled!"
+              : grant.status == "active"
+                ? "This grant hasn't been accepted yet!"
+                : "Sorry, this grant is not available!"}
           </Text>
           <Text
             style={{
@@ -74,6 +107,27 @@ export default function GrantCardPage({ route, navigation }: Props) {
             $0
           </Text>
         </View>
+
+        {/* Show activate button for grants that are active but not yet activated */}
+        {grant.status === "active" && (
+          <View style={{ marginTop: 20 }}>
+            <Button
+              style={{
+                backgroundColor: palette.primary,
+                borderTopWidth: 0,
+                borderRadius: 12,
+              }}
+              color="white"
+              iconColor="white"
+              iconSize={32}
+              icon="rep"
+              onPress={handleActivateGrant}
+              loading={isActivating}
+            >
+              Activate Grant
+            </Button>
+          </View>
+        )}
         <View
           style={{
             marginTop: 24,
@@ -170,8 +224,8 @@ export default function GrantCardPage({ route, navigation }: Props) {
               {renderMoney(grant?.amount_cents)}
             </Text>
           </View>
-
-          <View
+          {/* Current API scopes does not include the user email */}
+          {/* <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
@@ -198,7 +252,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
             >
               {grant?.user?.email}
             </Text>
-          </View>
+          </View> */}
           <View
             style={{
               flexDirection: "row",
