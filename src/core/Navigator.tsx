@@ -182,6 +182,7 @@ export default function Navigator() {
               options={{
                 title: "Home",
                 headerLargeTitle: true,
+                headerTransparent: true,
                 headerRight: () => (
                   <Ionicons.Button
                     name="add-circle-outline"

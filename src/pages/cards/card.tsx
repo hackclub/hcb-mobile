@@ -75,6 +75,7 @@ export default function CardPage(
 
   const { data: grantCard = _card as GrantCard } = useOfflineSWR<GrantCard>(
     grantId ? `card_grants/${grantId}` : null,
+    { fallbackData: _card as GrantCard },
   );
   const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
   const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
@@ -414,7 +415,7 @@ export default function CardPage(
           onPress: async () => {
             try {
               setisReturningGrant(true);
-              await hcb.post(`card_grants/${grantCard.grant_id}/cancel`);
+              await hcb.post(`card_grants/${grantId || grantCard.grant_id}/cancel`);
               Haptics.notificationAsync(
                 Haptics.NotificationFeedbackType.Success,
               );

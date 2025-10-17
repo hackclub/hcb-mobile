@@ -50,6 +50,16 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
 
+function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
+  useStripeTerminalInit({
+    enabled,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: true,
+  });
+  
+  return null;
+}
+
 SplashScreen.preventAutoHideAsync();
 
 SplashScreen.setOptions({
@@ -73,11 +83,6 @@ export default function AppContent({
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const hcb = useClient();
 
-  useStripeTerminalInit({
-    enabled: !!tokens?.accessToken && isAuthenticated,
-    enableReaderPreConnection: true,
-    enableSoftwareUpdates: true,
-  });
 
   useEffect(() => {
     resetStripeTerminalInitialization();
@@ -436,6 +441,9 @@ export default function AppContent({
         style={{ flex: 1 }}
       >
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
+          <StripeTerminalInitializer 
+            enabled={!!tokens?.accessToken && isAuthenticated}
+          />
           <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
             <GestureHandlerRootView>
               <StatusBar style={isDark ? "light" : "dark"} />
