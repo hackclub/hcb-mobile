@@ -697,26 +697,6 @@ export default function CardPage(
       }
     }
 
-    // Add top up button
-    if (isGrantCard && isManagerOrAdmin && canTopupCard(card)) {
-      buttons.push(
-        <Button
-          key="topup"
-          style={{
-            backgroundColor: "#3499EE",
-            borderTopWidth: 0,
-            borderRadius: 12,
-          }}
-          color="white"
-          iconColor="white"
-          icon="plus"
-          onPress={() => setShowTopupModal(true)}
-        >
-          Topup
-        </Button>,
-      );
-    }
-
     if (
       card?.type == "virtual" &&
       (card?.status as Card["status"]) !== "canceled" &&
@@ -736,6 +716,26 @@ export default function CardPage(
           loading={!!detailsLoading || !!cardDetailsLoading}
         >
           {detailsRevealed ? "Hide Details" : "Reveal Details"}
+        </Button>,
+      );
+    }
+
+    // Add top up button
+    if (isGrantCard && isManagerOrAdmin && canTopupCard(card)) {
+      buttons.push(
+        <Button
+          key="topup"
+          style={{
+            backgroundColor: "#3499EE",
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="white"
+          iconColor="white"
+          icon="plus"
+          onPress={() => setShowTopupModal(true)}
+        >
+          Topup
         </Button>,
       );
     }

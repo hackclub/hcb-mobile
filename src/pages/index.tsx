@@ -233,7 +233,7 @@ export default function App({ navigation }: Props) {
     },
   });
 
-  const { data: grantCards } = useOfflineSWR<GrantCard[]>("user/card_grants", {
+  const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<GrantCard[]>("user/card_grants", {
     fallbackData: [],
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -324,6 +324,7 @@ export default function App({ navigation }: Props) {
     try {
       reloadOrganizations();
       reloadInvitations();
+      reloadGrantCards();
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
       if (err.name !== "AbortError" && err.name !== "NetworkError") {
@@ -338,6 +339,7 @@ export default function App({ navigation }: Props) {
     try {
       reloadOrganizations();
       reloadInvitations();
+      reloadGrantCards();
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
       if (err.name !== "AbortError" && err.name !== "NetworkError") {

@@ -23,12 +23,12 @@ export default function UserMention({
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: user.admin || user.auditor ? 0 : 10,
+        gap: user.auditor ? 0 : 10,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <UserAvatar user={user} size={avatarSize} />
-        {(user.admin || user.auditor) && (
+        {(user.auditor) && (
           <View style={{ marginLeft: -10 }}>
             <Icon glyph="admin-badge" color="#f1c40f" size={badgeSize} />
           </View>
@@ -37,7 +37,7 @@ export default function UserMention({
       <Text
         style={{
           color: themeColors.text,
-          marginLeft: user.admin || user.auditor ? -5 : 0,
+          marginLeft: user.auditor ? -5 : 0,
         }}
       >
         {user.name}

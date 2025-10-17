@@ -490,7 +490,7 @@ export default function OrganizationPage({
               <TouchableHighlight
                 onPress={
                   item.id &&
-                  (userinOrganization || user?.admin || user?.auditor)
+                  (userinOrganization || user?.auditor)
                     ? () => {
                         if (
                           item.code === TransactionType.Disbursement &&
