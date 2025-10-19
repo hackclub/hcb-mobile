@@ -436,7 +436,7 @@ export default function AppContent({
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        edges={Platform.OS == "android" ? ["top", "bottom"] : []}
+        edges={Platform.OS == "android" ? ["bottom"] : []}
         style={{ flex: 1 }}
       >
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>

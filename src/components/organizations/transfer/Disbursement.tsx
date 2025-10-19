@@ -179,7 +179,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
             },
             inputAndroid: {
               color: themeColors.text,
-              padding: 15,
+              paddingHorizontal: 15,
               fontSize: 16,
             },
           }}

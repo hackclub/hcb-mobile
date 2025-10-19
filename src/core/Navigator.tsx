@@ -121,6 +121,7 @@ export default function Navigator() {
                 position: "absolute",
                 paddingBottom: 5,
                 height: 50,
+                elevation: 0,
               },
             }
           : {
@@ -182,7 +183,7 @@ export default function Navigator() {
               options={{
                 title: "Home",
                 headerLargeTitle: true,
-                headerTransparent: true,
+                headerTransparent: Platform.OS === "ios",
                 headerRight: () => (
                   <Ionicons.Button
                     name="add-circle-outline"
