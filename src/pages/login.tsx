@@ -5,7 +5,9 @@ import {
   DiscoveryDocument,
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
+import { ImageBackground } from "expo-image";
 import * as SystemUI from "expo-system-ui";
+import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -13,13 +15,15 @@ import {
   Animated,
   SafeAreaView,
   useColorScheme,
+  Linking,
+  Image,
 } from "react-native";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
 import { logCriticalError } from "../lib/errorUtils";
 import { useIsDark } from "../lib/useColorScheme";
-import { lightTheme, palette, theme as darkTheme } from "../styles/theme";
+import { palette } from "../styles/theme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -54,7 +58,22 @@ export default function Login() {
 
   const { setTokens } = useContext(AuthContext);
   const isDark = useIsDark();
-  const theme = isDark ? darkTheme : lightTheme;
+
+  const openInAppBrowser = async (url: string) => {
+    try {
+      await WebBrowser.openBrowserAsync(url, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
+        controlsColor: palette.primary,
+        showTitle: true,
+        enableBarCollapsing: false,
+        showInRecents: false,
+      });
+    } catch (error) {
+      console.error("Error opening browser:", error);
+      // Fallback to external browser if in-app browser fails
+      Linking.openURL(url);
+    }
+  };
 
   useEffect(() => {
     const setStatusBar = async () => {
@@ -131,53 +150,127 @@ export default function Login() {
   }, [animation]);
 
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        flexDirection: "column",
-      }}
+    <ImageBackground
+      source={require("../../assets/login-bg.png")}
+      style={{ flex: 1 }}
     >
-      <View
-        style={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}
-      >
-        <Animated.Image
-          source={
-            isDark
-              ? require("../../assets/icon.png")
-              : require("../../assets/icon-light.png")
-          }
+      <SafeAreaView style={{ flex: 1, flexDirection: "column" }}>
+        <View
           style={{
-            width: 100,
-            height: 100,
-            marginBottom: 20,
-            opacity: animation,
-            transform: [
-              {
-                scale: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.8, 1],
-                }),
-              },
-            ],
+            flexGrow: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 20,
           }}
-        />
-        <Text
-          style={{ color: palette.muted, textAlign: "center", fontSize: 20 }}
-        >
-          Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
-        </Text>
-      </View>
+        ></View>
 
-      <View style={{ marginBottom: 30 }}>
-        <Button
-          onPress={() => promptAsync()}
-          loading={loading}
-          style={{ marginHorizontal: 20 }}
+        <View
+          style={{
+            flexDirection: "column",
+            gap: 12,
+            paddingHorizontal: 20,
+            marginBottom: 20,
+          }}
         >
-          Log in
-        </Button>
-      </View>
-    </SafeAreaView>
+          <Animated.View
+            style={[
+              {
+                opacity: animation,
+                alignSelf: "flex-start",
+                transform: [
+                  {
+                    scale: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <Image
+              source={
+                isDark
+                  ? require("../../assets/icon.png")
+                  : require("../../assets/icon-light.png")
+              }
+              style={{ width: 80, height: 80 }}
+            />
+          </Animated.View>
+
+          <Text
+            style={{
+              color: "#FFFFFF",
+              textAlign: "center",
+              fontSize: 36,
+              fontWeight: "bold",
+              fontFamily: "sans-serif",
+              alignSelf: "flex-start",
+            }}
+          >
+            Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
+          </Text>
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "left",
+              fontSize: 16,
+              fontFamily: "sans-serif",
+              lineHeight: 22,
+            }}
+          >
+            Over 5,000 nonprofit projects use HCB to raise money and manage
+            their finances.
+          </Text>
+
+           <Button
+             variant="ghost"
+             onPress={() =>
+               openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
+             }
+            style={{
+              borderWidth: 0,
+              paddingVertical: 8,
+              paddingHorizontal: 0,
+              alignSelf: "flex-start",
+            }}
+          >
+            <Text
+              style={{
+                color: "#FFFFFF",
+                fontSize: 16,
+                fontWeight: "bold",
+                fontFamily: "sans-serif",
+              }}
+            >
+              What's HCB? →
+            </Text>
+          </Button>
+          <Button
+            variant="outline"
+            onPress={() => promptAsync()}
+            loading={loading}
+          >
+            Log in
+          </Button>
+           <Button
+             variant="primary"
+             onPress={() =>
+               openInAppBrowser("https://hcb.hackclub.com/users/auth?signup=true")
+             }
+            loading={loading}
+            style={{
+              backgroundColor: palette.primary,
+              borderWidth: 0,
+              borderRadius: 12,
+              paddingVertical: 16,
+              paddingHorizontal: 20,
+            }}
+          >
+            Sign up
+          </Button>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
