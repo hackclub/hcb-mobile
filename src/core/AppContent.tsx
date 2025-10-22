@@ -228,7 +228,7 @@ export default function AppContent({
 
   useEffect(() => {
     const setStatusBar = async () => {
-      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#F6F6F6");
+      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
     };
     setStatusBar();
     const checkAuth = async () => {
