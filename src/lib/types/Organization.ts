@@ -7,6 +7,7 @@ export default interface Organization extends HcbApiObject<"org"> {
   slug: string;
   icon?: string;
   background_image?: string;
+  donation_page_available: boolean;
   playground_mode: boolean;
   playground_mode_meeting_requested: boolean;
   transparent: boolean;
