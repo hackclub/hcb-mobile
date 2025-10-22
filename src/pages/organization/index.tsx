@@ -231,7 +231,7 @@ export default function OrganizationPage({
           imageColor: "white",
         });
 
-        if (!organization.playground_mode && supportsTapToPay) {
+        if (!organization.playground_mode && supportsTapToPay && organization.donation_page_available) {
           menuActions.push({
             id: "donation",
             title: "Collect Donations",

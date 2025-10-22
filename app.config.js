@@ -14,6 +14,7 @@ export default {
     assetBundlePatterns: ["**/*"],
     newArchEnabled: true,
     ios: {
+      icon: "./assets/icons/default.icon",
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       buildNumber: "20",

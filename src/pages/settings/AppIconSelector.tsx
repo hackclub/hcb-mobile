@@ -9,7 +9,6 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 
 const icons: { [key: string]: number | null } = {
   default: require("../../../assets/icons/default.png"),
-  "default dark": require("../../../assets/icons/default-dark.png"),
   cashmoney: require("../../../assets/icons/cash-money.png"),
   hacknight: Constants.platform?.ios
     ? require("../../../assets/icons/hack-night.png")
@@ -52,7 +51,6 @@ const iconKeyMap: { [key: string]: string } = {
 const getDisplayName = (key: string) => {
   const nameMap: { [key: string]: string } = {
     default: "Default",
-    "default dark": "Default Dark",
     hackathongrant: "Hackathon Grant",
     cashmoney: "Cash Money",
     christmas: "Christmas",
@@ -86,8 +84,6 @@ export default function AppIconSelector() {
 
     if (!iconName || iconName === "Default") {
       setCurrentIcon("default");
-    } else if (iconName === "DefaultDark") {
-      setCurrentIcon("default dark");
     } else if (iconName === "Admin") {
       setCurrentIcon("admin light");
     } else if (iconName === "AdminDark") {
@@ -103,8 +99,6 @@ export default function AppIconSelector() {
 
     if (iconName === "default") {
       configIconName = null;
-    } else if (iconName === "default dark") {
-      configIconName = "DefaultDark";
     } else if (iconName === "admin light") {
       configIconName = "Admin";
     } else if (iconName === "admin dark") {

@@ -1442,6 +1442,50 @@ export default function CardPage(
                   </View>
                 </>
               )}
+               {card?.total_spent_cents != null && (
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: palette.muted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Spending Limit
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                  >
+                    {renderMoney(card?.balance_available ?? 0)}
+                  </Text>
+                </View>
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: palette.muted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total Spent
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                  >
+                    {renderMoney(card?.total_spent_cents)}
+                  </Text>
+                </View>
+              </View>
+            )}
             </View>
 
             {/* Transactions Section */}
@@ -1462,28 +1506,6 @@ export default function CardPage(
               >
                 Transaction History
               </Text>
-              {card?.total_spent_cents != null && (
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: palette.muted,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Total Spent
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: themeColors.text,
-                    }}
-                  >
-                    {renderMoney(card?.total_spent_cents)}
-                  </Text>
-                </View>
-              )}
             </View>
 
             {transactionError ? (

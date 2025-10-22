@@ -14,18 +14,6 @@ const appIcons = [
     },
   },
   {
-    name: "DefaultDark",
-    ios: {
-      light: "./assets/icons/default-dark.png",
-      dark: "./assets/icons/default-dark.png",
-      tinted: "./assets/icons/default-dark.png",
-    },
-    android: {
-      foregroundImage: "./assets/app-icon-foreground.png",
-      backgroundColor: "#EC3750",
-    },
-  },
-  {
     name: "Cashmoney",
     ios: "./assets/icons/cash-money.png",
     android: {
