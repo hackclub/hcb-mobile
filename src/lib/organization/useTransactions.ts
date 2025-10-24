@@ -41,7 +41,7 @@ export function getMissingReceiptKey() {
 
 export default function useTransactions(id: string, prefix: string) {
   if (!id || !prefix) {
-    throw new Error("id and prefix are required");
+    throw new Error(`useTransactions requires both id and prefix parameters. Received id: ${id}, prefix: ${prefix}`);
   }
 
   const { fetcher } = useSWRConfig();
