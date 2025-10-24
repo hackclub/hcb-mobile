@@ -124,7 +124,7 @@ export default function OrganizationPage({
     isLoadingMore,
     loadMore,
     isLoading,
-  } = useTransactions(orgId);
+  } = useTransactions(orgId, "organizations");
   const [refreshing] = useState(false);
 
   useEffect(() => {
