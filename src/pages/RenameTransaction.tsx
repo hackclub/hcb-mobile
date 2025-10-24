@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { useSWRConfig } from "swr";
+import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
 import useClient from "../lib/client";
@@ -57,7 +58,7 @@ export default function RenameTransactionPage({
       },
       populateCache: true,
       onSuccess() {
-        mutate(getKey(orgId, "organizations"));
+        mutate(unstable_serialize(getKey(orgId, "organizations")));
       },
     },
   );
