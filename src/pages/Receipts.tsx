@@ -386,28 +386,35 @@ export default function ReceiptsPage({ navigation }: Props) {
 
   // Create data structure for FlatList
   const listData = [
-    { type: 'receipts', data: receipts },
-    { type: 'upload', data: null },
-    { type: 'transactions', data: groupedTransactions },
-    { type: 'empty-state', data: null },
-  ].filter(item => {
-    if (item.type === 'receipts') return receipts && receipts.length > 0;
-    if (item.type === 'transactions') return groupedTransactions.length > 0;
-    if (item.type === 'empty-state') return groupedTransactions.length === 0;
+    { type: "receipts", data: receipts },
+    { type: "upload", data: null },
+    { type: "transactions", data: groupedTransactions },
+    { type: "empty-state", data: null },
+  ].filter((item) => {
+    if (item.type === "receipts") return receipts && receipts.length > 0;
+    if (item.type === "transactions") return groupedTransactions.length > 0;
+    if (item.type === "empty-state") return groupedTransactions.length === 0;
     return true;
   });
 
-  const renderItem = ({ item }: { item: { type: string; data: unknown }; index: number }) => {
+  const renderItem = ({
+    item,
+  }: {
+    item: { type: string; data: unknown };
+    index: number;
+  }) => {
     switch (item.type) {
-      case 'receipts':
+      case "receipts":
         return (
           <FlatList
             horizontal
-            data={receipts?.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            ) || []}
+            data={
+              receipts?.sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime(),
+              ) || []
+            }
             renderItem={({ item: receipt }) => (
               <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
                 <TouchableOpacity
@@ -465,7 +472,11 @@ export default function ReceiptsPage({ navigation }: Props) {
                       </TouchableOpacity>
                     </View>
                     <Text
-                      style={{ color: palette.muted, fontSize: 12, marginTop: 5 }}
+                      style={{
+                        color: palette.muted,
+                        fontSize: 12,
+                        marginTop: 5,
+                      }}
                     >
                       Added{" "}
                       {formatDistanceToNowStrict(parseISO(receipt.created_at))}{" "}
@@ -481,7 +492,7 @@ export default function ReceiptsPage({ navigation }: Props) {
           />
         );
 
-      case 'upload':
+      case "upload":
         return (
           <View
             style={{
@@ -511,14 +522,18 @@ export default function ReceiptsPage({ navigation }: Props) {
               </Text>
             </TouchableOpacity>
             <Text
-              style={{ color: palette.muted, textAlign: "center", fontSize: 14 }}
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                fontSize: 14,
+              }}
             >
               Select photos from your device
             </Text>
           </View>
         );
 
-      case 'transactions':
+      case "transactions":
         return (
           <View style={{ marginBottom: 20 }}>
             <View
@@ -565,7 +580,7 @@ export default function ReceiptsPage({ navigation }: Props) {
           </View>
         );
 
-      case 'empty-state':
+      case "empty-state":
         return (
           <View
             style={{

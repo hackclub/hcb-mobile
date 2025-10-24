@@ -36,11 +36,11 @@ import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { logError, logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import useTransactions from "../../lib/organization/useTransactions";
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import useDigitalWallet from "../../lib/useDigitalWallet";
@@ -55,7 +55,6 @@ import {
   renderCardNumber,
   renderMoney,
 } from "../../utils/util";
-import useTransactions from "../../lib/organization/useTransactions";
 
 type CardPageProps = {
   cardId?: string;
@@ -963,22 +962,23 @@ export default function CardPage(
   };
 
   const listData = [
-    { type: 'error', data: cardError },
-    { type: 'card', data: card },
-    { type: 'actions', data: card },
-    { type: 'wallet', data: card },
-    { type: 'details', data: card },
-    { type: 'transactions-header', data: null },
-    { type: 'transactions', data: transactions },
-  ].filter(item => {
-    if (item.type === 'error') return cardError;
-    if (item.type === 'transactions') return !transactionError && !transactionsLoading;
+    { type: "error", data: cardError },
+    { type: "card", data: card },
+    { type: "actions", data: card },
+    { type: "wallet", data: card },
+    { type: "details", data: card },
+    { type: "transactions-header", data: null },
+    { type: "transactions", data: transactions },
+  ].filter((item) => {
+    if (item.type === "error") return cardError;
+    if (item.type === "transactions")
+      return !transactionError && !transactionsLoading;
     return true;
   });
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({ item }: { item: { type: string; data: unknown } }) => {
     switch (item.type) {
-      case 'error':
+      case "error":
         return (
           <View
             style={{
@@ -1003,7 +1003,7 @@ export default function CardPage(
           </View>
         );
 
-      case 'card':
+      case "card":
         return (
           <TouchableOpacity
             style={{ alignItems: "center", marginBottom: 20 }}
@@ -1050,10 +1050,10 @@ export default function CardPage(
           </TouchableOpacity>
         );
 
-      case 'actions':
+      case "actions":
         return card?.status != "canceled" ? getCardActionButtons() : null;
 
-      case 'wallet':
+      case "wallet":
         return ableToAddToWallet &&
           ephemeralKey &&
           Platform.OS === "ios" &&
@@ -1067,9 +1067,7 @@ export default function CardPage(
               width: "100%",
               marginBottom: 20,
             }}
-            iOSButtonStyle={
-              isDark ? "onDarkBackground" : "onLightBackground"
-            }
+            iOSButtonStyle={isDark ? "onDarkBackground" : "onLightBackground"}
             cardDetails={{
               name: walletCard?.cardholder?.name || user?.name || "",
               primaryAccountIdentifier:
@@ -1088,7 +1086,7 @@ export default function CardPage(
           />
         ) : null;
 
-      case 'details':
+      case "details":
         return (
           <View
             style={{
@@ -1500,7 +1498,7 @@ export default function CardPage(
           </View>
         );
 
-      case 'transactions-header':
+      case "transactions-header":
         return (
           <View
             style={{
@@ -1522,7 +1520,7 @@ export default function CardPage(
           </View>
         );
 
-      case 'transactions':
+      case "transactions":
         if (transactionError) {
           return (
             <View
@@ -1614,8 +1612,7 @@ export default function CardPage(
                 key={transaction.id}
                 onPress={() => {
                   navigation.navigate("Transaction", {
-                    orgId:
-                      card?.organization?.id || _card?.organization?.id,
+                    orgId: card?.organization?.id || _card?.organization?.id,
                     transaction: transaction,
                     transactionId: transaction.id,
                     title: getTransactionTitle(transaction),

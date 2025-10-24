@@ -53,7 +53,7 @@ export default function useTransactions(id: string, prefix: string) {
     return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
-  const { data, size, setSize, isLoading } = useSWRInfinite<
+  const { data, size, setSize, isLoading, error } = useSWRInfinite<
     PaginatedResponse<Transaction>
   >(getKey(id, prefix), infiniteFetcher);
 
@@ -72,6 +72,7 @@ export default function useTransactions(id: string, prefix: string) {
     isLoading,
     isLoadingMore,
     isReachingEnd,
+    error,
     loadMore() {
       if (isLoadingMore || isReachingEnd) return;
       setSize((s) => s + 1);
@@ -89,7 +90,7 @@ export function useMissingReceiptTransactions() {
     return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
-  const { data, size, setSize, isLoading } = useSWRInfinite<
+  const { data, size, setSize, isLoading, error } = useSWRInfinite<
     PaginatedResponse<Transaction>
   >(getMissingReceiptKey(), infiniteFetcher);
 
@@ -108,6 +109,7 @@ export function useMissingReceiptTransactions() {
     isLoading,
     isLoadingMore,
     isReachingEnd,
+    error,
     loadMore() {
       if (isLoadingMore || isReachingEnd) return;
       setSize((s) => s + 1);
