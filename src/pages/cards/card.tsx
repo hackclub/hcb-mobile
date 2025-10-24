@@ -12,7 +12,7 @@ import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
-  ScrollView,
+  FlatList,
   View,
   Text,
   ActivityIndicator,
@@ -36,11 +36,11 @@ import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { logError, logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import useTransactions from "../../lib/organization/useTransactions";
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import useDigitalWallet from "../../lib/useDigitalWallet";
@@ -248,14 +248,13 @@ export default function CardPage(
   );
 
   const {
-    data: transactionsData,
+    transactions,
     isLoading: transactionsLoading,
+    isLoadingMore,
+    isReachingEnd,
+    loadMore,
     error: transactionsError,
-  } = useOfflineSWR<{ data: ITransaction[] }>(
-    `cards/${_card?.id || card?.id || ""}/transactions`,
-  );
-
-  const transactions = transactionsData?.data || [];
+  } = useTransactions(_card?.id || card?.id || "", "cards");
 
   useEffect(() => {
     if (transactionsError && errorDisplayReady) {
@@ -962,25 +961,25 @@ export default function CardPage(
     return null;
   };
 
-  return (
-    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-      <ScrollView
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: tabBarHeight + 20,
-        }}
-        showsVerticalScrollIndicator={false}
-        scrollIndicatorInsets={{ bottom: tabBarHeight }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[palette.primary]}
-            tintColor={palette.primary}
-          />
-        }
-      >
-        {cardError ? (
+  const listData = [
+    { type: "error", data: cardError },
+    { type: "card", data: card },
+    { type: "actions", data: card },
+    { type: "wallet", data: card },
+    { type: "details", data: card },
+    { type: "transactions-header", data: null },
+    { type: "transactions", data: transactions },
+  ].filter((item) => {
+    if (item.type === "error") return cardError;
+    if (item.type === "transactions")
+      return !transactionError && !transactionsLoading;
+    return true;
+  });
+
+  const renderItem = ({ item }: { item: { type: string; data: unknown } }) => {
+    switch (item.type) {
+      case "error":
+        return (
           <View
             style={{
               padding: 20,
@@ -1002,371 +1001,318 @@ export default function CardPage(
             </Text>
             <Button onPress={onRefresh}>Retry</Button>
           </View>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={{ alignItems: "center", marginBottom: 20 }}
-              activeOpacity={0.9}
-              onPress={() => setCardExpanded(!cardExpanded)}
-            >
-              <PaymentCard
-                details={details}
-                card={card as Card}
-                onCardLoad={() => setCardLoaded(true)}
-                style={{ marginBottom: 10 }}
-                pattern={pattern}
-                patternDimensions={patternDimensions}
-              />
+        );
 
-              {isGrantCard && (
-                <View style={{ alignItems: "center", marginTop: 10 }}>
+      case "card":
+        return (
+          <TouchableOpacity
+            style={{ alignItems: "center", marginBottom: 20 }}
+            activeOpacity={0.9}
+            onPress={() => setCardExpanded(!cardExpanded)}
+          >
+            <PaymentCard
+              details={details}
+              card={card as Card}
+              onCardLoad={() => setCardLoaded(true)}
+              style={{ marginBottom: 10 }}
+              pattern={pattern}
+              patternDimensions={patternDimensions}
+            />
+
+            {isGrantCard && (
+              <View style={{ alignItems: "center", marginTop: 10 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    opacity: 0.7,
+                    color: themeColors.text,
+                  }}
+                >
+                  Available Balance
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    marginTop: 5,
+                    color: themeColors.text,
+                  }}
+                >
+                  {card?.status == "expired" || card?.status == "canceled"
+                    ? "$0"
+                    : renderMoney(
+                        grantCard?.amount_cents -
+                          (card?.total_spent_cents ?? 0),
+                      )}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        );
+
+      case "actions":
+        return card?.status != "canceled" ? getCardActionButtons() : null;
+
+      case "wallet":
+        return ableToAddToWallet &&
+          ephemeralKey &&
+          Platform.OS === "ios" &&
+          _card?.type !== "physical" &&
+          card?.status != "canceled" ? (
+          <AddToWalletButton
+            token={androidCardToken}
+            androidAssetSource={require("../../../assets/google-wallet.png")}
+            style={{
+              height: 48,
+              width: "100%",
+              marginBottom: 20,
+            }}
+            iOSButtonStyle={isDark ? "onDarkBackground" : "onLightBackground"}
+            cardDetails={{
+              name: walletCard?.cardholder?.name || user?.name || "",
+              // primary_account_identifier can be null but should always be passed (do not omit this property)
+              primaryAccountIdentifier:
+                walletCard?.wallets?.primary_account_identifier || null,
+              lastFour: walletCard?.last4,
+              description: "HCB Card",
+            }}
+            ephemeralKey={ephemeralKey}
+            onComplete={({ error }) => {
+              if (error) {
+                logCriticalError("Error adding card to wallet", error);
+              } else {
+                setAbleToAddToWallet(false);
+              }
+            }}
+          />
+        ) : null;
+
+      case "details":
+        return (
+          <View
+            style={{
+              marginBottom: 24,
+              padding: 20,
+              borderRadius: 15,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 3,
+              elevation: 2,
+              backgroundColor: themeColors.card,
+            }}
+          >
+            {renderCardStatus()}
+
+            {card?.user?.id ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 15,
+                  paddingRight: 90,
+                }}
+              >
+                <UserAvatar
+                  user={card.user}
+                  size={40}
+                  style={{ marginRight: 10 }}
+                />
+                <View style={{ flex: 1, flexShrink: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {cardName}
+                  </Text>
                   <Text
                     style={{
                       fontSize: 14,
-                      opacity: 0.7,
+                      color: palette.muted,
+                      marginTop: 2,
+                    }}
+                  >
+                    {card?.type === "virtual"
+                      ? "Virtual Card"
+                      : "Physical Card"}
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 15,
+                  paddingRight: 90,
+                }}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: palette.muted,
+                    marginRight: 10,
+                  }}
+                />
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "600",
                       color: themeColors.text,
                     }}
                   >
-                    Available Balance
+                    {cardName}
                   </Text>
                   <Text
                     style={{
-                      fontSize: 24,
-                      fontWeight: "bold",
-                      marginTop: 5,
-                      color: themeColors.text,
+                      fontSize: 14,
+                      color: palette.muted,
+                      marginTop: 2,
                     }}
                   >
-                    {card?.status == "expired" || card?.status == "canceled"
-                      ? "$0"
-                      : renderMoney(
-                          grantCard?.amount_cents -
-                            (card?.total_spent_cents ?? 0),
-                        )}
+                    {card?.type === "virtual"
+                      ? "Virtual Card"
+                      : "Physical Card"}
                   </Text>
                 </View>
-              )}
-            </TouchableOpacity>
+              </View>
+            )}
 
-            {card?.status != "canceled" && getCardActionButtons()}
-            {ableToAddToWallet &&
-              ephemeralKey &&
-              Platform.OS === "ios" &&
-              _card?.type !== "physical" &&
-              card?.status != "canceled" && (
-                <AddToWalletButton
-                  token={androidCardToken}
-                  androidAssetSource={require("../../../assets/google-wallet.png")}
-                  style={{
-                    height: 48,
-                    width: "100%",
-                    marginBottom: 20,
-                  }}
-                  iOSButtonStyle={
-                    isDark ? "onDarkBackground" : "onLightBackground"
-                  }
-                  cardDetails={{
-                    name: walletCard?.cardholder?.name || user?.name || "",
-                    primaryAccountIdentifier:
-                      walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
-                    lastFour: walletCard?.last4,
-                    description: "HCB Card",
-                  }}
-                  ephemeralKey={ephemeralKey}
-                  onComplete={({ error }) => {
-                    if (error) {
-                      logCriticalError("Error adding card to wallet", error);
-                    } else {
-                      setAbleToAddToWallet(false);
-                    }
-                  }}
-                />
-              )}
+            <Divider />
 
-            {/* Card Details Section */}
             <View
               style={{
-                marginBottom: 24,
-                padding: 20,
-                borderRadius: 15,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 3,
-                elevation: 2,
-                backgroundColor: themeColors.card,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 12,
               }}
             >
-              {renderCardStatus()}
-
-              {card?.user?.id ? (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 15,
-                    paddingRight: 90,
-                  }}
-                >
-                  <UserAvatar
-                    user={card.user}
-                    size={40}
-                    style={{ marginRight: 10 }}
-                  />
-                  <View style={{ flex: 1, flexShrink: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {cardName}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: palette.muted,
-                        marginTop: 2,
-                      }}
-                    >
-                      {card?.type === "virtual"
-                        ? "Virtual Card"
-                        : "Physical Card"}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 15,
-                    paddingRight: 90,
-                  }}
-                >
-                  <View
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: themeColors.text,
+                  flexShrink: 1,
+                }}
+              >
+                Card Number
+              </Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                {detailsLoading ||
+                cardDetailsLoading ||
+                (detailsRevealed && !details) ? (
+                  <Animated.View style={createSkeletonStyle(120, 22)} />
+                ) : (
+                  <Text
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      backgroundColor: palette.muted,
-                      marginRight: 10,
+                      color: palette.muted,
+                      fontSize: 16,
+                      fontWeight: "500",
+                      fontFamily: "JetBrainsMono-Regular",
                     }}
-                  />
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {cardName}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: palette.muted,
-                        marginTop: 2,
-                      }}
-                    >
-                      {card?.type === "virtual"
-                        ? "Virtual Card"
-                        : "Physical Card"}
-                    </Text>
-                  </View>
-                </View>
-              )}
+                    selectable={detailsRevealed && details ? true : false}
+                  >
+                    {detailsRevealed && details
+                      ? renderCardNumber(details.number)
+                      : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
+                  </Text>
+                )}
+              </View>
+            </View>
 
-              <Divider />
-
-              <View
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <Text
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
+                  fontSize: 16,
+                  color: themeColors.text,
+                  flexShrink: 1,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  Card Number
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(120, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details
-                        ? renderCardNumber(details.number)
-                        : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
-                    </Text>
-                  )}
-                </View>
+                Expires
+              </Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                {detailsLoading ||
+                cardDetailsLoading ||
+                (detailsRevealed && !details) ? (
+                  <Animated.View style={createSkeletonStyle(70, 22)} />
+                ) : (
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 16,
+                      fontWeight: "500",
+                      fontFamily: "JetBrainsMono-Regular",
+                    }}
+                    selectable={detailsRevealed && details ? true : false}
+                  >
+                    {detailsRevealed && details
+                      ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
+                      : "••/••"}
+                  </Text>
+                )}
               </View>
+            </View>
 
-              <View
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <Text
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
+                  fontSize: 16,
+                  color: themeColors.text,
+                  flexShrink: 1,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  Expires
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(70, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details
-                        ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
-                        : "••/••"}
-                    </Text>
-                  )}
-                </View>
+                CVC
+              </Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                {detailsLoading ||
+                cardDetailsLoading ||
+                (detailsRevealed && !details) ? (
+                  <Animated.View style={createSkeletonStyle(50, 22)} />
+                ) : (
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 16,
+                      fontWeight: "500",
+                      fontFamily: "JetBrainsMono-Regular",
+                    }}
+                    selectable={detailsRevealed && details ? true : false}
+                  >
+                    {detailsRevealed && details ? details.cvc : "•••"}
+                  </Text>
+                )}
               </View>
+            </View>
+            {isGrantCard && (
+              <>
+                <Divider />
 
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  CVC
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(50, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details ? details.cvc : "•••"}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              {isGrantCard && (
-                <>
-                  <Divider />
-
-                  <View>
-                    {grantCard?.user?.email && !isCardholder && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          marginBottom: 12,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: themeColors.text,
-                            flexShrink: 1,
-                          }}
-                        >
-                          Grant sent to
-                        </Text>
-                        <Text
-                          style={{
-                            color: palette.muted,
-                            fontSize: 16,
-                            fontWeight: "500",
-                            fontFamily: "JetBrainsMono-Regular",
-                          }}
-                          onPress={() =>
-                            Linking.openURL(`mailto:${grantCard?.user?.email}`)
-                          }
-                        >
-                          {grantCard?.user?.email}
-                        </Text>
-                      </View>
-                    )}
+                <View>
+                  {grantCard?.user?.email && !isCardholder && (
                     <View
                       style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
                         marginBottom: 12,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: themeColors.text,
-                        }}
-                      >
-                        Allowed Merchants
-                      </Text>
-                      <Text
-                        style={{
-                          color: palette.muted,
-                          fontSize: 16,
-                          fontWeight: "500",
-                          fontFamily: "JetBrainsMono-Regular",
-                        }}
-                      >
-                        {formatMerchantNames(grantCard?.allowed_merchants)}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginBottom: 12,
-                        flexWrap: "wrap",
                       }}
                     >
                       <Text
@@ -1376,7 +1322,7 @@ export default function CardPage(
                           flexShrink: 1,
                         }}
                       >
-                        Allowed Categories
+                        Grant sent to
                       </Text>
                       <Text
                         style={{
@@ -1385,49 +1331,29 @@ export default function CardPage(
                           fontWeight: "500",
                           fontFamily: "JetBrainsMono-Regular",
                         }}
+                        onPress={() =>
+                          Linking.openURL(`mailto:${grantCard?.user?.email}`)
+                        }
                       >
-                        {formatCategoryNames(grantCard?.allowed_categories)}
+                        {grantCard?.user?.email}
                       </Text>
                     </View>
-                    {grantCard?.purpose && (
-                      <>
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: themeColors.text,
-                            flexShrink: 1,
-                          }}
-                        >
-                          Purpose
-                        </Text>
-                        <Text
-                          style={{
-                            color: palette.muted,
-                            fontSize: 16,
-                            fontWeight: "500",
-                            fontFamily: "JetBrainsMono-Regular",
-                          }}
-                        >
-                          {grantCard?.purpose}
-                        </Text>
-                      </>
-                    )}
-                  </View>
+                  )}
                   <View
                     style={{
                       flexDirection: "row",
                       justifyContent: "space-between",
                       marginBottom: 12,
+                      flexWrap: "wrap",
                     }}
                   >
                     <Text
                       style={{
                         fontSize: 16,
                         color: themeColors.text,
-                        flexShrink: 1,
                       }}
                     >
-                      One time use?
+                      Allowed Merchants
                     </Text>
                     <Text
                       style={{
@@ -1437,196 +1363,336 @@ export default function CardPage(
                         fontFamily: "JetBrainsMono-Regular",
                       }}
                     >
-                      {grantCard?.one_time_use ? "Yes" : "No"}
+                      {formatMerchantNames(grantCard?.allowed_merchants)}
                     </Text>
                   </View>
-                </>
-              )}
-              {card?.total_spent_cents != null && (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 12,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: themeColors.text,
+                        flexShrink: 1,
+                      }}
+                    >
+                      Allowed Categories
+                    </Text>
+                    <Text
+                      style={{
+                        color: palette.muted,
+                        fontSize: 16,
+                        fontWeight: "500",
+                        fontFamily: "JetBrainsMono-Regular",
+                      }}
+                    >
+                      {formatCategoryNames(grantCard?.allowed_categories)}
+                    </Text>
+                  </View>
+                  {grantCard?.purpose && (
+                    <>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: themeColors.text,
+                          flexShrink: 1,
+                        }}
+                      >
+                        Purpose
+                      </Text>
+                      <Text
+                        style={{
+                          color: palette.muted,
+                          fontSize: 16,
+                          fontWeight: "500",
+                          fontFamily: "JetBrainsMono-Regular",
+                        }}
+                      >
+                        {grantCard?.purpose}
+                      </Text>
+                    </>
+                  )}
+                </View>
                 <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-between",
+                    marginBottom: 12,
                   }}
                 >
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: palette.muted,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Spending Limit
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {renderMoney(card?.balance_available ?? 0)}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: palette.muted,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Total Spent
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {renderMoney(card?.total_spent_cents)}
-                    </Text>
-                  </View>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: themeColors.text,
+                      flexShrink: 1,
+                    }}
+                  >
+                    One time use?
+                  </Text>
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 16,
+                      fontWeight: "500",
+                      fontFamily: "JetBrainsMono-Regular",
+                    }}
+                  >
+                    {grantCard?.one_time_use ? "Yes" : "No"}
+                  </Text>
                 </View>
-              )}
-            </View>
-
-            {/* Transactions Section */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 15,
-              }}
-            >
-              <Text
+              </>
+            )}
+            {card?.total_spent_cents != null && (
+              <View
                 style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: palette.muted,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                 }}
               >
-                Transaction History
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: palette.muted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Spending Limit
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                  >
+                    {renderMoney(card?.balance_available ?? 0)}
+                  </Text>
+                </View>
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: palette.muted,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total Spent
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: themeColors.text,
+                    }}
+                  >
+                    {renderMoney(card?.total_spent_cents)}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+        );
+
+      case "transactions-header":
+        return (
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 15,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "600",
+                color: palette.muted,
+              }}
+            >
+              Transaction History
+            </Text>
+          </View>
+        );
+
+      case "transactions":
+        if (transactionError) {
+          return (
+            <View
+              style={{
+                padding: 20,
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                borderRadius: 10,
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <Ionicons name="alert-circle" size={24} color="#EF4444" />
+              <Text
+                style={{
+                  color: "#EF4444",
+                  marginVertical: 10,
+                  textAlign: "center",
+                }}
+              >
+                {transactionError}
               </Text>
             </View>
+          );
+        }
 
-            {transactionError ? (
+        if (transactionsLoading) {
+          return (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 150,
+                backgroundColor: "rgba(0, 0, 0, 0.02)",
+                borderRadius: 15,
+              }}
+            >
+              <ActivityIndicator color={palette.primary} />
+              <Text style={{ color: themeColors.text, marginTop: 10 }}>
+                Loading transactions...
+              </Text>
+            </View>
+          );
+        }
+
+        if (transactions.length === 0) {
+          return (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 60,
+                backgroundColor: "rgba(0, 0, 0, 0.02)",
+                borderRadius: 15,
+              }}
+            >
+              <Ionicons
+                name="receipt-outline"
+                size={50}
+                color={palette.muted}
+              />
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 18,
+                  fontWeight: "600",
+                  marginTop: 15,
+                }}
+              >
+                No transactions yet
+              </Text>
+              <Text
+                style={{
+                  color: palette.muted,
+                  marginTop: 5,
+                  textAlign: "center",
+                  paddingHorizontal: 20,
+                }}
+              >
+                Transactions will appear here once this card is used
+              </Text>
+            </View>
+          );
+        }
+
+        return (
+          <View style={{ borderRadius: 15, overflow: "hidden" }}>
+            {transactions.map((transaction, transactionIndex) => (
+              <TouchableOpacity
+                key={transaction.id}
+                onPress={() => {
+                  navigation.navigate("Transaction", {
+                    orgId: card?.organization?.id || _card?.organization?.id,
+                    transaction: transaction,
+                    transactionId: transaction.id,
+                    title: getTransactionTitle(transaction),
+                  });
+                }}
+                style={[
+                  transactionIndex === 0 && {
+                    borderTopLeftRadius: 15,
+                    borderTopRightRadius: 15,
+                  },
+                  transactionIndex === transactions.length - 1 && {
+                    borderBottomLeftRadius: 15,
+                    borderBottomRightRadius: 15,
+                  },
+                ]}
+              >
+                <Transaction
+                  transaction={transaction}
+                  showMerchantIcon={true}
+                  top={transactionIndex == 0}
+                  bottom={transactionIndex == transactions.length - 1}
+                  hideAvatar
+                  orgId={
+                    card?.organization?.id || _card?.organization?.id || ""
+                  }
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <FlatList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => `${item.type}-${index}`}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: tabBarHeight + 20,
+        }}
+        showsVerticalScrollIndicator={false}
+        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[palette.primary]}
+            tintColor={palette.primary}
+          />
+        }
+        onEndReached={() => {
+          if (!isReachingEnd && !isLoadingMore) {
+            loadMore();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={() => {
+          if (isLoadingMore) {
+            return (
               <View
                 style={{
                   padding: 20,
-                  backgroundColor: "rgba(239, 68, 68, 0.1)",
-                  borderRadius: 10,
-                  alignItems: "center",
-                  marginBottom: 20,
-                }}
-              >
-                <Ionicons name="alert-circle" size={24} color="#EF4444" />
-                <Text
-                  style={{
-                    color: "#EF4444",
-                    marginVertical: 10,
-                    textAlign: "center",
-                  }}
-                >
-                  {transactionError}
-                </Text>
-              </View>
-            ) : transactionsLoading ? (
-              <View
-                style={{
                   alignItems: "center",
                   justifyContent: "center",
-                  height: 150,
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                  borderRadius: 15,
                 }}
               >
                 <ActivityIndicator color={palette.primary} />
-                <Text style={{ color: themeColors.text, marginTop: 10 }}>
-                  Loading transactions...
-                </Text>
               </View>
-            ) : transactions.length === 0 ? (
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 60,
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                  borderRadius: 15,
-                }}
-              >
-                <Ionicons
-                  name="receipt-outline"
-                  size={50}
-                  color={palette.muted}
-                />
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 18,
-                    fontWeight: "600",
-                    marginTop: 15,
-                  }}
-                >
-                  No transactions yet
-                </Text>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    marginTop: 5,
-                    textAlign: "center",
-                    paddingHorizontal: 20,
-                  }}
-                >
-                  Transactions will appear here once this card is used
-                </Text>
-              </View>
-            ) : (
-              <View style={{ borderRadius: 15, overflow: "hidden" }}>
-                {transactions.map((transaction, index) => (
-                  <TouchableOpacity
-                    key={transaction.id}
-                    onPress={() => {
-                      navigation.navigate("Transaction", {
-                        orgId:
-                          card?.organization?.id || _card?.organization?.id,
-                        transaction,
-                        transactionId: transaction.id,
-                        title: getTransactionTitle(transaction),
-                      });
-                    }}
-                    style={[
-                      index === 0 && {
-                        borderTopLeftRadius: 15,
-                        borderTopRightRadius: 15,
-                      },
-                      index === transactions.length - 1 && {
-                        borderBottomLeftRadius: 15,
-                        borderBottomRightRadius: 15,
-                      },
-                    ]}
-                  >
-                    <Transaction
-                      transaction={transaction}
-                      showMerchantIcon={true}
-                      top={index == 0}
-                      bottom={index == transactions.length - 1}
-                      hideAvatar
-                      orgId={
-                        card?.organization?.id || _card?.organization?.id || ""
-                      }
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </>
-        )}
-      </ScrollView>
+            );
+          }
+          return null;
+        }}
+      />
 
       {/* Add the activation modal */}
       <Modal
