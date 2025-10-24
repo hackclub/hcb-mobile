@@ -1070,6 +1070,7 @@ export default function CardPage(
             iOSButtonStyle={isDark ? "onDarkBackground" : "onLightBackground"}
             cardDetails={{
               name: walletCard?.cardholder?.name || user?.name || "",
+              // primary_account_identifier can be null but should always be passed (do not omit this property)
               primaryAccountIdentifier:
                 walletCard?.wallets?.primary_account_identifier || null,
               lastFour: walletCard?.last4,
