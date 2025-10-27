@@ -1,3 +1,5 @@
+
+import Icon from "@thedev132/hackclub-icons-rn";
 import {
   useAuthRequest,
   makeRedirectUri,
@@ -6,6 +8,7 @@ import {
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
 import * as SystemUI from "expo-system-ui";
+import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
 import {
   Text,
@@ -13,6 +16,9 @@ import {
   Animated,
   SafeAreaView,
   useColorScheme,
+  ImageBackground,
+  StyleSheet,
+  Pressable,
 } from "react-native";
 
 import AuthContext from "../auth/auth";
@@ -130,54 +136,146 @@ export default function Login() {
     }).start();
   }, [animation]);
 
-  return (
-    <SafeAreaView
-      style={{
-        backgroundColor: theme.colors.background,
-        flex: 1,
-        flexDirection: "column",
-      }}
-    >
-      <View
-        style={{ flexGrow: 1, alignItems: "center", justifyContent: "center" }}
-      >
-        <Animated.Image
-          source={
-            isDark
-              ? require("../../assets/icon.png")
-              : require("../../assets/icon-light.png")
-          }
-          style={{
-            width: 100,
-            height: 100,
-            marginBottom: 20,
-            opacity: animation,
-            transform: [
-              {
-                scale: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.8, 1],
-                }),
-              },
-            ],
-          }}
-        />
-        <Text
-          style={{ color: palette.muted, textAlign: "center", fontSize: 20 }}
-        >
-          Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
-        </Text>
-      </View>
+  const handleWhatsHCB = async () => {
+    await WebBrowser.openBrowserAsync(
+      "https://hackclub.com/fiscal-sponsorship/",
+    );
+  };
 
-      <View style={{ marginBottom: 30 }}>
-        <Button
-          onPress={() => promptAsync()}
-          loading={loading}
-          style={{ marginHorizontal: 20 }}
-        >
-          Log in
-        </Button>
-      </View>
+  const handleSignUp = async () => {
+    await WebBrowser.openBrowserAsync(
+      "https://hcb.hackclub.com/users/auth?signup=true",
+    );
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    backgroundImage: {
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.3)",
+    },
+    content: {
+      flex: 1,
+      justifyContent: "flex-end",
+      paddingHorizontal: 20,
+      paddingBottom: 50,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      backgroundColor: palette.primary,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 24,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    icon: {
+      width: 48,
+      height: 48,
+    },
+    welcomeText: {
+      fontSize: 32,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      marginBottom: 12,
+    },
+    highlightText: {
+      color: palette.primary,
+    },
+    descriptionText: {
+      fontSize: 16,
+      color: "#FFFFFF",
+      opacity: 0.9,
+      marginBottom: 20,
+      lineHeight: 22,
+    },
+    whatsHCBContainer: {
+      marginBottom: 24,
+    },
+    whatsHCBText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#FFFFFF",
+    },
+    buttonContainer: {
+      gap: 12,
+    },
+  });
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ImageBackground
+        source={
+          isDark
+            ? require("../../assets/banner-dark.png")
+            : require("../../assets/banner-light.png")
+        }
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <View style={styles.content}>
+            <Animated.View
+              style={{
+                opacity: animation,
+                transform: [
+                  {
+                    translateY: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                ],
+              }}
+            >
+              <View style={styles.iconContainer}>
+                <Icon glyph="bank-account" size={48} color="#FFFFFF" />
+              </View>
+
+              <Text style={styles.welcomeText}>
+                Welcome to <Text style={styles.highlightText}>HCB</Text>.
+              </Text>
+
+              <Text style={styles.descriptionText}>
+                Over 5,000 nonprofit projects use HCB to raise money and manage
+                their finances.
+              </Text>
+
+              <Pressable
+                style={styles.whatsHCBContainer}
+                onPress={handleWhatsHCB}
+              >
+                <Text style={styles.whatsHCBText}>What's HCB? →</Text>
+              </Pressable>
+
+              <View style={styles.buttonContainer}>
+                <Button
+                  onPress={() => promptAsync()}
+                  loading={loading}
+                  variant="outline"
+                >
+                  Log in
+                </Button>
+
+                <Button onPress={handleSignUp} variant="primary">
+                  Sign up
+                </Button>
+              </View>
+            </Animated.View>
+          </View>
+        </View>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
