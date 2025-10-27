@@ -64,7 +64,7 @@ export default function Login() {
 
   useEffect(() => {
     const setStatusBar = async () => {
-      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#F6F6F6");
+      await SystemUI.setBackgroundColorAsync("#000000");
     };
     setStatusBar();
     if (!response || isProcessing) return;
@@ -158,7 +158,7 @@ export default function Login() {
     },
     overlay: {
       flex: 1,
-      backgroundColor: isDark ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.3)",
+      backgroundColor: isDark ? "rgba(0, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)",
     },
     content: {
       flex: 1,
@@ -264,6 +264,7 @@ export default function Login() {
                   onPress={() => promptAsync()}
                   loading={loading}
                   variant="outline"
+                  color="#FFFFFF"
                 >
                   Log in
                 </Button>
