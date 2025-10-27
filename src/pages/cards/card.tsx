@@ -254,7 +254,7 @@ export default function CardPage(
     isReachingEnd,
     loadMore,
     error: transactionsError,
-  } = useTransactions(_card?.id || card?.id || "", "cards");
+  } = useTransactions(id, "cards");
 
   useEffect(() => {
     if (transactionsError && errorDisplayReady) {

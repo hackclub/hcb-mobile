@@ -7,13 +7,8 @@ import {
 import * as Haptics from "expo-haptics";
 import * as SystemUI from "expo-system-ui";
 import { useContext, useEffect, useRef, useState } from "react";
-import {
-  Text,
-  View,
-  Animated,
-  SafeAreaView,
-  useColorScheme,
-} from "react-native";
+import { Text, View, Animated, useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
