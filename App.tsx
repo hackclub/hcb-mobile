@@ -31,6 +31,7 @@ function App() {
       dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
       debug: false,
       enableLogs: true,
+      attachScreenshot: true,
       integrations: [
         Sentry.reactNativeTracingIntegration(),
         Sentry.reactNativeErrorHandlersIntegration(),
