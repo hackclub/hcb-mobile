@@ -7,7 +7,6 @@ import { View, Text, Alert } from "react-native";
 import Button from "../../components/Button";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import useClient from "../../lib/client";
-import { logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
@@ -45,7 +44,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
-      logCriticalError("Error activating grant", err, { grantId });
+      console.error("Error activating grant", err, { grantId });
       Alert.alert("Error", "Failed to activate grant. Please try again later.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

@@ -20,7 +20,6 @@ import TransactionWrapper from "../../components/organizations/TransactionWrappe
 import MockTransaction, {
   MockTransactionType,
 } from "../../components/transaction/MockTransaction";
-import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
@@ -56,7 +55,7 @@ export default function OrganizationPage({
     {
       fallbackData: _organization,
       onError: (err) => {
-        logError("Error fetching organization:", err, {
+        console.error("Error fetching organization:", err, {
           context: { orgId, isOnline },
         });
       },
@@ -143,7 +142,7 @@ export default function OrganizationPage({
           setShowTapToPayBanner(false);
         }
       } catch (error) {
-        logError("Error checking tap to pay banner status", error, {
+        console.error("Error checking tap to pay banner status", error, {
           context: { action: "check_ttp_banner" },
         });
         setShowTapToPayBanner(false);
@@ -164,7 +163,7 @@ export default function OrganizationPage({
       await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
       setShowTapToPayBanner(false);
     } catch (error) {
-      logError("Error saving tap to pay banner dismiss status", error, {
+      console.error("Error saving tap to pay banner dismiss status", error, {
         context: { action: "dismiss_ttp_banner" },
       });
       setShowTapToPayBanner(false);

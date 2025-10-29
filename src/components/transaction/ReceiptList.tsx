@@ -12,7 +12,6 @@ import useSWR from "swr";
 
 import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
-import { logCriticalError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
 import Transaction, {
@@ -108,7 +107,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               // Refresh the receipts list
               mutate();
             } catch (error) {
-              logCriticalError("Error deleting receipt", error, {
+              console.error("Error deleting receipt", error, {
                 receiptId: receipt.id,
               });
               Toast.show({

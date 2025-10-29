@@ -12,7 +12,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
-import { logCriticalError } from "../lib/errorUtils";
 import { useIsDark } from "../lib/useColorScheme";
 import { lightTheme, palette, theme as darkTheme } from "../styles/theme";
 
@@ -99,7 +98,7 @@ export default function Login() {
           setIsProcessing(false);
         })
         .catch((error) => {
-          logCriticalError("Error exchanging code for token", error, {
+          console.error("Error exchanging code for token", error, {
             authCode: request?.codeChallenge,
           });
           setLoading(false);

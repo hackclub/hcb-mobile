@@ -7,8 +7,6 @@ import {
   ReactNode,
 } from "react";
 
-import { logError } from "../lib/errorUtils";
-
 export type ThemeType = "light" | "dark" | "system";
 
 const THEME_KEY = "app_theme";
@@ -40,7 +38,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
           setThemeState(storedTheme);
         }
       } catch (error) {
-        logError("Error loading theme from storage", error, {
+        console.error("Error loading theme from storage", error, {
           context: { action: "theme_load" },
         });
         // Default to system theme on error
@@ -54,7 +52,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AsyncStorage.setItem(THEME_KEY, newTheme);
     } catch (error) {
-      logError("Error saving theme to storage", error, {
+      console.error("Error saving theme to storage", error, {
         context: { newTheme },
       });
     }
@@ -65,7 +63,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     try {
       await AsyncStorage.setItem(THEME_KEY, "system");
     } catch (error) {
-      logError("Error resetting theme in storage", error, {
+      console.error("Error resetting theme in storage", error, {
         context: { action: "theme_reset" },
       });
     }

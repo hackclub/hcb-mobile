@@ -4,7 +4,6 @@ import { KyInstance } from "ky";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { showAlert } from "../lib/alertUtils";
-import { logCriticalError } from "../lib/errorUtils";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
@@ -33,7 +32,7 @@ export const toggleCardFrozen = (
       onSuccessfulStatusChange(newStatus);
     })
     .catch((err) => {
-      logCriticalError("Error updating card status", err, {
+      console.error("Error updating card status", err, {
         cardId: card.id,
         newStatus,
       });
@@ -93,7 +92,7 @@ export const handleTopup = async (
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
-    logCriticalError("Topup error", error, {
+    console.error("Topup error", error, {
       cardId: card.id,
       amount: topupAmount,
     });
@@ -129,7 +128,7 @@ export const handleSetPurpose = async (
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
-    logCriticalError("Set purpose error", error, {
+    console.error("Set purpose error", error, {
       cardId: card.id,
       purpose: purposeText,
     });
@@ -164,7 +163,7 @@ export const handleOneTimeUse = async (
       type: ALERT_TYPE.SUCCESS,
     });
   } catch (error) {
-    logCriticalError("One time use error", error, {
+    console.error("One time use error", error, {
       cardId: card?.id || grantCard?.card_id,
     });
     showAlert("Error", "Failed to set one time use. Please try again.");
@@ -211,7 +210,7 @@ export const returnGrant = async (
             await mutate("user/cards");
             navigation.goBack();
           } catch (err) {
-            logCriticalError("Error returning grant", err, {
+            console.error("Error returning grant", err, {
               cardId: card.id,
             });
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -260,7 +259,7 @@ export const handleBurnCard = async (
               type: ALERT_TYPE.SUCCESS,
             });
           } catch (error) {
-            logCriticalError("Burn card error", error, { cardId: card.id });
+            console.error("Burn card error", error, { cardId: card.id });
             showAlert("Error", "Failed to burn card. Please try again.");
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           } finally {
@@ -272,8 +271,7 @@ export const handleBurnCard = async (
   );
 };
 
-export 
-const handleActivate = async (
+export const handleActivate = async (
   last4: string,
   setActivating: (activating: boolean) => void,
   card: Card,
@@ -304,7 +302,7 @@ const handleActivate = async (
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   } catch (err) {
-    logCriticalError("Error activating card", err, { cardId: card?.id });
+    console.error("Error activating card", err, { cardId: card?.id });
     showAlert("Error", "Failed to activate card. Please try again later.");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {

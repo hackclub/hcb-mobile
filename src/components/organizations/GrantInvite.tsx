@@ -5,7 +5,6 @@ import { useState } from "react";
 import { View, Text, TouchableHighlight, Alert } from "react-native";
 
 import useClient from "../../lib/client";
-import { logCriticalError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import GrantCard from "../../lib/types/GrantCard";
 import { palette } from "../../styles/theme";
@@ -46,7 +45,7 @@ export default function GrantInvite({
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
-      logCriticalError("Error creating card for grant", err, {
+      console.error("Error creating card for grant", err, {
         grantId: grant.id,
       });
       Alert.alert("Error", "Failed to create card. Please try again later.");

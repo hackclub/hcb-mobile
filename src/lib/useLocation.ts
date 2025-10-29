@@ -7,8 +7,6 @@ import * as Location from "expo-location";
 import { useCallback, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 
-import { logError } from "./errorUtils";
-
 export function useLocation() {
   const [accessDenied, setAccessDenied] = useState<boolean>(false);
   const [location, setLocation] = useState<{
@@ -29,7 +27,7 @@ export function useLocation() {
 
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
-      logError("Location permission error", err, {
+      console.error("Location permission error", err, {
         context: { platform: Platform.OS },
       });
       return false; // Return false when permission request fails
@@ -54,7 +52,7 @@ export function useLocation() {
         setLocation(coordinates);
       },
       (error: GeolocationError) => {
-        logError("Error getting location", error, {
+        console.error("Error getting location", error, {
           context: { action: "get_location" },
         });
       },
@@ -79,7 +77,7 @@ export function useLocation() {
 
       setLocation(coordinates);
     } catch (error) {
-      logError("Error getting iOS location", error, {
+      console.error("Error getting iOS location", error, {
         context: { action: "get_ios_location" },
       });
       setAccessDenied(true); // Set access denied on error
@@ -98,7 +96,7 @@ export function useLocation() {
       };
 
       getLocation().catch((err) => {
-        logError("Location access error", err, {
+        console.error("Location access error", err, {
           context: { platform: Platform.OS },
         });
       });
