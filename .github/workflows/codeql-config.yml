@@ -1,0 +1,11 @@
+name: legacy-codeql-config (noop)
+
+on:
+  workflow_call:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain noop
+        run: echo "This file was mistakenly placed here; real config is at .github/codeql/codeql-config.yml"
