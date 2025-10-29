@@ -9,7 +9,6 @@ import * as Sentry from "@sentry/react-native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
-import * as QuickActions from "expo-quick-actions";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -34,8 +33,8 @@ import useSWR, { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
 import useClient from "../lib/client";
+
 import { TabParamList } from "../lib/NavigatorParamList";
-import User from "../lib/types/User";
 import { useIsDark } from "../lib/useColorScheme";
 import {
   resetStripeTerminalInitialization,
@@ -50,6 +49,8 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
+import User from "../lib/types/User";
+import SentryUserBridge from "../components/core/SentryUserBridge";
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
@@ -201,32 +202,6 @@ export default function AppContent({
 
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
-  }, []);
-
-  // Handle quick action routing
-  useEffect(() => {
-    const subscription = QuickActions.addListener((action) => {
-      if (action?.params?.href && navRef.current) {
-        // Use the navigation reference to navigate to the specified href
-        const href = action.params.href as string;
-        if (href === "/cards") {
-          navRef.current.navigate("Cards", {
-            screen: "CardList",
-          });
-        } else if (href === "/receipts") {
-          navRef.current.navigate("Receipts");
-        } else if (href === "/settings") {
-          navRef.current.navigate("Settings");
-        } else {
-          navRef.current.navigate("Home", {
-            screen: "Event",
-            params: { orgId: href.replace("/", "") as `org_${string}` },
-          });
-        }
-      }
-    });
-
-    return () => subscription?.remove();
   }, []);
 
   useEffect(() => {
@@ -485,22 +460,4 @@ export default function AppContent({
       </SafeAreaView>
     </SafeAreaProvider>
   );
-}
-
-function SentryUserBridge() {
-  const { data: user } = useSWR<User>("user");
-  useEffect(() => {
-    console.log("user", user);
-    if (user?.id) {
-      Sentry.setUser({
-        id: String(user.id),
-        email: user.email ?? undefined,
-        username: user.name ?? undefined,
-      });
-    } else {
-      Sentry.setUser(null);
-      Sentry.setContext("user", null as unknown as Record<string, unknown>);
-    }
-  }, [user]);
-  return null;
 }
