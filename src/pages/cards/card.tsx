@@ -29,9 +29,7 @@ import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
 import SetPurposeModal from "../../components/cards/modals/SetPurposeModal";
 import TopupModal from "../../components/cards/modals/TopupModal";
 import WalletModal from "../../components/cards/modals/WalletModal";
-import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
-import { logError, logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
 import Card from "../../lib/types/Card";
@@ -81,7 +79,7 @@ export default function CardPage(
     `cards/${id}`,
     {
       onError: (err) => {
-        logError("Error fetching card", err, { context: { cardId: id } });
+        console.error("Error fetching card", err, { context: { cardId: id } });
         setCardError("Unable to load card details. Please try again later.");
       },
     },
@@ -299,7 +297,7 @@ export default function CardPage(
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
-      logError("Refresh error", err, { context: { cardId: card?.id } });
+      console.error("Refresh error", err, { context: { cardId: card?.id } });
     } finally {
       setRefreshing(false);
     }
@@ -370,7 +368,7 @@ export default function CardPage(
           height: patternData.height,
         });
       } catch (error) {
-        logError("Error generating pattern for card", error, {
+        console.error("Error generating pattern for card", error, {
           context: { cardId: card.id },
         });
       }
@@ -381,10 +379,7 @@ export default function CardPage(
 
   const canTopupCard = (card: Card | undefined) => {
     if (!card || !card.status) return false;
-    return (
-      card.status !== "canceled" &&
-      card.status !== "expired"
-    );
+    return card.status !== "canceled" && card.status !== "expired";
   };
 
   function getCardActionButtons() {
@@ -690,7 +685,7 @@ export default function CardPage(
               ephemeralKey={ephemeralKey}
               onComplete={({ error }) => {
                 if (error) {
-                  logCriticalError("Error adding card to wallet", error);
+                  console.error("Error adding card to wallet", error);
                 } else {
                   setAbleToAddToWallet(false);
                 }
@@ -732,7 +727,17 @@ export default function CardPage(
           setShowActivateModal(false);
           setLast4("");
         }}
-        onActivate={() => handleActivate(last4, setActivating, card as Card, setShowActivateModal, setLast4, hcb, onSuccessfulStatusChange)}
+        onActivate={() =>
+          handleActivate(
+            last4,
+            setActivating,
+            card as Card,
+            setShowActivateModal,
+            setLast4,
+            hcb,
+            onSuccessfulStatusChange,
+          )
+        }
         last4={last4}
         setLast4={setLast4}
         activating={activating}
@@ -795,7 +800,7 @@ export default function CardPage(
         cardStatus={cardStatus}
         onComplete={({ error }) => {
           if (error) {
-            logCriticalError("Error adding card to wallet", error);
+            console.error("Error adding card to wallet", error);
           } else {
             setCardStatus("CARD_ALREADY_EXISTS");
             setCardAddedToWallet(true);

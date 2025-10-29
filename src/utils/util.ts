@@ -4,7 +4,6 @@ import { Merchant, Category } from "@thedev132/yellowpages";
 import words from "lodash/words";
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 
-import { logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction, {
@@ -119,7 +118,7 @@ export const formatMerchantNames = async (
 
     return merchantNames.join(", ");
   } catch (error) {
-    logError("Error formatting merchant names", error, {
+    console.error("Error formatting merchant names", error, {
       context: { merchantIds: merchantIds },
     });
     return "Loading...";
@@ -155,7 +154,7 @@ export const formatCategoryNames = async (
 
     return categoryNames.join(", ");
   } catch (error) {
-    logError("Error formatting category names", error, {
+    console.error("Error formatting category names", error, {
       context: { categoryIds: categoryIds },
     });
     return "Loading...";
@@ -194,6 +193,7 @@ export function handleMenuActions(
   organization: Organization | OrganizationExpanded | undefined,
   user: User | undefined,
   supportsTapToPay: boolean,
+  scheme: string,
 ): MenuAction[] {
   if (!organization || !user) {
     return [];
@@ -214,7 +214,7 @@ export function handleMenuActions(
       id: "accountNumber",
       title: "Account Details",
       image: "creditcard.and.123",
-      imageColor: "white",
+      imageColor: scheme === "dark" ? "white" : "black",
     });
 
     if (isManager && !playgroundMode) {
@@ -222,7 +222,7 @@ export function handleMenuActions(
         id: "transfer",
         title: "Transfer Money",
         image: "dollarsign.circle",
-        imageColor: "white",
+        imageColor: scheme === "dark" ? "white" : "black",
       });
     }
 
@@ -230,7 +230,7 @@ export function handleMenuActions(
       id: "team",
       title: "Manage Team",
       image: "person.2.badge.gearshape",
-      imageColor: "white",
+      imageColor: scheme === "dark" ? "white" : "black",
     });
 
     if (
@@ -243,7 +243,7 @@ export function handleMenuActions(
         id: "donation",
         title: "Collect Donations",
         image: "dollarsign.circle",
-        imageColor: "white",
+        imageColor: scheme === "dark" ? "white" : "black",
       });
     }
   }

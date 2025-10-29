@@ -1,6 +1,5 @@
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 
-import { logError } from "./errorUtils";
 import { useOffline } from "./useOffline";
 
 /**
@@ -40,7 +39,7 @@ export function useOfflineSWR<Data, Error = unknown>(
         if (swrOptions?.onError) {
           swrOptions.onError(err, key, config);
         } else {
-          logError("SWR fetch error:", err, { context });
+          console.error("SWR fetch error:", err, { context });
         }
       }
     },

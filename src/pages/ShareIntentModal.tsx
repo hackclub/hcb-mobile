@@ -16,7 +16,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
-import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
@@ -287,7 +286,7 @@ export default function ShareIntentModal({
 
       navigation.goBack();
     } catch (error) {
-      logCriticalError("Upload error", error, {
+      console.error("Upload error", error, {
         action: "share_intent_upload",
       });
       Toast.show({
@@ -306,7 +305,7 @@ export default function ShareIntentModal({
 
   const getTransactionForAssignment = (assignment: ImageAssignment) => {
     if (!assignment) {
-      logError(
+      console.error(
         "getTransactionForAssignment called with undefined assignment",
         new Error("Undefined assignment"),
         {

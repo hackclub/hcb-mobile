@@ -5,6 +5,7 @@ import {
   LinkingOptions,
   NavigationContainerRef,
 } from "@react-navigation/native";
+import * as Sentry from "@sentry/react-native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -29,12 +30,12 @@ import {
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { SWRConfig } from "swr";
+import useSWR, { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
 import useClient from "../lib/client";
-import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
+import User from "../lib/types/User";
 import { useIsDark } from "../lib/useColorScheme";
 import {
   resetStripeTerminalInitialization,
@@ -196,6 +197,8 @@ export default function AppContent({
     navRef.current = navigationRef.current;
   }, []);
 
+  // Sentry user binding must occur within SWRConfig provider. We'll mount a child component later.
+
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
   }, []);
@@ -272,7 +275,7 @@ export default function AppContent({
           if (result.success) {
             setIsAuthenticated(true);
           } else {
-            logError(
+            console.error(
               "Biometric authentication failed",
               new Error(result.error || "Authentication failed"),
               {
@@ -282,7 +285,7 @@ export default function AppContent({
             setIsAuthenticated(false);
           }
         } catch (error) {
-          logError("Biometric authentication error", error, {
+          console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
           setIsAuthenticated(false);
@@ -302,9 +305,7 @@ export default function AppContent({
       const now = Date.now();
       if (tokens.expiresAt <= now + 5 * 60 * 1000) {
         refreshAccessToken().catch((error) => {
-          logError("Failed to preemptively refresh token", error, {
-            shouldReportToSentry: true,
-          });
+          console.error("Failed to preemptively refresh token", error);
         });
       }
     } else {
@@ -388,7 +389,7 @@ export default function AppContent({
         const url = await Linking.getInitialURL();
         if (url && isUniversalLinkingEnabled === false) {
           Linking.openURL(url).catch((err) =>
-            logError("Failed to open URL in browser", err, {
+            console.error("Failed to open URL in browser", err, {
               context: { url },
             }),
           );
@@ -400,7 +401,7 @@ export default function AppContent({
         const subscription = Linking.addEventListener("url", ({ url }) => {
           if (url && !isUniversalLinkingEnabled) {
             Linking.openURL(url).catch((err) =>
-              logError("Failed to open URL in browser", err, {
+              console.error("Failed to open URL in browser", err, {
                 context: { url },
               }),
             );
@@ -460,6 +461,7 @@ export default function AppContent({
                   errorRetryInterval: 1000,
                 }}
               >
+                <SentryUserBridge />
                 <ActionSheetProvider>
                   <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                     <NavigationContainer
@@ -483,4 +485,22 @@ export default function AppContent({
       </SafeAreaView>
     </SafeAreaProvider>
   );
+}
+
+function SentryUserBridge() {
+  const { data: user } = useSWR<User>("user");
+  useEffect(() => {
+    console.log("user", user);
+    if (user?.id) {
+      Sentry.setUser({
+        id: String(user.id),
+        email: user.email ?? undefined,
+        username: user.name ?? undefined,
+      });
+    } else {
+      Sentry.setUser(null);
+      Sentry.setContext("user", null as unknown as Record<string, unknown>);
+    }
+  }, [user]);
+  return null;
 }

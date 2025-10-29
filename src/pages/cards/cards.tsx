@@ -21,7 +21,6 @@ import ReorderableList, {
 
 import CardListSkeleton from "../../components/cards/CardListSkeleton";
 import PaymentCard from "../../components/PaymentCard";
-import { logError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
@@ -115,7 +114,7 @@ export default function CardsPage({ navigation }: Props) {
             },
           };
         } catch (error) {
-          logError("Error generating pattern for card", error, {
+          console.error("Error generating pattern for card", error, {
             context: { cardId: card.id },
           });
         }
@@ -236,7 +235,7 @@ export default function CardsPage({ navigation }: Props) {
           );
         }
       } catch (error) {
-        logError("Error fetching canceled cards shown status", error, {
+        console.error("Error fetching canceled cards shown status", error, {
           context: { action: "fetch_canceled_cards_status" },
         });
       }
@@ -268,7 +267,7 @@ export default function CardsPage({ navigation }: Props) {
           setSortedCards(allCards);
         }
       } catch (error) {
-        logError("Error loading saved card order", error, {
+        console.error("Error loading saved card order", error, {
           context: { action: "load_card_order" },
         });
         setSortedCards(allCards);
@@ -283,7 +282,7 @@ export default function CardsPage({ navigation }: Props) {
       await reloadCards();
       await reloadGrantCards();
     } catch (error) {
-      logError("Error refreshing cards", error, {
+      console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
       });
     }
@@ -302,7 +301,7 @@ export default function CardsPage({ navigation }: Props) {
       );
       await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
     } catch (error) {
-      logError("Error saving card order", error, {
+      console.error("Error saving card order", error, {
         context: { action: "save_card_order" },
       });
     }

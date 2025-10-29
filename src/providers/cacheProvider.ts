@@ -4,8 +4,6 @@ import { AppState, InteractionManager, Platform } from "react-native";
 import { Cache, State } from "swr";
 import { useDebouncedCallback } from "use-debounce";
 
-import { logError } from "../lib/errorUtils";
-
 type CacheValue = unknown;
 
 export class CacheProvider implements Cache<CacheValue> {
@@ -49,7 +47,7 @@ export class CacheProvider implements Cache<CacheValue> {
       }
       this.isInitialized = true;
     } catch (error) {
-      logError("Error initializing cache", error, {
+      console.error("Error initializing cache", error, {
         context: { cacheSize: this.map.size },
       });
     }
@@ -62,7 +60,7 @@ export class CacheProvider implements Cache<CacheValue> {
         await cacheDir.create();
       }
     } catch (error) {
-      logError("Error ensuring cache directory", error, {
+      console.error("Error ensuring cache directory", error, {
         context: { cacheDir: this.cacheDir },
       });
       throw error; // Re-throw as this is critical for cache functionality
@@ -82,7 +80,7 @@ export class CacheProvider implements Cache<CacheValue> {
         await cacheFile.write(JSON.stringify(Array.from(this.map.entries())));
       }
     } catch (error) {
-      logError("Error saving cache", error, {
+      console.error("Error saving cache", error, {
         context: { cacheSize: this.map.size },
       });
     }

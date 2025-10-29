@@ -1,8 +1,6 @@
 import { Category, Merchant } from "@thedev132/yellowpages";
 import { useEffect, useState } from "react";
 
-import { logError } from "./errorUtils";
-
 let isInitialized = false;
 let initializationPromise: Promise<void> | null = null;
 const iconCache = new Map<string, string | undefined>();
@@ -20,7 +18,7 @@ async function initializeMerchant() {
       await Category.initialize();
       isInitialized = true;
     } catch (error) {
-      logError("Error initializing merchant library", error, {
+      console.error("Error initializing merchant library", error, {
         context: { library: "Merchant" },
       });
       isInitialized = true;
@@ -66,7 +64,7 @@ export function useMerchantIcon(
         iconCache.set(networkId, merchantIcon);
         setIcon(merchantIcon);
       } catch (error) {
-        logError("Error looking up merchant icon", error, {
+        console.error("Error looking up merchant icon", error, {
           context: { networkId },
         });
         iconCache.set(networkId, undefined);

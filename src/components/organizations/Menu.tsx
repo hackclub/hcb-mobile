@@ -30,7 +30,12 @@ export default function Menu({
     if (!organization || !user) {
       return [];
     }
-    return handleMenuActions(organization, user, supportsTapToPay || false);
+    return handleMenuActions(
+      organization,
+      user,
+      supportsTapToPay || false,
+      scheme || "light",
+    );
   }, [organization, user, supportsTapToPay]);
 
   if (menuActions.length === 0) {

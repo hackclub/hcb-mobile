@@ -22,7 +22,6 @@ import HelpscoutBeacon from "react-native-helpscout-beacon";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
-import { logError } from "../../lib/errorUtils";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
@@ -106,7 +105,7 @@ export default function SettingsPage({ navigation }: Props) {
           setTheme(storedTheme);
         }
       } catch (error) {
-        logError("Error loading settings", error, {
+        console.error("Error loading settings", error, {
           context: { action: "settings_load" },
         });
       }
@@ -130,7 +129,7 @@ export default function SettingsPage({ navigation }: Props) {
             : "white",
         );
       } catch (error) {
-        logError("Error setting system UI background color", error, {
+        console.error("Error setting system UI background color", error, {
           context: { theme: value },
         });
       }
@@ -142,7 +141,7 @@ export default function SettingsPage({ navigation }: Props) {
       setBiometricsRequired(value);
       await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
     } catch (error) {
-      logError("Error saving biometrics setting", error, {
+      console.error("Error saving biometrics setting", error, {
         context: { action: "biometrics_toggle", value },
       });
       // Revert the state if saving fails
@@ -165,7 +164,7 @@ export default function SettingsPage({ navigation }: Props) {
       cache.clear();
       setTokens(null);
     } catch (error) {
-      logError("Error clearing storage during sign out", error, {
+      console.error("Error clearing storage during sign out", error, {
         context: { action: "sign_out" },
       });
       // Still clear cache and tokens even if storage clearing fails

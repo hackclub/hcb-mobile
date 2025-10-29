@@ -17,7 +17,6 @@ import { mutate } from "swr";
 
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
-import { logCriticalError } from "../lib/errorUtils";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
@@ -108,7 +107,7 @@ export default function ReceiptSelectionModal({
 
       navigation.goBack();
     } catch (error) {
-      logCriticalError("Upload error", error, {
+      console.error("Upload error", error, {
         transactionId: transaction.id,
         receiptCount: selectedReceipts.size,
       });

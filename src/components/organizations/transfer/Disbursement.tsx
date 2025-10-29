@@ -12,7 +12,6 @@ import useSWR from "swr";
 
 import AuthContext from "../../../auth/auth";
 import { showAlert } from "../../../lib/alertUtils";
-import { logError } from "../../../lib/errorUtils";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useIsDark } from "../../../lib/useColorScheme";
 import { useOffline } from "../../../lib/useOffline";
@@ -94,7 +93,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         setReason("");
       }
     } catch (error) {
-      logError("Transfer operation failed", error, {
+      console.error("Transfer operation failed", error, {
         context: {
           organizationId: organization.id,
           targetOrgId: chosenOrg,

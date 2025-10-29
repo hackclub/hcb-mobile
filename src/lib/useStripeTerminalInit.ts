@@ -5,8 +5,6 @@ import {
 } from "@stripe/stripe-terminal-react-native";
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import { logError } from "./errorUtils";
-
 interface UseStripeTerminalInitOptions {
   organizationId?: string;
   enabled?: boolean;
@@ -80,7 +78,7 @@ export function useStripeTerminalInit(
           try {
             await terminal?.installAvailableUpdate();
           } catch (error) {
-            logError(
+            console.error(
               "Failed to install Stripe Terminal software update",
               error,
               {
@@ -135,7 +133,7 @@ export function useStripeTerminalInit(
       try {
         if (!terminal) {
           const error = new Error("Terminal instance is null");
-          logError("Stripe Terminal not available", error, {
+          console.error("Stripe Terminal not available", error, {
             context: { organizationId },
           });
           globalInitializationState = {
@@ -198,7 +196,7 @@ export function useStripeTerminalInit(
         return true;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        logError("Stripe Terminal initialization error", err, {
+        console.error("Stripe Terminal initialization error", err, {
           context: { organizationId },
         });
 

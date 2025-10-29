@@ -3,8 +3,6 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 import React, { useState, useEffect } from "react";
 
-import { logCriticalError, logError } from "../lib/errorUtils";
-
 import AuthContext, { AuthTokens } from "./auth";
 
 const ACCESS_TOKEN_KEY = "auth_access_token";
@@ -63,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (error) {
-        logCriticalError("Failed to load auth tokens", error, {
+        console.error("Failed to load auth tokens", error, {
           action: "token_load",
         });
       } finally {
@@ -122,9 +120,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await SecureStore.deleteItemAsync(TOKEN_CREATED_AT_KEY);
         await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
         setTokensState(null);
+        Sentry.setUser(null);
       }
     } catch (error) {
-      logCriticalError("Failed to save auth tokens", error, {
+      console.error("Failed to save auth tokens", error, {
         action: "token_save",
       });
     }
@@ -141,11 +140,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
 
       setTokensState(null);
+      Sentry.setUser(null);
 
       lastSuccessfulRefreshTime = 0;
       refreshPromise = null;
     } catch (error) {
-      logError("Error during forced logout", error, {
+      console.error("Error during forced logout", error, {
         context: { action: "forced_logout" },
       });
     }
@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Validate client ID
       if (!process.env.EXPO_PUBLIC_CLIENT_ID) {
-        logCriticalError(
+        console.error(
           "Cannot refresh token: EXPO_PUBLIC_CLIENT_ID environment variable is not set",
           new Error("Missing CLIENT_ID"),
           { action: "token_refresh", missing_env: "EXPO_PUBLIC_CLIENT_ID" },
@@ -229,7 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             const errorBody = await response.text();
-            logCriticalError(
+            console.error(
               `Token refresh failed with status ${response.status}`,
               new Error(errorBody),
               { action: "token_refresh", status: response.status, errorBody },
@@ -237,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             try {
               const errorJson = JSON.parse(errorBody);
-              logCriticalError(
+              console.error(
                 "Token refresh error details",
                 new Error(errorJson.error),
                 {
@@ -265,7 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = await response.json();
 
           if (!data.access_token || !data.refresh_token) {
-            logCriticalError(
+            console.error(
               "Invalid token response from server",
               new Error("Missing tokens"),
               {
@@ -294,7 +294,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           return { success: true, newTokens };
         } catch (error) {
-          logCriticalError("Token refresh failed", error, {
+          console.error("Token refresh failed", error, {
             action: "token_refresh",
           });
           await forceLogout();
@@ -306,7 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return refreshPromise;
     } catch (error) {
-      logCriticalError("Error initiating token refresh", error, {
+      console.error("Error initiating token refresh", error, {
         action: "token_refresh_init",
       });
       refreshPromise = null;

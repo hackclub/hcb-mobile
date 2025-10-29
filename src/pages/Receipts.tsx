@@ -29,7 +29,6 @@ import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
 import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
 import { showAlert } from "../lib/alertUtils";
 import useClient from "../lib/client";
-import { logCriticalError } from "../lib/errorUtils";
 import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import Receipt from "../lib/types/Receipt";
@@ -321,7 +320,7 @@ export default function ReceiptsPage({ navigation }: Props) {
               // Refresh the receipts list
               refreshReceipts();
             } catch (error) {
-              logCriticalError("Error deleting receipt", error, { receiptId });
+              console.error("Error deleting receipt", error, { receiptId });
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",

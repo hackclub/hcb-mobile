@@ -3,8 +3,6 @@ import { useContext, useMemo } from "react";
 
 import AuthContext, { AuthTokens } from "../auth/auth";
 
-import { logCriticalError } from "./errorUtils";
-
 type KyResponse = Awaited<ReturnType<typeof ky>>;
 
 export default function useClient() {
@@ -27,7 +25,7 @@ export default function useClient() {
           try {
             return await retry();
           } catch (error) {
-            logCriticalError("Failed to process queued request", error, {
+            console.error("Failed to process queued request", error, {
               context: "queue_processing",
             });
             throw error;
@@ -72,11 +70,9 @@ export default function useClient() {
                     });
                     return newResponse;
                   } catch (error) {
-                    logCriticalError(
-                      "Failed to process queued request",
-                      error,
-                      { context: "auth_retry" },
-                    );
+                    console.error("Failed to process queued request", error, {
+                      context: "auth_retry",
+                    });
                     throw error;
                   }
                 });
@@ -130,11 +126,9 @@ export default function useClient() {
                       });
                       return newResponse;
                     } catch (error) {
-                      logCriticalError(
-                        "Failed to process queued request",
-                        error,
-                        { context: "token_refresh_retry" },
-                      );
+                      console.error("Failed to process queued request", error, {
+                        context: "token_refresh_retry",
+                      });
                       throw error;
                     }
                   });
@@ -188,18 +182,16 @@ export default function useClient() {
                       pendingRetries.delete(requestKey);
                       return newResponse;
                     } catch (innerError) {
-                      logCriticalError(
-                        "Inner retry request failed",
-                        innerError,
-                        { context: "inner_retry" },
-                      );
+                      console.error("Inner retry request failed", innerError, {
+                        context: "inner_retry",
+                      });
                       pendingRetries.delete(requestKey);
                       return response;
                     }
                   }
                 }
               } catch (refreshError) {
-                logCriticalError(
+                console.error(
                   "Error during token refresh - user will be logged out",
                   refreshError,
                   { context: "token_refresh" },
