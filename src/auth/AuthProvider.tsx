@@ -30,12 +30,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadTokens = async () => {
       try {
-        const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-        const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-        const expiresAtStr = await SecureStore.getItemAsync(EXPIRES_AT_KEY);
-        const createdAtStr =
-          await SecureStore.getItemAsync(TOKEN_CREATED_AT_KEY);
-        const codeVerifier = await SecureStore.getItemAsync(CODE_VERIFIER_KEY);
+        const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY, {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
+        const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY, {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
+        const expiresAtStr = await SecureStore.getItemAsync(EXPIRES_AT_KEY, {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
+        const createdAtStr = await SecureStore.getItemAsync(
+          TOKEN_CREATED_AT_KEY,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
+        const codeVerifier = await SecureStore.getItemAsync(CODE_VERIFIER_KEY, {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
 
         if (accessToken && refreshToken && expiresAtStr) {
           const expiresAt = parseInt(expiresAtStr, 10);
@@ -65,23 +77,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setTokens = async (newTokens: AuthTokens | null) => {
     try {
       if (newTokens) {
-        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, newTokens.accessToken);
+        await SecureStore.setItemAsync(
+          ACCESS_TOKEN_KEY,
+          newTokens.accessToken,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
         await SecureStore.setItemAsync(
           REFRESH_TOKEN_KEY,
           newTokens.refreshToken,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
         );
         await SecureStore.setItemAsync(
           EXPIRES_AT_KEY,
           newTokens.expiresAt.toString(),
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
         );
         await SecureStore.setItemAsync(
           TOKEN_CREATED_AT_KEY,
           newTokens.createdAt.toString(),
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
         );
         if (newTokens.codeVerifier) {
           await SecureStore.setItemAsync(
             CODE_VERIFIER_KEY,
             newTokens.codeVerifier,
+            {
+              keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+            },
           );
         }
         setTokensState(newTokens);
