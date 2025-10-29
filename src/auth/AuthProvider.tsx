@@ -39,10 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const expiresAtStr = await SecureStore.getItemAsync(EXPIRES_AT_KEY, {
           keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
         });
-        const createdAtStr =
-          await SecureStore.getItemAsync(TOKEN_CREATED_AT_KEY, {
+        const createdAtStr = await SecureStore.getItemAsync(
+          TOKEN_CREATED_AT_KEY,
+          {
             keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-          });
+          },
+        );
         const codeVerifier = await SecureStore.getItemAsync(CODE_VERIFIER_KEY, {
           keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
         });
@@ -75,9 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setTokens = async (newTokens: AuthTokens | null) => {
     try {
       if (newTokens) {
-        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, newTokens.accessToken, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
+        await SecureStore.setItemAsync(
+          ACCESS_TOKEN_KEY,
+          newTokens.accessToken,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
         await SecureStore.setItemAsync(
           REFRESH_TOKEN_KEY,
           newTokens.refreshToken,
