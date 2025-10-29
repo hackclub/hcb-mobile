@@ -4,12 +4,12 @@ paths:
   - src
 
 paths-ignore:
-  - node_modules
-  - android
-  - ios
-  - patches
-  - private-sdk
-  - **/*.d.ts
+  - "node_modules"
+  - "android"
+  - "ios"
+  - "patches"
+  - "private-sdk"
+  - "**/*.d.ts"
 
 queries:
   - name: Security Extended
