@@ -10,9 +10,14 @@ jobs:
   eslint:
     name: ESLint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
@@ -20,12 +25,21 @@ jobs:
       - run: npm install
       - name: Run ESLint
         run: npm run lint
+      - name: Suggest ESLint fixes (reviewdog)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: '.'
+          fail_on_error: 'false'
+          filter_mode: added
   prettier:
     name: Prettier
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
@@ -38,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
