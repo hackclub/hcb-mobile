@@ -5,7 +5,6 @@ import {
   LinkingOptions,
   NavigationContainerRef,
 } from "@react-navigation/native";
-import * as Sentry from "@sentry/react-native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -29,11 +28,11 @@ import {
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import useSWR, { SWRConfig } from "swr";
+import { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
+import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
-
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import {
@@ -49,8 +48,6 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
-import User from "../lib/types/User";
-import SentryUserBridge from "../components/core/SentryUserBridge";
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
