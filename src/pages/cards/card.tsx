@@ -143,7 +143,7 @@ export default function CardPage(
     refresh: refreshDigitalWallet,
   } = useDigitalWallet(
     _card?.id || card?.id || "",
-    !isVirtualCard || isCardholder,
+    !isVirtualCard || !isCardholder,
   );
   const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
   const tabBarHeight = useBottomTabBarHeight();
