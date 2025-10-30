@@ -141,16 +141,10 @@ export default function CardPage(
     androidCardToken,
     status: walletStatus,
     refresh: refreshDigitalWallet,
-  } = isCardholder
-    ? useDigitalWallet(_card?.id || card?.id || "", !isVirtualCard)
-    : {
-        canAddToWallet: false,
-        ephemeralKey: null,
-        card: null,
-        androidCardToken: null,
-        status: null,
-        refresh: () => {},
-      };
+  } = useDigitalWallet(
+    _card?.id || card?.id || "",
+    !isVirtualCard || isCardholder,
+  );
   const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
   const tabBarHeight = useBottomTabBarHeight();
 
