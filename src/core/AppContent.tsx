@@ -8,7 +8,6 @@ import {
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
-import * as QuickActions from "expo-quick-actions";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -32,8 +31,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import AuthContext from "../auth/auth";
+import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
-import { logError } from "../lib/errorUtils";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import {
@@ -196,34 +195,10 @@ export default function AppContent({
     navRef.current = navigationRef.current;
   }, []);
 
+  // Sentry user binding must occur within SWRConfig provider. We'll mount a child component later.
+
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
-  }, []);
-
-  // Handle quick action routing
-  useEffect(() => {
-    const subscription = QuickActions.addListener((action) => {
-      if (action?.params?.href && navRef.current) {
-        // Use the navigation reference to navigate to the specified href
-        const href = action.params.href as string;
-        if (href === "/cards") {
-          navRef.current.navigate("Cards", {
-            screen: "CardList",
-          });
-        } else if (href === "/receipts") {
-          navRef.current.navigate("Receipts");
-        } else if (href === "/settings") {
-          navRef.current.navigate("Settings");
-        } else {
-          navRef.current.navigate("Home", {
-            screen: "Event",
-            params: { orgId: href.replace("/", "") as `org_${string}` },
-          });
-        }
-      }
-    });
-
-    return () => subscription?.remove();
   }, []);
 
   useEffect(() => {
@@ -272,7 +247,7 @@ export default function AppContent({
           if (result.success) {
             setIsAuthenticated(true);
           } else {
-            logError(
+            console.error(
               "Biometric authentication failed",
               new Error(result.error || "Authentication failed"),
               {
@@ -282,7 +257,7 @@ export default function AppContent({
             setIsAuthenticated(false);
           }
         } catch (error) {
-          logError("Biometric authentication error", error, {
+          console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
           setIsAuthenticated(false);
@@ -302,9 +277,7 @@ export default function AppContent({
       const now = Date.now();
       if (tokens.expiresAt <= now + 5 * 60 * 1000) {
         refreshAccessToken().catch((error) => {
-          logError("Failed to preemptively refresh token", error, {
-            shouldReportToSentry: true,
-          });
+          console.error("Failed to preemptively refresh token", error);
         });
       }
     } else {
@@ -388,7 +361,7 @@ export default function AppContent({
         const url = await Linking.getInitialURL();
         if (url && isUniversalLinkingEnabled === false) {
           Linking.openURL(url).catch((err) =>
-            logError("Failed to open URL in browser", err, {
+            console.error("Failed to open URL in browser", err, {
               context: { url },
             }),
           );
@@ -400,7 +373,7 @@ export default function AppContent({
         const subscription = Linking.addEventListener("url", ({ url }) => {
           if (url && !isUniversalLinkingEnabled) {
             Linking.openURL(url).catch((err) =>
-              logError("Failed to open URL in browser", err, {
+              console.error("Failed to open URL in browser", err, {
                 context: { url },
               }),
             );
@@ -460,6 +433,7 @@ export default function AppContent({
                   errorRetryInterval: 1000,
                 }}
               >
+                <SentryUserBridge />
                 <ActionSheetProvider>
                   <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                     <NavigationContainer

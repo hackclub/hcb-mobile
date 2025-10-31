@@ -31,7 +31,6 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
-import { logError, logCriticalError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -62,7 +61,7 @@ export default function OrganizationDonationPage({
           await AsyncStorage.setItem("ttpDidOnboarding", "true");
         }
       } catch (error) {
-        logError("Error in tap-to-pay onboarding", error, {
+        console.error("Error in tap-to-pay onboarding", error, {
           context: { action: "ttp_onboarding" },
         });
       }
@@ -275,7 +274,7 @@ function PageContent({
         const saved = await AsyncStorage.getItem("donationTaxDeductible");
         if (saved !== null) setIsTaxDeductable(JSON.parse(saved));
       } catch (error) {
-        logError("Error loading tax deductible setting", error);
+        console.error("Error loading tax deductible setting", error);
       }
     };
     loadSetting();
@@ -289,7 +288,7 @@ function PageContent({
           JSON.stringify(isTaxDeductable),
         );
       } catch (error) {
-        logError("Error saving tax deductible setting", error);
+        console.error("Error saving tax deductible setting", error);
       }
     };
     saveSetting();
@@ -324,7 +323,7 @@ function PageContent({
           setCurrentProgress(null);
           await disconnectReader();
         } catch (e) {
-          logError("Error disconnecting reader on page load", e, {
+          console.error("Error disconnecting reader on page load", e, {
             context: { orgId, action: "disconnect_reader" },
           });
         }
@@ -344,7 +343,7 @@ function PageContent({
           await discoverReaders({ discoveryMethod: "tapToPay" });
         }
       } catch (error) {
-        logError("Error discovering readers", error, {
+        console.error("Error discovering readers", error, {
           context: { orgId, action: "discover_readers" },
         });
       }
@@ -446,7 +445,7 @@ function PageContent({
       const data = (await response.json()) as { id: string };
       return data.id;
     } catch (error) {
-      logCriticalError("Error creating donation", error, {
+      console.error("Error creating donation", error, {
         orgId,
         amount: value * 100,
       });
@@ -456,7 +455,7 @@ function PageContent({
 
   async function connectReader(selectedReader: Reader.Type) {
     if (!isStripeInitialized) {
-      logError(
+      console.error(
         "Attempted to connect reader before Stripe Terminal initialization",
         new Error("Stripe Terminal not initialized"),
         {
@@ -483,7 +482,7 @@ function PageContent({
 
       setCurrentProgress(null);
       if (error) {
-        logCriticalError("connectReader error", error, {
+        console.error("connectReader error", error, {
           context: { orgId, action: "connect_reader" },
         });
         showAlert(
@@ -502,7 +501,7 @@ function PageContent({
       if (error.code == "AlreadyConnectedToReader") {
         return true;
       }
-      logError("connectReader error", error, {
+      console.error("connectReader error", error, {
         context: { orgId, action: "connect_reader" },
       });
       showAlert(
@@ -534,7 +533,7 @@ function PageContent({
           ),
       });
       if (error) {
-        logCriticalError("createPaymentIntent error", error, {
+        console.error("createPaymentIntent error", error, {
           context: { orgId, donation_id, action: "payment_intent" },
         });
         return false;
@@ -551,7 +550,7 @@ function PageContent({
       });
       return paymentIntent;
     } catch (error) {
-      logError("paymentIntent error", error, {
+      console.error("paymentIntent error", error, {
         context: { orgId, donation_id, action: "payment_intent" },
       });
     }
@@ -563,7 +562,7 @@ function PageContent({
     let output: boolean;
     try {
       if (!collectPaymentMethod) {
-        logError(
+        console.error(
           "collectPaymentMethod not available",
           new Error("Method not initialized"),
           {
@@ -584,7 +583,7 @@ function PageContent({
       }
       output = (await confirmPayment(localPayment)) ?? false;
     } catch (error) {
-      logError("collectPayment error", error, {
+      console.error("collectPayment error", error, {
         context: { orgId, action: "collect_payment" },
       });
       output = false;
@@ -596,7 +595,7 @@ function PageContent({
     let success;
     try {
       if (!confirmPaymentIntent) {
-        logError(
+        console.error(
           "confirmPaymentIntent not available",
           new Error("Method not initialized"),
           {
@@ -614,7 +613,7 @@ function PageContent({
       }
       success = true;
     } catch (error) {
-      logError("confirmPayment error", error, {
+      console.error("confirmPayment error", error, {
         context: { orgId, action: "confirm_payment" },
       });
       success = false;
@@ -743,7 +742,7 @@ function PageContent({
               }
 
               if (!isStripeInitialized) {
-                logError(
+                console.error(
                   "Attempted to discover readers before Stripe Terminal initialization",
                   new Error("Stripe Terminal not initialized"),
                   {
@@ -765,9 +764,7 @@ function PageContent({
               if (found && readerRef.current) {
                 await connectReader(readerRef.current);
               } else {
-                logCriticalError("No reader found " + JSON.stringify(readers), {
-                  context: { orgId, action: "connect_reader" },
-                });
+                console.error("No reader found", JSON.stringify(readers));
                 showAlert(
                   "No reader found",
                   "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
@@ -902,7 +899,7 @@ function PageContent({
                   const donation_id = await createDonation();
                   await paymentIntent({ donation_id });
                 } catch (error) {
-                  logCriticalError("createDonation error", error, {
+                  console.error("createDonation error", error, {
                     context: {
                       orgId,
                       amount: value * 100,

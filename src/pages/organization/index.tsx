@@ -1,82 +1,41 @@
-import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MenuAction, MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Text,
-  View,
-  ActivityIndicator,
-  SectionList,
-  TouchableHighlight,
-  useColorScheme,
-  Platform,
-} from "react-native";
-import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { View, ActivityIndicator, SectionList, Platform } from "react-native";
 import { mutate } from "swr";
 
-import Button from "../../components/Button";
 import AccessDenied from "../../components/organizations/AccessDenied";
 import { EmptyState } from "../../components/organizations/EmptyState";
+import Header from "../../components/organizations/Header";
 import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
+import Menu from "../../components/organizations/Menu";
 import OfflineNoData from "../../components/organizations/OfflineNoData";
 import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
+import SectionHeader from "../../components/organizations/SectionHeader";
 import TapToPayBanner from "../../components/organizations/TapToPayBanner";
+import TransactionWrapper from "../../components/organizations/TransactionWrapper";
 import MockTransaction, {
   MockTransactionType,
 } from "../../components/transaction/MockTransaction";
-import Transaction from "../../components/transaction/Transaction";
-import { logError } from "../../lib/errorUtils";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
 import useTransactions from "../../lib/organization/useTransactions";
-import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
 import ITransaction, {
-  TransactionType,
   TransactionWithoutId,
 } from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
 import { useOffline } from "../../lib/useOffline";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
-import { palette } from "../../styles/theme";
-import { renderDate, renderMoney } from "../../utils/util";
+import { addPendingFeeToTransactions, renderDate } from "../../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
-
-function addPendingFeeToTransactions(
-  transactions: ITransaction[],
-  organization: Organization | OrganizationExpanded | undefined,
-): TransactionWithoutId[] {
-  if (
-    transactions.length > 0 &&
-    organization &&
-    "fee_balance_cents" in organization &&
-    organization.fee_balance_cents > 0
-  ) {
-    return [
-      {
-        amount_cents: -organization.fee_balance_cents,
-        code: TransactionType.BankFee,
-        date: "",
-        pending: true,
-        memo: "FISCAL SPONSORSHIP",
-        has_custom_memo: false,
-        declined: false,
-        missing_receipt: false,
-      },
-      ...transactions,
-    ];
-  } else {
-    return transactions;
-  }
-}
 
 export default function OrganizationPage({
   route: {
@@ -84,7 +43,6 @@ export default function OrganizationPage({
   },
   navigation,
 }: Props) {
-  const scheme = useColorScheme();
   const { isOnline } = useOffline();
 
   const {
@@ -97,7 +55,7 @@ export default function OrganizationPage({
     {
       fallbackData: _organization,
       onError: (err) => {
-        logError("Error fetching organization:", err, {
+        console.error("Error fetching organization:", err, {
           context: { orgId, isOnline },
         });
       },
@@ -118,22 +76,35 @@ export default function OrganizationPage({
       organization.users.some((u) => u.id === user?.id)
     );
   }, [organization, user]);
+  const playgroundMode = useMemo(
+    () => organization?.playground_mode,
+    [organization],
+  );
+  const donationPageAvailable = useMemo(
+    () => organization?.donation_page_available,
+    [organization],
+  );
+  const organizationErrorStatus = useMemo(() => {
+    return organizationError &&
+      typeof organizationError === "object" &&
+      "status" in organizationError
+      ? organizationError.status
+      : null;
+  }, [organizationError]);
+  const isAccessDenied = useMemo(
+    () => organizationErrorStatus === 403,
+    [organizationErrorStatus],
+  );
 
   const {
     transactions: _transactions,
     isLoadingMore,
     loadMore,
     isLoading,
-  } = useTransactions(orgId);
+  } = useTransactions(orgId, "organizations");
   const [refreshing] = useState(false);
 
   useEffect(() => {
-    const isAccessDenied =
-      organizationError &&
-      typeof organizationError === "object" &&
-      "status" in organizationError &&
-      organizationError.status === 403;
-
     const isOfflineNoData = organizationError && !isOnline && !organization;
 
     if (isAccessDenied) {
@@ -149,7 +120,7 @@ export default function OrganizationPage({
         title: organization.name || "Organization",
       });
     }
-  }, [organizationError, organization, navigation, isOnline]);
+  }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
@@ -157,152 +128,69 @@ export default function OrganizationPage({
         const hasSeenBanner = await AsyncStorage.getItem(
           "hasSeenTapToPayBanner",
         );
-        if (!hasSeenBanner && supportsTapToPay && Platform.OS === "ios") {
+
+        if (
+          !hasSeenBanner &&
+          userinOrganization &&
+          !playgroundMode &&
+          supportsTapToPay &&
+          donationPageAvailable &&
+          Platform.OS === "ios"
+        ) {
           setShowTapToPayBanner(true);
+        } else {
+          setShowTapToPayBanner(false);
         }
       } catch (error) {
-        logError("Error checking tap to pay banner status", error, {
+        console.error("Error checking tap to pay banner status", error, {
           context: { action: "check_ttp_banner" },
         });
+        setShowTapToPayBanner(false);
       }
     };
     checkTapToPayBanner();
-  }, [supportsTapToPay]);
-
-  // Terminal initialization is now handled by the useStripeTerminalInit hook
+  }, [
+    supportsTapToPay,
+    userinOrganization,
+    organization,
+    playgroundMode,
+    donationPageAvailable,
+    user,
+  ]);
 
   const handleDismissTapToPayBanner = async () => {
     try {
       await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
       setShowTapToPayBanner(false);
     } catch (error) {
-      logError("Error saving tap to pay banner dismiss status", error, {
+      console.error("Error saving tap to pay banner dismiss status", error, {
         context: { action: "dismiss_ttp_banner" },
       });
-      // Still hide the banner even if saving fails
       setShowTapToPayBanner(false);
     }
   };
 
   useEffect(() => {
     if (organization && user) {
-      const isManager =
-        "users" in organization &&
-        organization.users.some(
-          (u) => u.id === user?.id && u.role === "manager",
-        );
-
       navigation.setOptions({
         title: organization.name,
-        // headerTitle: () => <OrganizationTitle organization={organization} />,
+        headerRight: () => (
+          <Menu
+            user={user}
+            navigation={navigation}
+            organization={organization}
+            supportsTapToPay={supportsTapToPay}
+          />
+        ),
       });
-
-      const menuActions: MenuAction[] = [];
-
-      if (
-        "users" in organization &&
-        organization.users.some((u) => u.id === user?.id)
-      ) {
-        if (
-          "account_number" in organization &&
-          organization.account_number !== null
-        ) {
-          menuActions.push({
-            id: "accountNumber",
-            title: "Account Details",
-            image: "creditcard.and.123",
-            imageColor: "white",
-          });
-        }
-
-        if (isManager && !organization.playground_mode) {
-          menuActions.push({
-            id: "transfer",
-            title: "Transfer Money",
-            image: "dollarsign.circle",
-            imageColor: "white",
-          });
-        }
-
-        menuActions.push({
-          id: "team",
-          title: "Manage Team",
-          image: "person.2.badge.gearshape",
-          imageColor: "white",
-        });
-
-        if (
-          !organization.playground_mode &&
-          supportsTapToPay &&
-          organization.donation_page_available
-        ) {
-          menuActions.push({
-            id: "donation",
-            title: "Collect Donations",
-            image: "dollarsign.circle",
-            imageColor: "white",
-          });
-        }
-
-        navigation.setOptions({
-          headerRight: () => (
-            <MenuView
-              actions={menuActions}
-              themeVariant={scheme || undefined}
-              onPressAction={({ nativeEvent: { event } }) => {
-                if (event == "accountNumber") {
-                  navigation.navigate("AccountNumber", {
-                    orgId: organization.id,
-                  });
-                } else if (event == "team") {
-                  navigation.navigate("OrganizationTeam", {
-                    orgId: organization.id,
-                  });
-                } else if (event == "donation") {
-                  if (supportsTapToPay) {
-                    navigation.navigate("OrganizationDonation", {
-                      orgId: organization.id,
-                    });
-                  } else {
-                    Dialog.show({
-                      type: ALERT_TYPE.DANGER,
-                      title: "Unsupported Device",
-                      textBody:
-                        "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
-                      button: "Ok",
-                    });
-                  }
-                } else if (event == "transfer") {
-                  navigation.navigate("Transfer", {
-                    organization: organization,
-                  });
-                }
-              }}
-            >
-              <Ionicons.Button
-                name="ellipsis-horizontal-circle"
-                backgroundColor="transparent"
-                size={24}
-                color={palette.primary}
-                iconStyle={{ marginRight: 0 }}
-              />
-            </MenuView>
-          ),
-        });
-      }
     }
-  }, [organization, scheme, navigation, user, supportsTapToPay]);
+  }, [organization, navigation, user, supportsTapToPay]);
 
   useEffect(() => {
-    if (
-      organizationError &&
-      typeof organizationError === "object" &&
-      "status" in organizationError &&
-      organizationError.status === 401
-    ) {
+    if (organizationErrorStatus === 401) {
       mutateOrganization();
     }
-  }, [organizationError, mutateOrganization]);
+  }, [organizationErrorStatus, mutateOrganization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -325,8 +213,10 @@ export default function OrganizationPage({
     [transactions],
   );
 
-  const mock = new MockTransactionEngine();
-  const mockTransactions = mock.generateMockTransactionList();
+  const mockTransactions = useMemo(
+    () => new MockTransactionEngine().generateMockTransactionList(),
+    [],
+  );
   const mockSections: { title: string; data: MockTransactionType[] }[] =
     useMemo(() => {
       return Object.entries(groupBy(mockTransactions, (t) => t.date))
@@ -337,30 +227,26 @@ export default function OrganizationPage({
         }));
     }, [mockTransactions]);
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     if (isOnline) {
       mutate(`organizations/${orgId}`);
       mutate(`organizations/${orgId}/transactions`);
     }
-  };
+  }, [isOnline, orgId]);
 
-  if (
-    organizationLoading ||
-    userLoading ||
-    (organizationError &&
-      typeof organizationError === "object" &&
-      "status" in organizationError &&
-      organizationError.status === 403)
-  ) {
-    return <LoadingSkeleton />;
+  if (organizationLoading || userLoading || isAccessDenied) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          padding: 20,
+        }}
+      >
+        <LoadingSkeleton />
+      </View>
+    );
   }
-
-  // Check for 403 access denied error
-  const isAccessDenied =
-    organizationError &&
-    typeof organizationError === "object" &&
-    "status" in organizationError &&
-    organizationError.status === 403;
 
   // Check for offline with no cached data
   const isOfflineNoData = organizationError && !isOnline && !organization;
@@ -388,78 +274,42 @@ export default function OrganizationPage({
         <SectionList
           initialNumToRender={20}
           ListFooterComponent={() =>
-            isLoadingMore && !isLoading && !organization.playground_mode ? (
+            isLoadingMore && !isLoading && !playgroundMode ? (
               <View style={{ padding: 20, alignItems: "center" }}>
                 <ActivityIndicator size="small" color={themeColors.primary} />
               </View>
             ) : null
           }
           onEndReachedThreshold={0.2}
-          onEndReached={() => loadMore()}
+          onEndReached={loadMore}
           refreshing={refreshing}
-          onRefresh={() => onRefresh()}
+          onRefresh={onRefresh}
           ListHeaderComponent={() => (
-            <View>
+            <>
               {showTapToPayBanner && (
                 <TapToPayBanner
                   onDismiss={handleDismissTapToPayBanner}
                   orgId={orgId}
                 />
               )}
-              {organization?.playground_mode && <PlaygroundBanner />}
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  marginBottom: 32,
-                  gap: 10,
-                }}
-              >
-                <View>
-                  <Text
-                    style={{
-                      color: palette.muted,
-                      fontSize: 12,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Balance
-                  </Text>
-                  <Text style={{ color: themeColors.text, fontSize: 36 }}>
-                    {"balance_cents" in organization &&
-                      renderMoney(organization.balance_cents)}
-                  </Text>
-                </View>
-                {organization?.playground_mode && (
-                  <Button
-                    style={{
-                      backgroundColor: "#3F9CEE",
-                      borderTopWidth: 0,
-                    }}
-                    color="#fff"
-                    onPress={() => setShowMockData((prev) => !prev)}
-                  >
-                    {showMockData ? "Hide Mock Data" : "Show Mock Data"}
-                  </Button>
-                )}
-              </View>
-
+              {playgroundMode && <PlaygroundBanner />}
+              <Header
+                organization={organization}
+                showMockData={showMockData}
+                setShowMockData={setShowMockData}
+              />
               {isLoading && <LoadingSkeleton />}
               {!isLoading && sections.length === 0 && !showMockData && (
                 <EmptyState isOnline={isOnline} />
               )}
-            </View>
+            </>
           )}
           // @ts-expect-error workaround for mock data
           sections={
-            organization?.playground_mode && showMockData
+            playgroundMode && showMockData
               ? (mockSections as unknown)
               : sections
           }
-          // stickySectionHeadersEnabled={false}
           style={{ flexGrow: 1 }}
           contentContainerStyle={{
             padding: 20,
@@ -467,63 +317,31 @@ export default function OrganizationPage({
           }}
           scrollIndicatorInsets={{ bottom: tabBarSize }}
           renderSectionHeader={({ section: { title } }) => (
-            <Text
-              style={{
-                color: palette.muted,
-                backgroundColor: themeColors.background,
-                paddingTop: 10,
-                paddingBottom: 5,
-                paddingHorizontal: 10,
-                fontSize: 10,
-                textTransform: "uppercase",
-              }}
-            >
-              {title}
-            </Text>
+            <SectionHeader title={title} />
           )}
-          renderItem={({ item, index, section: { data } }) =>
-            organization?.playground_mode ? (
-              <MockTransaction
-                transaction={item}
-                top={index == 0}
-                bottom={index == data.length - 1}
-              />
-            ) : (
-              <TouchableHighlight
-                onPress={
-                  item.id && (userinOrganization || user?.auditor)
-                    ? () => {
-                        if (
-                          item.code === TransactionType.Disbursement &&
-                          "transfer" in item &&
-                          item.transfer?.card_grant_id
-                        ) {
-                          navigation.navigate("GrantCard", {
-                            grantId: item.transfer.card_grant_id,
-                          });
-                        } else {
-                          navigation.navigate("Transaction", {
-                            transactionId: item.id!,
-                            orgId,
-                            transaction: item as ITransaction,
-                            title: getTransactionTitle(item as ITransaction),
-                          });
-                        }
-                      }
-                    : undefined
-                }
-                underlayColor={themeColors.background}
-                activeOpacity={0.7}
-              >
-                <Transaction
-                  orgId={orgId}
+          renderItem={({ item, index, section: { data } }) => {
+            if (playgroundMode) {
+              return (
+                <MockTransaction
                   transaction={item}
-                  top={index == 0}
-                  bottom={index == data.length - 1}
+                  top={index === 0}
+                  bottom={index === data.length - 1}
                 />
-              </TouchableHighlight>
-            )
-          }
+              );
+            }
+
+            return (
+              <TransactionWrapper
+                item={item}
+                user={user}
+                organization={organization}
+                navigation={navigation}
+                orgId={orgId}
+                index={index}
+                data={data as ITransaction[]}
+              />
+            );
+          }}
         />
       ) : (
         <LoadingSkeleton />

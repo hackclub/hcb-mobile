@@ -7,6 +7,7 @@ export default {
     slug: "hcb-mobile",
     owner: "hackclub",
     version: "1.0.0",
+    platforms: ["ios", "android"],
     scheme: "hcb",
     orientation: "portrait",
     icon: "./assets/app-icon.png",
@@ -42,9 +43,6 @@ export default {
       versionCode: 3,
       edgeToEdgeEnabled: true,
     },
-    web: {
-      bundler: "metro",
-    },
     extra: {
       eas: {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
@@ -57,6 +55,9 @@ export default {
       remoteBuildCache: {
         provider: "eas",
       },
+    },
+    updates: {
+      url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
     },
     plugins: [
       [

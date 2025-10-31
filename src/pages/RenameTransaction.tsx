@@ -58,7 +58,7 @@ export default function RenameTransactionPage({
       },
       populateCache: true,
       onSuccess() {
-        mutate(unstable_serialize(getKey(orgId)));
+        mutate(unstable_serialize(getKey(orgId, "organizations")));
       },
     },
   );

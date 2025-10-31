@@ -9,19 +9,11 @@ import { ImageBackground } from "expo-image";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
-import {
-  Text,
-  View,
-  Animated,
-  SafeAreaView,
-  useColorScheme,
-  Linking,
-  Image,
-} from "react-native";
+import { Text, View, Animated, useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
-import { logCriticalError } from "../lib/errorUtils";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../styles/theme";
 
@@ -123,7 +115,7 @@ export default function Login() {
           setIsProcessing(false);
         })
         .catch((error) => {
-          logCriticalError("Error exchanging code for token", error, {
+          console.error("Error exchanging code for token", error, {
             authCode: request?.codeChallenge,
           });
           setLoading(false);

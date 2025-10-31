@@ -29,7 +29,6 @@ import { mutate, preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
-import { logCriticalError, logError } from "../lib/errorUtils";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
@@ -58,7 +57,7 @@ TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
 
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
-    logCriticalError("Failed to execute the background task:", error);
+    console.error("Failed to execute the background task:", error);
     return BackgroundTask.BackgroundTaskResult.Failed;
   }
 });
@@ -119,7 +118,7 @@ export default function App({ navigation }: Props) {
           await registerBackgroundTaskAsync();
         }
       } catch (error) {
-        logError("Failed to register background task:", error);
+        console.error("Failed to register background task:", error);
       }
     })();
   }, []);
@@ -144,7 +143,7 @@ export default function App({ navigation }: Props) {
           // Don't process yet, wait for data to load
         } else {
           if (missingReceiptError) {
-            logError(
+            console.error(
               "Error fetching missing receipts, retrying",
               missingReceiptError,
               { context: { action: "missing_receipts_fetch" } },
@@ -216,7 +215,7 @@ export default function App({ navigation }: Props) {
     revalidateOnReconnect: false,
     dedupingInterval: 2000,
     onError: (err) => {
-      logError("Error fetching organizations:", err);
+      console.error("Error fetching organizations:", err);
     },
   });
 
@@ -229,7 +228,7 @@ export default function App({ navigation }: Props) {
     revalidateOnReconnect: false,
     dedupingInterval: 2000,
     onError: (err) => {
-      logError("Error fetching invitations:", err);
+      console.error("Error fetching invitations:", err);
     },
   });
 
@@ -241,7 +240,7 @@ export default function App({ navigation }: Props) {
     revalidateOnReconnect: false,
     dedupingInterval: 2000,
     onError: (err) => {
-      logError("Error fetching grant cards:", err);
+      console.error("Error fetching grant cards:", err);
     },
   });
 
@@ -315,7 +314,7 @@ export default function App({ navigation }: Props) {
       }
     } catch (err) {
       if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        logError("Error preloading data:", err);
+        console.error("Error preloading data:", err);
       }
     }
   }, [organizations, fetcher, isOnline, shouldFetch]);
@@ -330,7 +329,7 @@ export default function App({ navigation }: Props) {
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
       if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        logError("Error refreshing data:", err);
+        console.error("Error refreshing data:", err);
       }
     }
   };
@@ -345,7 +344,7 @@ export default function App({ navigation }: Props) {
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
     } catch (err) {
       if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        logError("Error reloading data on focus:", err);
+        console.error("Error reloading data on focus:", err);
       }
     }
   });

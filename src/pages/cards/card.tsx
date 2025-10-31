@@ -7,40 +7,34 @@ import {
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
-import * as Linking from "expo-linking";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
   ScrollView,
   View,
-  Text,
-  ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
   Animated,
-  Modal,
-  TextInput,
   Platform,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
+import CardDetails from "../../components/cards/CardDetails";
+import CardDisplay from "../../components/cards/CardDisplay";
+import CardError from "../../components/cards/CardError";
 import CardSkeleton from "../../components/cards/CardSkeleton";
-import Divider from "../../components/Divider";
-import PaymentCard from "../../components/PaymentCard";
-import Transaction from "../../components/transaction/Transaction";
-import UserAvatar from "../../components/UserAvatar";
-import { showAlert } from "../../lib/alertUtils";
+import CardTransactions from "../../components/cards/CardTransactions";
+import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
+import SetPurposeModal from "../../components/cards/modals/SetPurposeModal";
+import TopupModal from "../../components/cards/modals/TopupModal";
+import WalletModal from "../../components/cards/modals/WalletModal";
 import useClient from "../../lib/client";
-import { logError, logCriticalError } from "../../lib/errorUtils";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
-import { getTransactionTitle } from "../../lib/transactionTitle";
+import useTransactions from "../../lib/organization/useTransactions";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import ITransaction from "../../lib/types/Transaction";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import useDigitalWallet from "../../lib/useDigitalWallet";
@@ -48,13 +42,16 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
 import {
-  formatCategoryNames,
-  formatMerchantNames,
-  normalizeSvg,
-  redactedCardNumber,
-  renderCardNumber,
-  renderMoney,
-} from "../../utils/util";
+  handleActivate,
+  handleBurnCard,
+  handleOneTimeUse,
+  handleSetPurpose,
+  handleTopup,
+  returnGrant,
+  toggleCardDetails,
+  toggleCardFrozen,
+} from "../../utils/cardActions";
+import { normalizeSvg } from "../../utils/util";
 
 type CardPageProps = {
   cardId?: string;
@@ -82,7 +79,7 @@ export default function CardPage(
     `cards/${id}`,
     {
       onError: (err) => {
-        logError("Error fetching card", err, { context: { cardId: id } });
+        console.error("Error fetching card", err, { context: { cardId: id } });
         setCardError("Unable to load card details. Please try again later.");
       },
     },
@@ -107,6 +104,7 @@ export default function CardPage(
     organization?.users.some(
       (orgUser) => orgUser.id === user?.id && orgUser.role === "manager",
     ) || user?.admin;
+  const isVirtualCard = card?.type === "virtual";
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
   const [transactionError, setTransactionError] = useState<string | null>(null);
@@ -143,8 +141,12 @@ export default function CardPage(
     androidCardToken,
     status: walletStatus,
     refresh: refreshDigitalWallet,
-  } = useDigitalWallet(_card?.id || card?.id || "", _card?.type === "physical");
+  } = useDigitalWallet(
+    _card?.id || card?.id || "",
+    !isVirtualCard || !isCardholder,
+  );
   const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
+  const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -232,15 +234,12 @@ export default function CardPage(
     themeColors.text,
   ]);
 
-  // Retrigger digital wallet data on modal open/close
   useEffect(() => {
     refreshDigitalWallet();
   }, [showWalletModal, refreshDigitalWallet]);
 
-  // Also refresh when the screen regains focus (e.g., after switching apps)
   useFocusEffect(
     useCallback(() => {
-      // Only refresh if modal isn't open to avoid double refresh
       if (!showWalletModal) {
         refreshDigitalWallet();
       }
@@ -248,14 +247,13 @@ export default function CardPage(
   );
 
   const {
-    data: transactionsData,
+    transactions,
     isLoading: transactionsLoading,
+    isLoadingMore,
+    isReachingEnd,
+    loadMore,
     error: transactionsError,
-  } = useOfflineSWR<{ data: ITransaction[] }>(
-    `cards/${_card?.id || card?.id || ""}/transactions`,
-  );
-
-  const transactions = transactionsData?.data || [];
+  } = useTransactions(id, "cards");
 
   useEffect(() => {
     if (transactionsError && errorDisplayReady) {
@@ -293,37 +291,6 @@ export default function CardPage(
     mutate("user/cards");
   };
 
-  const toggleCardFrozen = () => {
-    if (!card || !card.id) {
-      showAlert("Error", "Cannot update card status. Please try again.");
-      return;
-    }
-
-    setIsUpdatingStatus(true);
-    const newStatus = card.status === "active" ? "frozen" : "active";
-
-    hcb
-      .patch(`cards/${card.id}`, {
-        json: { status: newStatus },
-      })
-      .then(() => {
-        onSuccessfulStatusChange(newStatus);
-      })
-      .catch((err) => {
-        logCriticalError("Error updating card status", err, {
-          cardId: card.id,
-          newStatus,
-        });
-        setIsUpdatingStatus(false);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        showAlert(
-          "Error",
-          "Failed to update card status. Please try again later.",
-          [{ text: "OK" }],
-        );
-      });
-  };
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -333,16 +300,13 @@ export default function CardPage(
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
-      logError("Refresh error", err, { context: { cardId: card?.id } });
+      console.error("Refresh error", err, { context: { cardId: card?.id } });
     } finally {
       setRefreshing(false);
     }
   }, [mutate, card?.id, id, grantId]);
 
-  const tabBarHeight = useBottomTabBarHeight();
-
   useEffect(() => {
-    // Create skeleton loading animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(skeletonAnim, {
@@ -379,102 +343,12 @@ export default function CardPage(
     ...extraStyles,
   });
 
-  const toggleCardDetails = async () => {
-    const willReveal = !detailsRevealed;
-    if (willReveal) {
-      setCardDetailsLoading(true);
-    }
-    await toggleDetailsRevealed();
-    if (willReveal) {
-      setTimeout(() => setCardDetailsLoading(false), 800);
-    } else {
-      setCardDetailsLoading(false);
-    }
-  };
-
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
   const [isReturningGrant, setisReturningGrant] = useState(false);
-  const returnGrant = async () => {
-    if (!card || !card.id) {
-      showAlert("Error", "Cannot update card status. Please try again.");
-      return;
-    }
-    showAlert(
-      `${!isCardholder ? "Cancel and return" : "Return"} ${renderMoney(
-        grantCard.amount_cents - (card?.total_spent_cents ?? 0),
-      )} to ${card.organization.name}?`,
-      "Caution, returning this grant will render it unusable.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "I understand",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setisReturningGrant(true);
-              await hcb.post(
-                `card_grants/${grantId || grantCard.grant_id}/cancel`,
-              );
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              await mutate("user/cards");
-              navigation.goBack();
-            } catch (err) {
-              logCriticalError("Error returning grant", err, {
-                cardId: card.id,
-              });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              showAlert(
-                "Error",
-                "Failed to return grant. Please try again later.",
-                [{ text: "OK" }],
-              );
-            } finally {
-              setisReturningGrant(false);
-            }
-          },
-        },
-      ],
-    );
-  };
-  const handleActivate = async () => {
-    if (!last4 || last4.length !== 4) {
-      showAlert("Error", "Please enter the last 4 digits of your card");
-      return;
-    }
-
-    setActivating(true);
-    try {
-      const response = await hcb.patch(`cards/${card?.id}`, {
-        json: { status: "active", last4 },
-      });
-
-      if (response.ok) {
-        onSuccessfulStatusChange("active");
-        setShowActivateModal(false);
-        setLast4("");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } else {
-        const data = (await response.json()) as { error?: string };
-        showAlert("Error", data.error || "Failed to activate card");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
-    } catch (err) {
-      logCriticalError("Error activating card", err, { cardId: card?.id });
-      showAlert("Error", "Failed to activate card. Please try again later.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setActivating(false);
-    }
-  };
 
   useEffect(() => {
     const generateCardPattern = async () => {
-      if (!card || card.type !== "virtual") return;
+      if (!card || !isVirtualCard) return;
 
       try {
         const patternData = await generate({
@@ -497,163 +371,18 @@ export default function CardPage(
           height: patternData.height,
         });
       } catch (error) {
-        logError("Error generating pattern for card", error, {
+        console.error("Error generating pattern for card", error, {
           context: { cardId: card.id },
         });
       }
     };
 
     generateCardPattern();
-  }, [card]);
-
-  const handleTopup = async () => {
-    if (!topupAmount || !card) return;
-
-    const amount = parseFloat(topupAmount);
-    if (isNaN(amount) || amount <= 0) {
-      showAlert(
-        "Invalid Amount",
-        "Please enter a valid amount greater than 0.",
-      );
-      return;
-    }
-
-    setIsToppingUp(true);
-    try {
-      await hcb.post(`cards/${card.id}/topup`, {
-        json: { amount_cents: Math.round(amount * 100) },
-      });
-
-      setTopupAmount("");
-      setShowTopupModal(false);
-      mutate(`cards/${card.id}`);
-      mutate("user/cards");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      logCriticalError("Topup error", error, {
-        cardId: card.id,
-        amount: topupAmount,
-      });
-      showAlert("Error", "Failed to top up card. Please try again.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsToppingUp(false);
-    }
-  };
-
-  const handleSetPurpose = async () => {
-    if (!card) return;
-
-    setIsSettingPurpose(true);
-    try {
-      await hcb.patch(`card_grants/${grantId}`, {
-        json: { purpose: purposeText },
-      });
-
-      setPurposeText("");
-      setShowPurposeModal(false);
-      mutate(`cards/${card.id}`);
-      mutate(`grant_cards/${grantId}`);
-      mutate("user/cards");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      logCriticalError("Set purpose error", error, {
-        cardId: card.id,
-        purpose: purposeText,
-      });
-      showAlert("Error", "Failed to set purpose. Please try again.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsSettingPurpose(false);
-    }
-  };
-
-  const handleOneTimeUse = async () => {
-    if (!card) return;
-    setIsOneTimeUse(true);
-    try {
-      await hcb.patch(`card_grants/${grantId}`, {
-        json: { one_time_use: !grantCard.one_time_use },
-      });
-      mutate(`card_grants/${grantId}`);
-      mutate("user/cards");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        title: grantCard.one_time_use
-          ? "One time use disabled"
-          : "One time use enabled",
-        type: ALERT_TYPE.SUCCESS,
-      });
-    } catch (error) {
-      logCriticalError("One time use error", error, {
-        cardId: card?.id || grantCard?.card_id,
-      });
-      showAlert("Error", "Failed to set one time use. Please try again.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsOneTimeUse(false);
-    }
-  };
-
-  const handleBurnCard = async () => {
-    if (!card) return;
-
-    showAlert(
-      "Are you sure you want to do this?",
-      "Unlike freezing a card, this can't be reversed.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Burn Card",
-          style: "destructive",
-          onPress: async () => {
-            setIsBurningCard(true);
-            try {
-              await hcb.post(`cards/${card.id}/cancel`);
-              mutate(`cards/${card.id}`);
-              mutate("user/cards");
-              Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success,
-              );
-              Toast.show({
-                title: "Card burned",
-                type: ALERT_TYPE.SUCCESS,
-              });
-            } catch (error) {
-              logCriticalError("Burn card error", error, { cardId: card.id });
-              showAlert("Error", "Failed to burn card. Please try again.");
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            } finally {
-              setIsBurningCard(false);
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const isValidCardStatus = (
-    status: string | undefined,
-  ): status is Card["status"] => {
-    return (
-      status === "inactive" ||
-      status === "frozen" ||
-      status === "active" ||
-      status === "canceled" ||
-      status === "expired"
-    );
-  };
+  }, [card, isVirtualCard]);
 
   const canTopupCard = (card: Card | undefined) => {
     if (!card || !card.status) return false;
-    return (
-      isValidCardStatus(card.status) &&
-      card.status !== "canceled" &&
-      card.status !== "expired"
-    );
+    return card.status !== "canceled" && card.status !== "expired";
   };
 
   function getCardActionButtons() {
@@ -661,7 +390,7 @@ export default function CardPage(
 
     // Add activate/freeze button
     if (!isGrantCard || isManagerOrAdmin) {
-      if (card?.type === "physical" && card?.status === "inactive") {
+      if (!isVirtualCard && card?.status === "inactive") {
         buttons.push(
           <Button
             key="activate"
@@ -691,7 +420,14 @@ export default function CardPage(
             color="#186177"
             iconColor="#186177"
             icon="freeze"
-            onPress={() => toggleCardFrozen()}
+            onPress={() =>
+              toggleCardFrozen(
+                card as Card,
+                setIsUpdatingStatus,
+                onSuccessfulStatusChange,
+                hcb,
+              )
+            }
             loading={!!isUpdatingStatus}
           >
             {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
@@ -701,7 +437,7 @@ export default function CardPage(
     }
 
     if (
-      card?.type == "virtual" &&
+      isVirtualCard &&
       (card?.status as Card["status"]) !== "canceled" &&
       isCardholder
     ) {
@@ -715,7 +451,13 @@ export default function CardPage(
           color="white"
           iconColor="white"
           icon={detailsRevealed ? "private-fill" : "view"}
-          onPress={toggleCardDetails}
+          onPress={() =>
+            toggleCardDetails(
+              detailsRevealed,
+              setCardDetailsLoading,
+              toggleDetailsRevealed,
+            )
+          }
           loading={!!detailsLoading || !!cardDetailsLoading}
         >
           {detailsRevealed ? "Hide Details" : "Reveal Details"}
@@ -752,7 +494,16 @@ export default function CardPage(
           style={{
             backgroundColor: "#415E84",
           }}
-          onPress={handleOneTimeUse}
+          onPress={() =>
+            handleOneTimeUse(
+              card as Card,
+              setIsOneTimeUse,
+              () => mutate(`card_grants/${grantId}`),
+              hcb,
+              grantId as string,
+              grantCard as GrantCard,
+            )
+          }
           loading={isOneTimeUse}
         >
           One Time Use
@@ -796,7 +547,18 @@ export default function CardPage(
           color="white"
           iconColor="white"
           icon={!isCardholder ? "reply" : "support"}
-          onPress={returnGrant}
+          onPress={() =>
+            returnGrant(
+              card as Card,
+              isCardholder,
+              grantCard as GrantCard,
+              setisReturningGrant,
+              () => mutate(`card_grants/${grantId}`),
+              hcb,
+              grantId as string,
+              navigation,
+            )
+          }
           loading={!!isReturningGrant}
         >
           {!isCardholder ? "Cancel Grant" : "Return Grant"}
@@ -810,7 +572,14 @@ export default function CardPage(
           icon="fire"
           key="fire"
           style={{ backgroundColor: "#D0152D" }}
-          onPress={handleBurnCard}
+          onPress={() =>
+            handleBurnCard(
+              card as Card,
+              setIsBurningCard,
+              () => mutate(`cards/${card?.id}`),
+              hcb,
+            )
+          }
           loading={isBurningCard}
         >
           Burn Card
@@ -845,123 +614,6 @@ export default function CardPage(
     return <CardSkeleton />;
   }
 
-  const renderCardStatus = () => {
-    if (card?.status === "active") {
-      return (
-        <View
-          style={{
-            position: "absolute",
-            top: 15,
-            right: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.05)",
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-          }}
-        >
-          <Ionicons name="checkmark-circle" size={14} color="#34D399" />
-          <Text
-            style={{
-              marginLeft: 5,
-              fontSize: 14,
-              fontWeight: "500",
-              color: "#34D399",
-            }}
-          >
-            Active
-          </Text>
-        </View>
-      );
-    } else if (card?.status === "frozen") {
-      return (
-        <View
-          style={{
-            position: "absolute",
-            top: 15,
-            right: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.05)",
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-          }}
-        >
-          <Ionicons name="snow" size={14} color="#3B82F6" />
-          <Text
-            style={{
-              marginLeft: 5,
-              fontSize: 14,
-              fontWeight: "500",
-              color: "#3B82F6",
-            }}
-          >
-            Frozen
-          </Text>
-        </View>
-      );
-    } else if (card?.status === "canceled") {
-      return (
-        <View
-          style={{
-            position: "absolute",
-            top: 15,
-            right: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.05)",
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-          }}
-        >
-          <Ionicons name="close-circle" size={14} color="#EF4444" />
-          <Text
-            style={{
-              marginLeft: 5,
-              fontSize: 14,
-              fontWeight: "500",
-              color: "#EF4444",
-            }}
-          >
-            Canceled
-          </Text>
-        </View>
-      );
-    } else if (card?.status === "expired") {
-      return (
-        <View
-          style={{
-            position: "absolute",
-            top: 15,
-            right: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.05)",
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-          }}
-        >
-          <Ionicons name="time" size={14} color="#F59E0B" />
-          <Text
-            style={{
-              marginLeft: 5,
-              fontSize: 14,
-              fontWeight: "500",
-              color: "#F59E0B",
-            }}
-          >
-            Expired
-          </Text>
-        </View>
-      );
-    }
-    return null;
-  };
-
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
       <ScrollView
@@ -979,1047 +631,187 @@ export default function CardPage(
             tintColor={palette.primary}
           />
         }
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const paddingToBottom = 20;
+          if (
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - paddingToBottom
+          ) {
+            if (!isReachingEnd && !isLoadingMore) {
+              loadMore();
+            }
+          }
+        }}
+        scrollEventThrottle={400}
       >
-        {cardError ? (
-          <View
-            style={{
-              padding: 20,
-              backgroundColor: "rgba(239, 68, 68, 0.1)",
-              borderRadius: 10,
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Ionicons name="alert-circle" size={24} color="#EF4444" />
-            <Text
+        {cardError && <CardError error={cardError} onRetry={onRefresh} />}
+
+        {card && (
+          <CardDisplay
+            card={card}
+            grantCard={grantCard}
+            isGrantCard={isGrantCard}
+            cardExpanded={cardExpanded}
+            setCardExpanded={setCardExpanded}
+            details={details}
+            onCardLoad={() => setCardLoaded(true)}
+            pattern={pattern}
+            patternDimensions={patternDimensions}
+            cardName={cardName}
+          />
+        )}
+
+        {card?.status != "canceled" && getCardActionButtons()}
+
+        {ableToAddToWallet &&
+          ephemeralKey &&
+          Platform.OS === "ios" &&
+          !isVirtualCard &&
+          card?.status != "canceled" && (
+            <AddToWalletButton
+              token={androidCardToken}
+              androidAssetSource={require("../../../assets/google-wallet.png")}
               style={{
-                color: "#EF4444",
-                marginVertical: 10,
-                textAlign: "center",
+                height: 48,
+                width: "100%",
+                marginBottom: 20,
               }}
-            >
-              {cardError}
-            </Text>
-            <Button onPress={onRefresh}>Retry</Button>
-          </View>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={{ alignItems: "center", marginBottom: 20 }}
-              activeOpacity={0.9}
-              onPress={() => setCardExpanded(!cardExpanded)}
-            >
-              <PaymentCard
-                details={details}
-                card={card as Card}
-                onCardLoad={() => setCardLoaded(true)}
-                style={{ marginBottom: 10 }}
-                pattern={pattern}
-                patternDimensions={patternDimensions}
-              />
-
-              {isGrantCard && (
-                <View style={{ alignItems: "center", marginTop: 10 }}>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      opacity: 0.7,
-                      color: themeColors.text,
-                    }}
-                  >
-                    Available Balance
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "bold",
-                      marginTop: 5,
-                      color: themeColors.text,
-                    }}
-                  >
-                    {card?.status == "expired" || card?.status == "canceled"
-                      ? "$0"
-                      : renderMoney(
-                          grantCard?.amount_cents -
-                            (card?.total_spent_cents ?? 0),
-                        )}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {card?.status != "canceled" && getCardActionButtons()}
-            {ableToAddToWallet &&
-              ephemeralKey &&
-              Platform.OS === "ios" &&
-              _card?.type !== "physical" &&
-              card?.status != "canceled" && (
-                <AddToWalletButton
-                  token={androidCardToken}
-                  androidAssetSource={require("../../../assets/google-wallet.png")}
-                  style={{
-                    height: 48,
-                    width: "100%",
-                    marginBottom: 20,
-                  }}
-                  iOSButtonStyle={
-                    isDark ? "onDarkBackground" : "onLightBackground"
-                  }
-                  cardDetails={{
-                    name: walletCard?.cardholder?.name || user?.name || "",
-                    primaryAccountIdentifier:
-                      walletCard?.wallets?.primary_account_identifier || null, // This can be null, but should still always be passed. Failing to pass the primaryAccountIdentifier can result in a failure to provision the card.
-                    lastFour: walletCard?.last4,
-                    description: "HCB Card",
-                  }}
-                  ephemeralKey={ephemeralKey}
-                  onComplete={({ error }) => {
-                    if (error) {
-                      logCriticalError("Error adding card to wallet", error);
-                    } else {
-                      setAbleToAddToWallet(false);
-                    }
-                  }}
-                />
-              )}
-
-            {/* Card Details Section */}
-            <View
-              style={{
-                marginBottom: 24,
-                padding: 20,
-                borderRadius: 15,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 3,
-                elevation: 2,
-                backgroundColor: themeColors.card,
+              iOSButtonStyle={isDark ? "onDarkBackground" : "onLightBackground"}
+              cardDetails={{
+                name: walletCard?.cardholder?.name || user?.name || "",
+                primaryAccountIdentifier:
+                  walletCard?.wallets?.primary_account_identifier || null,
+                lastFour: walletCard?.last4,
+                description: "HCB Card",
               }}
-            >
-              {renderCardStatus()}
-
-              {card?.user?.id ? (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 15,
-                    paddingRight: 90,
-                  }}
-                >
-                  <UserAvatar
-                    user={card.user}
-                    size={40}
-                    style={{ marginRight: 10 }}
-                  />
-                  <View style={{ flex: 1, flexShrink: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {cardName}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: palette.muted,
-                        marginTop: 2,
-                      }}
-                    >
-                      {card?.type === "virtual"
-                        ? "Virtual Card"
-                        : "Physical Card"}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 15,
-                    paddingRight: 90,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      backgroundColor: palette.muted,
-                      marginRight: 10,
-                    }}
-                  />
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {cardName}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: palette.muted,
-                        marginTop: 2,
-                      }}
-                    >
-                      {card?.type === "virtual"
-                        ? "Virtual Card"
-                        : "Physical Card"}
-                    </Text>
-                  </View>
-                </View>
-              )}
-
-              <Divider />
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  Card Number
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(120, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details
-                        ? renderCardNumber(details.number)
-                        : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
-                    </Text>
-                  )}
-                </View>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  Expires
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(70, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details
-                        ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
-                        : "••/••"}
-                    </Text>
-                  )}
-                </View>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  CVC
-                </Text>
-                <View style={{ flex: 1, alignItems: "flex-end" }}>
-                  {detailsLoading ||
-                  cardDetailsLoading ||
-                  (detailsRevealed && !details) ? (
-                    <Animated.View style={createSkeletonStyle(50, 22)} />
-                  ) : (
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                      selectable={detailsRevealed && details ? true : false}
-                    >
-                      {detailsRevealed && details ? details.cvc : "•••"}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              {isGrantCard && (
-                <>
-                  <Divider />
-
-                  <View>
-                    {grantCard?.user?.email && !isCardholder && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          marginBottom: 12,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: themeColors.text,
-                            flexShrink: 1,
-                          }}
-                        >
-                          Grant sent to
-                        </Text>
-                        <Text
-                          style={{
-                            color: palette.muted,
-                            fontSize: 16,
-                            fontWeight: "500",
-                            fontFamily: "JetBrainsMono-Regular",
-                          }}
-                          onPress={() =>
-                            Linking.openURL(`mailto:${grantCard?.user?.email}`)
-                          }
-                        >
-                          {grantCard?.user?.email}
-                        </Text>
-                      </View>
-                    )}
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginBottom: 12,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: themeColors.text,
-                        }}
-                      >
-                        Allowed Merchants
-                      </Text>
-                      <Text
-                        style={{
-                          color: palette.muted,
-                          fontSize: 16,
-                          fontWeight: "500",
-                          fontFamily: "JetBrainsMono-Regular",
-                        }}
-                      >
-                        {formatMerchantNames(grantCard?.allowed_merchants)}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginBottom: 12,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: themeColors.text,
-                          flexShrink: 1,
-                        }}
-                      >
-                        Allowed Categories
-                      </Text>
-                      <Text
-                        style={{
-                          color: palette.muted,
-                          fontSize: 16,
-                          fontWeight: "500",
-                          fontFamily: "JetBrainsMono-Regular",
-                        }}
-                      >
-                        {formatCategoryNames(grantCard?.allowed_categories)}
-                      </Text>
-                    </View>
-                    {grantCard?.purpose && (
-                      <>
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: themeColors.text,
-                            flexShrink: 1,
-                          }}
-                        >
-                          Purpose
-                        </Text>
-                        <Text
-                          style={{
-                            color: palette.muted,
-                            fontSize: 16,
-                            fontWeight: "500",
-                            fontFamily: "JetBrainsMono-Regular",
-                          }}
-                        >
-                          {grantCard?.purpose}
-                        </Text>
-                      </>
-                    )}
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginBottom: 12,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        color: themeColors.text,
-                        flexShrink: 1,
-                      }}
-                    >
-                      One time use?
-                    </Text>
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 16,
-                        fontWeight: "500",
-                        fontFamily: "JetBrainsMono-Regular",
-                      }}
-                    >
-                      {grantCard?.one_time_use ? "Yes" : "No"}
-                    </Text>
-                  </View>
-                </>
-              )}
-              {card?.total_spent_cents != null && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: palette.muted,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Spending Limit
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {renderMoney(card?.balance_available ?? 0)}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: palette.muted,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Total Spent
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "600",
-                        color: themeColors.text,
-                      }}
-                    >
-                      {renderMoney(card?.total_spent_cents)}
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </View>
-
-            {/* Transactions Section */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 15,
+              ephemeralKey={ephemeralKey}
+              onComplete={({ error }) => {
+                if (error) {
+                  console.error("Error adding card to wallet", error);
+                } else {
+                  setAbleToAddToWallet(false);
+                }
               }}
-            >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: palette.muted,
-                }}
-              >
-                Transaction History
-              </Text>
-            </View>
+            />
+          )}
 
-            {transactionError ? (
-              <View
-                style={{
-                  padding: 20,
-                  backgroundColor: "rgba(239, 68, 68, 0.1)",
-                  borderRadius: 10,
-                  alignItems: "center",
-                  marginBottom: 20,
-                }}
-              >
-                <Ionicons name="alert-circle" size={24} color="#EF4444" />
-                <Text
-                  style={{
-                    color: "#EF4444",
-                    marginVertical: 10,
-                    textAlign: "center",
-                  }}
-                >
-                  {transactionError}
-                </Text>
-              </View>
-            ) : transactionsLoading ? (
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 150,
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                  borderRadius: 15,
-                }}
-              >
-                <ActivityIndicator color={palette.primary} />
-                <Text style={{ color: themeColors.text, marginTop: 10 }}>
-                  Loading transactions...
-                </Text>
-              </View>
-            ) : transactions.length === 0 ? (
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 60,
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
-                  borderRadius: 15,
-                }}
-              >
-                <Ionicons
-                  name="receipt-outline"
-                  size={50}
-                  color={palette.muted}
-                />
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 18,
-                    fontWeight: "600",
-                    marginTop: 15,
-                  }}
-                >
-                  No transactions yet
-                </Text>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    marginTop: 5,
-                    textAlign: "center",
-                    paddingHorizontal: 20,
-                  }}
-                >
-                  Transactions will appear here once this card is used
-                </Text>
-              </View>
-            ) : (
-              <View style={{ borderRadius: 15, overflow: "hidden" }}>
-                {transactions.map((transaction, index) => (
-                  <TouchableOpacity
-                    key={transaction.id}
-                    onPress={() => {
-                      navigation.navigate("Transaction", {
-                        orgId:
-                          card?.organization?.id || _card?.organization?.id,
-                        transaction,
-                        transactionId: transaction.id,
-                        title: getTransactionTitle(transaction),
-                      });
-                    }}
-                    style={[
-                      index === 0 && {
-                        borderTopLeftRadius: 15,
-                        borderTopRightRadius: 15,
-                      },
-                      index === transactions.length - 1 && {
-                        borderBottomLeftRadius: 15,
-                        borderBottomRightRadius: 15,
-                      },
-                    ]}
-                  >
-                    <Transaction
-                      transaction={transaction}
-                      showMerchantIcon={true}
-                      top={index == 0}
-                      bottom={index == transactions.length - 1}
-                      hideAvatar
-                      orgId={
-                        card?.organization?.id || _card?.organization?.id || ""
-                      }
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </>
+        {card && (
+          <CardDetails
+            card={card}
+            grantCard={grantCard}
+            isGrantCard={isGrantCard}
+            isCardholder={isCardholder}
+            cardName={cardName}
+            details={details}
+            detailsRevealed={detailsRevealed}
+            detailsLoading={detailsLoading}
+            cardDetailsLoading={cardDetailsLoading}
+            createSkeletonStyle={createSkeletonStyle}
+          />
+        )}
+
+        {!transactionError && !transactionsLoading && (
+          <CardTransactions
+            transactions={transactions}
+            transactionsLoading={transactionsLoading}
+            transactionError={transactionError}
+            isLoadingMore={isLoadingMore || false}
+            card={card as Card}
+            _card={_card as Card}
+            navigation={navigation}
+          />
         )}
       </ScrollView>
 
-      {/* Add the activation modal */}
-      <Modal
+      <ActivateCardModal
         visible={showActivateModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowActivateModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 15,
-              padding: 20,
-              width: "100%",
-              maxWidth: 400,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "600",
-                color: themeColors.text,
-                marginBottom: 10,
-              }}
-            >
-              Activate Physical Card
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 20,
-              }}
-            >
-              Please enter the last 4 digits of your card to activate it.
-            </Text>
-            <TextInput
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 20,
-                fontFamily: "JetBrainsMono-Regular",
-              }}
-              placeholder="Last 4 digits"
-              placeholderTextColor={palette.muted}
-              keyboardType="number-pad"
-              maxLength={4}
-              value={last4}
-              onChangeText={setLast4}
-              autoFocus
-            />
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button
-                style={{
-                  flex: 1,
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                }}
-                color={themeColors.text}
-                onPress={() => {
-                  setShowActivateModal(false);
-                  setLast4("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                style={{ flex: 1 }}
-                onPress={handleActivate}
-                loading={activating}
-              >
-                Activate
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => {
+          setShowActivateModal(false);
+          setLast4("");
+        }}
+        onActivate={() =>
+          handleActivate(
+            last4,
+            setActivating,
+            card as Card,
+            setShowActivateModal,
+            setLast4,
+            hcb,
+            onSuccessfulStatusChange,
+          )
+        }
+        last4={last4}
+        setLast4={setLast4}
+        activating={activating}
+      />
 
-      {/* Add the top-up modal */}
-      <Modal
+      <TopupModal
         visible={showTopupModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowTopupModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 15,
-              padding: 20,
-              width: "100%",
-              maxWidth: 400,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "600",
-                color: themeColors.text,
-                marginBottom: 10,
-              }}
-            >
-              Topup Grant
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 8,
-                fontWeight: "500",
-              }}
-            >
-              Amount
-            </Text>
-            <TextInput
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 20,
-                fontFamily: "JetBrainsMono-Regular",
-              }}
-              placeholder="500.00"
-              placeholderTextColor={themeColors.text + "80"}
-              keyboardType="decimal-pad"
-              value={topupAmount}
-              onChangeText={setTopupAmount}
-              autoFocus
-            />
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button
-                style={{
-                  flex: 1,
-                  borderRadius: 15,
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                }}
-                color={themeColors.text}
-                onPress={() => {
-                  setShowTopupModal(false);
-                  setTopupAmount("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                style={{
-                  flex: 1,
-                  backgroundColor: "#3499EE",
-                  borderRadius: 15,
-                  paddingVertical: 14,
-                }}
-                color="white"
-                onPress={handleTopup}
-                loading={isToppingUp}
-                disabled={!topupAmount || parseFloat(topupAmount) <= 0}
-              >
-                Topup
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => {
+          setShowTopupModal(false);
+          setTopupAmount("");
+        }}
+        onTopup={() =>
+          handleTopup(
+            topupAmount,
+            card as Card,
+            setIsToppingUp,
+            setTopupAmount,
+            setShowTopupModal,
+            () => mutate(`cards/${card?.id}`),
+            hcb,
+          )
+        }
+        topupAmount={topupAmount}
+        setTopupAmount={setTopupAmount}
+        isToppingUp={isToppingUp}
+      />
 
-      {/* Add the purpose modal */}
-      <Modal
+      <SetPurposeModal
         visible={showPurposeModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowPurposeModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 15,
-              padding: 20,
-              width: "100%",
-              maxWidth: 400,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "600",
-                color: themeColors.text,
-                marginBottom: 10,
-              }}
-            >
-              Set Grant Purpose
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 8,
-                fontWeight: "500",
-              }}
-            >
-              Purpose
-            </Text>
-            <TextInput
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 20,
-                fontFamily: "JetBrainsMono-Regular",
-                minHeight: 80,
-                textAlignVertical: "top",
-              }}
-              placeholder="Describe the purpose of this grant..."
-              placeholderTextColor={themeColors.text + "80"}
-              multiline
-              numberOfLines={4}
-              value={purposeText}
-              onChangeText={setPurposeText}
-              autoFocus
-            />
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button
-                style={{
-                  flex: 1,
-                  borderRadius: 15,
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                }}
-                color={themeColors.text}
-                onPress={() => {
-                  setShowPurposeModal(false);
-                  setPurposeText("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                style={{
-                  flex: 1,
-                  backgroundColor: "#50ECC0",
-                  borderRadius: 15,
-                  paddingVertical: 14,
-                }}
-                color="#114F3D"
-                onPress={handleSetPurpose}
-                loading={isSettingPurpose}
-              >
-                Set Purpose
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => {
+          setShowPurposeModal(false);
+          setPurposeText("");
+        }}
+        onSetPurpose={() =>
+          handleSetPurpose(
+            card as Card,
+            setIsSettingPurpose,
+            setPurposeText,
+            setShowPurposeModal,
+            () => mutate(`cards/${card?.id}`),
+            hcb,
+            grantId || "",
+            purposeText,
+          )
+        }
+        purposeText={purposeText}
+        setPurposeText={setPurposeText}
+        isSettingPurpose={isSettingPurpose}
+      />
 
-      {/* Add the wallet modal for Android */}
-      <Modal
+      <WalletModal
         visible={showWalletModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowWalletModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 15,
-              padding: 20,
-              width: "100%",
-              maxWidth: 400,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "600",
-                color: themeColors.text,
-                marginBottom: 10,
-                textAlign: "center",
-              }}
-            >
-              Add to Google Wallet
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                marginBottom: 20,
-                textAlign: "center",
-                opacity: 0.8,
-              }}
-            >
-              Add your card to Google Wallet for easy payments and quick access.
-            </Text>
-
-            {cardStatus === "CARD_ALREADY_EXISTS" &&
-              androidCardToken == null && (
-                <View style={{ alignItems: "center" }}>
-                  <Image
-                    source={
-                      isDark
-                        ? require("../../../assets/gwallet-added-white.png")
-                        : require("../../../assets/gwallet-added-black.png")
-                    }
-                    style={{
-                      aspectRatio: 1449 / 326,
-                      width: "90%",
-                      marginBottom: 20,
-                    }}
-                  />
-                </View>
-              )}
-            {((ableToAddToWallet && !cardAddedToWallet) || androidCardToken) &&
-              ephemeralKey &&
-              _card?.type !== "physical" && (
-                <AddToWalletButton
-                  token={androidCardToken}
-                  androidAssetSource={require("../../../assets/google-wallet.png")}
-                  style={{
-                    alignSelf: "center",
-                    width: "70%",
-                    aspectRatio: 199 / 55,
-                    marginBottom: 20,
-                  }}
-                  cardDetails={{
-                    name: walletCard?.cardholder?.name || user?.name || "",
-                    primaryAccountIdentifier:
-                      walletCard?.wallets?.primary_account_identifier || null,
-                    lastFour: walletCard?.last4,
-                    description: "HCB Card",
-                  }}
-                  ephemeralKey={ephemeralKey}
-                  onComplete={({ error }) => {
-                    if (error) {
-                      logCriticalError("Error adding card to wallet", error);
-                    } else {
-                      setCardStatus("CARD_ALREADY_EXISTS");
-                      setCardAddedToWallet(true);
-                      setAbleToAddToWallet(false);
-                      setShowWalletModal(false);
-                    }
-                  }}
-                />
-              )}
-
-            <Button
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-              }}
-              color={themeColors.text}
-              onPress={() => setShowWalletModal(false)}
-            >
-              Cancel
-            </Button>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setShowWalletModal(false)}
+        ableToAddToWallet={ableToAddToWallet}
+        cardAddedToWallet={cardAddedToWallet}
+        androidCardToken={androidCardToken}
+        ephemeralKey={ephemeralKey}
+        walletCard={walletCard}
+        user={user || null}
+        cardStatus={cardStatus}
+        onComplete={({ error }) => {
+          if (error) {
+            console.error("Error adding card to wallet", error);
+          } else {
+            setCardStatus("CARD_ALREADY_EXISTS");
+            setCardAddedToWallet(true);
+            setAbleToAddToWallet(false);
+            setShowWalletModal(false);
+          }
+        }}
+      />
     </Animated.View>
   );
 }
