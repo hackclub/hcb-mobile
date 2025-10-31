@@ -1,6 +1,6 @@
 import { File, Directory, Paths } from "expo-file-system";
 import { useEffect } from "react";
-import { AppState, InteractionManager, Platform } from "react-native";
+import { AppState, InteractionManager } from "react-native";
 import { Cache, State } from "swr";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -23,27 +23,14 @@ export class CacheProvider implements Cache<CacheValue> {
     if (this.isInitialized) return;
 
     try {
-      if (Platform.OS === "web") {
-        const appCache = localStorage.getItem("app-cache");
-        if (appCache) {
-          JSON.parse(appCache).forEach(
-            ([key, value]: [string, State<CacheValue, Error>]) => {
-              this.map.set(key, value);
-            },
-          );
-        }
-      } else {
-        await this.ensureCacheDirectory();
-        const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
-        if (await cacheFile.exists) {
-          const data = await cacheFile.text();
-          const entries = JSON.parse(data);
-          entries.forEach(
-            ([key, value]: [string, State<CacheValue, Error>]) => {
-              this.map.set(key, value);
-            },
-          );
-        }
+      await this.ensureCacheDirectory();
+      const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
+      if (await cacheFile.exists) {
+        const data = await cacheFile.text();
+        const entries = JSON.parse(data);
+        entries.forEach(([key, value]: [string, State<CacheValue, Error>]) => {
+          this.map.set(key, value);
+        });
       }
       this.isInitialized = true;
     } catch (error) {
@@ -71,14 +58,9 @@ export class CacheProvider implements Cache<CacheValue> {
     if (this.map.size === 0) return;
 
     try {
-      if (Platform.OS === "web") {
-        const appCache = JSON.stringify(Array.from(this.map.entries()));
-        localStorage.setItem("app-cache", appCache);
-      } else {
-        await this.ensureCacheDirectory();
-        const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
-        await cacheFile.write(JSON.stringify(Array.from(this.map.entries())));
-      }
+      await this.ensureCacheDirectory();
+      const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
+      await cacheFile.write(JSON.stringify(Array.from(this.map.entries())));
     } catch (error) {
       console.error("Error saving cache", error, {
         context: { cacheSize: this.map.size },
