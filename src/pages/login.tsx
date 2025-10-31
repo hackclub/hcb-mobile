@@ -5,7 +5,7 @@ import {
   DiscoveryDocument,
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
-import { ImageBackground } from "expo-image";
+import { ImageBackground, Image } from "expo-image";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
