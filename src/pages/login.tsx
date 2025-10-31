@@ -151,7 +151,11 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={isDark ? require("../../assets/login-bg.png") : require("../../assets/login-bg-light.png")}
+      source={
+        isDark
+          ? require("../../assets/login-bg.png")
+          : require("../../assets/login-bg-light.png")
+      }
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1, flexDirection: "column" }}>
@@ -223,11 +227,11 @@ export default function Login() {
             their finances.
           </Text>
 
-           <Button
-             variant="ghost"
-             onPress={() =>
-               openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
-             }
+          <Button
+            variant="ghost"
+            onPress={() =>
+              openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
+            }
             style={{
               borderWidth: 0,
               paddingVertical: 8,
@@ -253,11 +257,13 @@ export default function Login() {
           >
             Log in
           </Button>
-           <Button
-             variant="primary"
-             onPress={() =>
-               openInAppBrowser("https://hcb.hackclub.com/users/auth?signup=true")
-             }
+          <Button
+            variant="primary"
+            onPress={() =>
+              openInAppBrowser(
+                "https://hcb.hackclub.com/users/auth?signup=true",
+              )
+            }
             loading={loading}
             style={{
               backgroundColor: palette.primary,
