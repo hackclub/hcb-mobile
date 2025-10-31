@@ -6,6 +6,7 @@ import {
 } from "expo-auth-session";
 import * as Haptics from "expo-haptics";
 import { ImageBackground, Image } from "expo-image";
+import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
