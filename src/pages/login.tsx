@@ -151,7 +151,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("../../assets/login-bg.png")}
+      source={isDark ? require("../../assets/login-bg.png") : require("../../assets/login-bg-light.png")}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1, flexDirection: "column" }}>
@@ -200,7 +200,7 @@ export default function Login() {
 
           <Text
             style={{
-              color: "#FFFFFF",
+              color: isDark ? "#FFFFFF" : "#17171E",
               textAlign: "center",
               fontSize: 36,
               fontWeight: "bold",
@@ -212,7 +212,7 @@ export default function Login() {
           </Text>
           <Text
             style={{
-              color: palette.muted,
+              color: isDark ? palette.muted : "#3C4858",
               textAlign: "left",
               fontSize: 16,
               fontFamily: "sans-serif",
@@ -237,7 +237,7 @@ export default function Login() {
           >
             <Text
               style={{
-                color: "#FFFFFF",
+                color: isDark ? "#FFFFFF" : "#17171E",
                 fontSize: 16,
                 fontWeight: "bold",
                 fontFamily: "sans-serif",
