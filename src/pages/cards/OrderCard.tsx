@@ -1,128 +1,136 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
-import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Linking, Alert } from "react-native";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import { useState, useMemo, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Linking,
+} from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useSWR, { useSWRConfig } from "swr";
 
-import CardIcon from "../components/cards/CardIcon";
-import RepIcon from "../components/cards/RepIcon";
-import { CardsStackParamList } from "../lib/NavigatorParamList";
-import Organization from "../lib/types/Organization";
-import { palette } from "../theme";
-import { Toast } from "react-native-alert-notification";
-import { ALERT_TYPE } from "react-native-alert-notification";
-import useClient from "../lib/client";
+import CardIcon from "../../components/cards/CardIcon";
+import RepIcon from "../../components/cards/RepIcon";
+import useClient from "../../lib/client";
+import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import Organization, {
+  OrganizationExpanded,
+} from "../../lib/types/Organization";
+import User from "../../lib/types/User";
+import { useIsDark } from "../../lib/useColorScheme";
+import useOfflineSWR from "../../lib/useOfflineSWR";
+import { palette } from "../../styles/theme";
+import { handleCreateCard } from "../../utils/cardActions";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "OrderCard">;
 
-export default function OrderCardScreen({ navigation, route }: Props) {
+export default function OrderCardScreen({ navigation }: Props) {
   const { colors: themeColors } = useTheme();
-  const { user, organizations } = route.params;
+  const isDark = useIsDark();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [cardType, setCardType] = useState("virtual"); 
+  const { data: user } = useOfflineSWR<User>(`user?expand=shipping_address`);
+  const [cardType, setCardType] = useState("virtual");
   const [organizationId, setOrganizationId] = useState<string>("");
   const [shippingName, setShippingName] = useState(user?.name || "");
-  const [addressLine1, setAddressLine1] = useState(user?.shipping_address?.address_line1 || "");
-  const [addressLine2, setAddressLine2] = useState(user?.shipping_address?.address_line2 || "");
+  const [addressLine1, setAddressLine1] = useState(
+    user?.shipping_address?.address_line1 || "",
+  );
+  const [addressLine2, setAddressLine2] = useState(
+    user?.shipping_address?.address_line2 || "",
+  );
   const [city, setCity] = useState(user?.shipping_address?.city || "");
-  const [stateProvince, setStateProvince] = useState(user?.shipping_address?.state || "");
-  const [zipCode, setZipCode] = useState(user?.shipping_address?.postal_code || "");
+  const [stateProvince, setStateProvince] = useState(
+    user?.shipping_address?.state || "",
+  );
+  const [zipCode, setZipCode] = useState(
+    user?.shipping_address?.postal_code || "",
+  );
+  const [expandedOrganizations, setExpandedOrganizations] = useState<
+    Record<string, OrganizationExpanded>
+  >({});
   const hcb = useClient();
+  const { data: organizations } = useSWR<Organization[]>("user/organizations");
+  const { fetcher } = useSWRConfig();
+  const currentUserId = user?.id;
 
-  console.log(user);
+  useEffect(() => {
+    if (!organizations || !fetcher || !currentUserId) return;
 
-  const validateFields = () => {
-    if (!organizationId) {
-      Alert.alert("Error", "Please select an organization");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
+    const fetchOrganizations = async () => {
+      const expanded: Record<string, OrganizationExpanded> = {};
 
-    if (cardType === "plastic") {
-      if (!shippingName.trim()) {
-        Alert.alert("Error", "Please enter a shipping name");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return false;
+      try {
+        const fetchPromises = organizations
+          .filter((org) => org.playground_mode === false)
+          .map(async (org) => {
+            try {
+              const expandedOrg = (await fetcher(
+                `organizations/${org.id}`,
+              )) as OrganizationExpanded;
+              if (expandedOrg && "users" in expandedOrg) {
+                expanded[org.id] = expandedOrg;
+              }
+            } catch (error) {
+              console.error(`Error fetching organization ${org.id}:`, error);
+            }
+          });
+
+        await Promise.all(fetchPromises);
+        setExpandedOrganizations(expanded);
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
       }
-      if (!addressLine1.trim()) {
-        Alert.alert("Error", "Please enter an address");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return false;
-      }
-      if (!city.trim()) {
-        Alert.alert("Error", "Please enter a city");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return false;
-      }
-      if (!stateProvince.trim()) {
-        Alert.alert("Error", "Please enter a state/province");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return false;
-      }
-      if (!zipCode.trim()) {
-        Alert.alert("Error", "Please enter a ZIP code");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        return false;
-      }
-    }
+    };
 
-    return true;
-  };
+    fetchOrganizations();
+  }, [organizations, fetcher, currentUserId]);
 
-  const handleCreateCard = async () => {
-    if (!validateFields()) return;
+  // Filter organizations where user is NOT a reader
+  const eligibleOrganizations = useMemo(() => {
+    if (!organizations || !currentUserId) return [];
 
-    setIsLoading(true);
-    console.log(organizationId);
-    console.log(cardType);
-    console.log(shippingName);
-    console.log(city);
-    console.log(addressLine1);
-    console.log(addressLine2);
-    console.log(stateProvince);
-    console.log(zipCode);
-    try {
-        const response = await hcb.post("cards", {
-
-        json: {
-          card: {
-            organization_id: organizationId,
-            card_type: cardType,
-            shipping_name: shippingName,
-            shipping_address_city: city,
-            shipping_address_line1: addressLine1,
-            shipping_address_line2: addressLine2,
-            shipping_address_postal_code: zipCode,
-            shipping_address_state: stateProvince,
-            shipping_address_country: "US",
-            birthday: user?.birthday
-          }
+    return organizations
+      .filter((org) => org.playground_mode === false)
+      .filter((org) => {
+        const expandedOrg = expandedOrganizations[org.id];
+        if (!expandedOrg || !("users" in expandedOrg)) {
+          return true;
         }
-      });
 
-      if (response.ok) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Toast.show({
-          type: ALERT_TYPE.SUCCESS,
-          title: "Card created!",
-          textBody: "Your card has been created successfully.",
-        });
-        navigation.goBack()
-      } else {
-        const data = await response.json();
-        Alert.alert("Error", data.error || "Failed to create card");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
-    } catch (err) {
-      console.error("Error creating card:", err);
-      Alert.alert("Error", "Failed to create card. Please try again later.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsLoading(false);
-    }
+        const userInOrg = expandedOrg.users.find((u) => u.id === currentUserId);
+        if (!userInOrg) {
+          return false;
+        }
+
+        return userInOrg.role !== "reader";
+      });
+  }, [organizations, expandedOrganizations, currentUserId]);
+
+  const handleOrderCard = async () => {
+    if (!user) return;
+    await handleCreateCard(
+      organizationId,
+      cardType,
+      shippingName,
+      city,
+      addressLine1,
+      addressLine2,
+      zipCode,
+      stateProvince,
+      hcb,
+      user,
+      setIsLoading,
+      navigation as unknown as NativeStackNavigationProp<CardsStackParamList>,
+    );
   };
 
   return (
@@ -138,20 +146,10 @@ export default function OrderCardScreen({ navigation, route }: Props) {
           contentContainerStyle={{
             flexGrow: 1,
             padding: 20,
+            marginTop: 30,
             paddingBottom: cardType === "plastic" ? 50 : 20,
           }}
         >
-          <Text
-            style={{
-              color: themeColors.text,
-              fontSize: 24,
-              fontWeight: "bold",
-              marginBottom: 30,
-            }}
-          >
-            Order a card
-          </Text>
-          
           <Text
             style={{
               color: palette.smoke,
@@ -165,11 +163,14 @@ export default function OrderCardScreen({ navigation, route }: Props) {
 
           <RNPickerSelect
             onValueChange={(value) => setOrganizationId(value)}
-            items={(organizations as unknown as Organization[])?.map(org => ({
-              label: org.name,
-              value: org.id,
-            })) || []}
+            items={[
+              ...eligibleOrganizations.map((org) => ({
+                label: org.name,
+                value: org.id,
+              })),
+            ]}
             value={organizationId}
+            darkTheme={isDark}
             style={{
               inputIOS: {
                 backgroundColor: themeColors.card,
@@ -178,6 +179,7 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 padding: 12,
                 marginBottom: 24,
                 fontSize: 15,
+                pointerEvents: "none",
               },
               inputAndroid: {
                 backgroundColor: themeColors.card,
@@ -187,15 +189,11 @@ export default function OrderCardScreen({ navigation, route }: Props) {
                 marginBottom: 24,
                 fontSize: 15,
               },
-              placeholder: {
-                color: palette.muted,
-              },
             }}
             placeholder={{
-              label: 'Select an organization...',
+              label: "Select an organization...",
               value: null,
             }}
-            useNativeAndroidPickerStyle={false}
           />
 
           <Text
@@ -435,15 +433,17 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               lineHeight: 18,
             }}
           >
-            By submitting, you agree to Stripe's{' '}
+            By submitting, you agree to Stripe's{" "}
             <Text
-              style={{ textDecorationLine: 'underline' }}
-              onPress={() => Linking.openURL('https://www.stripe.com/cardholder-terms')}
+              style={{ textDecorationLine: "underline" }}
+              onPress={() =>
+                Linking.openURL("https://www.stripe.com/cardholder-terms")
+              }
             >
               cardholder terms
-            </Text>. Your name,
-            birthday, and contact information is shared with them and their
-            banking partners.
+            </Text>
+            . Your name, birthday, and contact information is shared with them
+            and their banking partners.
           </Text>
 
           <TouchableOpacity
@@ -455,14 +455,16 @@ export default function OrderCardScreen({ navigation, route }: Props) {
               marginBottom: 20,
               opacity: isLoading ? 0.7 : 1,
             }}
-            onPress={handleCreateCard}
+            onPress={handleOrderCard}
             disabled={isLoading}
           >
-            <Text style={{ 
-              color: themeColors.text, 
-              fontWeight: "600",
-              fontSize: 16,
-            }}>
+            <Text
+              style={{
+                color: themeColors.text,
+                fontWeight: "600",
+                fontSize: 16,
+              }}
+            >
               {isLoading ? "Creating card..." : "Issue my card"}
             </Text>
           </TouchableOpacity>

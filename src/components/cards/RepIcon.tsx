@@ -1,4 +1,4 @@
-import Svg, { G, Path } from 'react-native-svg';
+import Svg, { G, Path } from "react-native-svg";
 
 const RepIcon = () => (
   <Svg

@@ -14,10 +14,10 @@ export default interface User extends Omit<HcbApiObject<"usr">, "created_at"> {
     state: string;
     postal_code: string;
     country: string;
-  }
+  };
 }
 
 export interface OrgUser extends User {
   joined_at: string;
-  role?: "member" | "manager";
+  role?: "member" | "manager" | "reader";
 }

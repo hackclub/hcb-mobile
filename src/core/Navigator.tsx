@@ -24,6 +24,7 @@ import { useIsDark } from "../lib/useColorScheme";
 import CardPage from "../pages/cards/card";
 import CardsPage from "../pages/cards/cards";
 import GrantCardPage from "../pages/cards/GrantCard";
+import OrderCardPage from "../pages/cards/OrderCard";
 import Home from "../pages/index";
 import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
@@ -315,6 +316,18 @@ export default function Navigator() {
               name="GrantCard"
               component={GrantCardPage}
               options={() => ({ title: "Card" })}
+            />
+            <CardsStack.Screen
+              name="OrderCard"
+              component={OrderCardPage}
+              options={{
+                presentation: "card",
+                headerShown: true,
+                title: "Order a Card",
+                headerBackTitle: "Cards",
+                headerShadowVisible: false,
+                headerTransparent: true,
+              }}
             />
             <Stack.Screen
               options={({ route }) => ({

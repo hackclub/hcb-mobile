@@ -104,7 +104,6 @@ export default function OrganizationPage({
   } = useTransactions(orgId, "organizations");
   const [refreshing] = useState(false);
 
-
   useEffect(() => {
     const isOfflineNoData = organizationError && !isOnline && !organization;
 

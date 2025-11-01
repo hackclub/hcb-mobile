@@ -16,19 +16,19 @@ import {
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
-import CardPage from "./pages/card";
-import CardsPage from "./pages/cards";
+import CardPage from "./pages/cards/card";
+import CardsPage from "./pages/cards/cards";
+import OrderCardPage from "./pages/cards/OrderCard";
 import Home from "./pages/index";
 import InvitationPage from "./pages/Invitation";
-import OrderCardPage from "./pages/OrderCard";
 import OrganizationPage from "./pages/organization";
 import AccountNumberPage from "./pages/organization/AccountNumber";
-import OrganizationSettingsPage from "./pages/organization/Settings";
+import OrganizationTeamPage from "./pages/organization/Team";
 import ReceiptsPage from "./pages/Receipts";
 import RenameTransactionPage from "./pages/RenameTransaction";
-import SettingsPage from "./pages/Settings";
+import SettingsPage from "./pages/settings/Settings";
 import TransactionPage from "./pages/Transaction";
-import { palette } from "./theme";
+import { palette } from "./styles/theme";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -145,8 +145,8 @@ export default function Navigator() {
               options={{ presentation: "modal", title: "Account Details" }}
             />
             <Stack.Screen
-              name="OrganizationSettings"
-              component={OrganizationSettingsPage}
+              name="OrganizationTeam"
+              component={OrganizationTeamPage}
               options={{
                 headerBackTitle: "Back",
                 title: "Manage Organization",
@@ -179,7 +179,7 @@ export default function Navigator() {
             <CardsStack.Screen
               name="Card"
               component={CardPage}
-              options={({ route }) => ({
+              options={() => ({
                 title: "Card",
               })}
             />
