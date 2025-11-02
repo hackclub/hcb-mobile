@@ -1,3 +1,4 @@
+name: Publish Updates to Production
 on:
   push:
     branches:
@@ -13,7 +14,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
-          cache: yarn
+          cache: npm
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
@@ -22,7 +23,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: yarn install
+        run: npm ci
 
       - name: 🚀 Create update
         run: eas update --channel production --non-interactive
