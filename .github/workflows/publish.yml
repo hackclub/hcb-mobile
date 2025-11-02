@@ -28,4 +28,4 @@ jobs:
       - name: 🚀 Create update
         run: |
           MESSAGE=$(git log -1 --pretty=%B)
-          eas update --channel production --non-interactive --message "$MESSAGE"
+          eas update --channel production --environment production --non-interactive --message "$MESSAGE"
