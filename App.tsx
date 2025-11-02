@@ -3,11 +3,11 @@ import "expo-dev-client";
 import * as SentryReact from "@sentry/react";
 import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
-import * as BackgroundTask from 'expo-background-task';
+import * as BackgroundTask from "expo-background-task";
 import { useFonts } from "expo-font";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
-import * as TaskManager from 'expo-task-manager';
-import * as Updates from 'expo-updates';
+import * as TaskManager from "expo-task-manager";
+import * as Updates from "expo-updates";
 import { useColorScheme } from "react-native";
 
 import { AuthProvider } from "./src/auth/AuthProvider";
@@ -18,7 +18,7 @@ import { LinkingProvider } from "./src/providers/LinkingContext";
 import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
 import { ThemeProvider } from "./src/providers/ThemeContext";
 
-const BACKGROUND_TASK_NAME = 'task-run-expo-update';
+const BACKGROUND_TASK_NAME = "task-run-expo-update";
 
 export const setupBackgroundUpdates = async () => {
   TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
