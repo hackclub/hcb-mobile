@@ -26,4 +26,6 @@ jobs:
         run: npm ci
 
       - name: 🚀 Create update
-        run: eas update --channel production --non-interactive
+        run: |
+          MESSAGE=$(git log -1 --pretty=%B)
+          eas update --channel production --non-interactive --message "$MESSAGE"
