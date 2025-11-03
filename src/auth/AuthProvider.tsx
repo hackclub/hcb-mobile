@@ -120,7 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await SecureStore.deleteItemAsync(TOKEN_CREATED_AT_KEY);
         await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
         setTokensState(null);
-        Sentry.setUser(null);
       }
     } catch (error) {
       console.error("Failed to save auth tokens", error, {
@@ -140,7 +139,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
 
       setTokensState(null);
-      Sentry.setUser(null);
 
       lastSuccessfulRefreshTime = 0;
       refreshPromise = null;
