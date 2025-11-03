@@ -103,36 +103,39 @@ export default function useClient() {
             if (response.status === 401) {
               console.log("Received 401 response, attempting token refresh...");
 
-              if (refreshInProgress) {
-                return new Promise<KyResponse>(() => {
-                  queuedRequests.push(async () => {
-                    try {
-                      const url = request.url.toString();
-                      const apiBase = process.env.EXPO_PUBLIC_API_BASE;
-                      let path = url.startsWith(apiBase)
-                        ? url.substring(apiBase.length)
-                        : url;
+              if (refreshInProgress && refreshPromise) {
+                // Wait for the ongoing refresh, then retry this request
+                console.log("Refresh already in progress, waiting for it to complete...");
+                try {
+                  const result = await refreshPromise;
+                  
+                  if (result.success && result.newTokens) {
+                    const url = request.url.toString();
+                    const apiBase = process.env.EXPO_PUBLIC_API_BASE;
+                    let path = url.startsWith(apiBase)
+                      ? url.substring(apiBase.length)
+                      : url;
 
-                      if (path.startsWith("/")) {
-                        path = path.substring(1);
-                      }
-
-                      const newResponse = await client(path, {
-                        method: request.method,
-                        headers: {
-                          Authorization: `Bearer ${tokens?.accessToken}`,
-                        },
-                        body: request.body,
-                      });
-                      return newResponse;
-                    } catch (error) {
-                      console.error("Failed to process queued request", error, {
-                        context: "token_refresh_retry",
-                      });
-                      throw error;
+                    if (path.startsWith("/")) {
+                      path = path.substring(1);
                     }
+
+                    console.log(`Retrying request after waiting for refresh: ${path}`);
+                    const newResponse = await client(path, {
+                      method: request.method,
+                      headers: {
+                        Authorization: `Bearer ${result.newTokens.accessToken}`,
+                      },
+                      body: request.body,
+                    });
+                    return newResponse;
+                  }
+                } catch (error) {
+                  console.error("Failed to retry after refresh", error, {
+                    context: "wait_for_refresh_retry",
                   });
-                });
+                  return response;
+                }
               }
 
               refreshInProgress = true;
