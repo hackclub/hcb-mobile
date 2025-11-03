@@ -138,14 +138,33 @@ export default function SettingsPage({ navigation }: Props) {
 
   const handleBiometricsToggle = async (value: boolean) => {
     try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        console.log("Biometric authentication not available");
+        return;
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to change biometric settings",
+        cancelLabel: "Cancel",
+        fallbackLabel: "Use passcode",
+        disableDeviceFallback: false,
+      });
+
+      if (!result.success) {
+        console.log("Biometric authentication failed or cancelled");
+        return;
+      }
+
+      // Only proceed if authentication succeeds
       setBiometricsRequired(value);
       await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
     } catch (error) {
       console.error("Error saving biometrics setting", error, {
         context: { action: "biometrics_toggle", value },
       });
-      // Revert the state if saving fails
-      setBiometricsRequired(!value);
     }
   };
 

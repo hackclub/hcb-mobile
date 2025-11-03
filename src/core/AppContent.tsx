@@ -237,6 +237,7 @@ export default function AppContent({
             return;
           }
 
+          // Keep splash screen visible during biometric authentication
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate to access HCB",
             cancelLabel: "Cancel",
@@ -256,17 +257,19 @@ export default function AppContent({
             );
             setIsAuthenticated(false);
           }
+          setAppIsReady(true);
         } catch (error) {
           console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
           setIsAuthenticated(false);
+          setAppIsReady(true);
         }
       } else {
         console.log("No access token, skipping biometric authentication");
         setIsAuthenticated(true);
+        setAppIsReady(true);
       }
-      setAppIsReady(true);
     };
 
     checkAuth();

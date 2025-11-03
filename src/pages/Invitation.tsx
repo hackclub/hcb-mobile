@@ -69,6 +69,7 @@ export default function InvitationPage({
           organization: invitation!.organization,
         });
         mutate(`user/organizations`);
+        mutate("user/invitations");
       },
       onError: () => {
         showAlert(
@@ -96,7 +97,10 @@ export default function InvitationPage({
     {
       populateCache: (_, invitations) =>
         invitations?.filter((i) => i.id != inviteId) || [],
-      onSuccess: () => navigation.goBack(),
+      onSuccess: () => {
+        mutate("user/invitations");
+        navigation.goBack();
+      },
     },
   );
 
