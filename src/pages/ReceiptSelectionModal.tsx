@@ -96,7 +96,7 @@ export default function ReceiptSelectionModal({
       }
 
       // Refresh the receipt bin data
-      await mutate("user/receipt_bin");
+      await mutate("receipts");
       await mutate("user/transactions/missing_receipt");
 
       Toast.show({
