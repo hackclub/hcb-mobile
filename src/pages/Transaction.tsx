@@ -67,7 +67,7 @@ export default function TransactionPage({
   );
   const { data: user } = useOfflineSWR<User>(`user`);
   const isUserInOrganizationOrAuditor = useMemo(() => {
-    return organization?.users.some((u) => u.id === user?.id || u.auditor);
+    return organization?.users.some((u) => u.id === user?.id) || user?.auditor;
   }, [organization, user]);
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
