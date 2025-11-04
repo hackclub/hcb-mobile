@@ -7,9 +7,9 @@ import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
 import { View, Text, Platform, ScrollView } from "react-native";
 
+import { useIsDark } from "../../lib/useColorScheme";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
-import { useIsDark } from "../../lib/useColorScheme";
 
 export default function About() {
   const { colors } = useTheme();
