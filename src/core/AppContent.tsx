@@ -238,9 +238,10 @@ export default function AppContent({
             return;
           }
 
-          // Prevent concurrent biometric authentication attempts
           if (isBiometricAuthInProgress.current) {
-            console.log("Biometric authentication already in progress, skipping...");
+            console.log(
+              "Biometric authentication already in progress, skipping...",
+            );
             return;
           }
 
