@@ -1,7 +1,7 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ScrollView,
   View,
@@ -31,8 +31,9 @@ import { TransactionViewProps } from "../components/transaction/types/Transactio
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
-import Organization from "../lib/types/Organization";
+import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import Transaction, { TransactionType } from "../lib/types/Transaction";
+import User from "../lib/types/User";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
@@ -61,7 +62,13 @@ export default function TransactionPage({
         ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
         : null,
   );
-
+  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
+    `organizations/${orgId || transaction?.organization?.id}`,
+  );
+  const { data: user } = useOfflineSWR<User>(`user`);
+  const isUserInOrganizationOrAuditor = useMemo(() => {
+    return organization?.users.some((u) => u.id === user?.id || u.auditor);
+  }, [organization, user]);
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
@@ -173,8 +180,9 @@ export default function TransactionPage({
               ))}
             </View>
           )}
-
-          <CommentField orgId={currentOrgId} transactionId={transactionId} />
+          {isUserInOrganizationOrAuditor && (
+            <CommentField orgId={currentOrgId} transactionId={transactionId} />
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
