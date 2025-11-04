@@ -80,6 +80,7 @@ export default function AppContent({
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
+  const isBiometricAuthInProgress = useRef(false);
   const hcb = useClient();
 
   useEffect(() => {
@@ -237,6 +238,14 @@ export default function AppContent({
             return;
           }
 
+          // Prevent concurrent biometric authentication attempts
+          if (isBiometricAuthInProgress.current) {
+            console.log("Biometric authentication already in progress, skipping...");
+            return;
+          }
+
+          isBiometricAuthInProgress.current = true;
+
           // Keep splash screen visible during biometric authentication
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate to access HCB",
@@ -258,12 +267,14 @@ export default function AppContent({
             setIsAuthenticated(false);
           }
           setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
         } catch (error) {
           console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
           setIsAuthenticated(false);
           setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
         }
       } else {
         console.log("No access token, skipping biometric authentication");
