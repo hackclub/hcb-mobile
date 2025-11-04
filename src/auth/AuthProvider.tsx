@@ -137,7 +137,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setTokensState(null);
 
-      lastSuccessfulRefreshTime = 0;
       refreshPromise = null;
     } catch (error) {
       console.error("Error during forced logout", error, {
@@ -277,8 +276,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await setTokens(newTokens);
 
           console.log("Token refreshed successfully");
-
-          lastSuccessfulRefreshTime = Date.now();
 
           return { success: true, newTokens };
         } catch (error) {
