@@ -13,8 +13,6 @@ const TOKEN_CREATED_AT_KEY = "auth_token_created_at";
 
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
-let lastSuccessfulRefreshTime = 0;
-
 let refreshPromise: Promise<{
   success: boolean;
   newTokens?: AuthTokens;

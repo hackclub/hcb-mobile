@@ -105,10 +105,12 @@ export default function useClient() {
 
               if (refreshInProgress && refreshPromise) {
                 // Wait for the ongoing refresh, then retry this request
-                console.log("Refresh already in progress, waiting for it to complete...");
+                console.log(
+                  "Refresh already in progress, waiting for it to complete...",
+                );
                 try {
                   const result = await refreshPromise;
-                  
+
                   if (result.success && result.newTokens) {
                     const url = request.url.toString();
                     const apiBase = process.env.EXPO_PUBLIC_API_BASE;
@@ -120,7 +122,9 @@ export default function useClient() {
                       path = path.substring(1);
                     }
 
-                    console.log(`Retrying request after waiting for refresh: ${path}`);
+                    console.log(
+                      `Retrying request after waiting for refresh: ${path}`,
+                    );
                     const newResponse = await client(path, {
                       method: request.method,
                       headers: {
