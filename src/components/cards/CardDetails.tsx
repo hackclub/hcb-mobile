@@ -349,7 +349,13 @@ export default function CardDetails({
               </Text>
             </View>
             {grantCard?.purpose && (
-              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 16,

@@ -68,8 +68,7 @@ export default function CardPage(
   const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const grantId =
-    "route" in props ? props.route.params.grantId : props.grantId;
+  const grantId = "route" in props ? props.route.params.grantId : props.grantId;
 
   const { data: grantCard = _card as GrantCard } = useOfflineSWR<GrantCard>(
     grantId ? `card_grants/${grantId}` : null,
