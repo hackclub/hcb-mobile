@@ -349,7 +349,7 @@ export default function CardDetails({
               </Text>
             </View>
             {grantCard?.purpose && (
-              <>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
                 <Text
                   style={{
                     fontSize: 16,
@@ -365,11 +365,12 @@ export default function CardDetails({
                     fontSize: 16,
                     fontWeight: "500",
                     fontFamily: "JetBrainsMono-Regular",
+                    flexShrink: 1,
                   }}
                 >
                   {grantCard?.purpose}
                 </Text>
-              </>
+              </View>
             )}
           </View>
           <View
