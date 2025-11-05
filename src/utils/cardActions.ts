@@ -66,10 +66,11 @@ export const toggleCardDetails = async (
 export const handleTopup = async (
   topupAmount: string,
   card: Card,
+  grantId: string,
   setIsToppingUp: (isToppingUp: boolean) => void,
   setTopupAmount: (topupAmount: string) => void,
   setShowTopupModal: (showTopupModal: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
 ) => {
   if (!topupAmount || !card) return;
@@ -82,13 +83,14 @@ export const handleTopup = async (
 
   setIsToppingUp(true);
   try {
-    await hcb.post(`cards/${card.id}/topup`, {
+    await hcb.post(`card_grants/${grantId}/topup`, {
       json: { amount_cents: Math.round(amount * 100) },
     });
 
     setTopupAmount("");
     setShowTopupModal(false);
     mutate(`cards/${card.id}`);
+    mutate(`card_grants/${grantId}`);
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
@@ -108,7 +110,7 @@ export const handleSetPurpose = async (
   setIsSettingPurpose: (isSettingPurpose: boolean) => void,
   setPurposeText: (purposeText: string) => void,
   setShowPurposeModal: (showPurposeModal: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   purposeText: string,
@@ -124,7 +126,7 @@ export const handleSetPurpose = async (
     setPurposeText("");
     setShowPurposeModal(false);
     mutate(`cards/${card.id}`);
-    mutate(`grant_cards/${grantId}`);
+    mutate(`card_grants/${grantId}`);
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
@@ -142,7 +144,7 @@ export const handleSetPurpose = async (
 export const handleOneTimeUse = async (
   card: Card,
   setIsOneTimeUse: (isOneTimeUse: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   grantCard: GrantCard,
@@ -178,7 +180,7 @@ export const returnGrant = async (
   isCardholder: boolean,
   grantCard: GrantCard,
   setisReturningGrant: (isReturningGrant: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   navigation: NativeStackNavigationProp<CardsStackParamList>,
@@ -231,7 +233,7 @@ export const returnGrant = async (
 export const handleBurnCard = async (
   card: Card,
   setIsBurningCard: (isBurningCard: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
 ) => {
   if (!card) return;

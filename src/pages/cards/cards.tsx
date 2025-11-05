@@ -340,7 +340,12 @@ export default function CardsPage({ navigation }: Props) {
           <CardItem
             item={item}
             isActive={false}
-            onPress={(card) => navigation.navigate("Card", { card })}
+            onPress={(card) =>
+              navigation.navigate("Card", {
+                card,
+                grantId: "grant_id" in card ? card.grant_id : undefined,
+              })
+            }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}
           />
