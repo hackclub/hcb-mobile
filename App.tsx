@@ -18,13 +18,18 @@ import { LinkingProvider } from "./src/providers/LinkingContext";
 import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
 import { ThemeProvider } from "./src/providers/ThemeContext";
 
-if (process.env.NODE_ENV === "production") {
+const routingInstrumentation = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: true,
+});
+
+if (!__DEV__) {
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
     debug: false,
     enableLogs: true,
     attachScreenshot: true,
     integrations: [
+      routingInstrumentation,
       Sentry.reactNativeTracingIntegration(),
       Sentry.reactNativeErrorHandlersIntegration(),
       Sentry.consoleLoggingIntegration({
@@ -49,6 +54,8 @@ if (process.env.NODE_ENV === "production") {
     replaysOnErrorSampleRate: 1.0,
   });
 }
+
+export { routingInstrumentation };
 
 const BACKGROUND_TASK_NAME = "task-run-expo-update";
 
