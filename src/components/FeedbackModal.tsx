@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -76,10 +75,6 @@ export default function FeedbackModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
         <View
           style={{
             flex: 1,
@@ -270,7 +265,6 @@ export default function FeedbackModal({
             </ScrollView>
           </View>
         </View>
-      </KeyboardAvoidingView>
     </Modal>
   );
 }
