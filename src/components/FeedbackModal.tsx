@@ -76,30 +76,34 @@ export default function FeedbackModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+      <Pressable
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+        onPress={handleClose}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ width: "100%", maxWidth: 500 }}
         >
-          <View
+          <Pressable
             style={{
               backgroundColor: colors.card,
               borderRadius: 20,
               padding: 24,
               width: "100%",
-              maxWidth: 500,
               maxHeight: "80%",
             }}
           >
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -268,9 +272,9 @@ export default function FeedbackModal({
                 </Button>
               </View>
             </ScrollView>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Pressable>
     </Modal>
   );
 }
