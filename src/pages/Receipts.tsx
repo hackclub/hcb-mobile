@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useMemo, useLayoutEffect } from "react";
+import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -119,6 +119,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   );
   const isDark = useIsDark();
   const hcb = useClient();
+  const uploadButtonRef = useRef(null);
 
   // Set navigation title
   useLayoutEffect(() => {
@@ -177,7 +178,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   });
 
   const handleReceiptUpload = () => {
-    handleActionSheet();
+    handleActionSheet(uploadButtonRef);
   };
 
   const handleDeleteReceipt = async (receiptId: string) => {
@@ -389,6 +390,7 @@ export default function ReceiptsPage({ navigation }: Props) {
             }}
           >
             <TouchableOpacity
+              ref={uploadButtonRef}
               style={{
                 backgroundColor: p.sky["500"],
                 paddingHorizontal: 24,

@@ -2,6 +2,13 @@ import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 
 import { useOffline } from "./useOffline";
 
+interface HTTPError extends Error {
+  status?: number;
+  response?: {
+    status?: number;
+  };
+}
+
 /**
  * Custom SWR hook that handles offline scenarios gracefully
  * - Only fetches when online
@@ -42,6 +49,32 @@ export function useOfflineSWR<Data, Error = unknown>(
           console.error("SWR fetch error:", err, { context });
         }
       }
+    },
+    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+      if (!isOnline) {
+        return;
+      }
+
+      const errorWithStatus = error as HTTPError;
+      const status =
+        errorWithStatus?.status || errorWithStatus?.response?.status;
+
+      if (status === 401 || status === 403) {
+        console.log(
+          `useOfflineSWR: Not retrying ${key} due to auth error (${status})`,
+        );
+        return;
+      }
+
+      if (status === 404) {
+        return;
+      }
+
+      if (retryCount >= 3) return;
+
+      // Exponential backoff
+      const timeout = Math.min(1000 * Math.pow(2, retryCount), 5000);
+      setTimeout(() => revalidate({ retryCount }), timeout);
     },
 
     ...swrOptions,
