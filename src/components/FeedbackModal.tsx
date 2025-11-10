@@ -39,7 +39,7 @@ export default function FeedbackModal({
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!feedbackText.trim()) {
       return;
     }

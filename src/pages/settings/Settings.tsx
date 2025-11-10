@@ -668,27 +668,36 @@ export default function SettingsPage({ navigation }: Props) {
       <FeedbackModal
         visible={feedbackModalVisible}
         onClose={() => setFeedbackModalVisible(false)}
-        onSubmit={async (feedback) => {
-          Sentry.captureFeedback(
-            {
-              name: user?.name || "",
-              email: user?.email || "",
-              message: feedback.message,
-            } as SendFeedbackParams,
-            {
-              captureContext: {
-                tags: {
-                  category: feedback.category,
+        onSubmit={(feedback) => {
+          try {
+            Sentry.captureFeedback(
+              {
+                name: user?.name || "",
+                email: user?.email || "",
+                message: feedback.message,
+              } as SendFeedbackParams,
+              {
+                captureContext: {
+                  tags: {
+                    category: feedback.category,
+                  },
                 },
               },
-            },
-          );
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          Toast.show({
-            type: ALERT_TYPE.SUCCESS,
-            title: "Feedback submitted!",
-            textBody: "Thank you for your feedback!",
-          });
+            );
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: "Feedback submitted!",
+              textBody: "Thank you for your feedback!",
+            });
+          } catch (error) {
+            console.error("Failed to submit feedback:", error);
+            Toast.show({
+              type: ALERT_TYPE.DANGER,
+              title: "Failed to submit feedback",
+              textBody: "Please try again later.",
+            });
+          }
         }}
       />
     </ScrollView>
