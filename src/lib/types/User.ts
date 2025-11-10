@@ -7,9 +7,9 @@ export default interface User extends Omit<HcbApiObject<"usr">, "created_at"> {
   admin: boolean;
   auditor: boolean;
   birthday?: string;
-  shipping_address: {
+  shipping_address?: {
     address_line1: string;
-    address_line2: string;
+    address_line2?: string;
     city: string;
     state: string;
     postal_code: string;
