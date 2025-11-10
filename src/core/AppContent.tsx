@@ -30,6 +30,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
+import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
 import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
@@ -207,6 +208,7 @@ export default function AppContent({
 
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
+    routingInstrumentation.registerNavigationContainer(navigationRef);
   }, []);
 
   useEffect(() => {

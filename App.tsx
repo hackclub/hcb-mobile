@@ -18,6 +18,45 @@ import { LinkingProvider } from "./src/providers/LinkingContext";
 import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
 import { ThemeProvider } from "./src/providers/ThemeContext";
 
+const routingInstrumentation = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: true,
+});
+
+if (!__DEV__) {
+  Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    debug: false,
+    enableLogs: true,
+    attachScreenshot: true,
+    integrations: [
+      routingInstrumentation,
+      Sentry.reactNativeTracingIntegration(),
+      Sentry.reactNativeErrorHandlersIntegration(),
+      Sentry.consoleLoggingIntegration({
+        levels: ["log", "warn", "error"],
+      }),
+      SentryReact.captureConsoleIntegration({
+        levels: ["error"],
+      }),
+      Sentry.breadcrumbsIntegration({
+        console: true,
+        dom: true,
+        sentry: true,
+      }),
+      Sentry.reactNativeInfoIntegration(),
+      Sentry.viewHierarchyIntegration(),
+      Sentry.mobileReplayIntegration({ maskAllVectors: false }),
+    ],
+    sendDefaultPii: true,
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 0.5,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  });
+}
+
+export { routingInstrumentation };
+
 const BACKGROUND_TASK_NAME = "task-run-expo-update";
 
 export const setupBackgroundUpdates = async () => {
@@ -47,38 +86,6 @@ function App() {
 
   const scheme = useColorScheme();
   const cache = useCache();
-
-  if (process.env.NODE_ENV === "production") {
-    Sentry.init({
-      dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-      debug: false,
-      enableLogs: true,
-      attachScreenshot: true,
-      integrations: [
-        Sentry.reactNativeTracingIntegration(),
-        Sentry.reactNativeErrorHandlersIntegration(),
-        Sentry.consoleLoggingIntegration({
-          levels: ["log", "warn", "error"],
-        }),
-        SentryReact.captureConsoleIntegration({
-          levels: ["error"],
-        }),
-        Sentry.breadcrumbsIntegration({
-          console: true,
-          dom: true,
-          sentry: true,
-        }),
-        Sentry.reactNativeInfoIntegration(),
-        Sentry.viewHierarchyIntegration(),
-        Sentry.mobileReplayIntegration({ maskAllVectors: false }),
-      ],
-      sendDefaultPii: true,
-      tracesSampleRate: 1.0,
-      profilesSampleRate: 0.5,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-    });
-  }
 
   if (!fontsLoaded) {
     return null;
