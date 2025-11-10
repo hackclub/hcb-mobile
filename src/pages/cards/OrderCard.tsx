@@ -60,8 +60,8 @@ export default function OrderCardScreen({ navigation }: Props) {
   const [expandedOrganizations, setExpandedOrganizations] = useState<
     Record<string, OrganizationExpanded>
   >({});
-  const { data: cardDesigns } = useOfflineSWR<CardDesign[]>(
-    `cards/card_designs?event_id=${organizationId}`,
+  const { data: cardDesigns } = useOfflineSWR<CardDesign[]>(organizationId ?
+    `cards/card_designs?event_id=${organizationId}` : `cards/card_designs`,
   );
   const hcb = useClient();
   const { data: organizations } = useSWR<Organization[]>("user/organizations");
