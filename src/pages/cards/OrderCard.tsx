@@ -412,6 +412,7 @@ export default function OrderCardScreen({ navigation }: Props) {
                 />
                 <TextInput
                   value={"United States"}
+                  editable={false}
                   style={{
                     backgroundColor: themeColors.card,
                     color: themeColors.text,
