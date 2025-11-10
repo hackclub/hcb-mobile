@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -75,26 +76,34 @@ export default function FeedbackModal({
       animationType="fade"
       onRequestClose={handleClose}
     >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
+      <Pressable
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+        onPress={handleClose}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ width: "100%", maxWidth: 500 }}
         >
-          <View
+          <Pressable
             style={{
               backgroundColor: colors.card,
               borderRadius: 20,
               padding: 24,
               width: "100%",
-              maxWidth: 500,
               maxHeight: "80%",
             }}
           >
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+            >
               <View
                 style={{
                   flexDirection: "row",
@@ -263,8 +272,9 @@ export default function FeedbackModal({
                 </Button>
               </View>
             </ScrollView>
-          </View>
-        </View>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Pressable>
     </Modal>
   );
 }
