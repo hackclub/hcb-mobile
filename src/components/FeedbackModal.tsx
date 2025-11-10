@@ -23,7 +23,7 @@ interface FeedbackModalProps {
 }
 
 const feedbackCategories = [
-  { id: "bug", label: "Bug Report", icon: "bug" as const },
+  { id: "bug", label: "Bug", icon: "bug" as const },
   { id: "feature", label: "Feature Request", icon: "bulb" as const },
   { id: "improvement", label: "Improvement", icon: "construct" as const },
   { id: "other", label: "Other", icon: "chatbox-ellipses" as const },
