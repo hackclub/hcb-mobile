@@ -13,9 +13,6 @@ const TOKEN_CREATED_AT_KEY = "auth_token_created_at";
 
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
-let lastSuccessfulRefreshTime = 0;
-const MIN_REFRESH_INTERVAL_MS = 1000;
-
 let refreshPromise: Promise<{
   success: boolean;
   newTokens?: AuthTokens;
@@ -120,7 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await SecureStore.deleteItemAsync(TOKEN_CREATED_AT_KEY);
         await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
         setTokensState(null);
-        Sentry.setUser(null);
       }
     } catch (error) {
       console.error("Failed to save auth tokens", error, {
@@ -140,9 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
 
       setTokensState(null);
-      Sentry.setUser(null);
 
-      lastSuccessfulRefreshTime = 0;
       refreshPromise = null;
     } catch (error) {
       console.error("Error during forced logout", error, {
@@ -181,13 +175,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const now = Date.now();
-      const timeSinceLastRefresh = now - lastSuccessfulRefreshTime;
-      if (timeSinceLastRefresh < MIN_REFRESH_INTERVAL_MS) {
-        console.log(
-          `Skipping token refresh - last refresh was ${timeSinceLastRefresh}ms ago (minimum interval: ${MIN_REFRESH_INTERVAL_MS}ms)`,
-        );
-        return { success: true, newTokens: tokens };
-      }
 
       console.log("Client ID:", process.env.EXPO_PUBLIC_CLIENT_ID);
       console.log("Redirect URI:", redirectUri);
@@ -283,8 +270,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await setTokens(newTokens);
 
           console.log("Token refreshed successfully");
-
-          lastSuccessfulRefreshTime = Date.now();
 
           return { success: true, newTokens };
         } catch (error) {
