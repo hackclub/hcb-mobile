@@ -175,7 +175,7 @@ export default function CardsPage({ navigation }: Props) {
               },
             ]}
             onPressAction={({ nativeEvent: { event } }) => {
-              if (event == "toggleCanceledCards") {
+              if (event === "toggleCanceledCards") {
                 const newValue = !canceledCardsShown;
                 setCanceledCardsShown(newValue);
                 AsyncStorage.setItem("canceledCardsShown", newValue.toString());
