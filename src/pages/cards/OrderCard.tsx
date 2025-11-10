@@ -506,7 +506,7 @@ export default function OrderCardScreen({ navigation }: Props) {
                                 height: "50%",
                               }}
                               tintColor={
-                                design.color == "black" ? "white" : "black"
+                                design.color === "black" ? "white" : "black"
                               }
                               contentFit="contain"
                             />
