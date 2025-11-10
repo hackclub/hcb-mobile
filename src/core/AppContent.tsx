@@ -49,6 +49,13 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
 
+interface HTTPError extends Error {
+  status?: number;
+  response?: {
+    status?: number;
+  };
+}
+
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
     enabled,
@@ -275,7 +282,11 @@ export default function AppContent({
   useEffect(() => {
     if (tokens) {
       const now = Date.now();
-      if (tokens.expiresAt <= now + 5 * 60 * 1000) {
+      if (
+        tokens.expiresAt <= now + 5 * 60 * 1000 &&
+        tokens.expiresAt > now + 2 * 60 * 1000
+      ) {
+        console.log("Preemptively refreshing token before it expires");
         refreshAccessToken().catch((error) => {
           console.error("Failed to preemptively refresh token", error);
         });
@@ -431,6 +442,38 @@ export default function AppContent({
                   keepPreviousData: true,
                   errorRetryCount: 3,
                   errorRetryInterval: 1000,
+                  onErrorRetry: (
+                    error,
+                    key,
+                    config,
+                    revalidate,
+                    { retryCount },
+                  ) => {
+                    const errorWithStatus = error as HTTPError;
+                    const status =
+                      errorWithStatus?.status ||
+                      errorWithStatus?.response?.status;
+
+                    if (status === 401 || status === 403) {
+                      console.log(
+                        `SWR: Not retrying ${key} due to auth error (${status})`,
+                      );
+                      return;
+                    }
+
+                    if (status === 404) {
+                      return;
+                    }
+
+                    if (retryCount >= 3) return;
+
+                    // Exponential backoff
+                    const timeout = Math.min(
+                      1000 * Math.pow(2, retryCount),
+                      5000,
+                    );
+                    setTimeout(() => revalidate({ retryCount }), timeout);
+                  },
                 }}
               >
                 <SentryUserBridge />

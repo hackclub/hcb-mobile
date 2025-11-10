@@ -1,6 +1,8 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import React from "react";
+import { findNodeHandle } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import useClient from "../lib/client";
@@ -81,61 +83,67 @@ export function useReceiptActionSheet({
     },
   );
 
-  const handleActionSheet = withOfflineCheck(() => {
-    const options = ["Camera", "Photo Library", "Document", "Cancel"];
-    const cancelButtonIndex = 3;
+  const handleActionSheet = withOfflineCheck(
+    (buttonRef?: React.RefObject<unknown>) => {
+      const options = ["Camera", "Photo Library", "Document", "Cancel"];
+      const cancelButtonIndex = 3;
 
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        userInterfaceStyle: isDark ? "dark" : "light",
-        containerStyle: {
-          backgroundColor: isDark ? "#252429" : "white",
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          userInterfaceStyle: isDark ? "dark" : "light",
+          containerStyle: {
+            backgroundColor: isDark ? "#252429" : "white",
+          },
+          textStyle: {
+            color: isDark ? "white" : "black",
+          },
+          anchor: buttonRef?.current
+            ? (findNodeHandle(buttonRef.current as React.Component) ??
+              undefined)
+            : undefined,
         },
-        textStyle: {
-          color: isDark ? "white" : "black",
-        },
-      },
-      async (buttonIndex) => {
-        if (buttonIndex === 0) {
-          // Take a photo
-          ImagePicker.requestCameraPermissionsAsync();
-          const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: "images",
-            quality: 1,
-          });
-          if (!result.canceled) {
-            await uploadFile({
-              uri: result.assets[0].uri,
-              fileName: result.assets[0].fileName || undefined,
+        async (buttonIndex) => {
+          if (buttonIndex === 0) {
+            // Take a photo
+            ImagePicker.requestCameraPermissionsAsync();
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: "images",
+              quality: 1,
             });
+            if (!result.canceled) {
+              await uploadFile({
+                uri: result.assets[0].uri,
+                fileName: result.assets[0].fileName || undefined,
+              });
+            }
+          } else if (buttonIndex === 1) {
+            // Pick from photo library
+            ImagePicker.requestMediaLibraryPermissionsAsync();
+            const result = await ImagePicker.launchImageLibraryAsync({
+              quality: 1,
+              allowsMultipleSelection: true,
+              selectionLimit: 10,
+            });
+            if (!result.canceled && result.assets.length > 0) {
+              await uploadMultipleFiles(result.assets);
+            }
+          } else if (buttonIndex === 2) {
+            // Pick a document
+            const result = await DocumentPicker.getDocumentAsync({
+              type: ["application/pdf", "image/*"],
+              copyToCacheDirectory: true,
+              multiple: true,
+            });
+            if (!result.canceled && result.assets.length > 0) {
+              await uploadMultipleFiles(result.assets);
+            }
           }
-        } else if (buttonIndex === 1) {
-          // Pick from photo library
-          ImagePicker.requestMediaLibraryPermissionsAsync();
-          const result = await ImagePicker.launchImageLibraryAsync({
-            quality: 1,
-            allowsMultipleSelection: true,
-            selectionLimit: 10,
-          });
-          if (!result.canceled && result.assets.length > 0) {
-            await uploadMultipleFiles(result.assets);
-          }
-        } else if (buttonIndex === 2) {
-          // Pick a document
-          const result = await DocumentPicker.getDocumentAsync({
-            type: ["application/pdf", "image/*"],
-            copyToCacheDirectory: true,
-            multiple: true,
-          });
-          if (!result.canceled && result.assets.length > 0) {
-            await uploadMultipleFiles(result.assets);
-          }
-        }
-      },
-    );
-  });
+        },
+      );
+    },
+  );
 
   return {
     handleActionSheet,

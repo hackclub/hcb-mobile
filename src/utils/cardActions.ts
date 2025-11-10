@@ -322,6 +322,7 @@ export const handleCreateCard = async (
   addressLine2: string,
   zipCode: string,
   stateProvince: string,
+  cardDesignId: string,
   hcb: KyInstance,
   user: User,
   setIsLoading: (isLoading: boolean) => void,
@@ -346,7 +347,7 @@ export const handleCreateCard = async (
       json: {
         card: {
           organization_id: organizationId,
-          card_type: cardType,
+          card_type: cardType === "plastic" ? "physical" : "virtual",
           shipping_name: shippingName,
           shipping_address_city: city,
           shipping_address_line1: addressLine1,
@@ -354,7 +355,7 @@ export const handleCreateCard = async (
           shipping_address_postal_code: zipCode,
           shipping_address_state: stateProvince,
           shipping_address_country: "US",
-          birthday: user?.birthday,
+          card_personalization_design_id: cardDesignId,
         },
       },
     });

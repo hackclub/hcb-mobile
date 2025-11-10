@@ -3,6 +3,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { Image } from "expo-image";
 import { useState, useMemo, useEffect } from "react";
 import {
   View,
@@ -22,6 +23,7 @@ import CardIcon from "../../components/cards/CardIcon";
 import RepIcon from "../../components/cards/RepIcon";
 import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import CardDesign from "../../lib/types/CardDesign";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -39,6 +41,7 @@ export default function OrderCardScreen({ navigation }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const { data: user } = useOfflineSWR<User>(`user?expand=shipping_address`);
   const [cardType, setCardType] = useState("virtual");
+  const [cardDesign, setCardDesign] = useState<CardDesign | null>(null);
   const [organizationId, setOrganizationId] = useState<string>("");
   const [shippingName, setShippingName] = useState(user?.name || "");
   const [addressLine1, setAddressLine1] = useState(
@@ -57,6 +60,9 @@ export default function OrderCardScreen({ navigation }: Props) {
   const [expandedOrganizations, setExpandedOrganizations] = useState<
     Record<string, OrganizationExpanded>
   >({});
+  const { data: cardDesigns } = useOfflineSWR<CardDesign[]>(
+    `cards/card_designs?event_id=${organizationId}`,
+  );
   const hcb = useClient();
   const { data: organizations } = useSWR<Organization[]>("user/organizations");
   const { fetcher } = useSWRConfig();
@@ -126,6 +132,7 @@ export default function OrderCardScreen({ navigation }: Props) {
       addressLine2,
       zipCode,
       stateProvince,
+      cardDesign?.id || "",
       hcb,
       user,
       setIsLoading,
@@ -162,7 +169,10 @@ export default function OrderCardScreen({ navigation }: Props) {
           </Text>
 
           <RNPickerSelect
-            onValueChange={(value) => setOrganizationId(value)}
+            onValueChange={(value) => {
+              setOrganizationId(value);
+              setCardDesign(null);
+            }}
             items={[
               ...eligibleOrganizations.map((org) => ({
                 label: org.name,
@@ -411,6 +421,100 @@ export default function OrderCardScreen({ navigation }: Props) {
                     fontSize: 15,
                   }}
                 />
+              </View>
+              <Text
+                style={{
+                  color: palette.smoke,
+                  fontSize: 16,
+                  fontWeight: "500",
+                  marginBottom: 16,
+                }}
+              >
+                Card Designs
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                  marginBottom: 24,
+                  gap: 12,
+                }}
+              >
+                {cardDesigns?.map((design) => {
+                  const isSelected = cardDesign?.id === design.id;
+                  return (
+                    <TouchableOpacity
+                      key={design.id}
+                      style={{
+                        backgroundColor: design.unlisted
+                          ? "#322D21"
+                          : "#2A424E",
+                        borderRadius: 12,
+                        width: "48%",
+                        marginBottom: isSelected ? -4 : 0,
+                        borderWidth: isSelected ? 2 : 0,
+                        borderColor: isSelected ? themeColors.text : "",
+                        overflow: "hidden",
+                      }}
+                      onPress={() => setCardDesign(design)}
+                    >
+                      <View
+                        style={{
+                          borderWidth: design.unlisted ? 1 : 0,
+                          borderColor: "#ff8c37",
+                          borderRadius: 12,
+                          borderStyle: "dashed",
+                          margin: isSelected ? -2 : 0,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: themeColors.text,
+                            fontSize: 15,
+                            fontWeight: "600",
+                            marginBottom: 12,
+                            textAlign: "center",
+                            marginTop: 16,
+                            marginHorizontal: 14,
+                          }}
+                        >
+                          {design.name}
+                        </Text>
+                        <View
+                          style={{ alignSelf: "flex-start", width: "100%" }}
+                        >
+                          <View
+                            style={{
+                              backgroundColor: design.color,
+                              borderTopRightRadius: 12,
+                              borderBottomLeftRadius: isSelected ? 0 : 12,
+                              aspectRatio: 1.586,
+                              justifyContent: "flex-start",
+                              alignItems: "flex-end",
+                              marginRight: 16,
+                              paddingRight: 16,
+                              paddingTop: 16,
+                            }}
+                          >
+                            <Image
+                              source={{ uri: design.logo_url }}
+                              style={{
+                                width: "50%",
+                                height: "50%",
+                              }}
+                              tintColor={
+                                design.color == "black" ? "white" : "black"
+                              }
+                              contentFit="contain"
+                            />
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </>
           )}
