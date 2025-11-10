@@ -2,7 +2,7 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNow } from "date-fns";
 import * as Haptics from "expo-haptics";
-import { memo, useState } from "react";
+import { memo, useState, useRef } from "react";
 import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
 
 import Organization from "../../lib/types/Organization";
@@ -30,6 +30,7 @@ function MissingReceiptTransaction({
 }) {
   const { colors: themeColors } = useTheme();
   const [loading, setLoading] = useState(false);
+  const uploadButtonRef = useRef(null);
 
   const { handleActionSheet, isOnline } = useReceiptActionSheet({
     orgId: transaction.organization.id,
@@ -81,6 +82,7 @@ function MissingReceiptTransaction({
 
         <View style={{ flexDirection: "row", gap: 12, marginLeft: 16 }}>
           <TouchableOpacity
+            ref={uploadButtonRef}
             style={{
               backgroundColor: p.sky["500"],
               borderRadius: 20,
@@ -89,7 +91,7 @@ function MissingReceiptTransaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={handleActionSheet}
+            onPress={() => handleActionSheet(uploadButtonRef)}
             disabled={!isOnline || loading}
           >
             {loading ? (

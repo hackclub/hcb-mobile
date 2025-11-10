@@ -171,7 +171,7 @@ export default function PaymentCard({
               width: "auto",
               height: 40,
               tintColor:
-                card.personalization?.color == "black" ? "white" : undefined,
+                card.personalization?.color == "black" ? "white" : "black",
               aspectRatio: logoWidth / logoHeight,
             }}
           />

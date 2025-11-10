@@ -216,12 +216,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             const errorBody = await response.text();
-            console.error(
-              `Token refresh failed with status ${response.status}`,
-              new Error(errorBody),
-              { action: "token_refresh", status: response.status, errorBody },
-            );
-
             try {
               const errorJson = JSON.parse(errorBody);
               console.error(
