@@ -672,8 +672,6 @@ export default function SettingsPage({ navigation }: Props) {
           try {
             Sentry.captureFeedback(
               {
-                name: user?.name || "",
-                email: user?.email || "",
                 message: feedback.message,
               } as SendFeedbackParams,
               {
