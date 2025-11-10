@@ -180,7 +180,7 @@ export default function CardsPage({ navigation }: Props) {
                 setCanceledCardsShown(newValue);
                 AsyncStorage.setItem("canceledCardsShown", newValue.toString());
               }
-              if (event == "toggleFrozenCards") {
+              if (event === "toggleFrozenCards") {
                 const newValue = !frozenCardsShown;
                 setFrozenCardsShown(newValue);
                 AsyncStorage.setItem("frozenCardsShown", newValue.toString());
