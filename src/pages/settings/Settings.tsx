@@ -2,8 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Sentry from "@sentry/react-native";
+import { SendFeedbackParams } from "@sentry/react-native";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import * as Haptics from "expo-haptics";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SystemUI from "expo-system-ui";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -18,10 +21,12 @@ import {
   Platform,
   Switch,
 } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import HelpscoutBeacon from "react-native-helpscout-beacon";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
+import FeedbackModal from "../../components/FeedbackModal";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
@@ -31,7 +36,6 @@ import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
 
-const TOS_URL = "https://hcb.hackclub.com/tos";
 const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
 
 const THEME_KEY = "app_theme";
@@ -76,6 +80,7 @@ export default function SettingsPage({ navigation }: Props) {
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
   const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
 
   useEffect(() => {
@@ -511,39 +516,6 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => Linking.openURL(TOS_URL)}
-          >
-            <Ionicons
-              name="document-text-outline"
-              size={22}
-              color={palette.muted}
-              style={{ marginRight: 12 }}
-            />
-            <Text style={{ color: colors.text, fontSize: 16 }}>
-              Terms & Conditions
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={palette.muted}
-              style={{ marginLeft: "auto" }}
-            />
-          </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
-          <Pressable
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 18,
-              paddingHorizontal: 18,
-            }}
             onPress={() => Linking.openURL(PRIVACY_URL)}
           >
             <Ionicons
@@ -588,6 +560,40 @@ export default function SettingsPage({ navigation }: Props) {
             <Text style={{ color: colors.text, fontSize: 16 }}>
               Info / About
             </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+
+          {/* Feedback */}
+
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => setFeedbackModalVisible(true)}
+          >
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
             <Ionicons
               name="chevron-forward"
               size={20}
@@ -657,6 +663,34 @@ export default function SettingsPage({ navigation }: Props) {
           Sign Out
         </Button>
       </View>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        visible={feedbackModalVisible}
+        onClose={() => setFeedbackModalVisible(false)}
+        onSubmit={async (feedback) => {
+          Sentry.captureFeedback(
+            {
+              name: user?.name || "",
+              email: user?.email || "",
+              message: feedback.message,
+            } as SendFeedbackParams,
+            {
+              captureContext: {
+                tags: {
+                  category: feedback.category,
+                },
+              },
+            },
+          );
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Feedback submitted!",
+            textBody: "Thank you for your feedback!",
+          });
+        }}
+      />
     </ScrollView>
   );
 }

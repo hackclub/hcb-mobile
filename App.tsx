@@ -22,38 +22,37 @@ const routingInstrumentation = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: true,
 });
 
-if (!__DEV__) {
-  Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    debug: false,
-    enableLogs: true,
-    attachScreenshot: true,
-    integrations: [
-      routingInstrumentation,
-      Sentry.reactNativeTracingIntegration(),
-      Sentry.reactNativeErrorHandlersIntegration(),
-      Sentry.consoleLoggingIntegration({
-        levels: ["log", "warn", "error"],
-      }),
-      SentryReact.captureConsoleIntegration({
-        levels: ["error"],
-      }),
-      Sentry.breadcrumbsIntegration({
-        console: true,
-        dom: true,
-        sentry: true,
-      }),
-      Sentry.reactNativeInfoIntegration(),
-      Sentry.viewHierarchyIntegration(),
-      Sentry.mobileReplayIntegration({ maskAllVectors: false }),
-    ],
-    sendDefaultPii: true,
-    tracesSampleRate: 1.0,
-    profilesSampleRate: 0.5,
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-  });
-}
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: false,
+  enableLogs: true,
+  attachScreenshot: true,
+  integrations: [
+    routingInstrumentation,
+    Sentry.reactNativeTracingIntegration(),
+    Sentry.reactNativeErrorHandlersIntegration(),
+    Sentry.consoleLoggingIntegration({
+      levels: ["log", "warn", "error"],
+    }),
+    SentryReact.captureConsoleIntegration({
+      levels: ["error"],
+    }),
+    Sentry.breadcrumbsIntegration({
+      console: true,
+      dom: true,
+      sentry: true,
+    }),
+    Sentry.reactNativeInfoIntegration(),
+    Sentry.viewHierarchyIntegration(),
+    Sentry.mobileReplayIntegration({ maskAllVectors: false }),
+    Sentry.feedbackIntegration(),
+  ],
+  sendDefaultPii: true,
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 0.5,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
 
 export { routingInstrumentation };
 
