@@ -335,8 +335,8 @@ export const handleCreateCard = async (
       organizationId,
       cardType,
       shippingName,
-      city,
       addressLine1,
+      city,
       stateProvince,
       zipCode,
     )
