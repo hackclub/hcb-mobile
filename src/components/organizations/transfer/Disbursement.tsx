@@ -166,7 +166,11 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         }}
       >
         <RNPickerSelect
-          placeholder={{ label: "Select an organization", value: "", color: themeColors.text }}
+          placeholder={{
+            label: "Select an organization",
+            value: "",
+            color: themeColors.text,
+          }}
           onValueChange={(itemValue: string) => setOrganization(itemValue)}
           darkTheme={isDark}
           style={{
@@ -186,7 +190,11 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
             ...organizations
               .filter((org) => org.id !== organization.id)
               .filter((org) => org.playground_mode === false)
-              .map((org) => ({ label: org.name, value: org.id, color: themeColors.text })),
+              .map((org) => ({
+                label: org.name,
+                value: org.id,
+                color: themeColors.text,
+              })),
           ]}
         />
       </View>

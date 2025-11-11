@@ -237,7 +237,12 @@ export default function OrderCardScreen({ navigation }: Props) {
                 alignItems: "center",
                 justifyContent: "flex-end",
                 borderWidth: cardType === "virtual" ? 2 : 0,
-                borderColor: cardType === "virtual" ? isDark ? themeColors.text : "#338eda" : "",
+                borderColor:
+                  cardType === "virtual"
+                    ? isDark
+                      ? themeColors.text
+                      : "#338eda"
+                    : "",
               }}
               onPress={() => setCardType("virtual")}
             >
@@ -273,7 +278,12 @@ export default function OrderCardScreen({ navigation }: Props) {
                 alignItems: "center",
                 justifyContent: "flex-end",
                 borderWidth: cardType === "plastic" ? 2 : 0,
-                borderColor: cardType === "plastic" ? isDark ? themeColors.text : "#338eda" : "",
+                borderColor:
+                  cardType === "plastic"
+                    ? isDark
+                      ? themeColors.text
+                      : "#338eda"
+                    : "",
               }}
               onPress={() => setCardType("plastic")}
             >
@@ -454,8 +464,12 @@ export default function OrderCardScreen({ navigation }: Props) {
                       key={design.id}
                       style={{
                         backgroundColor: design.unlisted
-                          ? isDark ? "#322D21" : "#F7F4E3"
-                          : isDark ? "#2A424E" : "#E7F2F9",
+                          ? isDark
+                            ? "#322D21"
+                            : "#F7F4E3"
+                          : isDark
+                            ? "#2A424E"
+                            : "#E7F2F9",
                         borderRadius: 12,
                         width: "48%",
                         marginBottom: isSelected ? -4 : 0,
