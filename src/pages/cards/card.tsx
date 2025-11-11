@@ -667,7 +667,7 @@ export default function CardPage(
         {ableToAddToWallet &&
           ephemeralKey &&
           Platform.OS === "ios" &&
-          !isVirtualCard &&
+          isVirtualCard &&
           card?.status != "canceled" && (
             <AddToWalletButton
               token={androidCardToken}
