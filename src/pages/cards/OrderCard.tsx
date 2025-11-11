@@ -161,7 +161,7 @@ export default function OrderCardScreen({ navigation }: Props) {
         >
           <Text
             style={{
-              color: palette.smoke,
+              color: themeColors.text,
               fontSize: 16,
               fontWeight: "500",
               marginBottom: 12,
@@ -179,6 +179,7 @@ export default function OrderCardScreen({ navigation }: Props) {
               ...eligibleOrganizations.map((org) => ({
                 label: org.name,
                 value: org.id,
+                color: themeColors.text,
               })),
             ]}
             value={organizationId}
@@ -205,12 +206,13 @@ export default function OrderCardScreen({ navigation }: Props) {
             placeholder={{
               label: "Select an organization...",
               value: null,
+              color: themeColors.text,
             }}
           />
 
           <Text
             style={{
-              color: palette.smoke,
+              color: themeColors.text,
               fontSize: 16,
               fontWeight: "500",
               marginBottom: 12,
@@ -228,21 +230,26 @@ export default function OrderCardScreen({ navigation }: Props) {
           >
             <TouchableOpacity
               style={{
-                backgroundColor: "#2A424E",
+                backgroundColor: isDark ? "#2A424E" : "#E7F2F9",
                 borderRadius: 12,
                 padding: 20,
                 width: "48%",
                 alignItems: "center",
                 justifyContent: "flex-end",
                 borderWidth: cardType === "virtual" ? 2 : 0,
-                borderColor: cardType === "virtual" ? themeColors.text : "",
+                borderColor:
+                  cardType === "virtual"
+                    ? isDark
+                      ? themeColors.text
+                      : "#338eda"
+                    : "",
               }}
               onPress={() => setCardType("virtual")}
             >
-              <RepIcon />
+              <RepIcon color={isDark ? themeColors.text : "#338eda"} />
               <Text
                 style={{
-                  color: themeColors.text,
+                  color: isDark ? themeColors.text : "#338eda",
                   fontWeight: "600",
                   marginTop: 12,
                   marginBottom: 6,
@@ -253,7 +260,7 @@ export default function OrderCardScreen({ navigation }: Props) {
               </Text>
               <Text
                 style={{
-                  color: palette.smoke,
+                  color: isDark ? palette.smoke : "#338eda",
                   fontSize: 13,
                   textAlign: "center",
                 }}
@@ -264,21 +271,26 @@ export default function OrderCardScreen({ navigation }: Props) {
 
             <TouchableOpacity
               style={{
-                backgroundColor: "#2A424E",
+                backgroundColor: isDark ? "#2A424E" : "#E7F2F9",
                 borderRadius: 12,
                 padding: 20,
                 width: "48%",
                 alignItems: "center",
                 justifyContent: "flex-end",
                 borderWidth: cardType === "plastic" ? 2 : 0,
-                borderColor: cardType === "plastic" ? themeColors.text : "",
+                borderColor:
+                  cardType === "plastic"
+                    ? isDark
+                      ? themeColors.text
+                      : "#338eda"
+                    : "",
               }}
               onPress={() => setCardType("plastic")}
             >
-              <CardIcon />
+              <CardIcon color={isDark ? themeColors.text : "#338eda"} />
               <Text
                 style={{
-                  color: themeColors.text,
+                  color: isDark ? themeColors.text : "#338eda",
                   fontWeight: "600",
                   marginTop: 12,
                   marginBottom: 6,
@@ -289,7 +301,7 @@ export default function OrderCardScreen({ navigation }: Props) {
               </Text>
               <Text
                 style={{
-                  color: palette.smoke,
+                  color: isDark ? palette.smoke : "#338eda",
                   fontSize: 13,
                   textAlign: "center",
                 }}
@@ -303,7 +315,7 @@ export default function OrderCardScreen({ navigation }: Props) {
             <>
               <Text
                 style={{
-                  color: palette.smoke,
+                  color: isDark ? palette.smoke : themeColors.text,
                   fontSize: 16,
                   fontWeight: "500",
                   marginBottom: 12,
@@ -427,7 +439,7 @@ export default function OrderCardScreen({ navigation }: Props) {
               </View>
               <Text
                 style={{
-                  color: palette.smoke,
+                  color: isDark ? palette.smoke : themeColors.text,
                   fontSize: 16,
                   fontWeight: "500",
                   marginBottom: 16,
@@ -452,8 +464,12 @@ export default function OrderCardScreen({ navigation }: Props) {
                       key={design.id}
                       style={{
                         backgroundColor: design.unlisted
-                          ? "#322D21"
-                          : "#2A424E",
+                          ? isDark
+                            ? "#322D21"
+                            : "#F7F4E3"
+                          : isDark
+                            ? "#2A424E"
+                            : "#E7F2F9",
                         borderRadius: 12,
                         width: "48%",
                         marginBottom: isSelected ? -4 : 0,
@@ -567,7 +583,7 @@ export default function OrderCardScreen({ navigation }: Props) {
           >
             <Text
               style={{
-                color: themeColors.text,
+                color: "white",
                 fontWeight: "600",
                 fontSize: 16,
               }}
