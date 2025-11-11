@@ -1,13 +1,12 @@
-import Svg, { Path, SvgProps } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 
-const CardIcon = (props: SvgProps) => (
+const CardIcon = ({ color }: { color: string }) => (
   <Svg
     width={40}
     height={40}
     viewBox="0 0 32 32"
     preserveAspectRatio="xMidYMid meet"
-    fill="white"
-    {...props}
+    fill={color}
   >
     <Path
       fillRule="evenodd"
