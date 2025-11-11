@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button } from "react-native";
+import { View, Text, StatusBar, Button, Linking } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
@@ -86,6 +86,68 @@ export default function AccountNumberPage({
       ),
     });
   }, [navigation]);
+
+  const { colors: themeColors } = useTheme();
+
+  if (
+    organization?.routing_number == null ||
+    organization?.account_number == null ||
+    organization?.swift_bic_code == null
+  ) {
+    return (
+      <View
+        style={{
+          padding: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+        <View style={{ alignItems: "center", maxWidth: 320 }}>
+          <Ionicons
+            name="document-text-outline"
+            size={80}
+            color={palette.muted}
+            style={{ marginBottom: 24 }}
+          />
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "600",
+              color: themeColors.text,
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            Account Details Not Available
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: palette.muted,
+              textAlign: "center",
+              lineHeight: 24,
+              marginBottom: 32,
+            }}
+          >
+            Your account details haven't been generated yet. Please generate
+            them on the website.
+          </Text>
+          <Button
+            title="Open Web Dashboard"
+            color={palette.primary}
+            onPress={() => {
+              Linking.openURL(
+                `https://hcb.hackclub.com/${organization?.slug}/account-number`,
+              );
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View
