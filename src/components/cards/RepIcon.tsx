@@ -1,11 +1,11 @@
 import Svg, { G, Path } from "react-native-svg";
 
-const RepIcon = () => (
+const RepIcon = ({ color }: { color: string }) => (
   <Svg
     aria-label="rep"
     viewBox="0 0 32 32"
     preserveAspectRatio="xMidYMid meet"
-    fill="white"
+    fill={color}
     width={48}
     height={48}
     title="rep"
