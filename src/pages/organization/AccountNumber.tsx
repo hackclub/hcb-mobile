@@ -89,7 +89,11 @@ export default function AccountNumberPage({
 
   const { colors: themeColors } = useTheme();
 
-  if (organization?.routing_number == null || organization?.account_number == null || organization?.swift_bic_code == null) {
+  if (
+    organization?.routing_number == null ||
+    organization?.account_number == null ||
+    organization?.swift_bic_code == null
+  ) {
     return (
       <View
         style={{
@@ -128,13 +132,16 @@ export default function AccountNumberPage({
               marginBottom: 32,
             }}
           >
-            Your account details haven't been generated yet. Please generate them on the website.
+            Your account details haven't been generated yet. Please generate
+            them on the website.
           </Text>
           <Button
             title="Open Web Dashboard"
             color={palette.primary}
             onPress={() => {
-              Linking.openURL(`https://hcb.hackclub.com/${organization?.slug}/account-number`);
+              Linking.openURL(
+                `https://hcb.hackclub.com/${organization?.slug}/account-number`,
+              );
             }}
           />
         </View>
