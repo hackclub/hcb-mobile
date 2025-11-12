@@ -6,11 +6,9 @@ import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import * as BackgroundTask from "expo-background-task";
 import * as Haptics from "expo-haptics";
 import * as QuickActions from "expo-quick-actions";
 import { useShareIntentContext } from "expo-share-intent";
-import * as TaskManager from "expo-task-manager";
 import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
 import {
   Text,
@@ -25,7 +23,7 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { mutate, preload, useSWRConfig } from "swr";
+import { preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
@@ -38,35 +36,6 @@ import ITransaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 import { organizationOrderEqual } from "../utils/util";
-
-const BACKGROUND_TASK_IDENTIFIER = "refresh-data";
-
-TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
-  try {
-    // Only attempt to mutate if we have network connectivity
-    const netInfo = await NetInfo.fetch();
-    if (!netInfo.isConnected) {
-      console.log("Background task skipped: no network connection");
-      return BackgroundTask.BackgroundTaskResult.Success;
-    }
-
-    await Promise.all([
-      mutate((k) => typeof k === "string" && k.startsWith("organizations/")),
-      mutate((k) => typeof k === "string" && k.startsWith("user/")),
-    ]);
-
-    return BackgroundTask.BackgroundTaskResult.Success;
-  } catch (error) {
-    console.error("Failed to execute the background task:", error);
-    return BackgroundTask.BackgroundTaskResult.Failed;
-  }
-});
-
-async function registerBackgroundTaskAsync() {
-  return BackgroundTask.registerTaskAsync(BACKGROUND_TASK_IDENTIFIER, {
-    minimumInterval: 60 * 60, // 1 hour in seconds
-  });
-}
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
@@ -106,21 +75,6 @@ export default function App({ navigation }: Props) {
     if (Platform.OS === "android") {
       runOnJS(setRefreshEnabled)(true);
     }
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const isRegistered = await TaskManager.isTaskRegisteredAsync(
-          BACKGROUND_TASK_IDENTIFIER,
-        );
-        if (!isRegistered) {
-          await registerBackgroundTaskAsync();
-        }
-      } catch (error) {
-        console.error("Failed to register background task:", error);
-      }
-    })();
   }, []);
 
   useEffect(() => {
