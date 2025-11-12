@@ -1,4 +1,3 @@
-
 ## Setup
 
 HCB Mobile connects to HCB throught the v4 API.

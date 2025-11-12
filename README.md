@@ -20,7 +20,6 @@ The official mobile app for [HCB](https://hackclub.com/bank/) - manage your orga
 
 </div>
 
-
 ## Table of Contents
 
 - [What is HCB?](#what-is-hcb)
@@ -61,6 +60,7 @@ We are so excited for you to join the codebase! We have a getting started
 documentation in the [`dev-docs` folder](/dev-docs/development.md).
 
 All contributors are expected to follow:
+
 - [Hack Club Code of Conduct](https://hackclub.com/conduct)
 - [Contributing Guidelines](https://github.com/hackclub/hackclub/blob/main/CONTRIBUTING.md)
 
