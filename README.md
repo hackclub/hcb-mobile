@@ -1,62 +1,74 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
-  <img src="assets/banner-light.png">
-</picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://cloud-djxhgxve6-hack-club-bot.vercel.app/0hcb-icon-icon-dark_1_.png">
+    <img src="https://cloud-5yru8jas0-hack-club-bot.vercel.app/0logo-512.png" width="126" alt="HCB logo">
+  </picture>
 
-### _HCB but smaller!_
+# HCB Mobile by Hack Club
+
+### _HCB in your pocket!_
+
+The official mobile app for [HCB](https://hackclub.com/bank/) - manage your organization's finances, track transactions, and stay connected on the go.
+
+<p align="center">
+  <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/6e061d60d00030c8b3a669503634fe765fdf7f6e_2.png" width="200" />
+  <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/1741f2a30811b0d1f3b8a40f6cb9bc0640a8c7ac_3.png" width="200" />
+  <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/7c2869acccda3603b6c2b82108183399e8039d52_4.png" width="200" />
+  <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/5e46e1969822788ee1b7be5b46f1e171603e6137_5.png" width="200" />
+</p>
 
 </div>
 
-## Setup
+## Table of Contents
 
-HCB Mobile connects to HCB throught the v4 API.
-You can either connect to the production HCB instance, or a local development instance.
+- [What is HCB?](#what-is-hcb)
+- [Features](#features)
+- [Quick start](#quick-start)
+- [Contributing](#contributing)
+- [Documentation](https://github.com/hackclub/hcb/blob/main/dev-docs/)
 
-### Production HCB
+## What is HCB?
 
-Set your `.env` to include the following variables:
+HCB is an [open source](https://hackclub.com/fiscal-sponsorship/open-source/),
+safe, and easy-to-use fiscal sponsorship platform for hackathons, Hack Clubs,
+robotic teams and more. We use it to run
+our [fiscal sponsorship program](https://hackclub.com/fiscal-sponsorship/), we
+provide high schoolers with a 501(c)(3) status-backed restricted fund for their
+organization.
 
-```
-EXPO_PUBLIC_API_BASE=https://hcb.hackclub.com/api/v4
-EXPO_PUBLIC_CLIENT_ID=yt8JHmPDmmYYLUmoEiGtocYwg5fSOGCrcIY3G-vkMRs
-EXPO_PUBLIC_STRIPE_API_KEY=pk_live_UAjIP1Kss29XZ6tW0MFWkjUQ
-```
+## Features
 
-### Development HCB
+**HCB Mobile** brings the full power of HCB right to your pocket. You can:
 
-Go into the Rails console on your development server (`bin/rails c`), and run the following:
+- Track your organizations—stay up to date with your organization activity straight for your phone.
 
-```
-app = Doorkeeper::Application.create(name: "mobile", redirect_uri: "hcb://", scopes: ["read", "write"], confidential: false)
-```
+- Manage your cards—now you can add your cards directly to your Apple / Google Wallet directly from the app (no more manually entering in card details). Need a new card on the go? Issue a new card right from your phone! Card got lost while shopping? Freeze it with just a tap.
 
-Then, set your `.env` to include the following variables:
+- Upload receipts the easy way—we all know receipt tracking is painful, so we built it directly into the app! Upload photos directly from your device, share them from other apps, or match existing receipts to transactions with a tap.
 
-```
-EXPO_PUBLIC_API_BASE=http://<host>/api/v4
-EXPO_PUBLIC_CLIENT_ID=<uid field from the Doorkeeper app>
-```
+- Accept Tap to Pay donations—accept contactless payments directly on your mobile device. No extra hardware required.
 
-## Building on iOS
+## Quick start
 
-1. Install Xcode/Node.js
-2. `npm install`
-3. `npm run ios` - builds and runs the app in a simulator
-   - Run with the `-- --device` flag to get a device selector, e.g. to run on a physical iPhone
-   - Bonus task: fry an egg on your Mac while this runs
-
-## Building on Android
-
-1. Install Android Studio & Node.js
-2. Setup a new AVD in Android Studio with api >= 34
-3. Install & set your `JAVA_HOME` to a Java 17 SDK
-4. `npm install`
-5. `npm run android` - builds and runs the app in a simulator
-   - Run with the `-- --device` flag to get a device selector, e.g. to run on a physical Android phone
-   - Bonus task: painfully watch Gradle attempt to work
+To run HCB Mobile in a development environment, follow the setup instructions in
+our [documentation](/dev-docs/development.md). We provide setup instructions for running the app both on Android Simulators [(Android Studio)](https://developer.android.com/studio) and on iOS Simulators [(Xcode)](https://developer.apple.com/xcode/)
 
 ## Contributing
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+We are so excited for you to join the codebase! We have a getting started
+documentation in the [`dev-docs` folder](/dev-docs/development.md).
+
+All contributors are expected to follow:
+
+- [Hack Club Code of Conduct](https://hackclub.com/conduct)
+- [Contributing Guidelines](https://github.com/hackclub/hackclub/blob/main/CONTRIBUTING.md)
+
+Join the [#hcb-mobile](https://hackclub.slack.com/archives/C04CW5HNGR5) channel on the [Hack Club Slack](https://hackclub.com/slack) for support.
+
+<div align="center">
+  <br>
+  <p><strong>Happy hacking. ❤️</strong></p>
+</div>
+
+🔼 [Back to Top](#hcb-mobile-by-hack-club)
