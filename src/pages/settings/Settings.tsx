@@ -36,7 +36,7 @@ import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
 
-const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
+const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 
 const THEME_KEY = "app_theme";
 const BIOMETRICS_KEY = "biometrics_required";

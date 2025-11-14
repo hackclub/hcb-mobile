@@ -187,11 +187,15 @@ export default function ProcessDonationPage({
     navigation.setOptions({
       title: showQR ? "Donation Link" : undefined,
       headerLeft: () => (
-        <Button
-          title={status === "ready" || status === "loading" ? "Cancel" : "Done"}
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
+        <View style={{ marginRight: Platform.OS === "android" ? 15 : 0 }}>
+          <Button
+            title={
+              status === "ready" || status === "loading" ? "Cancel" : "Done"
+            }
+            color={palette.primary}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
       ),
     });
   }, [showQR, status, navigation]);

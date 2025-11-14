@@ -197,7 +197,6 @@ export default function useClient() {
                     throw innerError;
                   }
                 } else {
-                  console.error("Token refresh failed, returning 401 response");
                   pendingRetriesRef.current.delete(requestKey);
                   return response;
                 }
