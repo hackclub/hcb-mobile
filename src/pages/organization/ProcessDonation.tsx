@@ -16,6 +16,10 @@ import {
 } from "react-native";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import StyledButton from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
@@ -109,12 +113,13 @@ function ButtonGroup({
   children: React.ReactNode;
   style?: ViewStyle;
 }) {
+  const insets = useSafeAreaInsets();
   return (
     <View
       style={{
         width: "100%",
         position: "absolute",
-        bottom: 30,
+        bottom: insets.bottom + 16,
         alignItems: "center",
         ...style,
       }}
@@ -407,9 +412,9 @@ export default function ProcessDonationPage({
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
+    <SafeAreaView style={{ flex: 1, padding: 20 }}>
       <StatusBar barStyle="light-content" />
       {renderContent()}
-    </View>
+    </SafeAreaView>
   );
 }

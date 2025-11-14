@@ -84,8 +84,27 @@ export default function SettingsPage({ navigation }: Props) {
   const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
 
   useEffect(() => {
-    HelpscoutBeacon.init(beaconID || "");
+    if (!beaconID) {
+      console.warn("HelpScout Beacon ID not configured");
+      return;
+    }
+
+    try {
+      HelpscoutBeacon.init(beaconID);
+    } catch (error) {
+      console.error("Failed to initialize HelpScout Beacon", error);
+    }
   }, [beaconID]);
+
+  useEffect(() => {
+    if (user?.email && user?.name && user?.id) {
+      try {
+        HelpscoutBeacon.login(user.email, user.name, user.id);
+      } catch (error) {
+        console.error("Failed to login to HelpScout Beacon", error);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -602,7 +621,7 @@ export default function SettingsPage({ navigation }: Props) {
             />
           </Pressable>
 
-          {Platform.OS === "ios" && (
+          {Platform.OS === "ios" && beacon?.signature && (
             <>
               <View
                 style={{
@@ -619,14 +638,18 @@ export default function SettingsPage({ navigation }: Props) {
                   paddingVertical: 18,
                   paddingHorizontal: 18,
                 }}
-                onPress={() =>
-                  HelpscoutBeacon.loginAndOpen(
-                    user?.email || "",
-                    user?.name || "",
-                    user?.id || "",
-                    beacon?.signature || "",
-                  )
-                }
+                onPress={() => {
+                  try {
+                    HelpscoutBeacon.open(beacon?.signature);
+                  } catch (error) {
+                    Toast.show({
+                      type: ALERT_TYPE.DANGER,
+                      title: "Failed to open HelpScout Beacon",
+                      textBody: "Please try again later.",
+                    });
+                    console.error("Failed to open HelpScout Beacon", error);
+                  }
+                }}
               >
                 <Ionicons
                   name="chatbox-ellipses-outline"

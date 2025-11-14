@@ -25,7 +25,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Progress from "react-native-progress";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
@@ -268,6 +271,7 @@ function PageContent({
   const [orgCheckLoading, setOrgCheckLoading] = useState(true);
   const hcb = useClient();
   const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const loadSetting = async () => {
@@ -577,9 +581,6 @@ function PageContent({
         paymentIntent: localPayment,
       });
       if (error) {
-        if (error.code != "Canceled") {
-          showAlert("Error collecting payment", error.message);
-        }
         return false;
       }
       output = (await confirmPayment(localPayment)) ?? false;
@@ -714,6 +715,22 @@ function PageContent({
 
             <Button
               onPress={async () => {
+                if (__DEV__) {
+                  navigation.navigate("ProcessDonation", {
+                    orgId,
+                    payment: { amount: 5000 } as PaymentIntent.Type, // $50.00
+                    collectPayment: async () => {
+                      // Mock payment function - simulates success after 2 seconds
+                      return new Promise((resolve) =>
+                        setTimeout(() => resolve(true), 2000),
+                      );
+                    },
+                    name: "Dev Test User",
+                    email: "dev@example.com",
+                    slug: orgSlug || "test-org",
+                  });
+                  return;
+                }
                 setLoadingConnectingReader(true);
                 const waitForReader = async (
                   timeoutMs = 10000,
@@ -777,7 +794,7 @@ function PageContent({
               style={{
                 marginBottom: 10,
                 position: "absolute",
-                bottom: Platform.OS === "android" ? 0 : 40,
+                bottom: insets.bottom || 16,
                 width: "100%",
               }}
               loading={loadingConnectingReader}

@@ -255,7 +255,11 @@ export default function Navigator() {
             <Stack.Screen
               name="ProcessDonation"
               component={ProcessDonationPage}
-              options={{ presentation: "modal", title: "Process Donation" }}
+              options={{
+                presentation: "modal",
+                title: "Process Donation",
+                headerTitle: "Process Donation",
+              }}
             />
             <Stack.Screen
               options={({ route }) => ({
