@@ -10,8 +10,11 @@ import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Text, View, Animated, useColorScheme, Platform } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, View, Animated, useColorScheme } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
@@ -31,6 +34,7 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -70,7 +74,7 @@ export default function Login() {
 
   useEffect(() => {
     const setStatusBar = async () => {
-      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#F6F6F6");
+      await SystemUI.setBackgroundColorAsync(isDark ? "#16161E" : "#F6F6F6");
     };
     setStatusBar();
     if (!response || isProcessing) return;
@@ -166,7 +170,7 @@ export default function Login() {
             flexDirection: "column",
             gap: 12,
             paddingHorizontal: 20,
-            marginBottom: Platform.OS === "ios" ? 20 : 0,
+            marginBottom: insets.bottom || 16,
           }}
         >
           <Animated.View
