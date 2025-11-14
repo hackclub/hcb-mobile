@@ -24,7 +24,7 @@ import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { mutate, preload, useSWRConfig } from "swr";
+import { preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
