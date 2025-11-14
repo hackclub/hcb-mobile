@@ -25,14 +25,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Progress from "react-native-progress";
-<<<<<<< HEAD
-import { SafeAreaView } from "react-native-safe-area-context";
-=======
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
->>>>>>> 5509a9f (More Android QoL)
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
@@ -808,20 +804,6 @@ function PageContent({
                   );
                 }
                 setLoadingConnectingReader(false);
-<<<<<<< HEAD
-              }}
-              style={{
-                marginBottom: 10,
-                position: "absolute",
-                bottom: Platform.OS === "android" ? 0 : 40,
-                width: "100%",
-              }}
-              loading={loadingConnectingReader}
-            >
-              Collect Donations
-            </Button>
-          </View>
-=======
                 return;
               }
 
@@ -872,7 +854,6 @@ function PageContent({
           >
             Collect Donations
           </Button>
->>>>>>> 5509a9f (More Android QoL)
         </View>
       </SafeAreaView>
     );
