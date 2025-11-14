@@ -198,11 +198,12 @@ export default function OrderCardScreen({ navigation }: Props) {
                 backgroundColor: themeColors.card,
                 color: themeColors.text,
                 borderRadius: 12,
-                padding: 12,
                 marginBottom: 24,
                 fontSize: 15,
+                paddingHorizontal: 15,
               },
             }}
+            useNativeAndroidPickerStyle={false}
             placeholder={{
               label: "Select an organization...",
               value: null,

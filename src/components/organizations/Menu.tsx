@@ -55,7 +55,7 @@ export default function Menu({
       }}
     >
       <Ionicons.Button
-        name="ellipsis-horizontal-circle"
+        name="ellipsis-horizontal-circle-outline"
         backgroundColor="transparent"
         size={24}
         color={palette.primary}
