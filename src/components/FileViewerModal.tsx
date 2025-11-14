@@ -54,6 +54,7 @@ export default function FileViewerModal({
   // Can't open PDFs in the WebView on Android
   if (Platform.OS === "android" && fileUrl.includes(".pdf")) {
     WebBrowser.openBrowserAsync(fileUrl);
+    onRequestClose();
     return null;
   }
 
