@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button, Linking } from "react-native";
+import { View, Text, StatusBar, Button, Linking, Platform } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
@@ -152,7 +152,7 @@ export default function AccountNumberPage({
   return (
     <View
       style={{
-        padding: 20,
+        padding: Platform.OS === "android" ? 40 : 20,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

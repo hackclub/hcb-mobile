@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth/auth";
@@ -122,173 +123,176 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {/* From Section */}
-      <Text
-        style={{
-          color: themeColors.text,
-          fontSize: 18,
-          marginVertical: 12,
-          fontWeight: "bold",
-        }}
-      >
-        From
-      </Text>
-      <View
-        style={{
-          backgroundColor: themeColors.card,
-          borderRadius: 8,
-          padding: 15,
-          marginBottom: 15,
-        }}
-      >
-        <Text style={{ color: themeColors.text, fontSize: 16 }}>
-          {organization.name} ({renderMoney(organization.balance_cents)})
-        </Text>
-      </View>
-
-      {/* To Section */}
-      <Text
-        style={{
-          color: themeColors.text,
-          fontSize: 18,
-          marginVertical: 12,
-          fontWeight: "bold",
-        }}
-      >
-        To
-      </Text>
-      <View
-        style={{
-          backgroundColor: themeColors.card,
-          borderRadius: 8,
-          marginBottom: 15,
-        }}
-      >
-        <RNPickerSelect
-          placeholder={{
-            label: "Select an organization",
-            value: "",
-            color: themeColors.text,
-          }}
-          onValueChange={(itemValue: string) => setOrganization(itemValue)}
-          darkTheme={isDark}
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+        {/* From Section */}
+        <Text
           style={{
-            inputIOS: {
-              color: themeColors.text,
-              padding: 15,
-              fontSize: 16,
-              pointerEvents: "none",
-            },
-            inputAndroid: {
-              color: themeColors.text,
-              paddingHorizontal: 15,
-              fontSize: 16,
-            },
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
           }}
-          items={[
-            ...organizations
-              .filter((org) => org.id !== organization.id)
-              .filter((org) => org.playground_mode === false)
-              .map((org) => ({
-                label: org.name,
-                value: org.id,
-                color: themeColors.text,
-              })),
-          ]}
-        />
-      </View>
-      <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
-        You can transfer to any organization you're a part of.
-      </Text>
-
-      {/* Amount Section */}
-      <Text
-        style={{
-          color: themeColors.text,
-          fontSize: 18,
-          marginVertical: 12,
-          fontWeight: "bold",
-        }}
-      >
-        Amount
-      </Text>
-      <TextInput
-        style={{
-          backgroundColor: themeColors.card,
-          color: themeColors.text,
-          borderRadius: 8,
-          padding: 12,
-          fontSize: 16,
-          marginBottom: 15,
-        }}
-        value={amount}
-        onChangeText={(text) => {
-          const sanitizedText = text.replace(/[^\d.]/g, "");
-          // remove 0.00 if user enters a new number
-          if (sanitizedText.startsWith("0.00")) {
-            setAmount(text.replace("0.00", ""));
-            return;
-          }
-          setAmount(sanitizedText ? `$${sanitizedText}` : "$0.00");
-        }}
-        placeholder="$0.00"
-        placeholderTextColor={themeColors.text}
-        keyboardType="numeric"
-      />
-
-      {/* Purpose Section */}
-      <Text
-        style={{
-          color: themeColors.text,
-          fontSize: 18,
-          marginVertical: 12,
-          fontWeight: "bold",
-        }}
-      >
-        What is the transfer for?
-      </Text>
-      <TextInput
-        style={{
-          backgroundColor: themeColors.card,
-          color: themeColors.text,
-          borderRadius: 8,
-          padding: 12,
-          fontSize: 16,
-          marginBottom: 10,
-        }}
-        value={reason}
-        onChangeText={(text) => setReason(text)}
-        placeholder="Donating extra funds to another organization"
-        placeholderTextColor={palette.muted}
-      />
-      <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
-        This is to help HCB keep record of our transactions.
-      </Text>
-
-      {/* Transfer Button */}
-      <TouchableOpacity
-        onPress={handleTransfer}
-        disabled={isLoading || !isOnline}
-        style={{
-          backgroundColor: isOnline
-            ? themeColors.primary
-            : themeColors.primary + "80",
-          padding: 15,
-          borderRadius: 8,
-          alignItems: "center",
-          marginVertical: 20,
-        }}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
-            Submit Transfer
+        >
+          From
+        </Text>
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 8,
+            padding: 15,
+            marginBottom: 15,
+          }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 16 }}>
+            {organization.name} ({renderMoney(organization.balance_cents)})
           </Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        </View>
+
+        {/* To Section */}
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          To
+        </Text>
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 8,
+            marginBottom: 15,
+          }}
+        >
+          <RNPickerSelect
+            placeholder={{
+              label: "Select an organization",
+              value: "",
+              color: themeColors.text,
+            }}
+            onValueChange={(itemValue: string) => setOrganization(itemValue)}
+            darkTheme={isDark}
+            style={{
+              inputIOS: {
+                color: themeColors.text,
+                padding: 15,
+                fontSize: 16,
+                pointerEvents: "none",
+              },
+              inputAndroid: {
+                color: themeColors.text,
+                paddingHorizontal: 15,
+                fontSize: 16,
+              },
+            }}
+            useNativeAndroidPickerStyle={false}
+            items={[
+              ...organizations
+                .filter((org) => org.id !== organization.id)
+                .filter((org) => org.playground_mode === false)
+                .map((org) => ({
+                  label: org.name,
+                  value: org.id,
+                  color: themeColors.text,
+                })),
+            ]}
+          />
+        </View>
+        <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
+          You can transfer to any organization you're a part of.
+        </Text>
+
+        {/* Amount Section */}
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          Amount
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            marginBottom: 15,
+          }}
+          value={amount}
+          onChangeText={(text) => {
+            const sanitizedText = text.replace(/[^\d.]/g, "");
+            // remove 0.00 if user enters a new number
+            if (sanitizedText.startsWith("0.00")) {
+              setAmount(text.replace("0.00", ""));
+              return;
+            }
+            setAmount(sanitizedText ? `$${sanitizedText}` : "$0.00");
+          }}
+          placeholder="$0.00"
+          placeholderTextColor={themeColors.text}
+          keyboardType="numeric"
+        />
+
+        {/* Purpose Section */}
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          What is the transfer for?
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 14,
+            marginBottom: 10,
+          }}
+          value={reason}
+          onChangeText={(text) => setReason(text)}
+          placeholder="Donating extra funds to another organization"
+          placeholderTextColor={palette.muted}
+        />
+        <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
+          This is to help HCB keep record of our transactions.
+        </Text>
+
+        {/* Transfer Button */}
+        <TouchableOpacity
+          onPress={handleTransfer}
+          disabled={isLoading || !isOnline}
+          style={{
+            backgroundColor: isOnline
+              ? themeColors.primary
+              : themeColors.primary + "80",
+            padding: 15,
+            borderRadius: 8,
+            alignItems: "center",
+            marginVertical: 20,
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+              Submit Transfer
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 

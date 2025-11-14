@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
   Modal,
@@ -6,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import ImageView from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -42,8 +44,17 @@ export default function FileViewerModal({
         imageIndex={0}
         visible={visible}
         onRequestClose={onRequestClose}
+        presentationStyle={
+          Platform.OS === "android" ? "overFullScreen" : "fullScreen"
+        }
       />
     );
+  }
+
+  // Can't open PDFs in the WebView on Android
+  if (Platform.OS === "android" && fileUrl.includes(".pdf")) {
+    WebBrowser.openBrowserAsync(fileUrl);
+    return null;
   }
 
   return (

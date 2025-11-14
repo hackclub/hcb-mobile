@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -87,8 +86,8 @@ export default function FeedbackModal({
         onPress={handleClose}
       >
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ width: "100%", maxWidth: 500 }}
+          behavior={"padding"}
+          style={{ width: "100%", minHeight: "60%" }}
         >
           <Pressable
             style={{

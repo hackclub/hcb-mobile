@@ -59,13 +59,6 @@ export function useOfflineSWR<Data, Error = unknown>(
       const status =
         errorWithStatus?.status || errorWithStatus?.response?.status;
 
-      if (status === 401 || status === 403) {
-        console.log(
-          `useOfflineSWR: Not retrying ${key} due to auth error (${status})`,
-        );
-        return;
-      }
-
       if (status === 404) {
         return;
       }

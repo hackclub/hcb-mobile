@@ -10,7 +10,7 @@ import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Text, View, Animated, useColorScheme } from "react-native";
+import { Text, View, Animated, useColorScheme, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
@@ -166,7 +166,7 @@ export default function Login() {
             flexDirection: "column",
             gap: 12,
             paddingHorizontal: 20,
-            marginBottom: 20,
+            marginBottom: Platform.OS === "ios" ? 20 : 0,
           }}
         >
           <Animated.View
@@ -257,7 +257,6 @@ export default function Login() {
                 "https://hcb.hackclub.com/users/auth?signup=true",
               )
             }
-            loading={loading}
             style={{
               backgroundColor: palette.primary,
               borderWidth: 0,

@@ -24,6 +24,7 @@ import {
   View,
   ActivityIndicator,
   Platform,
+  Appearance,
 } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -214,6 +215,7 @@ export default function AppContent({
   useEffect(() => {
     const setStatusBar = async () => {
       await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
+      Appearance.setColorScheme(isDark ? "dark" : "light");
     };
     setStatusBar();
     const checkAuth = async () => {
@@ -470,13 +472,6 @@ export default function AppContent({
                     const status =
                       errorWithStatus?.status ||
                       errorWithStatus?.response?.status;
-
-                    if (status === 401 || status === 403) {
-                      console.log(
-                        `SWR: Not retrying ${key} due to auth error (${status})`,
-                      );
-                      return;
-                    }
 
                     if (status === 404) {
                       return;
