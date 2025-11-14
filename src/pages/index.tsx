@@ -23,7 +23,8 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { preload, useSWRConfig } from "swr";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { mutate, preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
@@ -375,123 +376,125 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ReorderableList
-      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
-      onReorder={({ from, to }) => {
-        Haptics.selectionAsync();
-        const newOrgs = [...sortedOrgs];
-        const [removed] = newOrgs.splice(from, 1);
-        newOrgs.splice(to, 0, removed);
-        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
-          setSortedOrgs(newOrgs);
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+      <ReorderableList
+        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        onReorder={({ from, to }) => {
+          Haptics.selectionAsync();
+          const newOrgs = [...sortedOrgs];
+          const [removed] = newOrgs.splice(from, 1);
+          newOrgs.splice(to, 0, removed);
+          if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+            setSortedOrgs(newOrgs);
+          }
+        }}
+        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: tabBarHeight,
+        }}
+        contentInsetAdjustmentBehavior="automatic"
+        data={sortedOrgs}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            enabled={refreshEnabled}
+          />
         }
-      }}
-      scrollIndicatorInsets={{ bottom: tabBarHeight }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingBottom: tabBarHeight,
-      }}
-      contentInsetAdjustmentBehavior="automatic"
-      data={sortedOrgs}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          enabled={refreshEnabled}
-        />
-      }
-      panGesture={panGesture}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      ListHeaderComponent={() =>
-        (invitations && invitations.length > 0) ||
-        (grantInvites && grantInvites.length > 0) ? (
-          <View
-            style={{
-              marginTop: 10,
-              marginBottom: 20,
-              borderRadius: 10,
-            }}
-          >
-            {invitations && invitations.length > 0 && (
-              <>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                  }}
-                >
-                  Pending invitations
-                </Text>
-                {invitations.map((invitation) => (
-                  <Event
-                    key={invitation.id}
-                    invitation={invitation}
+        panGesture={panGesture}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        ListHeaderComponent={() =>
+          (invitations && invitations.length > 0) ||
+          (grantInvites && grantInvites.length > 0) ? (
+            <View
+              style={{
+                marginTop: 10,
+                marginBottom: 20,
+                borderRadius: 10,
+              }}
+            >
+              {invitations && invitations.length > 0 && (
+                <>
+                  <Text
                     style={{
-                      borderWidth: 2,
-                      borderColor:
-                        scheme == "dark" ? palette.primary : palette.muted,
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
                       marginBottom: 10,
                     }}
-                    event={invitation.organization}
-                    onPress={() =>
-                      navigation.navigate("Invitation", {
-                        inviteId: invitation.id,
-                        invitation,
-                      })
-                    }
-                    hideBalance
-                  />
-                ))}
-              </>
-            )}
+                  >
+                    Pending invitations
+                  </Text>
+                  {invitations.map((invitation) => (
+                    <Event
+                      key={invitation.id}
+                      invitation={invitation}
+                      style={{
+                        borderWidth: 2,
+                        borderColor:
+                          scheme == "dark" ? palette.primary : palette.muted,
+                        marginBottom: 10,
+                      }}
+                      event={invitation.organization}
+                      onPress={() =>
+                        navigation.navigate("Invitation", {
+                          inviteId: invitation.id,
+                          invitation,
+                        })
+                      }
+                      hideBalance
+                    />
+                  ))}
+                </>
+              )}
 
-            {grantInvites && grantInvites.length > 0 && (
-              <>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                    marginTop: invitations && invitations.length > 0 ? 20 : 0,
-                  }}
-                >
-                  Available grants
-                </Text>
-                {grantInvites.map((grant) => (
-                  <GrantInvite
-                    key={grant.id}
-                    grant={grant}
-                    navigation={navigation}
+              {grantInvites && grantInvites.length > 0 && (
+                <>
+                  <Text
                     style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
                       marginBottom: 10,
+                      marginTop: invitations && invitations.length > 0 ? 20 : 0,
                     }}
-                  />
-                ))}
-              </>
-            )}
-          </View>
-        ) : null
-      }
-      renderItem={renderItem}
-      ListFooterComponent={() =>
-        organizations.length > 2 && (
-          <Text
-            style={{
-              color: palette.muted,
-              textAlign: "center",
-              marginTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            Drag to reorder organizations
-          </Text>
-        )
-      }
-      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-    />
+                  >
+                    Available grants
+                  </Text>
+                  {grantInvites.map((grant) => (
+                    <GrantInvite
+                      key={grant.id}
+                      grant={grant}
+                      navigation={navigation}
+                      style={{
+                        marginBottom: 10,
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </View>
+          ) : null
+        }
+        renderItem={renderItem}
+        ListFooterComponent={() =>
+          organizations.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder organizations
+            </Text>
+          )
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+      />
+    </SafeAreaView>
   );
 }
