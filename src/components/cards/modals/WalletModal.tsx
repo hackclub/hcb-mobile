@@ -114,7 +114,8 @@ export default function WalletModal({
             </View>
           )}
           {((ableToAddToWallet && !cardAddedToWallet) || androidCardToken) &&
-            ephemeralKey && walletCard && (
+            ephemeralKey &&
+            walletCard && (
               <AddToWalletButton
                 {...(androidCardToken ? { token: androidCardToken } : {})}
                 androidAssetSource={require("../../../../assets/google-wallet.png")}

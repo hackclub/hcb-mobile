@@ -11,10 +11,7 @@ import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Text, View, Animated, useColorScheme } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
 import Button from "../components/Button";
@@ -34,7 +31,6 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
-  const insets = useSafeAreaInsets();
 
   const [request, response, promptAsync] = useAuthRequest(
     {
