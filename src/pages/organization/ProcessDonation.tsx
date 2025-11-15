@@ -119,7 +119,7 @@ function ButtonGroup({
       style={{
         width: "100%",
         position: "absolute",
-        bottom: insets.bottom + 16,
+        bottom: insets.bottom,
         alignItems: "center",
         ...style,
       }}
