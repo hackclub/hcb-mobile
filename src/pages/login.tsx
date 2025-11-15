@@ -170,7 +170,6 @@ export default function Login() {
             flexDirection: "column",
             gap: 12,
             paddingHorizontal: 20,
-            marginBottom: insets.bottom || 16,
           }}
         >
           <Animated.View

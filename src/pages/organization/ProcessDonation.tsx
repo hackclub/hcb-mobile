@@ -412,7 +412,7 @@ export default function ProcessDonationPage({
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20 }}>
       <StatusBar barStyle="light-content" />
       {renderContent()}
     </SafeAreaView>
