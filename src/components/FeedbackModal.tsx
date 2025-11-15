@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -34,6 +34,7 @@ export default function FeedbackModal({
   onSubmit,
 }: FeedbackModalProps) {
   const { colors } = useTheme();
+  const scrollViewRef = useRef<ScrollView>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("feature");
   const [feedbackText, setFeedbackText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +100,7 @@ export default function FeedbackModal({
             }}
           >
             <ScrollView
+              ref={scrollViewRef}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               bounces={false}
@@ -238,6 +240,11 @@ export default function FeedbackModal({
                 numberOfLines={6}
                 value={feedbackText}
                 onChangeText={setFeedbackText}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 100);
+                }}
               />
 
               {/* Action Buttons */}
