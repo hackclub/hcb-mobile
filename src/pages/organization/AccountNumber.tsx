@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { View, Text, StatusBar, Button, Linking, Platform } from "react-native";
 
@@ -10,7 +9,6 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
-import Icon from "@thedev132/hackclub-icons-rn";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 
@@ -78,22 +76,22 @@ export default function AccountNumberPage({
     navigation.setOptions({
       headerLeft: () => (
         <>
-        {Platform.OS === "android" ? (
-          <View style={{ marginRight: 20 }}>
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color={themeColors.text}
+          {Platform.OS === "android" ? (
+            <View style={{ marginRight: 20 }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={themeColors.text}
+                onPress={() => navigation.goBack()}
+              />
+            </View>
+          ) : (
+            <Button
+              title="Done"
+              color={palette.primary}
               onPress={() => navigation.goBack()}
             />
-          </View>
-        ) : (
-          <Button
-          title="Done"
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
-        )}
+          )}
         </>
       ),
     });
