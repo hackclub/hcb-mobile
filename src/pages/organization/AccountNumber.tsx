@@ -10,6 +10,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import Icon from "@thedev132/hackclub-icons-rn";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 
@@ -76,13 +77,24 @@ export default function AccountNumberPage({
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
+        <>
+        {Platform.OS === "android" ? (
+          <View style={{ marginRight: 20 }}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={themeColors.text}
+              onPress={() => navigation.goBack()}
+            />
+          </View>
+        ) : (
           <Button
-            title="Done"
-            color={palette.primary}
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+          title="Done"
+          color={palette.primary}
+          onPress={() => navigation.goBack()}
+        />
+        )}
+        </>
       ),
     });
   }, [navigation]);

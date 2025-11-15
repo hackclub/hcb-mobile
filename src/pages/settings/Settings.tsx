@@ -639,16 +639,7 @@ export default function SettingsPage({ navigation }: Props) {
                   paddingHorizontal: 18,
                 }}
                 onPress={() => {
-                  try {
-                    HelpscoutBeacon.open(beacon?.signature);
-                  } catch (error) {
-                    Toast.show({
-                      type: ALERT_TYPE.DANGER,
-                      title: "Failed to open HelpScout Beacon",
-                      textBody: "Please try again later.",
-                    });
-                    console.error("Failed to open HelpScout Beacon", error);
-                  }
+                  HelpscoutBeacon.open(beacon?.signature);
                 }}
               >
                 <Ionicons

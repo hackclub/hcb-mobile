@@ -161,17 +161,13 @@ export default function CardsPage({ navigation }: Props) {
             actions={[
               {
                 id: "toggleCanceledCards",
-                title: canceledCardsShown
-                  ? "Hide Canceled Cards"
-                  : "Show Canceled Cards",
-                state: canceledCardsShown ? "on" : "off",
+                title: "Hide Canceled Cards",
+                state: canceledCardsShown ? "off" : "on",
               },
               {
                 id: "toggleFrozenCards",
-                title: frozenCardsShown
-                  ? "Hide Frozen Cards"
-                  : "Show Frozen Cards",
-                state: frozenCardsShown ? "on" : "off",
+                title: "Hide Frozen Cards",
+                state: frozenCardsShown ? "off" : "on",
               },
             ]}
             onPressAction={({ nativeEvent: { event } }) => {

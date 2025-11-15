@@ -192,15 +192,24 @@ export default function ProcessDonationPage({
     navigation.setOptions({
       title: showQR ? "Donation Link" : undefined,
       headerLeft: () => (
-        <View style={{ marginRight: Platform.OS === "android" ? 15 : 0 }}>
+        <>
+        {Platform.OS === "android" ? (
+          <View style={{ marginRight: 20 }}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={theme.colors.text}
+              onPress={() => navigation.goBack()}
+            />
+          </View>
+        ) : (
           <Button
-            title={
-              status === "ready" || status === "loading" ? "Cancel" : "Done"
-            }
-            color={palette.primary}
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+          title="Done"
+          color={palette.primary}
+          onPress={() => navigation.goBack()}
+        />
+        )}
+        </>
       ),
     });
   }, [showQR, status, navigation]);

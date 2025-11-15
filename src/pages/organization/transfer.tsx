@@ -12,7 +12,8 @@ import {
 import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import { palette } from "../../styles/theme";
+import { palette, theme } from "../../styles/theme";
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 
@@ -24,13 +25,24 @@ export default function TransferPage({ navigation, route }: Props) {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
+        <>
+        {Platform.OS === "android" ? (
+          <View style={{ marginRight: 20 }}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={theme.colors.text}
+              onPress={() => navigation.goBack()}
+            />
+          </View>
+        ) : (
           <NativeButton
-            color={palette.primary}
-            title="Cancel"
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+          title="Done"
+          color={palette.primary}
+          onPress={() => navigation.goBack()}
+        />
+        )}
+        </>
       ),
     });
   }, [navigation]);
