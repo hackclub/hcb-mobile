@@ -119,7 +119,7 @@ function ButtonGroup({
       style={{
         width: "100%",
         position: "absolute",
-        bottom: insets.bottom + 16,
+        bottom: insets.bottom,
         alignItems: "center",
         ...style,
       }}
@@ -412,7 +412,7 @@ export default function ProcessDonationPage({
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20 }}>
       <StatusBar barStyle="light-content" />
       {renderContent()}
     </SafeAreaView>
