@@ -9,6 +9,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import Icon from "@thedev132/hackclub-icons-rn";
 
 type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 
