@@ -627,8 +627,9 @@ function PageContent({
           padding: 20,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
           flex: 1,
+          paddingBottom: Math.max(tabBarHeight, insets.bottom) + 20,
         }}
       >
         <View
@@ -637,8 +638,6 @@ function PageContent({
             justifyContent: "center",
             alignItems: "center",
             flex: 1,
-
-            paddingBottom: 100,
           }}
         >
           <Ionicons name="card-outline" size={100} color={palette.primary} />
@@ -708,96 +707,94 @@ function PageContent({
               />
             </View>
           ) : null}
-
-          <Button
-            onPress={async () => {
-              if (__DEV__) {
-                navigation.navigate("ProcessDonation", {
-                  orgId,
-                  payment: { amount: 5000 } as PaymentIntent.Type, // $50.00
-                  collectPayment: async () => {
-                    // Mock payment function - simulates success after 2 seconds
-                    return new Promise((resolve) =>
-                      setTimeout(() => resolve(true), 2000),
-                    );
-                  },
-                  name: "Dev Test User",
-                  email: "dev@example.com",
-                  slug: orgSlug || "test-org",
-                });
-                return;
-              }
-              setLoadingConnectingReader(true);
-              const waitForReader = async (
-                timeoutMs = 10000,
-                pollInterval = 300,
-              ) => {
-                const maxAttempts = Math.ceil(timeoutMs / pollInterval);
-                let attempts = 0;
-                while (attempts < maxAttempts) {
-                  await new Promise((res) => setTimeout(res, pollInterval));
-                  if (readerRef.current) {
-                    return true;
-                  }
-                  attempts++;
-                }
-                return false;
-              };
-
-              if (reader) {
-                await connectReader(reader);
-                setLoadingConnectingReader(false);
-                return;
-              }
-
-              if (preDiscoveredReaders.length > 0) {
-                await connectReader(preDiscoveredReaders[0]);
-                setLoadingConnectingReader(false);
-                return;
-              }
-
-              if (!isStripeInitialized) {
-                console.error(
-                  "Attempted to discover readers before Stripe Terminal initialization",
-                  new Error("Stripe Terminal not initialized"),
-                  {
-                    context: { orgId, action: "discover_readers" },
-                  },
-                );
-                showAlert(
-                  "Payment System Error",
-                  "Payment system is not ready. Please try again.",
-                );
-                setLoadingConnectingReader(false);
-                return;
-              }
-
-              const readers = await discoverReaders({
-                discoveryMethod: "tapToPay",
-              });
-              const found = await waitForReader();
-              if (found && readerRef.current) {
-                await connectReader(readerRef.current);
-              } else {
-                console.error("No reader found", JSON.stringify(readers));
-                showAlert(
-                  "No reader found",
-                  "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
-                );
-              }
-              setLoadingConnectingReader(false);
-            }}
-            style={{
-              marginBottom: 10,
-              position: "absolute",
-              bottom: insets.bottom + 30,
-              width: "100%",
-            }}
-            loading={loadingConnectingReader}
-          >
-            Collect Donations
-          </Button>
         </View>
+
+        <Button
+          onPress={async () => {
+            if (__DEV__) {
+              navigation.navigate("ProcessDonation", {
+                orgId,
+                payment: { amount: 5000 } as PaymentIntent.Type, // $50.00
+                collectPayment: async () => {
+                  // Mock payment function - simulates success after 2 seconds
+                  return new Promise((resolve) =>
+                    setTimeout(() => resolve(true), 2000),
+                  );
+                },
+                name: "Dev Test User",
+                email: "dev@example.com",
+                slug: orgSlug || "test-org",
+              });
+              return;
+            }
+            setLoadingConnectingReader(true);
+            const waitForReader = async (
+              timeoutMs = 10000,
+              pollInterval = 300,
+            ) => {
+              const maxAttempts = Math.ceil(timeoutMs / pollInterval);
+              let attempts = 0;
+              while (attempts < maxAttempts) {
+                await new Promise((res) => setTimeout(res, pollInterval));
+                if (readerRef.current) {
+                  return true;
+                }
+                attempts++;
+              }
+              return false;
+            };
+
+            if (reader) {
+              await connectReader(reader);
+              setLoadingConnectingReader(false);
+              return;
+            }
+
+            if (preDiscoveredReaders.length > 0) {
+              await connectReader(preDiscoveredReaders[0]);
+              setLoadingConnectingReader(false);
+              return;
+            }
+
+            if (!isStripeInitialized) {
+              console.error(
+                "Attempted to discover readers before Stripe Terminal initialization",
+                new Error("Stripe Terminal not initialized"),
+                {
+                  context: { orgId, action: "discover_readers" },
+                },
+              );
+              showAlert(
+                "Payment System Error",
+                "Payment system is not ready. Please try again.",
+              );
+              setLoadingConnectingReader(false);
+              return;
+            }
+
+            const readers = await discoverReaders({
+              discoveryMethod: "tapToPay",
+            });
+            const found = await waitForReader();
+            if (found && readerRef.current) {
+              await connectReader(readerRef.current);
+            } else {
+              console.error("No reader found", JSON.stringify(readers));
+              showAlert(
+                "No reader found",
+                "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
+              );
+            }
+            setLoadingConnectingReader(false);
+          }}
+          style={{
+            marginBottom: 0,
+            width: "100%",
+          }}
+          loading={loadingConnectingReader}
+        >
+          Collect Donations
+        </Button>
       </View>
     );
   }
@@ -927,6 +924,7 @@ function PageContent({
               style={{
                 width: "100%",
                 marginTop: "auto",
+                marginBottom: 0,
               }}
             >
               Create Donation
@@ -935,7 +933,9 @@ function PageContent({
             <Button
               onPress={() => reader && connectReader(reader)}
               style={{
+                width: "100%",
                 marginTop: "auto",
+                marginBottom: 0,
               }}
             >
               Reconnect reader
