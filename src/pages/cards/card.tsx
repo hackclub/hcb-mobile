@@ -6,7 +6,6 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
-import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -51,6 +50,7 @@ import {
   toggleCardDetails,
   toggleCardFrozen,
 } from "../../utils/cardActions";
+import * as Haptics from "../../utils/haptics";
 import { normalizeSvg } from "../../utils/util";
 
 type CardPageProps = {

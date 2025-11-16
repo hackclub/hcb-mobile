@@ -1,5 +1,4 @@
 import { useTheme } from "@react-navigation/native";
-import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import {
   View,
@@ -14,6 +13,7 @@ import useSWR, { mutate, useSWRConfig } from "swr";
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
 import { palette } from "../../../styles/theme";
+import * as Haptics from "../../../utils/haptics";
 import Button from "../../Button";
 import UserMention from "../../UserMention";
 

@@ -4,7 +4,6 @@ import {
   exchangeCodeAsync,
   DiscoveryDocument,
 } from "expo-auth-session";
-import * as Haptics from "expo-haptics";
 import { ImageBackground, Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
@@ -17,6 +16,7 @@ import AuthContext from "../auth/auth";
 import Button from "../components/Button";
 import { useIsDark } from "../lib/useColorScheme";
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,

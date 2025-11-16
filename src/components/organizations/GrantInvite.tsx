@@ -1,6 +1,5 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { View, Text, TouchableHighlight, Alert } from "react-native";
 
@@ -8,6 +7,7 @@ import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import GrantCard from "../../lib/types/GrantCard";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { renderMoney } from "../../utils/util";
 
 interface GrantInviteProps {

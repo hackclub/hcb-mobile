@@ -1,6 +1,5 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { View, Text, Alert } from "react-native";
 
@@ -12,6 +11,7 @@ import GrantCardType from "../../lib/types/GrantCard";
 import User from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import {
   renderMoney,
   formatMerchantNames,

@@ -4,7 +4,6 @@ import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -28,6 +27,7 @@ import Organization from "../../lib/types/Organization";
 import User from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
@@ -51,7 +51,10 @@ const CardItem = ({
   return (
     <Pressable
       onPress={() => onPress(item)}
-      onLongPress={drag}
+      onLongPress={() => {
+        Haptics.dragStartAsync();
+        drag();
+      }}
       disabled={isActive}
     >
       <PaymentCard
@@ -148,7 +151,7 @@ export default function CardsPage({ navigation }: Props) {
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [sortedCards, setSortedCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing] = useState(false);
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
   const panGesture = usePanGesture();
@@ -158,6 +161,7 @@ export default function CardsPage({ navigation }: Props) {
       headerRight: () => (
         <View style={{ flexDirection: "row" }}>
           <MenuView
+            isAnchoredToRight={true}
             actions={[
               {
                 id: "toggleCanceledCards",
@@ -324,17 +328,13 @@ export default function CardsPage({ navigation }: Props) {
   }, [allCards]);
 
   const onRefresh = async () => {
-    if (refreshing) return;
-
-    setRefreshing(true);
     try {
-      await Promise.all([reloadCards(), reloadGrantCards()]);
+      await reloadCards();
+      await reloadGrantCards();
     } catch (error) {
       console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
       });
-    } finally {
-      setRefreshing(false);
     }
   };
 

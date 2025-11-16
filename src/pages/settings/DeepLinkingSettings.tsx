@@ -3,6 +3,7 @@ import { Switch, View, Text, ActivityIndicator } from "react-native";
 
 import { useLinkingPref } from "../../providers/LinkingContext";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 
 export default function DeepLinkingSettings() {
   const { enabled, setEnabled } = useLinkingPref();
@@ -50,7 +51,10 @@ export default function DeepLinkingSettings() {
                 trackColor={{ false: "#767577", true: palette.primary }}
                 thumbColor="#f4f3f4"
                 ios_backgroundColor="#3e3e3e"
-                onValueChange={() => setEnabled(!enabled)}
+                onValueChange={() => {
+                  Haptics.toggleAsync(!enabled);
+                  setEnabled(!enabled);
+                }}
                 value={enabled}
               />
             )}

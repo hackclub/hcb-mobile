@@ -1,7 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNow } from "date-fns";
-import * as Haptics from "expo-haptics";
 import { memo, useState, useRef } from "react";
 import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
 
@@ -9,6 +8,7 @@ import Organization from "../../lib/types/Organization";
 import { TransactionCardCharge } from "../../lib/types/Transaction";
 import p from "../../styles/palette";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { renderMoney } from "../../utils/util";
 import UploadIcon from "../icons/UploadIcon";
 import { useReceiptActionSheet } from "../ReceiptActionSheet";
@@ -91,7 +91,10 @@ function MissingReceiptTransaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => handleActionSheet(uploadButtonRef)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              handleActionSheet(uploadButtonRef);
+            }}
             disabled={!isOnline || loading}
           >
             {loading ? (
