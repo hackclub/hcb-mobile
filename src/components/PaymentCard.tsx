@@ -188,9 +188,9 @@ export default function PaymentCard({
               left: 0,
               width: width * 0.86,
               height: (width * 0.86) / 1.588,
-              resizeMode: "cover",
               opacity: 0.32,
               borderRadius: 15,
+              objectFit: "cover",
             }}
           />
           <View style={{ top: 25, left: 25, position: "absolute" }}>

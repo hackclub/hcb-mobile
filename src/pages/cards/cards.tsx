@@ -148,7 +148,7 @@ export default function CardsPage({ navigation }: Props) {
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [sortedCards, setSortedCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
-  const [refreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
   const panGesture = usePanGesture();
@@ -324,13 +324,17 @@ export default function CardsPage({ navigation }: Props) {
   }, [allCards]);
 
   const onRefresh = async () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
     try {
-      await reloadCards();
-      await reloadGrantCards();
+      await Promise.all([reloadCards(), reloadGrantCards()]);
     } catch (error) {
       console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
       });
+    } finally {
+      setRefreshing(false);
     }
   };
 
