@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -24,6 +23,7 @@ import {
 import StyledButton from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 

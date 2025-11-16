@@ -1,5 +1,6 @@
-import * as Haptics from "expo-haptics";
 import { Alert } from "react-native";
+
+import * as Haptics from "./haptics";
 
 export const validateFields = (
   organizationId: string,

@@ -5,7 +5,6 @@ import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { useShareIntentContext } from "expo-share-intent";
 import { useEffect, useState, memo, useMemo, useCallback } from "react";
 import {
@@ -34,6 +33,7 @@ import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 import { organizationOrderEqual } from "../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
