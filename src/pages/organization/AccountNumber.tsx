@@ -68,9 +68,8 @@ export default function AccountNumberPage({
     params: { orgId },
   },
 }: Props) {
-  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${orgId}`,
-  );
+  const { data: organization, isLoading: organizationLoading } =
+    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`);
 
   useEffect(() => {
     navigation.setOptions({
@@ -102,7 +101,8 @@ export default function AccountNumberPage({
   if (
     organization?.routing_number == null ||
     organization?.account_number == null ||
-    organization?.swift_bic_code == null
+    organization?.swift_bic_code == null ||
+    !organizationLoading
   ) {
     return (
       <View

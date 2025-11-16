@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -102,7 +102,7 @@ export default function OrganizationPage({
     loadMore,
     isLoading,
   } = useTransactions(orgId, "organizations");
-  const [refreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const isOfflineNoData = organizationError && !isOnline && !organization;
@@ -227,12 +227,29 @@ export default function OrganizationPage({
         }));
     }, [mockTransactions]);
 
-  const onRefresh = useCallback(() => {
-    if (isOnline) {
-      mutate(`organizations/${orgId}`);
-      mutate(`organizations/${orgId}/transactions`);
+  const onRefresh = useCallback(async () => {
+    if (!isOnline || refreshing) return;
+
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        mutate(`organizations/${orgId}`),
+        mutate(`organizations/${orgId}/transactions?limit=35`),
+      ]);
+    } catch (err) {
+      if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
+        console.error("Error refreshing organization data:", err);
+      }
+    } finally {
+      setRefreshing(false);
     }
-  }, [isOnline, orgId]);
+  }, [isOnline, orgId, mutate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh();
+    }, [onRefresh]),
+  );
 
   if (organizationLoading || userLoading || isAccessDenied) {
     return (

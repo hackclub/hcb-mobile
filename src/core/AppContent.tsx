@@ -111,14 +111,11 @@ export default function AppContent({
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
 
-    // Return cached token if it's still valid
     if (cachedToken && now < tokenExpiry) {
       console.log("Using cached Stripe Terminal connection token");
       return cachedToken;
     }
 
-    // Check if we should actually fetch the token
-    // Only fetch if the user is authenticated and has access token
     if (!tokens?.accessToken) {
       console.log(
         "No access token available, skipping Stripe Terminal token fetch",
@@ -126,7 +123,6 @@ export default function AppContent({
       throw new Error("Authentication required for Stripe Terminal connection");
     }
 
-    // Check rate limiting
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
       const waitTime = Math.ceil(
         (TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000,
@@ -168,7 +164,6 @@ export default function AppContent({
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
 
-      // Cache the token
       setCachedToken(newToken);
       setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
@@ -204,8 +199,6 @@ export default function AppContent({
   useEffect(() => {
     navRef.current = navigationRef.current;
   }, []);
-
-  // Sentry user binding must occur within SWRConfig provider. We'll mount a child component later.
 
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
@@ -456,11 +449,15 @@ export default function AppContent({
                   fetcher,
                   revalidateOnFocus: true,
                   revalidateOnReconnect: true,
-                  dedupingInterval: 2000,
+                  revalidateIfStale: true,
+                  dedupingInterval: 1000,
                   shouldRetryOnError: true,
                   keepPreviousData: true,
-                  errorRetryCount: 3,
-                  errorRetryInterval: 1000,
+                  errorRetryCount: 5,
+                  errorRetryInterval: 500,
+                  refreshInterval: 0,
+                  loadingTimeout: 3000,
+                  focusThrottleInterval: 5000,
                   onErrorRetry: (
                     error,
                     key,
@@ -477,14 +474,41 @@ export default function AppContent({
                       return;
                     }
 
-                    if (retryCount >= 3) return;
+                    if (
+                      status &&
+                      status >= 400 &&
+                      status < 500 &&
+                      status !== 429
+                    ) {
+                      return;
+                    }
 
-                    // Exponential backoff
-                    const timeout = Math.min(
-                      1000 * Math.pow(2, retryCount),
-                      5000,
-                    );
-                    setTimeout(() => revalidate({ retryCount }), timeout);
+                    if (retryCount >= 5) return;
+
+                    const baseTimeout = 500 * Math.pow(1.5, retryCount);
+                    const jitter = Math.random() * 200;
+                    const timeout = Math.min(baseTimeout + jitter, 5000);
+
+                    setTimeout(() => {
+                      console.log(
+                        `Global retry for ${key} (attempt ${retryCount + 1})`,
+                      );
+                      revalidate({ retryCount });
+                    }, timeout);
+                  },
+                  onSuccess: (_data, key) => {
+                    if (__DEV__) {
+                      console.log(`Successfully fetched: ${key}`);
+                    }
+                  },
+                  onError: (error, key) => {
+                    if (
+                      error instanceof Error &&
+                      error.name !== "AbortError" &&
+                      error.name !== "NetworkError"
+                    ) {
+                      console.error(`Global SWR error for ${key}:`, error);
+                    }
                   },
                 }}
               >
