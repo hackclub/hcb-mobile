@@ -1,6 +1,5 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import * as Haptics from "expo-haptics";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 
 export interface ButtonProps {
   onPress?: () => void;
@@ -155,7 +155,7 @@ export default function Button(
       }}
       onPress={() => {
         if (props.hapticFeedback !== false) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
         }
         props.onPress && props.onPress();
       }}

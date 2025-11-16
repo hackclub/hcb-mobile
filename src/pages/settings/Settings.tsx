@@ -6,7 +6,6 @@ import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
-import * as Haptics from "expo-haptics";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SystemUI from "expo-system-ui";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -35,6 +34,7 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 
 const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 
@@ -144,6 +144,7 @@ export default function SettingsPage({ navigation }: Props) {
     }).start();
   }, [animation]);
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
+    Haptics.selectionAsync();
     setTheme(value);
     if (Platform.OS === "android") {
       try {
@@ -183,6 +184,7 @@ export default function SettingsPage({ navigation }: Props) {
       }
 
       // Only proceed if authentication succeeds
+      Haptics.toggleAsync(value);
       setBiometricsRequired(value);
       await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
     } catch (error) {

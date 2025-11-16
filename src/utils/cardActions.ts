@@ -1,5 +1,4 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { KyInstance } from "ky";
 import { Alert } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
@@ -11,6 +10,7 @@ import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
 
 import { validateFields } from "./cardHelpers";
+import * as Haptics from "./haptics";
 import { renderMoney } from "./util";
 
 export const toggleCardFrozen = (

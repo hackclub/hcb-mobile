@@ -18,6 +18,7 @@ import Organization, {
 import { useIsDark } from "../../lib/useColorScheme";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { orgColor } from "../../utils/util";
 
 import EventBalance from "./EventBalance";
@@ -173,7 +174,10 @@ const Event = memo(function Event({
   return (
     <TouchableHighlight
       onPress={onPress}
-      onLongPress={drag}
+      onLongPress={() => {
+        Haptics.dragStartAsync();
+        drag?.();
+      }}
       disabled={isActive}
       underlayColor={isActive ? "transparent" : themeColors.background}
       activeOpacity={isActive ? 1 : 0.7}

@@ -4,7 +4,6 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
-import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
@@ -45,6 +44,7 @@ import ShareIntentModal from "../pages/ShareIntentModal";
 import TransactionPage from "../pages/Transaction";
 import { useShareIntentContext } from "../providers/ShareIntentContext";
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -144,7 +144,7 @@ export default function Navigator() {
       screenListeners={({ navigation, route }) => ({
         tabPress: (e) => {
           // Add haptic feedback for all tab presses
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
 
           if (route.name === "Home") {
             const state = navigation.getState();
