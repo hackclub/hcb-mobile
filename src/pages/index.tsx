@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -7,9 +6,8 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import * as QuickActions from "expo-quick-actions";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
+import { useEffect, useState, memo, useMemo, useCallback } from "react";
 import {
   Text,
   View,
@@ -42,9 +40,6 @@ type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 /* eslint-disable react/prop-types */
 export default function App({ navigation }: Props) {
-  const [isOnline, setIsOnline] = useState(true);
-  const lastFetchTime = useRef<number>(0);
-  const FETCH_COOLDOWN_MS = 10000;
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
 
@@ -58,7 +53,7 @@ export default function App({ navigation }: Props) {
 
   const [refreshEnabled, setRefreshEnabled] = useState(true);
   const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
-  const [refreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleDragStart = useCallback(() => {
     "worklet";
@@ -142,61 +137,26 @@ export default function App({ navigation }: Props) {
     };
   }, [hasShareIntent, resetShareIntent]);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      setIsOnline(state.isConnected ?? false);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const shouldFetch = useCallback(() => {
-    const now = Date.now();
-    if (!isOnline) return false;
-    if (now - lastFetchTime.current < FETCH_COOLDOWN_MS) return false;
-    lastFetchTime.current = now;
-    return true;
-  }, [isOnline]);
-
   const {
     data: organizations,
     error,
     mutate: reloadOrganizations,
   } = useOfflineSWR<Organization[]>("user/organizations", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching organizations:", err);
-    },
   });
 
   const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
+
   const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
     Invitation[]
   >("user/invitations", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching invitations:", err);
-    },
   });
 
   const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<
     GrantCard[]
   >("user/card_grants", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching grant cards:", err);
-    },
   });
 
   // Filter grants that are active but don't have a card_id yet (need to create card)
@@ -216,93 +176,44 @@ export default function App({ navigation }: Props) {
   const panGesture = usePanGesture();
 
   useEffect(() => {
-    if (Platform.OS === "ios") {
-      QuickActions.setItems([
-        ...(sortedOrgs?.[0]
-          ? [
-              {
-                id: `org_${sortedOrgs[0].id}`,
-                title: sortedOrgs[0].name,
-                subtitle: "Open your favorite org 💰",
-                icon: "symbol:dollarsign.bank.building",
-                params: { href: `/${sortedOrgs[0].id}` },
-              },
-            ]
-          : []),
-        {
-          id: "cards",
-          title: "Cards",
-          subtitle: "View your cards 💳",
-          icon: "symbol:creditcard",
-          params: { href: `/cards` },
-        },
-        {
-          id: "receipts",
-          title: "Upload your receipts",
-          subtitle: "before Leo gets mad 😡",
-          icon: "symbol:text.document",
-          params: { href: `/receipts` },
-        },
-        {
-          id: "settings",
-          title: "Settings",
-          icon: "symbol:gearshape",
-          params: { href: `/settings` },
-        },
+    if (!organizations?.length) return;
+
+    preload("user", fetcher!);
+    preload("user/cards", fetcher!);
+
+    organizations.forEach((org) => {
+      const orgKey = `organizations/${org.id}`;
+      const transactionsKey = `organizations/${org.id}/transactions?limit=35`;
+      
+      preload(orgKey, fetcher!);
+      preload(transactionsKey, fetcher!);
+    });
+  }, [organizations, fetcher]);
+
+  const onRefresh = useCallback(async () => {
+    if (refreshing) return;
+    
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        reloadOrganizations(),
+        reloadInvitations(),
+        reloadGrantCards(),
       ]);
+      await mutate(
+        (k) => typeof k === "string" && k.startsWith("organizations"),
+      );
+    } finally {
+      setRefreshing(false);
     }
-  }, [sortedOrgs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadOrganizations, reloadInvitations, reloadGrantCards, mutate]);
 
-  useEffect(() => {
-    if (!shouldFetch()) return;
-
-    try {
-      if (isOnline) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        preload("user", fetcher!);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        preload("user/cards", fetcher!);
-        // prefetch all user organization details
-        for (const org of organizations || []) {
-          preload(`organizations/${org.id}`, fetcher!);
-        }
-      }
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error preloading data:", err);
-      }
-    }
-  }, [organizations, fetcher, isOnline, shouldFetch]);
-
-  const onRefresh = () => {
-    if (!shouldFetch()) return;
-
-    try {
-      reloadOrganizations();
-      reloadInvitations();
-      reloadGrantCards();
+  useFocusEffect(
+    useCallback(() => {
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error refreshing data:", err);
-      }
-    }
-  };
-
-  useFocusEffect(() => {
-    if (!shouldFetch()) return;
-
-    try {
-      reloadOrganizations();
-      reloadInvitations();
-      reloadGrantCards();
-      mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error reloading data on focus:", err);
-      }
-    }
-  });
+    }, [mutate]),
+  );
 
   const EventItem = memo(
     ({

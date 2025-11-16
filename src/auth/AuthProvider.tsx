@@ -145,10 +145,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const refreshAccessToken = async (): Promise<{
+  const refreshAccessToken = async (
+    retryAttempt = 0,
+  ): Promise<{
     success: boolean;
     newTokens?: AuthTokens;
   }> => {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 1000;
+
     try {
       if (refreshPromise) {
         console.log(
@@ -174,28 +179,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false };
       }
 
-      const now = Date.now();
-
       console.log("Client ID:", process.env.EXPO_PUBLIC_CLIENT_ID);
       console.log("Redirect URI:", redirectUri);
 
-      const tokenAge = now - (tokens.createdAt || 0);
 
-      const isTokenExpired = tokens.expiresAt <= now + 2 * 60 * 1000;
 
-      if (tokenAge < 5000 && !isTokenExpired) {
-        console.log(
-          `Token was just created ${tokenAge}ms ago and isn't expired, skipping refresh`,
-        );
-        return { success: true, newTokens: tokens };
-      }
-
-      if (tokens.expiresAt > now + 2 * 60 * 1000) {
-        console.log("Token is still valid, no need to refresh");
-        return { success: true, newTokens: tokens };
-      }
-
-      console.log("Refreshing access token...");
+      console.log(
+        `Refreshing access token... (attempt ${retryAttempt + 1}/${MAX_RETRIES + 1})`,
+      );
 
       refreshPromise = (async () => {
         try {
@@ -216,28 +207,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             const errorBody = await response.text();
+            let shouldRetry = false;
+            let errorJson: { error?: string } | null = null;
+
             try {
-              const errorJson = JSON.parse(errorBody);
+              errorJson = JSON.parse(errorBody);
               console.error(
                 "Token refresh error details",
-                new Error(errorJson.error),
+                new Error(errorJson?.error || "Unknown error"),
                 {
                   action: "token_refresh",
                   errorDetails: errorJson,
+                  statusCode: response.status,
                 },
               );
 
-              if (errorJson.error === "invalid_grant") {
+              if (errorJson?.error === "invalid_grant") {
                 console.log(
                   "Refresh token is invalid or already used - forcing logout",
                 );
                 await forceLogout();
+                throw new Error("Invalid refresh token");
               }
+
+              // Retry on server errors or rate limiting
+              shouldRetry =
+                response.status >= 500 ||
+                response.status === 429 ||
+                response.status === 503;
             } catch (e) {
-              Sentry.captureException(e);
+              // If we can't parse the error, it's likely a network issue - retry
+              shouldRetry = true;
+              if (!(e instanceof SyntaxError)) {
+                Sentry.captureException(e);
+              }
             }
 
-            await forceLogout();
+            // Retry on network/server errors
+            if (shouldRetry && retryAttempt < MAX_RETRIES) {
+              const delay = RETRY_DELAY_MS * Math.pow(2, retryAttempt);
+              console.log(
+                `Token refresh failed with retryable error, retrying in ${delay}ms...`,
+              );
+              refreshPromise = null;
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              return refreshAccessToken(retryAttempt + 1);
+            }
+
+            if (
+              errorJson?.error === "invalid_client" ||
+              errorJson?.error === "unauthorized_client"
+            ) {
+              await forceLogout();
+            }
+
             throw new Error(
               `Failed to refresh token: ${response.status} ${response.statusText}`,
             );
@@ -254,6 +277,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 response_data: data,
               },
             );
+
+            // Retry on malformed responses
+            if (retryAttempt < MAX_RETRIES) {
+              const delay = RETRY_DELAY_MS * Math.pow(2, retryAttempt);
+              console.log(`Malformed response, retrying in ${delay}ms...`);
+              refreshPromise = null;
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              return refreshAccessToken(retryAttempt + 1);
+            }
+
             throw new Error("Invalid token response from server");
           }
 
@@ -273,10 +306,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           return { success: true, newTokens };
         } catch (error) {
+          // Check if it's a network error
+          const isNetworkError =
+            error instanceof TypeError ||
+            (error instanceof Error &&
+              (error.message.includes("network") ||
+                error.message.includes("fetch") ||
+                error.message.includes("Failed to fetch")));
+
+          if (isNetworkError && retryAttempt < MAX_RETRIES) {
+            const delay = RETRY_DELAY_MS * Math.pow(2, retryAttempt);
+            console.log(
+              `Network error during token refresh, retrying in ${delay}ms...`,
+            );
+            refreshPromise = null;
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return refreshAccessToken(retryAttempt + 1);
+          }
+
           console.error("Token refresh failed", error, {
             action: "token_refresh",
+            retryAttempt,
           });
-          await forceLogout();
+
+          // Only force logout if it's not a network/temporary error
+          if (!isNetworkError) {
+            await forceLogout();
+          }
+
           return { success: false };
         } finally {
           refreshPromise = null;
@@ -289,7 +346,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         action: "token_refresh_init",
       });
       refreshPromise = null;
-      await forceLogout();
       return { success: false };
     }
   };
