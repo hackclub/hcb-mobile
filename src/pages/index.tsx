@@ -184,7 +184,7 @@ export default function App({ navigation }: Props) {
     organizations.forEach((org) => {
       const orgKey = `organizations/${org.id}`;
       const transactionsKey = `organizations/${org.id}/transactions?limit=35`;
-      
+
       preload(orgKey, fetcher!);
       preload(transactionsKey, fetcher!);
     });
@@ -192,7 +192,7 @@ export default function App({ navigation }: Props) {
 
   const onRefresh = useCallback(async () => {
     if (refreshing) return;
-    
+
     setRefreshing(true);
     try {
       await Promise.all([
@@ -206,7 +206,7 @@ export default function App({ navigation }: Props) {
     } finally {
       setRefreshing(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadOrganizations, reloadInvitations, reloadGrantCards, mutate]);
 
   useFocusEffect(

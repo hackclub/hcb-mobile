@@ -63,7 +63,7 @@ export default function useClient() {
     ): Promise<KyResponse> => {
       const retryKey = createUniqueRetryKey(method, path);
       freshTokenMapRef.current.set(retryKey, freshToken);
-      
+
       return clientRef.current!(path, { method, body });
     };
 
@@ -74,7 +74,7 @@ export default function useClient() {
     ): void => {
       const path = extractPath(request.url.toString());
       const method = request.method;
-      
+
       queuedRequestsRef.current.push({
         resolve,
         reject,
@@ -214,7 +214,7 @@ export default function useClient() {
         beforeRequest: [
           async (request) => {
             const requestKey = createRequestKey(request.method, request.url);
-            
+
             for (const [key, token] of freshTokenMapRef.current.entries()) {
               if (key.startsWith(requestKey)) {
                 request.headers.set("Authorization", `Bearer ${token}`);
@@ -222,7 +222,7 @@ export default function useClient() {
                 return;
               }
             }
-            
+
             const currentToken = tokensRef.current?.accessToken;
             if (currentToken) {
               request.headers.set("Authorization", `Bearer ${currentToken}`);

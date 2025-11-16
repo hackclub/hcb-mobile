@@ -182,8 +182,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Client ID:", process.env.EXPO_PUBLIC_CLIENT_ID);
       console.log("Redirect URI:", redirectUri);
 
-
-
       console.log(
         `Refreshing access token... (attempt ${retryAttempt + 1}/${MAX_RETRIES + 1})`,
       );

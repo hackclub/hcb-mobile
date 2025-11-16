@@ -325,7 +325,7 @@ export default function CardsPage({ navigation }: Props) {
 
   const onRefresh = async () => {
     if (refreshing) return;
-    
+
     setRefreshing(true);
     try {
       await Promise.all([reloadCards(), reloadGrantCards()]);
