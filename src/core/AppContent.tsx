@@ -90,6 +90,7 @@ export default function AppContent({
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const isBiometricAuthInProgress = useRef(false);
+  const lastAuthenticatedToken = useRef<string | null>(null);
   const hcb = useClient();
 
   useEffect(() => {
@@ -220,12 +221,22 @@ export default function AppContent({
     setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if (__DEV__) {
-          // bypass auth for development
+        if (lastAuthenticatedToken.current === tokens.accessToken) {
+          console.log(
+            "Already authenticated for this token, skipping biometric auth",
+          );
           setIsAuthenticated(true);
           setAppIsReady(true);
           return;
         }
+
+        // if (__DEV__) {
+        //   // bypass auth for development
+        //   lastAuthenticatedToken.current = tokens.accessToken;
+        //   setIsAuthenticated(true);
+        //   setAppIsReady(true);
+        //   return;
+        // }
         try {
           const biometricsRequired = await AsyncStorage.getItem(
             "biometrics_required",
@@ -233,6 +244,7 @@ export default function AppContent({
 
           if (biometricsRequired !== "true") {
             console.log("Biometric authentication not required, bypassing...");
+            lastAuthenticatedToken.current = tokens.accessToken;
             setIsAuthenticated(true);
             setAppIsReady(true);
             return;
@@ -244,6 +256,7 @@ export default function AppContent({
 
           if (!hasHardware || !isEnrolled) {
             console.log("Biometric authentication not available, bypassing...");
+            lastAuthenticatedToken.current = tokens.accessToken;
             setIsAuthenticated(true);
             setAppIsReady(true);
             return;
@@ -267,16 +280,22 @@ export default function AppContent({
           });
 
           if (result.success) {
+            lastAuthenticatedToken.current = tokens.accessToken;
             setIsAuthenticated(true);
           } else {
-            console.error(
-              "Biometric authentication failed",
-              new Error(result.error || "Authentication failed"),
-              {
-                context: { action: "biometric_auth", errorType: result.error },
-              },
-            );
-            setIsAuthenticated(false);
+            if (result.error !== "system_cancel") {
+              console.error(
+                "Biometric authentication failed",
+                new Error(result.error || "Authentication failed"),
+                {
+                  context: { action: "biometric_auth", errorType: result.error },
+                },
+              );
+              setIsAuthenticated(false);
+            } else {
+              console.log("Biometric authentication cancelled by user");
+              setIsAuthenticated(false);
+            }
           }
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -290,12 +309,26 @@ export default function AppContent({
         }
       } else {
         console.log("No access token, skipping biometric authentication");
+        lastAuthenticatedToken.current = null;
         setIsAuthenticated(true);
         setAppIsReady(true);
       }
     };
 
-    checkAuth();
+    let cancelled = false;
+
+    checkAuth().catch((error) => {
+      if (!cancelled) {
+        console.error("Unexpected error in checkAuth", error);
+        setIsAuthenticated(false);
+        setAppIsReady(true);
+        isBiometricAuthInProgress.current = false;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [tokens?.accessToken]);
 
   useEffect(() => {

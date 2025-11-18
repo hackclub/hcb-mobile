@@ -153,6 +153,7 @@ export default {
         {
           iosActivationRules: {
             NSExtensionActivationSupportsImageWithMaxCount: 5,
+            NSExtensionActivationSupportsFileWithMaxCount: 5
           },
           androidIntentFilters: ["image/*"],
         },

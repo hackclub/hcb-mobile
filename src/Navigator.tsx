@@ -101,7 +101,6 @@ export default function Navigator() {
                     name="add-circle-outline"
                     backgroundColor="transparent"
                     size={24}
-                    underlayColor={themeColors.card}
                     color={palette.primary}
                     iconStyle={{ marginRight: 0 }}
                     onPress={() =>
