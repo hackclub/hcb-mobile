@@ -1,5 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -13,7 +13,6 @@ import DisbursementScreen from "../../components/organizations/transfer/Disburse
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import { palette, theme } from "../../styles/theme";
-import { Ionicons } from "@expo/vector-icons";
 
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 
@@ -26,22 +25,22 @@ export default function TransferPage({ navigation, route }: Props) {
     navigation.setOptions({
       headerLeft: () => (
         <>
-        {Platform.OS === "android" ? (
-          <View style={{ marginRight: 20 }}>
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color={theme.colors.text}
+          {Platform.OS === "android" ? (
+            <View style={{ marginRight: 20 }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.text}
+                onPress={() => navigation.goBack()}
+              />
+            </View>
+          ) : (
+            <NativeButton
+              title="Done"
+              color={palette.primary}
               onPress={() => navigation.goBack()}
             />
-          </View>
-        ) : (
-          <NativeButton
-          title="Done"
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
-        )}
+          )}
         </>
       ),
     });

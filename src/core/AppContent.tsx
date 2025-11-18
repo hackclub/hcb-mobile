@@ -288,7 +288,10 @@ export default function AppContent({
                 "Biometric authentication failed",
                 new Error(result.error || "Authentication failed"),
                 {
-                  context: { action: "biometric_auth", errorType: result.error },
+                  context: {
+                    action: "biometric_auth",
+                    errorType: result.error,
+                  },
                 },
               );
               setIsAuthenticated(false);
