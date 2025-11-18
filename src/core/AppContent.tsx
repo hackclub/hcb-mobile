@@ -82,7 +82,7 @@ export default function AppContent({
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
-  const { tokens, refreshAccessToken } = useContext(AuthContext);
+  const { tokens, refreshAccessToken, setTokens } = useContext(AuthContext);
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -294,9 +294,11 @@ export default function AppContent({
                   },
                 },
               );
+              await setTokens(null);
               setIsAuthenticated(false);
             } else {
               console.log("Biometric authentication cancelled by user");
+              await setTokens(null);
               setIsAuthenticated(false);
             }
           }
@@ -306,6 +308,8 @@ export default function AppContent({
           console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
+          // Clear tokens to fully log out the user
+          await setTokens(null);
           setIsAuthenticated(false);
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -332,7 +336,7 @@ export default function AppContent({
     return () => {
       cancelled = true;
     };
-  }, [tokens?.accessToken]);
+  }, [tokens?.accessToken, setTokens]);
 
   useEffect(() => {
     if (tokens) {
