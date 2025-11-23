@@ -12,7 +12,7 @@ import {
 import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import { palette, theme } from "../../styles/theme";
+import { theme } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 
@@ -37,7 +37,7 @@ export default function TransferPage({ navigation, route }: Props) {
           ) : (
             <NativeButton
               title="Done"
-              color={palette.primary}
+              color={theme.colors.text}
               onPress={() => navigation.goBack()}
             />
           )}

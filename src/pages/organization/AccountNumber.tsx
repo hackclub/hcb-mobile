@@ -65,11 +65,13 @@ function AccountDetail({
 export default function AccountNumberPage({
   navigation,
   route: {
-    params: { orgId },
+    params: { orgId, organization: _organization },
   },
 }: Props) {
   const { data: organization, isLoading: organizationLoading } =
-    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`);
+    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`, {
+      fallbackData: _organization,
+    });
 
   useEffect(() => {
     navigation.setOptions({
@@ -87,7 +89,7 @@ export default function AccountNumberPage({
           ) : (
             <Button
               title="Done"
-              color={palette.primary}
+              color={themeColors.text}
               onPress={() => navigation.goBack()}
             />
           )}
