@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
@@ -9,7 +10,6 @@ import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
-import { palette } from "../../styles/theme";
 import { handleMenuActionEvent, handleMenuActions } from "../../utils/util";
 
 interface MenuProps {
@@ -26,6 +26,7 @@ export default function Menu({
   supportsTapToPay,
 }: MenuProps) {
   const scheme = useColorScheme();
+  const { colors: themeColors } = useTheme();
   const menuActions = useMemo(() => {
     if (!organization || !user) {
       return [];
@@ -58,7 +59,7 @@ export default function Menu({
         name="ellipsis-horizontal-circle"
         backgroundColor="transparent"
         size={24}
-        color={palette.primary}
+        color={themeColors.text}
         iconStyle={{ marginRight: 0 }}
       />
     </MenuView>

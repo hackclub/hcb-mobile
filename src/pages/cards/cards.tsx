@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
@@ -69,7 +69,7 @@ export default function CardsPage({ navigation }: Props) {
     useOfflineSWR<GrantCard[]>("user/card_grants");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
-
+  const { colors: themeColors } = useTheme();
   // Cache for card patterns
   const [patternCache, setPatternCache] = useState<
     Record<
@@ -173,7 +173,7 @@ export default function CardsPage({ navigation }: Props) {
             name="ellipsis-horizontal-circle"
             backgroundColor="transparent"
             size={24}
-            color={palette.primary}
+            color={themeColors.text}
             iconStyle={{ marginRight: 0 }}
           />
         </MenuView>
