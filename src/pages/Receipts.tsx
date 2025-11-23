@@ -405,7 +405,7 @@ export default function ReceiptsPage({ navigation }: Props) {
             >
               <UploadIcon size={28} color="white" />
               <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
-                Upload receipt
+                Upload Receipt
               </Text>
             </TouchableOpacity>
             <Text
