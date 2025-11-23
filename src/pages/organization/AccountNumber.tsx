@@ -65,11 +65,13 @@ function AccountDetail({
 export default function AccountNumberPage({
   navigation,
   route: {
-    params: { orgId },
+    params: { orgId, organization: _organization },
   },
 }: Props) {
   const { data: organization, isLoading: organizationLoading } =
-    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`);
+    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`, {
+      fallbackData: _organization,
+    });
 
   useEffect(() => {
     navigation.setOptions({
