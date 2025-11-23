@@ -10,7 +10,6 @@ import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
-import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
 import { handleMenuActionEvent, handleMenuActions } from "../../utils/util";
 
