@@ -16,7 +16,7 @@ import {
   Pressable,
   ScrollView,
   Animated,
-  useColorScheme,
+  useColorScheme as useSystemColorScheme,
   Platform,
   Switch,
 } from "react-native";
@@ -76,7 +76,7 @@ export default function SettingsPage({ navigation }: Props) {
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
-  const scheme = useColorScheme();
+  const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
@@ -143,19 +143,53 @@ export default function SettingsPage({ navigation }: Props) {
       useNativeDriver: true,
     }).start();
   }, [animation]);
+
+  useEffect(() => {
+    if (Platform.OS === "android" && theme === "system") {
+      (async () => {
+        try {
+          const shouldBeDark = deviceColorScheme === "dark";
+          console.log("System theme update:", {
+            theme,
+            deviceColorScheme,
+            shouldBeDark,
+          });
+          await SystemUI.setBackgroundColorAsync(
+            shouldBeDark ? "#252429" : "white",
+          );
+        } catch (error) {
+          console.error("Error setting system UI background color", error, {
+            context: { theme, deviceColorScheme },
+          });
+        }
+      })();
+    }
+  }, [theme, deviceColorScheme]);
+
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     Haptics.selectionAsync();
     setTheme(value);
+
     if (Platform.OS === "android") {
       try {
+        const currentDeviceTheme = deviceColorScheme ?? "light";
+        const shouldBeDark =
+          value === "dark" ||
+          (value === "system" && currentDeviceTheme === "dark");
+
+        console.log("Theme change:", {
+          value,
+          deviceColorScheme,
+          currentDeviceTheme,
+          shouldBeDark,
+        });
+
         await SystemUI.setBackgroundColorAsync(
-          value == "dark" || (value == "system" && scheme == "dark")
-            ? "#252429"
-            : "white",
+          shouldBeDark ? "#252429" : "white",
         );
       } catch (error) {
         console.error("Error setting system UI background color", error, {
-          context: { theme: value },
+          context: { theme: value, deviceColorScheme },
         });
       }
     }
@@ -183,7 +217,6 @@ export default function SettingsPage({ navigation }: Props) {
         return;
       }
 
-      // Only proceed if authentication succeeds
       Haptics.toggleAsync(value);
       setBiometricsRequired(value);
       await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
@@ -212,7 +245,6 @@ export default function SettingsPage({ navigation }: Props) {
       console.error("Error clearing storage during sign out", error, {
         context: { action: "sign_out" },
       });
-      // Still clear cache and tokens even if storage clearing fails
       cache.clear();
       setTokens(null);
     }
