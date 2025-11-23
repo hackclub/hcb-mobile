@@ -1,6 +1,8 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import React from "react";
+import { findNodeHandle } from "react-native";
 
 import { useIsDark } from "../../../lib/useColorScheme";
 import { useOffline } from "../../../lib/useOffline";
@@ -17,7 +19,7 @@ export function useCommentFileActionSheet() {
   const isDark = useIsDark();
 
   const handleActionSheet = withOfflineCheck(
-    (): Promise<SelectedFile | null> => {
+    (buttonRef?: React.RefObject<unknown>): Promise<SelectedFile | null> => {
       return new Promise((resolve) => {
         const options = ["Camera", "Photo Library", "Document", "Cancel"];
         const cancelButtonIndex = 3;
@@ -33,6 +35,10 @@ export function useCommentFileActionSheet() {
             textStyle: {
               color: isDark ? "white" : "black",
             },
+            anchor: buttonRef?.current
+              ? (findNodeHandle(buttonRef.current as React.Component) ??
+                undefined)
+              : undefined,
           },
           async (buttonIndex) => {
             if (buttonIndex === 0) {

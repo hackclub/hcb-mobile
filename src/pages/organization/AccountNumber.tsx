@@ -65,12 +65,13 @@ function AccountDetail({
 export default function AccountNumberPage({
   navigation,
   route: {
-    params: { orgId },
+    params: { orgId, organization: _organization },
   },
 }: Props) {
-  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${orgId}`,
-  );
+  const { data: organization, isLoading: organizationLoading } =
+    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`, {
+      fallbackData: _organization,
+    });
 
   useEffect(() => {
     navigation.setOptions({
@@ -100,9 +101,10 @@ export default function AccountNumberPage({
   const { colors: themeColors } = useTheme();
 
   if (
-    organization?.routing_number == null ||
-    organization?.account_number == null ||
-    organization?.swift_bic_code == null
+    !organizationLoading &&
+    (organization?.routing_number == null ||
+      organization?.account_number == null ||
+      organization?.swift_bic_code == null)
   ) {
     return (
       <View

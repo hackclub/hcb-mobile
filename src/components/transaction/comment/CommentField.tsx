@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -40,10 +40,12 @@ export default function CommentField({
   const hcb = useClient();
   const { handleActionSheet } = useCommentFileActionSheet();
   const { mutate: globalMutate } = useSWRConfig();
+  const buttonRef =
+    React.useRef<React.ElementRef<typeof TouchableOpacity>>(null);
 
   const pickFile = async () => {
     try {
-      const result = await handleActionSheet();
+      const result = await handleActionSheet(buttonRef);
       if (result) {
         setSelectedFile(result);
       }
@@ -193,6 +195,7 @@ export default function CommentField({
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <TouchableOpacity
+          ref={buttonRef}
           style={{
             borderWidth: 1,
             borderColor: "#348EDA",

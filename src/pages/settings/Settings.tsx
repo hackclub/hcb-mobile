@@ -236,24 +236,34 @@ export default function SettingsPage({ navigation }: Props) {
             marginBottom: 12,
           }}
         >
-          <Animated.Image
-            source={{ uri: user?.avatar }}
-            style={{
-              width: 54,
-              height: 54,
-              borderRadius: 27,
-              marginRight: 16,
-              opacity: animation,
-              transform: [
-                {
-                  scale: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  }),
-                },
-              ],
-            }}
-          />
+          {user?.avatar && (
+            <Animated.Image
+              source={{ uri: user?.avatar }}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 27,
+                marginRight: 16,
+                opacity: animation,
+                transform: [
+                  {
+                    scale: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    }),
+                  },
+                ],
+              }}
+            />
+          )}
+          {!user?.avatar && (
+            <Ionicons
+              name="person-circle-outline"
+              size={54}
+              color={palette.muted}
+              style={{ marginRight: 16 }}
+            />
+          )}
           <View>
             <Text
               style={{
@@ -263,10 +273,10 @@ export default function SettingsPage({ navigation }: Props) {
                 marginBottom: 2,
               }}
             >
-              {user?.name || " "}
+              {user?.name || "User"}
             </Text>
             <Text style={{ color: palette.muted, fontSize: 15 }}>
-              {user?.email || " "}
+              {user?.email || "user@example.com"}
             </Text>
           </View>
         </View>

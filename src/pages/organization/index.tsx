@@ -84,16 +84,11 @@ export default function OrganizationPage({
     () => organization?.donation_page_available,
     [organization],
   );
-  const organizationErrorStatus = useMemo(() => {
-    return organizationError &&
-      typeof organizationError === "object" &&
-      "status" in organizationError
-      ? organizationError.status
-      : null;
-  }, [organizationError]);
   const isAccessDenied = useMemo(
-    () => organizationErrorStatus === 403,
-    [organizationErrorStatus],
+    () =>
+      (organizationError as Error)?.message.includes("403") ||
+      (organizationError as Error)?.message.includes("404"),
+    [organizationError],
   );
 
   const {
@@ -187,10 +182,10 @@ export default function OrganizationPage({
   }, [organization, navigation, user, supportsTapToPay]);
 
   useEffect(() => {
-    if (organizationErrorStatus === 401) {
+    if ((organizationError as Error)?.message.includes("401")) {
       mutateOrganization();
     }
-  }, [organizationErrorStatus, mutateOrganization]);
+  }, [organizationError, mutateOrganization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
@@ -234,7 +229,7 @@ export default function OrganizationPage({
     }
   }, [isOnline, orgId]);
 
-  if (organizationLoading || userLoading || isAccessDenied) {
+  if (organizationLoading || userLoading) {
     return (
       <View
         style={{
@@ -270,82 +265,78 @@ export default function OrganizationPage({
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {organization !== undefined ? (
-        <SectionList
-          initialNumToRender={20}
-          ListFooterComponent={() =>
-            isLoadingMore && !isLoading && !playgroundMode ? (
-              <View style={{ padding: 20, alignItems: "center" }}>
-                <ActivityIndicator size="small" color={themeColors.primary} />
-              </View>
-            ) : null
-          }
-          onEndReachedThreshold={0.2}
-          onEndReached={loadMore}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          ListHeaderComponent={() => (
-            <>
-              {showTapToPayBanner && (
-                <TapToPayBanner
-                  onDismiss={handleDismissTapToPayBanner}
-                  orgId={orgId}
-                />
-              )}
-              {playgroundMode && <PlaygroundBanner />}
+      <SectionList
+        initialNumToRender={20}
+        ListFooterComponent={() =>
+          isLoadingMore && !isLoading && !playgroundMode ? (
+            <View style={{ padding: 20, alignItems: "center" }}>
+              <ActivityIndicator size="small" color={themeColors.primary} />
+            </View>
+          ) : null
+        }
+        onEndReachedThreshold={0.2}
+        onEndReached={loadMore}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListHeaderComponent={() => (
+          <>
+            {showTapToPayBanner && (
+              <TapToPayBanner
+                onDismiss={handleDismissTapToPayBanner}
+                orgId={orgId}
+              />
+            )}
+            {playgroundMode && <PlaygroundBanner />}
+            {organization && (
               <Header
                 organization={organization}
                 showMockData={showMockData}
                 setShowMockData={setShowMockData}
               />
-              {isLoading && <LoadingSkeleton />}
-              {!isLoading && sections.length === 0 && !showMockData && (
-                <EmptyState isOnline={isOnline} />
-              )}
-            </>
-          )}
-          // @ts-expect-error workaround for mock data
-          sections={
-            playgroundMode && showMockData
-              ? (mockSections as unknown)
-              : sections
-          }
-          style={{ flexGrow: 1 }}
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: tabBarSize + 20,
-          }}
-          scrollIndicatorInsets={{ bottom: tabBarSize }}
-          renderSectionHeader={({ section: { title } }) => (
-            <SectionHeader title={title} />
-          )}
-          renderItem={({ item, index, section: { data } }) => {
-            if (playgroundMode) {
-              return (
-                <MockTransaction
-                  transaction={item}
-                  top={index === 0}
-                  bottom={index === data.length - 1}
-                />
-              );
-            }
-
+            )}
+            {isLoading && <LoadingSkeleton />}
+            {!isLoading && sections.length === 0 && !showMockData && (
+              <EmptyState isOnline={isOnline} />
+            )}
+          </>
+        )}
+        // @ts-expect-error workaround for mock data
+        sections={
+          playgroundMode && showMockData ? (mockSections as unknown) : sections
+        }
+        style={{ flexGrow: 1 }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: tabBarSize + 20,
+        }}
+        scrollIndicatorInsets={{ bottom: tabBarSize }}
+        renderSectionHeader={({ section: { title } }) => (
+          <SectionHeader title={title} />
+        )}
+        renderItem={({ item, index, section: { data } }) => {
+          if (playgroundMode) {
             return (
-              <TransactionWrapper
-                item={item}
-                user={user}
-                organization={organization}
-                navigation={navigation}
-                orgId={orgId}
-                index={index}
-                data={data as ITransaction[]}
+              <MockTransaction
+                transaction={item}
+                top={index === 0}
+                bottom={index === data.length - 1}
               />
             );
-          }}
-        />
-      ) : (
-        <LoadingSkeleton />
-      )}
+          }
+
+          return (
+            <TransactionWrapper
+              item={item}
+              user={user}
+              organization={organization}
+              navigation={navigation}
+              orgId={orgId}
+              index={index}
+              data={data as ITransaction[]}
+            />
+          );
+        }}
+      />
     </View>
   );
 }

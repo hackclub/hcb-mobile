@@ -165,6 +165,12 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
+      [
+        "expo-web-browser",
+        {
+          experimentalLauncherActivity: true,
+        },
+      ],
       "expo-background-task",
       "./plugins/usePrivateSDK.js",
       "./plugins/fixManifestMerger.js",

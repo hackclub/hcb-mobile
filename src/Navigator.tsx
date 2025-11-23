@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
 import { StyleSheet, useColorScheme } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 
 // import OrganizationTitle from "./components/organizations/OrganizationTitle";
 import {
@@ -15,6 +15,7 @@ import {
 } from "./lib/NavigatorParamList";
 import { PaginatedResponse } from "./lib/types/HcbApiObject";
 import Invitation from "./lib/types/Invitation";
+import useOfflineSWR from "./lib/useOfflineSWR";
 import CardPage from "./pages/cards/card";
 import CardsPage from "./pages/cards/cards";
 import OrderCardPage from "./pages/cards/OrderCard";
@@ -36,10 +37,10 @@ const ReceiptsStack = createNativeStackNavigator<ReceiptsStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
-  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
+  const { data: missingReceiptData } = useOfflineSWR<PaginatedResponse<never>>(
     `user/transactions/missing_receipt`,
   );
-  const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
+  const { data: invitations } = useOfflineSWR<Invitation[]>(`user/invitations`);
 
   const scheme = useColorScheme();
 

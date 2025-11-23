@@ -18,13 +18,17 @@ import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
+import { useSWRConfig } from "swr";
 
 import CardListSkeleton from "../../components/cards/CardListSkeleton";
+import { NoCardsEmptyState } from "../../components/cards/NoCardsEmptyState";
 import PaymentCard from "../../components/PaymentCard";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
-import Organization from "../../lib/types/Organization";
+import Organization, {
+  OrganizationExpanded,
+} from "../../lib/types/Organization";
 import User from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
@@ -72,8 +76,65 @@ export default function CardsPage({ navigation }: Props) {
   const { data: user } = useOfflineSWR<User>("user");
   const { data: organizations } =
     useOfflineSWR<Organization[]>("user/organizations");
+  const { fetcher } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
+
+  const [expandedOrganizations, setExpandedOrganizations] = useState<
+    Record<string, OrganizationExpanded>
+  >({});
+
+  const isMemberOfAnyOrg = useMemo(() => {
+    if (!organizations || !user?.id) return false;
+
+    return organizations
+      .filter((org) => org.playground_mode === false)
+      .some((org) => {
+        const expandedOrg = expandedOrganizations[org.id];
+        if (!expandedOrg || !("users" in expandedOrg)) {
+          return true;
+        }
+
+        const userInOrg = expandedOrg.users.find((u) => u.id === user.id);
+        if (!userInOrg) {
+          return false;
+        }
+
+        return userInOrg.role !== "reader";
+      });
+  }, [organizations, expandedOrganizations, user?.id]);
+
+  useEffect(() => {
+    if (!organizations || !fetcher || !user?.id) return;
+
+    const fetchOrganizations = async () => {
+      const expanded: Record<string, OrganizationExpanded> = {};
+
+      try {
+        const fetchPromises = organizations
+          .filter((org) => org.playground_mode === false)
+          .map(async (org) => {
+            try {
+              const expandedOrg = (await fetcher(
+                `organizations/${org.id}`,
+              )) as OrganizationExpanded;
+              if (expandedOrg && "users" in expandedOrg) {
+                expanded[org.id] = expandedOrg;
+              }
+            } catch (error) {
+              console.error(`Error fetching organization ${org.id}:`, error);
+            }
+          });
+
+        await Promise.all(fetchPromises);
+        setExpandedOrganizations(expanded);
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      }
+    };
+
+    fetchOrganizations();
+  }, [organizations, fetcher, user?.id]);
 
   // Cache for card patterns
   const [patternCache, setPatternCache] = useState<
@@ -192,19 +253,21 @@ export default function CardsPage({ navigation }: Props) {
               iconStyle={{ marginRight: 0 }}
             />
           </MenuView>
-          <Ionicons.Button
-            name="add-circle-outline"
-            backgroundColor="transparent"
-            size={24}
-            color={palette.primary}
-            iconStyle={{ marginRight: 0 }}
-            onPress={() => {
-              if (user && organizations) {
-                navigation.navigate("OrderCard");
-              }
-            }}
-            underlayColor={"transparent"}
-          />
+          {isMemberOfAnyOrg && (
+            <Ionicons.Button
+              name="add-circle-outline"
+              backgroundColor="transparent"
+              size={24}
+              color={palette.primary}
+              iconStyle={{ marginRight: 0 }}
+              onPress={() => {
+                if (user && organizations) {
+                  navigation.navigate("OrderCard");
+                }
+              }}
+              underlayColor={"transparent"}
+            />
+          )}
         </View>
       ),
     });
@@ -215,6 +278,7 @@ export default function CardsPage({ navigation }: Props) {
     scheme,
     user,
     organizations,
+    isMemberOfAnyOrg,
   ]);
 
   const combineCards = useCallback(() => {
@@ -354,20 +418,26 @@ export default function CardsPage({ navigation }: Props) {
   };
 
   if (sortedCards) {
+    const filteredCards = sortedCards.filter((c) => {
+      if (
+        !canceledCardsShown &&
+        (c.status == "canceled" || c.status == "expired")
+      ) {
+        return false;
+      }
+      if (!frozenCardsShown && c.status == "frozen") {
+        return false;
+      }
+      return true;
+    });
+
+    if (filteredCards.length === 0) {
+      return <NoCardsEmptyState />;
+    }
+
     return (
       <ReorderableList
-        data={sortedCards.filter((c) => {
-          if (
-            !canceledCardsShown &&
-            (c.status == "canceled" || c.status == "expired")
-          ) {
-            return false;
-          }
-          if (!frozenCardsShown && c.status == "frozen") {
-            return false;
-          }
-          return true;
-        })}
+        data={filteredCards}
         keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
@@ -402,7 +472,7 @@ export default function CardsPage({ navigation }: Props) {
           />
         )}
         ListFooterComponent={() =>
-          sortedCards.length > 2 && (
+          filteredCards.length > 2 && (
             <Text
               style={{
                 color: palette.muted,

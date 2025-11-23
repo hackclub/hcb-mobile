@@ -73,6 +73,7 @@ export default function RenameTransactionPage({
           backgroundColor: themeColors.card,
           padding: 10,
           borderRadius: 8,
+          marginTop: 20,
         }}
         placeholderTextColor={palette.muted}
         selectTextOnFocus

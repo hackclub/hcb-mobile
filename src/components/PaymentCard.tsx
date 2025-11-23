@@ -182,13 +182,13 @@ export default function PaymentCard({
         <>
           <Image
             source={require("../../assets/card-frost.png")}
+            contentFit="cover"
             style={{
               position: "absolute",
               top: 0,
               left: 0,
               width: width * 0.86,
               height: (width * 0.86) / 1.588,
-              resizeMode: "cover",
               opacity: 0.32,
               borderRadius: 15,
             }}

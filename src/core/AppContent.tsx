@@ -136,9 +136,6 @@ export default function AppContent({
       console.warn(
         `Rate limited: Please wait ${waitTime} seconds before retrying`,
       );
-      throw new Error(
-        `Rate limited: Please wait ${waitTime} seconds before retrying`,
-      );
     }
 
     if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
@@ -185,6 +182,7 @@ export default function AppContent({
       if (
         error &&
         typeof error === "object" &&
+        error !== null &&
         "status" in error &&
         error.status === 429
       ) {
@@ -193,9 +191,6 @@ export default function AppContent({
           30000,
         ); // Max 30 seconds
         console.warn(
-          `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
-        );
-        throw new Error(
           `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
         );
       }
