@@ -192,7 +192,7 @@ export default function CardsPage({ navigation }: Props) {
               name="ellipsis-horizontal-circle-outline"
               backgroundColor="transparent"
               size={24}
-              color={palette.primary}
+              color={themeColors.text}
               iconStyle={{ marginRight: 0 }}
             />
           </MenuView>
