@@ -191,7 +191,7 @@ export default function Navigator() {
                     backgroundColor="transparent"
                     size={24}
                     underlayColor={themeColors.card}
-                    color={palette.primary}
+                    color={themeColors.text}
                     iconStyle={{ marginRight: 0 }}
                     accessibilityLabel="Apply for new organization"
                     accessibilityHint="Opens the HCB application form in browser"
