@@ -263,6 +263,7 @@ export function handleMenuActionEvent(
     case "accountNumber":
       navigation.navigate("AccountNumber", {
         orgId: organization.id,
+        organization: organization as OrganizationExpanded,
       });
       break;
     case "team":
