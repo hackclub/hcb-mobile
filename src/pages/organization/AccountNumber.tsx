@@ -87,7 +87,7 @@ export default function AccountNumberPage({
           ) : (
             <Button
               title="Done"
-              color={palette.primary}
+              color={themeColors.text}
               onPress={() => navigation.goBack()}
             />
           )}

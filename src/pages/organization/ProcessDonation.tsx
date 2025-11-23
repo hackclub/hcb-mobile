@@ -205,7 +205,7 @@ export default function ProcessDonationPage({
           ) : (
             <Button
               title="Done"
-              color={palette.primary}
+              color={theme.colors.text}
               onPress={() => navigation.goBack()}
             />
           )}
