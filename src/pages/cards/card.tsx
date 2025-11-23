@@ -6,7 +6,6 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
-import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -51,6 +50,7 @@ import {
   toggleCardDetails,
   toggleCardFrozen,
 } from "../../utils/cardActions";
+import * as Haptics from "../../utils/haptics";
 import { normalizeSvg } from "../../utils/util";
 
 type CardPageProps = {
@@ -68,7 +68,7 @@ export default function CardPage(
   const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const grantId = (props as CardPageProps)?.grantId;
+  const grantId = "route" in props ? props.route.params.grantId : props.grantId;
 
   const { data: grantCard = _card as GrantCard } = useOfflineSWR<GrantCard>(
     grantId ? `card_grants/${grantId}` : null,
@@ -141,16 +141,10 @@ export default function CardPage(
     androidCardToken,
     status: walletStatus,
     refresh: refreshDigitalWallet,
-  } = isCardholder
-    ? useDigitalWallet(_card?.id || card?.id || "", !isVirtualCard)
-    : {
-        canAddToWallet: false,
-        ephemeralKey: null,
-        card: null,
-        androidCardToken: null,
-        status: null,
-        refresh: () => {},
-      };
+  } = useDigitalWallet(
+    _card?.id || card?.id || "",
+    !isVirtualCard || !isCardholder,
+  );
   const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
   const tabBarHeight = useBottomTabBarHeight();
 
@@ -504,7 +498,7 @@ export default function CardPage(
             handleOneTimeUse(
               card as Card,
               setIsOneTimeUse,
-              () => mutate(`card_grants/${grantId}`),
+              mutate,
               hcb,
               grantId as string,
               grantCard as GrantCard,
@@ -559,7 +553,7 @@ export default function CardPage(
               isCardholder,
               grantCard as GrantCard,
               setisReturningGrant,
-              () => mutate(`card_grants/${grantId}`),
+              mutate,
               hcb,
               grantId as string,
               navigation,
@@ -673,7 +667,7 @@ export default function CardPage(
         {ableToAddToWallet &&
           ephemeralKey &&
           Platform.OS === "ios" &&
-          !isVirtualCard &&
+          isVirtualCard &&
           card?.status != "canceled" && (
             <AddToWalletButton
               token={androidCardToken}
@@ -762,10 +756,11 @@ export default function CardPage(
           handleTopup(
             topupAmount,
             card as Card,
+            grantId as string,
             setIsToppingUp,
             setTopupAmount,
             setShowTopupModal,
-            () => mutate(`cards/${card?.id}`),
+            mutate,
             hcb,
           )
         }
@@ -786,7 +781,7 @@ export default function CardPage(
             setIsSettingPurpose,
             setPurposeText,
             setShowPurposeModal,
-            () => mutate(`cards/${card?.id}`),
+            mutate,
             hcb,
             grantId || "",
             purposeText,

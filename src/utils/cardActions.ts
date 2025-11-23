@@ -1,13 +1,16 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { KyInstance } from "ky";
+import { Alert } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { showAlert } from "../lib/alertUtils";
 import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
+import User from "../lib/types/User";
 
+import { validateFields } from "./cardHelpers";
+import * as Haptics from "./haptics";
 import { renderMoney } from "./util";
 
 export const toggleCardFrozen = (
@@ -66,10 +69,11 @@ export const toggleCardDetails = async (
 export const handleTopup = async (
   topupAmount: string,
   card: Card,
+  grantId: string,
   setIsToppingUp: (isToppingUp: boolean) => void,
   setTopupAmount: (topupAmount: string) => void,
   setShowTopupModal: (showTopupModal: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
 ) => {
   if (!topupAmount || !card) return;
@@ -82,13 +86,14 @@ export const handleTopup = async (
 
   setIsToppingUp(true);
   try {
-    await hcb.post(`cards/${card.id}/topup`, {
+    await hcb.post(`card_grants/${grantId}/topup`, {
       json: { amount_cents: Math.round(amount * 100) },
     });
 
     setTopupAmount("");
     setShowTopupModal(false);
     mutate(`cards/${card.id}`);
+    mutate(`card_grants/${grantId}`);
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
@@ -108,7 +113,7 @@ export const handleSetPurpose = async (
   setIsSettingPurpose: (isSettingPurpose: boolean) => void,
   setPurposeText: (purposeText: string) => void,
   setShowPurposeModal: (showPurposeModal: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   purposeText: string,
@@ -124,7 +129,7 @@ export const handleSetPurpose = async (
     setPurposeText("");
     setShowPurposeModal(false);
     mutate(`cards/${card.id}`);
-    mutate(`grant_cards/${grantId}`);
+    mutate(`card_grants/${grantId}`);
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
@@ -142,7 +147,7 @@ export const handleSetPurpose = async (
 export const handleOneTimeUse = async (
   card: Card,
   setIsOneTimeUse: (isOneTimeUse: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   grantCard: GrantCard,
@@ -178,7 +183,7 @@ export const returnGrant = async (
   isCardholder: boolean,
   grantCard: GrantCard,
   setisReturningGrant: (isReturningGrant: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
   navigation: NativeStackNavigationProp<CardsStackParamList>,
@@ -231,7 +236,7 @@ export const returnGrant = async (
 export const handleBurnCard = async (
   card: Card,
   setIsBurningCard: (isBurningCard: boolean) => void,
-  mutate: (key: string) => Promise<void>,
+  mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
 ) => {
   if (!card) return;
@@ -307,5 +312,76 @@ export const handleActivate = async (
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {
     setActivating(false);
+  }
+};
+
+export const handleCreateCard = async (
+  organizationId: string,
+  cardType: string,
+  shippingName: string,
+  city: string,
+  addressLine1: string,
+  addressLine2: string,
+  zipCode: string,
+  stateProvince: string,
+  cardDesignId: string,
+  hcb: KyInstance,
+  user: User,
+  setIsLoading: (isLoading: boolean) => void,
+  navigation: NativeStackNavigationProp<CardsStackParamList>,
+) => {
+  if (
+    !validateFields(
+      organizationId,
+      cardType,
+      shippingName,
+      addressLine1,
+      city,
+      stateProvince,
+      zipCode,
+    )
+  )
+    return;
+
+  setIsLoading(true);
+  try {
+    const response = await hcb.post("cards", {
+      json: {
+        card: {
+          organization_id: organizationId,
+          card_type: cardType === "plastic" ? "physical" : "virtual",
+          ...(cardType === "plastic" && {
+            shipping_name: shippingName,
+            shipping_address_city: city,
+            shipping_address_line1: addressLine1,
+            shipping_address_line2: addressLine2,
+            shipping_address_postal_code: zipCode,
+            shipping_address_state: stateProvince,
+            shipping_address_country: "US",
+            card_personalization_design_id: null,
+          }),
+        },
+      },
+    });
+
+    if (response.ok) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: "Card created!",
+        textBody: "Your card has been created successfully.",
+      });
+      navigation.goBack();
+    } else {
+      const data = (await response.json()) as { error?: string };
+      Alert.alert("Error", data.error || "Failed to create card");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  } catch (err) {
+    console.error("Error creating card:", err);
+    Alert.alert("Error", "Failed to create card. Please try again later.");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  } finally {
+    setIsLoading(false);
   }
 };

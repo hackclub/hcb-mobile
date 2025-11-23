@@ -10,6 +10,8 @@ import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
+import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { handleMenuActionEvent, handleMenuActions } from "../../utils/util";
 
 interface MenuProps {
@@ -37,7 +39,7 @@ export default function Menu({
       supportsTapToPay || false,
       scheme || "light",
     );
-  }, [organization, user, supportsTapToPay]);
+  }, [organization, user, supportsTapToPay, scheme]);
 
   if (menuActions.length === 0) {
     return null;
@@ -47,6 +49,7 @@ export default function Menu({
       actions={menuActions}
       themeVariant={scheme || undefined}
       onPressAction={({ nativeEvent: { event } }) => {
+        Haptics.selectionAsync();
         handleMenuActionEvent(
           event,
           navigation,
@@ -56,7 +59,7 @@ export default function Menu({
       }}
     >
       <Ionicons.Button
-        name="ellipsis-horizontal-circle"
+        name="ellipsis-horizontal-circle-outline"
         backgroundColor="transparent"
         size={24}
         color={themeColors.text}

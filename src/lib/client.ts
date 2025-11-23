@@ -1,43 +1,210 @@
 import ky from "ky";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useRef } from "react";
 
 import AuthContext, { AuthTokens } from "../auth/auth";
 
 type KyResponse = Awaited<ReturnType<typeof ky>>;
 
+let globalRefreshInProgress = false;
+let globalRefreshPromise: Promise<{
+  success: boolean;
+  newTokens?: AuthTokens;
+}> | null = null;
+
+interface QueuedRequest {
+  resolve: (value: KyResponse) => void;
+  reject: (reason?: Error) => void;
+  retry: (token: string) => Promise<KyResponse>;
+}
+
 export default function useClient() {
   const { tokens, refreshAccessToken } = useContext(AuthContext);
 
-  return useMemo(() => {
-    const pendingRetries = new Set();
-    let refreshInProgress = false;
-    let refreshPromise: Promise<{
-      success: boolean;
-      newTokens?: AuthTokens;
-    }> | null = null;
-    let queuedRequests: Array<() => Promise<KyResponse>> = [];
+  const tokensRef = useRef(tokens);
+  const refreshAccessTokenRef = useRef(refreshAccessToken);
+  const clientRef = useRef<ReturnType<typeof ky.create> | null>(null);
+  const queuedRequestsRef = useRef<QueuedRequest[]>([]);
+  const pendingRetriesRef = useRef<Set<string>>(new Set());
+  const freshTokenMapRef = useRef<Map<string, string>>(new Map());
 
-    const processQueuedRequests = async () => {
-      const requests = [...queuedRequests];
-      queuedRequests = [];
-      return Promise.all(
-        requests.map(async (retry) => {
+  useEffect(() => {
+    tokensRef.current = tokens;
+  }, [tokens]);
+
+  useEffect(() => {
+    refreshAccessTokenRef.current = refreshAccessToken;
+  }, [refreshAccessToken]);
+
+  if (!clientRef.current) {
+    const extractPath = (url: string): string => {
+      const apiBase = process.env.EXPO_PUBLIC_API_BASE || "";
+      let path = url.startsWith(apiBase) ? url.substring(apiBase.length) : url;
+      if (path.startsWith("/")) {
+        path = path.substring(1);
+      }
+      return path;
+    };
+
+    const createRequestKey = (method: string, url: string): string => {
+      return `${method}:${url}`;
+    };
+
+    const createUniqueRetryKey = (method: string, path: string): string => {
+      const fullUrl = `${process.env.EXPO_PUBLIC_API_BASE}/${path}`;
+      const uniqueId = `${Date.now()}-${Math.random()}`;
+      return `${method}:${fullUrl}:${uniqueId}`;
+    };
+
+    const executeWithFreshToken = async (
+      path: string,
+      method: string,
+      body: BodyInit | null | undefined,
+      freshToken: string,
+    ): Promise<KyResponse> => {
+      const retryKey = createUniqueRetryKey(method, path);
+      freshTokenMapRef.current.set(retryKey, freshToken);
+
+      return clientRef.current!(path, { method, body });
+    };
+
+    const queueRequestForRetry = (
+      request: Request,
+      resolve: (value: KyResponse) => void,
+      reject: (reason?: Error) => void,
+    ): void => {
+      const path = extractPath(request.url.toString());
+      const method = request.method;
+
+      queuedRequestsRef.current.push({
+        resolve,
+        reject,
+        retry: async (freshToken: string) => {
+          return executeWithFreshToken(path, method, request.body, freshToken);
+        },
+      });
+    };
+
+    const processQueuedRequests = async (freshToken: string) => {
+      const requests = [...queuedRequestsRef.current];
+      queuedRequestsRef.current = [];
+
+      console.log(
+        `Processing ${requests.length} queued requests after token refresh`,
+      );
+
+      pendingRetriesRef.current.clear();
+      freshTokenMapRef.current.clear();
+
+      await Promise.all(
+        requests.map(async ({ resolve, reject, retry }) => {
           try {
-            return await retry();
+            const response = await retry(freshToken);
+            resolve(response);
           } catch (error) {
             console.error("Failed to process queued request", error, {
               context: "queue_processing",
             });
-            throw error;
+            reject(error);
           }
         }),
       );
     };
 
-    const client = ky.create({
+    const handleTokenRefreshSuccess = async (
+      request: Request,
+      requestKey: string,
+      newToken: string,
+    ): Promise<KyResponse> => {
+      console.log("Token refresh successful, processing queued requests");
+
+      if (queuedRequestsRef.current.length > 0) {
+        await processQueuedRequests(newToken);
+      }
+
+      const path = extractPath(request.url.toString());
+      console.log(`Retrying original request: ${path}`);
+
+      pendingRetriesRef.current.delete(requestKey);
+
+      const response = await executeWithFreshToken(
+        path,
+        request.method,
+        request.body,
+        newToken,
+      );
+
+      console.log(`Retry succeeded with status: ${response.status}`);
+      return response;
+    };
+
+    const handleTokenRefreshFailure = (
+      requestKey: string,
+      originalResponse: Response,
+    ): Response => {
+      console.error("Token refresh process failed");
+      pendingRetriesRef.current.delete(requestKey);
+
+      const requests = [...queuedRequestsRef.current];
+      queuedRequestsRef.current = [];
+      requests.forEach(({ reject }) => {
+        reject(new Error("Token refresh failed"));
+      });
+
+      return originalResponse;
+    };
+
+    const handle401Response = async (
+      request: Request,
+      requestKey: string,
+      response: Response,
+    ): Promise<KyResponse | Response> => {
+      console.log("Received 401 response, attempting token refresh...");
+
+      try {
+        if (globalRefreshInProgress) {
+          console.log("Token refresh in progress, queueing request");
+
+          return new Promise<KyResponse>((resolve, reject) => {
+            queueRequestForRetry(request, resolve, reject);
+          });
+        }
+
+        pendingRetriesRef.current.add(requestKey);
+        globalRefreshInProgress = true;
+
+        if (!globalRefreshPromise) {
+          globalRefreshPromise = refreshAccessTokenRef.current();
+        }
+
+        const result = await globalRefreshPromise;
+
+        if (result.success && result.newTokens) {
+          tokensRef.current = result.newTokens;
+          return await handleTokenRefreshSuccess(
+            request,
+            requestKey,
+            result.newTokens.accessToken,
+          );
+        } else {
+          console.warn("Token refresh did not succeed");
+          pendingRetriesRef.current.delete(requestKey);
+          return response;
+        }
+      } catch (error) {
+        return handleTokenRefreshFailure(requestKey, response);
+      } finally {
+        globalRefreshInProgress = false;
+        globalRefreshPromise = null;
+      }
+    };
+
+    clientRef.current = ky.create({
       prefixUrl: process.env.EXPO_PUBLIC_API_BASE,
       retry: {
-        limit: 0,
+        limit: 3,
+        methods: ["get", "put", "head", "delete", "options", "trace", "post"],
+        statusCodes: [408, 413, 429, 500, 502, 503, 504],
+        backoffLimit: 5000,
       },
       headers: {
         "User-Agent": "HCB-Mobile",
@@ -46,160 +213,48 @@ export default function useClient() {
       hooks: {
         beforeRequest: [
           async (request) => {
-            if (refreshInProgress) {
-              // If refresh is in progress, queue this request
-              return new Promise<KyResponse>(() => {
-                queuedRequests.push(async () => {
-                  try {
-                    const url = request.url.toString();
-                    const apiBase = process.env.EXPO_PUBLIC_API_BASE;
-                    let path = url.startsWith(apiBase)
-                      ? url.substring(apiBase.length)
-                      : url;
+            const requestKey = createRequestKey(request.method, request.url);
 
-                    if (path.startsWith("/")) {
-                      path = path.substring(1);
-                    }
-
-                    const newResponse = await client(path, {
-                      method: request.method,
-                      headers: {
-                        Authorization: `Bearer ${tokens?.accessToken}`,
-                      },
-                      body: request.body,
-                    });
-                    return newResponse;
-                  } catch (error) {
-                    console.error("Failed to process queued request", error, {
-                      context: "auth_retry",
-                    });
-                    throw error;
-                  }
-                });
-              });
+            for (const [key, token] of freshTokenMapRef.current.entries()) {
+              if (key.startsWith(requestKey)) {
+                request.headers.set("Authorization", `Bearer ${token}`);
+                freshTokenMapRef.current.delete(key);
+                return;
+              }
             }
 
-            if (tokens?.accessToken) {
-              request.headers.set(
-                "Authorization",
-                `Bearer ${tokens.accessToken}`,
-              );
+            const currentToken = tokensRef.current?.accessToken;
+            if (currentToken) {
+              request.headers.set("Authorization", `Bearer ${currentToken}`);
             }
+          },
+        ],
+        beforeRetry: [
+          async ({ request, error, retryCount }) => {
+            console.log(
+              `Retrying request (attempt ${retryCount + 1}):`,
+              request.url,
+              error instanceof Error ? error.message : "Unknown error",
+            );
           },
         ],
         afterResponse: [
           async (request, options, response) => {
             if (response.ok) return response;
 
-            const requestKey = `${request.method}:${request.url}`;
-            if (pendingRetries.has(requestKey)) {
+            const requestKey = createRequestKey(request.method, request.url);
+
+            if (pendingRetriesRef.current.has(requestKey)) {
               console.log(
                 "Request already being retried, returning response as-is to avoid loop",
               );
-              pendingRetries.delete(requestKey);
+              pendingRetriesRef.current.delete(requestKey);
               return response;
             }
 
+            // Handle 401 unauthorized responses
             if (response.status === 401) {
-              console.log("Received 401 response, attempting token refresh...");
-
-              if (refreshInProgress) {
-                return new Promise<KyResponse>(() => {
-                  queuedRequests.push(async () => {
-                    try {
-                      const url = request.url.toString();
-                      const apiBase = process.env.EXPO_PUBLIC_API_BASE;
-                      let path = url.startsWith(apiBase)
-                        ? url.substring(apiBase.length)
-                        : url;
-
-                      if (path.startsWith("/")) {
-                        path = path.substring(1);
-                      }
-
-                      const newResponse = await client(path, {
-                        method: request.method,
-                        headers: {
-                          Authorization: `Bearer ${tokens?.accessToken}`,
-                        },
-                        body: request.body,
-                      });
-                      return newResponse;
-                    } catch (error) {
-                      console.error("Failed to process queued request", error, {
-                        context: "token_refresh_retry",
-                      });
-                      throw error;
-                    }
-                  });
-                });
-              }
-
-              refreshInProgress = true;
-              try {
-                if (!refreshPromise) {
-                  refreshPromise = refreshAccessToken();
-                }
-                const result = await refreshPromise;
-
-                if (result.success && result.newTokens) {
-                  if (result.newTokens.accessToken !== tokens?.accessToken) {
-                    console.log(
-                      "Token refreshed, processing all queued requests",
-                    );
-
-                    await processQueuedRequests();
-
-                    const url = request.url.toString();
-                    const apiBase = process.env.EXPO_PUBLIC_API_BASE;
-                    let path = url.startsWith(apiBase)
-                      ? url.substring(apiBase.length)
-                      : url;
-
-                    if (path.startsWith("/")) {
-                      path = path.substring(1);
-                    }
-
-                    console.log(`Retrying path: ${path}`);
-
-                    const latestAccessToken = result.newTokens.accessToken;
-                    console.log(
-                      `Using directly returned token (first 10 chars): ${latestAccessToken.substring(0, 10)}...`,
-                    );
-
-                    try {
-                      const newResponse = await client(path, {
-                        method: request.method,
-                        headers: {
-                          Authorization: `Bearer ${latestAccessToken}`,
-                        },
-                        body: request.body,
-                      });
-
-                      console.log(
-                        `Retry succeeded with status: ${newResponse.status}`,
-                      );
-                      pendingRetries.delete(requestKey);
-                      return newResponse;
-                    } catch (innerError) {
-                      console.error("Inner retry request failed", innerError, {
-                        context: "inner_retry",
-                      });
-                      pendingRetries.delete(requestKey);
-                      return response;
-                    }
-                  }
-                }
-              } catch (refreshError) {
-                console.error(
-                  "Error during token refresh - user will be logged out",
-                  refreshError,
-                  { context: "token_refresh" },
-                );
-              } finally {
-                refreshInProgress = false;
-                refreshPromise = null;
-              }
+              return handle401Response(request, requestKey, response);
             }
 
             return response;
@@ -207,7 +262,7 @@ export default function useClient() {
         ],
       },
     });
+  }
 
-    return client;
-  }, [tokens, refreshAccessToken]);
+  return clientRef.current;
 }

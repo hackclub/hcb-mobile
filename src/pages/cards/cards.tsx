@@ -4,7 +4,6 @@ import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -24,8 +23,11 @@ import PaymentCard from "../../components/PaymentCard";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
+import Organization from "../../lib/types/Organization";
+import User from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
@@ -49,7 +51,10 @@ const CardItem = ({
   return (
     <Pressable
       onPress={() => onPress(item)}
-      onLongPress={drag}
+      onLongPress={() => {
+        Haptics.dragStartAsync();
+        drag();
+      }}
       disabled={isActive}
     >
       <PaymentCard
@@ -67,6 +72,9 @@ export default function CardsPage({ navigation }: Props) {
     useOfflineSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
   const { data: grantCards, mutate: reloadGrantCards } =
     useOfflineSWR<GrantCard[]>("user/card_grants");
+  const { data: user } = useOfflineSWR<User>("user");
+  const { data: organizations } =
+    useOfflineSWR<Organization[]>("user/organizations");
   const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
@@ -138,6 +146,7 @@ export default function CardsPage({ navigation }: Props) {
   );
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
+  const [frozenCardsShown, setFrozenCardsShown] = useState(true);
   const [allCards, setAllCards] =
     useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
   const [sortedCards, setSortedCards] =
@@ -150,36 +159,67 @@ export default function CardsPage({ navigation }: Props) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <MenuView
-          actions={[
-            {
-              id: "showCanceledCards",
-              title: "Show Canceled Cards",
-              state: canceledCardsShown ? "on" : "off",
-            },
-          ]}
-          onPressAction={({ nativeEvent: { event } }) => {
-            if (event == "showCanceledCards") {
-              setCanceledCardsShown(!canceledCardsShown);
-              AsyncStorage.setItem(
-                "canceledCardsShown",
-                (!canceledCardsShown).toString(),
-              );
-            }
-          }}
-          themeVariant={scheme || undefined}
-        >
+        <View style={{ flexDirection: "row" }}>
+          <MenuView
+            isAnchoredToRight={true}
+            actions={[
+              {
+                id: "toggleCanceledCards",
+                title: "Hide Canceled Cards",
+                state: canceledCardsShown ? "off" : "on",
+              },
+              {
+                id: "toggleFrozenCards",
+                title: "Hide Frozen Cards",
+                state: frozenCardsShown ? "off" : "on",
+              },
+            ]}
+            onPressAction={({ nativeEvent: { event } }) => {
+              if (event === "toggleCanceledCards") {
+                const newValue = !canceledCardsShown;
+                setCanceledCardsShown(newValue);
+                AsyncStorage.setItem("canceledCardsShown", newValue.toString());
+              }
+              if (event === "toggleFrozenCards") {
+                const newValue = !frozenCardsShown;
+                setFrozenCardsShown(newValue);
+                AsyncStorage.setItem("frozenCardsShown", newValue.toString());
+              }
+            }}
+            themeVariant={scheme || undefined}
+          >
+            <Ionicons.Button
+              name="ellipsis-horizontal-circle-outline"
+              backgroundColor="transparent"
+              size={24}
+              color={palette.primary}
+              iconStyle={{ marginRight: 0 }}
+            />
+          </MenuView>
           <Ionicons.Button
-            name="ellipsis-horizontal-circle"
+            name="add-circle-outline"
             backgroundColor="transparent"
             size={24}
             color={themeColors.text}
             iconStyle={{ marginRight: 0 }}
+            onPress={() => {
+              if (user && organizations) {
+                navigation.navigate("OrderCard");
+              }
+            }}
+            underlayColor={"transparent"}
           />
-        </MenuView>
+        </View>
       ),
     });
-  }, [navigation, canceledCardsShown, scheme]);
+  }, [
+    navigation,
+    canceledCardsShown,
+    frozenCardsShown,
+    scheme,
+    user,
+    organizations,
+  ]);
 
   const combineCards = useCallback(() => {
     // Transform grantCards
@@ -223,7 +263,7 @@ export default function CardsPage({ navigation }: Props) {
   }, [cards, grantCards]);
 
   useEffect(() => {
-    const fetchCanceledCardsShown = async () => {
+    const fetchCardsShown = async () => {
       try {
         const isCanceledCardsShown =
           await AsyncStorage.getItem("canceledCardsShown");
@@ -234,14 +274,24 @@ export default function CardsPage({ navigation }: Props) {
             (isCanceledCardsShown === "true").toString(),
           );
         }
+
+        const isFrozenCardsShown =
+          await AsyncStorage.getItem("frozenCardsShown");
+        if (isFrozenCardsShown) {
+          setFrozenCardsShown(isFrozenCardsShown === "true");
+          await AsyncStorage.setItem(
+            "frozenCardsShown",
+            (isFrozenCardsShown === "true").toString(),
+          );
+        }
       } catch (error) {
-        console.error("Error fetching canceled cards shown status", error, {
-          context: { action: "fetch_canceled_cards_status" },
+        console.error("Error fetching cards shown status", error, {
+          context: { action: "fetch_cards_status" },
         });
       }
     };
 
-    fetchCanceledCardsShown();
+    fetchCardsShown();
 
     if (cards && grantCards) {
       combineCards();
@@ -310,13 +360,18 @@ export default function CardsPage({ navigation }: Props) {
   if (sortedCards) {
     return (
       <ReorderableList
-        data={
-          canceledCardsShown
-            ? sortedCards
-            : sortedCards.filter(
-                (c) => c.status != "canceled" && c.status != "expired",
-              )
-        }
+        data={sortedCards.filter((c) => {
+          if (
+            !canceledCardsShown &&
+            (c.status == "canceled" || c.status == "expired")
+          ) {
+            return false;
+          }
+          if (!frozenCardsShown && c.status == "frozen") {
+            return false;
+          }
+          return true;
+        })}
         keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
@@ -340,7 +395,12 @@ export default function CardsPage({ navigation }: Props) {
           <CardItem
             item={item}
             isActive={false}
-            onPress={(card) => navigation.navigate("Card", { card })}
+            onPress={(card) =>
+              navigation.navigate("Card", {
+                card,
+                grantId: "grant_id" in card ? card.grant_id : undefined,
+              })
+            }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}
           />

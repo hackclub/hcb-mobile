@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -16,10 +15,15 @@ import {
 } from "react-native";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import StyledButton from "../../components/Button";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 
 type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
 
@@ -109,12 +113,13 @@ function ButtonGroup({
   children: React.ReactNode;
   style?: ViewStyle;
 }) {
+  const insets = useSafeAreaInsets();
   return (
     <View
       style={{
         width: "100%",
         position: "absolute",
-        bottom: 30,
+        bottom: insets.bottom,
         alignItems: "center",
         ...style,
       }}
@@ -187,11 +192,24 @@ export default function ProcessDonationPage({
     navigation.setOptions({
       title: showQR ? "Donation Link" : undefined,
       headerLeft: () => (
-        <Button
-          title={status === "ready" || status === "loading" ? "Cancel" : "Done"}
-          color={palette.primary}
-          onPress={() => navigation.goBack()}
-        />
+        <>
+          {Platform.OS === "android" ? (
+            <View style={{ marginRight: 20 }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.text}
+                onPress={() => navigation.goBack()}
+              />
+            </View>
+          ) : (
+            <Button
+              title="Done"
+              color={theme.colors.text}
+              onPress={() => navigation.goBack()}
+            />
+          )}
+        </>
       ),
     });
   }, [showQR, status, navigation]);
@@ -403,9 +421,9 @@ export default function ProcessDonationPage({
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 20 }}>
       <StatusBar barStyle="light-content" />
       {renderContent()}
-    </View>
+    </SafeAreaView>
   );
 }

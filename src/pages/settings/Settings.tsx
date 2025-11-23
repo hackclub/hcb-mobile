@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Sentry from "@sentry/react-native";
+import { SendFeedbackParams } from "@sentry/react-native";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -14,14 +16,16 @@ import {
   Pressable,
   ScrollView,
   Animated,
-  useColorScheme,
+  useColorScheme as useSystemColorScheme,
   Platform,
   Switch,
 } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import HelpscoutBeacon from "react-native-helpscout-beacon";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
+import FeedbackModal from "../../components/FeedbackModal";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
@@ -30,9 +34,9 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 
-const TOS_URL = "https://hcb.hackclub.com/tos";
-const PRIVACY_URL = "https://hcb.hackclub.com/privacy";
+const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 
 const THEME_KEY = "app_theme";
 const BIOMETRICS_KEY = "biometrics_required";
@@ -72,15 +76,35 @@ export default function SettingsPage({ navigation }: Props) {
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
-  const scheme = useColorScheme();
+  const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
   const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
 
   useEffect(() => {
-    HelpscoutBeacon.init(beaconID || "");
+    if (!beaconID) {
+      console.warn("HelpScout Beacon ID not configured");
+      return;
+    }
+
+    try {
+      HelpscoutBeacon.init(beaconID);
+    } catch (error) {
+      console.error("Failed to initialize HelpScout Beacon", error);
+    }
   }, [beaconID]);
+
+  useEffect(() => {
+    if (user?.email && user?.name && user?.id) {
+      try {
+        HelpscoutBeacon.login(user.email, user.name, user.id);
+      } catch (error) {
+        console.error("Failed to login to HelpScout Beacon", error);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -119,18 +143,53 @@ export default function SettingsPage({ navigation }: Props) {
       useNativeDriver: true,
     }).start();
   }, [animation]);
+
+  useEffect(() => {
+    if (Platform.OS === "android" && theme === "system") {
+      (async () => {
+        try {
+          const shouldBeDark = deviceColorScheme === "dark";
+          console.log("System theme update:", {
+            theme,
+            deviceColorScheme,
+            shouldBeDark,
+          });
+          await SystemUI.setBackgroundColorAsync(
+            shouldBeDark ? "#252429" : "white",
+          );
+        } catch (error) {
+          console.error("Error setting system UI background color", error, {
+            context: { theme, deviceColorScheme },
+          });
+        }
+      })();
+    }
+  }, [theme, deviceColorScheme]);
+
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
+    Haptics.selectionAsync();
     setTheme(value);
+
     if (Platform.OS === "android") {
       try {
+        const currentDeviceTheme = deviceColorScheme ?? "light";
+        const shouldBeDark =
+          value === "dark" ||
+          (value === "system" && currentDeviceTheme === "dark");
+
+        console.log("Theme change:", {
+          value,
+          deviceColorScheme,
+          currentDeviceTheme,
+          shouldBeDark,
+        });
+
         await SystemUI.setBackgroundColorAsync(
-          value == "dark" || (value == "system" && scheme == "dark")
-            ? "#252429"
-            : "white",
+          shouldBeDark ? "#252429" : "white",
         );
       } catch (error) {
         console.error("Error setting system UI background color", error, {
-          context: { theme: value },
+          context: { theme: value, deviceColorScheme },
         });
       }
     }
@@ -138,14 +197,33 @@ export default function SettingsPage({ navigation }: Props) {
 
   const handleBiometricsToggle = async (value: boolean) => {
     try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        console.log("Biometric authentication not available");
+        return;
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to change biometric settings",
+        cancelLabel: "Cancel",
+        fallbackLabel: "Use passcode",
+        disableDeviceFallback: false,
+      });
+
+      if (!result.success) {
+        console.log("Biometric authentication failed or cancelled");
+        return;
+      }
+
+      Haptics.toggleAsync(value);
       setBiometricsRequired(value);
       await AsyncStorage.setItem(BIOMETRICS_KEY, value.toString());
     } catch (error) {
       console.error("Error saving biometrics setting", error, {
         context: { action: "biometrics_toggle", value },
       });
-      // Revert the state if saving fails
-      setBiometricsRequired(!value);
     }
   };
 
@@ -167,7 +245,6 @@ export default function SettingsPage({ navigation }: Props) {
       console.error("Error clearing storage during sign out", error, {
         context: { action: "sign_out" },
       });
-      // Still clear cache and tokens even if storage clearing fails
       cache.clear();
       setTokens(null);
     }
@@ -492,39 +569,6 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => Linking.openURL(TOS_URL)}
-          >
-            <Ionicons
-              name="document-text-outline"
-              size={22}
-              color={palette.muted}
-              style={{ marginRight: 12 }}
-            />
-            <Text style={{ color: colors.text, fontSize: 16 }}>
-              Terms & Conditions
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={palette.muted}
-              style={{ marginLeft: "auto" }}
-            />
-          </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
-          <Pressable
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 18,
-              paddingHorizontal: 18,
-            }}
             onPress={() => Linking.openURL(PRIVACY_URL)}
           >
             <Ionicons
@@ -576,8 +620,42 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
 
-          {Platform.OS === "ios" && (
+          {/* Feedback */}
+
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => setFeedbackModalVisible(true)}
+          >
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+
+          {Platform.OS === "ios" && beacon?.signature && (
             <>
               <View
                 style={{
@@ -594,14 +672,9 @@ export default function SettingsPage({ navigation }: Props) {
                   paddingVertical: 18,
                   paddingHorizontal: 18,
                 }}
-                onPress={() =>
-                  HelpscoutBeacon.loginAndOpen(
-                    user?.email || "",
-                    user?.name || "",
-                    user?.id || "",
-                    beacon?.signature || "",
-                  )
-                }
+                onPress={() => {
+                  HelpscoutBeacon.open(beacon?.signature);
+                }}
               >
                 <Ionicons
                   name="chatbox-ellipses-outline"
@@ -638,6 +711,41 @@ export default function SettingsPage({ navigation }: Props) {
           Sign Out
         </Button>
       </View>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        visible={feedbackModalVisible}
+        onClose={() => setFeedbackModalVisible(false)}
+        onSubmit={(feedback) => {
+          try {
+            Sentry.captureFeedback(
+              {
+                message: feedback.message,
+              } as SendFeedbackParams,
+              {
+                captureContext: {
+                  tags: {
+                    category: feedback.category,
+                  },
+                },
+              },
+            );
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: "Feedback submitted!",
+              textBody: "Thank you for your feedback!",
+            });
+          } catch (error) {
+            console.error("Failed to submit feedback:", error);
+            Toast.show({
+              type: ALERT_TYPE.DANGER,
+              title: "Failed to submit feedback",
+              textBody: "Please try again later.",
+            });
+          }
+        }}
+      />
     </ScrollView>
   );
 }

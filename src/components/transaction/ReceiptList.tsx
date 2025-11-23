@@ -4,7 +4,7 @@ import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
@@ -73,6 +73,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const hcb = useClient();
   const isDark = useIsDark();
   const { isOnline, withOfflineCheck } = useOffline();
+  const addReceiptButtonRef = useRef(null);
 
   const { handleActionSheet, isOnline: actionSheetIsOnline } =
     useReceiptActionSheet({
@@ -219,7 +220,8 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         />
 
         <TouchableOpacity
-          onPress={handleActionSheet}
+          ref={addReceiptButtonRef}
+          onPress={() => handleActionSheet(addReceiptButtonRef)}
           disabled={!actionSheetIsOnline}
         >
           <Animated.View

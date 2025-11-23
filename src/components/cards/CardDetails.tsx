@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import * as Linking from "expo-linking";
-import { View, Text, Animated } from "react-native";
+import { View, Text, Animated, Platform } from "react-native";
 
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
@@ -157,7 +157,13 @@ export default function CardDetails({
         >
           Card Number
         </Text>
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+          }}
+        >
           {detailsLoading ||
           cardDetailsLoading ||
           (detailsRevealed && !details) ? (
@@ -166,7 +172,7 @@ export default function CardDetails({
             <Text
               style={{
                 color: palette.muted,
-                fontSize: 16,
+                fontSize: Platform.OS === "android" ? 15 : 16,
                 fontWeight: "500",
                 fontFamily: "JetBrainsMono-Regular",
               }}
@@ -349,7 +355,13 @@ export default function CardDetails({
               </Text>
             </View>
             {grantCard?.purpose && (
-              <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                }}
+              >
                 <Text
                   style={{
                     fontSize: 16,
@@ -365,11 +377,12 @@ export default function CardDetails({
                     fontSize: 16,
                     fontWeight: "500",
                     fontFamily: "JetBrainsMono-Regular",
+                    flexShrink: 1,
                   }}
                 >
                   {grantCard?.purpose}
                 </Text>
-              </>
+              </View>
             )}
           </View>
           <View

@@ -1,6 +1,5 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { View, Text, Alert } from "react-native";
 
@@ -9,8 +8,10 @@ import CardSkeleton from "../../components/cards/CardSkeleton";
 import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import GrantCardType from "../../lib/types/GrantCard";
+import User from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import * as Haptics from "../../utils/haptics";
 import {
   renderMoney,
   formatMerchantNames,
@@ -25,10 +26,11 @@ export default function GrantCardPage({ route, navigation }: Props) {
   const { data: grant, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
     `card_grants/cdg_${grantId}`,
   );
+  const { data: user } = useOfflineSWR<User>(`user`);
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   const [isActivating, setIsActivating] = useState(false);
-
+  const isGrantCardholder = grant?.user?.id === user?.id;
   const handleActivateGrant = async () => {
     setIsActivating(true);
     try {
@@ -108,7 +110,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
         </View>
 
         {/* Show activate button for grants that are active but not yet activated */}
-        {grant.status === "active" && (
+        {grant.status === "active" && isGrantCardholder && (
           <View style={{ marginTop: 20 }}>
             <Button
               style={{

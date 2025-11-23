@@ -1,17 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackScreenProps,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import * as BackgroundTask from "expo-background-task";
-import * as Haptics from "expo-haptics";
-import * as QuickActions from "expo-quick-actions";
 import { useShareIntentContext } from "expo-share-intent";
-import * as TaskManager from "expo-task-manager";
-import { useEffect, useState, useRef, memo, useMemo, useCallback } from "react";
+import { useEffect, useState, memo, useMemo, useCallback } from "react";
 import {
   Text,
   View,
@@ -25,7 +20,8 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { mutate, preload, useSWRConfig } from "swr";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
@@ -37,44 +33,13 @@ import Organization from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 import { organizationOrderEqual } from "../utils/util";
-
-const BACKGROUND_TASK_IDENTIFIER = "refresh-data";
-
-TaskManager.defineTask(BACKGROUND_TASK_IDENTIFIER, async () => {
-  try {
-    // Only attempt to mutate if we have network connectivity
-    const netInfo = await NetInfo.fetch();
-    if (!netInfo.isConnected) {
-      console.log("Background task skipped: no network connection");
-      return BackgroundTask.BackgroundTaskResult.Success;
-    }
-
-    await Promise.all([
-      mutate((k) => typeof k === "string" && k.startsWith("organizations/")),
-      mutate((k) => typeof k === "string" && k.startsWith("user/")),
-    ]);
-
-    return BackgroundTask.BackgroundTaskResult.Success;
-  } catch (error) {
-    console.error("Failed to execute the background task:", error);
-    return BackgroundTask.BackgroundTaskResult.Failed;
-  }
-});
-
-async function registerBackgroundTaskAsync() {
-  return BackgroundTask.registerTaskAsync(BACKGROUND_TASK_IDENTIFIER, {
-    minimumInterval: 60 * 60, // 1 hour in seconds
-  });
-}
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 /* eslint-disable react/prop-types */
 export default function App({ navigation }: Props) {
-  const [isOnline, setIsOnline] = useState(true);
-  const lastFetchTime = useRef<number>(0);
-  const FETCH_COOLDOWN_MS = 10000;
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
 
@@ -88,7 +53,7 @@ export default function App({ navigation }: Props) {
 
   const [refreshEnabled, setRefreshEnabled] = useState(true);
   const [shareIntentProcessed, setShareIntentProcessed] = useState(false);
-  const [refreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleDragStart = useCallback(() => {
     "worklet";
@@ -106,21 +71,6 @@ export default function App({ navigation }: Props) {
     if (Platform.OS === "android") {
       runOnJS(setRefreshEnabled)(true);
     }
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const isRegistered = await TaskManager.isTaskRegisteredAsync(
-          BACKGROUND_TASK_IDENTIFIER,
-        );
-        if (!isRegistered) {
-          await registerBackgroundTaskAsync();
-        }
-      } catch (error) {
-        console.error("Failed to register background task:", error);
-      }
-    })();
   }, []);
 
   useEffect(() => {
@@ -187,61 +137,26 @@ export default function App({ navigation }: Props) {
     };
   }, [hasShareIntent, resetShareIntent]);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      setIsOnline(state.isConnected ?? false);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const shouldFetch = useCallback(() => {
-    const now = Date.now();
-    if (!isOnline) return false;
-    if (now - lastFetchTime.current < FETCH_COOLDOWN_MS) return false;
-    lastFetchTime.current = now;
-    return true;
-  }, [isOnline]);
-
   const {
     data: organizations,
     error,
     mutate: reloadOrganizations,
   } = useOfflineSWR<Organization[]>("user/organizations", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching organizations:", err);
-    },
   });
 
   const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
+
   const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
     Invitation[]
   >("user/invitations", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching invitations:", err);
-    },
   });
 
   const { data: grantCards, mutate: reloadGrantCards } = useOfflineSWR<
     GrantCard[]
   >("user/card_grants", {
     fallbackData: [],
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 2000,
-    onError: (err) => {
-      console.error("Error fetching grant cards:", err);
-    },
   });
 
   // Filter grants that are active but don't have a card_id yet (need to create card)
@@ -261,93 +176,44 @@ export default function App({ navigation }: Props) {
   const panGesture = usePanGesture();
 
   useEffect(() => {
-    if (Platform.OS === "ios") {
-      QuickActions.setItems([
-        ...(sortedOrgs?.[0]
-          ? [
-              {
-                id: `org_${sortedOrgs[0].id}`,
-                title: sortedOrgs[0].name,
-                subtitle: "Open your favorite org 💰",
-                icon: "symbol:dollarsign.bank.building",
-                params: { href: `/${sortedOrgs[0].id}` },
-              },
-            ]
-          : []),
-        {
-          id: "cards",
-          title: "Cards",
-          subtitle: "View your cards 💳",
-          icon: "symbol:creditcard",
-          params: { href: `/cards` },
-        },
-        {
-          id: "receipts",
-          title: "Upload your receipts",
-          subtitle: "before Leo gets mad 😡",
-          icon: "symbol:text.document",
-          params: { href: `/receipts` },
-        },
-        {
-          id: "settings",
-          title: "Settings",
-          icon: "symbol:gearshape",
-          params: { href: `/settings` },
-        },
+    if (!organizations?.length) return;
+
+    preload("user", fetcher!);
+    preload("user/cards", fetcher!);
+
+    organizations.forEach((org) => {
+      const orgKey = `organizations/${org.id}`;
+      const transactionsKey = `organizations/${org.id}/transactions?limit=35`;
+
+      preload(orgKey, fetcher!);
+      preload(transactionsKey, fetcher!);
+    });
+  }, [organizations, fetcher]);
+
+  const onRefresh = useCallback(async () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        reloadOrganizations(),
+        reloadInvitations(),
+        reloadGrantCards(),
       ]);
+      await mutate(
+        (k) => typeof k === "string" && k.startsWith("organizations"),
+      );
+    } finally {
+      setRefreshing(false);
     }
-  }, [sortedOrgs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadOrganizations, reloadInvitations, reloadGrantCards, mutate]);
 
-  useEffect(() => {
-    if (!shouldFetch()) return;
-
-    try {
-      if (isOnline) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        preload("user", fetcher!);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        preload("user/cards", fetcher!);
-        // prefetch all user organization details
-        for (const org of organizations || []) {
-          preload(`organizations/${org.id}`, fetcher!);
-        }
-      }
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error preloading data:", err);
-      }
-    }
-  }, [organizations, fetcher, isOnline, shouldFetch]);
-
-  const onRefresh = () => {
-    if (!shouldFetch()) return;
-
-    try {
-      reloadOrganizations();
-      reloadInvitations();
-      reloadGrantCards();
+  useFocusEffect(
+    useCallback(() => {
       mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error refreshing data:", err);
-      }
-    }
-  };
-
-  useFocusEffect(() => {
-    if (!shouldFetch()) return;
-
-    try {
-      reloadOrganizations();
-      reloadInvitations();
-      reloadGrantCards();
-      mutate((k) => typeof k === "string" && k.startsWith("organizations"));
-    } catch (err) {
-      if (err.name !== "AbortError" && err.name !== "NetworkError") {
-        console.error("Error reloading data on focus:", err);
-      }
-    }
-  });
+    }, [mutate]),
+  );
 
   const EventItem = memo(
     ({
@@ -421,123 +287,125 @@ export default function App({ navigation }: Props) {
   }
 
   return (
-    <ReorderableList
-      keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
-      onReorder={({ from, to }) => {
-        Haptics.selectionAsync();
-        const newOrgs = [...sortedOrgs];
-        const [removed] = newOrgs.splice(from, 1);
-        newOrgs.splice(to, 0, removed);
-        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
-          setSortedOrgs(newOrgs);
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+      <ReorderableList
+        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        onReorder={({ from, to }) => {
+          Haptics.selectionAsync();
+          const newOrgs = [...sortedOrgs];
+          const [removed] = newOrgs.splice(from, 1);
+          newOrgs.splice(to, 0, removed);
+          if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+            setSortedOrgs(newOrgs);
+          }
+        }}
+        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: tabBarHeight,
+        }}
+        contentInsetAdjustmentBehavior="automatic"
+        data={sortedOrgs}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            enabled={refreshEnabled}
+          />
         }
-      }}
-      scrollIndicatorInsets={{ bottom: tabBarHeight }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingBottom: tabBarHeight,
-      }}
-      contentInsetAdjustmentBehavior="automatic"
-      data={sortedOrgs}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          enabled={refreshEnabled}
-        />
-      }
-      panGesture={panGesture}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      ListHeaderComponent={() =>
-        (invitations && invitations.length > 0) ||
-        (grantInvites && grantInvites.length > 0) ? (
-          <View
-            style={{
-              marginTop: 10,
-              marginBottom: 20,
-              borderRadius: 10,
-            }}
-          >
-            {invitations && invitations.length > 0 && (
-              <>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                  }}
-                >
-                  Pending invitations
-                </Text>
-                {invitations.map((invitation) => (
-                  <Event
-                    key={invitation.id}
-                    invitation={invitation}
+        panGesture={panGesture}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        ListHeaderComponent={() =>
+          (invitations && invitations.length > 0) ||
+          (grantInvites && grantInvites.length > 0) ? (
+            <View
+              style={{
+                marginTop: 10,
+                marginBottom: 20,
+                borderRadius: 10,
+              }}
+            >
+              {invitations && invitations.length > 0 && (
+                <>
+                  <Text
                     style={{
-                      borderWidth: 2,
-                      borderColor:
-                        scheme == "dark" ? palette.primary : palette.muted,
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
                       marginBottom: 10,
                     }}
-                    event={invitation.organization}
-                    onPress={() =>
-                      navigation.navigate("Invitation", {
-                        inviteId: invitation.id,
-                        invitation,
-                      })
-                    }
-                    hideBalance
-                  />
-                ))}
-              </>
-            )}
+                  >
+                    Pending invitations
+                  </Text>
+                  {invitations.map((invitation) => (
+                    <Event
+                      key={invitation.id}
+                      invitation={invitation}
+                      style={{
+                        borderWidth: 2,
+                        borderColor:
+                          scheme == "dark" ? palette.primary : palette.muted,
+                        marginBottom: 10,
+                      }}
+                      event={invitation.organization}
+                      onPress={() =>
+                        navigation.navigate("Invitation", {
+                          inviteId: invitation.id,
+                          invitation,
+                        })
+                      }
+                      hideBalance
+                    />
+                  ))}
+                </>
+              )}
 
-            {grantInvites && grantInvites.length > 0 && (
-              <>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 12,
-                    textTransform: "uppercase",
-                    marginBottom: 10,
-                    marginTop: invitations && invitations.length > 0 ? 20 : 0,
-                  }}
-                >
-                  Available grants
-                </Text>
-                {grantInvites.map((grant) => (
-                  <GrantInvite
-                    key={grant.id}
-                    grant={grant}
-                    navigation={navigation}
+              {grantInvites && grantInvites.length > 0 && (
+                <>
+                  <Text
                     style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
                       marginBottom: 10,
+                      marginTop: invitations && invitations.length > 0 ? 20 : 0,
                     }}
-                  />
-                ))}
-              </>
-            )}
-          </View>
-        ) : null
-      }
-      renderItem={renderItem}
-      ListFooterComponent={() =>
-        organizations.length > 2 && (
-          <Text
-            style={{
-              color: palette.muted,
-              textAlign: "center",
-              marginTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            Drag to reorder organizations
-          </Text>
-        )
-      }
-      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-    />
+                  >
+                    Available grants
+                  </Text>
+                  {grantInvites.map((grant) => (
+                    <GrantInvite
+                      key={grant.id}
+                      grant={grant}
+                      navigation={navigation}
+                      style={{
+                        marginBottom: 10,
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </View>
+          ) : null
+        }
+        renderItem={renderItem}
+        ListFooterComponent={() =>
+          organizations.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder organizations
+            </Text>
+          )
+        }
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+      />
+    </SafeAreaView>
   );
 }

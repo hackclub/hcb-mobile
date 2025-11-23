@@ -1,5 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -12,7 +12,7 @@ import {
 import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
-import { palette } from "../../styles/theme";
+import { theme } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "Transfer">;
 
@@ -24,13 +24,24 @@ export default function TransferPage({ navigation, route }: Props) {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
-          <NativeButton
-            color={palette.primary}
-            title="Cancel"
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+        <>
+          {Platform.OS === "android" ? (
+            <View style={{ marginRight: 20 }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={theme.colors.text}
+                onPress={() => navigation.goBack()}
+              />
+            </View>
+          ) : (
+            <NativeButton
+              title="Done"
+              color={theme.colors.text}
+              onPress={() => navigation.goBack()}
+            />
+          )}
+        </>
       ),
     });
   }, [navigation]);

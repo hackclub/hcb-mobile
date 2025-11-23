@@ -4,7 +4,6 @@ import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
-import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
@@ -24,6 +23,7 @@ import { useIsDark } from "../lib/useColorScheme";
 import CardPage from "../pages/cards/card";
 import CardsPage from "../pages/cards/cards";
 import GrantCardPage from "../pages/cards/GrantCard";
+import OrderCardPage from "../pages/cards/OrderCard";
 import Home from "../pages/index";
 import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
@@ -44,6 +44,7 @@ import ShareIntentModal from "../pages/ShareIntentModal";
 import TransactionPage from "../pages/Transaction";
 import { useShareIntentContext } from "../providers/ShareIntentContext";
 import { palette } from "../styles/theme";
+import * as Haptics from "../utils/haptics";
 
 const Stack = createNativeStackNavigator<StackParamList>();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
@@ -143,7 +144,7 @@ export default function Navigator() {
       screenListeners={({ navigation, route }) => ({
         tabPress: (e) => {
           // Add haptic feedback for all tab presses
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
 
           if (route.name === "Home") {
             const state = navigation.getState();
@@ -190,7 +191,7 @@ export default function Navigator() {
                     backgroundColor="transparent"
                     size={24}
                     underlayColor={themeColors.card}
-                    color={palette.primary}
+                    color={themeColors.text}
                     iconStyle={{ marginRight: 0 }}
                     accessibilityLabel="Apply for new organization"
                     accessibilityHint="Opens the HCB application form in browser"
@@ -254,7 +255,11 @@ export default function Navigator() {
             <Stack.Screen
               name="ProcessDonation"
               component={ProcessDonationPage}
-              options={{ presentation: "modal", title: "Process Donation" }}
+              options={{
+                presentation: "modal",
+                title: "Process Donation",
+                headerTitle: "Process Donation",
+              }}
             />
             <Stack.Screen
               options={({ route }) => ({
@@ -315,6 +320,18 @@ export default function Navigator() {
               name="GrantCard"
               component={GrantCardPage}
               options={() => ({ title: "Card" })}
+            />
+            <CardsStack.Screen
+              name="OrderCard"
+              component={OrderCardPage}
+              options={{
+                presentation: "card",
+                headerShown: true,
+                title: "Order a Card",
+                headerBackTitle: "Cards",
+                headerShadowVisible: false,
+                headerTransparent: true,
+              }}
             />
             <Stack.Screen
               options={({ route }) => ({

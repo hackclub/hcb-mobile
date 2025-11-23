@@ -24,12 +24,14 @@ import {
   View,
   ActivityIndicator,
   Platform,
+  Appearance,
 } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
+import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
 import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
@@ -48,6 +50,13 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
+
+interface HTTPError extends Error {
+  status?: number;
+  response?: {
+    status?: number;
+  };
+}
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
@@ -73,13 +82,16 @@ export default function AppContent({
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
-  const { tokens, refreshAccessToken } = useContext(AuthContext);
+  const { tokens, refreshAccessToken, setTokens } = useContext(AuthContext);
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
   const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
+  const isBiometricAuthInProgress = useRef(false);
+  const lastAuthenticatedToken = useRef<string | null>(null);
+  const hasPassedBiometrics = useRef(false);
   const hcb = useClient();
 
   useEffect(() => {
@@ -101,14 +113,11 @@ export default function AppContent({
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
 
-    // Return cached token if it's still valid
     if (cachedToken && now < tokenExpiry) {
       console.log("Using cached Stripe Terminal connection token");
       return cachedToken;
     }
 
-    // Check if we should actually fetch the token
-    // Only fetch if the user is authenticated and has access token
     if (!tokens?.accessToken) {
       console.log(
         "No access token available, skipping Stripe Terminal token fetch",
@@ -116,7 +125,6 @@ export default function AppContent({
       throw new Error("Authentication required for Stripe Terminal connection");
     }
 
-    // Check rate limiting
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
       const waitTime = Math.ceil(
         (TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000,
@@ -158,7 +166,6 @@ export default function AppContent({
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
 
-      // Cache the token
       setCachedToken(newToken);
       setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
@@ -195,25 +202,55 @@ export default function AppContent({
     navRef.current = navigationRef.current;
   }, []);
 
-  // Sentry user binding must occur within SWRConfig provider. We'll mount a child component later.
-
   const onNavigationReady = useCallback(() => {
     navRef.current = navigationRef.current;
+    routingInstrumentation.registerNavigationContainer(navigationRef);
   }, []);
 
   useEffect(() => {
     const setStatusBar = async () => {
       await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
+      // Only override Appearance when NOT using system theme
+      // When themePref is "system", set to null to use actual device theme
+      if (themePref === "system") {
+        Appearance.setColorScheme(null);
+      } else {
+        Appearance.setColorScheme(isDark ? "dark" : "light");
+      }
     };
     setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if (__DEV__) {
-          // bypass auth for development
+        if (lastAuthenticatedToken.current === tokens.accessToken) {
+          console.log(
+            "Already authenticated for this token, skipping biometric auth",
+          );
           setIsAuthenticated(true);
           setAppIsReady(true);
           return;
         }
+
+        // If user was already authenticated (token refresh scenario), update token without re-prompting
+        if (
+          lastAuthenticatedToken.current !== null &&
+          hasPassedBiometrics.current
+        ) {
+          console.log(
+            "Token refreshed, user already authenticated - updating token without re-prompting biometrics",
+          );
+          lastAuthenticatedToken.current = tokens.accessToken;
+          setIsAuthenticated(true);
+          setAppIsReady(true);
+          return;
+        }
+
+        // if (__DEV__) {
+        //   // bypass auth for development
+        //   lastAuthenticatedToken.current = tokens.accessToken;
+        //   setIsAuthenticated(true);
+        //   setAppIsReady(true);
+        //   return;
+        // }
         try {
           const biometricsRequired = await AsyncStorage.getItem(
             "biometrics_required",
@@ -221,6 +258,8 @@ export default function AppContent({
 
           if (biometricsRequired !== "true") {
             console.log("Biometric authentication not required, bypassing...");
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
             setAppIsReady(true);
             return;
@@ -232,11 +271,23 @@ export default function AppContent({
 
           if (!hasHardware || !isEnrolled) {
             console.log("Biometric authentication not available, bypassing...");
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
             setAppIsReady(true);
             return;
           }
 
+          if (isBiometricAuthInProgress.current) {
+            console.log(
+              "Biometric authentication already in progress, skipping...",
+            );
+            return;
+          }
+
+          isBiometricAuthInProgress.current = true;
+
+          // Keep splash screen visible during biometric authentication
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate to access HCB",
             cancelLabel: "Cancel",
@@ -245,37 +296,77 @@ export default function AppContent({
           });
 
           if (result.success) {
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
           } else {
-            console.error(
-              "Biometric authentication failed",
-              new Error(result.error || "Authentication failed"),
-              {
-                context: { action: "biometric_auth", errorType: result.error },
-              },
-            );
-            setIsAuthenticated(false);
+            if (result.error !== "system_cancel") {
+              console.error(
+                "Biometric authentication failed",
+                new Error(result.error || "Authentication failed"),
+                {
+                  context: {
+                    action: "biometric_auth",
+                    errorType: result.error,
+                  },
+                },
+              );
+              // Clear tokens to fully log out the user
+              hasPassedBiometrics.current = false;
+              await setTokens(null);
+              setIsAuthenticated(false);
+            } else {
+              console.log("Biometric authentication cancelled by user");
+              hasPassedBiometrics.current = false;
+              await setTokens(null);
+              setIsAuthenticated(false);
+            }
           }
+          setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
         } catch (error) {
           console.error("Biometric authentication error", error, {
             context: { action: "biometric_auth" },
           });
+          hasPassedBiometrics.current = false;
+          await setTokens(null);
           setIsAuthenticated(false);
+          setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
         }
       } else {
         console.log("No access token, skipping biometric authentication");
+        lastAuthenticatedToken.current = null;
+        hasPassedBiometrics.current = false;
         setIsAuthenticated(true);
+        setAppIsReady(true);
       }
-      setAppIsReady(true);
     };
 
-    checkAuth();
-  }, [tokens?.accessToken]);
+    let cancelled = false;
+
+    checkAuth().catch((error) => {
+      if (!cancelled) {
+        console.error("Unexpected error in checkAuth", error);
+        setIsAuthenticated(false);
+        setAppIsReady(true);
+        isBiometricAuthInProgress.current = false;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tokens?.accessToken, setTokens, isDark, themePref]);
 
   useEffect(() => {
     if (tokens) {
       const now = Date.now();
-      if (tokens.expiresAt <= now + 5 * 60 * 1000) {
+      if (
+        tokens.expiresAt <= now + 5 * 60 * 1000 &&
+        tokens.expiresAt > now + 2 * 60 * 1000
+      ) {
+        console.log("Preemptively refreshing token before it expires");
         refreshAccessToken().catch((error) => {
           console.error("Failed to preemptively refresh token", error);
         });
@@ -426,11 +517,67 @@ export default function AppContent({
                   fetcher,
                   revalidateOnFocus: true,
                   revalidateOnReconnect: true,
-                  dedupingInterval: 2000,
+                  revalidateIfStale: true,
+                  dedupingInterval: 1000,
                   shouldRetryOnError: true,
                   keepPreviousData: true,
-                  errorRetryCount: 3,
-                  errorRetryInterval: 1000,
+                  errorRetryCount: 5,
+                  errorRetryInterval: 500,
+                  refreshInterval: 0,
+                  loadingTimeout: 3000,
+                  focusThrottleInterval: 5000,
+                  onErrorRetry: (
+                    error,
+                    key,
+                    config,
+                    revalidate,
+                    { retryCount },
+                  ) => {
+                    const errorWithStatus = error as HTTPError;
+                    const status =
+                      errorWithStatus?.status ||
+                      errorWithStatus?.response?.status;
+
+                    if (status === 404) {
+                      return;
+                    }
+
+                    if (
+                      status &&
+                      status >= 400 &&
+                      status < 500 &&
+                      status !== 429
+                    ) {
+                      return;
+                    }
+
+                    if (retryCount >= 5) return;
+
+                    const baseTimeout = 500 * Math.pow(1.5, retryCount);
+                    const jitter = Math.random() * 200;
+                    const timeout = Math.min(baseTimeout + jitter, 5000);
+
+                    setTimeout(() => {
+                      console.log(
+                        `Global retry for ${key} (attempt ${retryCount + 1})`,
+                      );
+                      revalidate({ retryCount });
+                    }, timeout);
+                  },
+                  onSuccess: (_data, key) => {
+                    if (__DEV__) {
+                      console.log(`Successfully fetched: ${key}`);
+                    }
+                  },
+                  onError: (error, key) => {
+                    if (
+                      error instanceof Error &&
+                      error.name !== "AbortError" &&
+                      error.name !== "NetworkError"
+                    ) {
+                      console.error(`Global SWR error for ${key}:`, error);
+                    }
+                  },
                 }}
               >
                 <SentryUserBridge />

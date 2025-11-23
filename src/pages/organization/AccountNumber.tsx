@@ -2,9 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
-import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button } from "react-native";
+import { View, Text, StatusBar, Button, Linking, Platform } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";
@@ -69,28 +68,101 @@ export default function AccountNumberPage({
     params: { orgId },
   },
 }: Props) {
-  const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${orgId}`,
-  );
+  const { data: organization, isLoading: organizationLoading } =
+    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`);
 
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <View style={{ marginRight: Constants.platform?.android ? 15 : 0 }}>
-          <Button
-            title="Done"
-            color={palette.primary}
-            onPress={() => navigation.goBack()}
-          />
-        </View>
+        <>
+          {Platform.OS === "android" ? (
+            <View style={{ marginRight: 20 }}>
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={themeColors.text}
+                onPress={() => navigation.goBack()}
+              />
+            </View>
+          ) : (
+            <Button
+              title="Done"
+              color={themeColors.text}
+              onPress={() => navigation.goBack()}
+            />
+          )}
+        </>
       ),
     });
   }, [navigation]);
 
+  const { colors: themeColors } = useTheme();
+
+  if (
+    organization?.routing_number == null ||
+    organization?.account_number == null ||
+    organization?.swift_bic_code == null ||
+    !organizationLoading
+  ) {
+    return (
+      <View
+        style={{
+          padding: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+        <View style={{ alignItems: "center", maxWidth: 320 }}>
+          <Ionicons
+            name="document-text-outline"
+            size={80}
+            color={palette.muted}
+            style={{ marginBottom: 24 }}
+          />
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "600",
+              color: themeColors.text,
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            Account Details Not Available
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: palette.muted,
+              textAlign: "center",
+              lineHeight: 24,
+              marginBottom: 32,
+            }}
+          >
+            Your account details haven't been generated yet. Please generate
+            them on the website.
+          </Text>
+          <Button
+            title="Open Web Dashboard"
+            color={palette.primary}
+            onPress={() => {
+              Linking.openURL(
+                `https://hcb.hackclub.com/${organization?.slug}/account-number`,
+              );
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View
       style={{
-        padding: 20,
+        padding: Platform.OS === "android" ? 40 : 20,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
