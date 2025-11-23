@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import * as WebBrowser from "expo-web-browser";
@@ -42,6 +43,7 @@ export default function Navigator() {
   const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
 
   const scheme = useColorScheme();
+  const { colors: themeColors } = useTheme();
 
   const { mutate } = useSWRConfig();
 
@@ -99,7 +101,7 @@ export default function Navigator() {
                     name="add-circle-outline"
                     backgroundColor="transparent"
                     size={24}
-                    color={palette.primary}
+                    color={themeColors.text}
                     iconStyle={{ marginRight: 0 }}
                     onPress={() =>
                       WebBrowser.openBrowserAsync(
