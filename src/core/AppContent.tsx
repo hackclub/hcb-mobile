@@ -210,7 +210,13 @@ export default function AppContent({
   useEffect(() => {
     const setStatusBar = async () => {
       await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
-      Appearance.setColorScheme(isDark ? "dark" : "light");
+      // Only override Appearance when NOT using system theme
+      // When themePref is "system", set to null to use actual device theme
+      if (themePref === "system") {
+        Appearance.setColorScheme(null);
+      } else {
+        Appearance.setColorScheme(isDark ? "dark" : "light");
+      }
     };
     setStatusBar();
     const checkAuth = async () => {
@@ -351,7 +357,7 @@ export default function AppContent({
     return () => {
       cancelled = true;
     };
-  }, [tokens?.accessToken, setTokens, isDark]);
+  }, [tokens?.accessToken, setTokens, isDark, themePref]);
 
   useEffect(() => {
     if (tokens) {
