@@ -2,14 +2,14 @@ import { NavigatorScreenParams } from "@react-navigation/native";
 
 import Card from "./types/Card";
 import Invitation from "./types/Invitation";
-import Organization from "./types/Organization";
+import Organization, { OrganizationExpanded } from "./types/Organization";
 import Transaction from "./types/Transaction";
 
 export type StackParamList = {
   Organizations: undefined;
   Invitation: { inviteId: Invitation["id"]; invitation?: Invitation };
   Event: { orgId: Organization["id"]; organization?: Organization };
-  AccountNumber: { orgId: Organization["id"] };
+  AccountNumber: { orgId: Organization["id"]; organization?: OrganizationExpanded };
   ProcessDonation: {
     orgId: Organization["id"];
     payment: { amount: number };
