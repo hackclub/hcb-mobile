@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SystemUI from "expo-system-ui";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   Linking,
   Text,
@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import HelpscoutBeacon from "react-native-helpscout-beacon";
+import { mutate } from "swr";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
@@ -165,6 +166,12 @@ export default function SettingsPage({ navigation }: Props) {
       })();
     }
   }, [theme, deviceColorScheme]);
+
+  useFocusEffect(
+    useCallback(() => {
+      mutate("user");
+    }, [mutate]),
+  );
 
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     Haptics.selectionAsync();
