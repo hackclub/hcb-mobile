@@ -169,21 +169,21 @@ export default function SettingsPage({ navigation }: Props) {
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     Haptics.selectionAsync();
     setTheme(value);
-    
+
     if (Platform.OS === "android") {
       try {
         const currentDeviceTheme = deviceColorScheme ?? "light";
         const shouldBeDark =
           value === "dark" ||
           (value === "system" && currentDeviceTheme === "dark");
-        
+
         console.log("Theme change:", {
           value,
           deviceColorScheme,
           currentDeviceTheme,
           shouldBeDark,
         });
-        
+
         await SystemUI.setBackgroundColorAsync(
           shouldBeDark ? "#252429" : "white",
         );
