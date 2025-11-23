@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View, ActivityIndicator, SectionList, Platform } from "react-native";
-import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 
 import AccessDenied from "../../components/organizations/AccessDenied";
 import { EmptyState } from "../../components/organizations/EmptyState";
@@ -101,7 +101,9 @@ export default function OrganizationPage({
     isLoadingMore,
     loadMore,
     isLoading,
+    mutate: mutateTransactions,
   } = useTransactions(orgId, "organizations");
+  const { mutate } = useSWRConfig();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -232,10 +234,13 @@ export default function OrganizationPage({
 
     setRefreshing(true);
     try {
-      await Promise.all([
-        mutate(`organizations/${orgId}`),
-        mutate(`organizations/${orgId}/transactions?limit=35`),
-      ]);
+      await mutate(
+        (key) =>
+          typeof key === "string" &&
+          key.startsWith(`organizations/${orgId}/transactions`),
+      );
+      await mutateTransactions();
+      await mutateOrganization();
     } catch (err) {
       if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
         console.error("Error refreshing organization data:", err);
@@ -243,7 +248,7 @@ export default function OrganizationPage({
     } finally {
       setRefreshing(false);
     }
-  }, [isOnline, orgId, mutate]);
+  }, [isOnline, orgId, mutate, mutateTransactions, mutateOrganization, refreshing]);
 
   useFocusEffect(
     useCallback(() => {
