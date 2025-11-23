@@ -248,7 +248,14 @@ export default function OrganizationPage({
     } finally {
       setRefreshing(false);
     }
-  }, [isOnline, orgId, mutate, mutateTransactions, mutateOrganization, refreshing]);
+  }, [
+    isOnline,
+    orgId,
+    mutate,
+    mutateTransactions,
+    mutateOrganization,
+    refreshing,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
