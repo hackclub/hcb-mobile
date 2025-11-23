@@ -48,12 +48,7 @@ export function ShareIntentProvider({ children }: { children: ReactNode }) {
         resetShareIntent();
       }
     }
-  }, [
-    hasShareIntent,
-    shareIntent,
-    shareIntentProcessed,
-    resetShareIntent,
-  ]);
+  }, [hasShareIntent, shareIntent, shareIntentProcessed, resetShareIntent]);
 
   // Reset share intent processed flag when share intent changes
   useEffect(() => {
