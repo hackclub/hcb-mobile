@@ -101,10 +101,10 @@ export default function AccountNumberPage({
   const { colors: themeColors } = useTheme();
 
   if (
-    organization?.routing_number == null ||
-    organization?.account_number == null ||
-    organization?.swift_bic_code == null ||
-    !organizationLoading
+    !organizationLoading &&
+    (organization?.routing_number == null ||
+      organization?.account_number == null ||
+      organization?.swift_bic_code == null)
   ) {
     return (
       <View
