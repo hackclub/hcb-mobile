@@ -47,11 +47,11 @@ const themeOptions = [
     label: "Light",
     icon: "sunny" as keyof typeof Ionicons.glyphMap,
   },
-  {
-    key: "system",
-    label: "System",
-    icon: "phone-portrait" as keyof typeof Ionicons.glyphMap,
-  },
+  // {
+  //   key: "system",
+  //   label: "System",
+  //   icon: "phone-portrait" as keyof typeof Ionicons.glyphMap,
+  // },
   {
     key: "dark",
     label: "Dark",
@@ -76,8 +76,8 @@ export default function SettingsPage({ navigation }: Props) {
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
-  const scheme = useColorScheme();
   const isDark = useIsDark();
+  const scheme = useColorScheme();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
@@ -146,19 +146,18 @@ export default function SettingsPage({ navigation }: Props) {
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
     Haptics.selectionAsync();
     setTheme(value);
-    if (Platform.OS === "android") {
       try {
+        const shouldBeDark =
+          value == "dark" ||
+          (value == "system" && scheme == "dark");
         await SystemUI.setBackgroundColorAsync(
-          value == "dark" || (value == "system" && scheme == "dark")
-            ? "#252429"
-            : "white",
+          shouldBeDark ? "#252429" : "white",
         );
       } catch (error) {
         console.error("Error setting system UI background color", error, {
           context: { theme: value },
         });
       }
-    }
   };
 
   const handleBiometricsToggle = async (value: boolean) => {
