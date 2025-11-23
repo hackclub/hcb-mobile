@@ -8,7 +8,10 @@ import Transaction from "./types/Transaction";
 export type StackParamList = {
   Organizations: undefined;
   Invitation: { inviteId: Invitation["id"]; invitation?: Invitation };
-  Event: { orgId: Organization["id"]; organization?: Organization };
+  Event: {
+    orgId: Organization["id"];
+    organization?: Organization | OrganizationExpanded;
+  };
   AccountNumber: {
     orgId: Organization["id"];
     organization?: OrganizationExpanded;
