@@ -219,7 +219,7 @@ export default function CommentField({
         disabled={isSubmitting}
         style={{ backgroundColor: "#3199EE", paddingVertical: 12 }}
       >
-        Add comment
+        Add Comment
       </Button>
     </View>
   );
