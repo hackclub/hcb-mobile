@@ -47,11 +47,11 @@ const themeOptions = [
     label: "Light",
     icon: "sunny" as keyof typeof Ionicons.glyphMap,
   },
-  {
-    key: "system",
-    label: "System",
-    icon: "phone-portrait" as keyof typeof Ionicons.glyphMap,
-  },
+  // {
+  //   key: "system",
+  //   label: "System",
+  //   icon: "phone-portrait" as keyof typeof Ionicons.glyphMap,
+  // },
   {
     key: "dark",
     label: "Dark",
