@@ -55,7 +55,7 @@ export default function useTransactions(id: string, prefix: string) {
     return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
-  const { data, size, setSize, isLoading, error } = useSWRInfinite<
+  const { data, size, setSize, isLoading, error, mutate } = useSWRInfinite<
     PaginatedResponse<Transaction>
   >(getKey(id, prefix), infiniteFetcher);
 
@@ -78,6 +78,10 @@ export default function useTransactions(id: string, prefix: string) {
     loadMore() {
       if (isLoadingMore || isReachingEnd) return;
       setSize((s) => s + 1);
+    },
+    mutate: async () => {
+      setSize(1);
+      await mutate();
     },
   };
 }
