@@ -10,7 +10,6 @@ import { useEffect, useState, memo, useMemo, useCallback } from "react";
 import {
   Text,
   View,
-  ActivityIndicator,
   useColorScheme,
   RefreshControl,
   Platform,
@@ -25,6 +24,8 @@ import { preload, useSWRConfig } from "swr";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
+import { HomeLoadingSkeleton } from "../components/organizations/HomeLoadingSkeleton";
+import { NoOrganizationsEmptyState } from "../components/organizations/NoOrganizationsEmptyState";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
@@ -269,20 +270,15 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizations === undefined) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator />
-      </View>
-    );
+  if (organizations == undefined) {
+    return <HomeLoadingSkeleton />;
   }
 
   if (organizations?.length == 0 && invitations?.length == 0) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Ionicons name="people-outline" color={palette.muted} size={60} />
-        <Text style={{ color: palette.muted }}>Nothing here, yet.</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <NoOrganizationsEmptyState />
+      </SafeAreaView>
     );
   }
 

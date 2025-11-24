@@ -47,18 +47,34 @@ function MockTransactionIcon({
 
   const icon = mockTransactionIcon(transaction);
 
+  const iconSlot = {
+    width: 20,
+    height: 20,
+    flexShrink: 0,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginRight: 10,
+    overflow: "hidden" as const,
+  };
+
   if (icon === "paypal") {
-    return <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />;
-  } else {
     return (
+      <View style={iconSlot}>
+        <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={iconSlot}>
       <Icon
         // @ts-expect-error workaround for hackclub-icons-rn
         glyph={icon}
         color={palette.muted}
         size={20}
       />
-    );
-  }
+    </View>
+  );
 }
 
 function MockTransactionComponent({
@@ -89,7 +105,6 @@ function MockTransactionComponent({
           padding: 10,
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
           backgroundColor:
             transaction.feePayment || transaction.amount.cents < 0
               ? isDark
@@ -117,6 +132,7 @@ function MockTransactionComponent({
           color: themeColors.text,
           overflow: "hidden",
           flex: 1,
+          marginRight: 8,
         }}
       >
         {transaction?.localHcbCode?.memo?.replaceAll(/\s{2,}/g, " ") || ""}
@@ -131,7 +147,7 @@ function MockTransactionComponent({
             borderRadius: 20,
             paddingHorizontal: 5,
             paddingVertical: 2,
-            marginRight: 4,
+            marginRight: 8,
             backgroundColor: isDark ? "#2E161D" : "#FBEAED",
           }}
         >

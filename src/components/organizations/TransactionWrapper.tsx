@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { TouchableHighlight } from "react-native";
+import { memo } from "react";
+import { TouchableHighlight, View } from "react-native";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { getTransactionTitle } from "../../lib/transactionTitle";
@@ -17,18 +18,19 @@ interface TransactionWrapperProps {
   organization: Organization | OrganizationExpanded | undefined;
   navigation: NativeStackNavigationProp<StackParamList, "Event">;
   orgId: `org_${string}`;
-  index: number;
-  data: ITransaction[];
+  index?: number;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export default function TransactionWrapper({
+function TransactionWrapper({
   item,
   user,
   organization,
   navigation,
   orgId,
-  index,
-  data,
+  isFirst = false,
+  isLast = false,
 }: TransactionWrapperProps) {
   const { colors: themeColors } = useTheme();
 
@@ -64,17 +66,30 @@ export default function TransactionWrapper({
   };
 
   return (
-    <TouchableHighlight
-      onPress={canViewTransaction ? handlePress : undefined}
-      underlayColor={themeColors.background}
-      activeOpacity={0.7}
-    >
-      <Transaction
-        orgId={orgId}
-        transaction={item}
-        top={index == 0}
-        bottom={index == data.length - 1}
-      />
-    </TouchableHighlight>
+    <View style={{ overflow: "hidden" }}>
+      <TouchableHighlight
+        onPress={canViewTransaction ? handlePress : undefined}
+        underlayColor={themeColors.background}
+        activeOpacity={0.7}
+        style={{ overflow: "hidden" }}
+      >
+        <Transaction
+          orgId={orgId}
+          transaction={item}
+          top={isFirst}
+          bottom={isLast}
+        />
+      </TouchableHighlight>
+    </View>
   );
 }
+
+export default memo(TransactionWrapper, (prevProps, nextProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.isFirst === nextProps.isFirst &&
+    prevProps.isLast === nextProps.isLast &&
+    prevProps.user?.id === nextProps.user?.id &&
+    prevProps.organization?.id === nextProps.organization?.id
+  );
+});
