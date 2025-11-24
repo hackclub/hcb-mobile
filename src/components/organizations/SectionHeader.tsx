@@ -12,7 +12,6 @@ export default function SectionHeader({ title }: { title: string }) {
         backgroundColor: themeColors.background,
         paddingTop: 10,
         paddingBottom: 5,
-        paddingHorizontal: 10,
         fontSize: 10,
         textTransform: "uppercase",
       }}

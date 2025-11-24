@@ -79,6 +79,9 @@ function TransactionIcon({
 }) {
   if (hideIcon) return null;
 
+  const iconColor =
+    transaction.appearance == "hackathon_grant" ? palette.black : palette.muted;
+
   if (!hideAvatar && transaction.code == TransactionType.StripeCard) {
     return (
       <UserAvatar
@@ -86,28 +89,24 @@ function TransactionIcon({
         size={20}
       />
     );
-  } else {
-    if (transactionIcon(transaction) == "paypal") {
-      return (
-        <FontAwesomeIcon color={palette.muted} icon={faPaypal} size={20} />
-      );
-    } else if (transactionIcon(transaction) == "wise") {
-      return <WiseIcon color={palette.muted} size={20} />;
-    } else {
-      return (
-        <Icon
-          // @ts-expect-error it is checked above
-          glyph={transactionIcon(transaction)}
-          color={
-            transaction.appearance == "hackathon_grant"
-              ? palette.black
-              : palette.muted
-          }
-          size={20}
-        />
-      );
-    }
   }
+
+  if (transactionIcon(transaction) == "paypal") {
+    return <FontAwesomeIcon color={iconColor} icon={faPaypal} size={20} />;
+  }
+
+  if (transactionIcon(transaction) == "wise") {
+    return <WiseIcon color={iconColor} size={20} />;
+  }
+
+  return (
+    <Icon
+      // @ts-expect-error it is checked above
+      glyph={transactionIcon(transaction)}
+      color={iconColor}
+      size={20}
+    />
+  );
 }
 
 function Transaction({
@@ -143,6 +142,31 @@ function Transaction({
 
   const finalMerchantIcon = showMerchantIcon ? autoMerchantIcon : null;
 
+  // Standardized background colors
+  const backgroundColor =
+    transaction.declined || transaction.amount_cents < 0
+      ? isDark
+        ? "#351921"
+        : "#F9E3E7"
+      : transaction.amount_cents > 0
+        ? isDark
+          ? "#234740"
+          : "#d7f7ee"
+        : themeColors.card;
+
+  // Standardized text color
+  const textColor =
+    transaction.appearance == "hackathon_grant"
+      ? palette.black
+      : transaction.pending
+        ? palette.muted
+        : themeColors.text;
+
+  const amountColor =
+    transaction.appearance == "hackathon_grant"
+      ? palette.black
+      : themeColors.text;
+
   return (
     <View
       style={StyleSheet.compose(
@@ -151,16 +175,7 @@ function Transaction({
           flexDirection: "row",
           alignItems: "center",
           gap: 10,
-          backgroundColor:
-            transaction.declined || transaction.amount_cents < 0
-              ? isDark
-                ? "#351921"
-                : "#F9E3E7"
-              : transaction.amount_cents > 0
-                ? isDark
-                  ? "#234740"
-                  : "#d7f7ee"
-                : themeColors.card,
+          backgroundColor,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,
           borderBottomLeftRadius: bottom ? 8 : 0,
@@ -243,12 +258,7 @@ function Transaction({
         numberOfLines={1}
         style={{
           fontSize: 14,
-          color:
-            transaction.appearance == "hackathon_grant"
-              ? palette.black
-              : transaction.pending
-                ? palette.muted
-                : themeColors.text,
+          color: textColor,
           overflow: "hidden",
           flex: 1,
         }}
@@ -258,13 +268,6 @@ function Transaction({
             { appearance: "hackathon_grant", has_custom_memo: false },
             () => "💰 Hackathon grant",
           )
-          // .with(
-          //   {
-          //     card_charge: { merchant: { smart_name: P.string } },
-          //     has_custom_memo: false,
-          //   },
-          //   (tx) => tx.card_charge.merchant.smart_name,
-          // )
           .otherwise((tx) => tx.memo)
           .replaceAll(/\s{2,}/g, " ")}
       </Text>
@@ -297,10 +300,7 @@ function Transaction({
       )}
       <Text
         style={{
-          color:
-            transaction.appearance == "hackathon_grant"
-              ? palette.black
-              : themeColors.text,
+          color: amountColor,
         }}
       >
         {renderMoney(transaction.amount_cents)}
