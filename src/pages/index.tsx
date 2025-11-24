@@ -276,7 +276,9 @@ export default function App({ navigation }: Props) {
 
   if (organizations?.length == 0 && invitations?.length == 0) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
         <NoOrganizationsEmptyState />
       </SafeAreaView>
     );

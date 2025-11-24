@@ -6,7 +6,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import { palette } from "../../styles/theme";
 
-type NavigationProp = NativeStackNavigationProp<CardsStackParamList, "CardList">;
+type NavigationProp = NativeStackNavigationProp<
+  CardsStackParamList,
+  "CardList"
+>;
 
 export const NoCardsEmptyState = () => {
   const { colors: themeColors } = useTheme();

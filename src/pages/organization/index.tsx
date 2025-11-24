@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
@@ -41,8 +42,18 @@ type Props = NativeStackScreenProps<StackParamList, "Event">;
 // FlashList item types
 type ListItemType =
   | { type: "header"; title: string }
-  | { type: "transaction"; transaction: TransactionWithoutId; isFirst: boolean; isLast: boolean }
-  | { type: "mockTransaction"; transaction: MockTransactionType; isFirst: boolean; isLast: boolean };
+  | {
+      type: "transaction";
+      transaction: TransactionWithoutId;
+      isFirst: boolean;
+      isLast: boolean;
+    }
+  | {
+      type: "mockTransaction";
+      transaction: MockTransactionType;
+      isFirst: boolean;
+      isLast: boolean;
+    };
 
 export default function OrganizationPage({
   route: {
@@ -238,7 +249,8 @@ export default function OrganizationPage({
     }, [mockTransactions]);
 
   const { flatListData, stickyHeaderIndices } = useMemo(() => {
-    const sectionsToUse = playgroundMode && showMockData ? mockSections : sections;
+    const sectionsToUse =
+      playgroundMode && showMockData ? mockSections : sections;
     const result: ListItemType[] = [];
     const headerIndices: number[] = [];
 
@@ -268,38 +280,35 @@ export default function OrganizationPage({
     return { flatListData: result, stickyHeaderIndices: headerIndices };
   }, [sections, mockSections, playgroundMode, showMockData]);
 
-  const onRefresh = useCallback(async (showRefreshIndicator = true) => {
-    if (!isOnline || isRefreshingRef.current) return;
+  const onRefresh = useCallback(
+    async (showRefreshIndicator = true) => {
+      if (!isOnline || isRefreshingRef.current) return;
 
-    isRefreshingRef.current = true;
-    if (showRefreshIndicator) {
-      setRefreshing(true);
-    }
-    try {
-      await mutate(
-        (key) =>
-          typeof key === "string" &&
-          key.startsWith(`organizations/${orgId}/transactions`),
-      );
-      await mutateTransactions();
-      await mutateOrganization();
-    } catch (err) {
-      if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
-        console.error("Error refreshing organization data:", err);
-      }
-    } finally {
-      isRefreshingRef.current = false;
+      isRefreshingRef.current = true;
       if (showRefreshIndicator) {
-        setRefreshing(false);
+        setRefreshing(true);
       }
-    }
-  }, [
-    isOnline,
-    orgId,
-    mutate,
-    mutateTransactions,
-    mutateOrganization,
-  ]);
+      try {
+        await mutate(
+          (key) =>
+            typeof key === "string" &&
+            key.startsWith(`organizations/${orgId}/transactions`),
+        );
+        await mutateTransactions();
+        await mutateOrganization();
+      } catch (err) {
+        if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
+          console.error("Error refreshing organization data:", err);
+        }
+      } finally {
+        isRefreshingRef.current = false;
+        if (showRefreshIndicator) {
+          setRefreshing(false);
+        }
+      }
+    },
+    [isOnline, orgId, mutate, mutateTransactions, mutateOrganization],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -320,7 +329,7 @@ export default function OrganizationPage({
 
   const renderListHeader = useCallback(() => {
     if (!organization) return null;
-    
+
     return (
       <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
         {showTapToPayBanner && (
@@ -355,7 +364,11 @@ export default function OrganizationPage({
   const renderItem = useCallback(
     ({ item }: { item: ListItemType }) => {
       if (item.type === "header") {
-        return <View style={{ paddingHorizontal: 20 }}><SectionHeader title={item.title} /></View>;
+        return (
+          <View style={{ paddingHorizontal: 20 }}>
+            <SectionHeader title={item.title} />
+          </View>
+        );
       }
 
       if (item.type === "mockTransaction") {
@@ -369,16 +382,17 @@ export default function OrganizationPage({
       }
 
       return (
-        <View style={{ paddingHorizontal: 20 }}> 
-        <TransactionWrapper
-          item={item.transaction as ITransaction}
-          user={user}
-          organization={organization}
-          navigation={navigation}
-          orgId={orgId}
-          isFirst={item.isFirst}
-          isLast={item.isLast}
-          /></View>
+        <View style={{ paddingHorizontal: 20 }}>
+          <TransactionWrapper
+            item={item.transaction as ITransaction}
+            user={user}
+            organization={organization}
+            navigation={navigation}
+            orgId={orgId}
+            isFirst={item.isFirst}
+            isLast={item.isLast}
+          />
+        </View>
       );
     },
     [user, organization, navigation, orgId],
@@ -388,7 +402,7 @@ export default function OrganizationPage({
     if (item.type === "header") {
       return "header";
     }
-    
+
     if (item.type === "mockTransaction") {
       return "mockTransaction";
     }
@@ -401,7 +415,11 @@ export default function OrganizationPage({
     if (item.type === "header") {
       return `header-${item.title}`;
     }
-    if ("transaction" in item && "id" in item.transaction && item.transaction.id) {
+    if (
+      "transaction" in item &&
+      "id" in item.transaction &&
+      item.transaction.id
+    ) {
       return item.transaction.id;
     }
     return `item-${index}`;

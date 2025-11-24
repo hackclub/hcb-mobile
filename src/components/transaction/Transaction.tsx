@@ -80,9 +80,7 @@ function TransactionIcon({
   if (hideIcon) return null;
 
   const iconColor =
-    transaction.appearance == "hackathon_grant"
-      ? palette.black
-      : palette.muted;
+    transaction.appearance == "hackathon_grant" ? palette.black : palette.muted;
 
   if (!hideAvatar && transaction.code == TransactionType.StripeCard) {
     return (
@@ -165,9 +163,9 @@ function Transaction({
         : themeColors.text;
 
   const amountColor =
-  transaction.appearance == "hackathon_grant"
-  ? palette.black
-  : themeColors.text
+    transaction.appearance == "hackathon_grant"
+      ? palette.black
+      : themeColors.text;
 
   return (
     <View
