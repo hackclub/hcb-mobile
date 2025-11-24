@@ -19,6 +19,7 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 
 import CardListSkeleton from "../../components/cards/CardListSkeleton";
+import { NoCardsEmptyState } from "../../components/cards/NoCardsEmptyState";
 import PaymentCard from "../../components/PaymentCard";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import Card from "../../lib/types/Card";
@@ -358,20 +359,26 @@ export default function CardsPage({ navigation }: Props) {
   };
 
   if (sortedCards) {
+    const filteredCards = sortedCards.filter((c) => {
+      if (
+        !canceledCardsShown &&
+        (c.status == "canceled" || c.status == "expired")
+      ) {
+        return false;
+      }
+      if (!frozenCardsShown && c.status == "frozen") {
+        return false;
+      }
+      return true;
+    });
+
+    if (filteredCards.length === 0) {
+      return <NoCardsEmptyState />;
+    }
+
     return (
       <ReorderableList
-        data={sortedCards.filter((c) => {
-          if (
-            !canceledCardsShown &&
-            (c.status == "canceled" || c.status == "expired")
-          ) {
-            return false;
-          }
-          if (!frozenCardsShown && c.status == "frozen") {
-            return false;
-          }
-          return true;
-        })}
+        data={filteredCards}
         keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();

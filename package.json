@@ -33,6 +33,7 @@
     "@react-navigation/native-stack": "^6.9.13",
     "@sentry/cli": "^2.44.0",
     "@sentry/react-native": "~7.2.0",
+    "@shopify/flash-list": "^2.2.0",
     "@stripe/stripe-react-native": "^0.54.0",
     "@stripe/stripe-terminal-react-native": "^0.0.1-beta.26",
     "@thedev132/hackclub-icons-rn": "^0.0.18",

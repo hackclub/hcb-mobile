@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useMemo, useLayoutEffect, useRef } from "react";
+import { useState, useMemo, useLayoutEffect, useRef, useCallback } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
-  FlatList,
   Text,
   TouchableOpacity,
   View,
@@ -128,9 +128,11 @@ export default function ReceiptsPage({ navigation }: Props) {
     });
   }, [navigation]);
 
-  useFocusEffect(() => {
-    mutate();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh(false);
+    }, []),
+  );
 
   // Group transactions by organization
   const groupedTransactions = useMemo(() => {
@@ -162,11 +164,15 @@ export default function ReceiptsPage({ navigation }: Props) {
     return Object.values(groups);
   }, [data?.data]);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
+  const onRefresh = async (showIndicator = true) => {
+    if (showIndicator) {
+      setRefreshing(true);
+    }
     await mutate();
     await refreshReceipts();
-    setRefreshing(false);
+    if (showIndicator) {
+      setRefreshing(false);
+    }
   };
 
   const { handleActionSheet } = useReceiptActionSheet({
@@ -270,7 +276,7 @@ export default function ReceiptsPage({ navigation }: Props) {
     );
   }
 
-  // Create data structure for FlatList
+  // Create data structure for FlashList
   const listData = [
     { type: "receipts", data: receipts },
     { type: "upload", data: null },
@@ -292,7 +298,7 @@ export default function ReceiptsPage({ navigation }: Props) {
     switch (item.type) {
       case "receipts":
         return (
-          <FlatList
+          <FlashList
             horizontal
             data={
               receipts?.sort(
@@ -530,7 +536,7 @@ export default function ReceiptsPage({ navigation }: Props) {
   };
 
   return (
-    <FlatList
+    <FlashList
       data={listData}
       renderItem={renderItem}
       keyExtractor={(item, index) => `${item.type}-${index}`}

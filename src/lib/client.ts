@@ -204,7 +204,7 @@ export default function useClient() {
         limit: 3,
         methods: ["get", "put", "head", "delete", "options", "trace", "post"],
         statusCodes: [408, 413, 429, 500, 502, 503, 504],
-        backoffLimit: 5000,
+        backoffLimit: 10000,
       },
       headers: {
         "User-Agent": "HCB-Mobile",
