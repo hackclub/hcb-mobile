@@ -4,6 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
+import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -36,7 +37,6 @@ import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
-import { supportsAlternateIcons } from "expo-alternate-app-icons";
 
 const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 
