@@ -75,13 +75,8 @@ export default {
       [
         "@stripe/stripe-terminal-react-native",
         {
-          bluetoothBackgroundMode: true,
           locationWhenInUsePermission:
             "Location access is required in order to accept payments.",
-          bluetoothPeripheralPermission:
-            "Bluetooth access is required in order to connect to supported bluetooth card readers.",
-          bluetoothAlwaysUsagePermission:
-            "This app uses Bluetooth to connect to supported card readers.",
         },
       ],
       [
