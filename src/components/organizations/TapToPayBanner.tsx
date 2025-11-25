@@ -68,7 +68,7 @@ export default function TapToPayBanner({
               fontSize: 16,
             }}
           >
-            Accept Payments with Tap to Pay
+            Accept Payments with Tap to Pay on iPhone
           </Text>
         </View>
         <Text
