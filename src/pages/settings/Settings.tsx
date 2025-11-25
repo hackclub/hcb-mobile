@@ -4,6 +4,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
+import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -461,34 +462,43 @@ export default function SettingsPage({ navigation }: Props) {
               />
             </>
           )}
-          <Pressable
-            style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
-            onPress={() => navigation.navigate("AppIconSelector")}
-          >
-            <Ionicons
-              name="color-palette-outline"
-              size={22}
-              color={palette.muted}
-              style={{ marginRight: 12 }}
-            />
-            <Text style={{ color: colors.text, fontSize: 16 }}>
-              Change App Icon
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={palette.muted}
-              style={{ marginLeft: "auto" }}
-            />
-          </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
+          {supportsAlternateIcons && (
+            <>
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 18,
+                }}
+                onPress={() => navigation.navigate("AppIconSelector")}
+              >
+                <Ionicons
+                  name="color-palette-outline"
+                  size={22}
+                  color={palette.muted}
+                  style={{ marginRight: 12 }}
+                />
+                <Text style={{ color: colors.text, fontSize: 16 }}>
+                  Change App Icon
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={palette.muted}
+                  style={{ marginLeft: "auto" }}
+                />
+              </Pressable>
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: dividerColor,
+                  marginLeft: 20,
+                  marginRight: 20,
+                }}
+              />
+            </>
+          )}
+
           <Pressable
             style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
             onPress={() => navigation.navigate("DeepLinkingSettings")}
