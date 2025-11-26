@@ -60,6 +60,7 @@ export default function Login() {
         showTitle: true,
         enableBarCollapsing: false,
         showInRecents: false,
+        createTask: false,
       });
     } catch (error) {
       console.error("Error opening browser:", error);
