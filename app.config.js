@@ -164,7 +164,7 @@ export default {
         "expo-web-browser",
         {
           experimentalLauncherActivity: true,
-        }
+        },
       ],
       "expo-background-task",
       "./plugins/usePrivateSDK.js",
