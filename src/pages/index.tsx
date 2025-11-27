@@ -271,7 +271,7 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizationsLoading && !organizations) {
+  if (organizationsLoading) {
     return <HomeLoadingSkeleton />;
   }
 
@@ -390,7 +390,7 @@ export default function App({ navigation }: Props) {
         }
         renderItem={renderItem}
         ListFooterComponent={() =>
-          organizations.length > 2 && (
+          organizations && organizations.length > 2 && (
             <Text
               style={{
                 color: palette.muted,
