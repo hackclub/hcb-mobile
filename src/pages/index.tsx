@@ -21,12 +21,12 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
-import PromoBanner from "../components/PromoBanner";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "../components/organizations/HomeLoadingSkeleton";
 import { NoOrganizationsEmptyState } from "../components/organizations/NoOrganizationsEmptyState";
+import PromoBanner from "../components/PromoBanner";
 import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
@@ -288,7 +288,6 @@ export default function App({ navigation }: Props) {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-      <PromoBanner />
       <ReorderableList
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
         onReorder={({ from, to }) => {
@@ -317,79 +316,83 @@ export default function App({ navigation }: Props) {
         panGesture={panGesture}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        ListHeaderComponent={() =>
-          (invitations && invitations.length > 0) ||
-          (grantInvites && grantInvites.length > 0) ? (
-            <View
-              style={{
-                marginTop: 10,
-                marginBottom: 20,
-                borderRadius: 10,
-              }}
-            >
-              {invitations && invitations.length > 0 && (
-                <>
-                  <Text
-                    style={{
-                      color: palette.muted,
-                      fontSize: 12,
-                      textTransform: "uppercase",
-                      marginBottom: 10,
-                    }}
-                  >
-                    Pending invitations
-                  </Text>
-                  {invitations.map((invitation) => (
-                    <Event
-                      key={invitation.id}
-                      invitation={invitation}
+        ListHeaderComponent={() => (
+          <>
+            <PromoBanner />
+            {(invitations && invitations.length > 0) ||
+            (grantInvites && grantInvites.length > 0) ? (
+              <View
+                style={{
+                  marginTop: 10,
+                  marginBottom: 20,
+                  borderRadius: 10,
+                }}
+              >
+                {invitations && invitations.length > 0 && (
+                  <>
+                    <Text
                       style={{
-                        borderWidth: 2,
-                        borderColor:
-                          scheme == "dark" ? palette.primary : palette.muted,
+                        color: palette.muted,
+                        fontSize: 12,
+                        textTransform: "uppercase",
                         marginBottom: 10,
                       }}
-                      event={invitation.organization}
-                      onPress={() =>
-                        navigation.navigate("Invitation", {
-                          inviteId: invitation.id,
-                          invitation,
-                        })
-                      }
-                      hideBalance
-                    />
-                  ))}
-                </>
-              )}
+                    >
+                      Pending invitations
+                    </Text>
+                    {invitations.map((invitation) => (
+                      <Event
+                        key={invitation.id}
+                        invitation={invitation}
+                        style={{
+                          borderWidth: 2,
+                          borderColor:
+                            scheme == "dark" ? palette.primary : palette.muted,
+                          marginBottom: 10,
+                        }}
+                        event={invitation.organization}
+                        onPress={() =>
+                          navigation.navigate("Invitation", {
+                            inviteId: invitation.id,
+                            invitation,
+                          })
+                        }
+                        hideBalance
+                      />
+                    ))}
+                  </>
+                )}
 
-              {grantInvites && grantInvites.length > 0 && (
-                <>
-                  <Text
-                    style={{
-                      color: palette.muted,
-                      fontSize: 12,
-                      textTransform: "uppercase",
-                      marginBottom: 10,
-                      marginTop: invitations && invitations.length > 0 ? 20 : 0,
-                    }}
-                  >
-                    Available grants
-                  </Text>
-                  {grantInvites.map((grant) => (
-                    <GrantInvite
-                      key={grant.id}
-                      grant={grant}
-                      navigation={navigation}
+                {grantInvites && grantInvites.length > 0 && (
+                  <>
+                    <Text
                       style={{
+                        color: palette.muted,
+                        fontSize: 12,
+                        textTransform: "uppercase",
                         marginBottom: 10,
+                        marginTop:
+                          invitations && invitations.length > 0 ? 20 : 0,
                       }}
-                    />
-                  ))}
-                </>
-              )}
-            </View>
-          ) : null
-        }
+                    >
+                      Available grants
+                    </Text>
+                    {grantInvites.map((grant) => (
+                      <GrantInvite
+                        key={grant.id}
+                        grant={grant}
+                        navigation={navigation}
+                        style={{
+                          marginBottom: 10,
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
+              </View>
+            ) : null}
+          </>
+        )}
         renderItem={renderItem}
         ListFooterComponent={() =>
           organizations &&

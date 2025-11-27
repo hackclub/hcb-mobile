@@ -1,5 +1,5 @@
-import { useOfflineSWR } from "../lib/useOfflineSWR";
 import User from "../lib/types/User";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 
 export const useIsTeen = (): boolean => {
   const { data: user } = useOfflineSWR<User>("user");

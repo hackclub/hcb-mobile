@@ -1,13 +1,20 @@
-import { useEffect, useState, memo } from 'react';
-import { Linking, Pressable, StyleSheet, Text } from 'react-native';
-import { useTheme } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "@react-navigation/native";
+import { useEffect, useState, memo } from "react";
+import {
+  GestureResponderEvent,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { useIsTeen } from '../utils/age';
+import { useIsTeen } from "../utils/age";
 
-const PROMO_BANNER_CLICKED_KEY = '@promoBannerClicked';
+const PROMO_BANNER_CLICKED_KEY = "@promoBannerClicked";
 
-const PromoBanner = memo(() => {
+const PromoBanner = memo(function PromoBanner() {
   const isTeen = useIsTeen();
   const [isVisible, setIsVisible] = useState(false);
   const { colors } = useTheme();
@@ -15,9 +22,8 @@ const PromoBanner = memo(() => {
   useEffect(() => {
     const checkVisibility = async () => {
       const isDecember = new Date().getMonth() === 11;
-      const hasBeenClicked = await AsyncStorage.getItem(
-        PROMO_BANNER_CLICKED_KEY,
-      );
+      const hasBeenClicked =
+        (await AsyncStorage.getItem(PROMO_BANNER_CLICKED_KEY)) == "true";
 
       if (isTeen && isDecember && !hasBeenClicked) {
         setIsVisible(true);
@@ -28,13 +34,17 @@ const PromoBanner = memo(() => {
   }, [isTeen]);
 
   const handlePress = async () => {
+    Linking.openURL("https://hack.club/hcb-mobile-stickers");
+  };
+
+  const handleClose = async (e: GestureResponderEvent) => {
+    e.stopPropagation();
     try {
-      await AsyncStorage.setItem(PROMO_BANNER_CLICKED_KEY, 'true');
+      await AsyncStorage.setItem(PROMO_BANNER_CLICKED_KEY, "true");
       setIsVisible(false);
-    } catch (e) {
-      console.error('Error saving promo banner click', e);
+    } catch (error) {
+      console.error("Error saving promo banner dismiss", error);
     }
-    Linking.openURL('https://hackclub.com/stickers/');
   };
 
   if (!isVisible) {
@@ -44,36 +54,87 @@ const PromoBanner = memo(() => {
   return (
     <Pressable
       onPress={handlePress}
-      style={[
+      style={({ pressed }) => [
         styles.container,
         { backgroundColor: colors.card, borderColor: colors.primary },
+        pressed && styles.pressed,
       ]}
     >
-      <Text style={[styles.title, { color: colors.primary }]}>
-        Claim your free HCB stickers!
-      </Text>
-      <Text style={[styles.subtitle, { color: colors.text }]}>
-        Are you a teenager? Fill out the form to get free stickers!
-      </Text>
+      <View style={styles.content}>
+        <Text style={styles.icon}>🎁</Text>
+        <View style={styles.textContainer}>
+          <Text style={[styles.title, { color: colors.primary }]}>
+            Claim your free HCB stickers! →
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.text }]}>
+            Tap to fill out the form
+          </Text>
+        </View>
+        <Pressable
+          onPress={handleClose}
+          style={({ pressed }) => [
+            styles.closeButton,
+            pressed && styles.closeButtonPressed,
+          ]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text style={[styles.closeText, { color: colors.text }]}>✕</Text>
+        </Pressable>
+      </View>
     </Pressable>
   );
 });
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderWidth: 1,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  icon: {
+    fontSize: 24,
+  },
+  textContainer: {
+    flex: 1,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 2,
+    letterSpacing: -0.2,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  closeButton: {
+    padding: 4,
+    borderRadius: 10,
+  },
+  closeButtonPressed: {
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+  },
+  closeText: {
+    fontSize: 18,
+    fontWeight: "600",
+    opacity: 0.5,
   },
 });
 
