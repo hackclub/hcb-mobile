@@ -7,11 +7,16 @@ import {
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
-const isUpdateCritical = (updatesSystem: ReturnType<typeof useUpdates>): boolean => {
+const isUpdateCritical = (
+  updatesSystem: ReturnType<typeof useUpdates>,
+): boolean => {
   const { availableUpdate } = updatesSystem;
-  
-  const manifest = availableUpdate?.manifest as { extra?: { expoClient?: { extra?: { message?: string } } } } | undefined;
-  const message = manifest?.extra?.expoClient?.extra?.message?.toLowerCase() ?? "";
+
+  const manifest = availableUpdate?.manifest as
+    | { extra?: { expoClient?: { extra?: { message?: string } } } }
+    | undefined;
+  const message =
+    manifest?.extra?.expoClient?.extra?.message?.toLowerCase() ?? "";
   return message.includes("critical");
 };
 
@@ -79,7 +84,7 @@ export function useUpdateMonitor() {
           checkForUpdate();
         }
         appState.current = nextAppState;
-      }
+      },
     );
 
     return () => {
@@ -97,7 +102,12 @@ export function useUpdateMonitor() {
   }, [checkForUpdate]);
 
   useEffect(() => {
-    if (isCritical && hasUpdate && !hasPendingUpdate && !hasAutoDownloaded.current) {
+    if (
+      isCritical &&
+      hasUpdate &&
+      !hasPendingUpdate &&
+      !hasAutoDownloaded.current
+    ) {
       console.log("Critical update detected - auto-downloading");
       hasAutoDownloaded.current = true;
       downloadUpdate();
@@ -114,10 +124,14 @@ export function useUpdateMonitor() {
   }, [isCritical, hasPendingUpdate]);
 
   useEffect(() => {
-    if (hasUpdate && !isCritical && !hasPendingUpdate && !hasAutoDownloaded.current) {
+    if (
+      hasUpdate &&
+      !isCritical &&
+      !hasPendingUpdate &&
+      !hasAutoDownloaded.current
+    ) {
       hasAutoDownloaded.current = true;
       downloadUpdate();
     }
   }, [hasUpdate, isCritical, hasPendingUpdate]);
 }
-

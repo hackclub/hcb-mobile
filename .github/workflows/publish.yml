@@ -31,10 +31,10 @@ jobs:
         run: |
           # Get the commit message
           MESSAGE=$(git log -1 --pretty=%B)
-          
+
           # Get the PR number from the merge commit message
           PR_NUMBER=$(echo "$MESSAGE" | sed -n 's/.*#\([0-9]*\).*/\1/p' | head -1)
-          
+
           # If we found a PR number, check for critical label
           if [ ! -z "$PR_NUMBER" ]; then            
             # Get PR labels using GitHub API
