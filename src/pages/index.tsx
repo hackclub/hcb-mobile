@@ -390,7 +390,8 @@ export default function App({ navigation }: Props) {
         }
         renderItem={renderItem}
         ListFooterComponent={() =>
-          organizations && organizations.length > 2 && (
+          organizations &&
+          organizations.length > 2 && (
             <Text
               style={{
                 color: palette.muted,
