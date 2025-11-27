@@ -26,6 +26,29 @@ jobs:
         run: npm ci
 
       - name: 🚀 Create update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Get the commit message
           MESSAGE=$(git log -1 --pretty=%B)
+          
+          # Get the PR number from the merge commit message
+          PR_NUMBER=$(echo "$MESSAGE" | sed -n 's/.*#\([0-9]*\).*/\1/p' | head -1)
+          
+          # If we found a PR number, check for critical label
+          if [ ! -z "$PR_NUMBER" ]; then            
+            # Get PR labels using GitHub API
+            LABELS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER" | \
+              jq -r '.labels[].name')
+            
+            echo "PR Labels: $LABELS"
+            
+            # Check if "critical" label exists
+            if echo "$LABELS" | grep -iq "critical"; then
+              echo "Critical label found - prepending CRITICAL to message"
+              MESSAGE="CRITICAL: $MESSAGE"
+            fi
+          fi
+
           eas update --channel production --environment production --non-interactive --message "$MESSAGE"
