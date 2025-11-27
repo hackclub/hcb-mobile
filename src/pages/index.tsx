@@ -142,6 +142,7 @@ export default function App({ navigation }: Props) {
     data: organizations,
     error,
     mutate: reloadOrganizations,
+    isLoading: organizationsLoading,
   } = useOfflineSWR<Organization[]>("user/organizations", {
     fallbackData: [],
   });
@@ -270,7 +271,7 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizations == undefined) {
+  if (organizationsLoading) {
     return <HomeLoadingSkeleton />;
   }
 
@@ -389,6 +390,7 @@ export default function App({ navigation }: Props) {
         }
         renderItem={renderItem}
         ListFooterComponent={() =>
+          organizations &&
           organizations.length > 2 && (
             <Text
               style={{
