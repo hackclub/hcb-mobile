@@ -14,7 +14,7 @@ const PromoBanner = memo(() => {
 
   useEffect(() => {
     const checkVisibility = async () => {
-      const December = new Date().getMonth() === 12;
+      const December = new Date().getMonth() === 11;
       const hasBeenClicked = await AsyncStorage.getItem(
         PROMO_BANNER_CLICKED_KEY,
       );
