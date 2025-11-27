@@ -14,12 +14,12 @@ const PromoBanner = memo(() => {
 
   useEffect(() => {
     const checkVisibility = async () => {
-      const December = new Date().getMonth() === 11;
+      const isDecember = new Date().getMonth() === 11;
       const hasBeenClicked = await AsyncStorage.getItem(
         PROMO_BANNER_CLICKED_KEY,
       );
 
-      if (isTeen && December && !hasBeenClicked) {
+      if (isTeen && isDecember && !hasBeenClicked) {
         setIsVisible(true);
       }
     };
