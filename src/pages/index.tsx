@@ -271,7 +271,7 @@ export default function App({ navigation }: Props) {
     );
   }
 
-  if (organizationsLoading) {
+  if (organizationsLoading && !organizations) {
     return <HomeLoadingSkeleton />;
   }
 
