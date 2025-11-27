@@ -21,6 +21,7 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
+import PromoBanner from "../components/PromoBanner";
 
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
@@ -287,6 +288,7 @@ export default function App({ navigation }: Props) {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+      <PromoBanner />
       <ReorderableList
         keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
         onReorder={({ from, to }) => {
