@@ -44,15 +44,6 @@ export default {
       edgeToEdgeEnabled: true,
     },
     extra: {
-      message: "CRITICAL: testing13",
-      message: "CRITICAL: testing9",
-      message: "CRITICAL: testing9",
-      message: "CRITICAL: testing8",
-      message: "CRITICAL: testing8",
-      message: "CRITICAL: testing6",
-      message: "CRITICAL: testing4",
-      message: "CRITICAL: testing4",
-      message: "CRITICAL: testing3",
       eas: {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
       },
