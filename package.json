@@ -12,7 +12,8 @@
     "ts:check": "tsc",
     "postinstall": "patch-package",
     "eas-build-pre-install": "./.eas/hooks/pre-build.sh",
-    "eas-build-post-install": "./.eas/hooks/post-install.sh"
+    "eas-build-post-install": "./.eas/hooks/post-install.sh",
+    "publish:update": "node scripts/publish-update.js"
   },
   "dependencies": {
     "@expo/config-plugins": "~54.0.1",

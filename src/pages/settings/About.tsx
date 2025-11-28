@@ -256,7 +256,7 @@ export default function About() {
             opacity: 0.5,
           }}
         >
-          © {new Date().getFullYear()} Hack Club. All rights reserved.
+          © {new Date().getFullYear()} Hack Club. All rights reserved
         </Text>
       </View>
     </ScrollView>
