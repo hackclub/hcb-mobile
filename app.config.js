@@ -18,7 +18,7 @@ export default {
       icon: "./assets/icons/default.icon",
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "20",
+      buildNumber: "1",
       autoIncrement: "buildNumber",
       config: {
         usesNonExemptEncryption: false,
