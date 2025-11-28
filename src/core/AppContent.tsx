@@ -41,6 +41,7 @@ import {
   resetStripeTerminalInitialization,
   useStripeTerminalInit,
 } from "../lib/useStripeTerminalInit";
+import { useUpdateMonitor } from "../lib/useUpdateMonitor";
 import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
@@ -93,6 +94,8 @@ export default function AppContent({
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
   const hcb = useClient();
+
+  useUpdateMonitor();
 
   useEffect(() => {
     resetStripeTerminalInitialization();
