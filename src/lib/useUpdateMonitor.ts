@@ -7,12 +7,16 @@ import {
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
-const isUpdateCritical = (updatesSystem: ReturnType<typeof useUpdates>): boolean => {
+const isUpdateCritical = (
+  updatesSystem: ReturnType<typeof useUpdates>,
+): boolean => {
   const { availableUpdate } = updatesSystem;
-  
-  const manifest = availableUpdate?.manifest as { extra?: { message?: string } } | undefined;
+
+  const manifest = availableUpdate?.manifest as
+    | { extra?: { message?: string } }
+    | undefined;
   const message = manifest?.extra?.message?.toLowerCase() ?? "";
-  
+
   return message.includes("critical");
 };
 
