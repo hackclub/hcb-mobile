@@ -51,4 +51,5 @@ jobs:
             fi
           fi
 
-          eas update --channel production --environment production --non-interactive --message "$MESSAGE"
+          # Use our custom publish script that embeds the message in app.config.js
+          npm run publish:update -- --message "$MESSAGE" --channel production --environment production

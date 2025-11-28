@@ -7,16 +7,12 @@ import {
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
-const isUpdateCritical = (
-  updatesSystem: ReturnType<typeof useUpdates>,
-): boolean => {
+const isUpdateCritical = (updatesSystem: ReturnType<typeof useUpdates>): boolean => {
   const { availableUpdate } = updatesSystem;
-
-  const manifest = availableUpdate?.manifest as
-    | { extra?: { expoClient?: { extra?: { message?: string } } } }
-    | undefined;
-  const message =
-    manifest?.extra?.expoClient?.extra?.message?.toLowerCase() ?? "";
+  
+  const manifest = availableUpdate?.manifest as { extra?: { message?: string } } | undefined;
+  const message = manifest?.extra?.message?.toLowerCase() ?? "";
+  
   return message.includes("critical");
 };
 
@@ -38,12 +34,10 @@ export function useUpdateMonitor() {
 
   const hasUpdate = isUpdateAvailable && isUpdateDifferent;
   const hasPendingUpdate = isUpdatePending && isUpdateDifferent;
-
   const isCritical = hasUpdate && isUpdateCritical(updatesSystem);
 
   const checkForUpdate = useCallback(async (): Promise<void> => {
     if (__DEV__) {
-      console.log("Updates disabled in development mode");
       return;
     }
 
