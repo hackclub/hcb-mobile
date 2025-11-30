@@ -31,6 +31,7 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
+  const [showSignup, setShowSignup] = useState(false);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -42,6 +43,7 @@ export default function Login() {
       extraParams: {
         no_app_shell: "true",
         theme: scheme || "",
+        signup: showSignup.toString(),
       },
     },
     discovery,
@@ -142,6 +144,13 @@ export default function Login() {
       useNativeDriver: true,
     }).start();
   }, [animation]);
+
+  useEffect(() => {
+    if (request?.extraParams.signup == "true") {
+      promptAsync();
+      setShowSignup(false);
+    }
+  }, [promptAsync, request?.extraParams?.signup]);
 
   return (
     <ImageBackground
@@ -252,11 +261,9 @@ export default function Login() {
           </Button>
           <Button
             variant="primary"
-            onPress={() =>
-              openInAppBrowser(
-                "https://hcb.hackclub.com/users/auth?signup=true",
-              )
-            }
+            onPress={() => {
+              setShowSignup(true);
+            }}
             style={{
               backgroundColor: palette.primary,
               borderWidth: 0,
