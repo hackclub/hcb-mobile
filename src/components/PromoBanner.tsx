@@ -37,7 +37,7 @@ const PromoBanner = memo(function PromoBanner() {
 
   const handlePress = async () => {
     Linking.openURL(
-      `https://hack.club/hcb-mobile-stickers?user_id=${user?.id || ""}&name=${user?.name || ""}`,
+      `https://hack.club/hcb-mobile-stickers?user_id=${encodeURIComponent(user?.id || "")}&name=${encodeURIComponent(user?.name || "")}`,
     );
   };
 
