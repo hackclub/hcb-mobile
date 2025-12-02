@@ -7,9 +7,7 @@ import User from "../../lib/types/User";
 
 function SentryUserBridge() {
   const { tokens } = useContext(AuthContext);
-  const { data: user } = useSWR<User>(
-    tokens?.accessToken ? "user" : null,
-  );
+  const { data: user } = useSWR<User>(tokens?.accessToken ? "user" : null);
   useEffect(() => {
     if (user?.id) {
       Sentry.setUser({

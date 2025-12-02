@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useSWRConfig } from "swr";
 
 import { palette } from "../../styles/theme";
@@ -27,7 +33,10 @@ export const NoOrganizationsEmptyState = () => {
 
   return (
     <ScrollView
-      style={[styles.outerContainer, { backgroundColor: themeColors.background }]}
+      style={[
+        styles.outerContainer,
+        { backgroundColor: themeColors.background },
+      ]}
       contentInsetAdjustmentBehavior="automatic"
     >
       <View style={styles.bannerContainer}>

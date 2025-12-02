@@ -36,7 +36,9 @@ const PromoBanner = memo(function PromoBanner() {
   }, [isTeen]);
 
   const handlePress = async () => {
-    Linking.openURL(`https://hack.club/hcb-mobile-stickers?user_id=${user?.id || ""}&name=${user?.name || ""}`);
+    Linking.openURL(
+      `https://hack.club/hcb-mobile-stickers?user_id=${user?.id || ""}&name=${user?.name || ""}`,
+    );
   };
 
   const handleClose = async (e: GestureResponderEvent) => {
