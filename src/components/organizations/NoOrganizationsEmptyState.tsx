@@ -1,10 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useSWRConfig } from "swr";
 
 import { palette } from "../../styles/theme";
+import PromoBanner from "../PromoBanner";
 
 export const NoOrganizationsEmptyState = () => {
   const { colors: themeColors } = useTheme();
@@ -25,36 +32,52 @@ export const NoOrganizationsEmptyState = () => {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+    <ScrollView
+      style={[
+        styles.outerContainer,
+        { backgroundColor: themeColors.background },
+      ]}
+      contentInsetAdjustmentBehavior="automatic"
     >
-      <View style={styles.iconContainer}>
-        <Ionicons
-          name="rocket-outline"
-          size={64}
-          color={palette.primary}
-          style={styles.icon}
-        />
+      <View style={styles.bannerContainer}>
+        <PromoBanner />
       </View>
-      <Text style={[styles.title, { color: themeColors.text }]}>
-        Welcome to HCB
-      </Text>
-      <Text style={[styles.subtitle, { color: palette.muted }]}>
-        You aren't a part of an organization yet, looking to start one?
-      </Text>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: palette.primary }]}
-        onPress={handleApply}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.buttonText}>Apply to HCB</Text>
-        <Ionicons name="arrow-forward" size={20} color="#fff" />
-      </TouchableOpacity>
-    </View>
+      <View style={styles.container}>
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name="rocket-outline"
+            size={64}
+            color={palette.primary}
+            style={styles.icon}
+          />
+        </View>
+        <Text style={[styles.title, { color: themeColors.text }]}>
+          Welcome to HCB
+        </Text>
+        <Text style={[styles.subtitle, { color: palette.muted }]}>
+          You aren't a part of an organization yet, looking to start one?
+        </Text>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: palette.primary }]}
+          onPress={handleApply}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Apply to HCB</Text>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+  },
+  bannerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
   container: {
     flex: 1,
     alignItems: "center",

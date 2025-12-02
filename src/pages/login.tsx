@@ -31,6 +31,7 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
+  const showSignupRef = useRef(false);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -42,6 +43,7 @@ export default function Login() {
       extraParams: {
         no_app_shell: "true",
         theme: scheme || "",
+        signup: showSignupRef.current.toString(),
       },
     },
     discovery,
@@ -115,6 +117,8 @@ export default function Login() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setLoading(false);
           setIsProcessing(false);
+          processedResponseRef.current = null;
+          showSignupRef.current = false;
         })
         .catch((error) => {
           console.error("Error exchanging code for token", error, {
@@ -123,6 +127,7 @@ export default function Login() {
           setLoading(false);
           setIsProcessing(false);
           processedResponseRef.current = null;
+          showSignupRef.current = false;
         });
     }
 
@@ -252,11 +257,10 @@ export default function Login() {
           </Button>
           <Button
             variant="primary"
-            onPress={() =>
-              openInAppBrowser(
-                "https://hcb.hackclub.com/users/auth?signup=true",
-              )
-            }
+            onPress={() => {
+              showSignupRef.current = true;
+              promptAsync();
+            }}
             style={{
               backgroundColor: palette.primary,
               borderWidth: 0,
