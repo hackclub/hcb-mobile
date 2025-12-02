@@ -1,11 +1,15 @@
 import * as Sentry from "@sentry/react-native";
-import { memo, useEffect } from "react";
+import { memo, useContext, useEffect } from "react";
 import useSWR from "swr";
 
+import AuthContext from "../../auth/auth";
 import User from "../../lib/types/User";
 
 function SentryUserBridge() {
-  const { data: user } = useSWR<User>("user");
+  const { tokens } = useContext(AuthContext);
+  const { data: user } = useSWR<User>(
+    tokens?.accessToken ? "user" : null,
+  );
   useEffect(() => {
     if (user?.id) {
       Sentry.setUser({

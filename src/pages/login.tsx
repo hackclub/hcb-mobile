@@ -31,7 +31,7 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
-  const [showSignup, setShowSignup] = useState(false);
+  const showSignupRef = useRef(false);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -43,7 +43,7 @@ export default function Login() {
       extraParams: {
         no_app_shell: "true",
         theme: scheme || "",
-        signup: showSignup.toString(),
+        signup: showSignupRef.current.toString(),
       },
     },
     discovery,
@@ -124,7 +124,6 @@ export default function Login() {
           });
           setLoading(false);
           setIsProcessing(false);
-          processedResponseRef.current = null;
         });
     }
 
@@ -144,13 +143,6 @@ export default function Login() {
       useNativeDriver: true,
     }).start();
   }, [animation]);
-
-  useEffect(() => {
-    if (request?.extraParams.signup == "true") {
-      promptAsync();
-      setShowSignup(false);
-    }
-  }, [promptAsync, request?.extraParams?.signup]);
 
   return (
     <ImageBackground
@@ -262,7 +254,8 @@ export default function Login() {
           <Button
             variant="primary"
             onPress={() => {
-              setShowSignup(true);
+              showSignupRef.current = true;
+              promptAsync();
             }}
             style={{
               backgroundColor: palette.primary,
