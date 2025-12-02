@@ -10,6 +10,8 @@ import {
   View,
 } from "react-native";
 
+import User from "../lib/types/User";
+import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { useIsTeen } from "../utils/age";
 
 const PROMO_BANNER_CLICKED_KEY = "@promoBannerClicked";
@@ -18,7 +20,7 @@ const PromoBanner = memo(function PromoBanner() {
   const isTeen = useIsTeen();
   const [isVisible, setIsVisible] = useState(false);
   const { colors } = useTheme();
-
+  const { data: user } = useOfflineSWR<User>("user");
   useEffect(() => {
     const checkVisibility = async () => {
       const isDecember = new Date().getMonth() === 11;
@@ -34,7 +36,9 @@ const PromoBanner = memo(function PromoBanner() {
   }, [isTeen]);
 
   const handlePress = async () => {
-    Linking.openURL("https://hack.club/hcb-mobile-stickers");
+    Linking.openURL(
+      `https://hack.club/hcb-mobile-stickers?user_id=${encodeURIComponent(user?.id || "")}&name=${encodeURIComponent(user?.name || "")}`,
+    );
   };
 
   const handleClose = async (e: GestureResponderEvent) => {
@@ -67,7 +71,7 @@ const PromoBanner = memo(function PromoBanner() {
             Claim your free HCB stickers! →
           </Text>
           <Text style={[styles.subtitle, { color: colors.text }]}>
-            Tap to fill out the form
+            Limited edition stickers for early app adopters!
           </Text>
         </View>
         <Pressable
