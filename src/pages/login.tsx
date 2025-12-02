@@ -151,7 +151,10 @@ export default function Login() {
   };
 
   useEffect(() => {
-    if (pendingSignup !== null && request?.extraParams?.signup === pendingSignup.toString()) {
+    if (
+      pendingSignup !== null &&
+      request?.extraParams?.signup === pendingSignup.toString()
+    ) {
       doPrompt();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
