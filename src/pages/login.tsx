@@ -118,6 +118,7 @@ export default function Login() {
           setLoading(false);
           setIsProcessing(false);
           processedResponseRef.current = null;
+          showSignupRef.current = false;
         })
         .catch((error) => {
           console.error("Error exchanging code for token", error, {
@@ -126,6 +127,7 @@ export default function Login() {
           setLoading(false);
           setIsProcessing(false);
           processedResponseRef.current = null;
+          showSignupRef.current = false;
         });
     }
 
