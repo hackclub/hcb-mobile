@@ -462,7 +462,7 @@ export default function SettingsPage({ navigation }: Props) {
               />
             </>
           )}
-          {supportsAlternateIcons && (
+          {supportsAlternateIcons && Platform.OS != "android" && (
             <>
               <Pressable
                 style={{
