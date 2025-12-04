@@ -6,7 +6,7 @@ export default {
     name: IS_DEV ? "HCB (dev)" : "HCB",
     slug: "hcb-mobile",
     owner: "hackclub",
-    version: "1.0.0",
+    version: "1.0.2",
     platforms: ["ios", "android"],
     scheme: "hcb",
     orientation: "portrait",
@@ -18,7 +18,7 @@ export default {
       icon: "./assets/icons/default.icon",
       supportsTablet: false,
       bundleIdentifier: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
-      buildNumber: "20",
+      buildNumber: "1",
       autoIncrement: "buildNumber",
       config: {
         usesNonExemptEncryption: false,

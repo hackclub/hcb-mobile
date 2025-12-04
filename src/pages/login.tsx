@@ -31,6 +31,10 @@ export default function Login() {
   const scheme = useColorScheme();
   const [isProcessing, setIsProcessing] = useState(false);
   const processedResponseRef = useRef<string | null>(null);
+  const [isPrompting, setIsPrompting] = useState(false);
+  const [pendingSignup, setPendingSignup] = useState<boolean | null>(null);
+
+  const signupParam = pendingSignup ?? false;
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -42,6 +46,7 @@ export default function Login() {
       extraParams: {
         no_app_shell: "true",
         theme: scheme || "",
+        signup: signupParam.toString(),
       },
     },
     discovery,
@@ -115,6 +120,7 @@ export default function Login() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setLoading(false);
           setIsProcessing(false);
+          processedResponseRef.current = null;
         })
         .catch((error) => {
           console.error("Error exchanging code for token", error, {
@@ -132,6 +138,27 @@ export default function Login() {
       }
     };
   }, [response, request, setTokens, isProcessing, isDark]);
+
+  const doPrompt = async () => {
+    if (isPrompting) return;
+    setIsPrompting(true);
+    try {
+      await promptAsync();
+    } finally {
+      setIsPrompting(false);
+      setPendingSignup(null);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      pendingSignup !== null &&
+      request?.extraParams?.signup === pendingSignup.toString()
+    ) {
+      doPrompt();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSignup, request]);
 
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -245,18 +272,14 @@ export default function Login() {
           </Button>
           <Button
             variant="outline"
-            onPress={() => promptAsync()}
+            onPress={() => setPendingSignup(false)}
             loading={loading}
           >
             Log in
           </Button>
           <Button
             variant="primary"
-            onPress={() =>
-              openInAppBrowser(
-                "https://hcb.hackclub.com/users/auth?signup=true",
-              )
-            }
+            onPress={() => setPendingSignup(true)}
             style={{
               backgroundColor: palette.primary,
               borderWidth: 0,
