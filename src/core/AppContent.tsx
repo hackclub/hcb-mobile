@@ -433,7 +433,8 @@ export default function AppContent({
         if (
           path.startsWith("/branding") ||
           path.startsWith("/security") ||
-          path.startsWith("/roles")
+          path.startsWith("/roles") ||
+          path.startsWith("/wrapped")
         ) {
           Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
           return undefined;
