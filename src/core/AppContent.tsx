@@ -434,7 +434,8 @@ export default function AppContent({
           path.startsWith("/branding") ||
           path.startsWith("/security") ||
           path.startsWith("/roles") ||
-          path.startsWith("/wrapped")
+          path.startsWith("/wrapped") ||
+          path.startsWith("/mobile")
         ) {
           Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
           return undefined;
