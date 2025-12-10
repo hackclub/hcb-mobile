@@ -371,7 +371,9 @@ export default function AppContent({
         tokens.expiresAt > now + 2 * 60 * 1000
       ) {
         if (refreshPendingRef.current) {
-          console.log("Token refresh already in progress, skipping duplicate refresh");
+          console.log(
+            "Token refresh already in progress, skipping duplicate refresh",
+          );
           return;
         }
         console.log("Preemptively refreshing token before it expires");
