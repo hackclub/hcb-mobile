@@ -157,9 +157,7 @@ export default function useClient() {
 
       try {
         if (refreshInProgressRef.current) {
-          console.log(
-            "Token refresh already in progress, queueing request",
-          );
+          console.log("Token refresh already in progress, queueing request");
 
           return new Promise<KyResponse>((resolve, reject) => {
             queueRequestForRetry(request, resolve, reject);
