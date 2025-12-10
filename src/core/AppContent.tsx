@@ -386,7 +386,7 @@ export default function AppContent({
             refreshPendingRef.current = false;
           });
       } else {
-        // Token is not near expiry, reset the flag
+        // Reset the flag to allow preemptive refresh when token becomes near expiry again
         refreshPendingRef.current = false;
       }
     } else {
