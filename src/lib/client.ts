@@ -184,6 +184,7 @@ export default function useClient() {
           return response;
         }
       } catch (error) {
+        console.error("Error during token refresh:", error);
         refreshInProgressRef.current = false;
         return handleTokenRefreshFailure(requestKey, response);
       }
