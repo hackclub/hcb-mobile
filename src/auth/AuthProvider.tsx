@@ -18,6 +18,9 @@ let refreshPromise: Promise<{
   newTokens?: AuthTokens;
 }> | null = null;
 
+// Track if we're in the process of creating a new refresh promise
+let refreshPromiseCreationInProgress = false;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokensState] = useState<AuthTokens | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,6 +158,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const RETRY_DELAY_MS = 1000;
 
     try {
+while (refreshPromiseCreationInProgress) {
+        console.log(
+          "Another caller is creating refresh promise, waiting...",
+        );
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+
+
       if (refreshPromise) {
         console.log(
           "Token refresh already in progress, using existing promise",
@@ -185,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log(
         `Refreshing access token... (attempt ${retryAttempt + 1}/${MAX_RETRIES + 1})`,
       );
+      refreshPromiseCreationInProgress = true;
 
       refreshPromise = (async () => {
         try {
@@ -247,8 +259,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.log(
                 `Token refresh failed with retryable error, retrying in ${delay}ms...`,
               );
-              refreshPromise = null;
               await new Promise((resolve) => setTimeout(resolve, delay));
+              refreshPromise = null;
+              refreshPromiseCreationInProgress = false;
               return refreshAccessToken(retryAttempt + 1);
             }
 
@@ -280,8 +293,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (retryAttempt < MAX_RETRIES) {
               const delay = RETRY_DELAY_MS * Math.pow(2, retryAttempt);
               console.log(`Malformed response, retrying in ${delay}ms...`);
-              refreshPromise = null;
               await new Promise((resolve) => setTimeout(resolve, delay));
+              refreshPromise = null;
+              refreshPromiseCreationInProgress = false;
               return refreshAccessToken(retryAttempt + 1);
             }
 
@@ -317,8 +331,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log(
               `Network error during token refresh, retrying in ${delay}ms...`,
             );
-            refreshPromise = null;
             await new Promise((resolve) => setTimeout(resolve, delay));
+            refreshPromise = null;
+            refreshPromiseCreationInProgress = false;
             return refreshAccessToken(retryAttempt + 1);
           }
 
@@ -333,17 +348,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           return { success: false };
-        } finally {
-          refreshPromise = null;
         }
       })();
 
-      return refreshPromise;
+      refreshPromiseCreationInProgress = false;
+      const result = await refreshPromise;
+      refreshPromise = null;
+      
+      return result;
     } catch (error) {
       console.error("Error initiating token refresh", error, {
         action: "token_refresh_init",
       });
       refreshPromise = null;
+      refreshPromiseCreationInProgress = false;
       return { success: false };
     }
   };

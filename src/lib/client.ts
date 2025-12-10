@@ -5,12 +5,6 @@ import AuthContext, { AuthTokens } from "../auth/auth";
 
 type KyResponse = Awaited<ReturnType<typeof ky>>;
 
-let globalRefreshInProgress = false;
-let globalRefreshPromise: Promise<{
-  success: boolean;
-  newTokens?: AuthTokens;
-}> | null = null;
-
 interface QueuedRequest {
   resolve: (value: KyResponse) => void;
   reject: (reason?: Error) => void;
@@ -161,8 +155,8 @@ export default function useClient() {
       console.log("Received 401 response, attempting token refresh...");
 
       try {
-        if (globalRefreshInProgress) {
-          console.log("Token refresh in progress, queueing request");
+        if (queuedRequestsRef.current.length > 0) {
+          console.log("Token refresh in progress (queue not empty), queueing request");
 
           return new Promise<KyResponse>((resolve, reject) => {
             queueRequestForRetry(request, resolve, reject);
@@ -170,13 +164,7 @@ export default function useClient() {
         }
 
         pendingRetriesRef.current.add(requestKey);
-        globalRefreshInProgress = true;
-
-        if (!globalRefreshPromise) {
-          globalRefreshPromise = refreshAccessTokenRef.current();
-        }
-
-        const result = await globalRefreshPromise;
+        const result = await refreshAccessTokenRef.current();
 
         if (result.success && result.newTokens) {
           tokensRef.current = result.newTokens;
@@ -192,9 +180,6 @@ export default function useClient() {
         }
       } catch (error) {
         return handleTokenRefreshFailure(requestKey, response);
-      } finally {
-        globalRefreshInProgress = false;
-        globalRefreshPromise = null;
       }
     };
 
