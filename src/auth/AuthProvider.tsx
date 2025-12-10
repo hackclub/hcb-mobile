@@ -352,6 +352,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Only force logout if it's not a network/temporary error
             if (!isNetworkError) {
+              refreshPromiseCreationInProgress = false;
               await forceLogout();
             }
 
