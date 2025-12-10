@@ -282,7 +282,7 @@ export function useStripeTerminalInit(
 
   useEffect(() => {
     const interval = setInterval(() => {
-      //check if discovered readers have actually changed
+      // check if discovered readers have actually changed
       const readersChanged = () => {
         if (
           discoveredReaders.length !==
