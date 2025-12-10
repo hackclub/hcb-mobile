@@ -158,11 +158,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const RETRY_DELAY_MS = 1000;
 
     try {
-      while (refreshPromiseCreationInProgress) {
+      // Wait for refreshPromiseCreationInProgress to become false, but only up to a timeout
+      const WAIT_TIMEOUT_MS = 5000;
+      const WAIT_INTERVAL_MS = 50;
+      let waited = 0;
+      while (refreshPromiseCreationInProgress && waited < WAIT_TIMEOUT_MS) {
         console.log("Another caller is creating refresh promise, waiting...");
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, WAIT_INTERVAL_MS));
+        waited += WAIT_INTERVAL_MS;
       }
-
+      if (refreshPromiseCreationInProgress) {
+        console.error("Timeout waiting for refreshPromiseCreationInProgress to become false");
+        return { success: false };
+      }
       if (refreshPromise) {
         console.log(
           "Token refresh already in progress, using existing promise",
@@ -257,8 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 `Token refresh failed with retryable error, retrying in ${delay}ms...`,
               );
               await new Promise((resolve) => setTimeout(resolve, delay));
-              refreshPromise = null;
-              refreshPromiseCreationInProgress = false;
+              // Do not clear flags before recursive call; let top-level handle cleanup
               return refreshAccessToken(retryAttempt + 1);
             }
 
@@ -329,8 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               `Network error during token refresh, retrying in ${delay}ms...`,
             );
             await new Promise((resolve) => setTimeout(resolve, delay));
-            refreshPromise = null;
-            refreshPromiseCreationInProgress = false;
+
             return refreshAccessToken(retryAttempt + 1);
           }
 
