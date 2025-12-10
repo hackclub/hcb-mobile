@@ -354,7 +354,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               await forceLogout();
             }
 
-            lastError = error instanceof Error ? error : new Error(String(error));
+            lastError =
+              error instanceof Error ? error : new Error(String(error));
             break;
           }
         }
