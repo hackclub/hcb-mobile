@@ -367,9 +367,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false };
       })();
 
-      refreshPromiseCreationInProgress = false;
       const result = await refreshPromise;
       refreshPromise = null;
+      refreshPromiseCreationInProgress = false;
 
       return result;
     } catch (error) {
