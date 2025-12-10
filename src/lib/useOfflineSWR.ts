@@ -34,7 +34,7 @@ export function useOfflineSWR<Data, Error = unknown>(
     keepPreviousData: true,
     errorRetryCount: isOnline ? 5 : 0,
     errorRetryInterval: 500,
-    dedupingInterval: swrOptions?.dedupingInterval ?? 1000,
+    dedupingInterval: swrOptions?.dedupingInterval ?? 5000,
     onError: (err, key, config) => {
       if (
         isOnline &&

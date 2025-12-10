@@ -3,7 +3,7 @@ import {
   useStripeTerminal,
   Reader,
 } from "@stripe/stripe-terminal-react-native";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 interface UseStripeTerminalInitOptions {
   organizationId?: string;
@@ -282,11 +282,21 @@ export function useStripeTerminalInit(
 
   useEffect(() => {
     const interval = setInterval(() => {
+      //check if discovered readers have actually changed
+      const readersChanged = () => {
+        if (discoveredReaders.length !== globalInitializationState.discoveredReaders.length) {
+          return true;
+        }
+        return discoveredReaders.some(
+          (reader, index) => reader !== globalInitializationState.discoveredReaders[index]
+        );
+      };
+
       if (
         isInitialized !== globalInitializationState.isInitialized ||
         supportsTapToPay !== globalInitializationState.supportsTapToPay ||
         error !== globalInitializationState.error ||
-        discoveredReaders !== globalInitializationState.discoveredReaders ||
+        readersChanged() ||
         isUpdatingReaderSoftware !==
           globalInitializationState.isUpdatingReaderSoftware ||
         updateProgress !== globalInitializationState.updateProgress
@@ -312,14 +322,26 @@ export function useStripeTerminalInit(
     updateProgress,
   ]);
 
-  return {
-    isInitialized,
-    isInitializing,
-    supportsTapToPay,
-    error,
-    retry,
-    discoveredReaders,
-    isUpdatingReaderSoftware,
-    updateProgress,
-  };
+  return useMemo(
+    () => ({
+      isInitialized,
+      isInitializing,
+      supportsTapToPay,
+      error,
+      retry,
+      discoveredReaders,
+      isUpdatingReaderSoftware,
+      updateProgress,
+    }),
+    [
+      isInitialized,
+      isInitializing,
+      supportsTapToPay,
+      error,
+      retry,
+      discoveredReaders,
+      isUpdatingReaderSoftware,
+      updateProgress,
+    ],
+  );
 }
