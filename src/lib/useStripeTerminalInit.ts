@@ -218,7 +218,7 @@ export function useStripeTerminalInit(
     return await globalInitializationPromise;
   }, [terminal, organizationId, enableReaderPreConnection]);
 
-  const retry = () => {
+  const retry = useCallback(() => {
     initializationAttempted.current = false;
     hasLoggedWaiting = false;
     setError(null);
@@ -233,7 +233,7 @@ export function useStripeTerminalInit(
       isUpdatingReaderSoftware: false,
       updateProgress: null,
     };
-  };
+  }, []);
 
   useEffect(() => {
     if (!enabled || initializationAttempted.current) {
@@ -292,7 +292,7 @@ export function useStripeTerminalInit(
         }
         return discoveredReaders.some(
           (reader, index) =>
-            reader !== globalInitializationState.discoveredReaders[index],
+            reader.id !== globalInitializationState.discoveredReaders[index]?.id,
         );
       };
 
