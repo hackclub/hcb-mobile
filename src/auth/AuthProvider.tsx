@@ -248,6 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   console.log(
                     "Refresh token is invalid or already used - forcing logout",
                   );
+                  refreshPromiseCreationInProgress = false;
                   await forceLogout();
                   return { success: false };
                 }
