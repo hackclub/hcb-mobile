@@ -292,7 +292,8 @@ export function useStripeTerminalInit(
         }
         return discoveredReaders.some(
           (reader, index) =>
-            reader.id !== globalInitializationState.discoveredReaders[index]?.id,
+            reader.id !==
+            globalInitializationState.discoveredReaders[index]?.id,
         );
       };
 
