@@ -158,13 +158,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const RETRY_DELAY_MS = 1000;
 
     try {
-while (refreshPromiseCreationInProgress) {
-        console.log(
-          "Another caller is creating refresh promise, waiting...",
-        );
+      while (refreshPromiseCreationInProgress) {
+        console.log("Another caller is creating refresh promise, waiting...");
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
-
 
       if (refreshPromise) {
         console.log(
@@ -354,7 +351,7 @@ while (refreshPromiseCreationInProgress) {
       refreshPromiseCreationInProgress = false;
       const result = await refreshPromise;
       refreshPromise = null;
-      
+
       return result;
     } catch (error) {
       console.error("Error initiating token refresh", error, {

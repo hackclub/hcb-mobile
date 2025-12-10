@@ -1,7 +1,7 @@
 import ky from "ky";
 import { useContext, useEffect, useRef } from "react";
 
-import AuthContext, { AuthTokens } from "../auth/auth";
+import AuthContext from "../auth/auth";
 
 type KyResponse = Awaited<ReturnType<typeof ky>>;
 
@@ -20,6 +20,7 @@ export default function useClient() {
   const queuedRequestsRef = useRef<QueuedRequest[]>([]);
   const pendingRetriesRef = useRef<Set<string>>(new Set());
   const freshTokenMapRef = useRef<Map<string, string>>(new Map());
+  const refreshInProgressRef = useRef(false);
 
   useEffect(() => {
     tokensRef.current = tokens;
@@ -155,30 +156,37 @@ export default function useClient() {
       console.log("Received 401 response, attempting token refresh...");
 
       try {
-        if (queuedRequestsRef.current.length > 0) {
-          console.log("Token refresh in progress (queue not empty), queueing request");
+        if (refreshInProgressRef.current) {
+          console.log(
+            "Token refresh already in progress, queueing request",
+          );
 
           return new Promise<KyResponse>((resolve, reject) => {
             queueRequestForRetry(request, resolve, reject);
           });
         }
 
+        refreshInProgressRef.current = true;
         pendingRetriesRef.current.add(requestKey);
         const result = await refreshAccessTokenRef.current();
 
         if (result.success && result.newTokens) {
           tokensRef.current = result.newTokens;
-          return await handleTokenRefreshSuccess(
+          const successResponse = await handleTokenRefreshSuccess(
             request,
             requestKey,
             result.newTokens.accessToken,
           );
+          refreshInProgressRef.current = false;
+          return successResponse;
         } else {
           console.warn("Token refresh did not succeed");
           pendingRetriesRef.current.delete(requestKey);
+          refreshInProgressRef.current = false;
           return response;
         }
       } catch (error) {
+        refreshInProgressRef.current = false;
         return handleTokenRefreshFailure(requestKey, response);
       }
     };
