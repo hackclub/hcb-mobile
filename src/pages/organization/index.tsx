@@ -312,8 +312,10 @@ export default function OrganizationPage({
 
   useFocusEffect(
     useCallback(() => {
-      onRefresh(false);
-    }, [onRefresh]),
+      if (!isLoading && !isRefreshingRef.current) {
+        onRefresh(false);
+      }
+    }, [onRefresh, isLoading]),
   );
 
   const renderListFooter = useCallback(() => {
