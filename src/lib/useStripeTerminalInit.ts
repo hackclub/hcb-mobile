@@ -284,11 +284,15 @@ export function useStripeTerminalInit(
     const interval = setInterval(() => {
       //check if discovered readers have actually changed
       const readersChanged = () => {
-        if (discoveredReaders.length !== globalInitializationState.discoveredReaders.length) {
+        if (
+          discoveredReaders.length !==
+          globalInitializationState.discoveredReaders.length
+        ) {
           return true;
         }
         return discoveredReaders.some(
-          (reader, index) => reader !== globalInitializationState.discoveredReaders[index]
+          (reader, index) =>
+            reader !== globalInitializationState.discoveredReaders[index],
         );
       };
 
