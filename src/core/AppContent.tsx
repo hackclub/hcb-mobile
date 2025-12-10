@@ -93,6 +93,7 @@ export default function AppContent({
   const isBiometricAuthInProgress = useRef(false);
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
+  const refreshPendingRef = useRef(false);
   const hcb = useClient();
 
   useUpdateMonitor();
@@ -369,13 +370,23 @@ export default function AppContent({
         tokens.expiresAt <= now + 5 * 60 * 1000 &&
         tokens.expiresAt > now + 2 * 60 * 1000
       ) {
+        if (refreshPendingRef.current) {
+          console.log("Token refresh already in progress, skipping duplicate refresh");
+          return;
+        }
         console.log("Preemptively refreshing token before it expires");
-        refreshAccessToken().catch((error) => {
-          console.error("Failed to preemptively refresh token", error);
-        });
+        refreshPendingRef.current = true;
+        refreshAccessToken()
+          .catch((error) => {
+            console.error("Failed to preemptively refresh token", error);
+          })
+          .finally(() => {
+            refreshPendingRef.current = false;
+          });
       }
     } else {
       console.log("Token state updated - user is logged out");
+      refreshPendingRef.current = false;
     }
   }, [refreshAccessToken, tokens]);
 
