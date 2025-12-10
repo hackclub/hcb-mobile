@@ -265,7 +265,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 `Token refresh failed with retryable error, retrying in ${delay}ms...`,
               );
               await new Promise((resolve) => setTimeout(resolve, delay));
-              // Do not clear flags before recursive call; let top-level handle cleanup
               return refreshAccessToken(retryAttempt + 1);
             }
 
