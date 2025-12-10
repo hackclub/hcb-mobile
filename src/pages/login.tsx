@@ -8,7 +8,7 @@ import { ImageBackground, Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Text, View, Animated, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -36,8 +36,8 @@ export default function Login() {
 
   const signupParam = pendingSignup ?? false;
 
-  const [request, response, promptAsync] = useAuthRequest(
-    {
+const authConfig = useMemo(
+    () => ({
       clientId,
       redirectUri,
       scopes: ["read", "write"],
@@ -48,7 +48,12 @@ export default function Login() {
         theme: scheme || "",
         signup: signupParam.toString(),
       },
-    },
+    }),
+    [signupParam, scheme],
+  );
+
+  const [request, response, promptAsync] = useAuthRequest(
+    authConfig,
     discovery,
   );
 
@@ -79,6 +84,9 @@ export default function Login() {
       await SystemUI.setBackgroundColorAsync(isDark ? "#16161E" : "#F6F6F6");
     };
     setStatusBar();
+  }, [isDark]);
+
+  useEffect(() => {
     if (!response || isProcessing) return;
 
     const responseKey =
@@ -137,7 +145,7 @@ export default function Login() {
         processedResponseRef.current = responseKey;
       }
     };
-  }, [response, request, setTokens, isProcessing, isDark]);
+  }, [response, request, setTokens, isProcessing]);
 
   const doPrompt = async () => {
     if (isPrompting) return;
