@@ -372,7 +372,7 @@ export default function AppContent({
       ) {
         if (refreshPendingRef.current) {
           console.log(
-            "Token refresh already in progress, skipping duplicate refresh",
+            "Token refresh already pending in this component, skipping duplicate preemptive refresh",
           );
           return;
         }
@@ -385,6 +385,9 @@ export default function AppContent({
           .finally(() => {
             refreshPendingRef.current = false;
           });
+      } else {
+        // Reset the flag to allow preemptive refresh when token becomes near expiry again
+        refreshPendingRef.current = false;
       }
     } else {
       console.log("Token state updated - user is logged out");
