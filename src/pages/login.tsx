@@ -143,7 +143,7 @@ export default function Login() {
     if (isPrompting) return;
     setIsPrompting(true);
     try {
-      await promptAsync();
+      await promptAsync({ createTask: false });
     } finally {
       setIsPrompting(false);
       setPendingSignup(null);
