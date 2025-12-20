@@ -4,7 +4,7 @@ import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
@@ -79,6 +79,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const isDark = useIsDark();
   const { isOnline, withOfflineCheck } = useOffline();
   const addReceiptButtonRef = useRef(null);
+
+  useEffect(() => {
+    setLostReceipt(transaction.lost_receipt);
+    setMissingReceipt(transaction.missing_receipt);
+  }, [transaction.lost_receipt, transaction.missing_receipt]);
 
   const { handleActionSheet, isOnline: actionSheetIsOnline } =
     useReceiptActionSheet({
@@ -355,13 +360,13 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             alignItems: "center",
             alignSelf: "flex-start",
             marginTop: 12,
-            backgroundColor: "#FF8C36",
+            backgroundColor: palette.warning,
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 6,
           }}
         >
-          <Icon glyph="view-close" size={20} style={{ marginRight: 6 }} />
+          <Icon glyph="view-close" size={20} color="white" style={{ marginRight: 6 }} />
           <Text
             style={{
               color: "white",
