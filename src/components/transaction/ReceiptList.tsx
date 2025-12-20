@@ -367,7 +367,12 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             borderRadius: 6,
           }}
         >
-          <Icon glyph="view-close" size={20} color="white" style={{ marginRight: 6 }} />
+          <Icon
+            glyph="view-close"
+            size={20}
+            color="white"
+            style={{ marginRight: 6 }}
+          />
           <Text
             style={{
               color: "white",
