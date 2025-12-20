@@ -376,6 +376,15 @@ export default function Navigator() {
                 animation: "slide_from_bottom",
               }}
             />
+            <ReceiptsStack.Screen
+              name="ReceiptTransaction"
+              component={TransactionPage}
+              options={({ route }) => ({
+                headerBackTitle: "Back",
+                title:
+                  (route.params as { title?: string })?.title || "Transaction",
+              })}
+            />
           </ReceiptsStack.Navigator>
         )}
       </Tab.Screen>

@@ -60,12 +60,18 @@ export type ReceiptsStackParamList = {
   ReceiptSelectionModal: {
     transaction: Transaction & { organization: Organization };
   };
+  ReceiptTransaction: {
+    transactionId: Transaction["id"];
+    orgId?: Organization["id"];
+    transaction?: Transaction;
+    title?: string;
+  };
 };
 
 export type TabParamList = {
   Home: NavigatorScreenParams<StackParamList>;
   Cards: NavigatorScreenParams<CardsStackParamList>;
-  Receipts: undefined;
+  Receipts: NavigatorScreenParams<ReceiptsStackParamList>;
   Settings: undefined;
 };
 

@@ -181,6 +181,7 @@ export function addPendingFeeToTransactions(
         has_custom_memo: false,
         declined: false,
         missing_receipt: false,
+        lost_receipt: false,
       },
       ...transactions,
     ];

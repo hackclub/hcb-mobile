@@ -87,6 +87,9 @@ function TransactionWrapper({
 export default memo(TransactionWrapper, (prevProps, nextProps) => {
   return (
     prevProps.item.id === nextProps.item.id &&
+    prevProps.item.missing_receipt === nextProps.item.missing_receipt &&
+    prevProps.item.pending === nextProps.item.pending &&
+    prevProps.item.declined === nextProps.item.declined &&
     prevProps.isFirst === nextProps.isFirst &&
     prevProps.isLast === nextProps.isLast &&
     prevProps.user?.id === nextProps.user?.id &&
