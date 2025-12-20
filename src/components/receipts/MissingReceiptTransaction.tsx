@@ -18,6 +18,7 @@ function MissingReceiptTransaction({
   onComplete,
   _onUpload,
   onSelect,
+  onPress,
 }: {
   transaction: TransactionCardCharge & { organization: Organization };
   onComplete: () => void;
@@ -25,6 +26,9 @@ function MissingReceiptTransaction({
     transaction: TransactionCardCharge & { organization: Organization },
   ) => void;
   onSelect: (
+    transaction: TransactionCardCharge & { organization: Organization },
+  ) => void;
+  onPress: (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => void;
 }) {
@@ -42,7 +46,12 @@ function MissingReceiptTransaction({
   });
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => {
+        Haptics.selectionAsync();
+        onPress(transaction);
+      }}
       style={{
         backgroundColor: themeColors.card,
         borderRadius: 8,
@@ -91,7 +100,8 @@ function MissingReceiptTransaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => {
+            onPress={(e) => {
+              e.stopPropagation();
               Haptics.selectionAsync();
               handleActionSheet(uploadButtonRef);
             }}
@@ -113,7 +123,8 @@ function MissingReceiptTransaction({
               alignItems: "center",
               justifyContent: "center",
             }}
-            onPress={() => {
+            onPress={(e) => {
+              e.stopPropagation();
               Haptics.selectionAsync();
               onSelect(transaction);
             }}
@@ -123,7 +134,7 @@ function MissingReceiptTransaction({
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

@@ -69,6 +69,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
   const [deletingReceiptId, setDeletingReceiptId] = useState<string | null>(
     null,
   );
+  const [isMarkingLostReceipt, setIsMarkingLostReceipt] = useState(false);
+  const [lostReceipt, setLostReceipt] = useState(transaction.lost_receipt);
+  const [missingReceipt, setMissingReceipt] = useState(
+    transaction.missing_receipt,
+  );
 
   const hcb = useClient();
   const isDark = useIsDark();
@@ -107,6 +112,11 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
 
               // Refresh the receipts list
               mutate();
+
+              if (receipts && receipts.length === 1) {
+                setLostReceipt(false);
+                setMissingReceipt(true);
+              }
             } catch (error) {
               console.error("Error deleting receipt", error, {
                 receiptId: receipt.id,
@@ -118,6 +128,50 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               });
             } finally {
               setDeletingReceiptId(null);
+            }
+          },
+        },
+      ],
+    );
+  });
+
+  const handleMarkLostReceipt = withOfflineCheck(async () => {
+    showAlert(
+      "No/Lost Receipt",
+      "Mark this transaction as having a lost or unavailable receipt? This should only be used when you genuinely cannot provide a receipt.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Mark as Lost",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsMarkingLostReceipt(true);
+              await hcb.post(`transactions/${transaction.id}/mark_no_receipt`);
+
+              Toast.show({
+                type: ALERT_TYPE.SUCCESS,
+                title: "Receipt Marked as Lost",
+                textBody:
+                  "This transaction has been marked as having a lost receipt.",
+              });
+
+              setLostReceipt(true);
+            } catch (error) {
+              console.error("Error marking receipt as lost", error, {
+                transactionId: transaction.id,
+              });
+              Toast.show({
+                type: ALERT_TYPE.DANGER,
+                title: "Failed",
+                textBody:
+                  "Failed to mark receipt as lost. Please try again later.",
+              });
+            } finally {
+              setIsMarkingLostReceipt(false);
             }
           },
         },
@@ -237,7 +291,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             }}
             layout={transition}
           >
-            {isLoading && !transaction.missing_receipt ? (
+            {isLoading && !missingReceipt ? (
               <ActivityIndicator color={palette.muted} />
             ) : (
               <>
@@ -254,6 +308,71 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           </Animated.View>
         </TouchableOpacity>
       </View>
+
+      {missingReceipt && !lostReceipt && (
+        <TouchableOpacity
+          onPress={handleMarkLostReceipt}
+          disabled={isMarkingLostReceipt || !isOnline}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "flex-start",
+            marginTop: 12,
+            opacity: isOnline ? 1 : 0.5,
+          }}
+        >
+          {isMarkingLostReceipt ? (
+            <ActivityIndicator
+              size="small"
+              color={palette.muted}
+              style={{ marginRight: 6 }}
+            />
+          ) : (
+            <Ionicons
+              name="close-circle-outline"
+              color={palette.muted}
+              size={16}
+              style={{ marginRight: 4 }}
+            />
+          )}
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 14,
+              textDecorationLine: "underline",
+            }}
+          >
+            No/lost receipt?
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Show indicator when receipt is already marked as lost */}
+      {lostReceipt && receipts && receipts.length === 0 && (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "flex-start",
+            marginTop: 12,
+            backgroundColor: "#FF8C36",
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 6,
+          }}
+        >
+          <Icon glyph="view-close" size={20} style={{ marginRight: 6 }} />
+          <Text
+            style={{
+              color: "white",
+              fontSize: 13,
+              fontWeight: "600",
+            }}
+          >
+            Marked as lost receipt
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
