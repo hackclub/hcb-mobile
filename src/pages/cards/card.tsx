@@ -253,6 +253,7 @@ export default function CardPage(
     isReachingEnd,
     loadMore,
     error: transactionsError,
+    mutate: mutateTransactions,
   } = useTransactions(id, "cards");
 
   useEffect(() => {
@@ -295,7 +296,7 @@ export default function CardPage(
     setRefreshing(true);
     try {
       await mutate(`cards/${card?.id}`);
-      await mutate(`cards/${id}/transactions`);
+      await mutateTransactions();
       await mutate(`card_grants/${grantId}`);
       setCardError(null);
       setTransactionError(null);
@@ -304,7 +305,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, id, grantId]);
+  }, [mutate, card?.id, mutateTransactions, grantId]);
 
   useEffect(() => {
     Animated.loop(
