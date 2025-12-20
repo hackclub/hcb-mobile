@@ -165,6 +165,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               });
 
               setLostReceipt(true);
+              setMissingReceipt(false);
             } catch (error) {
               console.error("Error marking receipt as lost", error, {
                 transactionId: transaction.id,
