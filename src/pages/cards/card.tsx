@@ -305,7 +305,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, id, grantId]);
+  }, [mutate, card?.id, mutateTransactions, grantId]);
 
   useEffect(() => {
     Animated.loop(
