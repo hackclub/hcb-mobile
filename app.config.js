@@ -42,6 +42,16 @@ export default {
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       versionCode: 3,
       edgeToEdgeEnabled: true,
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: {
+            scheme: "https",
+            host: "hcb.hackclub.com"
+          },
+        },
+      ],
     },
     extra: {
       eas: {
