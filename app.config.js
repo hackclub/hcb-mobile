@@ -48,7 +48,7 @@ export default {
           autoVerify: true,
           data: {
             scheme: "https",
-            host: "hcb.hackclub.com"
+            host: "hcb.hackclub.com",
           },
         },
       ],
