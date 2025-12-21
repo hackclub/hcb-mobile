@@ -401,7 +401,7 @@ export default function AppContent({
     }
   }, [appIsReady]);
 
-  const linking = useMemo(
+  const linking: LinkingOptions<TabParamList> = useMemo(
     () => ({
       prefixes: [
         Linking.createURL("/"),
@@ -420,7 +420,7 @@ export default function AppContent({
                 path: "hcb/:transactionId/:attachReceipt?",
                 parse: {
                   transactionId: (id) => `txn_${id}`,
-                  attachReceipt: (attachReceipt: boolean) => attachReceipt,
+                  attachReceipt: (value: string) => value === "attachReceipt",
                 },
               },
               Event: ":orgId",
