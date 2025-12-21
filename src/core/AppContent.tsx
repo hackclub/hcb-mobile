@@ -420,7 +420,7 @@ export default function AppContent({
                 path: "hcb/:transactionId/:attachReceipt?",
                 parse: {
                   transactionId: (id) => `txn_${id}`,
-                  attachReceipt: (value: string) => value === "attachReceipt",
+                  attachReceipt: (attachReceipt) => attachReceipt,
                 },
               },
               Event: ":orgId",
