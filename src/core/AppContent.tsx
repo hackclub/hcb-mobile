@@ -417,9 +417,10 @@ export default function AppContent({
             screens: {
               Invitation: "invites/:inviteId",
               Transaction: {
-                path: "hcb/:transactionId",
+                path: "hcb/:transactionId/:attachReceipt?",
                 parse: {
                   transactionId: (id) => `txn_${id}`,
+                  attachReceipt: (attachReceipt: boolean) => attachReceipt,
                 },
               },
               Event: ":orgId",

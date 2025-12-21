@@ -54,6 +54,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     (transaction as TransactionCardCharge).card_charge?.card?.organization
       ?.id ||
     "";
+  const attachReceipt = params.attachReceipt;
 
   const {
     data: receipts,
@@ -91,6 +92,18 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
       transactionId: transaction.id,
       onUploadComplete: mutate,
     });
+
+  useEffect(() => {
+    console.log("actionSheetIsOnline", actionSheetIsOnline);
+    if (attachReceipt && actionSheetIsOnline) {
+      console.log("attachReceipt", attachReceipt);
+      // we add a small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        handleActionSheet(addReceiptButtonRef);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [attachReceipt, actionSheetIsOnline, handleActionSheet]);
 
   const handleDeleteReceipt = withOfflineCheck(async (receipt: Receipt) => {
     showAlert(
