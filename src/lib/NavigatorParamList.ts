@@ -31,7 +31,7 @@ export type StackParamList = {
     orgId?: Organization["id"];
     transaction?: Transaction;
     title?: string;
-    attachReceipt?: boolean;
+    attachReceipt?: string;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
