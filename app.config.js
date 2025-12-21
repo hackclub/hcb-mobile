@@ -50,6 +50,7 @@ export default {
             scheme: "https",
             host: "hcb.hackclub.com",
           },
+          category: ["BROWSABLE", "DEFAULT"],
         },
       ],
     },
