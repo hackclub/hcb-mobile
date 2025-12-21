@@ -401,7 +401,7 @@ export default function AppContent({
     }
   }, [appIsReady]);
 
-  const linking: LinkingOptions<TabParamList> = useMemo(
+  const linking = useMemo(
     () => ({
       prefixes: [
         Linking.createURL("/"),
