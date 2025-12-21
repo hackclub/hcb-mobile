@@ -94,9 +94,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     });
 
   useEffect(() => {
-    console.log("actionSheetIsOnline", actionSheetIsOnline);
     if (attachReceipt && actionSheetIsOnline) {
-      console.log("attachReceipt", attachReceipt);
       // we add a small delay to ensure component is mounted
       const timer = setTimeout(() => {
         handleActionSheet(addReceiptButtonRef);
