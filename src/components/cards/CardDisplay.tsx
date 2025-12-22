@@ -22,7 +22,6 @@ interface CardDisplayProps {
 
 export default function CardDisplay({
   card,
-  grantCard,
   isGrantCard,
   cardExpanded,
   setCardExpanded,
@@ -69,9 +68,7 @@ export default function CardDisplay({
           >
             {card?.status == "expired" || card?.status == "canceled"
               ? "$0"
-              : renderMoney(
-                  card?.balance_available ?? 0,
-                )}
+              : renderMoney(card?.balance_available ?? 0)}
           </Text>
         </View>
       )}
