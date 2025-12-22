@@ -70,8 +70,7 @@ export default function CardDisplay({
             {card?.status == "expired" || card?.status == "canceled"
               ? "$0"
               : renderMoney(
-                  (grantCard?.amount_cents ?? 0) -
-                    (card?.total_spent_cents ?? 0),
+                  card?.balance_available ?? 0,
                 )}
           </Text>
         </View>
