@@ -103,15 +103,11 @@ export default function OrganizationPage({
     [organization],
   );
   const organizationErrorStatus = useMemo(() => {
-    return organizationError &&
-      typeof organizationError === "object" &&
-      "status" in organizationError
-      ? organizationError.status
-      : null;
+    return organizationError?.toString().includes("403");
   }, [organizationError]);
   const isAccessDenied = useMemo(
-    () => organizationErrorStatus === 403,
-    [organizationErrorStatus],
+    () => organizationError?.toString().includes("403"),
+    [organizationError],
   );
 
   const {
@@ -192,7 +188,7 @@ export default function OrganizationPage({
   };
 
   useEffect(() => {
-    if (organization && user) {
+    if (organization && user && !isAccessDenied) {
       navigation.setOptions({
         title: organization.name,
         headerRight: () => (
@@ -208,7 +204,7 @@ export default function OrganizationPage({
   }, [organization, navigation, user, supportsTapToPay]);
 
   useEffect(() => {
-    if (organizationErrorStatus === 401) {
+    if (organizationErrorStatus?.toString().includes("401")) {
       mutateOrganization();
     }
   }, [organizationErrorStatus, mutateOrganization]);
@@ -282,7 +278,7 @@ export default function OrganizationPage({
 
   const onRefresh = useCallback(
     async (showRefreshIndicator = true) => {
-      if (!isOnline || isRefreshingRef.current) return;
+      if (!isOnline || isRefreshingRef.current || isAccessDenied) return;
 
       isRefreshingRef.current = true;
       if (showRefreshIndicator) {
@@ -307,15 +303,22 @@ export default function OrganizationPage({
         }
       }
     },
-    [isOnline, orgId, mutate, mutateTransactions, mutateOrganization],
+    [
+      isOnline,
+      orgId,
+      mutate,
+      mutateTransactions,
+      mutateOrganization,
+      isAccessDenied,
+    ],
   );
 
   useFocusEffect(
     useCallback(() => {
-      if (!isLoading && !isRefreshingRef.current) {
+      if (!isLoading && !isRefreshingRef.current && !isAccessDenied) {
         onRefresh(false);
       }
-    }, [onRefresh, isLoading]),
+    }, [onRefresh, isLoading, isAccessDenied]),
   );
 
   const renderListFooter = useCallback(() => {
@@ -427,7 +430,7 @@ export default function OrganizationPage({
     return `item-${index}`;
   }, []);
 
-  if (organizationLoading || userLoading || isAccessDenied) {
+  if (organizationLoading || userLoading) {
     return (
       <View
         style={{
