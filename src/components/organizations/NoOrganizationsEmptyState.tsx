@@ -11,7 +11,6 @@ import {
 import { useSWRConfig } from "swr";
 
 import { palette } from "../../styles/theme";
-import PromoBanner from "../PromoBanner";
 
 export const NoOrganizationsEmptyState = () => {
   const { colors: themeColors } = useTheme();
@@ -39,9 +38,6 @@ export const NoOrganizationsEmptyState = () => {
       ]}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <View style={styles.bannerContainer}>
-        <PromoBanner />
-      </View>
       <View style={styles.container}>
         <View style={styles.iconContainer}>
           <Ionicons
@@ -73,10 +69,6 @@ export const NoOrganizationsEmptyState = () => {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-  },
-  bannerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
   },
   container: {
     flex: 1,
