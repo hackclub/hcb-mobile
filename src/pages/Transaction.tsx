@@ -83,7 +83,6 @@ export default function TransactionPage({
               const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
               try {
                 await Share.share({
-                  message: url,
                   url: url,
                 });
               } catch (error) {
