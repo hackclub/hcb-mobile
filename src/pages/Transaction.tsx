@@ -79,7 +79,7 @@ export default function TransactionPage({
         headerRight: () => (
           <TouchableOpacity
             onPress={async () => {
-              const hcbCode = transaction.id.split("txn_")[1];
+              const hcbCode = transaction.id.slice(4);
               const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
               try {
                 await Share.share({
