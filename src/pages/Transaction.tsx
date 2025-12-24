@@ -47,20 +47,18 @@ export default function TransactionPage({
 }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
+  //filter in case of deeplink with #commentId
+  const txnId = transactionId.split("#")[0]
   const { data: transaction, isLoading } = useOfflineSWR<
     Transaction & { organization?: Organization }
   >(
     orgId
-      ? `organizations/${orgId}/transactions/${transactionId}`
-      : `transactions/${transactionId}`,
+      ? `organizations/${orgId}/transactions/${txnId}`
+      : `transactions/${txnId}`,
     { fallbackData: _transaction },
   );
   const { data: comments } = useOfflineSWR<IComment[]>(
-    orgId
-      ? `organizations/${orgId}/transactions/${transactionId}/comments`
-      : transaction?.organization?.id
-        ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
-        : null,
+        `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`
   );
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${orgId || transaction?.organization?.id}`,
@@ -77,34 +75,23 @@ export default function TransactionPage({
     try {
       await Promise.all([
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}`
-            : `transactions/${transactionId}`,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}`,
           undefined,
           { revalidate: true },
         ),
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}/comments`
-            : transaction?.organization?.id
-              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
-              : null,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`,
           undefined,
           { revalidate: true },
         ),
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}/receipts`
-            : transaction?.organization?.id
-              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/receipts`
-              : null,
-          undefined,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/receipts`,
           { revalidate: true },
         ),
         globalMutate(
           (key) =>
             typeof key === "string" &&
-            key.startsWith(`organizations/${orgId}/transactions`),
+            key.startsWith(`organizations/${orgId}/transactions/${txnId}`),
         ),
       ]);
     } finally {
@@ -181,7 +168,7 @@ export default function TransactionPage({
             </View>
           )}
           {isUserInOrganizationOrAuditor && (
-            <CommentField orgId={currentOrgId} transactionId={transactionId} />
+            <CommentField orgId={currentOrgId} transactionId={txnId} />
           )}
         </View>
       </ScrollView>
