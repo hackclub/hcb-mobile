@@ -50,7 +50,7 @@ function QRCodeCard({
         shadowOpacity: isDark ? 0.3 : 0.12,
         shadowRadius: 12,
         elevation: 5,
-        marginBottom: 64,
+        marginBottom: Platform.OS === "android" ? 96 : 64,
       }}
     >
       <QRCodeStyled
