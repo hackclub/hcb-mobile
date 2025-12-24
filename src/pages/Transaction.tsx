@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   View,
@@ -10,6 +11,8 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
+  Share,
+  TouchableOpacity,
 } from "react-native";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
@@ -69,6 +72,34 @@ export default function TransactionPage({
   }, [organization, user]);
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
+
+  useEffect(() => {
+    if (transaction) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={async () => {
+              const hcbCode = transaction.id.split("txn_")[1];
+              const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
+              try {
+                await Share.share({
+                  message: url,
+                  url: url,
+                });
+              } catch (error) {
+                console.error("Error sharing transaction:", error);
+              }
+            }}
+            style={{ padding: 8 }}
+            accessibilityLabel="Share transaction"
+            accessibilityRole="button"
+          >
+            <Ionicons name="share-outline" size={22} color={themeColors.text} />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [transaction, navigation, themeColors.text]);
 
   const onRefresh = async () => {
     setRefreshing(true);
