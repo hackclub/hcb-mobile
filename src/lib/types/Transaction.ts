@@ -36,6 +36,7 @@ export interface TransactionBase
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;
+  organization?: Organization;
   appearance?: "hackathon_grant" | string;
   _debug?: {
     hcb_code: string;

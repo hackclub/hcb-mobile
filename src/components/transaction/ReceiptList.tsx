@@ -14,9 +14,7 @@ import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
-import Transaction, {
-  TransactionCardCharge,
-} from "../../lib/types/Transaction";
+import Transaction from "../../lib/types/Transaction";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../styles/theme";
@@ -50,10 +48,7 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
   const orgId =
-    params.orgId ||
-    (transaction as TransactionCardCharge).card_charge?.card?.organization
-      ?.id ||
-    "";
+    params.orgId || (transaction as Transaction).organization?.id || "";
   const attachReceipt = params.attachReceipt;
 
   const {
@@ -61,7 +56,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     isLoading,
     mutate,
   } = useSWR<Receipt[]>(
-    `organizations/${orgId}/transactions/${transaction.id}/receipts`,
+    `organizations/${transaction?.organization?.id || orgId}/transactions/${transaction.id}/receipts`,
   );
 
   const { colors: themeColors } = useTheme();
