@@ -189,123 +189,119 @@ export default function Login() {
           }}
         ></View>
 
-          {/* Main content */}
-          <View
-            style={{
-              flexDirection: "column",
-              gap: 16,
-              paddingHorizontal: 24,
-              paddingBottom: Platform.OS === "android" ? 20 : 8,
-            }}
-          >
-            {/* Logo */}
-            <Animated.View
-              style={[
-                {
-                  opacity: animation,
-                  alignSelf: "flex-start",
-                  marginBottom: 8,
-                  transform: [
-                    {
-                      scale: animation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.8, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <View
-                style={{
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  ...(Platform.OS === "ios" && {
-                    shadowColor: palette.primary,
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.35,
-                    shadowRadius: 16,
-                  }),
-                }}
-              >
-                <Image
-                  source={
-                    isDark
-                      ? require("../../assets/icon.png")
-                      : require("../../assets/icon-light.png")
-                  }
-                  style={{ width: 72, height: 72 }}
-                />
-              </View>
-            </Animated.View>
-
-            {/* Welcome text */}
-            <View>
-              <Text
-                style={{
-                  color: isDark ? "#FFFFFF" : "#17171E",
-                  fontSize: 34,
-                  fontWeight: "800",
-                  letterSpacing: -1,
-                  marginBottom: 8,
-                }}
-              >
-                Welcome to{" "}
-                <Text style={{ color: palette.primary }}>HCB</Text>.
-              </Text>
-              <Text
-                style={{
-                  color: isDark ? "#8b95a5" : "#52606d",
-                  fontSize: 17,
-                  lineHeight: 24,
-                  letterSpacing: -0.2,
-                }}
-              >can
-                Over 5,000 nonprofit projects use HCB to raise money and manage
-                their finances.
-              </Text>
-            </View>
-
-            <Button
-              variant="ghost"
-              onPress={() =>
-                openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
-              }
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 0,
+        {/* Main content */}
+        <View
+          style={{
+            flexDirection: "column",
+            gap: 16,
+            paddingHorizontal: 24,
+            paddingBottom: Platform.OS === "android" ? 20 : 8,
+          }}
+        >
+          {/* Logo */}
+          <Animated.View
+            style={[
+              {
+                opacity: animation,
                 alignSelf: "flex-start",
+                marginBottom: 8,
+                transform: [
+                  {
+                    scale: animation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View
+              style={{
+                borderRadius: 20,
+                overflow: "hidden",
+                ...(Platform.OS === "ios" && {
+                  shadowColor: palette.primary,
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.35,
+                  shadowRadius: 16,
+                }),
               }}
             >
-              <Text
-                style={{
-                  color: palette.primary,
-                  fontSize: 16,
-                  fontWeight: "600",
-                  letterSpacing: -0.2,
-                }}
-              >
-                What's HCB? →
-              </Text>
-            </Button>
-
-            <View style={{ gap: 12, marginTop: 8 }}>
-              <Button
-                variant="primary"
-                onPress={() => setPendingSignup(true)}
-              >
-                Get Started
-              </Button>
-              <Button
-                variant="outline"
-                onPress={() => setPendingSignup(false)}
-                loading={loading}
-              >
-                Log In
-              </Button>
+              <Image
+                source={
+                  isDark
+                    ? require("../../assets/icon.png")
+                    : require("../../assets/icon-light.png")
+                }
+                style={{ width: 72, height: 72 }}
+              />
             </View>
+          </Animated.View>
+
+          {/* Welcome text */}
+          <View>
+            <Text
+              style={{
+                color: isDark ? "#FFFFFF" : "#17171E",
+                fontSize: 34,
+                fontWeight: "800",
+                letterSpacing: -1,
+                marginBottom: 8,
+              }}
+            >
+              Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
+            </Text>
+            <Text
+              style={{
+                color: isDark ? "#8b95a5" : "#52606d",
+                fontSize: 17,
+                lineHeight: 24,
+                letterSpacing: -0.2,
+              }}
+            >
+              can Over 5,000 nonprofit projects use HCB to raise money and
+              manage their finances.
+            </Text>
           </View>
-        </SafeAreaView>
-      </ImageBackground>
+
+          <Button
+            variant="ghost"
+            onPress={() =>
+              openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
+            }
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 0,
+              alignSelf: "flex-start",
+            }}
+          >
+            <Text
+              style={{
+                color: palette.primary,
+                fontSize: 16,
+                fontWeight: "600",
+                letterSpacing: -0.2,
+              }}
+            >
+              What's HCB? →
+            </Text>
+          </Button>
+
+          <View style={{ gap: 12, marginTop: 8 }}>
+            <Button variant="primary" onPress={() => setPendingSignup(true)}>
+              Get Started
+            </Button>
+            <Button
+              variant="outline"
+              onPress={() => setPendingSignup(false)}
+              loading={loading}
+            >
+              Log In
+            </Button>
+          </View>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

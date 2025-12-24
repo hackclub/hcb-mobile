@@ -46,7 +46,9 @@ export default function TapToPayBanner({
   const titleColor = isDark ? "#fff" : "#1f2d3d";
   const subtitleColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)";
   const dismissBg = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
-  const dismissBgPressed = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.12)";
+  const dismissBgPressed = isDark
+    ? "rgba(255,255,255,0.2)"
+    : "rgba(0,0,0,0.12)";
   const dismissIconColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)";
 
   return (

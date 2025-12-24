@@ -97,7 +97,12 @@ const Event = memo(function Event({
           }}
         >
           {invitation && invitation.sender && (
-            <Text style={{ color: isDark ? palette.muted : palette.slate, marginBottom: 3 }}>
+            <Text
+              style={{
+                color: isDark ? palette.muted : palette.slate,
+                marginBottom: 3,
+              }}
+            >
               <Text style={{ fontWeight: "600" }}>
                 {invitation.sender.name}
               </Text>{" "}

@@ -50,7 +50,7 @@ function QRCodeCard({
         shadowOpacity: isDark ? 0.3 : 0.12,
         shadowRadius: 12,
         elevation: 5,
-        marginBottom: 64
+        marginBottom: 64,
       }}
     >
       <QRCodeStyled
@@ -94,9 +94,14 @@ function QRCodeCard({
 function StatusIcon({ status }: { status: string }) {
   const isDark = useIsDark();
   const color = status === "success" ? palette.success : palette.primary;
-  const bgColor = status === "success" 
-    ? isDark ? "rgba(51, 214, 166, 0.15)" : "rgba(51, 214, 166, 0.1)"
-    : isDark ? "rgba(236, 55, 80, 0.15)" : "rgba(236, 55, 80, 0.1)";
+  const bgColor =
+    status === "success"
+      ? isDark
+        ? "rgba(51, 214, 166, 0.15)"
+        : "rgba(51, 214, 166, 0.1)"
+      : isDark
+        ? "rgba(236, 55, 80, 0.15)"
+        : "rgba(236, 55, 80, 0.1)";
 
   return (
     <View
@@ -243,7 +248,9 @@ export default function ProcessDonationPage({
                 width: 100,
                 height: 100,
                 borderRadius: 50,
-                backgroundColor: isDark ? "rgba(236, 55, 80, 0.12)" : "rgba(236, 55, 80, 0.08)",
+                backgroundColor: isDark
+                  ? "rgba(236, 55, 80, 0.12)"
+                  : "rgba(236, 55, 80, 0.08)",
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 24,
@@ -319,7 +326,9 @@ export default function ProcessDonationPage({
                   borderRadius: 12,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                >
                   <Icon glyph="email" size={18} color={palette.muted} />
                   <Text
                     style={{
@@ -387,11 +396,14 @@ export default function ProcessDonationPage({
                       lineHeight: 22,
                     }}
                   >
-                    The payment couldn't be processed. Please try again or use the QR code instead.
+                    The payment couldn't be processed. Please try again or use
+                    the QR code instead.
                   </Text>
                 </>
               )}
-              {showQR && <QRCodeCard donationUrl={donationUrl} amount={donationAmount} />}
+              {showQR && (
+                <QRCodeCard donationUrl={donationUrl} amount={donationAmount} />
+              )}
             </View>
             <ButtonGroup>
               {showQR ? (
@@ -463,7 +475,9 @@ export default function ProcessDonationPage({
                 width: 100,
                 height: 100,
                 borderRadius: 50,
-                backgroundColor: isDark ? "rgba(236, 55, 80, 0.12)" : "rgba(236, 55, 80, 0.08)",
+                backgroundColor: isDark
+                  ? "rgba(236, 55, 80, 0.12)"
+                  : "rgba(236, 55, 80, 0.08)",
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 32,

@@ -86,11 +86,7 @@ export const NoOrganizationsEmptyState = () => {
         >
           You aren't a part of an organization yet.{"\n"}Looking to start one?
         </Text>
-        <Button
-          variant="primary"
-          icon="enter"
-          onPress={handleApply}
-        >
+        <Button variant="primary" icon="enter" onPress={handleApply}>
           Apply to HCB
         </Button>
       </View>

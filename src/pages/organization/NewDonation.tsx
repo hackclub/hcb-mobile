@@ -1,3 +1,4 @@
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -5,7 +6,7 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Text,
   View,
@@ -15,15 +16,12 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../styles/theme";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 type Props = NativeStackScreenProps<StackParamList, "NewDonation">;
 
@@ -34,8 +32,6 @@ export default function NewDonationPage({
   navigation,
 }: Props) {
   const { colors } = useTheme();
-  const isDark = useIsDark();
-  const insets = useSafeAreaInsets();
   const hcb = useClient();
 
   const [amount, setAmount] = useState("$");
@@ -487,4 +483,3 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
     </View>
   );
 };
-

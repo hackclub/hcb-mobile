@@ -51,11 +51,7 @@ export const NoCardsEmptyState = () => {
           }),
         }}
       >
-        <Ionicons
-          name="card-outline"
-          size={48}
-          color={palette.primary}
-        />
+        <Ionicons name="card-outline" size={48} color={palette.primary} />
       </View>
       <Text
         style={{
@@ -81,11 +77,7 @@ export const NoCardsEmptyState = () => {
       >
         Get started by ordering your first card from your organization
       </Text>
-      <Button
-        variant="primary"
-        icon="card"
-        onPress={handleOrderCard}
-      >
+      <Button variant="primary" icon="card" onPress={handleOrderCard}>
         Order a Card
       </Button>
     </View>
