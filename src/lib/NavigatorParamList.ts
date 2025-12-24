@@ -26,6 +26,7 @@ export type StackParamList = {
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
+  NewDonation: { orgId: Organization["id"]; orgSlug: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];

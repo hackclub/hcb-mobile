@@ -29,6 +29,7 @@ import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
 import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
+import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
@@ -250,6 +251,14 @@ export default function Navigator() {
               options={{
                 headerBackTitle: "Back",
                 title: "Collect Donations",
+              }}
+            />
+            <Stack.Screen
+              name="NewDonation"
+              component={NewDonationPage}
+              options={{
+                headerBackTitle: "Back",
+                title: "New Donation",
               }}
             />
             <Stack.Screen
