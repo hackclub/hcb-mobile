@@ -14,9 +14,7 @@ import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
-import Transaction, {
-  TransactionCardCharge,
-} from "../../lib/types/Transaction";
+import Transaction from "../../lib/types/Transaction";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../styles/theme";
