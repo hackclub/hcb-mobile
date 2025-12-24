@@ -25,6 +25,7 @@ export type StackParamList = {
     slug: string;
   };
   OrganizationTeam: { orgId: Organization["id"] };
+  InviteUser: { orgId: Organization["id"]; orgName: string };
   OrganizationDonation: { orgId: Organization["id"] };
   NewDonation: { orgId: Organization["id"]; orgSlug: string };
   Transaction: {

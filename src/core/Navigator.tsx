@@ -29,6 +29,7 @@ import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
 import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
+import InviteUserPage from "../pages/organization/InviteUser";
 import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import OrganizationTeamPage from "../pages/organization/Team";
@@ -243,6 +244,15 @@ export default function Navigator() {
               options={{
                 headerBackTitle: "Back",
                 title: "Team",
+              }}
+            />
+            <Stack.Screen
+              name="InviteUser"
+              component={InviteUserPage}
+              options={{
+                presentation: "modal",
+                headerShown: false,
+                title: "Invite User",
               }}
             />
             <Stack.Screen

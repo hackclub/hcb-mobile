@@ -3,7 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { capitalize } from "lodash";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
@@ -31,6 +31,7 @@ function MemberRole(props: { role: OrgUser["role"] }) {
 }
 
 export default function OrganizationTeamPage({
+  navigation,
   route: {
     params: { orgId },
   },
@@ -65,9 +66,10 @@ export default function OrganizationTeamPage({
           iconSize={28}
           iconOffset={2}
           onPress={() =>
-            Linking.openURL(
-              `https://hcb.hackclub.com/${organization.slug}/invites/new`,
-            )
+            navigation.navigate("InviteUser", {
+              orgId: organization.id,
+              orgName: organization.name,
+            })
           }
         >
           Invite
