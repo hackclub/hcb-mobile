@@ -417,7 +417,7 @@ export default function ReceiptsPage({ navigation }: Props) {
                 backgroundColor: p.sky["500"],
                 paddingHorizontal: 24,
                 paddingVertical: 12,
-                borderRadius: 8,
+                borderRadius: 12,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
