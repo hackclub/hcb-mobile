@@ -133,12 +133,15 @@ function ButtonGroup({
   style?: ViewStyle;
 }) {
   const insets = useSafeAreaInsets();
+  // On Android, safe area insets at bottom are often 0, so add minimum padding
+  const bottomPadding =
+    Platform.OS === "android" ? Math.max(insets.bottom, 48) : insets.bottom;
   return (
     <View
       style={{
         width: "100%",
         position: "absolute",
-        bottom: insets.bottom,
+        bottom: bottomPadding,
         alignItems: "center",
         ...style,
       }}
