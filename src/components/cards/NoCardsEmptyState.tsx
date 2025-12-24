@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Platform } from "react-native";
 
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../styles/theme";
+import Button from "../Button";
 
 type NavigationProp = NativeStackNavigationProp<
   CardsStackParamList,
@@ -14,6 +16,7 @@ type NavigationProp = NativeStackNavigationProp<
 export const NoCardsEmptyState = () => {
   const { colors: themeColors } = useTheme();
   const navigation = useNavigation<NavigationProp>();
+  const isDark = useIsDark();
 
   const handleOrderCard = () => {
     navigation.navigate("OrderCard");
@@ -21,73 +24,70 @@ export const NoCardsEmptyState = () => {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+        backgroundColor: themeColors.background,
+      }}
     >
-      <View style={styles.iconContainer}>
+      <View
+        style={{
+          width: 100,
+          height: 100,
+          borderRadius: 50,
+          backgroundColor: isDark
+            ? "rgba(236, 55, 80, 0.1)"
+            : "rgba(236, 55, 80, 0.08)",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 28,
+          ...(Platform.OS === "ios" && {
+            shadowColor: palette.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+          }),
+        }}
+      >
         <Ionicons
           name="card-outline"
-          size={64}
+          size={48}
           color={palette.primary}
-          style={styles.icon}
         />
       </View>
-      <Text style={[styles.title, { color: themeColors.text }]}>
+      <Text
+        style={{
+          color: themeColors.text,
+          fontSize: 26,
+          fontWeight: "800",
+          marginBottom: 12,
+          textAlign: "center",
+          letterSpacing: -0.5,
+        }}
+      >
         No Cards Yet
       </Text>
-      <Text style={[styles.subtitle, { color: palette.muted }]}>
+      <Text
+        style={{
+          color: isDark ? "#7a8494" : palette.muted,
+          fontSize: 16,
+          textAlign: "center",
+          marginBottom: 32,
+          lineHeight: 24,
+          paddingHorizontal: 20,
+        }}
+      >
         Get started by ordering your first card from your organization
       </Text>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: palette.primary }]}
+      <Button
+        variant="primary"
+        icon="card"
         onPress={handleOrderCard}
-        activeOpacity={0.8}
       >
-        <Text style={styles.buttonText}>Order a Card</Text>
-        <Ionicons name="arrow-forward" size={20} color="#fff" />
-      </TouchableOpacity>
+        Order a Card
+      </Button>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-  },
-  iconContainer: {
-    marginBottom: 24,
-  },
-  icon: {
-    opacity: 0.9,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 24,
-    paddingHorizontal: 16,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    gap: 8,
-    minWidth: 200,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
