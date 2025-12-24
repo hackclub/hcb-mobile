@@ -91,7 +91,9 @@ export default function TransactionPage({
         globalMutate(
           (key) =>
             typeof key === "string" &&
-            key.startsWith(`organizations/${orgId}/transactions/${txnId}`),
+            key.startsWith(
+              `organizations/${transaction?.organization?.id || orgId}/transactions`,
+            ),
         ),
       ]);
     } finally {
