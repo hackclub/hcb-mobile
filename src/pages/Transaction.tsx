@@ -48,7 +48,7 @@ export default function TransactionPage({
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
   //filter in case of deeplink with #commentId
-  const txnId = transactionId.split("#")[0]
+  const txnId = transactionId.split("#")[0];
   const { data: transaction, isLoading } = useOfflineSWR<
     Transaction & { organization?: Organization }
   >(
@@ -58,7 +58,7 @@ export default function TransactionPage({
     { fallbackData: _transaction },
   );
   const { data: comments } = useOfflineSWR<IComment[]>(
-        `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`
+    `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`,
   );
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${orgId || transaction?.organization?.id}`,

@@ -50,9 +50,7 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
   const orgId =
-    params.orgId ||
-    (transaction as Transaction).organization?.id
-    || "";
+    params.orgId || (transaction as Transaction).organization?.id || "";
   const attachReceipt = params.attachReceipt;
 
   const {
