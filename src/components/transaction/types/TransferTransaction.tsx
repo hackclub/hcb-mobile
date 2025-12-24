@@ -83,9 +83,10 @@ export default function TransferTransaction({
             label: "From",
             value: transfer.from.name,
             onPress:
-              userInFromOrg && transfer.from.id != props.orgId
+              (userInFromOrg || user?.auditor) &&
+              transfer.from.id != props.orgId
                 ? () =>
-                    navigation.navigate("Event", {
+                    navigation.push("Event", {
                       orgId: transfer.from.id,
                       organization: transfer.from,
                     })
@@ -95,9 +96,9 @@ export default function TransferTransaction({
             label: "To",
             value: transfer.to.name,
             onPress:
-              userInToOrg && transfer.to.id != props.orgId
+              (userInToOrg || user?.auditor) && transfer.to.id != props.orgId
                 ? () =>
-                    navigation.navigate("Event", {
+                    navigation.push("Event", {
                       orgId: transfer.to.id,
                       organization: transfer.to,
                     })
