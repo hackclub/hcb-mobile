@@ -260,8 +260,8 @@ export default function Login() {
                 letterSpacing: -0.2,
               }}
             >
-              Over 5,000 nonprofit projects use HCB to raise money and
-              manage their finances.
+              Over 5,000 nonprofit projects use HCB to raise money and manage
+              their finances.
             </Text>
           </View>
 
