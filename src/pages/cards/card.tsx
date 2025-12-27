@@ -25,14 +25,11 @@ import CardError from "../../components/cards/CardError";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import CardTransactions from "../../components/cards/CardTransactions";
 import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
-import SetPurposeModal from "../../components/cards/modals/SetPurposeModal";
-import TopupModal from "../../components/cards/modals/TopupModal";
 import WalletModal from "../../components/cards/modals/WalletModal";
 import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
 import Card from "../../lib/types/Card";
-import GrantCard from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -43,10 +40,6 @@ import { palette } from "../../styles/theme";
 import {
   handleActivate,
   handleBurnCard,
-  handleOneTimeUse,
-  handleSetPurpose,
-  handleTopup,
-  returnGrant,
   toggleCardDetails,
   toggleCardFrozen,
 } from "../../utils/cardActions";
@@ -55,7 +48,6 @@ import { normalizeSvg } from "../../utils/util";
 
 type CardPageProps = {
   cardId?: string;
-  grantId?: string;
   card?: Card;
   navigation: NativeStackNavigationProp<CardsStackParamList>;
 };
@@ -68,13 +60,8 @@ export default function CardPage(
   const navigation = "route" in props ? props.navigation : props.navigation;
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
-  const grantId = "route" in props ? props.route.params.grantId : props.grantId;
 
-  const { data: grantCard = _card as GrantCard } = useOfflineSWR<GrantCard>(
-    grantId ? `card_grants/${grantId}` : null,
-    { fallbackData: _card as GrantCard },
-  );
-  const id = _card?.id ?? grantCard?.card_id ?? `crd_${cardId}`;
+  const id = _card?.id ?? `crd_${cardId}`;
   const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
     `cards/${id}`,
     {
@@ -96,9 +83,6 @@ export default function CardPage(
     loading: detailsLoading,
   } = useStripeCardDetails(_card?.id || card?.id || "");
 
-  const isGrantCard =
-    grantCard?.amount_cents != null ||
-    (props as CardPageProps)?.grantId != null;
   const isCardholder = user?.id == card?.user?.id;
   const isManagerOrAdmin =
     organization?.users.some(
@@ -114,14 +98,7 @@ export default function CardPage(
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
-  const [showTopupModal, setShowTopupModal] = useState(false);
-  const [showPurposeModal, setShowPurposeModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const [purposeText, setPurposeText] = useState("");
-  const [isSettingPurpose, setIsSettingPurpose] = useState(false);
-  const [isOneTimeUse, setIsOneTimeUse] = useState(false);
-  const [topupAmount, setTopupAmount] = useState("");
-  const [isToppingUp, setIsToppingUp] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
   const [pattern, setPattern] = useState<string>();
@@ -232,6 +209,7 @@ export default function CardPage(
     cardAddedToWallet,
     isDark,
     themeColors.text,
+    card?.status,
   ]);
 
   useEffect(() => {
@@ -297,7 +275,6 @@ export default function CardPage(
     try {
       await mutate(`cards/${card?.id}`);
       await mutateTransactions();
-      await mutate(`card_grants/${grantId}`);
       setCardError(null);
       setTransactionError(null);
     } catch (err) {
@@ -305,7 +282,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, mutateTransactions, grantId]);
+  }, [mutate, card?.id, mutateTransactions]);
 
   useEffect(() => {
     Animated.loop(
@@ -345,7 +322,6 @@ export default function CardPage(
   });
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
-  const [isReturningGrant, setisReturningGrant] = useState(false);
 
   useEffect(() => {
     const generateCardPattern = async () => {
@@ -381,60 +357,53 @@ export default function CardPage(
     generateCardPattern();
   }, [card, isVirtualCard]);
 
-  const canTopupCard = (card: Card | undefined) => {
-    if (!card || !card.status) return false;
-    return card.status !== "canceled" && card.status !== "expired";
-  };
-
   function getCardActionButtons() {
     const buttons = [];
 
     // Add activate/freeze button
-    if (!isGrantCard || isManagerOrAdmin) {
-      if (!isVirtualCard && card?.status === "inactive") {
-        buttons.push(
-          <Button
-            key="activate"
-            style={{
-              backgroundColor: palette.primary,
-              borderTopWidth: 0,
-              borderRadius: 12,
-            }}
-            color="white"
-            iconColor="white"
-            iconSize={32}
-            icon="rep"
-            onPress={() => setShowActivateModal(true)}
-          >
-            Activate Card
-          </Button>,
-        );
-      } else if (isCardholder || isManagerOrAdmin) {
-        buttons.push(
-          <Button
-            key="freeze"
-            style={{
-              backgroundColor: "#71C5E7",
-              borderTopWidth: 0,
-              borderRadius: 12,
-            }}
-            color="#186177"
-            iconColor="#186177"
-            icon="freeze"
-            onPress={() =>
-              toggleCardFrozen(
-                card as Card,
-                setIsUpdatingStatus,
-                onSuccessfulStatusChange,
-                hcb,
-              )
-            }
-            loading={!!isUpdatingStatus}
-          >
-            {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
-          </Button>,
-        );
-      }
+    if (!isVirtualCard && card?.status === "inactive") {
+      buttons.push(
+        <Button
+          key="activate"
+          style={{
+            backgroundColor: palette.primary,
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="white"
+          iconColor="white"
+          iconSize={32}
+          icon="rep"
+          onPress={() => setShowActivateModal(true)}
+        >
+          Activate Card
+        </Button>,
+      );
+    } else if (isCardholder || isManagerOrAdmin) {
+      buttons.push(
+        <Button
+          key="freeze"
+          style={{
+            backgroundColor: "#71C5E7",
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="#186177"
+          iconColor="#186177"
+          icon="freeze"
+          onPress={() =>
+            toggleCardFrozen(
+              card as Card,
+              setIsUpdatingStatus,
+              onSuccessfulStatusChange,
+              hcb,
+            )
+          }
+          loading={!!isUpdatingStatus}
+        >
+          {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
+        </Button>,
+      );
     }
 
     if (
@@ -466,108 +435,7 @@ export default function CardPage(
       );
     }
 
-    // Add top up button
-    if (isGrantCard && isManagerOrAdmin && canTopupCard(card)) {
-      buttons.push(
-        <Button
-          key="topup"
-          style={{
-            backgroundColor: "#3499EE",
-            borderTopWidth: 0,
-            borderRadius: 12,
-          }}
-          color="white"
-          iconColor="white"
-          icon="plus"
-          onPress={() => setShowTopupModal(true)}
-        >
-          Topup
-        </Button>,
-      );
-    }
-
-    // Add one time button
-    if (isGrantCard && isManagerOrAdmin) {
-      buttons.push(
-        <Button
-          icon="private"
-          key="one-time"
-          style={{
-            backgroundColor: "#415E84",
-          }}
-          onPress={() =>
-            handleOneTimeUse(
-              card as Card,
-              setIsOneTimeUse,
-              mutate,
-              hcb,
-              grantId as string,
-              grantCard as GrantCard,
-            )
-          }
-          loading={isOneTimeUse}
-        >
-          One Time Use
-        </Button>,
-      );
-    }
-
-    if (isGrantCard && isManagerOrAdmin) {
-      buttons.push(
-        <Button
-          icon="edit"
-          key="edit-purpose"
-          color="#114F3D"
-          style={{
-            backgroundColor: "#50ECC0",
-          }}
-          onPress={() => {
-            setPurposeText("");
-            setShowPurposeModal(true);
-          }}
-        >
-          Set Purpose
-        </Button>,
-      );
-    }
-
-    // Add grant button
-    if (
-      isGrantCard &&
-      _card?.status != "canceled" &&
-      (isCardholder || isManagerOrAdmin)
-    ) {
-      buttons.push(
-        <Button
-          key="grant"
-          style={{
-            backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
-            borderTopWidth: 0,
-            borderRadius: 12,
-          }}
-          color="white"
-          iconColor="white"
-          icon={!isCardholder ? "reply" : "support"}
-          onPress={() =>
-            returnGrant(
-              card as Card,
-              isCardholder,
-              grantCard as GrantCard,
-              setisReturningGrant,
-              mutate,
-              hcb,
-              grantId as string,
-              navigation,
-            )
-          }
-          loading={!!isReturningGrant}
-        >
-          {!isCardholder ? "Cancel Grant" : "Return Grant"}
-        </Button>,
-      );
-    }
-
-    if ((isManagerOrAdmin || isCardholder) && !isGrantCard) {
+    if (isManagerOrAdmin || isCardholder) {
       buttons.push(
         <Button
           icon="fire"
@@ -651,8 +519,7 @@ export default function CardPage(
         {card && (
           <CardDisplay
             card={card}
-            grantCard={grantCard}
-            isGrantCard={isGrantCard}
+            isGrantCard={false}
             cardExpanded={cardExpanded}
             setCardExpanded={setCardExpanded}
             details={details}
@@ -700,8 +567,7 @@ export default function CardPage(
         {card && (
           <CardDetails
             card={card}
-            grantCard={grantCard}
-            isGrantCard={isGrantCard}
+            isGrantCard={false}
             isCardholder={isCardholder}
             cardName={cardName}
             details={details}
@@ -745,52 +611,6 @@ export default function CardPage(
         last4={last4}
         setLast4={setLast4}
         activating={activating}
-      />
-
-      <TopupModal
-        visible={showTopupModal}
-        onClose={() => {
-          setShowTopupModal(false);
-          setTopupAmount("");
-        }}
-        onTopup={() =>
-          handleTopup(
-            topupAmount,
-            card as Card,
-            grantId as string,
-            setIsToppingUp,
-            setTopupAmount,
-            setShowTopupModal,
-            mutate,
-            hcb,
-          )
-        }
-        topupAmount={topupAmount}
-        setTopupAmount={setTopupAmount}
-        isToppingUp={isToppingUp}
-      />
-
-      <SetPurposeModal
-        visible={showPurposeModal}
-        onClose={() => {
-          setShowPurposeModal(false);
-          setPurposeText("");
-        }}
-        onSetPurpose={() =>
-          handleSetPurpose(
-            card as Card,
-            setIsSettingPurpose,
-            setPurposeText,
-            setShowPurposeModal,
-            mutate,
-            hcb,
-            grantId || "",
-            purposeText,
-          )
-        }
-        purposeText={purposeText}
-        setPurposeText={setPurposeText}
-        isSettingPurpose={isSettingPurpose}
       />
 
       <WalletModal
