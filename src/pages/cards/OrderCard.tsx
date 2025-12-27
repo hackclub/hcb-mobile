@@ -561,7 +561,7 @@ export default function OrderCardScreen({ navigation }: Props) {
             <Text
               style={{ textDecorationLine: "underline" }}
               onPress={() =>
-                Linking.openURL("https://www.stripe.com/cardholder-terms")
+                Linking.openURL("https://stripe.com/legal/issuing/celtic-authorized-user-terms")
               }
             >
               cardholder terms
