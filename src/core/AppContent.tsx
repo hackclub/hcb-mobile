@@ -122,10 +122,7 @@ export default function AppContent({
     }
 
     if (!tokens?.accessToken) {
-      console.log(
-        "No access token available, skipping Stripe Terminal token fetch",
-      );
-      throw new Error("Authentication required for Stripe Terminal connection");
+      return "";
     }
 
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {

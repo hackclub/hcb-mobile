@@ -86,6 +86,13 @@ const authConfig = useMemo(
     setStatusBar();
   }, [isDark]);
 
+  const codeVerifierRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (request?.codeVerifier) {
+      codeVerifierRef.current = request.codeVerifier;
+    }
+  }, [request?.codeVerifier]);
+
   useEffect(() => {
     if (!response || isProcessing) return;
 
@@ -95,6 +102,12 @@ const authConfig = useMemo(
     if (processedResponseRef.current === responseKey) return;
 
     if (response.type === "success") {
+      const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
+      if (!codeVerifier) {
+        console.error("No code verifier available for token exchange");
+        return;
+      }
+
       processedResponseRef.current = responseKey;
       setIsProcessing(true);
       setLoading(true);
@@ -103,7 +116,7 @@ const authConfig = useMemo(
           clientId,
           redirectUri,
           code: response.params.code,
-          extraParams: { code_verifier: request!.codeVerifier! },
+          extraParams: { code_verifier: codeVerifier },
         },
         discovery,
       )
@@ -121,30 +134,22 @@ const authConfig = useMemo(
             refreshToken: r.refreshToken || "",
             expiresAt,
             createdAt: Date.now(),
-            codeVerifier: request?.codeVerifier,
+            codeVerifier: codeVerifier,
           };
 
           setTokens(tokens);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setLoading(false);
           setIsProcessing(false);
-          processedResponseRef.current = null;
         })
         .catch((error) => {
           console.error("Error exchanging code for token", error, {
-            authCode: request?.codeChallenge,
+            authCode: response.params.code,
           });
           setLoading(false);
           setIsProcessing(false);
-          processedResponseRef.current = null;
         });
     }
-
-    return () => {
-      if (response.type === "success") {
-        processedResponseRef.current = responseKey;
-      }
-    };
   }, [response, request, setTokens, isProcessing]);
 
   const doPrompt = async () => {
