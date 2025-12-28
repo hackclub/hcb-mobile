@@ -203,6 +203,9 @@ export default function OrganizationDonationPage({
 
       setCurrentProgress(null);
       if (error) {
+        if ((error as { code?: string }).code == "AlreadyConnectedToReader") {
+          return true;
+        }
         console.error("connectReader error", error, {
           context: { orgId, action: "connect_reader" },
         });
