@@ -247,15 +247,17 @@ export default function CardsPage({ navigation }: Props) {
       ...(transformedGrantCards || []),
     ];
 
-    // Sort cards by status
+    const statusOrder: Record<string, number> = {
+      active: 0,
+      inactive: 1,
+      frozen: 2,
+      canceled: 3,
+      expired: 4,
+    };
     combinedCards.sort((a, b) => {
-      if (a.status == "active" && b.status != "active") {
-        return -1;
-      } else if (a.status != "active" && b.status == "active") {
-        return 1;
-      } else {
-        return 0;
-      }
+      const orderA = statusOrder[a.status] ?? 5;
+      const orderB = statusOrder[b.status] ?? 5;
+      return orderA - orderB;
     });
 
     // Update state
