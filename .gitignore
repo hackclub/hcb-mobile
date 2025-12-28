@@ -27,4 +27,5 @@ android/
 .env.local
 .env
 
-src/lib/yellowpages/
+src/lib/yellowpages/data.json
+src/lib/yellowpages/.last-updated

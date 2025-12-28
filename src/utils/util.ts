@@ -87,9 +87,7 @@ export function organizationOrderEqual(a: Organization[], b: Organization[]) {
   return true;
 }
 
-export const formatMerchantNames = (
-  merchantIds: string[] | undefined,
-) => {
+export const formatMerchantNames = (merchantIds: string[] | undefined) => {
   if (!merchantIds || merchantIds.length === 0) {
     return "All";
   }
@@ -123,9 +121,7 @@ export const formatMerchantNames = (
   }
 };
 
-export const formatCategoryNames = (
-  categoryIds: string[] | undefined,
-) => {
+export const formatCategoryNames = (categoryIds: string[] | undefined) => {
   if (!categoryIds || categoryIds.length === 0) {
     return "All";
   }
