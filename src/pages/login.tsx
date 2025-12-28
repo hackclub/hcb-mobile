@@ -36,7 +36,7 @@ export default function Login() {
 
   const signupParam = pendingSignup ?? false;
 
-const authConfig = useMemo(
+  const authConfig = useMemo(
     () => ({
       clientId,
       redirectUri,
