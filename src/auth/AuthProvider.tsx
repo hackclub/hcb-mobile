@@ -161,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const currentCodeVerifier = tokens?.codeVerifier;
     const clientId = process.env.EXPO_PUBLIC_CLIENT_ID;
 
-    refreshPromise = (async () => {
+    return (refreshPromise = (async () => {
       try {
         if (!currentRefreshToken) {
           console.warn("Cannot refresh token: No refresh token available");
@@ -335,9 +335,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // new callers from trying to use an already-resolved promise
         refreshPromise = null;
       }
-    })();
-
-    return refreshPromise;
+    })());
   };
 
   if (isLoading) {
