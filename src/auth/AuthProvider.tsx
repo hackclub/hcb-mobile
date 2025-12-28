@@ -178,9 +178,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false };
       }
 
-      console.log("Client ID:", process.env.EXPO_PUBLIC_CLIENT_ID);
-      console.log("Redirect URI:", redirectUri);
-
       console.log("Refreshing access token...");
 
       // Create the refresh promise and ensure it's cleared when done
@@ -248,14 +245,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   }
                 }
 
-                // Retry on network/server errors via loop continuation
                 if (shouldRetry && attempt < MAX_RETRIES) {
                   const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
                   console.log(
                     `Token refresh failed with retryable error, retrying in ${delay}ms...`,
                   );
                   await new Promise((resolve) => setTimeout(resolve, delay));
-                  continue; // Retry via loop, not recursion
+                  continue;
                 }
 
                 if (
@@ -283,12 +279,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   },
                 );
 
-                // Retry on malformed responses via loop continuation
                 if (attempt < MAX_RETRIES) {
                   const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
                   console.log(`Malformed response, retrying in ${delay}ms...`);
                   await new Promise((resolve) => setTimeout(resolve, delay));
-                  continue; // Retry via loop, not recursion
+                  continue;
                 }
 
                 lastError = new Error("Invalid token response from server");
@@ -311,7 +306,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
               return { success: true, newTokens };
             } catch (error) {
-              // Check if it's a network error
               const isNetworkError =
                 error instanceof TypeError ||
                 (error instanceof Error &&
@@ -325,7 +319,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   `Network error during token refresh, retrying in ${delay}ms...`,
                 );
                 await new Promise((resolve) => setTimeout(resolve, delay));
-                continue; // Retry via loop, not recursion
+                continue;
               }
 
               console.error("Token refresh failed", error, {
@@ -333,7 +327,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 attempt,
               });
 
-              // Only force logout if it's not a network/temporary error
               if (!isNetworkError) {
                 await forceLogout();
               }
@@ -344,7 +337,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
 
-          // All retries exhausted
           if (lastError) {
             console.error("Token refresh failed after all retries", lastError);
           }
@@ -357,14 +349,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       })();
 
-      // Simply return the promise - it will be cleared in the finally block
       return refreshPromise;
     } catch (error) {
       console.error("Error initiating token refresh", error, {
         action: "token_refresh_init",
       });
       refreshPromise = null;
-      refreshPromiseCreationInProgress = false;
       return { success: false };
     }
   };
