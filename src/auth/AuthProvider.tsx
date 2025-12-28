@@ -152,211 +152,192 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 1000;
 
-    try {
-      // Check if refresh is already in progress
-      if (refreshPromise) {
-        console.log(
-          "Token refresh already in progress, using existing promise",
-        );
-        return refreshPromise;
-      }
+    if (refreshPromise) {
+      console.log("Token refresh already in progress, using existing promise");
+      return refreshPromise;
+    }
 
-      if (!tokens?.refreshToken) {
-        console.warn("Cannot refresh token: No refresh token available");
-        await forceLogout();
-        return { success: false };
-      }
+    const currentRefreshToken = tokens?.refreshToken;
+    const currentCodeVerifier = tokens?.codeVerifier;
+    const clientId = process.env.EXPO_PUBLIC_CLIENT_ID;
 
-      // Validate client ID
-      if (!process.env.EXPO_PUBLIC_CLIENT_ID) {
-        console.error(
-          "Cannot refresh token: EXPO_PUBLIC_CLIENT_ID environment variable is not set",
-          new Error("Missing CLIENT_ID"),
-          { action: "token_refresh", missing_env: "EXPO_PUBLIC_CLIENT_ID" },
-        );
-        await forceLogout();
-        return { success: false };
-      }
+    refreshPromise = (async () => {
+      try {
+        if (!currentRefreshToken) {
+          console.warn("Cannot refresh token: No refresh token available");
+          await forceLogout();
+          return { success: false };
+        }
 
-      console.log("Refreshing access token...");
+        console.log("Refreshing access token...");
 
-      // Create the refresh promise and ensure it's cleared when done
-      refreshPromise = (async () => {
-        try {
-          let lastError: Error | null = null;
+        let lastError: Error | null = null;
 
-          for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-            try {
-              if (attempt > 0) {
-                console.log(
-                  `Retry attempt ${attempt}/${MAX_RETRIES} for token refresh`,
-                );
-              }
-
-              const formBody = `grant_type=refresh_token&client_id=${encodeURIComponent(process.env.EXPO_PUBLIC_CLIENT_ID!)}&refresh_token=${encodeURIComponent(tokens.refreshToken)}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(tokens.codeVerifier ?? "")}`;
-
-              console.log("Attempting refresh with body:", formBody);
-
-              const response = await fetch(
-                `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                  },
-                  body: formBody,
-                },
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            if (attempt > 0) {
+              console.log(
+                `Retry attempt ${attempt}/${MAX_RETRIES} for token refresh`,
               );
+            }
 
-              if (!response.ok) {
-                const errorBody = await response.text();
-                let shouldRetry = false;
-                let errorJson: { error?: string } | null = null;
+            const formBody = `grant_type=refresh_token&client_id=${encodeURIComponent(clientId)}&refresh_token=${encodeURIComponent(currentRefreshToken)}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(currentCodeVerifier ?? "")}`;
 
-                try {
-                  errorJson = JSON.parse(errorBody);
-                  console.error(
-                    "Token refresh error details",
-                    new Error(errorJson?.error || "Unknown error"),
-                    {
-                      action: "token_refresh",
-                      errorDetails: errorJson,
-                      statusCode: response.status,
-                    },
-                  );
+            console.log("Attempting refresh with body:", formBody);
 
-                  if (errorJson?.error === "invalid_grant") {
-                    console.log(
-                      "Refresh token is invalid or already used - forcing logout",
-                    );
-                    await forceLogout();
-                    return { success: false };
-                  }
+            const response = await fetch(
+              `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: formBody,
+              },
+            );
 
-                  // Retry on server errors or rate limiting
-                  shouldRetry =
-                    response.status >= 500 ||
-                    response.status === 429 ||
-                    response.status === 503;
-                } catch (e) {
-                  shouldRetry = true;
-                  if (!(e instanceof SyntaxError)) {
-                    Sentry.captureException(e);
-                  }
-                }
+            if (!response.ok) {
+              const errorBody = await response.text();
+              let shouldRetry = false;
+              let errorJson: { error?: string } | null = null;
 
-                if (shouldRetry && attempt < MAX_RETRIES) {
-                  const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
-                  console.log(
-                    `Token refresh failed with retryable error, retrying in ${delay}ms...`,
-                  );
-                  await new Promise((resolve) => setTimeout(resolve, delay));
-                  continue;
-                }
-
-                if (
-                  errorJson?.error === "invalid_client" ||
-                  errorJson?.error === "unauthorized_client"
-                ) {
-                  await forceLogout();
-                }
-
-                lastError = new Error(
-                  `Failed to refresh token: ${response.status} ${response.statusText}`,
-                );
-                break;
-              }
-
-              const data = await response.json();
-
-              if (!data.access_token || !data.refresh_token) {
+              try {
+                errorJson = JSON.parse(errorBody);
                 console.error(
-                  "Invalid token response from server",
-                  new Error("Missing tokens"),
+                  "Token refresh error details",
+                  new Error(errorJson?.error || "Unknown error"),
                   {
                     action: "token_refresh",
-                    response_data: data,
+                    errorDetails: errorJson,
+                    statusCode: response.status,
                   },
                 );
 
-                if (attempt < MAX_RETRIES) {
-                  const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
-                  console.log(`Malformed response, retrying in ${delay}ms...`);
-                  await new Promise((resolve) => setTimeout(resolve, delay));
-                  continue;
+                if (errorJson?.error === "invalid_grant") {
+                  console.log(
+                    "Refresh token is invalid or already used - forcing logout",
+                  );
+                  await forceLogout();
+                  return { success: false };
                 }
 
-                lastError = new Error("Invalid token response from server");
-                break;
+                // Retry on server errors or rate limiting
+                shouldRetry =
+                  response.status >= 500 ||
+                  response.status === 429 ||
+                  response.status === 503;
+              } catch (e) {
+                shouldRetry = true;
+                if (!(e instanceof SyntaxError)) {
+                  Sentry.captureException(e);
+                }
               }
 
-              const expiresAt = Date.now() + (data.expires_in || 7200) * 1000;
-
-              const newTokens = {
-                accessToken: data.access_token,
-                refreshToken: data.refresh_token,
-                expiresAt,
-                createdAt: Date.now(),
-                codeVerifier: tokens.codeVerifier,
-              };
-
-              await setTokens(newTokens);
-
-              console.log("Token refreshed successfully");
-
-              return { success: true, newTokens };
-            } catch (error) {
-              const isNetworkError =
-                error instanceof TypeError ||
-                (error instanceof Error &&
-                  (error.message.includes("network") ||
-                    error.message.includes("fetch") ||
-                    error.message.includes("Failed to fetch")));
-
-              if (isNetworkError && attempt < MAX_RETRIES) {
+              if (shouldRetry && attempt < MAX_RETRIES) {
                 const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
                 console.log(
-                  `Network error during token refresh, retrying in ${delay}ms...`,
+                  `Token refresh failed with retryable error, retrying in ${delay}ms...`,
                 );
                 await new Promise((resolve) => setTimeout(resolve, delay));
                 continue;
               }
 
-              console.error("Token refresh failed", error, {
-                action: "token_refresh",
-                attempt,
-              });
-
-              if (!isNetworkError) {
+              if (
+                errorJson?.error === "invalid_client" ||
+                errorJson?.error === "unauthorized_client"
+              ) {
                 await forceLogout();
               }
 
-              lastError =
-                error instanceof Error ? error : new Error(String(error));
+              lastError = new Error(
+                `Failed to refresh token: ${response.status} ${response.statusText}`,
+              );
               break;
             }
-          }
 
-          if (lastError) {
-            console.error("Token refresh failed after all retries", lastError);
+            const data = await response.json();
+
+            if (!data.access_token || !data.refresh_token) {
+              console.error(
+                "Invalid token response from server",
+                new Error("Missing tokens"),
+                {
+                  action: "token_refresh",
+                  response_data: data,
+                },
+              );
+
+              if (attempt < MAX_RETRIES) {
+                const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
+                console.log(`Malformed response, retrying in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+                continue;
+              }
+
+              lastError = new Error("Invalid token response from server");
+              break;
+            }
+
+            const expiresAt = Date.now() + (data.expires_in || 7200) * 1000;
+
+            const newTokens = {
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token,
+              expiresAt,
+              createdAt: Date.now(),
+              codeVerifier: currentCodeVerifier,
+            };
+
+            await setTokens(newTokens);
+
+            console.log("Token refreshed successfully");
+
+            return { success: true, newTokens };
+          } catch (error) {
+            const isNetworkError =
+              error instanceof TypeError ||
+              (error instanceof Error &&
+                (error.message.includes("network") ||
+                  error.message.includes("fetch") ||
+                  error.message.includes("Failed to fetch")));
+
+            if (isNetworkError && attempt < MAX_RETRIES) {
+              const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
+              console.log(
+                `Network error during token refresh, retrying in ${delay}ms...`,
+              );
+              await new Promise((resolve) => setTimeout(resolve, delay));
+              continue;
+            }
+
+            console.error("Token refresh failed", error, {
+              action: "token_refresh",
+              attempt,
+            });
+
+            if (!isNetworkError) {
+              await forceLogout();
+            }
+
+            lastError =
+              error instanceof Error ? error : new Error(String(error));
+            break;
           }
-          return { success: false };
-        } finally {
-          // Clear the promise immediately when it completes (success or failure)
-          // This ensures all concurrent callers get the same result, and prevents
-          // new callers from trying to use an already-resolved promise
-          refreshPromise = null;
         }
-      })();
 
-      return refreshPromise;
-    } catch (error) {
-      console.error("Error initiating token refresh", error, {
-        action: "token_refresh_init",
-      });
-      refreshPromise = null;
-      return { success: false };
-    }
+        if (lastError) {
+          console.error("Token refresh failed after all retries", lastError);
+        }
+        return { success: false };
+      } finally {
+        // Clear the promise immediately when it completes (success or failure)
+        // This ensures all concurrent callers get the same result, and prevents
+        // new callers from trying to use an already-resolved promise
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
   };
 
   if (isLoading) {
