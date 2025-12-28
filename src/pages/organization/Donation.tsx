@@ -203,7 +203,11 @@ export default function OrganizationDonationPage({
 
       setCurrentProgress(null);
       if (error) {
-        if ((error as { code?: string }).code == "AlreadyConnectedToReader") {
+        if (
+          (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+          (error as { code?: string }).code ==
+            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+        ) {
           return true;
         }
         console.error("connectReader error", error, {
@@ -220,7 +224,11 @@ export default function OrganizationDonationPage({
       setCurrentProgress(null);
       return true;
     } catch (error) {
-      if ((error as { code?: string }).code == "AlreadyConnectedToReader") {
+      if (
+        (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+        (error as { code?: string }).code ==
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+      ) {
         return true;
       }
       console.error("connectReader error", error, {
