@@ -26,3 +26,6 @@ ios/
 android/
 .env.local
 .env
+
+src/lib/yellowpages/data.json
+src/lib/yellowpages/.last-updated

@@ -1,5 +1,6 @@
-import { Category, Merchant } from "@thedev132/yellowpages";
 import { useEffect, useState } from "react";
+
+import { Merchant } from "./yellowpages";
 
 let isInitialized = false;
 let initializationPromise: Promise<void> | null = null;
@@ -14,8 +15,6 @@ async function initializeMerchant() {
 
   initializationPromise = (async () => {
     try {
-      await Merchant.initialize();
-      await Category.initialize();
       isInitialized = true;
     } catch (error) {
       console.error("Error initializing merchant library", error, {
@@ -59,7 +58,7 @@ export function useMerchantIcon(
 
       try {
         const merchant = Merchant.lookup({ networkId });
-        const merchantIcon = await merchant.getIcon();
+        const merchantIcon = merchant.getIcon();
 
         iconCache.set(networkId, merchantIcon);
         setIcon(merchantIcon);
