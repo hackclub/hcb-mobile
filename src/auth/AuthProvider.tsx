@@ -18,9 +18,6 @@ let refreshPromise: Promise<{
   newTokens?: AuthTokens;
 }> | null = null;
 
-// Track if we're in the process of creating a new refresh promise
-let refreshPromiseCreationInProgress = false;
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokensState] = useState<AuthTokens | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,53 +152,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 1000;
 
-    try {
-      // Wait for refreshPromiseCreationInProgress to become false, but only up to a timeout
-      const WAIT_TIMEOUT_MS = 5000;
-      const WAIT_INTERVAL_MS = 50;
-      let waited = 0;
-      while (refreshPromiseCreationInProgress && waited < WAIT_TIMEOUT_MS) {
-        console.log("Another caller is creating refresh promise, waiting...");
-        await new Promise((resolve) => setTimeout(resolve, WAIT_INTERVAL_MS));
-        waited += WAIT_INTERVAL_MS;
-      }
-      if (refreshPromiseCreationInProgress) {
-        console.error(
-          "Timeout waiting for refreshPromiseCreationInProgress to become false",
-        );
-        return { success: false };
-      }
-      if (refreshPromise) {
-        console.log(
-          "Token refresh already in progress, using existing promise",
-        );
-        return refreshPromise;
-      }
+    if (refreshPromise) {
+      console.log("Token refresh already in progress, using existing promise");
+      return refreshPromise;
+    }
 
-      if (!tokens?.refreshToken) {
-        console.warn("Cannot refresh token: No refresh token available");
-        await forceLogout();
-        return { success: false };
-      }
+    const currentRefreshToken = tokens?.refreshToken;
+    const currentCodeVerifier = tokens?.codeVerifier;
+    const clientId = process.env.EXPO_PUBLIC_CLIENT_ID;
 
-      // Validate client ID
-      if (!process.env.EXPO_PUBLIC_CLIENT_ID) {
-        console.error(
-          "Cannot refresh token: EXPO_PUBLIC_CLIENT_ID environment variable is not set",
-          new Error("Missing CLIENT_ID"),
-          { action: "token_refresh", missing_env: "EXPO_PUBLIC_CLIENT_ID" },
-        );
-        await forceLogout();
-        return { success: false };
-      }
+    return (refreshPromise = (async () => {
+      try {
+        if (!currentRefreshToken) {
+          console.warn("Cannot refresh token: No refresh token available");
+          await forceLogout();
+          return { success: false };
+        }
 
-      console.log("Client ID:", process.env.EXPO_PUBLIC_CLIENT_ID);
-      console.log("Redirect URI:", redirectUri);
+        console.log("Refreshing access token...");
 
-      console.log("Refreshing access token...");
-      refreshPromiseCreationInProgress = true;
-
-      refreshPromise = (async () => {
         let lastError: Error | null = null;
 
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -212,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               );
             }
 
-            const formBody = `grant_type=refresh_token&client_id=${encodeURIComponent(process.env.EXPO_PUBLIC_CLIENT_ID!)}&refresh_token=${encodeURIComponent(tokens.refreshToken)}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(tokens.codeVerifier ?? "")}`;
+            const formBody = `grant_type=refresh_token&client_id=${encodeURIComponent(clientId)}&refresh_token=${encodeURIComponent(currentRefreshToken)}&redirect_uri=${encodeURIComponent(redirectUri)}&code_verifier=${encodeURIComponent(currentCodeVerifier ?? "")}`;
 
             console.log("Attempting refresh with body:", formBody);
 
@@ -248,7 +217,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   console.log(
                     "Refresh token is invalid or already used - forcing logout",
                   );
-                  refreshPromiseCreationInProgress = false;
                   await forceLogout();
                   return { success: false };
                 }
@@ -265,14 +233,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }
 
-              // Retry on network/server errors via loop continuation
               if (shouldRetry && attempt < MAX_RETRIES) {
                 const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
                 console.log(
                   `Token refresh failed with retryable error, retrying in ${delay}ms...`,
                 );
                 await new Promise((resolve) => setTimeout(resolve, delay));
-                continue; // Retry via loop, not recursion
+                continue;
               }
 
               if (
@@ -300,12 +267,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 },
               );
 
-              // Retry on malformed responses via loop continuation
               if (attempt < MAX_RETRIES) {
                 const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
                 console.log(`Malformed response, retrying in ${delay}ms...`);
                 await new Promise((resolve) => setTimeout(resolve, delay));
-                continue; // Retry via loop, not recursion
+                continue;
               }
 
               lastError = new Error("Invalid token response from server");
@@ -319,7 +285,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               refreshToken: data.refresh_token,
               expiresAt,
               createdAt: Date.now(),
-              codeVerifier: tokens.codeVerifier,
+              codeVerifier: currentCodeVerifier,
             };
 
             await setTokens(newTokens);
@@ -328,7 +294,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return { success: true, newTokens };
           } catch (error) {
-            // Check if it's a network error
             const isNetworkError =
               error instanceof TypeError ||
               (error instanceof Error &&
@@ -342,7 +307,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 `Network error during token refresh, retrying in ${delay}ms...`,
               );
               await new Promise((resolve) => setTimeout(resolve, delay));
-              continue; // Retry via loop, not recursion
+              continue;
             }
 
             console.error("Token refresh failed", error, {
@@ -350,9 +315,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               attempt,
             });
 
-            // Only force logout if it's not a network/temporary error
             if (!isNetworkError) {
-              refreshPromiseCreationInProgress = false;
               await forceLogout();
             }
 
@@ -362,26 +325,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // All retries exhausted
         if (lastError) {
           console.error("Token refresh failed after all retries", lastError);
         }
         return { success: false };
-      })();
-
-      const result = await refreshPromise;
-      refreshPromise = null;
-      refreshPromiseCreationInProgress = false;
-
-      return result;
-    } catch (error) {
-      console.error("Error initiating token refresh", error, {
-        action: "token_refresh_init",
-      });
-      refreshPromise = null;
-      refreshPromiseCreationInProgress = false;
-      return { success: false };
-    }
+      } finally {
+        // Clear the promise immediately when it completes (success or failure)
+        // This ensures all concurrent callers get the same result, and prevents
+        // new callers from trying to use an already-resolved promise
+        refreshPromise = null;
+      }
+    })());
   };
 
   if (isLoading) {
