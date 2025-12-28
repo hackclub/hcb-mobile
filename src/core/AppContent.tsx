@@ -93,6 +93,7 @@ export default function AppContent({
   const isBiometricAuthInProgress = useRef(false);
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
+  const refreshPendingRef = useRef(false);
   const hcb = useClient();
 
   useUpdateMonitor();
@@ -366,13 +367,28 @@ export default function AppContent({
         tokens.expiresAt <= now + 5 * 60 * 1000 &&
         tokens.expiresAt > now + 2 * 60 * 1000
       ) {
+        if (refreshPendingRef.current) {
+          console.log(
+            "Token refresh already pending in this component, skipping duplicate preemptive refresh",
+          );
+          return;
+        }
         console.log("Preemptively refreshing token before it expires");
-        refreshAccessToken().catch((error) => {
-          console.error("Failed to preemptively refresh token", error);
-        });
+        refreshPendingRef.current = true;
+        refreshAccessToken()
+          .catch((error) => {
+            console.error("Failed to preemptively refresh token", error);
+          })
+          .finally(() => {
+            refreshPendingRef.current = false;
+          });
+      } else {
+        // Reset the flag to allow preemptive refresh when token becomes near expiry again
+        refreshPendingRef.current = false;
       }
     } else {
       console.log("Token state updated - user is logged out");
+      refreshPendingRef.current = false;
     }
   }, [refreshAccessToken, tokens]);
 
@@ -398,9 +414,10 @@ export default function AppContent({
             screens: {
               Invitation: "invites/:inviteId",
               Transaction: {
-                path: "hcb/:transactionId",
+                path: "hcb/:transactionId/:attachReceipt?",
                 parse: {
                   transactionId: (id) => `txn_${id}`,
+                  attachReceipt: (attachReceipt) => attachReceipt,
                 },
               },
               Event: ":orgId",

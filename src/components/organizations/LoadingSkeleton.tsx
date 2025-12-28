@@ -1,21 +1,45 @@
 import { useTheme } from "@react-navigation/native";
-import { View } from "react-native";
+import { useEffect, useRef } from "react";
+import { View, Animated } from "react-native";
 
 export const LoadingSkeleton = () => {
   const { colors: themeColors } = useTheme();
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [shimmerAnim]);
+
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 0.8],
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {[1, 2, 3, 4, 5].map((section) => (
-        <View key={section} style={{ marginBottom: 24 }}>
-          <View
+      {[1, 2, 3, 4].map((section) => (
+        <View key={section} style={{ marginBottom: 20 }}>
+          <Animated.View
             style={{
               height: 14,
               backgroundColor: themeColors.border,
               borderRadius: 4,
               width: "25%",
               marginBottom: 12,
-              marginLeft: 10,
+              opacity: shimmerOpacity,
             }}
           />
 

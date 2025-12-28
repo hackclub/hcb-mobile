@@ -9,7 +9,7 @@ import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Text, View, Animated, useColorScheme } from "react-native";
+import { Text, View, Animated, useColorScheme, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../auth/auth";
@@ -156,7 +156,7 @@ const authConfig = useMemo(
     if (isPrompting) return;
     setIsPrompting(true);
     try {
-      await promptAsync();
+      await promptAsync({ createTask: false });
     } finally {
       setIsPrompting(false);
       setPendingSignup(null);
@@ -202,18 +202,22 @@ const authConfig = useMemo(
           }}
         ></View>
 
+        {/* Main content */}
         <View
           style={{
             flexDirection: "column",
-            gap: 12,
-            paddingHorizontal: 20,
+            gap: 16,
+            paddingHorizontal: 24,
+            paddingBottom: Platform.OS === "android" ? 20 : 8,
           }}
         >
+          {/* Logo */}
           <Animated.View
             style={[
               {
                 opacity: animation,
                 alignSelf: "flex-start",
+                marginBottom: 8,
                 transform: [
                   {
                     scale: animation.interpolate({
@@ -225,40 +229,54 @@ const authConfig = useMemo(
               },
             ]}
           >
-            <Image
-              source={
-                isDark
-                  ? require("../../assets/icon.png")
-                  : require("../../assets/icon-light.png")
-              }
-              style={{ width: 80, height: 80 }}
-            />
+            <View
+              style={{
+                borderRadius: 20,
+                overflow: "hidden",
+                ...(Platform.OS === "ios" && {
+                  shadowColor: palette.primary,
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowOpacity: 0.35,
+                  shadowRadius: 16,
+                }),
+              }}
+            >
+              <Image
+                source={
+                  isDark
+                    ? require("../../assets/icon.png")
+                    : require("../../assets/icon-light.png")
+                }
+                style={{ width: 72, height: 72 }}
+              />
+            </View>
           </Animated.View>
 
-          <Text
-            style={{
-              color: isDark ? "#FFFFFF" : "#17171E",
-              textAlign: "center",
-              fontSize: 36,
-              fontWeight: "bold",
-              fontFamily: "sans-serif",
-              alignSelf: "flex-start",
-            }}
-          >
-            Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
-          </Text>
-          <Text
-            style={{
-              color: isDark ? palette.muted : "#3C4858",
-              textAlign: "left",
-              fontSize: 16,
-              fontFamily: "sans-serif",
-              lineHeight: 22,
-            }}
-          >
-            Over 5,000 nonprofit projects use HCB to raise money and manage
-            their finances.
-          </Text>
+          {/* Welcome text */}
+          <View>
+            <Text
+              style={{
+                color: isDark ? "#FFFFFF" : "#17171E",
+                fontSize: 34,
+                fontWeight: "800",
+                letterSpacing: -1,
+                marginBottom: 8,
+              }}
+            >
+              Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
+            </Text>
+            <Text
+              style={{
+                color: isDark ? "#8b95a5" : "#52606d",
+                fontSize: 17,
+                lineHeight: 24,
+                letterSpacing: -0.2,
+              }}
+            >
+              Over 5,000 nonprofit projects use HCB to raise money and manage
+              their finances.
+            </Text>
+          </View>
 
           <Button
             variant="ghost"
@@ -266,7 +284,6 @@ const authConfig = useMemo(
               openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
             }
             style={{
-              borderWidth: 0,
               paddingVertical: 8,
               paddingHorizontal: 0,
               alignSelf: "flex-start",
@@ -274,35 +291,28 @@ const authConfig = useMemo(
           >
             <Text
               style={{
-                color: isDark ? "#FFFFFF" : "#17171E",
+                color: palette.primary,
                 fontSize: 16,
-                fontWeight: "bold",
-                fontFamily: "sans-serif",
+                fontWeight: "600",
+                letterSpacing: -0.2,
               }}
             >
               What's HCB? →
             </Text>
           </Button>
-          <Button
-            variant="outline"
-            onPress={() => setPendingSignup(false)}
-            loading={loading}
-          >
-            Log in
-          </Button>
-          <Button
-            variant="primary"
-            onPress={() => setPendingSignup(true)}
-            style={{
-              backgroundColor: palette.primary,
-              borderWidth: 0,
-              borderRadius: 12,
-              paddingVertical: 16,
-              paddingHorizontal: 20,
-            }}
-          >
-            Sign up
-          </Button>
+
+          <View style={{ gap: 12, marginTop: 8 }}>
+            <Button variant="primary" onPress={() => setPendingSignup(true)}>
+              Get Started
+            </Button>
+            <Button
+              variant="outline"
+              onPress={() => setPendingSignup(false)}
+              loading={loading}
+            >
+              Log In
+            </Button>
+          </View>
         </View>
       </SafeAreaView>
     </ImageBackground>

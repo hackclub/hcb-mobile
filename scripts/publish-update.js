@@ -18,6 +18,13 @@ const appConfigPath = path.join(__dirname, "..", "app.config.js");
 const backupPath = path.join(__dirname, "..", "app.config.backup.js");
 
 try {
+  // Bundle yellowpages data before publishing update
+  console.log("📦 Bundling yellow_pages data...");
+  execSync("node scripts/bundle-yellowpages.js", {
+    stdio: "inherit",
+    env: { ...process.env },
+  });
+
   const appConfigContent = fs.readFileSync(appConfigPath, "utf8");
   fs.writeFileSync(backupPath, appConfigContent);
   console.log("✅ Backed up app.config.js");

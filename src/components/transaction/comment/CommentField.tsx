@@ -1,4 +1,5 @@
 import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { useState } from "react";
 import {
   View,
@@ -153,7 +154,8 @@ export default function CommentField({
               borderColor: "#ff8c37",
               borderStyle: "dashed",
               borderRadius: 8,
-              padding: 12,
+              paddingVertical: 6,
+              paddingHorizontal: 12,
               backgroundColor: "#ff8c3710",
             }}
           >
@@ -167,27 +169,11 @@ export default function CommentField({
             >
               Admin only comment
             </Text>
-            <View
-              style={{
-                width: 22,
-                height: 22,
-                borderWidth: 2,
-                borderColor: "#ff8c37",
-                borderRadius: 4,
-                backgroundColor: adminOnly ? "#ff8c37" : "transparent",
-                alignItems: "center",
-                justifyContent: "center",
-                marginLeft: 12,
-              }}
-            >
-              {adminOnly && (
-                <Text
-                  style={{ color: "white", fontSize: 14, fontWeight: "bold" }}
-                >
-                  ✓
-                </Text>
-              )}
-            </View>
+            <Icon
+              glyph={adminOnly ? "checkmark" : "checkbox"}
+              color="#ff8c37"
+              size={32}
+            />
           </Pressable>
         ))}
 

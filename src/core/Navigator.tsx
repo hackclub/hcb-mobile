@@ -29,6 +29,7 @@ import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
 import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
+import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
@@ -253,6 +254,14 @@ export default function Navigator() {
               }}
             />
             <Stack.Screen
+              name="NewDonation"
+              component={NewDonationPage}
+              options={{
+                headerBackTitle: "Back",
+                title: "New Donation",
+              }}
+            />
+            <Stack.Screen
               name="ProcessDonation"
               component={ProcessDonationPage}
               options={{
@@ -375,6 +384,15 @@ export default function Navigator() {
                 headerShown: false,
                 animation: "slide_from_bottom",
               }}
+            />
+            <ReceiptsStack.Screen
+              name="ReceiptTransaction"
+              component={TransactionPage}
+              options={({ route }) => ({
+                headerBackTitle: "Back",
+                title:
+                  (route.params as { title?: string })?.title || "Transaction",
+              })}
             />
           </ReceiptsStack.Navigator>
         )}

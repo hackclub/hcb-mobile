@@ -96,7 +96,7 @@ function TransactionIcon({
   }
 
   if (transactionIcon(transaction) == "wise") {
-    return <WiseIcon color={iconColor} size={20} />;
+    return <WiseIcon color={iconColor} size={22} />;
   }
 
   return (
@@ -104,7 +104,7 @@ function TransactionIcon({
       // @ts-expect-error it is checked above
       glyph={transactionIcon(transaction)}
       color={iconColor}
-      size={20}
+      size={22}
     />
   );
 }
@@ -171,10 +171,11 @@ function Transaction({
     <View
       style={StyleSheet.compose(
         {
-          padding: 10,
+          paddingVertical: 14,
+          paddingHorizontal: 12,
           flexDirection: "row",
           alignItems: "center",
-          gap: 10,
+          gap: 12,
           backgroundColor,
           borderTopLeftRadius: top ? 8 : 0,
           borderTopRightRadius: top ? 8 : 0,

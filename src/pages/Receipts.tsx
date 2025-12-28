@@ -40,6 +40,7 @@ function OrganizationSection({
   onComplete,
   onUpload,
   onSelect,
+  onPress,
 }: {
   organization: Organization;
   transactions: (TransactionCardCharge & { organization: Organization })[];
@@ -48,6 +49,9 @@ function OrganizationSection({
     transaction: TransactionCardCharge & { organization: Organization },
   ) => void;
   onSelect: (
+    transaction: TransactionCardCharge & { organization: Organization },
+  ) => void;
+  onPress: (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => void;
 }) {
@@ -93,6 +97,7 @@ function OrganizationSection({
           onComplete={onComplete}
           _onUpload={onUpload}
           onSelect={onSelect}
+          onPress={onPress}
         />
       ))}
     </View>
@@ -262,6 +267,17 @@ export default function ReceiptsPage({ navigation }: Props) {
     });
   };
 
+  const handleTransactionPress = (
+    transaction: TransactionCardCharge & { organization: Organization },
+  ) => {
+    navigation.navigate("ReceiptTransaction", {
+      transactionId: transaction.id,
+      orgId: transaction.organization.id,
+      transaction: transaction,
+      title: transaction.memo,
+    });
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView
@@ -401,7 +417,7 @@ export default function ReceiptsPage({ navigation }: Props) {
                 backgroundColor: p.sky["500"],
                 paddingHorizontal: 24,
                 paddingVertical: 12,
-                borderRadius: 8,
+                borderRadius: 12,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
@@ -468,6 +484,7 @@ export default function ReceiptsPage({ navigation }: Props) {
                 onComplete={() => mutate()}
                 onUpload={handleTransactionUpload}
                 onSelect={handleTransactionSelect}
+                onPress={handleTransactionPress}
               />
             ))}
           </View>

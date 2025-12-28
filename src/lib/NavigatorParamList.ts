@@ -26,11 +26,13 @@ export type StackParamList = {
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
+  NewDonation: { orgId: Organization["id"]; orgSlug: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
     transaction?: Transaction;
     title?: string;
+    attachReceipt?: string;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
@@ -60,12 +62,18 @@ export type ReceiptsStackParamList = {
   ReceiptSelectionModal: {
     transaction: Transaction & { organization: Organization };
   };
+  ReceiptTransaction: {
+    transactionId: Transaction["id"];
+    orgId?: Organization["id"];
+    transaction?: Transaction;
+    title?: string;
+  };
 };
 
 export type TabParamList = {
   Home: NavigatorScreenParams<StackParamList>;
   Cards: NavigatorScreenParams<CardsStackParamList>;
-  Receipts: undefined;
+  Receipts: NavigatorScreenParams<ReceiptsStackParamList>;
   Settings: undefined;
 };
 
