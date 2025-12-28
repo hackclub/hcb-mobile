@@ -26,3 +26,5 @@ ios/
 android/
 .env.local
 .env
+
+src/lib/yellowpages/

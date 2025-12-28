@@ -1,6 +1,5 @@
 import { MenuAction } from "@react-native-menu/menu";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Merchant, Category } from "@thedev132/yellowpages";
 import words from "lodash/words";
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 
@@ -11,6 +10,7 @@ import ITransaction, {
   TransactionWithoutId,
 } from "../lib/types/Transaction";
 import User from "../lib/types/User";
+import { Merchant, Category } from "../lib/yellowpages";
 import { palette } from "../styles/theme";
 
 export function renderMoney(cents: number) {
@@ -87,7 +87,7 @@ export function organizationOrderEqual(a: Organization[], b: Organization[]) {
   return true;
 }
 
-export const formatMerchantNames = async (
+export const formatMerchantNames = (
   merchantIds: string[] | undefined,
 ) => {
   if (!merchantIds || merchantIds.length === 0) {
@@ -95,8 +95,6 @@ export const formatMerchantNames = async (
   }
 
   try {
-    await Merchant.initialize();
-
     const merchantNames: string[] = [];
     const validIds = merchantIds.filter((id): id is string => !!id);
     const unnamedCount = validIds.filter((id) => {
@@ -125,10 +123,9 @@ export const formatMerchantNames = async (
   }
 };
 
-export const formatCategoryNames = async (
+export const formatCategoryNames = (
   categoryIds: string[] | undefined,
 ) => {
-  await Category.initialize();
   if (!categoryIds || categoryIds.length === 0) {
     return "All";
   }
