@@ -3,7 +3,6 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
 
-import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
 import Transaction from "../../lib/types/Transaction";
@@ -17,7 +16,8 @@ interface CardTransactionsProps {
   isLoadingMore: boolean;
   card: Card;
   _card: Card;
-  navigation: NativeStackNavigationProp<CardsStackParamList>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  navigation: NativeStackNavigationProp<any>;
 }
 
 export default function CardTransactions({
