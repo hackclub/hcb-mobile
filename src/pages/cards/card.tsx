@@ -390,51 +390,49 @@ export default function CardPage(
     const buttons = [];
 
     // Add activate/freeze button
-    if (!isGrantCard || isManagerOrAdmin) {
-      if (!isVirtualCard && card?.status === "inactive") {
-        buttons.push(
-          <Button
-            key="activate"
-            style={{
-              backgroundColor: palette.primary,
-              borderTopWidth: 0,
-              borderRadius: 12,
-            }}
-            color="white"
-            iconColor="white"
-            iconSize={32}
-            icon="rep"
-            onPress={() => setShowActivateModal(true)}
-          >
-            Activate Card
-          </Button>,
-        );
-      } else if (isCardholder || isManagerOrAdmin) {
-        buttons.push(
-          <Button
-            key="freeze"
-            style={{
-              backgroundColor: "#71C5E7",
-              borderTopWidth: 0,
-              borderRadius: 12,
-            }}
-            color="#186177"
-            iconColor="#186177"
-            icon="freeze"
-            onPress={() =>
-              toggleCardFrozen(
-                card as Card,
-                setIsUpdatingStatus,
-                onSuccessfulStatusChange,
-                hcb,
-              )
-            }
-            loading={!!isUpdatingStatus}
-          >
-            {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
-          </Button>,
-        );
-      }
+    if (!isVirtualCard && card?.status === "inactive") {
+      buttons.push(
+        <Button
+          key="activate"
+          style={{
+            backgroundColor: palette.primary,
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="white"
+          iconColor="white"
+          iconSize={32}
+          icon="rep"
+          onPress={() => setShowActivateModal(true)}
+        >
+          Activate Card
+        </Button>,
+      );
+    } else if (isCardholder || isManagerOrAdmin) {
+      buttons.push(
+        <Button
+          key="freeze"
+          style={{
+            backgroundColor: "#71C5E7",
+            borderTopWidth: 0,
+            borderRadius: 12,
+          }}
+          color="#186177"
+          iconColor="#186177"
+          icon="freeze"
+          onPress={() =>
+            toggleCardFrozen(
+              card as Card,
+              setIsUpdatingStatus,
+              onSuccessfulStatusChange,
+              hcb,
+            )
+          }
+          loading={!!isUpdatingStatus}
+        >
+          {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
+        </Button>,
+      );
     }
 
     if (
