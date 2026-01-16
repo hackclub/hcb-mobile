@@ -235,7 +235,10 @@ export default function AppContent({
     setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if (lastAuthenticatedToken.current === tokens.accessToken) {
+        if (
+          lastAuthenticatedToken.current === tokens.accessToken &&
+          hasPassedBiometrics.current
+        ) {
           console.log(
             "Already authenticated for this token, skipping biometric auth",
           );
@@ -314,27 +317,9 @@ export default function AppContent({
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
           } else {
-            if (result.error !== "system_cancel") {
-              console.error(
-                "Biometric authentication failed",
-                new Error(result.error || "Authentication failed"),
-                {
-                  context: {
-                    action: "biometric_auth",
-                    errorType: result.error,
-                  },
-                },
-              );
-              // Clear tokens to fully log out the user
-              hasPassedBiometrics.current = false;
-              await setTokenResponse(null);
-              setIsAuthenticated(false);
-            } else {
-              console.log("Biometric authentication cancelled by user");
-              hasPassedBiometrics.current = false;
-              await setTokenResponse(null);
-              setIsAuthenticated(false);
-            }
+            hasPassedBiometrics.current = false;
+            lastAuthenticatedToken.current = null;
+            setIsAuthenticated(false);
           }
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -343,7 +328,7 @@ export default function AppContent({
             context: { action: "biometric_auth" },
           });
           hasPassedBiometrics.current = false;
-          await setTokenResponse(null);
+          lastAuthenticatedToken.current = null;
           setIsAuthenticated(false);
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;

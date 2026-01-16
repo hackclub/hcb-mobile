@@ -32,6 +32,7 @@ import ExpensePayoutTransaction from "../components/transaction/types/ExpensePay
 import InvoiceTransaction from "../components/transaction/types/InvoiceTransaction";
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
+import WiseTransaction from "../components/transaction/types/WiseTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
@@ -184,6 +185,7 @@ export default function TransactionPage({
           .with({ transfer: P.any },               (tx) => <TransferTransaction     transaction={tx} {...transactionViewProps} />)
           .with({ donation: P.any },               (tx) => <DonationTransaction     transaction={tx} {...transactionViewProps} />)
           .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction  transaction={tx} {...transactionViewProps} />)
+          .with({ wise_transfer: P.any },          (tx) => <WiseTransaction         transaction={tx} {...transactionViewProps} />)
           .with({ check_deposit: P.any },          (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
           .with({ invoice: P.any },                (tx) => <InvoiceTransaction      transaction={tx} {...transactionViewProps} />)
           .with({ expense_payout: P.any },         (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
