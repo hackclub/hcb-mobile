@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth/auth";
+import { getAccessToken } from "../../../auth/tokenUtils";
 import { showAlert } from "../../../lib/alertUtils";
 import { OrganizationExpanded } from "../../../lib/types/Organization";
 import { useIsDark } from "../../../lib/useColorScheme";
@@ -31,7 +32,10 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { colors: themeColors } = useTheme();
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
-  const { tokens } = useContext(AuthContext);
+  const { tokenResponse } = useContext(AuthContext);
+
+  // Extract accessToken for backward compatibility
+  const accessToken = getAccessToken(tokenResponse);
   const { isOnline, withOfflineCheck } = useOffline();
   const isDark = useIsDark();
 
@@ -67,7 +71,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${tokens?.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

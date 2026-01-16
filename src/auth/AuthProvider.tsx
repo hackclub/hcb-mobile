@@ -1,64 +1,112 @@
-import * as Sentry from "@sentry/react-native";
-import { makeRedirectUri } from "expo-auth-session";
+import {
+  refreshAsync,
+  revokeAsync,
+  TokenResponse,
+  type DiscoveryDocument,
+} from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
-import AuthContext, { AuthTokens } from "./auth";
+import AuthContext from "./auth";
+import { migrateLegacyTokens, clearLegacyTokens } from "./migration";
 
-const ACCESS_TOKEN_KEY = "auth_access_token";
-const REFRESH_TOKEN_KEY = "auth_refresh_token";
-const EXPIRES_AT_KEY = "auth_expires_at";
+const TOKEN_RESPONSE_KEY = "auth_token_response";
 const CODE_VERIFIER_KEY = "auth_code_verifier";
-const TOKEN_CREATED_AT_KEY = "auth_token_created_at";
 
-const redirectUri = makeRedirectUri({ scheme: "hcb" });
+const discovery: DiscoveryDocument = {
+  authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
+  tokenEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
+  revocationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/revoke`,
+};
 
 let refreshPromise: Promise<{
   success: boolean;
-  newTokens?: AuthTokens;
+  newTokenResponse?: TokenResponse;
 }> | null = null;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [tokens, setTokensState] = useState<AuthTokens | null>(null);
+  const [tokenResponse, setTokenResponseState] = useState<TokenResponse | null>(
+    null,
+  );
+  const [codeVerifier, setCodeVerifierState] = useState<string | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadTokens = async () => {
+    const loadTokenResponse = async () => {
       try {
-        const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
-        const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
-        const expiresAtStr = await SecureStore.getItemAsync(EXPIRES_AT_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
-        const createdAtStr = await SecureStore.getItemAsync(
-          TOKEN_CREATED_AT_KEY,
+        // Try new format first
+        const tokenResponseStr = await SecureStore.getItemAsync(
+          TOKEN_RESPONSE_KEY,
           {
             keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
           },
         );
-        const codeVerifier = await SecureStore.getItemAsync(CODE_VERIFIER_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
+        const codeVerifierStr = await SecureStore.getItemAsync(
+          CODE_VERIFIER_KEY,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
 
-        if (accessToken && refreshToken && expiresAtStr) {
-          const expiresAt = parseInt(expiresAtStr, 10);
-          const createdAt = createdAtStr
-            ? parseInt(createdAtStr, 10)
-            : Date.now();
-          setTokensState({
-            accessToken,
-            refreshToken,
-            expiresAt,
-            createdAt,
-            codeVerifier: codeVerifier || undefined,
-          });
+        if (tokenResponseStr) {
+          try {
+            const tokenData = JSON.parse(tokenResponseStr);
+            const loadedTokenResponse = new TokenResponse(tokenData);
+            setTokenResponseState(loadedTokenResponse);
+            if (codeVerifierStr) {
+              setCodeVerifierState(codeVerifierStr);
+            }
+            setIsLoading(false);
+            return;
+          } catch (parseError) {
+            console.error("Failed to parse stored token response", parseError, {
+              action: "token_parse",
+            });
+            // Clear invalid token data
+            await SecureStore.deleteItemAsync(TOKEN_RESPONSE_KEY);
+            await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
+          }
+        }
+
+        // Migrate from legacy format if new format not found
+        const migration = await migrateLegacyTokens();
+        if (migration.tokenResponse) {
+          setTokenResponseState(migration.tokenResponse);
+          if (migration.codeVerifier) {
+            setCodeVerifierState(migration.codeVerifier);
+          }
+
+          // Save in new format and clean up legacy keys
+          const tokenData = {
+            accessToken: migration.tokenResponse.accessToken,
+            refreshToken: migration.tokenResponse.refreshToken,
+            expiresIn: migration.tokenResponse.expiresIn,
+            issuedAt: migration.tokenResponse.issuedAt,
+            tokenType: migration.tokenResponse.tokenType,
+            scope: migration.tokenResponse.scope,
+          };
+          await SecureStore.setItemAsync(
+            TOKEN_RESPONSE_KEY,
+            JSON.stringify(tokenData),
+            {
+              keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+            },
+          );
+          if (migration.codeVerifier) {
+            await SecureStore.setItemAsync(
+              CODE_VERIFIER_KEY,
+              migration.codeVerifier,
+              {
+                keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+              },
+            );
+          }
+          await clearLegacyTokens();
         }
       } catch (error) {
-        console.error("Failed to load auth tokens", error, {
+        console.error("Failed to load auth token response", error, {
           action: "token_load",
         });
       } finally {
@@ -66,281 +114,139 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    loadTokens();
+    loadTokenResponse();
   }, []);
 
-  const setTokens = async (newTokens: AuthTokens | null) => {
+  const setTokenResponse = async (
+    newTokenResponse: TokenResponse | null,
+    newCodeVerifier?: string,
+  ) => {
     try {
-      if (newTokens) {
+      if (newTokenResponse) {
+        const tokenData = {
+          accessToken: newTokenResponse.accessToken,
+          refreshToken: newTokenResponse.refreshToken,
+          expiresIn: newTokenResponse.expiresIn,
+          issuedAt: newTokenResponse.issuedAt,
+          tokenType: newTokenResponse.tokenType,
+          scope: newTokenResponse.scope,
+        };
         await SecureStore.setItemAsync(
-          ACCESS_TOKEN_KEY,
-          newTokens.accessToken,
+          TOKEN_RESPONSE_KEY,
+          JSON.stringify(tokenData),
           {
             keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
           },
         );
-        await SecureStore.setItemAsync(
-          REFRESH_TOKEN_KEY,
-          newTokens.refreshToken,
-          {
+        if (newCodeVerifier) {
+          await SecureStore.setItemAsync(CODE_VERIFIER_KEY, newCodeVerifier, {
             keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-          },
-        );
-        await SecureStore.setItemAsync(
-          EXPIRES_AT_KEY,
-          newTokens.expiresAt.toString(),
-          {
-            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-          },
-        );
-        await SecureStore.setItemAsync(
-          TOKEN_CREATED_AT_KEY,
-          newTokens.createdAt.toString(),
-          {
-            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-          },
-        );
-        if (newTokens.codeVerifier) {
-          await SecureStore.setItemAsync(
-            CODE_VERIFIER_KEY,
-            newTokens.codeVerifier,
-            {
-              keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-            },
-          );
+          });
+          setCodeVerifierState(newCodeVerifier);
         }
-        setTokensState(newTokens);
+        setTokenResponseState(newTokenResponse);
       } else {
-        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-        await SecureStore.deleteItemAsync(EXPIRES_AT_KEY);
-        await SecureStore.deleteItemAsync(TOKEN_CREATED_AT_KEY);
+        await SecureStore.deleteItemAsync(TOKEN_RESPONSE_KEY);
         await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
-        setTokensState(null);
+        setTokenResponseState(null);
+        setCodeVerifierState(undefined);
       }
     } catch (error) {
-      console.error("Failed to save auth tokens", error, {
+      console.error("Failed to save auth token response", error, {
         action: "token_save",
       });
     }
   };
 
-  // Force logout - ensure all tokens are cleared and state is consistent
   const forceLogout = async () => {
-    console.log("Forcing logout due to auth failure");
-    try {
-      await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-      await SecureStore.deleteItemAsync(EXPIRES_AT_KEY);
-      await SecureStore.deleteItemAsync(TOKEN_CREATED_AT_KEY);
-      await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
-
-      setTokensState(null);
-
-      refreshPromise = null;
-    } catch (error) {
-      console.error("Error during forced logout", error, {
-        context: { action: "forced_logout" },
-      });
+    if (tokenResponse?.refreshToken) {
+      try {
+        await revokeAsync(
+          {
+            clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+            token: tokenResponse.refreshToken,
+          },
+          discovery,
+        );
+      } catch {
+        // Ignore - we still want to clear local state
+      }
     }
+    await setTokenResponse(null);
+    refreshPromise = null;
   };
 
   const refreshAccessToken = async (): Promise<{
     success: boolean;
-    newTokens?: AuthTokens;
+    newTokenResponse?: TokenResponse;
   }> => {
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY_MS = 1000;
+    if (refreshPromise) return refreshPromise;
 
-    if (refreshPromise) {
-      console.log("Token refresh already in progress, using existing promise");
-      return refreshPromise;
+    const currentRefreshToken = tokenResponse?.refreshToken;
+    const currentCodeVerifier = codeVerifier;
+
+    if (!currentRefreshToken) {
+      await forceLogout();
+      return { success: false };
     }
-
-    const currentRefreshToken = tokens?.refreshToken;
-    const currentCodeVerifier = tokens?.codeVerifier;
-    const clientId = process.env.EXPO_PUBLIC_CLIENT_ID;
 
     return (refreshPromise = (async () => {
       try {
-        if (!currentRefreshToken) {
-          console.warn("Cannot refresh token: No refresh token available");
+        const result = await refreshAsync(
+          {
+            clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+            refreshToken: currentRefreshToken,
+          },
+          discovery,
+        );
+
+        if (!result.accessToken || !result.refreshToken) {
           await forceLogout();
           return { success: false };
         }
 
-        console.log("Refreshing access token...");
-        let lastError: Error | null = null;
-        let hasSuccessfulRefresh = false;
+        await setTokenResponse(result, currentCodeVerifier);
+        return { success: true, newTokenResponse: result };
+      } catch (error: unknown) {
+        const oauthError = (error as { error?: string })?.error;
 
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-          try {
-            if (attempt > 0) {
-              console.log(
-                `Retry attempt ${attempt}/${MAX_RETRIES} for token refresh`,
-              );
-            }
-
-            const formBody = `grant_type=refresh_token&client_id=${encodeURIComponent(clientId)}&refresh_token=${encodeURIComponent(currentRefreshToken)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-
-            console.log("Attempting refresh with body:", formBody);
-
-            const response = await fetch(
-              `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: formBody,
-              },
-            );
-
-            if (!response.ok) {
-              const errorBody = await response.text();
-              let shouldRetry = false;
-              let errorJson: { error?: string } | null = null;
-
-              try {
-                errorJson = JSON.parse(errorBody);
-                console.error(
-                  "Token refresh error details",
-                  new Error(errorJson?.error || "Unknown error"),
-                  {
-                    action: "token_refresh",
-                    errorDetails: errorJson,
-                    statusCode: response.status,
-                  },
-                );
-
-                if (errorJson?.error === "invalid_grant") {
-                  if (hasSuccessfulRefresh) {
-                    console.log(
-                      "Refresh token is invalid or already used, but we already successfully refreshed - not forcing logout",
-                    );
-                    return { success: true };
-                  }
-                  console.log(
-                    "Refresh token is invalid or already used - forcing logout",
-                  );
-                  await forceLogout();
-                  return { success: false };
-                }
-
-                // Retry on server errors or rate limiting
-                shouldRetry =
-                  response.status >= 500 ||
-                  response.status === 429 ||
-                  response.status === 503;
-              } catch (e) {
-                shouldRetry = true;
-                if (!(e instanceof SyntaxError)) {
-                  Sentry.captureException(e);
-                }
-              }
-
-              if (shouldRetry && attempt < MAX_RETRIES) {
-                const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
-                console.log(
-                  `Token refresh failed with retryable error, retrying in ${delay}ms...`,
-                );
-                await new Promise((resolve) => setTimeout(resolve, delay));
-                continue;
-              }
-
-              if (
-                errorJson?.error === "invalid_client" ||
-                errorJson?.error === "unauthorized_client"
-              ) {
-                await forceLogout();
-              }
-
-              lastError = new Error(
-                `Failed to refresh token: ${response.status} ${response.statusText}`,
-              );
-              break;
-            }
-
-            const data = await response.json();
-
-            if (!data.access_token || !data.refresh_token) {
-              console.error(
-                "Invalid token response from server",
-                new Error("Missing tokens"),
-                {
-                  action: "token_refresh",
-                  response_data: data,
-                },
-              );
-
-              if (attempt < MAX_RETRIES) {
-                const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
-                console.log(`Malformed response, retrying in ${delay}ms...`);
-                await new Promise((resolve) => setTimeout(resolve, delay));
-                continue;
-              }
-
-              lastError = new Error("Invalid token response from server");
-              break;
-            }
-
-            const expiresAt = Date.now() + (data.expires_in || 7200) * 1000;
-
-            const newTokens = {
-              accessToken: data.access_token,
-              refreshToken: data.refresh_token,
-              expiresAt,
-              createdAt: Date.now(),
-              codeVerifier: currentCodeVerifier,
-            };
-
-            await setTokens(newTokens);
-
-            console.log("Token refreshed successfully");
-            hasSuccessfulRefresh = true;
-
-            return { success: true, newTokens };
-          } catch (error) {
-            const isNetworkError =
-              error instanceof TypeError ||
-              (error instanceof Error &&
-                (error.message.includes("network") ||
-                  error.message.includes("fetch") ||
-                  error.message.includes("Failed to fetch")));
-
-            if (isNetworkError && attempt < MAX_RETRIES) {
-              const delay = RETRY_DELAY_MS * Math.pow(2, attempt);
-              console.log(
-                `Network error during token refresh, retrying in ${delay}ms...`,
-              );
-              await new Promise((resolve) => setTimeout(resolve, delay));
-              continue;
-            }
-
-            console.error("Token refresh failed", error, {
-              action: "token_refresh",
-              attempt,
-            });
-
-            if (!isNetworkError) {
-              await forceLogout();
-            }
-
-            lastError =
-              error instanceof Error ? error : new Error(String(error));
-            break;
-          }
+        if (
+          oauthError === "invalid_grant" ||
+          oauthError === "invalid_client" ||
+          oauthError === "unauthorized_client"
+        ) {
+          await forceLogout();
+          return { success: false };
         }
 
-        if (lastError) {
-          console.error("Token refresh failed after all retries", lastError);
-        }
+        console.error("Token refresh failed", error);
         return { success: false };
       } finally {
         refreshPromise = null;
       }
     })());
   };
+
+  const shouldRefreshToken = useCallback(
+    (leewaySeconds: number = 300): boolean => {
+      if (!tokenResponse) return false;
+
+      try {
+        if (tokenResponse.shouldRefresh()) return true;
+
+        if (tokenResponse.expiresIn && tokenResponse.issuedAt) {
+          const expiresAt =
+            (tokenResponse.issuedAt + tokenResponse.expiresIn) * 1000;
+          return expiresAt <= Date.now() + leewaySeconds * 1000;
+        }
+
+        return false;
+      } catch {
+        return false;
+      }
+    },
+    [tokenResponse],
+  );
 
   if (isLoading) {
     return null;
@@ -349,9 +255,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        tokens,
-        setTokens,
+        tokenResponse,
+        codeVerifier,
+        setTokenResponse,
         refreshAccessToken,
+        shouldRefreshToken,
       }}
     >
       {children}

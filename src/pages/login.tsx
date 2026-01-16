@@ -59,7 +59,7 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
 
-  const { setTokens } = useContext(AuthContext);
+  const { setTokenResponse } = useContext(AuthContext);
   const isDark = useIsDark();
 
   const openInAppBrowser = async (url: string) => {
@@ -127,17 +127,8 @@ export default function Login() {
             console.warn("No refresh token received from authorization server");
           }
 
-          const expiresAt = Date.now() + (r.expiresIn || 7200) * 1000;
-
-          const tokens = {
-            accessToken: r.accessToken,
-            refreshToken: r.refreshToken || "",
-            expiresAt,
-            createdAt: Date.now(),
-            codeVerifier: codeVerifier,
-          };
-
-          setTokens(tokens);
+          // Use TokenResponse directly from expo-auth-session
+          setTokenResponse(r, codeVerifier);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setLoading(false);
           setIsProcessing(false);
@@ -150,7 +141,7 @@ export default function Login() {
           setIsProcessing(false);
         });
     }
-  }, [response, request, setTokens, isProcessing]);
+  }, [response, request, setTokenResponse, isProcessing]);
 
   const doPrompt = async () => {
     if (isPrompting) return;
