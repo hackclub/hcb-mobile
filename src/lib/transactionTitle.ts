@@ -23,6 +23,10 @@ export function getTransactionTitle(transaction: Transaction): string {
       (tx) => `Donation of ${renderMoney(Math.abs(tx.amount_cents))}`,
     )
     .with(
+      { wise_transfer: {} },
+      (tx) => `Wise Transfer of ${renderMoney(Math.abs(tx.amount_cents))}`,
+    )
+    .with(
       { ach_transfer: {} },
       (tx) => `ACH Transfer of ${renderMoney(Math.abs(tx.amount_cents))}`,
     )
