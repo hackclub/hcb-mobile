@@ -12,9 +12,9 @@ interface QueuedRequest {
 }
 
 export default function useClient() {
-  const { tokens, refreshAccessToken } = useContext(AuthContext);
+  const { tokenResponse, refreshAccessToken } = useContext(AuthContext);
 
-  const tokensRef = useRef(tokens);
+  const tokenResponseRef = useRef(tokenResponse);
   const refreshAccessTokenRef = useRef(refreshAccessToken);
   const clientRef = useRef<ReturnType<typeof ky.create> | null>(null);
   const queuedRequestsRef = useRef<QueuedRequest[]>([]);
@@ -23,8 +23,8 @@ export default function useClient() {
   const refreshInProgressRef = useRef(false);
 
   useEffect(() => {
-    tokensRef.current = tokens;
-  }, [tokens]);
+    tokenResponseRef.current = tokenResponse;
+  }, [tokenResponse]);
 
   useEffect(() => {
     refreshAccessTokenRef.current = refreshAccessToken;
@@ -153,12 +153,9 @@ export default function useClient() {
       requestKey: string,
       response: Response,
     ): Promise<KyResponse | Response> => {
-      console.log("Received 401 response, attempting token refresh...");
 
       try {
         if (refreshInProgressRef.current) {
-          console.log("Token refresh already in progress, queueing request");
-
           return new Promise<KyResponse>((resolve, reject) => {
             queueRequestForRetry(request, resolve, reject);
           });
@@ -168,12 +165,12 @@ export default function useClient() {
         pendingRetriesRef.current.add(requestKey);
         const result = await refreshAccessTokenRef.current();
 
-        if (result.success && result.newTokens) {
-          tokensRef.current = result.newTokens;
+        if (result.success && result.newTokenResponse) {
+          tokenResponseRef.current = result.newTokenResponse;
           const successResponse = await handleTokenRefreshSuccess(
             request,
             requestKey,
-            result.newTokens.accessToken,
+            result.newTokenResponse.accessToken,
           );
           refreshInProgressRef.current = false;
           return successResponse;
@@ -215,7 +212,7 @@ export default function useClient() {
               }
             }
 
-            const currentToken = tokensRef.current?.accessToken;
+            const currentToken = tokenResponseRef.current?.accessToken;
             if (currentToken) {
               request.headers.set("Authorization", `Bearer ${currentToken}`);
             }

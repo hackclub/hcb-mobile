@@ -5,6 +5,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
+import {
+  revokeAsync,
+  type DiscoveryDocument,
+} from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -43,6 +47,12 @@ const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 const THEME_KEY = "app_theme";
 const BIOMETRICS_KEY = "biometrics_required";
 
+const discovery: DiscoveryDocument = {
+  authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
+  tokenEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/token`,
+  revocationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/revoke`,
+};
+
 const themeOptions = [
   {
     key: "light",
@@ -71,7 +81,7 @@ function isTapToPaySupported() {
 type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 
 export default function SettingsPage({ navigation }: Props) {
-  const { setTokens } = useContext(AuthContext);
+  const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
   const { data: beacon } = useOfflineSWR<Beacon>("user/beacon_config");
   const { colors } = useTheme();
@@ -238,6 +248,20 @@ export default function SettingsPage({ navigation }: Props) {
   const handleSignOut = async () => {
     resetTheme();
     try {
+      if (tokenResponse?.refreshToken) {
+        try {
+          await revokeAsync(
+            {
+              clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+              token: tokenResponse.refreshToken,
+            },
+            discovery,
+          );
+        } catch (revokeError) {
+          console.warn("Failed to revoke token during sign out", revokeError);
+        }
+      }
+
       await AsyncStorage.multiRemove([
         THEME_KEY,
         BIOMETRICS_KEY,
@@ -248,13 +272,13 @@ export default function SettingsPage({ navigation }: Props) {
         "cardOrder",
       ]);
       cache.clear();
-      setTokens(null);
+      setTokenResponse(null);
     } catch (error) {
       console.error("Error clearing storage during sign out", error, {
         context: { action: "sign_out" },
       });
       cache.clear();
-      setTokens(null);
+      setTokenResponse(null);
     }
   };
 

@@ -444,7 +444,7 @@ export default function ReceiptsPage({ navigation }: Props) {
 
       case "transactions":
         return (
-          <View style={{ marginBottom: 20 }}>
+          <View style={{ marginBottom: 40 }}>
             <View
               style={{
                 flexDirection: "row",
