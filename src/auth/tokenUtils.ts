@@ -31,7 +31,6 @@ export function tokenResponseToLegacyTokens(
   };
 }
 
-
 export function getAccessToken(
   tokenResponse: TokenResponse | null,
 ): string | null {

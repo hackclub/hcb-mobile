@@ -33,7 +33,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   const { data: organizations } =
     useSWR<OrganizationExpanded[]>("user/organizations");
   const { tokenResponse } = useContext(AuthContext);
-  
+
   // Extract accessToken for backward compatibility
   const accessToken = getAccessToken(tokenResponse);
   const { isOnline, withOfflineCheck } = useOffline();

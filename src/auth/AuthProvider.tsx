@@ -25,20 +25,30 @@ let refreshPromise: Promise<{
 }> | null = null;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [tokenResponse, setTokenResponseState] = useState<TokenResponse | null>(null);
-  const [codeVerifier, setCodeVerifierState] = useState<string | undefined>(undefined);
+  const [tokenResponse, setTokenResponseState] = useState<TokenResponse | null>(
+    null,
+  );
+  const [codeVerifier, setCodeVerifierState] = useState<string | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadTokenResponse = async () => {
       try {
         // Try new format first
-        const tokenResponseStr = await SecureStore.getItemAsync(TOKEN_RESPONSE_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
-        const codeVerifierStr = await SecureStore.getItemAsync(CODE_VERIFIER_KEY, {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
+        const tokenResponseStr = await SecureStore.getItemAsync(
+          TOKEN_RESPONSE_KEY,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
+        const codeVerifierStr = await SecureStore.getItemAsync(
+          CODE_VERIFIER_KEY,
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
 
         if (tokenResponseStr) {
           try {
@@ -77,13 +87,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             tokenType: migration.tokenResponse.tokenType,
             scope: migration.tokenResponse.scope,
           };
-          await SecureStore.setItemAsync(TOKEN_RESPONSE_KEY, JSON.stringify(tokenData), {
-            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-          });
-          if (migration.codeVerifier) {
-            await SecureStore.setItemAsync(CODE_VERIFIER_KEY, migration.codeVerifier, {
+          await SecureStore.setItemAsync(
+            TOKEN_RESPONSE_KEY,
+            JSON.stringify(tokenData),
+            {
               keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-            });
+            },
+          );
+          if (migration.codeVerifier) {
+            await SecureStore.setItemAsync(
+              CODE_VERIFIER_KEY,
+              migration.codeVerifier,
+              {
+                keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+              },
+            );
           }
           await clearLegacyTokens();
         }
@@ -113,9 +131,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           tokenType: newTokenResponse.tokenType,
           scope: newTokenResponse.scope,
         };
-        await SecureStore.setItemAsync(TOKEN_RESPONSE_KEY, JSON.stringify(tokenData), {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        });
+        await SecureStore.setItemAsync(
+          TOKEN_RESPONSE_KEY,
+          JSON.stringify(tokenData),
+          {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          },
+        );
         if (newCodeVerifier) {
           await SecureStore.setItemAsync(CODE_VERIFIER_KEY, newCodeVerifier, {
             keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
@@ -140,7 +162,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (tokenResponse?.refreshToken) {
       try {
         await revokeAsync(
-          { clientId: process.env.EXPO_PUBLIC_CLIENT_ID!, token: tokenResponse.refreshToken },
+          {
+            clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
+            token: tokenResponse.refreshToken,
+          },
           discovery,
         );
       } catch {
@@ -184,8 +209,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true, newTokenResponse: result };
       } catch (error: unknown) {
         const oauthError = (error as { error?: string })?.error;
-        
-        if (oauthError === "invalid_grant" || oauthError === "invalid_client" || oauthError === "unauthorized_client") {
+
+        if (
+          oauthError === "invalid_grant" ||
+          oauthError === "invalid_client" ||
+          oauthError === "unauthorized_client"
+        ) {
           await forceLogout();
           return { success: false };
         }
@@ -201,15 +230,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const shouldRefreshToken = useCallback(
     (leewaySeconds: number = 300): boolean => {
       if (!tokenResponse) return false;
-      
+
       try {
         if (tokenResponse.shouldRefresh()) return true;
-        
+
         if (tokenResponse.expiresIn && tokenResponse.issuedAt) {
-          const expiresAt = (tokenResponse.issuedAt + tokenResponse.expiresIn) * 1000;
+          const expiresAt =
+            (tokenResponse.issuedAt + tokenResponse.expiresIn) * 1000;
           return expiresAt <= Date.now() + leewaySeconds * 1000;
         }
-        
+
         return false;
       } catch {
         return false;

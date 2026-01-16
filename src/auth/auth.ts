@@ -4,7 +4,10 @@ import { createContext } from "react";
 const AuthContext = createContext<{
   tokenResponse: TokenResponse | null;
   codeVerifier?: string;
-  setTokenResponse: (tokenResponse: TokenResponse | null, codeVerifier?: string) => void;
+  setTokenResponse: (
+    tokenResponse: TokenResponse | null,
+    codeVerifier?: string,
+  ) => void;
   refreshAccessToken: () => Promise<{
     success: boolean;
     newTokenResponse?: TokenResponse;

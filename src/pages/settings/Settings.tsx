@@ -5,10 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
-import {
-  revokeAsync,
-  type DiscoveryDocument,
-} from "expo-auth-session";
+import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";

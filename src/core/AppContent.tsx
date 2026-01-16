@@ -91,7 +91,7 @@ export default function AppContent({
     setTokenResponse,
     shouldRefreshToken,
   } = useContext(AuthContext);
-  
+
   // Extract tokens from tokenResponse for backward compatibility
   const tokens = useMemo(
     () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),

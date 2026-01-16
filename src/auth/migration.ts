@@ -15,7 +15,6 @@ const KEYCHAIN_OPTIONS = {
   keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
 } as const;
 
-
 export async function migrateLegacyTokens(): Promise<{
   tokenResponse: TokenResponse | null;
   codeVerifier: string | undefined;

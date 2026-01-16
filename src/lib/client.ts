@@ -153,7 +153,6 @@ export default function useClient() {
       requestKey: string,
       response: Response,
     ): Promise<KyResponse | Response> => {
-
       try {
         if (refreshInProgressRef.current) {
           return new Promise<KyResponse>((resolve, reject) => {
