@@ -29,8 +29,8 @@ export default function WiseTransaction({
     <View>
       <View style={{ flexDirection: "column", alignItems: "center" }}>
         <TransactionTitle badge={badge}>
-          {renderMoney(Math.abs(wise_transfer.amount_cents)).slice(1)} {wise_transfer.currency}{" "}
-          <Muted>sent via</Muted>
+          {renderMoney(Math.abs(wise_transfer.amount_cents)).slice(1)}{" "}
+          {wise_transfer.currency} <Muted>sent via</Muted>
           {"\n"}
           Wise Transfer
         </TransactionTitle>
@@ -41,12 +41,14 @@ export default function WiseTransaction({
             label: "Recipient",
             value: wise_transfer.recipient_name,
           },
-          ...(wise_transfer.recipient_email ? [
-            {
-              label: "Recipient Email",
-              value: wise_transfer.recipient_email,
-            },
-          ] : []),
+          ...(wise_transfer.recipient_email
+            ? [
+                {
+                  label: "Recipient Email",
+                  value: wise_transfer.recipient_email,
+                },
+              ]
+            : []),
           {
             label: "Recipient Country",
             value: wise_transfer.recipient_country,
@@ -65,12 +67,14 @@ export default function WiseTransaction({
               .filter(Boolean)
               .join(" "),
           },
-          ...(wise_transfer.return_reason ? [
-            {
-              label: "Return Reason",
-              value: wise_transfer.return_reason,
-            },
-          ] : []),
+          ...(wise_transfer.return_reason
+            ? [
+                {
+                  label: "Return Reason",
+                  value: wise_transfer.return_reason,
+                },
+              ]
+            : []),
           descriptionDetail(orgId, transaction, navigation),
           {
             label: "Sent",

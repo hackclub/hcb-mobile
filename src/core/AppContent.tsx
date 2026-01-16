@@ -318,7 +318,7 @@ export default function AppContent({
             setIsAuthenticated(true);
           } else {
             hasPassedBiometrics.current = false;
-            lastAuthenticatedToken.current = null; 
+            lastAuthenticatedToken.current = null;
             setIsAuthenticated(false);
           }
           setAppIsReady(true);
@@ -328,7 +328,7 @@ export default function AppContent({
             context: { action: "biometric_auth" },
           });
           hasPassedBiometrics.current = false;
-          lastAuthenticatedToken.current = null; 
+          lastAuthenticatedToken.current = null;
           setIsAuthenticated(false);
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
