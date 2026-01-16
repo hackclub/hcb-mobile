@@ -64,7 +64,7 @@ export default function RenameTransactionPage({
   );
 
   return (
-    <View style={{ padding: 20 }}>
+    <View style={{ padding: 30 }}>
       <StatusBar barStyle="light-content" />
 
       <TextInput
