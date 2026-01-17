@@ -33,7 +33,8 @@ import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
-type CardWithGrant = Card & Required<Pick<Card, "last4">> & { grant_id?: string };
+type CardWithGrant = Card &
+  Required<Pick<Card, "last4">> & { grant_id?: string };
 
 type CardItemProps = {
   item: CardWithGrant;
