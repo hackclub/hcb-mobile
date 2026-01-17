@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react-native";
 import {
   refreshAsync,
   revokeAsync,
@@ -53,7 +54,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (tokenResponseStr) {
           try {
             const tokenData = JSON.parse(tokenResponseStr);
+
+            Sentry.setContext("token_load", {
+              hasStoredRefreshToken: !!tokenData.refreshToken,
+              storedRefreshTokenLength: tokenData.refreshToken?.length,
+              storedRefreshTokenPreview: tokenData.refreshToken
+                ? `${tokenData.refreshToken.substring(0, 8)}...${tokenData.refreshToken.substring(tokenData.refreshToken.length - 4)}`
+                : "missing",
+              hasStoredAccessToken: !!tokenData.accessToken,
+              storedAccessTokenLength: tokenData.accessToken?.length,
+              storedTokenKeys: Object.keys(tokenData),
+              hasExpiresIn: !!tokenData.expiresIn,
+              hasIssuedAt: !!tokenData.issuedAt,
+            });
+
             const loadedTokenResponse = new TokenResponse(tokenData);
+
+            const refreshTokenLost =
+              tokenData.refreshToken && !loadedTokenResponse.refreshToken;
+
+            Sentry.setContext("token_response_after_load", {
+              hasRefreshToken: !!loadedTokenResponse.refreshToken,
+              refreshTokenLength: loadedTokenResponse.refreshToken?.length,
+              refreshTokenPreview: loadedTokenResponse.refreshToken
+                ? `${loadedTokenResponse.refreshToken.substring(0, 8)}...${loadedTokenResponse.refreshToken.substring(loadedTokenResponse.refreshToken.length - 4)}`
+                : "missing",
+              hasAccessToken: !!loadedTokenResponse.accessToken,
+              refreshTokenLost: refreshTokenLost,
+              refreshTokenPropertyExists: "refreshToken" in loadedTokenResponse,
+            });
+
+            if (refreshTokenLost) {
+              Sentry.captureMessage(
+                "CRITICAL: RefreshToken lost during TokenResponse construction",
+                {
+                  level: "error",
+                  tags: {
+                    issue_type: "token_refresh_token_lost",
+                  },
+                },
+              );
+            }
+
+            Sentry.addBreadcrumb({
+              message: "Token loaded from SecureStore",
+              level: "info",
+              data: {
+                refreshTokenPreserved: !refreshTokenLost,
+                hasRefreshToken: !!loadedTokenResponse.refreshToken,
+              },
+            });
+
             setTokenResponseState(loadedTokenResponse);
             if (codeVerifierStr) {
               setCodeVerifierState(codeVerifierStr);
@@ -63,6 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (parseError) {
             console.error("Failed to parse stored token response", parseError, {
               action: "token_parse",
+            });
+            Sentry.captureException(parseError, {
+              tags: { action: "token_parse" },
+              contexts: {
+                token_load: {
+                  error: "parse_failed",
+                },
+              },
             });
             // Clear invalid token data
             await SecureStore.deleteItemAsync(TOKEN_RESPONSE_KEY);
@@ -185,13 +244,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const currentRefreshToken = tokenResponse?.refreshToken;
     const currentCodeVerifier = codeVerifier;
 
+    Sentry.setContext("token_refresh_attempt", {
+      hasTokenResponse: !!tokenResponse,
+      hasRefreshToken: !!currentRefreshToken,
+      refreshTokenLength: currentRefreshToken?.length,
+      refreshTokenPreview: currentRefreshToken
+        ? `${currentRefreshToken.substring(0, 8)}...${currentRefreshToken.substring(currentRefreshToken.length - 4)}`
+        : "missing",
+      tokenResponseKeys: tokenResponse ? Object.keys(tokenResponse) : [],
+      refreshTokenInObject: tokenResponse && "refreshToken" in tokenResponse,
+      hasClientId: !!process.env.EXPO_PUBLIC_CLIENT_ID,
+    });
+
     if (!currentRefreshToken) {
+      Sentry.captureMessage(
+        "Token refresh failed: No refresh token available",
+        {
+          level: "error",
+          tags: {
+            issue_type: "token_refresh_missing_token",
+          },
+        },
+      );
       await forceLogout();
       return { success: false };
     }
 
     return (refreshPromise = (async () => {
       try {
+        Sentry.addBreadcrumb({
+          message: "Starting token refresh",
+          level: "info",
+          data: {
+            refreshTokenLength: currentRefreshToken.length,
+            hasClientId: !!process.env.EXPO_PUBLIC_CLIENT_ID,
+          },
+        });
+
         const result = await refreshAsync(
           {
             clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
@@ -201,9 +290,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
 
         if (!result.accessToken || !result.refreshToken) {
+          Sentry.captureMessage("Token refresh returned incomplete response", {
+            level: "error",
+            tags: {
+              issue_type: "token_refresh_incomplete",
+            },
+            contexts: {
+              refresh_response: {
+                hasAccessToken: !!result.accessToken,
+                hasRefreshToken: !!result.refreshToken,
+              },
+            },
+          });
           await forceLogout();
           return { success: false };
         }
+
+        Sentry.addBreadcrumb({
+          message: "Token refresh successful",
+          level: "info",
+          data: {
+            hasNewAccessToken: !!result.accessToken,
+            hasNewRefreshToken: !!result.refreshToken,
+            newRefreshTokenLength: result.refreshToken.length,
+          },
+        });
 
         await setTokenResponse(result, currentCodeVerifier);
         return { success: true, newTokenResponse: result };
@@ -217,15 +328,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const oauthError =
           errorObj.code || errorObj.params?.error || errorObj.error;
 
+        // Capture full error context in Sentry
+        Sentry.setContext("token_refresh_error", {
+          oauthError,
+          errorCode: errorObj.code,
+          errorParams: errorObj.params,
+          refreshTokenLength: currentRefreshToken.length,
+          refreshTokenPreview: `${currentRefreshToken.substring(0, 8)}...${currentRefreshToken.substring(currentRefreshToken.length - 4)}`,
+        });
+
         if (
           oauthError === "invalid_grant" ||
           oauthError === "invalid_client" ||
           oauthError === "unauthorized_client"
         ) {
+          Sentry.captureException(error, {
+            level: "error",
+            tags: {
+              issue_type: "token_refresh_oauth_error",
+              oauth_error: oauthError,
+            },
+            contexts: {
+              token_refresh: {
+                oauthError,
+                refreshTokenLength: currentRefreshToken.length,
+              },
+            },
+          });
           await forceLogout();
           return { success: false };
         }
 
+        Sentry.captureException(error, {
+          level: "error",
+          tags: {
+            issue_type: "token_refresh_unknown_error",
+          },
+        });
         console.error("Token refresh failed", error);
         return { success: false };
       } finally {
