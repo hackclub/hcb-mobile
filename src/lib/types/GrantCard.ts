@@ -8,4 +8,5 @@ export default interface GrantCard extends Card {
   purpose: string;
   allowed_merchants: string[];
   allowed_categories: string[];
+  balance_cents: number;
 }
