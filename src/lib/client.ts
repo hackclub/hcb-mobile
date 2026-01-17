@@ -12,10 +12,12 @@ interface QueuedRequest {
 }
 
 export default function useClient() {
-  const { tokenResponse, refreshAccessToken } = useContext(AuthContext);
+  const { tokenResponse, refreshAccessToken, setTokenResponse } =
+    useContext(AuthContext);
 
   const tokenResponseRef = useRef(tokenResponse);
   const refreshAccessTokenRef = useRef(refreshAccessToken);
+  const setTokenResponseRef = useRef(setTokenResponse);
   const clientRef = useRef<ReturnType<typeof ky.create> | null>(null);
   const queuedRequestsRef = useRef<QueuedRequest[]>([]);
   const pendingRetriesRef = useRef<Set<string>>(new Set());
@@ -29,6 +31,10 @@ export default function useClient() {
   useEffect(() => {
     refreshAccessTokenRef.current = refreshAccessToken;
   }, [refreshAccessToken]);
+
+  useEffect(() => {
+    setTokenResponseRef.current = setTokenResponse;
+  }, [setTokenResponse]);
 
   if (!clientRef.current) {
     const extractPath = (url: string): string => {
@@ -132,11 +138,11 @@ export default function useClient() {
       return response;
     };
 
-    const handleTokenRefreshFailure = (
+    const handleTokenRefreshFailure = async (
       requestKey: string,
       originalResponse: Response,
-    ): Response => {
-      console.error("Token refresh process failed");
+    ): Promise<Response> => {
+      console.error("Token refresh process failed - forcing logout");
       pendingRetriesRef.current.delete(requestKey);
 
       const requests = [...queuedRequestsRef.current];
@@ -144,6 +150,8 @@ export default function useClient() {
       requests.forEach(({ reject }) => {
         reject(new Error("Token refresh failed"));
       });
+
+      await setTokenResponseRef.current(null);
 
       return originalResponse;
     };
@@ -174,15 +182,16 @@ export default function useClient() {
           refreshInProgressRef.current = false;
           return successResponse;
         } else {
-          console.warn("Token refresh did not succeed");
+          console.warn("Token refresh did not succeed - forcing logout");
           pendingRetriesRef.current.delete(requestKey);
           refreshInProgressRef.current = false;
+          await setTokenResponseRef.current(null);
           return response;
         }
       } catch (error) {
         console.error("Error during token refresh:", error);
         refreshInProgressRef.current = false;
-        return handleTokenRefreshFailure(requestKey, response);
+        return await handleTokenRefreshFailure(requestKey, response);
       }
     };
 
