@@ -223,10 +223,10 @@ export default function CardsPage({ navigation }: Props) {
   ]);
 
   const combineCards = useCallback(() => {
-    if (!cards || !grantCards) return;
+    if (!cards) return;
 
     const grantCardMap = new Map<string, string>();
-    grantCards.forEach((grantCard) => {
+    (grantCards || []).forEach((grantCard) => {
       if (grantCard.card_id) {
         grantCardMap.set(grantCard.card_id, grantCard.id);
       }
