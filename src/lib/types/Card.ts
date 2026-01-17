@@ -10,6 +10,7 @@ export default interface Card extends HcbApiObject<"crd"> {
   status: "inactive" | "frozen" | "active" | "canceled" | "expired";
   name?: string;
   organization: Organization;
+  last_frozen_by?: User;
   personalization?: {
     color: "black" | "white";
     logo_url?: string;

@@ -398,10 +398,14 @@ export default function CardsPage({ navigation }: Props) {
             item={item}
             isActive={false}
             onPress={(card) =>
-              navigation.navigate("Card", {
-                card,
-                grantId: card.grant_id,
-              })
+              card.grant_id
+                ? navigation.navigate("GrantCard", {
+                    grantId: card.grant_id,
+                    cardId: card.id,
+                  })
+                : navigation.navigate("Card", {
+                    card,
+                  })
             }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}
