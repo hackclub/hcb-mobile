@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (tokenResponseStr) {
           try {
             const tokenData = JSON.parse(tokenResponseStr);
-            
+
             Sentry.setContext("token_load", {
               hasStoredRefreshToken: !!tokenData.refreshToken,
               storedRefreshTokenLength: tokenData.refreshToken?.length,
@@ -67,11 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               hasExpiresIn: !!tokenData.expiresIn,
               hasIssuedAt: !!tokenData.issuedAt,
             });
-            
+
             const loadedTokenResponse = new TokenResponse(tokenData);
-            
-            const refreshTokenLost = tokenData.refreshToken && !loadedTokenResponse.refreshToken;
-            
+
+            const refreshTokenLost =
+              tokenData.refreshToken && !loadedTokenResponse.refreshToken;
+
             Sentry.setContext("token_response_after_load", {
               hasRefreshToken: !!loadedTokenResponse.refreshToken,
               refreshTokenLength: loadedTokenResponse.refreshToken?.length,
@@ -82,16 +83,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               refreshTokenLost: refreshTokenLost,
               refreshTokenPropertyExists: "refreshToken" in loadedTokenResponse,
             });
-            
+
             if (refreshTokenLost) {
-              Sentry.captureMessage("CRITICAL: RefreshToken lost during TokenResponse construction", {
-                level: "error",
-                tags: {
-                  issue_type: "token_refresh_token_lost",
+              Sentry.captureMessage(
+                "CRITICAL: RefreshToken lost during TokenResponse construction",
+                {
+                  level: "error",
+                  tags: {
+                    issue_type: "token_refresh_token_lost",
+                  },
                 },
-              });
+              );
             }
-            
+
             Sentry.addBreadcrumb({
               message: "Token loaded from SecureStore",
               level: "info",
@@ -100,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 hasRefreshToken: !!loadedTokenResponse.refreshToken,
               },
             });
-            
+
             setTokenResponseState(loadedTokenResponse);
             if (codeVerifierStr) {
               setCodeVerifierState(codeVerifierStr);
@@ -253,12 +257,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (!currentRefreshToken) {
-      Sentry.captureMessage("Token refresh failed: No refresh token available", {
-        level: "error",
-        tags: {
-          issue_type: "token_refresh_missing_token",
+      Sentry.captureMessage(
+        "Token refresh failed: No refresh token available",
+        {
+          level: "error",
+          tags: {
+            issue_type: "token_refresh_missing_token",
+          },
         },
-      });
+      );
       await forceLogout();
       return { success: false };
     }
@@ -273,7 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             hasClientId: !!process.env.EXPO_PUBLIC_CLIENT_ID,
           },
         });
-        
+
         const result = await refreshAsync(
           {
             clientId: process.env.EXPO_PUBLIC_CLIENT_ID!,
