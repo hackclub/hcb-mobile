@@ -50,21 +50,21 @@ type Props = NativeStackScreenProps<
 >;
 
 export default function GrantCardPage({ route, navigation }: Props) {
-  const { grantId } = route.params;
+  const { grantId, cardId } = route.params;
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
 
   const { data: grantCard, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
-    `card_grants/${fullGrantId}`,
+    `card_grants/${fullGrantId}?expand=balance_cents`,
   );
   const { data: user } = useOfflineSWR<User>(`user`);
   const hcb = useClient();
 
   const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
-    grantCard?.card_id ? `cards/${grantCard.card_id}` : null,
+    cardId ? `cards/${cardId}?expand=last_frozen_by` : null,
     {
       onError: (err) => {
         console.error("Error fetching card", err, {
-          context: { cardId: grantCard?.card_id },
+          context: { cardId },
         });
         setCardError("Unable to load card details. Please try again later.");
       },
@@ -126,7 +126,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
     loadMore,
     error: transactionsError,
     mutate: mutateTransactions,
-  } = useTransactions(card?.id || "", "cards");
+  } = useTransactions(cardId || card?.id || "", "cards");
 
   useEffect(() => {
     const timer = setTimeout(() => {

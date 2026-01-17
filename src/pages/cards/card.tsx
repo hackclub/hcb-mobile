@@ -63,7 +63,7 @@ export default function CardPage(
 
   const id = _card?.id ?? `crd_${cardId}`;
   const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
-    `cards/${id}`,
+    `cards/${id}?expand=last_frozen_by`,
     {
       onError: (err) => {
         console.error("Error fetching card", err, { context: { cardId: id } });

@@ -36,7 +36,7 @@ export type StackParamList = {
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
-  GrantCard: { grantId: string };
+  GrantCard: { grantId: string; cardId?: string };
   ShareIntentModal: {
     images: string[];
     missingTransactions: (Transaction & { organization: Organization })[];
@@ -46,7 +46,7 @@ export type StackParamList = {
 export type CardsStackParamList = {
   CardList: undefined;
   Card: { card?: Card; cardId?: string };
-  GrantCard: { grantId: string };
+  GrantCard: { grantId: string; cardId?: string };
   OrderCard: undefined;
   Transaction: {
     transactionId: Transaction["id"];

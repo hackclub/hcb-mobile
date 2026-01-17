@@ -208,7 +208,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await setTokenResponse(result, currentCodeVerifier);
         return { success: true, newTokenResponse: result };
       } catch (error: unknown) {
-        const oauthError = (error as { error?: string })?.error;
+        // expo-auth-session TokenError has the error code in error.code or error.params?.error
+        const errorObj = error as {
+          code?: string;
+          params?: { error?: string };
+          error?: string;
+        };
+        const oauthError =
+          errorObj.code || errorObj.params?.error || errorObj.error;
 
         if (
           oauthError === "invalid_grant" ||
