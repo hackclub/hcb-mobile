@@ -26,11 +26,13 @@ export type StackParamList = {
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
+  NewDonation: { orgId: Organization["id"]; orgSlug: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];
     transaction?: Transaction;
     title?: string;
+    attachReceipt?: string;
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };

@@ -14,9 +14,7 @@ import { showAlert } from "../../lib/alertUtils";
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Receipt from "../../lib/types/Receipt";
-import Transaction, {
-  TransactionCardCharge,
-} from "../../lib/types/Transaction";
+import Transaction from "../../lib/types/Transaction";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../styles/theme";
@@ -50,17 +48,15 @@ const transition = Layout.duration(300).easing(Easing.out(Easing.quad));
 function ReceiptList({ transaction }: { transaction: Transaction }) {
   const { params } = useRoute<RouteProp<StackParamList, "Transaction">>();
   const orgId =
-    params.orgId ||
-    (transaction as TransactionCardCharge).card_charge?.card?.organization
-      ?.id ||
-    "";
+    params.orgId || (transaction as Transaction).organization?.id || "";
+  const attachReceipt = params.attachReceipt;
 
   const {
     data: receipts,
     isLoading,
     mutate,
   } = useSWR<Receipt[]>(
-    `organizations/${orgId}/transactions/${transaction.id}/receipts`,
+    `organizations/${transaction?.organization?.id || orgId}/transactions/${transaction.id}/receipts`,
   );
 
   const { colors: themeColors } = useTheme();
@@ -91,6 +87,18 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
       transactionId: transaction.id,
       onUploadComplete: mutate,
     });
+
+  useEffect(() => {
+    if (attachReceipt && actionSheetIsOnline) {
+      // we add a small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        handleActionSheet(addReceiptButtonRef);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+    // only run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleDeleteReceipt = withOfflineCheck(async (receipt: Receipt) => {
     showAlert(

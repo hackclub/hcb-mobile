@@ -44,12 +44,8 @@ const Event = memo(function Event({
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
   );
-  // const { data: transactions, isLoading: transactionsIsLoading } = useSWR<
-  //   PaginatedResponse<ITransaction>
-  // >(showTransactions ? `organizations/${event.id}/transactions?limit=5` : null);
 
   const { colors: themeColors } = useTheme();
-  // Terminal initialization is handled by the useStripeTerminalInit hook but not used in this component
   useStripeTerminalInit({
     organizationId: event?.id,
     enabled: !!(event && !event.playground_mode),
@@ -58,29 +54,37 @@ const Event = memo(function Event({
   const color = orgColor(event.id);
   const isDark = useIsDark();
 
-  // Terminal initialization is now handled by the useStripeTerminalInit hook
-
   const contentView = (
     <>
       <View style={{ flexDirection: "row", alignItems: "center", padding: 16 }}>
         {event.icon ? (
-          <Image
-            source={{ uri: event.icon }}
-            cachePolicy="memory-disk"
-            contentFit="scale-down"
+          <View
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              marginRight: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: isDark ? 0.4 : 0.15,
+              shadowRadius: 4,
+              elevation: 3,
             }}
-          />
+          >
+            <Image
+              source={{ uri: event.icon }}
+              cachePolicy="memory-disk"
+              contentFit="cover"
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                marginRight: 14,
+              }}
+            />
+          </View>
         ) : (
           <View
             style={{
-              borderRadius: 8,
-              width: 40,
-              height: 40,
+              borderRadius: 10,
+              width: 44,
+              height: 44,
               backgroundColor: color,
               marginRight: 16,
             }}
@@ -93,7 +97,12 @@ const Event = memo(function Event({
           }}
         >
           {invitation && invitation.sender && (
-            <Text style={{ color: palette.muted, marginBottom: 3 }}>
+            <Text
+              style={{
+                color: isDark ? palette.muted : palette.slate,
+                marginBottom: 3,
+              }}
+            >
               <Text style={{ fontWeight: "600" }}>
                 {invitation.sender.name}
               </Text>{" "}
@@ -104,8 +113,9 @@ const Event = memo(function Event({
             numberOfLines={2}
             style={{
               color: themeColors.text,
-              fontSize: 20,
-              fontWeight: "600",
+              fontSize: 18,
+              fontWeight: "700",
+              letterSpacing: -0.3,
             }}
           >
             {event.name}
@@ -132,42 +142,28 @@ const Event = memo(function Event({
               </Text>
             </View>
           )}
-          {!hideBalance && <EventBalance balance_cents={data?.balance_cents} />}
+          {!hideBalance && (
+            <View style={{ marginTop: 4 }}>
+              <EventBalance balance_cents={data?.balance_cents} />
+            </View>
+          )}
         </View>
-        <Ionicons
-          name="chevron-forward-outline"
-          size={24}
-          color={palette.muted}
-        />
+        <View
+          style={{
+            backgroundColor: isDark
+              ? "rgba(255, 255, 255, 0.08)"
+              : "rgba(0, 0, 0, 0.07)",
+            borderRadius: 20,
+            padding: 6,
+          }}
+        >
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={isDark ? palette.muted : palette.black}
+          />
+        </View>
       </View>
-      {/* {transactions?.data && transactions.data.length >= 1 ? (
-          <>
-            {transactions.data.map((tx, index) => (
-              <Transaction
-                transaction={tx}
-                orgId={event.id}
-                key={tx.id}
-                bottom={index == transactions.data.length - 1}
-                hideMissingReceipt
-              />
-            ))}
-            {transactions.has_more && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: 10,
-                }}
-              >
-                <Text style={{ color: palette.info }}>See more activity</Text>
-                <Ionicons name="chevron-forward" color={palette.info} size={18} />
-              </View>
-            )}
-          </>
-        ) : transactionsIsLoading ? (
-          <ActivityIndicator style={{ marginVertical: 20 }} />
-        ) : null} */}
     </>
   );
 
@@ -209,7 +205,7 @@ const Event = memo(function Event({
             style={{
               backgroundColor: isDark
                 ? "rgba(37, 36, 41, 0.85)"
-                : "rgba(255, 255, 255, 0.7)",
+                : "rgba(255, 255, 255, 0.88)",
               borderRadius: 10,
               position: "relative",
               zIndex: 1,

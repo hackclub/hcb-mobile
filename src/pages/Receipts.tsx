@@ -417,7 +417,7 @@ export default function ReceiptsPage({ navigation }: Props) {
                 backgroundColor: p.sky["500"],
                 paddingHorizontal: 24,
                 paddingVertical: 12,
-                borderRadius: 8,
+                borderRadius: 12,
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
@@ -444,7 +444,7 @@ export default function ReceiptsPage({ navigation }: Props) {
 
       case "transactions":
         return (
-          <View style={{ marginBottom: 20 }}>
+          <View style={{ marginBottom: 40 }}>
             <View
               style={{
                 flexDirection: "row",

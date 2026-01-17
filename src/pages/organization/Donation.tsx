@@ -1,29 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme, NavigationProp } from "@react-navigation/native";
+import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   ConnectTapToPayParams,
-  PaymentIntent,
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import Checkbox from "expo-checkbox";
-import { useEffect, useRef, useState, useLayoutEffect } from "react";
-import {
-  Platform,
-  ActivityIndicator,
-  Linking,
-  Text,
-  View,
-  TextInput,
-  Keyboard as RNKeyboard,
-  TouchableWithoutFeedback,
-  ScrollView,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Platform, ActivityIndicator, Linking, Text, View } from "react-native";
 import * as Progress from "react-native-progress";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,7 +17,6 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
-import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -49,7 +34,53 @@ export default function OrganizationDonationPage({
   navigation,
 }: Props) {
   const isDark = useIsDark();
+  const { colors } = useTheme();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
+  const { data: organization, isLoading: organizationLoading } =
+    useOfflineSWR<Organization>(`organizations/${orgId}`);
+  const { accessDenied } = useLocation();
+
+  const {
+    isInitialized: isStripeInitialized,
+    isInitializing: isStripeInitializing,
+    error: stripeInitError,
+    discoveredReaders: preDiscoveredReaders,
+    isUpdatingReaderSoftware,
+    updateProgress: softwareUpdateProgress,
+  } = useStripeTerminalInit({
+    organizationId: orgId,
+    enabled: true,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: false,
+  });
+
+  const [reader, setReader] = useState<Reader.Type | undefined>(
+    preDiscoveredReaders.length > 0 ? preDiscoveredReaders[0] : undefined,
+  );
+  const readerRef = useRef<Reader.Type | undefined>(reader);
+  const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState<string | null>(
+    softwareUpdateProgress,
+  );
+
+  const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
+  const {
+    discoverReaders,
+    connectReader: connectReaderTapToPay,
+    disconnectReader,
+    connectedReader,
+  } = useStripeTerminal({
+    onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
+      if (!reader && readers.length > 0) setReader(readers[0]);
+    },
+    onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
+      if (!isUpdatingReaderSoftware) setCurrentProgress(progress);
+    },
+  });
+
+  // Tap to Pay onboarding
   useEffect(() => {
     const getDidOnboarding = async () => {
       try {
@@ -73,164 +104,9 @@ export default function OrganizationDonationPage({
     }
   }, [isDark]);
 
-  return <PageWrapper orgId={orgId} navigation={navigation} />;
-}
-
-function PageWrapper({
-  orgId,
-  navigation,
-}: {
-  orgId: `org_${string}`;
-  navigation: NavigationProp<StackParamList>;
-}) {
-  return <PageContent orgId={orgId} navigation={navigation} />;
-}
-
-const SectionHeader = ({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) => {
-  const { colors } = useTheme();
-
-  return (
-    <>
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          marginBottom: subtitle ? 10 : 16,
-          color: colors.text,
-        }}
-      >
-        {title}
-      </Text>
-      {subtitle && (
-        <Text style={{ color: palette.muted, fontSize: 16, marginBottom: 16 }}>
-          {subtitle}
-        </Text>
-      )}
-    </>
-  );
-};
-
-const SettingsModal = ({
-  visible,
-  onClose,
-  isTaxDeductable,
-  setIsTaxDeductable,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  isTaxDeductable: boolean;
-  setIsTaxDeductable: (value: boolean) => void;
-}) => {
-  const { colors } = useTheme();
-
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: 20,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
-            Donation Settings
-          </Text>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={{ fontSize: 16, color: palette.primary }}>Done</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={{
-            flex: 1,
-            padding: 20,
-            marginHorizontal: 30,
-            alignItems: "center",
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
-            <View>
-              <Text style={{ color: colors.text, fontSize: 16 }}>
-                I'm receiving goods for this donation.
-              </Text>
-              <Text
-                style={{ color: palette.muted, fontSize: 14, marginTop: 8 }}
-              >
-                Check this if the donor is receiving goods or services in
-                exchange for their donation.
-              </Text>
-            </View>
-
-            <Checkbox
-              color={colors.primary}
-              style={{
-                borderRadius: 5,
-                width: 25,
-                height: 25,
-                marginHorizontal: 10,
-              }}
-              value={isTaxDeductable}
-              onValueChange={setIsTaxDeductable}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-function PageContent({
-  orgId,
-  navigation,
-}: {
-  orgId: `org_${string}`;
-  navigation: NavigationProp<StackParamList>;
-}) {
-  const { colors } = useTheme();
-  const { data: organization, isLoading: organizationLoading } =
-    useOfflineSWR<Organization>(`organizations/${orgId}`);
-  const { accessDenied } = useLocation();
-  const {
-    isInitialized: isStripeInitialized,
-    isInitializing: isStripeInitializing,
-    error: stripeInitError,
-    discoveredReaders: preDiscoveredReaders,
-    isUpdatingReaderSoftware,
-    updateProgress: softwareUpdateProgress,
-  } = useStripeTerminalInit({
-    organizationId: orgId,
-    enabled: true,
-    enableReaderPreConnection: true,
-    enableSoftwareUpdates: false,
-  });
-  const [amount, setAmount] = useState("$");
-  const value = parseFloat(amount.replace("$", "0"));
-  const [reader, setReader] = useState<Reader.Type | undefined>(
-    preDiscoveredReaders.length > 0 ? preDiscoveredReaders[0] : undefined,
-  );
-  const readerRef = useRef<Reader.Type | undefined>(reader);
   useEffect(() => {
     readerRef.current = reader;
   }, [reader]);
-  const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState<string | null>(
-    softwareUpdateProgress,
-  );
 
   useEffect(() => {
     if (preDiscoveredReaders.length > 0 && !reader) {
@@ -243,86 +119,13 @@ function PageContent({
       isUpdatingReaderSoftware ? softwareUpdateProgress : null,
     );
   }, [softwareUpdateProgress, isUpdatingReaderSoftware]);
-  const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
-  const {
-    discoverReaders,
-    connectReader: connectReaderTapToPay,
-    disconnectReader,
-    createPaymentIntent,
-    collectPaymentMethod,
-    confirmPaymentIntent,
-    connectedReader,
-  } = useStripeTerminal({
-    onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
-      if (!reader && readers.length > 0) setReader(readers[0]);
-    },
-    onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
-      if (!isUpdatingReaderSoftware) setCurrentProgress(progress);
-    },
-  });
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isTaxDeductable, setIsTaxDeductable] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const emailRef = useRef<TextInput>(null);
-  const [orgCheckLoading, setOrgCheckLoading] = useState(true);
-  const hcb = useClient();
-  const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    const loadSetting = async () => {
-      try {
-        const saved = await AsyncStorage.getItem("donationTaxDeductible");
-        if (saved !== null) setIsTaxDeductable(JSON.parse(saved));
-      } catch (error) {
-        console.error("Error loading tax deductible setting", error);
-      }
-    };
-    loadSetting();
-  }, []);
-
-  useEffect(() => {
-    const saveSetting = async () => {
-      try {
-        await AsyncStorage.setItem(
-          "donationTaxDeductible",
-          JSON.stringify(isTaxDeductable),
-        );
-      } catch (error) {
-        console.error("Error saving tax deductible setting", error);
-      }
-    };
-    saveSetting();
-  }, [isTaxDeductable]);
-
-  // Set up navigation header with settings icon when connected
-  useLayoutEffect(() => {
-    if (connectedReader && !orgCheckLoading) {
-      navigation.setOptions({
-        headerRight: () => (
-          <TouchableOpacity
-            onPress={() => setShowSettingsModal(true)}
-            style={{ padding: 4 }}
-          >
-            <Ionicons name="settings-outline" size={24} color={colors.text} />
-          </TouchableOpacity>
-        ),
-      });
-    } else {
-      navigation.setOptions({
-        headerRight: undefined,
-      });
-    }
-  }, [navigation, connectedReader, orgCheckLoading, colors.text]);
-
+  // Disconnect reader if org changed
   useEffect(() => {
     (async () => {
       const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
       if (connectedReader && storedOrgId !== orgId) {
         try {
-          setLoadingConnectingReader(false);
-          setCurrentProgress(null);
           await disconnectReader();
         } catch (e) {
           console.error("Error disconnecting reader on page load", e, {
@@ -330,10 +133,10 @@ function PageContent({
           });
         }
       }
-      setOrgCheckLoading(false);
     })();
   }, [connectedReader, disconnectReader, orgId]);
 
+  // Discover readers
   useEffect(() => {
     (async () => {
       try {
@@ -357,9 +160,11 @@ function PageContent({
     preDiscoveredReaders.length,
   ]);
 
+  // Location access
   async function handleRequestLocation() {
     await Linking.openSettings();
   }
+
   useEffect(() => {
     if (accessDenied) {
       showAlert(
@@ -375,6 +180,150 @@ function PageContent({
     }
   }, [accessDenied]);
 
+  // Connect reader function
+  async function connectReader(selectedReader: Reader.Type) {
+    if (!isStripeInitialized) {
+      showAlert(
+        "Payment System Error",
+        "Payment system is not ready. Please try again.",
+      );
+      return false;
+    }
+
+    setLoadingConnectingReader(true);
+    try {
+      const { error } = await connectReaderTapToPay(
+        {
+          reader: selectedReader,
+          locationId: locationIdStripeMock,
+          merchantDisplayName: organization?.name || "HCB",
+        } as ConnectTapToPayParams,
+        "tapToPay",
+      );
+
+      setCurrentProgress(null);
+      if (error) {
+        if (
+          (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+          (error as { code?: string }).code ==
+            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+        ) {
+          return true;
+        }
+        console.error("connectReader error", error, {
+          context: { orgId, action: "connect_reader" },
+        });
+        showAlert(
+          "Connection Error",
+          "Failed to connect to Tap to Pay reader. Please try again.",
+        );
+        return false;
+      }
+
+      await AsyncStorage.setItem("lastConnectedOrgId", orgId);
+      setCurrentProgress(null);
+      return true;
+    } catch (error) {
+      if (
+        (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+        (error as { code?: string }).code ==
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+      ) {
+        return true;
+      }
+      console.error("connectReader error", error, {
+        context: { orgId, action: "connect_reader" },
+      });
+      showAlert(
+        "Connection Error",
+        "Failed to connect to Tap to Pay reader. Please try again.",
+      );
+      return false;
+    } finally {
+      setLoadingConnectingReader(false);
+    }
+  }
+
+  // Navigate to NewDonation screen
+  const navigateToNewDonation = () => {
+    navigation.navigate("NewDonation", {
+      orgId,
+      orgSlug: organization?.slug || "",
+    });
+  };
+
+  // Handle Get Started button
+  const handleGetStarted = async () => {
+    // Dev mode - skip reader connection
+    if (__DEV__) {
+      navigateToNewDonation();
+      return;
+    }
+
+    setLoadingConnectingReader(true);
+
+    const waitForReader = async (timeoutMs = 10000, pollInterval = 300) => {
+      const maxAttempts = Math.ceil(timeoutMs / pollInterval);
+      let attempts = 0;
+      while (attempts < maxAttempts) {
+        await new Promise((res) => setTimeout(res, pollInterval));
+        if (readerRef.current) {
+          return true;
+        }
+        attempts++;
+      }
+      return false;
+    };
+
+    // Try to connect with existing reader
+    if (reader) {
+      const connected = await connectReader(reader);
+      if (connected) {
+        navigateToNewDonation();
+      }
+      setLoadingConnectingReader(false);
+      return;
+    }
+
+    if (preDiscoveredReaders.length > 0) {
+      const connected = await connectReader(preDiscoveredReaders[0]);
+      if (connected) {
+        navigateToNewDonation();
+      }
+      setLoadingConnectingReader(false);
+      return;
+    }
+
+    if (!isStripeInitialized) {
+      showAlert(
+        "Payment System Error",
+        "Payment system is not ready. Please try again.",
+      );
+      setLoadingConnectingReader(false);
+      return;
+    }
+
+    // Discover and connect
+    const readers = await discoverReaders({
+      discoveryMethod: "tapToPay",
+    });
+    const found = await waitForReader();
+    if (found && readerRef.current) {
+      const connected = await connectReader(readerRef.current);
+      if (connected) {
+        navigateToNewDonation();
+      }
+    } else {
+      console.error("No reader found", JSON.stringify(readers));
+      showAlert(
+        "No reader found",
+        "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
+      );
+    }
+    setLoadingConnectingReader(false);
+  };
+
+  // Loading state
   if (organizationLoading || !organization || isStripeInitializing) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -388,6 +337,7 @@ function PageContent({
     );
   }
 
+  // Error state
   if (stripeInitError) {
     return (
       <View
@@ -427,658 +377,197 @@ function PageContent({
     );
   }
 
-  const orgName = organization.name;
-  const orgSlug = organization.slug;
-
-  const createDonation = async () => {
-    try {
-      if (value <= 0) {
-        showAlert("Error creating donation", "Amount must be greater than 0.");
-        return "";
-      }
-      const response = await hcb.post(`organizations/${orgId}/donations`, {
-        json: {
-          amount_cents: value * 100,
-          name,
-          email,
-          tax_deductable: isTaxDeductable,
-        },
-      });
-      const data = (await response.json()) as { id: string };
-      return data.id;
-    } catch (error) {
-      console.error("Error creating donation", error, {
-        orgId,
-        amount: value * 100,
-      });
-      throw error; // Re-throw to let calling code handle it
-    }
-  };
-
-  async function connectReader(selectedReader: Reader.Type) {
-    if (!isStripeInitialized) {
-      console.error(
-        "Attempted to connect reader before Stripe Terminal initialization",
-        new Error("Stripe Terminal not initialized"),
-        {
-          context: { orgId, action: "connect_reader" },
-        },
-      );
-      showAlert(
-        "Payment System Error",
-        "Payment system is not ready. Please try again.",
-      );
-      return false;
-    }
-
-    setLoadingConnectingReader(true);
-    try {
-      const { error } = await connectReaderTapToPay(
-        {
-          reader: selectedReader,
-          locationId: locationIdStripeMock,
-          merchantDisplayName: organization?.name || "HCB",
-        } as ConnectTapToPayParams,
-        "tapToPay",
-      );
-
-      setCurrentProgress(null);
-      if (error) {
-        console.error("connectReader error", error, {
-          context: { orgId, action: "connect_reader" },
-        });
-        showAlert(
-          "Connection Error",
-          "Failed to connect to Tap to Pay reader. Please try again.",
-        );
-        return false;
-      }
-
-      console.log("Successfully connected to Tap to Pay reader");
-      // Update AsyncStorage with the new org id after successful connection
-      await AsyncStorage.setItem("lastConnectedOrgId", orgId);
-      setCurrentProgress(null);
-      return true;
-    } catch (error) {
-      if (error.code == "AlreadyConnectedToReader") {
-        return true;
-      }
-      console.error("connectReader error", error, {
-        context: { orgId, action: "connect_reader" },
-      });
-      showAlert(
-        "Connection Error",
-        "Failed to connect to Tap to Pay reader. Please try again.",
-      );
-      return false;
-    } finally {
-      setLoadingConnectingReader(false);
-    }
-  }
-
-  async function paymentIntent({ donation_id }: { donation_id: string }) {
-    try {
-      const { error, paymentIntent } = await createPaymentIntent({
-        amount: Number((value * 100).toFixed()),
-        currency: "usd",
-        paymentMethodTypes: ["card_present"],
-        offlineBehavior: "prefer_online",
-        captureMethod: "automatic",
-        metadata: {
-          donation_id,
-          donation: "true",
-        },
-        statementDescriptor:
-          `HCB ${orgName.replace(/[<>\\'"*]/g, "") || "DONATION"}`.substring(
-            0,
-            22,
-          ),
-      });
-      if (error) {
-        console.error("createPaymentIntent error", error, {
-          context: { orgId, donation_id, action: "payment_intent" },
-        });
-        return false;
-      }
-      navigation.navigate("ProcessDonation", {
-        orgId,
-        payment: paymentIntent,
-        collectPayment: async () => {
-          return await collectPayment(paymentIntent);
-        },
-        name,
-        email,
-        slug: orgSlug || "",
-      });
-      return paymentIntent;
-    } catch (error) {
-      console.error("paymentIntent error", error, {
-        context: { orgId, donation_id, action: "payment_intent" },
-      });
-    }
-  }
-
-  async function collectPayment(
-    localPayment: PaymentIntent.Type,
-  ): Promise<boolean> {
-    let output: boolean;
-    try {
-      if (!collectPaymentMethod) {
-        console.error(
-          "collectPaymentMethod not available",
-          new Error("Method not initialized"),
-          {
-            context: { orgId, action: "collect_payment" },
-          },
-        );
-        return false;
-      }
-
-      const { error } = await collectPaymentMethod({
-        paymentIntent: localPayment,
-      });
-      if (error) {
-        return false;
-      }
-      output = (await confirmPayment(localPayment)) ?? false;
-    } catch (error) {
-      console.error("collectPayment error", error, {
-        context: { orgId, action: "collect_payment" },
-      });
-      output = false;
-    }
-    return output;
-  }
-
-  async function confirmPayment(localPayment: PaymentIntent.Type) {
-    let success;
-    try {
-      if (!confirmPaymentIntent) {
-        console.error(
-          "confirmPaymentIntent not available",
-          new Error("Method not initialized"),
-          {
-            context: { orgId, action: "confirm_payment" },
-          },
-        );
-        return false;
-      }
-
-      const { error } = await confirmPaymentIntent({
-        paymentIntent: localPayment,
-      });
-      if (error) {
-        return;
-      }
-      success = true;
-    } catch (error) {
-      console.error("confirmPayment error", error, {
-        context: { orgId, action: "confirm_payment" },
-      });
-      success = false;
-    }
-    return success;
-  }
-
-  if (!connectedReader || orgCheckLoading) {
-    return (
-      <View
-        style={{
-          padding: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flex: 1,
-          paddingBottom: Math.max(tabBarHeight, insets.bottom) + 20,
-        }}
-      >
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flex: 1,
-          }}
-        >
-          <Ionicons name="card-outline" size={100} color={palette.primary} />
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "600",
-              marginBottom: 10,
-              marginTop: 10,
-              color: colors.text,
-            }}
-          >
-            Collect Donations
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: colors.text,
-              marginBottom: 20,
-            }}
-          >
-            Receive donations using Tap to Pay{" "}
-            {Platform.OS === "ios" ? "on iPhone" : ""}
-          </Text>
-
-          {isUpdatingReaderSoftware && (
-            <View
-              style={{
-                marginTop: 8,
-                marginBottom: 8,
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colors.text,
-                  marginBottom: 8,
-                  textAlign: "center",
-                }}
-              >
-                Updating reader software...
-              </Text>
-              {currentProgress && (
-                <Progress.Bar
-                  progress={parseFloat(currentProgress)}
-                  color={palette.primary}
-                  width={200}
-                  height={20}
-                />
-              )}
-            </View>
-          )}
-
-          {currentProgress && !isUpdatingReaderSoftware ? (
-            <View
-              style={{
-                marginTop: 8,
-                marginBottom: 8,
-              }}
-            >
-              <Progress.Bar
-                progress={parseFloat(currentProgress || "0")}
-                color={palette.primary}
-                width={200}
-                height={20}
-              />
-            </View>
-          ) : null}
-        </View>
-
-        <Button
-          onPress={async () => {
-            if (__DEV__) {
-              navigation.navigate("ProcessDonation", {
-                orgId,
-                payment: { amount: 5000 } as PaymentIntent.Type, // $50.00
-                collectPayment: async () => {
-                  // Mock payment function - simulates success after 2 seconds
-                  return new Promise((resolve) =>
-                    setTimeout(() => resolve(true), 2000),
-                  );
-                },
-                name: "Dev Test User",
-                email: "dev@example.com",
-                slug: orgSlug || "test-org",
-              });
-              return;
-            }
-            setLoadingConnectingReader(true);
-            const waitForReader = async (
-              timeoutMs = 10000,
-              pollInterval = 300,
-            ) => {
-              const maxAttempts = Math.ceil(timeoutMs / pollInterval);
-              let attempts = 0;
-              while (attempts < maxAttempts) {
-                await new Promise((res) => setTimeout(res, pollInterval));
-                if (readerRef.current) {
-                  return true;
-                }
-                attempts++;
-              }
-              return false;
-            };
-
-            if (reader) {
-              await connectReader(reader);
-              setLoadingConnectingReader(false);
-              return;
-            }
-
-            if (preDiscoveredReaders.length > 0) {
-              await connectReader(preDiscoveredReaders[0]);
-              setLoadingConnectingReader(false);
-              return;
-            }
-
-            if (!isStripeInitialized) {
-              console.error(
-                "Attempted to discover readers before Stripe Terminal initialization",
-                new Error("Stripe Terminal not initialized"),
-                {
-                  context: { orgId, action: "discover_readers" },
-                },
-              );
-              showAlert(
-                "Payment System Error",
-                "Payment system is not ready. Please try again.",
-              );
-              setLoadingConnectingReader(false);
-              return;
-            }
-
-            const readers = await discoverReaders({
-              discoveryMethod: "tapToPay",
-            });
-            const found = await waitForReader();
-            if (found && readerRef.current) {
-              await connectReader(readerRef.current);
-            } else {
-              console.error("No reader found", JSON.stringify(readers));
-              showAlert(
-                "No reader found",
-                "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
-              );
-            }
-            setLoadingConnectingReader(false);
-          }}
-          style={{
-            marginBottom: 0,
-            width: "100%",
-          }}
-          loading={loadingConnectingReader}
-        >
-          Collect Donations
-        </Button>
-      </View>
-    );
-  }
-  return (
-    <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingBottom: tabBarHeight,
-        }}
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-      >
-        <View
-          style={{
-            padding: 20,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            flex: 1,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <SectionHeader
-            title="Capture Donation"
-            subtitle="Collect donations for your organization right from your mobile device."
-          />
-
-          <View
-            style={{
-              flexDirection: "column",
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              marginBottom: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                gap: 20,
-              }}
-            >
-              <View style={{ flexBasis: 70 }}>
-                <Text style={{ color: colors.text, fontSize: 20 }}>Name</Text>
-              </View>
-              <TextInput
-                style={{
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                  padding: 12,
-                  borderRadius: 8,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-                selectTextOnFocus
-                clearButtonMode="while-editing"
-                value={name}
-                autoCapitalize="words"
-                onChangeText={setName}
-                autoComplete="off"
-                autoCorrect={false}
-                placeholder={"Full name (optional)"}
-                placeholderTextColor={palette.muted}
-                returnKeyType="next"
-                onSubmitEditing={() => {
-                  emailRef.current?.focus();
-                }}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                gap: 20,
-                marginTop: 10,
-              }}
-            >
-              <View style={{ flexBasis: 70 }}>
-                <Text style={{ color: colors.text, fontSize: 20 }}>Email</Text>
-              </View>
-              <TextInput
-                style={{
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                  padding: 12,
-                  borderRadius: 8,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-                selectTextOnFocus
-                clearButtonMode="while-editing"
-                placeholder="Email (optional)"
-                placeholderTextColor={palette.muted}
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-                ref={emailRef}
-              />
-            </View>
-          </View>
-          <View style={{ flex: 1, width: "100%", marginVertical: 15 }}>
-            <Keyboard amount={amount} setAmount={setAmount} />
-          </View>
-
-          {connectedReader ? (
-            <Button
-              onPress={async () => {
-                try {
-                  const donation_id = await createDonation();
-                  await paymentIntent({ donation_id });
-                } catch (error) {
-                  console.error("createDonation error", error, {
-                    context: {
-                      orgId,
-                      amount: value * 100,
-                      action: "create_donation",
-                    },
-                  });
-                  showAlert("Error creating donation", "Please try again.");
-                }
-              }}
-              style={{
-                width: "100%",
-                marginTop: "auto",
-                marginBottom: 0,
-              }}
-            >
-              Create Donation
-            </Button>
-          ) : (
-            <Button
-              onPress={() => reader && connectReader(reader)}
-              style={{
-                width: "100%",
-                marginTop: "auto",
-                marginBottom: 0,
-              }}
-            >
-              Reconnect reader
-            </Button>
-          )}
-        </View>
-        <SettingsModal
-          visible={showSettingsModal}
-          onClose={() => setShowSettingsModal(false)}
-          isTaxDeductable={isTaxDeductable}
-          setIsTaxDeductable={setIsTaxDeductable}
-        />
-      </ScrollView>
-    </TouchableWithoutFeedback>
-  );
-}
-
-interface KeyboardProps {
-  amount: string;
-  setAmount: (value: string) => void;
-}
-
-interface NumberProps {
-  number?: number;
-  symbol?: string;
-  onPress?: () => void;
-}
-
-const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
-  const [error, setError] = useState(false);
-  const theme = useTheme();
-
-  function pressNumber(amount: string, number: number) {
-    if (
-      parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
-      (amount == "$" && number == 0) ||
-      amount[amount.length - 3] == "."
-    ) {
-      setError(true);
-      setTimeout(() => setError(false), 200);
-    } else {
-      setAmount(amount + number);
-    }
-  }
-
-  function pressDecimal(amount: string) {
-    if (amount.includes(".") || amount == "$") {
-      setError(true);
-      setTimeout(() => setError(false), 200);
-    } else {
-      setAmount(amount + ".");
-    }
-  }
-
-  function pressBackspace(amount: string) {
-    if (amount == "$") {
-      setError(true);
-      setTimeout(() => setError(false), 200);
-    } else {
-      setAmount(amount.slice(0, amount.length - 1));
-    }
-  }
-
-  const Number = ({ number, symbol, onPress }: NumberProps) => (
-    <Text
-      style={{
-        color: theme.colors.text,
-        fontSize: 24,
-        textAlign: "center",
-        fontFamily: "JetBrainsMono-Regular",
-        flexGrow: 1,
-      }}
-      onPress={() => {
-        if (onPress) {
-          onPress();
-        } else if (number !== undefined) {
-          pressNumber(amount, number as number);
-        }
-      }}
-    >
-      {number}
-      {symbol}
-    </Text>
-  );
-
+  // Main splash screen
   return (
     <View
       style={{
-        width: "100%",
-        flexGrow: 1,
+        padding: 24,
         display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "space-around",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flex: 1,
+        paddingBottom: Math.max(tabBarHeight, insets.bottom) + 24,
       }}
     >
-      <Text
+      <View
         style={{
-          color: error ? palette.primary : theme.colors.text,
-          paddingBottom: 10,
-          paddingHorizontal: 10,
-          fontSize: 72,
-          textTransform: "uppercase",
-          textAlign: "center",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+          width: "100%",
         }}
       >
-        {amount}
-        {amount == "$" && <Text>0</Text>}
-        {amount[amount.length - 1] == "." && (
-          <Text style={{ color: palette.muted }}>00</Text>
+        {/* Hero Icon Container */}
+        <View
+          style={{
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: isDark
+              ? "rgba(236, 55, 80, 0.12)"
+              : "rgba(236, 55, 80, 0.08)",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 28,
+          }}
+        >
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: isDark
+                ? "rgba(236, 55, 80, 0.2)"
+                : "rgba(236, 55, 80, 0.15)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="card-outline" size={40} color={palette.primary} />
+          </View>
+        </View>
+
+        <Text
+          style={{
+            fontSize: 26,
+            fontWeight: "700",
+            marginBottom: 12,
+            color: colors.text,
+            letterSpacing: -0.5,
+            textAlign: "center",
+          }}
+        >
+          Collect Donations
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            color: palette.muted,
+            textAlign: "center",
+            lineHeight: 24,
+            paddingHorizontal: 20,
+          }}
+        >
+          Accept contactless payments using Tap to Pay
+          {Platform.OS === "ios" ? " on iPhone" : ""}
+        </Text>
+
+        {/* Feature Pills */}
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 8,
+            marginTop: 32,
+            paddingHorizontal: 16,
+          }}
+        >
+          {[
+            { icon: "flash-outline", text: "Instant" },
+            { icon: "shield-checkmark-outline", text: "Secure" },
+            { icon: "receipt-outline", text: "Tax receipts" },
+          ].map((feature, index) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: isDark ? colors.card : "#f1f5f9",
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+                borderRadius: 20,
+                gap: 6,
+              }}
+            >
+              <Ionicons
+                name={feature.icon as keyof typeof Ionicons.glyphMap}
+                size={16}
+                color={palette.muted}
+              />
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 13,
+                  fontWeight: "500",
+                }}
+              >
+                {feature.text}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Progress indicators */}
+        {isUpdatingReaderSoftware && (
+          <View
+            style={{
+              marginTop: 32,
+              alignItems: "center",
+              width: "100%",
+              paddingHorizontal: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                color: palette.muted,
+                marginBottom: 12,
+                textAlign: "center",
+              }}
+            >
+              Updating reader software...
+            </Text>
+            {currentProgress && (
+              <View style={{ width: "100%", maxWidth: 240 }}>
+                <Progress.Bar
+                  progress={parseFloat(currentProgress)}
+                  color={palette.primary}
+                  width={null}
+                  height={6}
+                  borderRadius={3}
+                  unfilledColor={isDark ? colors.card : "#e2e8f0"}
+                  borderWidth={0}
+                />
+              </View>
+            )}
+          </View>
         )}
-        {amount[amount.length - 2] == "." && (
-          <Text style={{ color: palette.muted }}>0</Text>
-        )}
-      </Text>
-      <View>
-        <View style={{ flexDirection: "row", paddingBottom: 16 }}>
-          <Number number={1} />
-          <Number number={2} />
-          <Number number={3} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 24, paddingBottom: 16 }}
-        >
-          <Number number={4} />
-          <Number number={5} />
-          <Number number={6} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 24, paddingBottom: 16 }}
-        >
-          <Number number={7} />
-          <Number number={8} />
-          <Number number={9} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 24, paddingBottom: 16 }}
-        >
-          <Number symbol={"."} onPress={() => pressDecimal(amount)} />
-          <Number number={0} />
-          <Number symbol={"←"} onPress={() => pressBackspace(amount)} />
-        </View>
+
+        {currentProgress && !isUpdatingReaderSoftware ? (
+          <View
+            style={{
+              marginTop: 32,
+              width: "100%",
+              paddingHorizontal: 40,
+            }}
+          >
+            <Progress.Bar
+              progress={parseFloat(currentProgress || "0")}
+              color={palette.primary}
+              width={null}
+              height={6}
+              borderRadius={3}
+              unfilledColor={isDark ? colors.card : "#e2e8f0"}
+              borderWidth={0}
+            />
+          </View>
+        ) : null}
       </View>
+
+      <Button
+        onPress={handleGetStarted}
+        style={{
+          marginBottom: 0,
+          width: "100%",
+          paddingVertical: 16,
+        }}
+        fontSize={17}
+        loading={loadingConnectingReader}
+      >
+        Get Started
+      </Button>
     </View>
   );
-};
+}

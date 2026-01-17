@@ -33,10 +33,13 @@ import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
+type CardWithGrant = Card &
+  Required<Pick<Card, "last4">> & { grant_id?: string };
+
 type CardItemProps = {
-  item: (Card & Required<Pick<Card, "last4">>) | GrantCard;
+  item: CardWithGrant;
   isActive: boolean;
-  onPress: (card: (Card & Required<Pick<Card, "last4">>) | GrantCard) => void;
+  onPress: (card: CardWithGrant) => void;
   pattern?: string;
   patternDimensions?: { width: number; height: number };
 };
@@ -89,16 +92,15 @@ export default function CardsPage({ navigation }: Props) {
 
   useEffect(() => {
     const generatePatterns = async () => {
-      if (!cards && !grantCards) return;
+      if (!cards) return;
 
-      const allCards = [...(cards || []), ...(grantCards || [])];
       const newPatternCache: Record<
         string,
         { pattern: string; dimensions: { width: number; height: number } }
       > = {};
 
-      for (const card of allCards) {
-        if (card.type !== "virtual") continue;
+      for (const card of cards) {
+        if (card.type !== "virtual" || !card.last4) continue;
 
         try {
           const patternData = await generate({
@@ -133,7 +135,7 @@ export default function CardsPage({ navigation }: Props) {
     };
 
     generatePatterns();
-  }, [cards, grantCards]);
+  }, [cards]);
 
   useFocusEffect(
     useCallback(() => {
@@ -148,10 +150,8 @@ export default function CardsPage({ navigation }: Props) {
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
-  const [allCards, setAllCards] =
-    useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
-  const [sortedCards, setSortedCards] =
-    useState<((Card & Required<Pick<Card, "last4">>) | GrantCard)[]>();
+  const [allCards, setAllCards] = useState<CardWithGrant[]>();
+  const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
   const [refreshing] = useState(false);
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
@@ -223,43 +223,40 @@ export default function CardsPage({ navigation }: Props) {
   ]);
 
   const combineCards = useCallback(() => {
-    // Transform grantCards
-    const transformedGrantCards = grantCards
-      ?.map((grantCard) => ({
-        ...grantCard,
-        grant_id: grantCard.id, // Move original id to grant_id
-        id: grantCard.card_id, // Replace id with card_id
-        last4: cards?.find((card) => card.id === grantCard.card_id)?.last4, // add last4 from card as doesn't show in grantCard
-      }))
-      .filter(
-        (grantCard) => grantCard.card_id !== null, // Filter out the card grants that haven't been assigned a card yet
-      );
+    if (!cards) return;
 
-    // Filter out cards that are also grantCards
-    const filteredCards = cards?.filter(
-      (card) =>
-        !transformedGrantCards?.some((grantCard) => grantCard.id === card.id),
-    );
-
-    // Combine filtered cards and transformed grantCards
-    const combinedCards = [
-      ...(filteredCards || []),
-      ...(transformedGrantCards || []),
-    ];
-
-    // Sort cards by status
-    combinedCards.sort((a, b) => {
-      if (a.status == "active" && b.status != "active") {
-        return -1;
-      } else if (a.status != "active" && b.status == "active") {
-        return 1;
-      } else {
-        return 0;
+    const grantCardMap = new Map<string, string>();
+    (grantCards || []).forEach((grantCard) => {
+      if (grantCard.card_id) {
+        grantCardMap.set(grantCard.card_id, grantCard.id);
       }
     });
 
-    // Update state
-    // @ts-expect-error both types have the same properties that are used
+    const combinedCards: CardWithGrant[] = cards
+      .filter((card): card is Card & Required<Pick<Card, "last4">> => {
+        return !!card.last4;
+      })
+      .map((card) => {
+        const grant_id = grantCardMap.get(card.id);
+        return {
+          ...card,
+          grant_id,
+        };
+      });
+
+    const statusOrder: Record<string, number> = {
+      active: 0,
+      inactive: 1,
+      frozen: 2,
+      canceled: 3,
+      expired: 4,
+    };
+    combinedCards.sort((a, b) => {
+      const orderA = statusOrder[a.status] ?? 5;
+      const orderB = statusOrder[b.status] ?? 5;
+      return orderA - orderB;
+    });
+
     setAllCards(combinedCards);
   }, [cards, grantCards]);
 
@@ -339,9 +336,7 @@ export default function CardsPage({ navigation }: Props) {
     }
   };
 
-  const saveCardOrder = async (
-    newOrder: ((Card & Required<Pick<Card, "last4">>) | GrantCard)[],
-  ) => {
+  const saveCardOrder = async (newOrder: CardWithGrant[]) => {
     try {
       const orderMap = newOrder.reduce(
         (acc, card, index) => {

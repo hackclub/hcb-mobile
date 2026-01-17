@@ -1,24 +1,24 @@
+import { TokenResponse } from "expo-auth-session";
 import { createContext } from "react";
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
-  createdAt: number;
-  codeVerifier?: string;
-}
-
 const AuthContext = createContext<{
-  tokens: AuthTokens | null;
-  setTokens: (tokens: AuthTokens | null) => void;
+  tokenResponse: TokenResponse | null;
+  codeVerifier?: string;
+  setTokenResponse: (
+    tokenResponse: TokenResponse | null,
+    codeVerifier?: string,
+  ) => void;
   refreshAccessToken: () => Promise<{
     success: boolean;
-    newTokens?: AuthTokens;
+    newTokenResponse?: TokenResponse;
   }>;
+  shouldRefreshToken: (leewaySeconds?: number) => boolean;
 }>({
-  tokens: null,
-  setTokens: () => {},
+  tokenResponse: null,
+  codeVerifier: undefined,
+  setTokenResponse: () => {},
   refreshAccessToken: async () => ({ success: false }),
+  shouldRefreshToken: () => false,
 });
 
 export default AuthContext;

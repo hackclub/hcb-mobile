@@ -36,6 +36,7 @@ export interface TransactionBase
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;
+  organization?: Organization;
   appearance?: "hackathon_grant" | string;
   _debug?: {
     hcb_code: string;
@@ -143,6 +144,26 @@ export interface TransactionAchTransfer extends TransactionBase {
   ach_transfer: AchTransfer;
 }
 
+export interface WiseTransfer {
+  recipient_name: string;
+  recipient_email?: string;
+  recipient_country: string;
+  payment_for: string;
+  currency: string;
+  amount_cents: number;
+  usd_amount_cents?: number;
+  state: string;
+  organization_id: string;
+  return_reason?: string;
+  sent_at?: string;
+  sender?: User;
+}
+
+export interface TransactionWise extends TransactionBase {
+  code: TransactionType.Wise;
+  wise_transfer: WiseTransfer;
+}
+
 export interface Invoice {
   id: string;
   amount_cents: number;
@@ -193,6 +214,7 @@ type Transaction =
   | TransactionCheckDeposit
   | TransactionInvoice
   | TransactionAchTransfer
+  | TransactionWise
   | TransactionTransfer
   | TransactionCheck
   | TransactionDonation

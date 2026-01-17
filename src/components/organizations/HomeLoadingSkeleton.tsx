@@ -1,10 +1,44 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { View, ScrollView } from "react-native";
+import { useEffect, useRef } from "react";
+import { View, ScrollView, Animated, Platform } from "react-native";
+
+import { useIsDark } from "../../lib/useColorScheme";
 
 export const HomeLoadingSkeleton = () => {
   const { colors: themeColors } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
+  const isDark = useIsDark();
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [shimmerAnim]);
+
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 0.8],
+  });
+
+  const skeletonBg = isDark
+    ? "rgba(255, 255, 255, 0.06)"
+    : "rgba(0, 0, 0, 0.04)";
+  const skeletonItemBg = isDark
+    ? "rgba(255, 255, 255, 0.08)"
+    : "rgba(0, 0, 0, 0.06)";
 
   return (
     <ScrollView
@@ -19,52 +53,64 @@ export const HomeLoadingSkeleton = () => {
           key={item}
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 10,
+            borderRadius: 14,
             padding: 16,
             marginBottom: 16,
             flexDirection: "row",
             alignItems: "center",
+            ...(Platform.OS === "ios" && {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: isDark ? 0.25 : 0.08,
+              shadowRadius: 8,
+            }),
+            ...(Platform.OS === "android" && {
+              elevation: isDark ? 4 : 2,
+            }),
           }}
         >
           {/* Icon skeleton */}
-          <View
+          <Animated.View
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              backgroundColor: themeColors.border,
-              marginRight: 16,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              backgroundColor: skeletonBg,
+              marginRight: 14,
+              opacity: shimmerOpacity,
             }}
           />
           {/* Content skeleton */}
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, gap: 8 }}>
             {/* Organization name skeleton */}
-            <View
+            <Animated.View
               style={{
-                height: 20,
-                backgroundColor: themeColors.border,
-                borderRadius: 4,
-                width: "70%",
-                marginBottom: 8,
+                height: 18,
+                backgroundColor: skeletonItemBg,
+                borderRadius: 6,
+                width: "65%",
+                opacity: shimmerOpacity,
               }}
             />
             {/* Balance skeleton */}
-            <View
+            <Animated.View
               style={{
                 height: 14,
-                backgroundColor: themeColors.border,
-                borderRadius: 4,
-                width: "40%",
+                backgroundColor: skeletonBg,
+                borderRadius: 6,
+                width: "35%",
+                opacity: shimmerOpacity,
               }}
             />
           </View>
           {/* Chevron skeleton */}
-          <View
+          <Animated.View
             style={{
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-              backgroundColor: themeColors.border,
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: skeletonBg,
+              opacity: shimmerOpacity,
             }}
           />
         </View>

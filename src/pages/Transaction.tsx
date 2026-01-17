@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   View,
@@ -10,6 +11,8 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
+  Share,
+  TouchableOpacity,
 } from "react-native";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
@@ -29,6 +32,7 @@ import ExpensePayoutTransaction from "../components/transaction/types/ExpensePay
 import InvoiceTransaction from "../components/transaction/types/InvoiceTransaction";
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
+import WiseTransaction from "../components/transaction/types/WiseTransaction";
 import { StackParamList } from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
@@ -47,20 +51,18 @@ export default function TransactionPage({
 }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
+  //filter in case of deeplink with #commentId
+  const txnId = transactionId.split("#")[0];
   const { data: transaction, isLoading } = useOfflineSWR<
     Transaction & { organization?: Organization }
   >(
     orgId
-      ? `organizations/${orgId}/transactions/${transactionId}`
-      : `transactions/${transactionId}`,
+      ? `organizations/${orgId}/transactions/${txnId}`
+      : `transactions/${txnId}`,
     { fallbackData: _transaction },
   );
   const { data: comments } = useOfflineSWR<IComment[]>(
-    orgId
-      ? `organizations/${orgId}/transactions/${transactionId}/comments`
-      : transaction?.organization?.id
-        ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
-        : null,
+    `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`,
   );
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${orgId || transaction?.organization?.id}`,
@@ -72,39 +74,57 @@ export default function TransactionPage({
   const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
+  useEffect(() => {
+    if (transaction) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={async () => {
+              const hcbCode = transaction.id.slice(4);
+              const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
+              try {
+                await Share.share({
+                  url: url,
+                });
+              } catch (error) {
+                console.error("Error sharing transaction:", error);
+              }
+            }}
+            style={{ padding: 8 }}
+            accessibilityLabel="Share transaction"
+            accessibilityRole="button"
+          >
+            <Ionicons name="share-outline" size={22} color={themeColors.text} />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [transaction, navigation, themeColors.text]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
       await Promise.all([
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}`
-            : `transactions/${transactionId}`,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}`,
           undefined,
           { revalidate: true },
         ),
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}/comments`
-            : transaction?.organization?.id
-              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/comments`
-              : null,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`,
           undefined,
           { revalidate: true },
         ),
         mutate(
-          orgId
-            ? `organizations/${orgId}/transactions/${transactionId}/receipts`
-            : transaction?.organization?.id
-              ? `organizations/${transaction.organization.id}/transactions/${transactionId}/receipts`
-              : null,
-          undefined,
+          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/receipts`,
           { revalidate: true },
         ),
         globalMutate(
           (key) =>
             typeof key === "string" &&
-            key.startsWith(`organizations/${orgId}/transactions`),
+            key.startsWith(
+              `organizations/${transaction?.organization?.id || orgId}/transactions`,
+            ),
         ),
       ]);
     } finally {
@@ -165,6 +185,7 @@ export default function TransactionPage({
           .with({ transfer: P.any },               (tx) => <TransferTransaction     transaction={tx} {...transactionViewProps} />)
           .with({ donation: P.any },               (tx) => <DonationTransaction     transaction={tx} {...transactionViewProps} />)
           .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction  transaction={tx} {...transactionViewProps} />)
+          .with({ wise_transfer: P.any },          (tx) => <WiseTransaction         transaction={tx} {...transactionViewProps} />)
           .with({ check_deposit: P.any },          (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
           .with({ invoice: P.any },                (tx) => <InvoiceTransaction      transaction={tx} {...transactionViewProps} />)
           .with({ expense_payout: P.any },         (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
@@ -181,7 +202,7 @@ export default function TransactionPage({
             </View>
           )}
           {isUserInOrganizationOrAuditor && (
-            <CommentField orgId={currentOrgId} transactionId={transactionId} />
+            <CommentField orgId={currentOrgId} transactionId={txnId} />
           )}
         </View>
       </ScrollView>

@@ -3,7 +3,8 @@
     "jsx": "react-jsx",
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "extends": "expo/tsconfig.base",
   "include": ["src/**/*", "App.tsx", "env.d.ts"]

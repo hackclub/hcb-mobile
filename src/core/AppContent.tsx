@@ -33,6 +33,7 @@ import { SWRConfig } from "swr";
 
 import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
+import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
 import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
 import { TabParamList } from "../lib/NavigatorParamList";
@@ -83,7 +84,19 @@ export default function AppContent({
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
-  const { tokens, refreshAccessToken, setTokens } = useContext(AuthContext);
+  const {
+    tokenResponse,
+    codeVerifier,
+    refreshAccessToken,
+    setTokenResponse,
+    shouldRefreshToken,
+  } = useContext(AuthContext);
+
+  // Extract tokens from tokenResponse for backward compatibility
+  const tokens = useMemo(
+    () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
+    [tokenResponse, codeVerifier],
+  );
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -123,10 +136,7 @@ export default function AppContent({
     }
 
     if (!tokens?.accessToken) {
-      console.log(
-        "No access token available, skipping Stripe Terminal token fetch",
-      );
-      throw new Error("Authentication required for Stripe Terminal connection");
+      return "";
     }
 
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
@@ -225,7 +235,10 @@ export default function AppContent({
     setStatusBar();
     const checkAuth = async () => {
       if (tokens?.accessToken) {
-        if (lastAuthenticatedToken.current === tokens.accessToken) {
+        if (
+          lastAuthenticatedToken.current === tokens.accessToken &&
+          hasPassedBiometrics.current
+        ) {
           console.log(
             "Already authenticated for this token, skipping biometric auth",
           );
@@ -304,27 +317,9 @@ export default function AppContent({
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
           } else {
-            if (result.error !== "system_cancel") {
-              console.error(
-                "Biometric authentication failed",
-                new Error(result.error || "Authentication failed"),
-                {
-                  context: {
-                    action: "biometric_auth",
-                    errorType: result.error,
-                  },
-                },
-              );
-              // Clear tokens to fully log out the user
-              hasPassedBiometrics.current = false;
-              await setTokens(null);
-              setIsAuthenticated(false);
-            } else {
-              console.log("Biometric authentication cancelled by user");
-              hasPassedBiometrics.current = false;
-              await setTokens(null);
-              setIsAuthenticated(false);
-            }
+            hasPassedBiometrics.current = false;
+            lastAuthenticatedToken.current = null;
+            setIsAuthenticated(false);
           }
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -333,7 +328,7 @@ export default function AppContent({
             context: { action: "biometric_auth" },
           });
           hasPassedBiometrics.current = false;
-          await setTokens(null);
+          lastAuthenticatedToken.current = null;
           setIsAuthenticated(false);
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -361,15 +356,11 @@ export default function AppContent({
     return () => {
       cancelled = true;
     };
-  }, [tokens?.accessToken, setTokens, isDark, themePref]);
+  }, [tokenResponse?.accessToken, setTokenResponse, isDark, themePref, tokens]);
 
   useEffect(() => {
-    if (tokens) {
-      const now = Date.now();
-      if (
-        tokens.expiresAt <= now + 5 * 60 * 1000 &&
-        tokens.expiresAt > now + 2 * 60 * 1000
-      ) {
+    if (tokenResponse) {
+      if (shouldRefreshToken(300)) {
         if (refreshPendingRef.current) {
           console.log(
             "Token refresh already pending in this component, skipping duplicate preemptive refresh",
@@ -393,7 +384,7 @@ export default function AppContent({
       console.log("Token state updated - user is logged out");
       refreshPendingRef.current = false;
     }
-  }, [refreshAccessToken, tokens]);
+  }, [refreshAccessToken, tokenResponse, shouldRefreshToken]);
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
@@ -417,9 +408,10 @@ export default function AppContent({
             screens: {
               Invitation: "invites/:inviteId",
               Transaction: {
-                path: "hcb/:transactionId",
+                path: "hcb/:transactionId/:attachReceipt?",
                 parse: {
                   transactionId: (id) => `txn_${id}`,
+                  attachReceipt: (attachReceipt) => attachReceipt,
                 },
               },
               Event: ":orgId",

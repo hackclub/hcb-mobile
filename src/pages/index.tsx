@@ -276,14 +276,6 @@ export default function App({ navigation }: Props) {
     return <HomeLoadingSkeleton />;
   }
 
-  if (organizations?.length == 0 && invitations?.length == 0) {
-    return (
-      <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-        <NoOrganizationsEmptyState />
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ReorderableList
@@ -314,6 +306,7 @@ export default function App({ navigation }: Props) {
         panGesture={panGesture}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
             <PromoBanner />
