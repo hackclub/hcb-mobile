@@ -63,14 +63,17 @@ export default function GrantCardPage({ route, navigation }: Props) {
     data: card,
     error: cardFetchError,
     mutate: mutateCard,
-  } = useOfflineSWR<Card>(cardId ? `cards/${cardId}?expand=last_frozen_by` : null, {
-    onError: (err) => {
-      console.error("Error fetching card", err, {
-        context: { cardId },
-      });
-      setCardError("Unable to load card details. Please try again later.");
+  } = useOfflineSWR<Card>(
+    cardId ? `cards/${cardId}?expand=last_frozen_by` : null,
+    {
+      onError: (err) => {
+        console.error("Error fetching card", err, {
+          context: { cardId },
+        });
+        setCardError("Unable to load card details. Please try again later.");
+      },
     },
-  });
+  );
 
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     card?.organization.id ? `organizations/${card.organization.id}` : null,
