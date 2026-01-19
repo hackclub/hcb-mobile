@@ -59,17 +59,18 @@ export default function GrantCardPage({ route, navigation }: Props) {
   const { data: user } = useOfflineSWR<User>(`user`);
   const hcb = useClient();
 
-  const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
-    cardId ? `cards/${cardId}?expand=last_frozen_by` : null,
-    {
-      onError: (err) => {
-        console.error("Error fetching card", err, {
-          context: { cardId },
-        });
-        setCardError("Unable to load card details. Please try again later.");
-      },
+  const {
+    data: card,
+    error: cardFetchError,
+    mutate: mutateCard,
+  } = useOfflineSWR<Card>(cardId ? `cards/${cardId}?expand=last_frozen_by` : null, {
+    onError: (err) => {
+      console.error("Error fetching card", err, {
+        context: { cardId },
+      });
+      setCardError("Unable to load card details. Please try again later.");
     },
-  );
+  });
 
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     card?.organization.id ? `organizations/${card.organization.id}` : null,
@@ -285,29 +286,27 @@ export default function GrantCardPage({ route, navigation }: Props) {
     const updatedCard = {
       ...card,
       status: updatedStatus,
-    };
+    } as Card;
 
-    mutate(`cards/${card?.id}`, updatedCard, false);
+    // Use bound mutate for card - optimistically update then revalidate
+    mutateCard(updatedCard, { revalidate: true });
+
+    // Update user/cards list
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
         list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
-      false,
+      { revalidate: true },
     );
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    mutate(`cards/${card?.id}`);
-    mutate("user/cards");
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await reloadGrant();
-      if (card?.id) {
-        await mutate(`cards/${card.id}`);
-      }
+      await mutateCard();
       await mutateTransactions();
       setCardError(null);
       setTransactionError(null);
@@ -318,7 +317,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
     } finally {
       setRefreshing(false);
     }
-  }, [reloadGrant, card?.id, mutate, mutateTransactions, fullGrantId]);
+  }, [reloadGrant, mutateCard, mutateTransactions, fullGrantId]);
 
   const canTopupCard = (card: Card | undefined) => {
     if (!card || !card.status) return false;

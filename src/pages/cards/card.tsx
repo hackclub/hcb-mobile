@@ -62,15 +62,16 @@ export default function CardPage(
   const hcb = useClient();
 
   const id = _card?.id ?? `crd_${cardId}`;
-  const { data: card, error: cardFetchError } = useOfflineSWR<Card>(
-    `cards/${id}?expand=last_frozen_by`,
-    {
-      onError: (err) => {
-        console.error("Error fetching card", err, { context: { cardId: id } });
-        setCardError("Unable to load card details. Please try again later.");
-      },
+  const {
+    data: card,
+    error: cardFetchError,
+    mutate: mutateCard,
+  } = useOfflineSWR<Card>(`cards/${id}?expand=last_frozen_by`, {
+    onError: (err) => {
+      console.error("Error fetching card", err, { context: { cardId: id } });
+      setCardError("Unable to load card details. Please try again later.");
     },
-  );
+  });
   const { data: user } = useOfflineSWR<User>(`user`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${_card?.organization.id || card?.organization.id}`,
@@ -253,27 +254,26 @@ export default function CardPage(
     const updatedCard = {
       ...card,
       status: updatedStatus,
-    };
+    } as Card;
 
-    mutate(`cards/${card?.id}`, updatedCard, false);
+    // Use bound mutate for card - optimistically update then revalidate
+    mutateCard(updatedCard, { revalidate: true });
 
+    // Update user/cards list
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
         list?.map((c) => (c.id === updatedCard.id ? updatedCard : c)),
-      false,
+      { revalidate: true },
     );
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    mutate(`cards/${card?.id}`);
-    mutate("user/cards");
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await mutate(`cards/${card?.id}`);
+      await mutateCard();
       await mutateTransactions();
       setCardError(null);
       setTransactionError(null);
@@ -282,7 +282,7 @@ export default function CardPage(
     } finally {
       setRefreshing(false);
     }
-  }, [mutate, card?.id, mutateTransactions]);
+  }, [mutateCard, card?.id, mutateTransactions]);
 
   useEffect(() => {
     Animated.loop(
@@ -445,7 +445,7 @@ export default function CardPage(
             handleBurnCard(
               card as Card,
               setIsBurningCard,
-              () => mutate(`cards/${card?.id}`),
+              () => mutateCard(),
               hcb,
             )
           }
