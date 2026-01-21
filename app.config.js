@@ -31,9 +31,16 @@ export default {
         "com.apple.developer.payment-pass-provisioning": true,
         "com.apple.developer.proximity-reader.payment.acceptance": true,
       },
+      infoPlist: {
+        NSCameraUsageDescription:
+          "Access your camera to take photos of receipts",
+        NSMicrophoneUsageDescription:
+          "Access your microphone to transcribe voice messages in help conversations",
+      },
     },
     android: {
       icon: "./assets/app-icon.png",
+      googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/app-icon-foreground.png",
         monochromeImage: "./assets/app-icon-monochrome.png",
@@ -178,8 +185,27 @@ export default {
         },
       ],
       "expo-background-task",
+      [
+        "@intercom/intercom-react-native",
+        {
+          appId: "uom9k5zn",
+          androidApiKey: "***REMOVED***",
+          iosApiKey: "***REMOVED***",
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/app-icon.png",
+          color: "#EC3750",
+        },
+      ],
+      [
+        "./plugins/withIntercomExpoPushRouter.js",
+        { serviceName: "AppFirebaseMessagingService" },
+      ],
+      "./plugins/withIntercomIOSPush.js",
       "./plugins/usePrivateSDK.js",
-      "./plugins/fixManifestMerger.js",
     ],
   },
 };

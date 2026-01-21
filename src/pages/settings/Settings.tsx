@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -23,14 +24,12 @@ import {
   Switch,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import HelpscoutBeacon from "react-native-helpscout-beacon";
 import { mutate } from "swr";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import FeedbackModal from "../../components/FeedbackModal";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
-import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
@@ -80,7 +79,7 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
-  const { data: beacon } = useOfflineSWR<Beacon>("user/beacon_config");
+  const { data: token } = useOfflineSWR<string>("user/intercom_token");
   const { colors } = useTheme();
   const cache = useCache();
   const { theme, setTheme, resetTheme } = useThemeContext();
@@ -90,30 +89,10 @@ export default function SettingsPage({ navigation }: Props) {
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
-  const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
 
   useEffect(() => {
-    if (!beaconID) {
-      console.warn("HelpScout Beacon ID not configured");
-      return;
-    }
-
-    try {
-      HelpscoutBeacon.init(beaconID);
-    } catch (error) {
-      console.error("Failed to initialize HelpScout Beacon", error);
-    }
-  }, [beaconID]);
-
-  useEffect(() => {
-    if (user?.email && user?.name && user?.id) {
-      try {
-        HelpscoutBeacon.login(user.email, user.name, user.id);
-      } catch (error) {
-        console.error("Failed to login to HelpScout Beacon", error);
-      }
-    }
-  }, [user]);
+    Intercom.setUserJwt(token ?? "");
+  }, [token]);
 
   useEffect(() => {
     (async () => {
@@ -693,7 +672,7 @@ export default function SettingsPage({ navigation }: Props) {
             />
           </Pressable>
 
-          {Platform.OS === "ios" && beacon?.signature && (
+          {/* {token && ( */}
             <>
               <View
                 style={{
@@ -710,8 +689,21 @@ export default function SettingsPage({ navigation }: Props) {
                   paddingVertical: 18,
                   paddingHorizontal: 18,
                 }}
-                onPress={() => {
-                  HelpscoutBeacon.open(beacon?.signature);
+                onPress={async () => {
+                  if (user) {
+                    Intercom.loginUserWithUserAttributes({
+                      email: user?.email,
+                      userId: user?.id,
+                    });
+                    Intercom.updateUser({
+                      email: user?.email,
+                      userId: user?.id,
+                      name: user?.name,
+                    });
+                  } else {
+                    Intercom.loginUnidentifiedUser();
+                  }
+                  Intercom.present();
                 }}
               >
                 <Ionicons
@@ -731,7 +723,7 @@ export default function SettingsPage({ navigation }: Props) {
                 />
               </Pressable>
             </>
-          )}
+          {/* )} */}
         </View>
 
         {/* Sign Out Button */}

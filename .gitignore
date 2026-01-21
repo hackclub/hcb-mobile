@@ -26,6 +26,7 @@ ios/
 android/
 .env.local
 .env
+google-services.json
 
 src/lib/yellowpages/data.json
 src/lib/yellowpages/.last-updated

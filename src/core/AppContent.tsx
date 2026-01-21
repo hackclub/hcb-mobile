@@ -1,4 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   NavigationContainer,
@@ -8,6 +9,7 @@ import {
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -38,6 +40,7 @@ import SentryUserBridge from "../components/core/SentryUserBridge";
 import useClient from "../lib/client";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
+import { usePushNotifications } from "../lib/usePushNotifications";
 import {
   resetStripeTerminalInitialization,
   useStripeTerminalInit,
@@ -108,6 +111,8 @@ export default function AppContent({
   const hasPassedBiometrics = useRef(false);
   const refreshPendingRef = useRef(false);
   const hcb = useClient();
+  const { register: registerPushNotifications } = usePushNotifications();
+  const pushNotificationsRegistered = useRef(false);
 
   useUpdateMonitor();
 
@@ -233,6 +238,9 @@ export default function AppContent({
       }
     };
     setStatusBar();
+  }, [isDark, themePref]);
+
+  useEffect(() => {
     const checkAuth = async () => {
       if (tokens?.accessToken) {
         if (
@@ -242,8 +250,6 @@ export default function AppContent({
           console.log(
             "Already authenticated for this token, skipping biometric auth",
           );
-          setIsAuthenticated(true);
-          setAppIsReady(true);
           return;
         }
 
@@ -256,8 +262,6 @@ export default function AppContent({
             "Token refreshed, user already authenticated - updating token without re-prompting biometrics",
           );
           lastAuthenticatedToken.current = tokens.accessToken;
-          setIsAuthenticated(true);
-          setAppIsReady(true);
           return;
         }
 
@@ -356,7 +360,7 @@ export default function AppContent({
     return () => {
       cancelled = true;
     };
-  }, [tokenResponse?.accessToken, setTokenResponse, isDark, themePref, tokens]);
+  }, [tokenResponse?.accessToken, setTokenResponse, tokens]);
 
   useEffect(() => {
     if (tokenResponse) {
@@ -385,6 +389,56 @@ export default function AppContent({
       refreshPendingRef.current = false;
     }
   }, [refreshAccessToken, tokenResponse, shouldRefreshToken]);
+
+  useEffect(() => {
+    if (tokens?.accessToken && isAuthenticated && appIsReady && !pushNotificationsRegistered.current) {
+      pushNotificationsRegistered.current = true;
+      console.log("registering push notifications");
+      registerPushNotifications().then((result) => {
+        console.log("result", result);
+        if (result.expoPushToken || result.nativePushToken) {
+          console.log("Push notifications registered successfully", {
+            expoPushToken: result.expoPushToken,
+            nativePushToken: result.nativePushToken,
+            nativePushTokenType: result.nativePushTokenType,
+          });
+          if (result.nativePushToken) {
+            Intercom.sendTokenToIntercom(result.nativePushToken);
+            console.log("Push token sent to Intercom", result.nativePushToken);
+          }
+          // TODO: Send tokens to backend when endpoint is available
+          // hcb.post("user/push_tokens", {
+          //   json: {
+          //     expo_push_token: result.expoPushToken,
+          //   },
+          // });
+        }
+      });
+    }
+  }, [
+    tokens?.accessToken,
+    isAuthenticated,
+    appIsReady,
+    registerPushNotifications,
+  ]);
+
+
+  useEffect(() => {
+    Intercom.setInAppMessageVisibility("GONE");
+
+    const notifSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const contentData = response.notification.request.content.data as Record<string, unknown> | undefined;
+      const trigger = response.notification.request.trigger as { payload?: Record<string, unknown> } | null;
+      const data = contentData || trigger?.payload;
+      if (data?.intercom_push_type) {
+        Intercom.present();
+      }
+    });
+
+    return () => {
+      notifSubscription.remove();
+    };
+  }, []);
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
@@ -528,7 +582,7 @@ export default function AppContent({
                 value={{
                   provider: () => cache,
                   fetcher,
-                  revalidateOnFocus: true,
+                  revalidateOnFocus: false,
                   revalidateOnReconnect: true,
                   revalidateIfStale: true,
                   dedupingInterval: 1000,
@@ -538,7 +592,7 @@ export default function AppContent({
                   errorRetryInterval: 500,
                   refreshInterval: 0,
                   loadingTimeout: 3000,
-                  focusThrottleInterval: 5000,
+                  focusThrottleInterval: 10000,
                   onErrorRetry: (
                     error,
                     key,

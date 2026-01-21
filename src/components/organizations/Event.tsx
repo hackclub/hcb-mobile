@@ -23,26 +23,28 @@ import { orgColor } from "../../utils/util";
 
 import EventBalance from "./EventBalance";
 
-const Event = memo(function Event({
-  event,
-  hideBalance = false,
-  onPress,
-  drag,
-  isActive,
-  style,
-  invitation,
-  // showTransactions = false,
-}: ViewProps & {
-  event: Organization;
-  hideBalance?: boolean;
-  showTransactions?: boolean;
-  invitation?: Invitation;
-  onPress?: () => void;
-  isActive?: boolean;
-  drag?: () => void;
-}) {
+const Event = memo(
+  function Event({
+    event,
+    hideBalance = false,
+    onPress,
+    drag,
+    isActive,
+    style,
+    invitation,
+    // showTransactions = false,
+  }: ViewProps & {
+    event: Organization;
+    hideBalance?: boolean;
+    showTransactions?: boolean;
+    invitation?: Invitation;
+    onPress?: () => void;
+    isActive?: boolean;
+    drag?: () => void;
+  }) {
   const { data } = useSWR<OrganizationExpanded>(
     hideBalance ? null : `organizations/${event.id}`,
+    { keepPreviousData: true },
   );
 
   const { colors: themeColors } = useTheme();
@@ -190,6 +192,11 @@ const Event = memo(function Event({
           <Image
             source={{ uri: event.background_image }}
             cachePolicy="memory-disk"
+            placeholder={{ blurhash: "L6PZfSi_.AyE_3t7t7R**0o#DgR4" }}
+            placeholderContentFit="cover"
+            transition={0}
+            recyclingKey={event.background_image}
+            priority="high"
             style={{
               position: "absolute",
               top: 0,
@@ -198,6 +205,7 @@ const Event = memo(function Event({
               bottom: 0,
               width: "100%",
               height: "100%",
+              backgroundColor: themeColors.card,
             }}
             contentFit="cover"
           />
@@ -230,6 +238,18 @@ const Event = memo(function Event({
       )}
     </TouchableHighlight>
   );
-});
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.event.id === nextProps.event.id &&
+      prevProps.event.name === nextProps.event.name &&
+      prevProps.event.icon === nextProps.event.icon &&
+      prevProps.event.background_image === nextProps.event.background_image &&
+      prevProps.hideBalance === nextProps.hideBalance &&
+      prevProps.isActive === nextProps.isActive &&
+      prevProps.invitation?.id === nextProps.invitation?.id
+    );
+  },
+);
 
 export default Event;
