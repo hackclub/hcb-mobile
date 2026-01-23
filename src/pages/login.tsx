@@ -29,10 +29,18 @@ const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
 export default function Login() {
   const scheme = useColorScheme();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const processedResponseRef = useRef<string | null>(null);
+  const isDark = useIsDark();
+
+  const [loading, setLoading] = useState(false);
   const [isPrompting, setIsPrompting] = useState(false);
   const [pendingSignup, setPendingSignup] = useState<boolean | null>(null);
+
+  // Prevent duplicate token exchanges
+  const isProcessingRef = useRef(false);
+  const processedCodesRef = useRef<Set<string>>(new Set());
+  const codeVerifierRef = useRef<string | null>(null);
+
+  const { setTokenResponse } = useContext(AuthContext);
 
   const signupParam = pendingSignup ?? false;
 
@@ -56,11 +64,6 @@ export default function Login() {
     authConfig,
     discovery,
   );
-
-  const [loading, setLoading] = useState(false);
-
-  const { setTokenResponse } = useContext(AuthContext);
-  const isDark = useIsDark();
 
   const openInAppBrowser = async (url: string) => {
     try {
@@ -86,7 +89,6 @@ export default function Login() {
     setStatusBar();
   }, [isDark]);
 
-  const codeVerifierRef = useRef<string | null>(null);
   useEffect(() => {
     if (request?.codeVerifier) {
       codeVerifierRef.current = request.codeVerifier;
@@ -94,58 +96,56 @@ export default function Login() {
   }, [request?.codeVerifier]);
 
   useEffect(() => {
-    if (!response || isProcessing) return;
+    if (response?.type !== "success") return;
 
-    const responseKey =
-      response.type +
-      (response.type === "success" ? response.params?.code : "");
-    if (processedResponseRef.current === responseKey) return;
+    const authCode = response.params?.code;
+    if (!authCode) return;
 
-    if (response.type === "success") {
-      const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
-      if (!codeVerifier) {
-        console.error("No code verifier available for token exchange");
-        return;
-      }
-
-      processedResponseRef.current = responseKey;
-      setIsProcessing(true);
-      setLoading(true);
-      exchangeCodeAsync(
-        {
-          clientId,
-          redirectUri,
-          code: response.params.code,
-          extraParams: { code_verifier: codeVerifier },
-        },
-        discovery,
-      )
-        .then(async (r) => {
-          console.log("Token exchange successful");
-
-          if (!r.refreshToken) {
-            console.warn("No refresh token received from authorization server");
-          }
-
-          // Use TokenResponse directly from expo-auth-session
-          setTokenResponse(r, codeVerifier);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setLoading(false);
-          setIsProcessing(false);
-        })
-        .catch((error) => {
-          console.error("Error exchanging code for token", error, {
-            authCode: response.params.code,
-          });
-          setLoading(false);
-          setIsProcessing(false);
-        });
+    if (isProcessingRef.current || processedCodesRef.current.has(authCode)) {
+      return;
     }
-  }, [response, request, setTokenResponse, isProcessing]);
+
+    const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
+    if (!codeVerifier) {
+      console.error("No code verifier available for token exchange");
+      return;
+    }
+
+    isProcessingRef.current = true;
+    processedCodesRef.current.add(authCode);
+    setLoading(true);
+
+    exchangeCodeAsync(
+      {
+        clientId,
+        redirectUri,
+        code: authCode,
+        extraParams: { code_verifier: codeVerifier },
+      },
+      discovery,
+    )
+      .then((tokenResponse) => {
+        if (!tokenResponse.refreshToken) {
+          console.warn("No refresh token received from authorization server");
+        }
+        setTokenResponse(tokenResponse, codeVerifier);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      })
+      .catch((error) => {
+        console.error("Error exchanging code for token:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+        isProcessingRef.current = false;
+      });
+  }, [response, request, setTokenResponse]);
 
   const doPrompt = async () => {
     if (isPrompting) return;
+
     setIsPrompting(true);
+    isProcessingRef.current = false;
+
     try {
       await promptAsync({ createTask: false });
     } finally {
