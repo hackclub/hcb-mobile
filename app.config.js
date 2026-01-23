@@ -188,9 +188,9 @@ export default {
       [
         "@intercom/intercom-react-native",
         {
-          appId: "uom9k5zn",
-          androidApiKey: "***REMOVED***",
-          iosApiKey: "***REMOVED***",
+          appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
+          androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+          iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
         },
       ],
       [
