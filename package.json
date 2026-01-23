@@ -69,7 +69,6 @@
     "expo-quick-actions": "^5.0.0",
     "expo-screen-capture": "~8.0.9",
     "expo-secure-store": "~15.0.7",
-    "expo-sensors": "~15.0.8",
     "expo-share-intent": "^5.0.1",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",

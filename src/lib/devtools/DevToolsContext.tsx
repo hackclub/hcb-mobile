@@ -9,8 +9,6 @@ import useSWR from "swr";
 
 import User from "../types/User";
 
-import { useShakeDetector } from "./useShakeDetector";
-
 interface DevToolsContextType {
   isOpen: boolean;
   open: () => void;
@@ -46,8 +44,6 @@ export function DevToolsProvider({ children }: { children: ReactNode }) {
       setIsOpen(true);
     }
   }, []);
-
-  useShakeDetector(toggle, isAuditor);
 
   return (
     <DevToolsContext.Provider
