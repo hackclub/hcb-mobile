@@ -89,10 +89,6 @@ export default function useClient() {
       const requests = [...queuedRequestsRef.current];
       queuedRequestsRef.current = [];
 
-      console.log(
-        `Processing ${requests.length} queued requests after token refresh`,
-      );
-
       pendingRetriesRef.current.clear();
       freshTokenMapRef.current.clear();
 

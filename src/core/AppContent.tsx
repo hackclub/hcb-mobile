@@ -273,7 +273,6 @@ export default function AppContent({
           );
 
           if (biometricsRequired !== "true") {
-            console.log("Biometric authentication not required, bypassing...");
             lastAuthenticatedToken.current = tokens.accessToken;
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
@@ -286,7 +285,6 @@ export default function AppContent({
           const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
           if (!hasHardware || !isEnrolled) {
-            console.log("Biometric authentication not available, bypassing...");
             lastAuthenticatedToken.current = tokens.accessToken;
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
