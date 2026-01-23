@@ -6,7 +6,6 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
-import * as ScreenCapture from "expo-screen-capture";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -85,18 +84,6 @@ export default function CardPage(
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card?.id || card?.id || "");
-
-  useEffect(() => {
-    if (detailsRevealed) {
-      ScreenCapture.preventScreenCaptureAsync("card-details");
-    } else {
-      ScreenCapture.allowScreenCaptureAsync("card-details");
-    }
-
-    return () => {
-      ScreenCapture.allowScreenCaptureAsync("card-details");
-    };
-  }, [detailsRevealed]);
 
   const isCardholder = user?.id == card?.user?.id;
   const isManagerOrAdmin =

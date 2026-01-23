@@ -1,6 +1,5 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import * as ScreenCapture from "expo-screen-capture";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -89,19 +88,6 @@ export default function GrantCardPage({ route, navigation }: Props) {
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(card?.id || "");
-
-  // Prevent screen capture when sensitive card details are revealed
-  useEffect(() => {
-    if (detailsRevealed) {
-      ScreenCapture.preventScreenCaptureAsync("grant-card-details");
-    } else {
-      ScreenCapture.allowScreenCaptureAsync("grant-card-details");
-    }
-
-    return () => {
-      ScreenCapture.allowScreenCaptureAsync("grant-card-details");
-    };
-  }, [detailsRevealed]);
 
   const isCardholder = user?.id === card?.user?.id;
   const isManagerOrAdmin =

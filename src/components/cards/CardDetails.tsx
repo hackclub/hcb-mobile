@@ -1,6 +1,8 @@
 import { useTheme } from "@react-navigation/native";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
+import * as ScreenCapture from "expo-screen-capture";
+import { useEffect } from "react";
 import { View, Text, Animated, Platform, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
@@ -50,6 +52,18 @@ export default function CardDetails({
   createSkeletonStyle,
 }: CardDetailsProps) {
   const { colors: themeColors } = useTheme();
+
+  useEffect(() => {
+    if (detailsRevealed && details) {
+      ScreenCapture.preventScreenCaptureAsync("card-details");
+    } else {
+      ScreenCapture.allowScreenCaptureAsync("card-details");
+    }
+
+    return () => {
+      ScreenCapture.allowScreenCaptureAsync("card-details");
+    };
+  }, [detailsRevealed, details]);
 
   const handleCopy = async (value: string, label: string) => {
     await Clipboard.setStringAsync(value);
