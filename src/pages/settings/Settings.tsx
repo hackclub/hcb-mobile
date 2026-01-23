@@ -30,7 +30,7 @@ import { mutate } from "swr";
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import FeedbackModal from "../../components/FeedbackModal";
-import { useDevTools } from "../../lib/devtools";
+import { useDevTools } from "../../lib/devtools/DevToolsContext";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -94,8 +94,10 @@ export default function SettingsPage({ navigation }: Props) {
   const [storeReviewAvailable, setStoreReviewAvailable] = useState(false);
 
   useEffect(() => {
-    Intercom.setUserJwt(token ?? "");
-  }, [token]);
+    if (token) {
+      Intercom.setUserJwt(token);
+    }
+  }, [token, tokenResponse]);
 
   useEffect(() => {
     (async () => {

@@ -52,6 +52,7 @@ import { useLinkingPref } from "../providers/LinkingContext";
 import { useThemeContext } from "../providers/ThemeContext";
 import { lightTheme, theme } from "../styles/theme";
 import { getStateFromPath } from "../utils/getStateFromPath";
+import { trackAppOpen } from "../utils/storeReview";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
@@ -419,6 +420,12 @@ export default function AppContent({
     appIsReady,
     registerPushNotifications,
   ]);
+
+  useEffect(() => {
+    if (appIsReady) {
+      trackAppOpen();
+    }
+  }, [appIsReady]);
 
   useEffect(() => {
     Intercom.setInAppMessageVisibility("GONE");
