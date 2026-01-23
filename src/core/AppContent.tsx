@@ -136,7 +136,6 @@ export default function AppContent({
     const now = Date.now();
 
     if (cachedToken && now < tokenExpiry) {
-      console.log("Using cached Stripe Terminal connection token");
       return cachedToken;
     }
 
@@ -170,7 +169,6 @@ export default function AppContent({
     }
 
     try {
-      console.log("Fetching new Stripe Terminal connection token...");
       setLastTokenFetch(now);
       setTokenFetchAttempts((prev) => prev + 1);
 
@@ -189,9 +187,6 @@ export default function AppContent({
       setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
 
-      console.log(
-        "Successfully fetched and cached Stripe Terminal connection token",
-      );
       return newToken;
     } catch (error) {
       console.error("Token fetch failed:", error);

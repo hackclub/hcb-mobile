@@ -12,7 +12,9 @@ import { useColorScheme } from "react-native";
 
 import { AuthProvider } from "./src/auth/AuthProvider";
 import { CustomAlertProvider } from "./src/components/alert/CustomAlertProvider";
+import { DevToolsPanel } from "./src/components/devtools";
 import AppContent from "./src/core/AppContent";
+import { DevToolsProvider } from "./src/lib/devtools";
 import { useCache } from "./src/providers/cacheProvider";
 import { LinkingProvider } from "./src/providers/LinkingContext";
 import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
@@ -95,13 +97,16 @@ function App() {
       <ExpoShareIntentProvider>
         <ThemeProvider>
           <AuthProvider>
-            <ShareIntentProvider>
-              <LinkingProvider>
-                <CustomAlertProvider>
-                  <AppContent scheme={scheme} cache={cache} />
-                </CustomAlertProvider>
-              </LinkingProvider>
-            </ShareIntentProvider>
+            <DevToolsProvider>
+              <ShareIntentProvider>
+                <LinkingProvider>
+                  <CustomAlertProvider>
+                    <AppContent scheme={scheme} cache={cache} />
+                  </CustomAlertProvider>
+                </LinkingProvider>
+              </ShareIntentProvider>
+              <DevToolsPanel />
+            </DevToolsProvider>
           </AuthProvider>
         </ThemeProvider>
       </ExpoShareIntentProvider>

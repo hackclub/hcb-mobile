@@ -30,6 +30,7 @@ import { mutate } from "swr";
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import FeedbackModal from "../../components/FeedbackModal";
+import { useDevTools } from "../../lib/devtools";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -797,6 +798,8 @@ export default function SettingsPage({ navigation }: Props) {
         >
           Sign Out
         </Button>
+
+        {__DEV__ && <DevToolsButton colors={colors} />}
       </View>
 
       {/* Feedback Modal */}
@@ -834,5 +837,32 @@ export default function SettingsPage({ navigation }: Props) {
         }}
       />
     </ScrollView>
+  );
+}
+
+function DevToolsButton({ colors }: { colors: { primary: string; card: string; text: string } }) {
+  const { forceOpen } = useDevTools();
+
+  return (
+    <Pressable
+      style={{
+        marginBottom: 40,
+        backgroundColor: colors.card,
+        borderRadius: 16,
+        paddingVertical: 16,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ff8c37",
+        borderStyle: "dashed",
+      }}
+      onPress={forceOpen}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <Ionicons name="bug" size={20} color="#ff8c37" />
+        <Text style={{ color: "#ff8c37", fontWeight: "600", fontSize: 16 }}>
+          Open Dev Tools
+        </Text>
+      </View>
+    </Pressable>
   );
 }
