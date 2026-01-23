@@ -182,9 +182,14 @@ export default function NetworkInspector({ colors }: Props) {
         <Text style={{ fontSize: 14, color: colors.muted }}>
           {filteredLogs.length}{filteredLogs.length !== logs.length ? ` / ${logs.length}` : ""} requests
         </Text>
-        <Pressable onPress={() => networkLogger.clear()} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
-          <Text style={{ color: colors.primary }}>Clear</Text>
-        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Pressable onPress={() => setLogs(networkLogger.getLogs())} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+            <Ionicons name="refresh" size={18} color={colors.primary} />
+          </Pressable>
+          <Pressable onPress={() => networkLogger.clear()} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+            <Text style={{ color: colors.primary }}>Clear</Text>
+          </Pressable>
+        </View>
       </View>
 
       <FlatList

@@ -40,12 +40,6 @@ export function getMissingReceiptKey() {
 }
 
 export default function useTransactions(id: string, prefix: string) {
-  if (!id || !prefix) {
-    throw new Error(
-      `useTransactions requires both id and prefix parameters. Received id: ${id}, prefix: ${prefix}`,
-    );
-  }
-
   const { fetcher } = useSWRConfig();
 
   const infiniteFetcher = (
@@ -55,9 +49,11 @@ export default function useTransactions(id: string, prefix: string) {
     return fetcher(url) as Promise<PaginatedResponse<Transaction>>;
   };
 
+  const keyFn = id && prefix ? getKey(id, prefix) : () => null;
+
   const { data, size, setSize, isLoading, error, mutate } = useSWRInfinite<
     PaginatedResponse<Transaction>
-  >(getKey(id, prefix), infiniteFetcher);
+  >(keyFn, infiniteFetcher);
 
   const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d?.data) || [],
