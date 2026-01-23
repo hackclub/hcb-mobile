@@ -154,7 +154,7 @@ export default function Navigator() {
             if (currentTab.name === "Home" && currentTab.state) {
               const homeStackState = currentTab.state;
               if (
-                homeStackState.index && homeStackState.index > 0 ||
+                (homeStackState.index && homeStackState.index > 0) ||
                 homeStackState.routes[homeStackState.index ?? 0].name !==
                   "Organizations"
               ) {
