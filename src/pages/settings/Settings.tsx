@@ -35,7 +35,6 @@ import { SettingsStackParamList } from "../../lib/NavigatorParamList";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
@@ -83,8 +82,7 @@ export default function SettingsPage({ navigation }: Props) {
   const { data: user } = useOfflineSWR<User>("user");
   const { data: token } = useOfflineSWR<string>("user/intercom_token");
   const { colors } = useTheme();
-  const cache = useCache();
-  const { theme, setTheme, resetTheme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
   const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
@@ -234,8 +232,11 @@ export default function SettingsPage({ navigation }: Props) {
   };
 
   const handleSignOut = async () => {
-    resetTheme();
     try {
+      if (user?.id) {
+        await AsyncStorage.setItem("last_logged_in_user_id", String(user.id));
+      }
+
       if (tokenResponse?.refreshToken) {
         try {
           await revokeAsync(
@@ -250,22 +251,11 @@ export default function SettingsPage({ navigation }: Props) {
         }
       }
 
-      await AsyncStorage.multiRemove([
-        THEME_KEY,
-        BIOMETRICS_KEY,
-        "organizationOrder",
-        "canceledCardsShown",
-        "ttpDidOnboarding",
-        "hasSeenTapToPayBanner",
-        "cardOrder",
-      ]);
-      cache.clear();
       setTokenResponse(null);
     } catch (error) {
-      console.error("Error clearing storage during sign out", error, {
+      console.error("Error during sign out", error, {
         context: { action: "sign_out" },
       });
-      cache.clear();
       setTokenResponse(null);
     }
   };

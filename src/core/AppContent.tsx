@@ -37,6 +37,7 @@ import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
 import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
 import SentryUserBridge from "../components/core/SentryUserBridge";
+import UserChangeDetector from "../components/core/UserChangeDetector";
 import useClient from "../lib/client";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
@@ -657,6 +658,7 @@ export default function AppContent({
                 }}
               >
                 <SentryUserBridge />
+                <UserChangeDetector />
                 <ActionSheetProvider>
                   <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                     <NavigationContainer

@@ -19,4 +19,5 @@ export const ASYNC_STORAGE_KEYS = [
   "isTapToPayEnabled",
   "linking-enabled",
   "organizationOrder",
+  "last_logged_in_user_id",
 ] as const;
