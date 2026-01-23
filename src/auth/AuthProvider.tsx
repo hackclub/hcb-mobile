@@ -9,7 +9,6 @@ import * as SecureStore from "expo-secure-store";
 import React, { useState, useEffect, useCallback } from "react";
 
 import AuthContext from "./auth";
-import { migrateLegacyTokens, clearLegacyTokens } from "./migration";
 
 const TOKEN_RESPONSE_KEY = "auth_token_response";
 const CODE_VERIFIER_KEY = "auth_code_verifier";
@@ -129,41 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Migrate from legacy format if new format not found
-        const migration = await migrateLegacyTokens();
-        if (migration.tokenResponse) {
-          setTokenResponseState(migration.tokenResponse);
-          if (migration.codeVerifier) {
-            setCodeVerifierState(migration.codeVerifier);
-          }
-
-          // Save in new format and clean up legacy keys
-          const tokenData = {
-            accessToken: migration.tokenResponse.accessToken,
-            refreshToken: migration.tokenResponse.refreshToken,
-            expiresIn: migration.tokenResponse.expiresIn,
-            issuedAt: migration.tokenResponse.issuedAt,
-            tokenType: migration.tokenResponse.tokenType,
-            scope: migration.tokenResponse.scope,
-          };
-          await SecureStore.setItemAsync(
-            TOKEN_RESPONSE_KEY,
-            JSON.stringify(tokenData),
-            {
-              keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-            },
-          );
-          if (migration.codeVerifier) {
-            await SecureStore.setItemAsync(
-              CODE_VERIFIER_KEY,
-              migration.codeVerifier,
-              {
-                keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-              },
-            );
-          }
-          await clearLegacyTokens();
-        }
       } catch (error) {
         console.error("Failed to load auth token response", error, {
           action: "token_load",

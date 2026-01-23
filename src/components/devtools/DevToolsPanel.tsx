@@ -1,14 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-
-  useColorScheme,
-} from "react-native";
+import { Modal, View, Text, Pressable, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDevTools } from "../../lib/devtools/DevToolsContext";
@@ -55,24 +47,43 @@ export default function DevToolsPanel() {
   };
 
   return (
-    <Modal visible={isOpen} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.modalRoot, { backgroundColor: colors.background }]}>
-        <SafeAreaView style={styles.container}>
-          <View style={[styles.header, { borderBottomColor: colors.border }]}>
-            <Text style={[styles.title, { color: colors.text }]}>Dev Tools</Text>
-            <Pressable onPress={close} style={styles.closeButton}>
+    <Modal visible={isOpen} animationType="slide" presentationStyle="formSheet">
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+            }}
+          >
+            <Text style={{ fontSize: 20, fontWeight: "bold", color: colors.text }}>
+              Dev Tools
+            </Text>
+            <Pressable onPress={close} style={{ padding: 4 }}>
               <Ionicons name="close" size={24} color={colors.text} />
             </Pressable>
           </View>
 
-          <View style={[styles.tabBar, { backgroundColor: colors.card }]}>
+          <View style={{ flexDirection: "row", padding: 8, gap: 8, backgroundColor: colors.card }}>
             {tabs.map((tab) => (
               <Pressable
                 key={tab.key}
-                style={[
-                  styles.tab,
-                  activeTab === tab.key && { backgroundColor: colors.primary },
-                ]}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  borderRadius: 8,
+                  gap: 6,
+                  backgroundColor: activeTab === tab.key ? colors.primary : "transparent",
+                }}
                 onPress={() => setActiveTab(tab.key)}
               >
                 <Ionicons
@@ -81,10 +92,11 @@ export default function DevToolsPanel() {
                   color={activeTab === tab.key ? "#fff" : colors.muted}
                 />
                 <Text
-                  style={[
-                    styles.tabLabel,
-                    { color: activeTab === tab.key ? "#fff" : colors.muted },
-                  ]}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: activeTab === tab.key ? "#fff" : colors.muted,
+                  }}
                 >
                   {tab.label}
                 </Text>
@@ -92,55 +104,9 @@ export default function DevToolsPanel() {
             ))}
           </View>
 
-          <View style={styles.content}>{renderContent()}</View>
+          <View style={{ flex: 1 }}>{renderContent()}</View>
         </SafeAreaView>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  modalRoot: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  tabBar: {
-    flexDirection: "row",
-    padding: 8,
-    gap: 8,
-  },
-  tab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-  },
-  tabLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  content: {
-    flex: 1,
-  },
-});

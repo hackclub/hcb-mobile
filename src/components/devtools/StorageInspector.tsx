@@ -2,16 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-  Modal,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator } from "react-native";
 
 import { SECURE_STORE_KEYS, ASYNC_STORAGE_KEYS } from "../../lib/devtools/storageKeys";
 
@@ -44,25 +35,25 @@ export default function StorageInspector({ colors }: Props) {
   const loadAsyncStorage = useCallback(async () => {
     const results: StorageItem[] = [];
     const allKeys = await AsyncStorage.getAllKeys();
-    
+
     for (const key of ASYNC_STORAGE_KEYS) {
       const value = await AsyncStorage.getItem(key);
       results.push({ key, value });
     }
-    
+
     for (const key of allKeys) {
       if (!ASYNC_STORAGE_KEYS.includes(key as typeof ASYNC_STORAGE_KEYS[number])) {
         const value = await AsyncStorage.getItem(key);
         results.push({ key, value });
       }
     }
-    
+
     return results;
   }, []);
 
   const loadSecureStore = useCallback(async () => {
     const results: StorageItem[] = [];
-    
+
     for (const { key, sensitive } of SECURE_STORE_KEYS) {
       try {
         const value = await SecureStore.getItemAsync(key, {
@@ -73,7 +64,7 @@ export default function StorageInspector({ colors }: Props) {
         results.push({ key, value: null, sensitive });
       }
     }
-    
+
     return results;
   }, []);
 
@@ -107,7 +98,7 @@ export default function StorageInspector({ colors }: Props) {
             }
             loadData();
             setSelectedItem(null);
-          } catch (error) {
+          } catch {
             Alert.alert("Error", "Failed to delete item");
           }
         },
@@ -128,76 +119,67 @@ export default function StorageInspector({ colors }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.segmentContainer, { backgroundColor: colors.card }]}>
+    <View style={{ flex: 1 }}>
+      <View style={{ flexDirection: "row", margin: 12, borderRadius: 8, padding: 4, backgroundColor: colors.card }}>
         <Pressable
-          style={[
-            styles.segment,
-            storageType === "async" && { backgroundColor: colors.primary },
-          ]}
+          style={{
+            flex: 1,
+            paddingVertical: 8,
+            borderRadius: 6,
+            alignItems: "center",
+            backgroundColor: storageType === "async" ? colors.primary : "transparent",
+          }}
           onPress={() => setStorageType("async")}
         >
-          <Text
-            style={[
-              styles.segmentText,
-              { color: storageType === "async" ? "#fff" : colors.muted },
-            ]}
-          >
+          <Text style={{ fontSize: 14, fontWeight: "600", color: storageType === "async" ? "#fff" : colors.muted }}>
             AsyncStorage
           </Text>
         </Pressable>
         <Pressable
-          style={[
-            styles.segment,
-            storageType === "secure" && { backgroundColor: colors.primary },
-          ]}
+          style={{
+            flex: 1,
+            paddingVertical: 8,
+            borderRadius: 6,
+            alignItems: "center",
+            backgroundColor: storageType === "secure" ? colors.primary : "transparent",
+          }}
           onPress={() => setStorageType("secure")}
         >
-          <Text
-            style={[
-              styles.segmentText,
-              { color: storageType === "secure" ? "#fff" : colors.muted },
-            ]}
-          >
+          <Text style={{ fontSize: 14, fontWeight: "600", color: storageType === "secure" ? "#fff" : colors.muted }}>
             SecureStore
           </Text>
         </Pressable>
       </View>
 
-      <View style={[styles.toolbar, { backgroundColor: colors.card }]}>
-        <Text style={[styles.count, { color: colors.muted }]}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.card }}>
+        <Text style={{ fontSize: 14, color: colors.muted }}>
           {items.filter((i) => i.value !== null).length} items
         </Text>
-        <Pressable onPress={loadData} style={styles.refreshButton}>
+        <Pressable onPress={loadData} style={{ padding: 8 }}>
           <Ionicons name="refresh" size={18} color={colors.primary} />
         </Pressable>
       </View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : (
-        <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 12, gap: 8 }}>
           {items.map((item) => (
             <Pressable
               key={item.key}
-              style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border }]}
+              style={{ padding: 12, borderRadius: 8, borderWidth: 1, marginBottom: 8, backgroundColor: colors.card, borderColor: colors.border }}
               onPress={() => setSelectedItem(item)}
             >
-              <View style={styles.itemHeader}>
-                <Text style={[styles.itemKey, { color: colors.text }]} numberOfLines={1}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", flex: 1, color: colors.text }} numberOfLines={1}>
                   {item.key}
                 </Text>
-                {item.sensitive && (
-                  <Ionicons name="lock-closed" size={14} color={colors.muted} />
-                )}
+                {item.sensitive && <Ionicons name="lock-closed" size={14} color={colors.muted} />}
               </View>
               <Text
-                style={[
-                  styles.itemValue,
-                  { color: item.value === null ? colors.muted : colors.text },
-                ]}
+                style={{ fontSize: 13, fontFamily: "JetBrainsMono-Regular", color: item.value === null ? colors.muted : colors.text }}
                 numberOfLines={2}
               >
                 {item.value === null ? "[not set]" : formatValue(item.value, item.sensitive)}
@@ -213,11 +195,11 @@ export default function StorageInspector({ colors }: Props) {
         presentationStyle="pageSheet"
         onRequestClose={() => setSelectedItem(null)}
       >
-        <View style={[styles.detailContainer, { backgroundColor: colors.background }]}>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
           {selectedItem && (
             <>
-              <View style={[styles.detailHeader, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.detailTitle, { color: colors.text }]} numberOfLines={1}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                <Text style={{ fontSize: 16, fontWeight: "bold", flex: 1, marginRight: 12, color: colors.text }} numberOfLines={1}>
                   {selectedItem.key}
                 </Text>
                 <Pressable onPress={() => setSelectedItem(null)}>
@@ -225,24 +207,18 @@ export default function StorageInspector({ colors }: Props) {
                 </Pressable>
               </View>
 
-              <View style={[styles.detailToolbar, { borderBottomColor: colors.border }]}>
+              <View style={{ flexDirection: "row", padding: 12, gap: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
                 {selectedItem.sensitive && (
                   <Pressable
-                    style={[styles.toolbarButton, { backgroundColor: colors.card }]}
+                    style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: colors.card }}
                     onPress={() => setShowSensitive(!showSensitive)}
                   >
-                    <Ionicons
-                      name={showSensitive ? "eye-off" : "eye"}
-                      size={18}
-                      color={colors.primary}
-                    />
-                    <Text style={{ color: colors.primary, marginLeft: 6 }}>
-                      {showSensitive ? "Hide" : "Show"}
-                    </Text>
+                    <Ionicons name={showSensitive ? "eye-off" : "eye"} size={18} color={colors.primary} />
+                    <Text style={{ color: colors.primary, marginLeft: 6 }}>{showSensitive ? "Hide" : "Show"}</Text>
                   </Pressable>
                 )}
                 <Pressable
-                  style={[styles.toolbarButton, { backgroundColor: "#ff453a20" }]}
+                  style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: "#ff453a20" }}
                   onPress={() => handleDelete(selectedItem.key)}
                 >
                   <Ionicons name="trash" size={18} color="#ff453a" />
@@ -250,10 +226,10 @@ export default function StorageInspector({ colors }: Props) {
                 </Pressable>
               </View>
 
-              <ScrollView style={styles.detailContent}>
-                <View style={[styles.valueContainer, { backgroundColor: colors.card }]}>
+              <ScrollView style={{ flex: 1, padding: 12 }}>
+                <View style={{ padding: 12, borderRadius: 8, backgroundColor: colors.card }}>
                   <Text
-                    style={[styles.valueText, { color: colors.text }]}
+                    style={{ fontSize: 13, fontFamily: "JetBrainsMono-Regular", color: colors.text }}
                     selectable={!selectedItem.sensitive || showSensitive}
                   >
                     {formatValue(selectedItem.value, selectedItem.sensitive)}
@@ -267,112 +243,3 @@ export default function StorageInspector({ colors }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  segmentContainer: {
-    flexDirection: "row",
-    margin: 12,
-    borderRadius: 8,
-    padding: 4,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-  segmentText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  toolbar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  count: {
-    fontSize: 14,
-  },
-  refreshButton: {
-    padding: 8,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    padding: 12,
-    gap: 8,
-  },
-  item: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginBottom: 8,
-  },
-  itemHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  itemKey: {
-    fontSize: 14,
-    fontWeight: "600",
-    flex: 1,
-  },
-  itemValue: {
-    fontSize: 13,
-    fontFamily: "JetBrainsMono-Regular",
-  },
-  detailContainer: {
-    flex: 1,
-  },
-  detailHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  detailTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flex: 1,
-    marginRight: 12,
-  },
-  detailToolbar: {
-    flexDirection: "row",
-    padding: 12,
-    gap: 12,
-    borderBottomWidth: 1,
-  },
-  toolbarButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  detailContent: {
-    flex: 1,
-    padding: 12,
-  },
-  valueContainer: {
-    padding: 12,
-    borderRadius: 8,
-  },
-  valueText: {
-    fontSize: 13,
-    fontFamily: "JetBrainsMono-Regular",
-  },
-});
