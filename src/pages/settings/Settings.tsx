@@ -599,20 +599,28 @@ export default function SettingsPage({ navigation }: Props) {
               paddingHorizontal: 18,
             }}
             onPress={async () => {
-              if (user) {
-                Intercom.loginUserWithUserAttributes({
-                  email: user?.email,
-                  userId: user?.id,
+              try {
+                if (user) {
+                  await Intercom.loginUserWithUserAttributes({
+                    email: user.email,
+                    userId: user.id,
+                  });
+                  await Intercom.updateUser({
+                    email: user.email,
+                    userId: user.id,
+                    name: user.name,
+                  });
+                } else {
+                  await Intercom.loginUnidentifiedUser();
+                }
+                await Intercom.present();
+              } catch (error) {
+                Toast.show({
+                  type: ALERT_TYPE.DANGER,
+                  title: "Error",
+                  textBody: "Unable to open support chat. Please try again.",
                 });
-                Intercom.updateUser({
-                  email: user?.email,
-                  userId: user?.id,
-                  name: user?.name,
-                });
-              } else {
-                Intercom.loginUnidentifiedUser();
               }
-              Intercom.present();
             }}
           >
             <Ionicons
