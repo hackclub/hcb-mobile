@@ -16,7 +16,7 @@ function withIntercomIOSPush(config) {
     if (!contents.includes("import UserNotifications")) {
       contents = contents.replace(
         "import Expo",
-        "import Expo\nimport UserNotifications"
+        "import Expo\nimport UserNotifications",
       );
     }
 
@@ -42,9 +42,7 @@ function withIntercomIOSPush(config) {
 
     // Insert before the closing brace of AppDelegate class
     // Find the pattern: closing brace after Universal Links method
-    const insertPoint = contents.lastIndexOf(
-      "}\n\nclass ReactNativeDelegate"
-    );
+    const insertPoint = contents.lastIndexOf("}\n\nclass ReactNativeDelegate");
 
     if (insertPoint !== -1) {
       contents =
@@ -54,9 +52,7 @@ function withIntercomIOSPush(config) {
       console.log("✅ Added push notification methods to AppDelegate");
     } else {
       // Fallback: try to find the class closing brace differently
-      const appDelegateEnd = contents.indexOf(
-        "class ReactNativeDelegate"
-      );
+      const appDelegateEnd = contents.indexOf("class ReactNativeDelegate");
       if (appDelegateEnd !== -1) {
         // Find the } before ReactNativeDelegate
         let bracePos = appDelegateEnd - 1;
@@ -68,7 +64,9 @@ function withIntercomIOSPush(config) {
             contents.slice(0, bracePos) +
             pushMethods +
             contents.slice(bracePos);
-          console.log("✅ Added push notification methods to AppDelegate (fallback)");
+          console.log(
+            "✅ Added push notification methods to AppDelegate (fallback)",
+          );
         }
       }
     }

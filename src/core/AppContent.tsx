@@ -386,7 +386,12 @@ export default function AppContent({
   }, [refreshAccessToken, tokenResponse, shouldRefreshToken]);
 
   useEffect(() => {
-    if (tokens?.accessToken && isAuthenticated && appIsReady && !pushNotificationsRegistered.current) {
+    if (
+      tokens?.accessToken &&
+      isAuthenticated &&
+      appIsReady &&
+      !pushNotificationsRegistered.current
+    ) {
       pushNotificationsRegistered.current = true;
       console.log("registering push notifications");
       registerPushNotifications().then((result) => {
@@ -417,18 +422,22 @@ export default function AppContent({
     registerPushNotifications,
   ]);
 
-
   useEffect(() => {
     Intercom.setInAppMessageVisibility("GONE");
 
-    const notifSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      const contentData = response.notification.request.content.data as Record<string, unknown> | undefined;
-      const trigger = response.notification.request.trigger as { payload?: Record<string, unknown> } | null;
-      const data = contentData || trigger?.payload;
-      if (data?.intercom_push_type) {
-        Intercom.present();
-      }
-    });
+    const notifSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const contentData = response.notification.request.content.data as
+          | Record<string, unknown>
+          | undefined;
+        const trigger = response.notification.request.trigger as {
+          payload?: Record<string, unknown>;
+        } | null;
+        const data = contentData || trigger?.payload;
+        if (data?.intercom_push_type) {
+          Intercom.present();
+        }
+      });
 
     return () => {
       notifSubscription.remove();

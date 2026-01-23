@@ -1,6 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useMemo } from "react";
-import { View, Text, FlatList, Pressable, Modal, ScrollView, TextInput, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  Modal,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+} from "react-native";
 
 import { NetworkLog, networkLogger } from "../../lib/devtools/networkLogger";
 
@@ -63,7 +72,11 @@ function matchesStatusFilter(log: NetworkLog, filter: StatusFilter): boolean {
 
 function maskSensitive(key: string, value: string): string {
   const lowerKey = key.toLowerCase();
-  if (lowerKey === "authorization" || lowerKey.includes("token") || lowerKey.includes("secret")) {
+  if (
+    lowerKey === "authorization" ||
+    lowerKey.includes("token") ||
+    lowerKey.includes("secret")
+  ) {
     if (value.length > 20) {
       return value.substring(0, 10) + "..." + value.substring(value.length - 5);
     }
@@ -112,23 +125,56 @@ export default function NetworkInspector({ colors }: Props) {
       }}
       onPress={() => setSelectedLog(item)}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 }}>
-        <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, backgroundColor: colors.primary + "20" }}>
-          <Text style={{ fontSize: 12, fontWeight: "600", color: colors.primary }}>{item.method}</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 6,
+        }}
+      >
+        <View
+          style={{
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderRadius: 4,
+            backgroundColor: colors.primary + "20",
+          }}
+        >
+          <Text
+            style={{ fontSize: 12, fontWeight: "600", color: colors.primary }}
+          >
+            {item.method}
+          </Text>
         </View>
-        <Text style={{ fontSize: 14, fontWeight: "600", color: getStatusColor(item.status) }} numberOfLines={1}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: getStatusColor(item.status),
+          }}
+          numberOfLines={1}
+        >
           {item.status || "pending"}
         </Text>
         <Text style={{ fontSize: 12, marginLeft: "auto", color: colors.muted }}>
           {formatDuration(item.duration)}
         </Text>
       </View>
-      <Text style={{ fontSize: 14, marginBottom: 4, color: colors.text }} numberOfLines={1}>
+      <Text
+        style={{ fontSize: 14, marginBottom: 4, color: colors.text }}
+        numberOfLines={1}
+      >
         {getShortUrl(item.url)}
       </Text>
-      <Text style={{ fontSize: 12, color: colors.muted }}>{formatTime(item.startTime)}</Text>
+      <Text style={{ fontSize: 12, color: colors.muted }}>
+        {formatTime(item.startTime)}
+      </Text>
       {item.error && (
-        <Text style={{ color: "#ff453a", fontSize: 12, marginTop: 4 }} numberOfLines={1}>
+        <Text
+          style={{ color: "#ff453a", fontSize: 12, marginTop: 4 }}
+          numberOfLines={1}
+        >
           {item.error}
         </Text>
       )}
@@ -137,8 +183,20 @@ export default function NetworkInspector({ colors }: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 12, paddingBottom: 8, backgroundColor: colors.card }}>
-        <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, gap: 8, backgroundColor: colors.background }}>
+      <View
+        style={{ padding: 12, paddingBottom: 8, backgroundColor: colors.card }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 8,
+            gap: 8,
+            backgroundColor: colors.background,
+          }}
+        >
           <Ionicons name="search" size={16} color={colors.muted} />
           <TextInput
             style={{ flex: 1, fontSize: 14, padding: 0, color: colors.text }}
@@ -158,7 +216,11 @@ export default function NetworkInspector({ colors }: Props) {
       </View>
 
       <View style={{ paddingBottom: 8, backgroundColor: colors.card }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, gap: 6 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 12, gap: 6 }}
+        >
           {statusFilters.map((f) => (
             <Pressable
               key={f.key}
@@ -166,11 +228,18 @@ export default function NetworkInspector({ colors }: Props) {
                 paddingHorizontal: 12,
                 paddingVertical: 6,
                 borderRadius: 6,
-                backgroundColor: statusFilter === f.key ? f.color + "30" : "transparent",
+                backgroundColor:
+                  statusFilter === f.key ? f.color + "30" : "transparent",
               }}
               onPress={() => setStatusFilter(f.key)}
             >
-              <Text style={{ fontSize: 13, fontWeight: "600", color: statusFilter === f.key ? f.color : colors.muted }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: "600",
+                  color: statusFilter === f.key ? f.color : colors.muted,
+                }}
+              >
                 {f.label}
               </Text>
             </Pressable>
@@ -178,15 +247,32 @@ export default function NetworkInspector({ colors }: Props) {
         </ScrollView>
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.card }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          backgroundColor: colors.card,
+        }}
+      >
         <Text style={{ fontSize: 14, color: colors.muted }}>
-          {filteredLogs.length}{filteredLogs.length !== logs.length ? ` / ${logs.length}` : ""} requests
+          {filteredLogs.length}
+          {filteredLogs.length !== logs.length ? ` / ${logs.length}` : ""}{" "}
+          requests
         </Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <Pressable onPress={() => setLogs(networkLogger.getLogs())} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+          <Pressable
+            onPress={() => setLogs(networkLogger.getLogs())}
+            style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+          >
             <Ionicons name="refresh" size={18} color={colors.primary} />
           </Pressable>
-          <Pressable onPress={() => networkLogger.clear()} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+          <Pressable
+            onPress={() => networkLogger.clear()}
+            style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+          >
             <Text style={{ color: colors.primary }}>Clear</Text>
           </Pressable>
         </View>
@@ -213,8 +299,25 @@ export default function NetworkInspector({ colors }: Props) {
         <View style={{ flex: 1, backgroundColor: colors.background }}>
           {selectedLog && (
             <>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                <Text style={{ fontSize: 18, fontWeight: "bold", color: colors.text }}>Request Details</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: colors.text,
+                  }}
+                >
+                  Request Details
+                </Text>
                 <Pressable onPress={() => setSelectedLog(null)}>
                   <Ionicons name="close" size={24} color={colors.text} />
                 </Pressable>
@@ -222,39 +325,83 @@ export default function NetworkInspector({ colors }: Props) {
               <ScrollView style={{ flex: 1, padding: 12 }}>
                 <Section title="General" colors={colors}>
                   <Row label="URL" value={selectedLog.url} colors={colors} />
-                  <Row label="Method" value={selectedLog.method} colors={colors} />
-                  <Row label="Status" value={`${selectedLog.status || "-"} ${selectedLog.statusText || ""}`} colors={colors} />
-                  <Row label="Duration" value={formatDuration(selectedLog.duration)} colors={colors} />
-                  <Row label="Time" value={formatTime(selectedLog.startTime)} colors={colors} />
+                  <Row
+                    label="Method"
+                    value={selectedLog.method}
+                    colors={colors}
+                  />
+                  <Row
+                    label="Status"
+                    value={`${selectedLog.status || "-"} ${selectedLog.statusText || ""}`}
+                    colors={colors}
+                  />
+                  <Row
+                    label="Duration"
+                    value={formatDuration(selectedLog.duration)}
+                    colors={colors}
+                  />
+                  <Row
+                    label="Time"
+                    value={formatTime(selectedLog.startTime)}
+                    colors={colors}
+                  />
                 </Section>
 
-                {selectedLog.requestHeaders && Object.keys(selectedLog.requestHeaders).length > 0 && (
-                  <Section title="Request Headers" colors={colors}>
-                    {Object.entries(selectedLog.requestHeaders).map(([key, value]) => (
-                      <Row key={key} label={key} value={maskSensitive(key, value)} colors={colors} />
-                    ))}
-                  </Section>
-                )}
+                {selectedLog.requestHeaders &&
+                  Object.keys(selectedLog.requestHeaders).length > 0 && (
+                    <Section title="Request Headers" colors={colors}>
+                      {Object.entries(selectedLog.requestHeaders).map(
+                        ([key, value]) => (
+                          <Row
+                            key={key}
+                            label={key}
+                            value={maskSensitive(key, value)}
+                            colors={colors}
+                          />
+                        ),
+                      )}
+                    </Section>
+                  )}
 
                 {selectedLog.requestBody && (
                   <Section title="Request Body" colors={colors}>
-                    <Text style={{ fontSize: 12, fontFamily: "JetBrainsMono-Regular", color: colors.text }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "JetBrainsMono-Regular",
+                        color: colors.text,
+                      }}
+                    >
                       {formatBody(selectedLog.requestBody)}
                     </Text>
                   </Section>
                 )}
 
-                {selectedLog.responseHeaders && Object.keys(selectedLog.responseHeaders).length > 0 && (
-                  <Section title="Response Headers" colors={colors}>
-                    {Object.entries(selectedLog.responseHeaders).map(([key, value]) => (
-                      <Row key={key} label={key} value={value} colors={colors} />
-                    ))}
-                  </Section>
-                )}
+                {selectedLog.responseHeaders &&
+                  Object.keys(selectedLog.responseHeaders).length > 0 && (
+                    <Section title="Response Headers" colors={colors}>
+                      {Object.entries(selectedLog.responseHeaders).map(
+                        ([key, value]) => (
+                          <Row
+                            key={key}
+                            label={key}
+                            value={value}
+                            colors={colors}
+                          />
+                        ),
+                      )}
+                    </Section>
+                  )}
 
                 {selectedLog.responseBody && (
                   <Section title="Response Body" colors={colors}>
-                    <Text style={{ fontSize: 12, fontFamily: "JetBrainsMono-Regular", color: colors.text }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "JetBrainsMono-Regular",
+                        color: colors.text,
+                      }}
+                    >
                       {formatBody(selectedLog.responseBody)}
                     </Text>
                   </Section>
@@ -262,7 +409,13 @@ export default function NetworkInspector({ colors }: Props) {
 
                 {selectedLog.error && (
                   <Section title="Error" colors={colors}>
-                    <Text style={{ fontSize: 12, fontFamily: "JetBrainsMono-Regular", color: "#ff453a" }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "JetBrainsMono-Regular",
+                        color: "#ff453a",
+                      }}
+                    >
                       {selectedLog.error}
                     </Text>
                   </Section>
@@ -276,19 +429,59 @@ export default function NetworkInspector({ colors }: Props) {
   );
 }
 
-function Section({ title, children, colors }: { title: string; children: React.ReactNode; colors: Props["colors"] }) {
+function Section({
+  title,
+  children,
+  colors,
+}: {
+  title: string;
+  children: React.ReactNode;
+  colors: Props["colors"];
+}) {
   return (
-    <View style={{ borderRadius: 8, padding: 12, marginBottom: 12, backgroundColor: colors.card }}>
-      <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 8, color: colors.text }}>{title}</Text>
+    <View
+      style={{
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+        backgroundColor: colors.card,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "600",
+          marginBottom: 8,
+          color: colors.text,
+        }}
+      >
+        {title}
+      </Text>
       {children}
     </View>
   );
 }
 
-function Row({ label, value, colors }: { label: string; value: string; colors: Props["colors"] }) {
+function Row({
+  label,
+  value,
+  colors,
+}: {
+  label: string;
+  value: string;
+  colors: Props["colors"];
+}) {
   return (
-    <View style={{ paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }}>
-      <Text style={{ fontSize: 12, marginBottom: 2, color: colors.muted }}>{label}</Text>
+    <View
+      style={{
+        paddingVertical: 8,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.border,
+      }}
+    >
+      <Text style={{ fontSize: 12, marginBottom: 2, color: colors.muted }}>
+        {label}
+      </Text>
       <Text style={{ fontSize: 14, color: colors.text }} selectable>
         {value}
       </Text>

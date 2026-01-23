@@ -12,7 +12,11 @@ import StorageInspector from "./StorageInspector";
 
 type Tab = "network" | "storage" | "auth" | "console";
 
-const tabs: { key: Tab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+const tabs: {
+  key: Tab;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
   { key: "network", label: "Network", icon: "globe-outline" },
   { key: "storage", label: "Storage", icon: "folder-outline" },
   { key: "auth", label: "Auth", icon: "key-outline" },
@@ -61,7 +65,9 @@ export default function DevToolsPanel() {
               borderBottomColor: colors.border,
             }}
           >
-            <Text style={{ fontSize: 20, fontWeight: "bold", color: colors.text }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: "bold", color: colors.text }}
+            >
               Dev Tools
             </Text>
             <Pressable onPress={close} style={{ padding: 4 }}>
@@ -69,7 +75,14 @@ export default function DevToolsPanel() {
             </Pressable>
           </View>
 
-          <View style={{ flexDirection: "row", padding: 8, gap: 8, backgroundColor: colors.card }}>
+          <View
+            style={{
+              flexDirection: "row",
+              padding: 8,
+              gap: 8,
+              backgroundColor: colors.card,
+            }}
+          >
             {tabs.map((tab) => (
               <Pressable
                 key={tab.key}
@@ -82,7 +95,8 @@ export default function DevToolsPanel() {
                   paddingHorizontal: 12,
                   borderRadius: 8,
                   gap: 6,
-                  backgroundColor: activeTab === tab.key ? colors.primary : "transparent",
+                  backgroundColor:
+                    activeTab === tab.key ? colors.primary : "transparent",
                 }}
                 onPress={() => setActiveTab(tab.key)}
               >

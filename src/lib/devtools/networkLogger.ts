@@ -65,11 +65,19 @@ const originalFetch = global.fetch;
 
 global.fetch = async function (
   input: RequestInfo | URL,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<Response> {
   const id = `req_${++requestIdCounter}_${Date.now()}`;
-  const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-  const method = init?.method || (typeof input === "object" && "method" in input ? input.method : "GET") || "GET";
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.toString()
+        : input.url;
+  const method =
+    init?.method ||
+    (typeof input === "object" && "method" in input ? input.method : "GET") ||
+    "GET";
 
   const requestHeaders: Record<string, string> = {};
   if (init?.headers) {
@@ -121,7 +129,10 @@ global.fetch = async function (
     let responseBody: string | undefined;
     try {
       const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json") || contentType.includes("text/")) {
+      if (
+        contentType.includes("application/json") ||
+        contentType.includes("text/")
+      ) {
         responseBody = await clonedResponse.text();
         if (responseBody.length > 10000) {
           responseBody = responseBody.substring(0, 10000) + "... [truncated]";

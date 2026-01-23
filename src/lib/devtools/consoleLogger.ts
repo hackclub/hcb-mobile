@@ -28,7 +28,8 @@ class ConsoleLogger {
     const log: ConsoleLog = {
       id: `console_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
-      message: message.length > 5000 ? message.substring(0, 5000) + "..." : message,
+      message:
+        message.length > 5000 ? message.substring(0, 5000) + "..." : message,
       timestamp: Date.now(),
     };
 

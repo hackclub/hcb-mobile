@@ -127,7 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
           }
         }
-
       } catch (error) {
         console.error("Failed to load auth token response", error, {
           action: "token_load",

@@ -66,7 +66,9 @@ export default function GrantCardPage({ route, navigation }: Props) {
     error: cardFetchError,
     mutate: mutateCard,
   } = useOfflineSWR<Card>(
-    cardId || grantCard?.card_id ? `cards/${cardId || grantCard?.card_id}?expand=last_frozen_by` : null,
+    cardId || grantCard?.card_id
+      ? `cards/${cardId || grantCard?.card_id}?expand=last_frozen_by`
+      : null,
     {
       onError: (err) => {
         console.error("Error fetching card", err, {

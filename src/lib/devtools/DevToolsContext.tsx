@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 import useSWR from "swr";
 
 import User from "../types/User";
@@ -44,7 +50,9 @@ export function DevToolsProvider({ children }: { children: ReactNode }) {
   useShakeDetector(toggle, isAuditor);
 
   return (
-    <DevToolsContext.Provider value={{ isOpen, open, close, toggle, forceOpen }}>
+    <DevToolsContext.Provider
+      value={{ isOpen, open, close, toggle, forceOpen }}
+    >
       {children}
     </DevToolsContext.Provider>
   );

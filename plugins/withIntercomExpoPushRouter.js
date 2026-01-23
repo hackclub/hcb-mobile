@@ -24,7 +24,7 @@ function withIntercomExpoPushRouter(config, props = {}) {
 
       if (!packageName) {
         throw new Error(
-          "withIntercomExpoPushRouter: Missing android.package in app config."
+          "withIntercomExpoPushRouter: Missing android.package in app config.",
         );
       }
 
@@ -38,7 +38,7 @@ function withIntercomExpoPushRouter(config, props = {}) {
         "src",
         "main",
         "java",
-        packagePath
+        packagePath,
       );
 
       console.log(`📁 Kotlin directory: ${kotlinDir}`);
@@ -73,17 +73,21 @@ class ${serviceName} : ExpoFirebaseMessagingService() {
         projectRoot,
         "android",
         "app",
-        "build.gradle"
+        "build.gradle",
       );
 
       if (fs.existsSync(buildGradlePath)) {
         let buildGradle = fs.readFileSync(buildGradlePath, "utf8");
 
-        const firebaseBomDep = "implementation platform('com.google.firebase:firebase-bom:33.0.0')";
-        const firebaseMessagingDep = "implementation 'com.google.firebase:firebase-messaging'";
+        const firebaseBomDep =
+          "implementation platform('com.google.firebase:firebase-bom:33.0.0')";
+        const firebaseMessagingDep =
+          "implementation 'com.google.firebase:firebase-messaging'";
 
         if (!buildGradle.includes("firebase-messaging")) {
-          console.log("📝 Adding Firebase Messaging dependency to build.gradle...");
+          console.log(
+            "📝 Adding Firebase Messaging dependency to build.gradle...",
+          );
 
           const dependenciesRegex = /(dependencies\s*\{[\s\S]*?)(^\})/m;
           const match = buildGradle.match(dependenciesRegex);
@@ -91,16 +95,22 @@ class ${serviceName} : ExpoFirebaseMessagingService() {
           if (match) {
             buildGradle = buildGradle.replace(
               dependenciesRegex,
-              `$1\n    // Firebase Messaging (required for ${serviceName})\n    ${firebaseBomDep}\n    ${firebaseMessagingDep}\n$2`
+              `$1\n    // Firebase Messaging (required for ${serviceName})\n    ${firebaseBomDep}\n    ${firebaseMessagingDep}\n$2`,
             );
 
             fs.writeFileSync(buildGradlePath, buildGradle, "utf8");
-            console.log("✅ Added Firebase Messaging dependency to build.gradle");
+            console.log(
+              "✅ Added Firebase Messaging dependency to build.gradle",
+            );
           } else {
-            console.warn("⚠️ Could not find dependencies block in build.gradle");
+            console.warn(
+              "⚠️ Could not find dependencies block in build.gradle",
+            );
           }
         } else {
-          console.log("ℹ️ Firebase Messaging dependency already exists in build.gradle");
+          console.log(
+            "ℹ️ Firebase Messaging dependency already exists in build.gradle",
+          );
         }
       }
 
@@ -119,7 +129,7 @@ class ${serviceName} : ExpoFirebaseMessagingService() {
 
     if (!packageName) {
       throw new Error(
-        "withIntercomExpoPushRouter: Missing android.package in app config."
+        "withIntercomExpoPushRouter: Missing android.package in app config.",
       );
     }
 
@@ -143,12 +153,12 @@ class ${serviceName} : ExpoFirebaseMessagingService() {
 
     if (mainApplication.service.length < originalCount) {
       console.log(
-        `✅ Removed ${originalCount - mainApplication.service.length} default Expo FCM service(s)`
+        `✅ Removed ${originalCount - mainApplication.service.length} default Expo FCM service(s)`,
       );
     }
 
     const existingIndex = mainApplication.service.findIndex(
-      (s) => s?.$?.["android:name"] === fqcn
+      (s) => s?.$?.["android:name"] === fqcn,
     );
 
     const serviceEntry = {

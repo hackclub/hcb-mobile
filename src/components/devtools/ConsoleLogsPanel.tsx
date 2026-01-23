@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useState, useEffect, useRef } from "react";
-import { View, Text, FlatList, Pressable, Modal, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  Modal,
+  ScrollView,
+} from "react-native";
 
 import { ConsoleLog, consoleLogger } from "../../lib/devtools/consoleLogger";
 
@@ -76,7 +83,8 @@ export default function ConsoleLogsPanel({ colors }: Props) {
     return consoleLogger.subscribe(setLogs);
   }, []);
 
-  const filteredLogs = filter === "all" ? logs : logs.filter((log) => log.type === filter);
+  const filteredLogs =
+    filter === "all" ? logs : logs.filter((log) => log.type === filter);
 
   const handleCopy = async (text: string) => {
     await Clipboard.setStringAsync(text);
@@ -96,16 +104,41 @@ export default function ConsoleLogsPanel({ colors }: Props) {
       }}
       onPress={() => setSelectedLog(item)}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
-        <Ionicons name={getLogIcon(item.type)} size={14} color={getLogColor(item.type)} />
-        <Text style={{ fontSize: 11, fontWeight: "700", color: getLogColor(item.type) }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
+        <Ionicons
+          name={getLogIcon(item.type)}
+          size={14}
+          color={getLogColor(item.type)}
+        />
+        <Text
+          style={{
+            fontSize: 11,
+            fontWeight: "700",
+            color: getLogColor(item.type),
+          }}
+        >
           {item.type.toUpperCase()}
         </Text>
         <Text style={{ fontSize: 11, marginLeft: "auto", color: colors.muted }}>
           {formatTime(item.timestamp)}
         </Text>
       </View>
-      <Text style={{ fontSize: 12, fontFamily: "JetBrainsMono-Regular", lineHeight: 18, color: colors.text }} numberOfLines={3}>
+      <Text
+        style={{
+          fontSize: 12,
+          fontFamily: "JetBrainsMono-Regular",
+          lineHeight: 18,
+          color: colors.text,
+        }}
+        numberOfLines={3}
+      >
         {item.message}
       </Text>
     </Pressable>
@@ -113,7 +146,14 @@ export default function ConsoleLogsPanel({ colors }: Props) {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: "row", padding: 8, gap: 6, backgroundColor: colors.card }}>
+      <View
+        style={{
+          flexDirection: "row",
+          padding: 8,
+          gap: 6,
+          backgroundColor: colors.card,
+        }}
+      >
         {filters.map((f) => (
           <Pressable
             key={f.key}
@@ -121,20 +161,41 @@ export default function ConsoleLogsPanel({ colors }: Props) {
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 6,
-              backgroundColor: filter === f.key ? f.color + "30" : "transparent",
+              backgroundColor:
+                filter === f.key ? f.color + "30" : "transparent",
             }}
             onPress={() => setFilter(f.key)}
           >
-            <Text style={{ fontSize: 13, fontWeight: "600", color: filter === f.key ? f.color : colors.muted }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "600",
+                color: filter === f.key ? f.color : colors.muted,
+              }}
+            >
               {f.label}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.card }}>
-        <Text style={{ fontSize: 14, color: colors.muted }}>{filteredLogs.length} logs</Text>
-        <Pressable onPress={() => consoleLogger.clear()} style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          backgroundColor: colors.card,
+        }}
+      >
+        <Text style={{ fontSize: 14, color: colors.muted }}>
+          {filteredLogs.length} logs
+        </Text>
+        <Pressable
+          onPress={() => consoleLogger.clear()}
+          style={{ paddingHorizontal: 12, paddingVertical: 6 }}
+        >
           <Text style={{ color: colors.primary }}>Clear</Text>
         </Pressable>
       </View>
@@ -161,10 +222,31 @@ export default function ConsoleLogsPanel({ colors }: Props) {
         <View style={{ flex: 1, backgroundColor: colors.background }}>
           {selectedLog && (
             <>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Ionicons name={getLogIcon(selectedLog.type)} size={20} color={getLogColor(selectedLog.type)} />
-                  <Text style={{ fontSize: 16, fontWeight: "bold", color: getLogColor(selectedLog.type) }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
+                }}
+              >
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                >
+                  <Ionicons
+                    name={getLogIcon(selectedLog.type)}
+                    size={20}
+                    color={getLogColor(selectedLog.type)}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color: getLogColor(selectedLog.type),
+                    }}
+                  >
                     {selectedLog.type.toUpperCase()}
                   </Text>
                 </View>
@@ -173,36 +255,108 @@ export default function ConsoleLogsPanel({ colors }: Props) {
                 </Pressable>
               </View>
 
-              <View style={{ margin: 12, borderRadius: 8, padding: 12, backgroundColor: colors.card }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 }}>
-                  <Text style={{ fontSize: 14, color: colors.muted }}>Time</Text>
-                  <Text style={{ fontSize: 14, fontWeight: "500", color: colors.text }}>
+              <View
+                style={{
+                  margin: 12,
+                  borderRadius: 8,
+                  padding: 12,
+                  backgroundColor: colors.card,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    paddingVertical: 6,
+                  }}
+                >
+                  <Text style={{ fontSize: 14, color: colors.muted }}>
+                    Time
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "500",
+                      color: colors.text,
+                    }}
+                  >
                     {formatFullTime(selectedLog.timestamp)}
                   </Text>
                 </View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 }}>
-                  <Text style={{ fontSize: 14, color: colors.muted }}>Length</Text>
-                  <Text style={{ fontSize: 14, fontWeight: "500", color: colors.text }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    paddingVertical: 6,
+                  }}
+                >
+                  <Text style={{ fontSize: 14, color: colors.muted }}>
+                    Length
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "500",
+                      color: colors.text,
+                    }}
+                  >
                     {selectedLog.message.length} chars
                   </Text>
                 </View>
               </View>
 
-              <View style={{ flexDirection: "row", paddingHorizontal: 12, paddingBottom: 12, gap: 12 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  paddingHorizontal: 12,
+                  paddingBottom: 12,
+                  gap: 12,
+                }}
+              >
                 <Pressable
-                  style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, backgroundColor: colors.card }}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 16,
+                    paddingVertical: 10,
+                    borderRadius: 8,
+                    backgroundColor: colors.card,
+                  }}
                   onPress={() => handleCopy(selectedLog.message)}
                 >
-                  <Ionicons name={copied ? "checkmark" : "copy"} size={18} color={copied ? "#30d158" : colors.primary} />
-                  <Text style={{ color: copied ? "#30d158" : colors.primary, marginLeft: 6 }}>
+                  <Ionicons
+                    name={copied ? "checkmark" : "copy"}
+                    size={18}
+                    color={copied ? "#30d158" : colors.primary}
+                  />
+                  <Text
+                    style={{
+                      color: copied ? "#30d158" : colors.primary,
+                      marginLeft: 6,
+                    }}
+                  >
                     {copied ? "Copied!" : "Copy"}
                   </Text>
                 </Pressable>
               </View>
 
               <ScrollView style={{ flex: 1, padding: 12 }}>
-                <View style={{ borderRadius: 8, padding: 12, backgroundColor: colors.card }}>
-                  <Text style={{ fontSize: 13, fontFamily: "JetBrainsMono-Regular", lineHeight: 20, color: colors.text }} selectable>
+                <View
+                  style={{
+                    borderRadius: 8,
+                    padding: 12,
+                    backgroundColor: colors.card,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontFamily: "JetBrainsMono-Regular",
+                      lineHeight: 20,
+                      color: colors.text,
+                    }}
+                    selectable
+                  >
                     {selectedLog.message}
                   </Text>
                 </View>

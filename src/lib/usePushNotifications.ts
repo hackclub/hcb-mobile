@@ -97,11 +97,11 @@ export function usePushNotifications(): UsePushNotificationsResult {
     };
 
     try {
-    //   if (!Device.isDevice) {
-    //     setError("Push notifications require a physical device");
-    //     setIsLoading(false);
-    //     return result;
-    //   }
+      //   if (!Device.isDevice) {
+      //     setError("Push notifications require a physical device");
+      //     setIsLoading(false);
+      //     return result;
+      //   }
 
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();

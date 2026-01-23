@@ -841,7 +841,11 @@ export default function SettingsPage({ navigation }: Props) {
   );
 }
 
-function DevToolsButton({ colors }: { colors: { primary: string; card: string; text: string } }) {
+function DevToolsButton({
+  colors,
+}: {
+  colors: { primary: string; card: string; text: string };
+}) {
   const { forceOpen } = useDevTools();
 
   return (

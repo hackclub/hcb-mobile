@@ -9,19 +9,24 @@ const COOLDOWN_TIME = 500;
 export function useShakeDetector(onShake: () => void, enabled: boolean = true) {
   const shakeTimestamps = useRef<number[]>([]);
   const lastShakeTime = useRef<number>(0);
-  const subscription = useRef<ReturnType<typeof Accelerometer.addListener> | null>(null);
+  const subscription = useRef<ReturnType<
+    typeof Accelerometer.addListener
+  > | null>(null);
 
   const handleAccelerometerData = useCallback(
     ({ x, y, z }: { x: number; y: number; z: number }) => {
       const acceleration = Math.sqrt(x * x + y * y + z * z);
       const now = Date.now();
 
-      if (acceleration > SHAKE_THRESHOLD && now - lastShakeTime.current > COOLDOWN_TIME) {
+      if (
+        acceleration > SHAKE_THRESHOLD &&
+        now - lastShakeTime.current > COOLDOWN_TIME
+      ) {
         lastShakeTime.current = now;
         shakeTimestamps.current.push(now);
 
         shakeTimestamps.current = shakeTimestamps.current.filter(
-          (timestamp) => now - timestamp < SHAKE_TIME_WINDOW
+          (timestamp) => now - timestamp < SHAKE_TIME_WINDOW,
         );
 
         if (shakeTimestamps.current.length >= SHAKE_COUNT_THRESHOLD) {
@@ -30,7 +35,7 @@ export function useShakeDetector(onShake: () => void, enabled: boolean = true) {
         }
       }
     },
-    [onShake]
+    [onShake],
   );
 
   useEffect(() => {
