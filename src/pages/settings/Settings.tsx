@@ -810,7 +810,7 @@ export default function SettingsPage({ navigation }: Props) {
           Sign Out
         </Button>
 
-        { user?.auditor && <DevToolsButton colors={colors} /> }
+        {user?.auditor && <DevToolsButton colors={colors} />}
       </View>
 
       {/* Feedback Modal */}
