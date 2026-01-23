@@ -568,6 +568,142 @@ export default function SettingsPage({ navigation }: Props) {
           )}
         </View>
 
+        {/* Support & Feedback Section */}
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            color: colors.text,
+            marginBottom: 14,
+            marginTop: 10,
+          }}
+        >
+          Support & Feedback
+        </Text>
+        <View
+          style={{
+            backgroundColor: colors.card,
+            borderRadius: 16,
+            paddingVertical: 0,
+            paddingHorizontal: 0,
+            marginBottom: 24,
+          }}
+        >
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={async () => {
+              if (user) {
+                Intercom.loginUserWithUserAttributes({
+                  email: user?.email,
+                  userId: user?.id,
+                });
+                Intercom.updateUser({
+                  email: user?.email,
+                  userId: user?.id,
+                  name: user?.name,
+                });
+              } else {
+                Intercom.loginUnidentifiedUser();
+              }
+              Intercom.present();
+            }}
+          >
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              Contact Support
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => setFeedbackModalVisible(true)}
+          >
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={async () => {
+              const storeUrl = StoreReview.storeUrl();
+              if (storeUrl) {
+                Linking.openURL(storeUrl);
+              } else if (storeReviewAvailable) {
+                try {
+                  await StoreReview.requestReview();
+                } catch (error) {
+                  console.error("Error requesting store review", error);
+                }
+              }
+            }}
+          >
+            <Ionicons
+              name="star-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Rate Us</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+        </View>
+
         {/* Legal & Info Section */}
         <Text
           style={{
@@ -647,141 +783,6 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
-
-          {/* Feedback */}
-
-          <Pressable
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 18,
-              paddingHorizontal: 18,
-            }}
-            onPress={() => setFeedbackModalVisible(true)}
-          >
-            <Ionicons
-              name="create-outline"
-              size={22}
-              color={palette.muted}
-              style={{ marginRight: 12 }}
-            />
-            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={palette.muted}
-              style={{ marginLeft: "auto" }}
-            />
-          </Pressable>
-
-          <>
-            <View
-              style={{
-                height: 1,
-                backgroundColor: dividerColor,
-                marginLeft: 20,
-                marginRight: 20,
-              }}
-            />
-            <Pressable
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: 18,
-                paddingHorizontal: 18,
-              }}
-              onPress={async () => {
-                // For manual button press, open the store directly
-                // This is more reliable and follows platform guidelines
-                const storeUrl = StoreReview.storeUrl();
-                if (storeUrl) {
-                  Linking.openURL(storeUrl);
-                } else if (storeReviewAvailable) {
-                  // Fallback to in-app review if store URL not configured
-                  try {
-                    await StoreReview.requestReview();
-                  } catch (error) {
-                    console.error("Error requesting store review", error);
-                  }
-                }
-              }}
-            >
-              <Ionicons
-                name="star-outline"
-                size={22}
-                color={palette.muted}
-                style={{ marginRight: 12 }}
-              />
-              <Text style={{ color: colors.text, fontSize: 16 }}>Rate Us</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={palette.muted}
-                style={{ marginLeft: "auto" }}
-              />
-            </Pressable>
-          </>
-
-          {/* {token && ( */}
-            <>
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
-                }}
-              />
-              <Pressable
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 18,
-                  paddingHorizontal: 18,
-                }}
-                onPress={async () => {
-                  if (user) {
-                    Intercom.loginUserWithUserAttributes({
-                      email: user?.email,
-                      userId: user?.id,
-                    });
-                    Intercom.updateUser({
-                      email: user?.email,
-                      userId: user?.id,
-                      name: user?.name,
-                    });
-                  } else {
-                    Intercom.loginUnidentifiedUser();
-                  }
-                  Intercom.present();
-                }}
-              >
-                <Ionicons
-                  name="chatbox-ellipses-outline"
-                  size={22}
-                  color={palette.muted}
-                  style={{ marginRight: 12 }}
-                />
-                <Text style={{ color: colors.text, fontSize: 16 }}>
-                  Contact Support
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={palette.muted}
-                  style={{ marginLeft: "auto" }}
-                />
-              </Pressable>
-            </>
-          {/* )} */}
         </View>
 
         {/* Sign Out Button */}
