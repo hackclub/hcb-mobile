@@ -10,6 +10,7 @@ import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as StoreReview from "expo-store-review";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
@@ -89,10 +90,18 @@ export default function SettingsPage({ navigation }: Props) {
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+  const [storeReviewAvailable, setStoreReviewAvailable] = useState(false);
 
   useEffect(() => {
     Intercom.setUserJwt(token ?? "");
   }, [token]);
+
+  useEffect(() => {
+    (async () => {
+      const available = await StoreReview.isAvailableAsync();
+      setStoreReviewAvailable(available);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -157,7 +166,7 @@ export default function SettingsPage({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       mutate("user");
-    }, [mutate]),
+    }, []),
   );
 
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
@@ -671,6 +680,54 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
+
+          <>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: dividerColor,
+                marginLeft: 20,
+                marginRight: 20,
+              }}
+            />
+            <Pressable
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 18,
+                paddingHorizontal: 18,
+              }}
+              onPress={async () => {
+                // For manual button press, open the store directly
+                // This is more reliable and follows platform guidelines
+                const storeUrl = StoreReview.storeUrl();
+                if (storeUrl) {
+                  Linking.openURL(storeUrl);
+                } else if (storeReviewAvailable) {
+                  // Fallback to in-app review if store URL not configured
+                  try {
+                    await StoreReview.requestReview();
+                  } catch (error) {
+                    console.error("Error requesting store review", error);
+                  }
+                }
+              }}
+            >
+              <Ionicons
+                name="star-outline"
+                size={22}
+                color={palette.muted}
+                style={{ marginRight: 12 }}
+              />
+              <Text style={{ color: colors.text, fontSize: 16 }}>Rate Us</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={palette.muted}
+                style={{ marginLeft: "auto" }}
+              />
+            </Pressable>
+          </>
 
           {/* {token && ( */}
             <>

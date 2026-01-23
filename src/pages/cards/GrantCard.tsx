@@ -1,5 +1,6 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as ScreenCapture from "expo-screen-capture";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -42,6 +43,7 @@ import {
   toggleCardFrozen,
 } from "../../utils/cardActions";
 import * as Haptics from "../../utils/haptics";
+import { maybeRequestReview } from "../../utils/storeReview";
 import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<
@@ -85,6 +87,19 @@ export default function GrantCardPage({ route, navigation }: Props) {
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(card?.id || "");
+
+  // Prevent screen capture when sensitive card details are revealed
+  useEffect(() => {
+    if (detailsRevealed) {
+      ScreenCapture.preventScreenCaptureAsync("grant-card-details");
+    } else {
+      ScreenCapture.allowScreenCaptureAsync("grant-card-details");
+    }
+
+    return () => {
+      ScreenCapture.allowScreenCaptureAsync("grant-card-details");
+    };
+  }, [detailsRevealed]);
 
   const isCardholder = user?.id === card?.user?.id;
   const isManagerOrAdmin =
@@ -269,6 +284,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
         await reloadGrant();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert("Success", "Grant activated successfully!");
+        maybeRequestReview();
       } else {
         const data = (await response.json()) as { error?: string };
         Alert.alert("Error", data.error || "Failed to activate grant");

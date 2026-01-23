@@ -6,6 +6,7 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { AddToWalletButton } from "@stripe/stripe-react-native";
+import * as ScreenCapture from "expo-screen-capture";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -44,6 +45,7 @@ import {
   toggleCardFrozen,
 } from "../../utils/cardActions";
 import * as Haptics from "../../utils/haptics";
+import { maybeRequestReview } from "../../utils/storeReview";
 import { normalizeSvg } from "../../utils/util";
 
 type CardPageProps = {
@@ -83,6 +85,18 @@ export default function CardPage(
     revealed: detailsRevealed,
     loading: detailsLoading,
   } = useStripeCardDetails(_card?.id || card?.id || "");
+
+  useEffect(() => {
+    if (detailsRevealed) {
+      ScreenCapture.preventScreenCaptureAsync("card-details");
+    } else {
+      ScreenCapture.allowScreenCaptureAsync("card-details");
+    }
+
+    return () => {
+      ScreenCapture.allowScreenCaptureAsync("card-details");
+    };
+  }, [detailsRevealed]);
 
   const isCardholder = user?.id == card?.user?.id;
   const isManagerOrAdmin =
@@ -559,6 +573,7 @@ export default function CardPage(
                   console.error("Error adding card to wallet", error);
                 } else {
                   setAbleToAddToWallet(false);
+                  maybeRequestReview();
                 }
               }}
             />
@@ -631,6 +646,7 @@ export default function CardPage(
             setCardAddedToWallet(true);
             setAbleToAddToWallet(false);
             setShowWalletModal(false);
+            maybeRequestReview();
           }
         }}
       />
