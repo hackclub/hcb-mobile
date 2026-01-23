@@ -1,6 +1,8 @@
 import { useTheme } from "@react-navigation/native";
+import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
-import { View, Text, Animated, Platform } from "react-native";
+import { View, Text, Animated, Platform, TouchableOpacity } from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import Card from "../../lib/types/Card";
 import GrantCard from "../../lib/types/GrantCard";
@@ -48,6 +50,15 @@ export default function CardDetails({
   createSkeletonStyle,
 }: CardDetailsProps) {
   const { colors: themeColors } = useTheme();
+
+  const handleCopy = async (value: string, label: string) => {
+    await Clipboard.setStringAsync(value);
+    Toast.show({
+      type: ALERT_TYPE.SUCCESS,
+      title: "Copied",
+      textBody: `${label} copied to clipboard`,
+    });
+  };
 
   return (
     <View
@@ -168,6 +179,21 @@ export default function CardDetails({
           cardDetailsLoading ||
           (detailsRevealed && !details) ? (
             <Animated.View style={createSkeletonStyle(120, 22)} />
+          ) : detailsRevealed && details ? (
+            <TouchableOpacity
+              onPress={() => handleCopy(details.number, "Card number")}
+            >
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: Platform.OS === "android" ? 15 : 16,
+                  fontWeight: "500",
+                  fontFamily: "JetBrainsMono-Regular",
+                }}
+              >
+                {renderCardNumber(details.number)}
+              </Text>
+            </TouchableOpacity>
           ) : (
             <Text
               style={{
@@ -176,11 +202,8 @@ export default function CardDetails({
                 fontWeight: "500",
                 fontFamily: "JetBrainsMono-Regular",
               }}
-              selectable={detailsRevealed && details ? true : false}
             >
-              {detailsRevealed && details
-                ? renderCardNumber(details.number)
-                : redactedCardNumber(card?.last4 ?? grantCard?.last4)}
+              {redactedCardNumber(card?.last4 ?? grantCard?.last4)}
             </Text>
           )}
         </View>
@@ -207,6 +230,26 @@ export default function CardDetails({
           cardDetailsLoading ||
           (detailsRevealed && !details) ? (
             <Animated.View style={createSkeletonStyle(70, 22)} />
+          ) : detailsRevealed && details ? (
+            <TouchableOpacity
+              onPress={() =>
+                handleCopy(
+                  `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`,
+                  "Expiry date",
+                )
+              }
+            >
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 16,
+                  fontWeight: "500",
+                  fontFamily: "JetBrainsMono-Regular",
+                }}
+              >
+                {`${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`}
+              </Text>
+            </TouchableOpacity>
           ) : (
             <Text
               style={{
@@ -215,11 +258,8 @@ export default function CardDetails({
                 fontWeight: "500",
                 fontFamily: "JetBrainsMono-Regular",
               }}
-              selectable={detailsRevealed && details ? true : false}
             >
-              {detailsRevealed && details
-                ? `${String(details.exp_month).padStart(2, "0")}/${details.exp_year}`
-                : "••/••"}
+              {"••/••"}
             </Text>
           )}
         </View>
@@ -246,6 +286,19 @@ export default function CardDetails({
           cardDetailsLoading ||
           (detailsRevealed && !details) ? (
             <Animated.View style={createSkeletonStyle(50, 22)} />
+          ) : detailsRevealed && details ? (
+            <TouchableOpacity onPress={() => handleCopy(details.cvc, "CVC")}>
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 16,
+                  fontWeight: "500",
+                  fontFamily: "JetBrainsMono-Regular",
+                }}
+              >
+                {details.cvc}
+              </Text>
+            </TouchableOpacity>
           ) : (
             <Text
               style={{
@@ -254,9 +307,8 @@ export default function CardDetails({
                 fontWeight: "500",
                 fontFamily: "JetBrainsMono-Regular",
               }}
-              selectable={detailsRevealed && details ? true : false}
             >
-              {detailsRevealed && details ? details.cvc : "•••"}
+              {"•••"}
             </Text>
           )}
         </View>
