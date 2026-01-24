@@ -144,7 +144,7 @@ function Transaction({
 
   // Standardized background colors
   const backgroundColor =
-    transaction.declined || transaction.amount_cents < 0
+    transaction.reversed ? isDark ? "#252429" : "#EAEDF1" : transaction.declined || transaction.amount_cents < 0
       ? isDark
         ? "#351921"
         : "#F9E3E7"
@@ -216,42 +216,58 @@ function Transaction({
         />
       )}
 
-      {!hidePendingLabel && (transaction.declined || transaction.pending) && (
+      {!hidePendingLabel && (transaction.reversed || transaction.declined || transaction.pending) && (
         <View
           style={
-            transaction.declined
+            transaction.reversed
               ? {
-                  backgroundColor: isDark ? "#401A23" : "#891A2A",
+                  backgroundColor: isDark ? "#2A394C" : "#D5E0EF",
                   borderWidth: 1,
-                  borderColor: isDark ? "#401A23" : "#891A2A",
+                  borderColor: isDark ? "#2A394C" : "#D5E0EF",
                   borderRadius: 10,
                   paddingHorizontal: 8,
                   paddingVertical: 2,
                   marginRight: 4,
                 }
-              : {
-                  borderWidth: 1,
-                  borderStyle: "dashed",
-                  borderColor: "#8492a6",
-                  borderRadius: 10,
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                  marginRight: 4,
-                }
+              : transaction.declined
+                ? {
+                    backgroundColor: isDark ? "#401A23" : "#891A2A",
+                    borderWidth: 1,
+                    borderColor: isDark ? "#401A23" : "#891A2A",
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    marginRight: 4,
+                  }
+                : {
+                    borderWidth: 1,
+                    borderStyle: "dashed",
+                    borderColor: "#8492a6",
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    marginRight: 4,
+                  }
           }
         >
           <Text
             style={
-              transaction.declined
+              transaction.reversed
                 ? {
-                    color: isDark ? "#891A2A" : "#fff",
+                    color: isDark ? "#338eda" : "#D5E0EF",
                     fontSize: 12,
                     fontWeight: "bold",
                   }
-                : { color: "#8492a6", fontSize: 12, fontWeight: "bold" }
+                : transaction.declined
+                  ? {
+                      color: isDark ? "#891A2A" : "#fff",
+                      fontSize: 12,
+                      fontWeight: "bold",
+                    }
+                  : { color: "#8492a6", fontSize: 12, fontWeight: "bold" }
             }
           >
-            {transaction.declined ? "Declined" : "Pending"}
+            {transaction.reversed ? "Reversed" : transaction.declined ? "Declined" : "Pending"}
           </Text>
         </View>
       )}

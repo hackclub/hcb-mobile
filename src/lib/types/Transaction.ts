@@ -33,6 +33,7 @@ export interface TransactionBase
   has_custom_memo: boolean;
   pending: boolean;
   declined: boolean;
+  reversed: boolean;
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;

@@ -90,6 +90,7 @@ export default memo(TransactionWrapper, (prevProps, nextProps) => {
     prevProps.item.missing_receipt === nextProps.item.missing_receipt &&
     prevProps.item.pending === nextProps.item.pending &&
     prevProps.item.declined === nextProps.item.declined &&
+    prevProps.item.reversed === nextProps.item.reversed &&
     prevProps.isFirst === nextProps.isFirst &&
     prevProps.isLast === nextProps.isLast &&
     prevProps.user?.id === nextProps.user?.id &&
