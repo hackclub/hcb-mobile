@@ -80,7 +80,7 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
-  const { data: token } = useOfflineSWR<string>("user/intercom_token");
+  const { data: intercomToken } = useOfflineSWR<{ token: string }>("user/intercom_token");
   const { colors } = useTheme();
   const { theme, setTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
@@ -90,12 +90,6 @@ export default function SettingsPage({ navigation }: Props) {
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
   const [storeReviewAvailable, setStoreReviewAvailable] = useState(false);
-
-  useEffect(() => {
-    if (token) {
-      Intercom.setUserJwt(token);
-    }
-  }, [token, tokenResponse]);
 
   useEffect(() => {
     (async () => {
@@ -589,26 +583,23 @@ export default function SettingsPage({ navigation }: Props) {
               paddingHorizontal: 18,
             }}
             onPress={async () => {
-              try {
-                if (user) {
-                  await Intercom.loginUserWithUserAttributes({
-                    email: user.email,
-                    userId: user.id,
-                  });
-                  await Intercom.updateUser({
-                    email: user.email,
-                    userId: user.id,
-                    name: user.name,
-                  });
-                } else {
-                  await Intercom.loginUnidentifiedUser();
-                }
+              if (user && intercomToken) {
+                await Intercom.setUserJwt(intercomToken.token);
+                await Intercom.loginUserWithUserAttributes({
+                  email: user.email,
+                  userId: user.id,
+                });
+                await Intercom.updateUser({
+                  email: user.email,
+                  userId: user.id,
+                  name: user.name,
+                });
                 await Intercom.present();
-              } catch (error) {
+              } else {
                 Toast.show({
-                  type: ALERT_TYPE.DANGER,
-                  title: "Error",
-                  textBody: "Unable to open support chat. Please try again.",
+                  type: ALERT_TYPE.WARNING,
+                  title: "Unable to open support",
+                  textBody: "User information is not available. Please try again later.",
                 });
               }
             }}
