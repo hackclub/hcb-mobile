@@ -15,6 +15,14 @@ export default interface User extends Omit<HcbApiObject<"usr">, "created_at"> {
     postal_code: string;
     country: string;
   };
+  billing_address?: {
+    address_line1: string;
+    address_line2?: string;
+    city: string;
+    state: string;
+    postal_code: string;
+    country: string;
+  };
 }
 
 export interface OrgUser extends User {

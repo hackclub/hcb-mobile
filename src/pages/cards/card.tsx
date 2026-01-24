@@ -73,7 +73,7 @@ export default function CardPage(
       setCardError("Unable to load card details. Please try again later.");
     },
   });
-  const { data: user } = useOfflineSWR<User>(`user`);
+  const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${_card?.organization.id || card?.organization.id}`,
   );
@@ -577,6 +577,7 @@ export default function CardPage(
             detailsLoading={detailsLoading}
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
+            user={user}
           />
         )}
 

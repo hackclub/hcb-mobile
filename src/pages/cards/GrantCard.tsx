@@ -57,7 +57,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
   const { data: grantCard, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
     `card_grants/${fullGrantId}?expand=balance_cents`,
   );
-  const { data: user } = useOfflineSWR<User>(`user`);
+  const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const hcb = useClient();
 
   const {
@@ -588,6 +588,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
             detailsLoading={detailsLoading}
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
+            user={user}
           />
         )}
 
