@@ -509,6 +509,7 @@ export default function CardDetails({
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
+              marginBottom: 12,
             }}
           >
             <Text
