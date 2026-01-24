@@ -36,9 +36,11 @@ import { SWRConfig } from "swr";
 import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
 import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
+import { DevToolsPanel } from "../components/devtools";
 import SentryUserBridge from "../components/core/SentryUserBridge";
 import UserChangeDetector from "../components/core/UserChangeDetector";
 import useClient from "../lib/client";
+import { DevToolsProvider } from "../lib/devtools";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
 import { usePushNotifications } from "../lib/usePushNotifications";
@@ -657,24 +659,27 @@ export default function AppContent({
                   },
                 }}
               >
-                <SentryUserBridge />
-                <UserChangeDetector />
-                <ActionSheetProvider>
-                  <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                    <NavigationContainer
-                      ref={navigationRef}
-                      theme={navTheme}
-                      linking={linking}
-                      onReady={onNavigationReady}
-                    >
-                      {tokens?.accessToken && isAuthenticated ? (
-                        <Navigator />
-                      ) : (
-                        <Login />
-                      )}
-                    </NavigationContainer>
-                  </AlertNotificationRoot>
-                </ActionSheetProvider>
+                <DevToolsProvider>
+                  <SentryUserBridge />
+                  <UserChangeDetector />
+                  <ActionSheetProvider>
+                    <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
+                      <NavigationContainer
+                        ref={navigationRef}
+                        theme={navTheme}
+                        linking={linking}
+                        onReady={onNavigationReady}
+                      >
+                        {tokens?.accessToken && isAuthenticated ? (
+                          <Navigator />
+                        ) : (
+                          <Login />
+                        )}
+                      </NavigationContainer>
+                    </AlertNotificationRoot>
+                  </ActionSheetProvider>
+                  <DevToolsPanel />
+                </DevToolsProvider>
               </SWRConfig>
             </GestureHandlerRootView>
           </View>

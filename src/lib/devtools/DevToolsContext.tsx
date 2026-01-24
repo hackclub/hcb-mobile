@@ -23,7 +23,7 @@ export function DevToolsProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useSWR<User>("user");
 
-  const isAuditor = user?.auditor === true;
+  const isAuditor = user?.auditor == true;
 
   const open = useCallback(() => {
     if (isAuditor) {

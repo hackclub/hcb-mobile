@@ -837,7 +837,7 @@ function DevToolsButton({
 }: {
   colors: { primary: string; card: string; text: string };
 }) {
-  const { forceOpen } = useDevTools();
+  const { open } = useDevTools();
 
   return (
     <Pressable
@@ -851,7 +851,7 @@ function DevToolsButton({
         borderColor: "#ff8c37",
         borderStyle: "dashed",
       }}
-      onPress={forceOpen}
+      onPress={open}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Ionicons name="bug" size={20} color="#ff8c37" />
