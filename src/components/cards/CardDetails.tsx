@@ -1,4 +1,5 @@
 import { useTheme } from "@react-navigation/native";
+import { format } from "date-fns";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import * as ScreenCapture from "expo-screen-capture";
@@ -478,6 +479,35 @@ export default function CardDetails({
               {grantCard?.one_time_use ? "Yes" : "No"}
             </Text>
           </View>
+          {grantCard?.expires_on && (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: themeColors.text,
+                  flexShrink: 1,
+                }}
+              >
+                Spend By
+              </Text>
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 16,
+                  fontWeight: "500",
+                  fontFamily: "JetBrainsMono-Regular",
+                }}
+              >
+                {format(new Date(grantCard.expires_on), "MMM d, yyyy")}
+              </Text>
+            </View>
+          )}
         </>
       )}
 
