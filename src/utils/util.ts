@@ -173,6 +173,7 @@ export function addPendingFeeToTransactions(
         memo: "FISCAL SPONSORSHIP",
         has_custom_memo: false,
         declined: false,
+        reversed: false,
         missing_receipt: false,
         lost_receipt: false,
       },
