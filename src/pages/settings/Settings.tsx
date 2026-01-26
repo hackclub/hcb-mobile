@@ -591,11 +591,6 @@ export default function SettingsPage({ navigation }: Props) {
                   email: user.email,
                   userId: user.id,
                 });
-                await Intercom.updateUser({
-                  email: user.email,
-                  userId: user.id,
-                  name: user.name,
-                });
                 await Intercom.present();
               } else {
                 Toast.show({
