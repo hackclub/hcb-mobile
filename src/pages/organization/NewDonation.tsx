@@ -131,6 +131,14 @@ export default function NewDonationPage({
         paymentIntent: localPayment,
       });
       if (error) {
+        console.error("collectPaymentMethod error", error, {
+          context: { orgId, action: "collect_payment" },
+        });
+        showAlert(
+          "Error collecting payment",
+          "Failed to collect payment. Please try again. Error: " +
+            error.message,
+        );
         return false;
       }
       output = (await confirmPayment(localPayment)) ?? false;

@@ -80,7 +80,9 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
-  const { data: intercomToken } = useOfflineSWR<{ token: string }>("user/intercom_token");
+  const { data: intercomToken } = useOfflineSWR<{ token: string }>(
+    "user/intercom_token",
+  );
   const { colors } = useTheme();
   const { theme, setTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
@@ -599,7 +601,8 @@ export default function SettingsPage({ navigation }: Props) {
                 Toast.show({
                   type: ALERT_TYPE.WARNING,
                   title: "Unable to open support",
-                  textBody: "User information is not available. Please try again later.",
+                  textBody:
+                    "User information is not available. Please try again later.",
                 });
               }
             }}

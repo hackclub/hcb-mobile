@@ -331,7 +331,7 @@ export default function CardDetails({
         </View>
       </View>
 
-      {user?.billing_address && (
+      {user?.billing_address && isCardholder && (
         <>
           <Divider />
           <View
