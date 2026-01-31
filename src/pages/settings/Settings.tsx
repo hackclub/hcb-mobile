@@ -247,6 +247,12 @@ export default function SettingsPage({ navigation }: Props) {
         }
       }
 
+      try {
+        await Intercom.logout();
+      } catch (intercomError) {
+        console.warn("Failed to logout from Intercom", intercomError);
+      }
+
       setTokenResponse(null);
     } catch (error) {
       console.error("Error during sign out", error, {
@@ -586,12 +592,22 @@ export default function SettingsPage({ navigation }: Props) {
             }}
             onPress={async () => {
               if (user && intercomToken) {
-                await Intercom.setUserJwt(intercomToken.token);
-                await Intercom.loginUserWithUserAttributes({
-                  email: user.email,
-                  userId: user.id,
-                });
-                await Intercom.present();
+                try {
+                  await Intercom.logout();
+                  await Intercom.setUserJwt(intercomToken.token);
+                  await Intercom.loginUserWithUserAttributes({
+                    userId: user.id,
+                  });
+                  await Intercom.present();
+                } catch (error) {
+                  console.error("Intercom error:", error);
+                  Toast.show({
+                    type: ALERT_TYPE.WARNING,
+                    title: "Unable to open support",
+                    textBody:
+                      "Something went wrong. Please try again later.",
+                  });
+                }
               } else {
                 Toast.show({
                   type: ALERT_TYPE.WARNING,

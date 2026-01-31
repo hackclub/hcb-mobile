@@ -1,3 +1,4 @@
+import Intercom from "@intercom/intercom-react-native";
 import * as Sentry from "@sentry/react-native";
 import {
   refreshAsync,
@@ -193,6 +194,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // Ignore - we still want to clear local state
       }
+    }
+    try {
+      await Intercom.logout();
+    } catch {
+      // Ignore - we still want to clear local state
     }
     await setTokenResponse(null);
     refreshPromise = null;
