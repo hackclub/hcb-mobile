@@ -592,10 +592,11 @@ export default function SettingsPage({ navigation }: Props) {
                   await Intercom.loginUserWithUserAttributes({
                     email: user.email,
                   });
-                  await Intercom.present();
                 } catch (error) {
+                  Intercom.loginUnidentifiedUser();
                   console.error("Error logging in to Intercom", error);
                 }
+                await Intercom.present();
               } else {
                 Toast.show({
                   type: ALERT_TYPE.WARNING,
