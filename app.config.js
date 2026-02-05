@@ -40,7 +40,7 @@ export default {
     },
     android: {
       icon: "./assets/app-icon.png",
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: "./private-sdk/google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/app-icon-foreground.png",
         monochromeImage: "./assets/app-icon-monochrome.png",
