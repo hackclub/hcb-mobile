@@ -586,12 +586,16 @@ export default function SettingsPage({ navigation }: Props) {
             }}
             onPress={async () => {
               if (user && intercomToken) {
+                try {
+                await Intercom.logout()
                 await Intercom.setUserJwt(intercomToken.token);
                 await Intercom.loginUserWithUserAttributes({
-                  email: user.email,
-                  userId: user.id,
+                    email: user.email,
                 });
-                await Intercom.present();
+                  await Intercom.present();
+                } catch (error) {
+                  console.error("Error logging in to Intercom", error);
+                }
               } else {
                 Toast.show({
                   type: ALERT_TYPE.WARNING,
@@ -657,6 +661,7 @@ export default function SettingsPage({ navigation }: Props) {
               marginRight: 20,
             }}
           />
+          { storeReviewAvailable && (
           <Pressable
             style={{
               flexDirection: "row",
@@ -691,6 +696,7 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
+          )}
         </View>
 
         {/* Legal & Info Section */}
