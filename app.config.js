@@ -46,6 +46,7 @@ export default {
         monochromeImage: "./assets/app-icon-monochrome.png",
         backgroundColor: "#EC3750",
       },
+      blockedPermissions: [ 'android.permission.READ_MEDIA_IMAGES', 'android.permission.READ_MEDIA_VIDEO' ],
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       versionCode: 3,
       edgeToEdgeEnabled: true,
