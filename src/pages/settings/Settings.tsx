@@ -653,49 +653,53 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
           {storeReviewAvailable && (
-            <Pressable
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: 18,
-                paddingHorizontal: 18,
-              }}
-              onPress={async () => {
-                const storeUrl = StoreReview.storeUrl();
-                if (storeUrl) {
-                  Linking.openURL(storeUrl);
-                } else if (storeReviewAvailable) {
-                  try {
-                    await StoreReview.requestReview();
-                  } catch (error) {
-                    console.error("Error requesting store review", error);
+            <>
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: dividerColor,
+                  marginLeft: 20,
+                  marginRight: 20,
+                }}
+              />
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 18,
+                  paddingHorizontal: 18,
+                }}
+                onPress={async () => {
+                  const storeUrl = StoreReview.storeUrl();
+                  if (storeUrl) {
+                    Linking.openURL(storeUrl);
+                  } else if (storeReviewAvailable) {
+                    try {
+                      await StoreReview.requestReview();
+                    } catch (error) {
+                      console.error("Error requesting store review", error);
+                    }
                   }
-                }
-              }}
-            >
-              <Ionicons
-                name="star-outline"
-                size={22}
-                color={palette.muted}
-                style={{ marginRight: 12 }}
-              />
-              <Text style={{ color: colors.text, fontSize: 16 }}>Rate Us</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={palette.muted}
-                style={{ marginLeft: "auto" }}
-              />
-            </Pressable>
+                }}
+              >
+                <Ionicons
+                  name="star-outline"
+                  size={22}
+                  color={palette.muted}
+                  style={{ marginRight: 12 }}
+                />
+                <Text style={{ color: colors.text, fontSize: 16 }}>
+                  Rate Us
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={palette.muted}
+                  style={{ marginLeft: "auto" }}
+                />
+              </Pressable>
+            </>
           )}
         </View>
 
