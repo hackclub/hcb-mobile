@@ -32,8 +32,7 @@ export default function useAddToWallet(
   options: UseAddToWalletOptions,
 ): UseAddToWalletReturn {
   const { isVirtualCard, isCardholder } = options;
-  const skip =
-    !cardId || !isVirtualCard || !isCardholder;
+  const skip = !cardId || !isVirtualCard || !isCardholder;
 
   const {
     canAddToWallet,

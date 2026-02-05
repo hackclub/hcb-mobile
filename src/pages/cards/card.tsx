@@ -576,7 +576,6 @@ export default function CardPage(
         setLast4={setLast4}
         activating={activating}
       />
-
     </Animated.View>
   );
 }
