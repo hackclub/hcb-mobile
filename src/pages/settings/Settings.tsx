@@ -593,7 +593,7 @@ export default function SettingsPage({ navigation }: Props) {
                     email: user.email,
                   });
                 } catch (error) {
-                  Intercom.loginUnidentifiedUser();
+                  await Intercom.loginUnidentifiedUser();
                   console.error("Error logging in to Intercom", error);
                 }
                 await Intercom.present();

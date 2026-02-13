@@ -128,6 +128,23 @@ export default function AppContent({
     setTokenExpiry(0);
   }, []);
 
+  useEffect(() => {
+    const initializeIntercom = async () => {
+      try {
+      const apiKey = Platform.select({
+        ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+        android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+      });
+      await Intercom.initialize(apiKey, process.env.EXPO_PUBLIC_INTERCOM_APP_ID);
+    } catch (error) {
+      console.error("Error initializing Intercom", error);
+    }
+  };
+  initializeIntercom().catch((error) => {
+    console.error("Error initializing Intercom", error);
+  });
+  }, []);
+
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
   const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
   const [cachedToken, setCachedToken] = useState<string | null>(null);

@@ -84,6 +84,7 @@ export default function NewDonationPage({
         metadata: {
           donation_id,
           donation: "true",
+          event_id: orgId,
         },
         statementDescriptor: `HCB DONATION`.substring(0, 22),
       });
