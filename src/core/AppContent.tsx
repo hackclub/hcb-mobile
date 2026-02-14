@@ -91,13 +91,8 @@ export default function AppContent({
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
-  const {
-    tokenResponse,
-    codeVerifier,
-    refreshAccessToken,
-    setTokenResponse,
-    shouldRefreshToken,
-  } = useContext(AuthContext);
+  const { tokenResponse, codeVerifier, setTokenResponse } =
+    useContext(AuthContext);
 
   // Extract tokens from tokenResponse for backward compatibility
   const tokens = useMemo(
@@ -113,7 +108,6 @@ export default function AppContent({
   const isBiometricAuthInProgress = useRef(false);
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
-  const refreshPendingRef = useRef(false);
   const hcb = useClient();
   const { register: registerPushNotifications } = usePushNotifications();
   const pushNotificationsRegistered = useRef(false);
@@ -375,34 +369,6 @@ export default function AppContent({
       cancelled = true;
     };
   }, [tokenResponse?.accessToken, setTokenResponse, tokens]);
-
-  useEffect(() => {
-    if (tokenResponse) {
-      if (shouldRefreshToken(300)) {
-        if (refreshPendingRef.current) {
-          console.log(
-            "Token refresh already pending in this component, skipping duplicate preemptive refresh",
-          );
-          return;
-        }
-        console.log("Preemptively refreshing token before it expires");
-        refreshPendingRef.current = true;
-        refreshAccessToken()
-          .catch((error) => {
-            console.error("Failed to preemptively refresh token", error);
-          })
-          .finally(() => {
-            refreshPendingRef.current = false;
-          });
-      } else {
-        // Reset the flag to allow preemptive refresh when token becomes near expiry again
-        refreshPendingRef.current = false;
-      }
-    } else {
-      console.log("Token state updated - user is logged out");
-      refreshPendingRef.current = false;
-    }
-  }, [refreshAccessToken, tokenResponse, shouldRefreshToken]);
 
   useEffect(() => {
     if (
