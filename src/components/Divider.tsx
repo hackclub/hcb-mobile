@@ -12,7 +12,7 @@ export default function Divider() {
         backgroundColor: isDark ? palette.slate : palette.smoke,
         height: 1,
         width: "100%",
-        marginBottom: 30,
+        marginVertical: 15,
       }}
     />
   );

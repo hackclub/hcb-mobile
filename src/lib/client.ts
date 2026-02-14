@@ -1,207 +1,22 @@
-import ky from "ky";
-import { useContext, useEffect, useRef } from "react";
+import ky, { type KyInstance } from "ky";
 
-import AuthContext from "../auth/auth";
+import { tokenManager } from "./tokenManager";
 
-type KyResponse = Awaited<ReturnType<typeof ky>>;
+/**
+ * Simplified HTTP client with automatic token refresh
+ * Token refresh is handled automatically before requests and on 401 responses
+ */
+let clientInstance: KyInstance | null = null;
+let refreshInProgress = false;
 
-interface QueuedRequest {
-  resolve: (value: KyResponse) => void;
-  reject: (reason?: Error) => void;
-  retry: (token: string) => Promise<KyResponse>;
-}
-
-export default function useClient() {
-  const { tokenResponse, refreshAccessToken, setTokenResponse } =
-    useContext(AuthContext);
-
-  const tokenResponseRef = useRef(tokenResponse);
-  const refreshAccessTokenRef = useRef(refreshAccessToken);
-  const setTokenResponseRef = useRef(setTokenResponse);
-  const clientRef = useRef<ReturnType<typeof ky.create> | null>(null);
-  const queuedRequestsRef = useRef<QueuedRequest[]>([]);
-  const pendingRetriesRef = useRef<Set<string>>(new Set());
-  const freshTokenMapRef = useRef<Map<string, string>>(new Map());
-  const refreshInProgressRef = useRef(false);
-
-  useEffect(() => {
-    tokenResponseRef.current = tokenResponse;
-  }, [tokenResponse]);
-
-  useEffect(() => {
-    refreshAccessTokenRef.current = refreshAccessToken;
-  }, [refreshAccessToken]);
-
-  useEffect(() => {
-    setTokenResponseRef.current = setTokenResponse;
-  }, [setTokenResponse]);
-
-  if (!clientRef.current) {
-    const extractPath = (url: string): string => {
-      const apiBase = process.env.EXPO_PUBLIC_API_BASE || "";
-      let path = url.startsWith(apiBase) ? url.substring(apiBase.length) : url;
-      if (path.startsWith("/")) {
-        path = path.substring(1);
-      }
-      return path;
-    };
-
-    const createRequestKey = (method: string, url: string): string => {
-      return `${method}:${url}`;
-    };
-
-    const createUniqueRetryKey = (method: string, path: string): string => {
-      const fullUrl = `${process.env.EXPO_PUBLIC_API_BASE}/${path}`;
-      const uniqueId = `${Date.now()}-${Math.random()}`;
-      return `${method}:${fullUrl}:${uniqueId}`;
-    };
-
-    const executeWithFreshToken = async (
-      path: string,
-      method: string,
-      body: BodyInit | null | undefined,
-      freshToken: string,
-    ): Promise<KyResponse> => {
-      const retryKey = createUniqueRetryKey(method, path);
-      freshTokenMapRef.current.set(retryKey, freshToken);
-
-      return clientRef.current!(path, { method, body });
-    };
-
-    const queueRequestForRetry = (
-      request: Request,
-      resolve: (value: KyResponse) => void,
-      reject: (reason?: Error) => void,
-    ): void => {
-      const path = extractPath(request.url.toString());
-      const method = request.method;
-
-      queuedRequestsRef.current.push({
-        resolve,
-        reject,
-        retry: async (freshToken: string) => {
-          return executeWithFreshToken(path, method, request.body, freshToken);
-        },
-      });
-    };
-
-    const processQueuedRequests = async (freshToken: string) => {
-      const requests = [...queuedRequestsRef.current];
-      queuedRequestsRef.current = [];
-
-      console.log(
-        `Processing ${requests.length} queued requests after token refresh`,
-      );
-
-      pendingRetriesRef.current.clear();
-      freshTokenMapRef.current.clear();
-
-      await Promise.all(
-        requests.map(async ({ resolve, reject, retry }) => {
-          try {
-            const response = await retry(freshToken);
-            resolve(response);
-          } catch (error) {
-            console.error("Failed to process queued request", error, {
-              context: "queue_processing",
-            });
-            reject(error);
-          }
-        }),
-      );
-    };
-
-    const handleTokenRefreshSuccess = async (
-      request: Request,
-      requestKey: string,
-      newToken: string,
-    ): Promise<KyResponse> => {
-      console.log("Token refresh successful, processing queued requests");
-
-      if (queuedRequestsRef.current.length > 0) {
-        await processQueuedRequests(newToken);
-      }
-
-      const path = extractPath(request.url.toString());
-      console.log(`Retrying original request: ${path}`);
-
-      pendingRetriesRef.current.delete(requestKey);
-
-      const response = await executeWithFreshToken(
-        path,
-        request.method,
-        request.body,
-        newToken,
-      );
-
-      console.log(`Retry succeeded with status: ${response.status}`);
-      return response;
-    };
-
-    const handleTokenRefreshFailure = async (
-      requestKey: string,
-      originalResponse: Response,
-    ): Promise<Response> => {
-      console.error("Token refresh process failed - forcing logout");
-      pendingRetriesRef.current.delete(requestKey);
-
-      const requests = [...queuedRequestsRef.current];
-      queuedRequestsRef.current = [];
-      requests.forEach(({ reject }) => {
-        reject(new Error("Token refresh failed"));
-      });
-
-      await setTokenResponseRef.current(null);
-
-      return originalResponse;
-    };
-
-    const handle401Response = async (
-      request: Request,
-      requestKey: string,
-      response: Response,
-    ): Promise<KyResponse | Response> => {
-      try {
-        if (refreshInProgressRef.current) {
-          return new Promise<KyResponse>((resolve, reject) => {
-            queueRequestForRetry(request, resolve, reject);
-          });
-        }
-
-        refreshInProgressRef.current = true;
-        pendingRetriesRef.current.add(requestKey);
-        const result = await refreshAccessTokenRef.current();
-
-        if (result.success && result.newTokenResponse) {
-          tokenResponseRef.current = result.newTokenResponse;
-          const successResponse = await handleTokenRefreshSuccess(
-            request,
-            requestKey,
-            result.newTokenResponse.accessToken,
-          );
-          refreshInProgressRef.current = false;
-          return successResponse;
-        } else {
-          console.warn("Token refresh did not succeed - forcing logout");
-          pendingRetriesRef.current.delete(requestKey);
-          refreshInProgressRef.current = false;
-          await setTokenResponseRef.current(null);
-          return response;
-        }
-      } catch (error) {
-        console.error("Error during token refresh:", error);
-        refreshInProgressRef.current = false;
-        return await handleTokenRefreshFailure(requestKey, response);
-      }
-    };
-
-    clientRef.current = ky.create({
+export function getClient(): KyInstance {
+  if (!clientInstance) {
+    clientInstance = ky.create({
       prefixUrl: process.env.EXPO_PUBLIC_API_BASE,
       retry: {
         limit: 3,
         methods: ["get", "put", "head", "delete", "options", "trace", "post"],
         statusCodes: [408, 413, 429, 500, 502, 503, 504],
-        backoffLimit: 10000,
       },
       headers: {
         "User-Agent": "HCB-Mobile",
@@ -210,48 +25,127 @@ export default function useClient() {
       hooks: {
         beforeRequest: [
           async (request) => {
-            const requestKey = createRequestKey(request.method, request.url);
-
-            for (const [key, token] of freshTokenMapRef.current.entries()) {
-              if (key.startsWith(requestKey)) {
-                request.headers.set("Authorization", `Bearer ${token}`);
-                freshTokenMapRef.current.delete(key);
-                return;
-              }
+            // Get valid access token (refreshes automatically if needed)
+            const token = await tokenManager.getValidAccessToken();
+            if (token) {
+              request.headers.set("Authorization", `Bearer ${token}`);
+            } else {
+              console.warn(
+                "[HTTP Client] No access token available for request",
+                {
+                  url: request.url,
+                  method: request.method,
+                },
+              );
             }
-
-            const currentToken = tokenResponseRef.current?.accessToken;
-            if (currentToken) {
-              request.headers.set("Authorization", `Bearer ${currentToken}`);
-            }
-          },
-        ],
-        beforeRetry: [
-          async ({ request, error, retryCount }) => {
-            console.log(
-              `Retrying request (attempt ${retryCount + 1}):`,
-              request.url,
-              error instanceof Error ? error.message : "Unknown error",
-            );
           },
         ],
         afterResponse: [
           async (request, options, response) => {
-            if (response.ok) return response;
-
-            const requestKey = createRequestKey(request.method, request.url);
-
-            if (pendingRetriesRef.current.has(requestKey)) {
-              console.log(
-                "Request already being retried, returning response as-is to avoid loop",
-              );
-              pendingRetriesRef.current.delete(requestKey);
-              return response;
-            }
-
-            // Handle 401 unauthorized responses
+            // Handle 401 by refreshing token and retrying once
             if (response.status === 401) {
-              return handle401Response(request, requestKey, response);
+              console.warn("[HTTP Client] Received 401 Unauthorized", {
+                url: request.url,
+                method: request.method,
+              });
+
+              // Prevent multiple simultaneous refresh attempts
+              if (refreshInProgress) {
+                console.log(
+                  "[HTTP Client] Refresh already in progress, waiting...",
+                );
+                // Wait for ongoing refresh to complete
+                while (refreshInProgress) {
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                }
+                // Retry with fresh token
+                const token = await tokenManager.getValidAccessToken();
+                if (token) {
+                  console.log(
+                    "[HTTP Client] Retrying request after refresh completed",
+                  );
+                  return clientInstance!.extend({
+                    headers: { Authorization: `Bearer ${token}` },
+                  })(request.url, {
+                    method: request.method,
+                    body: options.body,
+                    headers: options.headers,
+                  });
+                }
+                console.warn(
+                  "[HTTP Client] No token available after refresh, returning 401",
+                );
+                return response;
+              }
+
+              refreshInProgress = true;
+              try {
+                console.log(
+                  "[HTTP Client] Starting token refresh due to 401...",
+                );
+                const refreshed = await tokenManager.refresh();
+
+                if (refreshed?.accessToken) {
+                  console.log(
+                    "[HTTP Client] Token refreshed, retrying original request",
+                  );
+                  // Clone request body if it exists (FormData, Blob, etc. can't be reused)
+                  let retryBody: BodyInit | null = null;
+                  if (request.body) {
+                    // For FormData, we need to reconstruct it from options
+                    if (options.body instanceof FormData) {
+                      retryBody = options.body;
+                    } else if (request.body instanceof FormData) {
+                      // FormData can't be cloned, use from options if available
+                      retryBody = options.body || null;
+                    } else {
+                      // For other body types, try to clone
+                      try {
+                        retryBody = await request.clone().body;
+                      } catch {
+                        // Fallback to options.body
+                        retryBody = options.body || null;
+                      }
+                    }
+                  }
+
+                  // Retry using ky to maintain consistency
+                  const retryClient = clientInstance!.extend({
+                    headers: {
+                      Authorization: `Bearer ${refreshed.accessToken}`,
+                    },
+                  });
+
+                  type HttpMethod =
+                    | "GET"
+                    | "POST"
+                    | "PUT"
+                    | "DELETE"
+                    | "PATCH"
+                    | "HEAD"
+                    | "OPTIONS";
+                  const retryResponse = await retryClient(request.url, {
+                    method: request.method as HttpMethod,
+                    body: retryBody || options.body,
+                    headers: options.headers,
+                  });
+
+                  console.log("[HTTP Client] Retry successful", {
+                    status: retryResponse.status,
+                    url: request.url,
+                  });
+                  return retryResponse;
+                } else {
+                  // Refresh failed, logout
+                  console.error(
+                    "[HTTP Client] Token refresh failed, logging out",
+                  );
+                  await tokenManager.logout("401_refresh_failed");
+                  return response;
+                }
+              } finally {
+                refreshInProgress = false;
+              }
             }
 
             return response;
@@ -260,6 +154,13 @@ export default function useClient() {
       },
     });
   }
+  return clientInstance;
+}
 
-  return clientRef.current;
+/**
+ * Hook to get the HTTP client instance
+ * Token refresh is handled automatically
+ */
+export default function useClient() {
+  return getClient();
 }

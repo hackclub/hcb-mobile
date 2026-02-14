@@ -36,7 +36,6 @@ let hasLoggedWaiting = false;
 
 // Reset function to clear global state on app restart
 export function resetStripeTerminalInitialization() {
-  console.log("Resetting Stripe Terminal initialization state");
   globalInitializationPromise = null;
   hasLoggedWaiting = false;
   globalInitializationState = {
@@ -120,7 +119,6 @@ export function useStripeTerminalInit(
   const initializeTerminal = useCallback(async (): Promise<boolean> => {
     if (globalInitializationPromise) {
       if (!hasLoggedWaiting) {
-        console.log("Waiting for existing Stripe Terminal initialization...");
         hasLoggedWaiting = true;
       }
       return await globalInitializationPromise;

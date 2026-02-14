@@ -15,6 +15,7 @@ import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
 import { palette } from "../../../styles/theme";
 import * as Haptics from "../../../utils/haptics";
+import { maybeRequestReview } from "../../../utils/storeReview";
 import Button from "../../Button";
 import UserMention from "../../UserMention";
 
@@ -104,6 +105,7 @@ export default function CommentField({
         ),
       ]);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      maybeRequestReview();
     } catch (error) {
       console.error("Error adding comment:", error);
       Alert.alert("Error", "Failed to add comment");

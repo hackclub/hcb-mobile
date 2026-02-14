@@ -8,6 +8,7 @@ import { StackParamList } from "../../lib/NavigatorParamList";
 import GrantCard from "../../lib/types/GrantCard";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
+import { maybeRequestReview } from "../../utils/storeReview";
 import { renderMoney } from "../../utils/util";
 
 interface GrantInviteProps {
@@ -32,6 +33,7 @@ export default function GrantInvite({
 
       if (response.ok) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        maybeRequestReview();
 
         navigation.navigate("GrantCard", {
           grantId: grant.id,

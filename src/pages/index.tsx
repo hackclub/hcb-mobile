@@ -40,6 +40,44 @@ import { organizationOrderEqual } from "../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
+const EventItem = memo(
+  ({
+    organization,
+    navigation,
+    orgCount,
+  }: {
+    organization: Organization;
+    navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
+    orgCount: number;
+  }) => {
+    const drag = useReorderableDrag();
+    const handlePress = useCallback(() => {
+      navigation.navigate("Event", {
+        orgId: organization.id,
+        organization,
+      });
+    }, [navigation, organization]);
+
+    return (
+      <Event
+        event={organization}
+        drag={drag}
+        isActive={false}
+        showTransactions={orgCount <= 2}
+        onPress={handlePress}
+      />
+    );
+  },
+  (prev, next) =>
+    prev.organization.id === next.organization.id &&
+    prev.organization.name === next.organization.name &&
+    prev.organization.icon === next.organization.icon &&
+    prev.organization.background_image === next.organization.background_image &&
+    prev.orgCount === next.orgCount,
+);
+
+EventItem.displayName = "EventItem";
+
 /* eslint-disable react/prop-types */
 export default function App({ navigation }: Props) {
   const { hasShareIntent, shareIntent, resetShareIntent } =
@@ -218,41 +256,17 @@ export default function App({ navigation }: Props) {
     }, [mutate]),
   );
 
-  const EventItem = memo(
-    ({
-      organization,
-      navigation,
-    }: {
-      organization: Organization;
-      navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
-    }) => {
-      const drag = useReorderableDrag();
-      const handlePress = useCallback(() => {
-        navigation.navigate("Event", {
-          orgId: organization.id,
-          organization,
-        });
-      }, [navigation, organization]);
-
-      return (
-        <Event
-          event={organization}
-          drag={drag}
-          isActive={false}
-          showTransactions={organizations ? organizations.length <= 2 : false}
-          onPress={handlePress}
-        />
-      );
-    },
-  );
-
-  EventItem.displayName = "EventItem";
+  const orgCount = organizations?.length ?? 0;
 
   const renderItem = useCallback(
     ({ item: organization }: { item: Organization }) => (
-      <EventItem organization={organization} navigation={navigation} />
+      <EventItem
+        organization={organization}
+        navigation={navigation}
+        orgCount={orgCount}
+      />
     ),
-    [navigation, EventItem],
+    [navigation, orgCount],
   );
 
   // Show cached data even if there's an error
@@ -279,7 +293,7 @@ export default function App({ navigation }: Props) {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ReorderableList
-        keyExtractor={(item) => item.id?.toString() ?? Math.random().toString()}
+        keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
           const newOrgs = [...sortedOrgs];

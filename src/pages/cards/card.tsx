@@ -5,7 +5,6 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import { AddToWalletButton } from "@stripe/stripe-react-native";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
@@ -19,21 +18,21 @@ import {
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
+import AddToWalletSection from "../../components/cards/AddToWalletSection";
 import CardDetails from "../../components/cards/CardDetails";
 import CardDisplay from "../../components/cards/CardDisplay";
 import CardError from "../../components/cards/CardError";
 import CardSkeleton from "../../components/cards/CardSkeleton";
 import CardTransactions from "../../components/cards/CardTransactions";
 import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
-import WalletModal from "../../components/cards/modals/WalletModal";
 import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
 import Card from "../../lib/types/Card";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
+import useAddToWallet from "../../lib/useAddToWallet";
 import { useIsDark } from "../../lib/useColorScheme";
-import useDigitalWallet from "../../lib/useDigitalWallet";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
@@ -72,7 +71,7 @@ export default function CardPage(
       setCardError("Unable to load card details. Please try again later.");
     },
   });
-  const { data: user } = useOfflineSWR<User>(`user`);
+  const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${_card?.organization.id || card?.organization.id}`,
   );
@@ -99,7 +98,6 @@ export default function CardPage(
   const skeletonAnim = useRef(new Animated.Value(0)).current;
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
   const [pattern, setPattern] = useState<string>();
@@ -109,21 +107,18 @@ export default function CardPage(
   }>();
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
-  const [cardAddedToWallet, setCardAddedToWallet] = useState(false);
-  const [cardStatus, setCardStatus] = useState<string | null>(null);
   const isDark = useIsDark();
+  const wallet = useAddToWallet(_card?.id || card?.id || "", {
+    isVirtualCard: !!isVirtualCard,
+    isCardholder: !!isCardholder,
+  });
   const {
-    canAddToWallet,
-    ephemeralKey,
-    card: walletCard,
-    androidCardToken,
-    status: walletStatus,
-    refresh: refreshDigitalWallet,
-  } = useDigitalWallet(
-    _card?.id || card?.id || "",
-    !isVirtualCard || !isCardholder,
-  );
-  const [ableToAddToWallet, setAbleToAddToWallet] = useState(canAddToWallet);
+    setShowWalletModal,
+    ableToAddToWallet,
+    cardAddedToWallet,
+    showWalletModal,
+    refreshDigitalWallet,
+  } = wallet;
   const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
@@ -135,21 +130,12 @@ export default function CardPage(
   }, []);
 
   useEffect(() => {
-    setCardStatus(walletStatus);
     if ((cardFetchError || !card) && errorDisplayReady) {
       setCardError("Unable to load card details. Please try again later.");
     } else if (!cardFetchError) {
       setCardError(null);
-      setAbleToAddToWallet(canAddToWallet);
     }
-  }, [
-    cardFetchError,
-    errorDisplayReady,
-    card,
-    canAddToWallet,
-    walletCard,
-    walletStatus,
-  ]);
+  }, [cardFetchError, errorDisplayReady, card]);
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -206,6 +192,7 @@ export default function CardPage(
     }
   }, [
     navigation,
+    setShowWalletModal,
     ableToAddToWallet,
     cardAddedToWallet,
     isDark,
@@ -532,37 +519,13 @@ export default function CardPage(
 
         {card?.status != "canceled" && getCardActionButtons()}
 
-        {ableToAddToWallet &&
-          ephemeralKey &&
-          Platform.OS === "ios" &&
-          isVirtualCard &&
-          card?.status != "canceled" && (
-            <AddToWalletButton
-              token={androidCardToken}
-              androidAssetSource={require("../../../assets/google-wallet.png")}
-              style={{
-                height: 48,
-                width: "100%",
-                marginBottom: 20,
-              }}
-              iOSButtonStyle={isDark ? "onDarkBackground" : "onLightBackground"}
-              cardDetails={{
-                name: walletCard?.cardholder?.name || user?.name || "",
-                primaryAccountIdentifier:
-                  walletCard?.wallets?.primary_account_identifier || null,
-                lastFour: walletCard?.last4,
-                description: "HCB Card",
-              }}
-              ephemeralKey={ephemeralKey}
-              onComplete={({ error }) => {
-                if (error) {
-                  console.error("Error adding card to wallet", error);
-                } else {
-                  setAbleToAddToWallet(false);
-                }
-              }}
-            />
-          )}
+        {isVirtualCard && (
+          <AddToWalletSection
+            {...wallet}
+            user={user}
+            cardNotCanceled={card?.status != "canceled"}
+          />
+        )}
 
         {card && (
           <CardDetails
@@ -575,6 +538,7 @@ export default function CardPage(
             detailsLoading={detailsLoading}
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
+            user={user}
           />
         )}
 
@@ -611,28 +575,6 @@ export default function CardPage(
         last4={last4}
         setLast4={setLast4}
         activating={activating}
-      />
-
-      <WalletModal
-        visible={showWalletModal}
-        onClose={() => setShowWalletModal(false)}
-        ableToAddToWallet={ableToAddToWallet}
-        cardAddedToWallet={cardAddedToWallet}
-        androidCardToken={androidCardToken}
-        ephemeralKey={ephemeralKey}
-        walletCard={walletCard}
-        user={user || null}
-        cardStatus={cardStatus}
-        onComplete={({ error }) => {
-          if (error) {
-            console.error("Error adding card to wallet", error);
-          } else {
-            setCardStatus("CARD_ALREADY_EXISTS");
-            setCardAddedToWallet(true);
-            setAbleToAddToWallet(false);
-            setShowWalletModal(false);
-          }
-        }}
       />
     </Animated.View>
   );

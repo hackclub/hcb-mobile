@@ -33,6 +33,7 @@ export interface TransactionBase
   has_custom_memo: boolean;
   pending: boolean;
   declined: boolean;
+  reversed: boolean;
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;
@@ -120,7 +121,6 @@ export interface Transfer extends HcbApiObject<"xfr"> {
   memo: string;
   status: "pending" | "completed" | "rejected";
   amount_cents: number;
-  transaction_id: TransactionBase["id"];
   card_grant_id?: string;
 }
 

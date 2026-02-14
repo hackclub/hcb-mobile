@@ -6,7 +6,7 @@ export default {
     name: IS_DEV ? "HCB (dev)" : "HCB",
     slug: "hcb-mobile",
     owner: "hackclub",
-    version: "1.0.2",
+    version: "1.0.3",
     platforms: ["ios", "android"],
     scheme: "hcb",
     orientation: "portrait",
@@ -31,14 +31,25 @@ export default {
         "com.apple.developer.payment-pass-provisioning": true,
         "com.apple.developer.proximity-reader.payment.acceptance": true,
       },
+      infoPlist: {
+        NSCameraUsageDescription:
+          "Access your camera to take photos of receipts",
+        NSMicrophoneUsageDescription:
+          "Access your microphone to transcribe voice messages in help conversations",
+      },
     },
     android: {
       icon: "./assets/app-icon.png",
+      googleServicesFile: "./private-sdk/google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/app-icon-foreground.png",
         monochromeImage: "./assets/app-icon-monochrome.png",
         backgroundColor: "#EC3750",
       },
+      blockedPermissions: [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+      ],
       package: IS_DEV ? "com.hackclub.hcb.dev" : "com.hackclub.hcb",
       versionCode: 3,
       edgeToEdgeEnabled: true,
@@ -178,8 +189,28 @@ export default {
         },
       ],
       "expo-background-task",
+      [
+        "@intercom/intercom-react-native",
+        {
+          // appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
+          // androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+          // iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+          useManualInit: true,
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/app-icon.png",
+          color: "#EC3750",
+        },
+      ],
+      [
+        "./plugins/withIntercomExpoPushRouter.js",
+        { serviceName: "AppFirebaseMessagingService" },
+      ],
+      "./plugins/withIntercomIOSPush.js",
       "./plugins/usePrivateSDK.js",
-      "./plugins/fixManifestMerger.js",
     ],
   },
 };

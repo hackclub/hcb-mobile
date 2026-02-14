@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,6 +10,7 @@ import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as StoreReview from "expo-store-review";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
@@ -23,18 +25,16 @@ import {
   Switch,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import HelpscoutBeacon from "react-native-helpscout-beacon";
 import { mutate } from "swr";
 
 import AuthContext from "../../auth/auth";
 import Button from "../../components/Button";
 import FeedbackModal from "../../components/FeedbackModal";
+import { useDevTools } from "../../lib/devtools/DevToolsContext";
 import { SettingsStackParamList } from "../../lib/NavigatorParamList";
-import Beacon from "../../lib/types/Beacon";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { useCache } from "../../providers/cacheProvider";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
@@ -80,40 +80,25 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
 export default function SettingsPage({ navigation }: Props) {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
-  const { data: beacon } = useOfflineSWR<Beacon>("user/beacon_config");
+  const { data: intercomToken } = useOfflineSWR<{ token: string }>(
+    "user/intercom_token",
+  );
   const { colors } = useTheme();
-  const cache = useCache();
-  const { theme, setTheme, resetTheme } = useThemeContext();
+  const { theme, setTheme } = useThemeContext();
   const animation = useRef(new Animated.Value(0)).current;
   const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
-  const beaconID = process.env.EXPO_PUBLIC_HELPSCOUT_BEACON_ID;
+  const [storeReviewAvailable, setStoreReviewAvailable] = useState(false);
 
   useEffect(() => {
-    if (!beaconID) {
-      console.warn("HelpScout Beacon ID not configured");
-      return;
-    }
-
-    try {
-      HelpscoutBeacon.init(beaconID);
-    } catch (error) {
-      console.error("Failed to initialize HelpScout Beacon", error);
-    }
-  }, [beaconID]);
-
-  useEffect(() => {
-    if (user?.email && user?.name && user?.id) {
-      try {
-        HelpscoutBeacon.login(user.email, user.name, user.id);
-      } catch (error) {
-        console.error("Failed to login to HelpScout Beacon", error);
-      }
-    }
-  }, [user]);
+    (async () => {
+      const available = await StoreReview.isAvailableAsync();
+      setStoreReviewAvailable(available);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -178,7 +163,7 @@ export default function SettingsPage({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       mutate("user");
-    }, [mutate]),
+    }, []),
   );
 
   const handleThemeChange = async (value: "light" | "dark" | "system") => {
@@ -243,8 +228,11 @@ export default function SettingsPage({ navigation }: Props) {
   };
 
   const handleSignOut = async () => {
-    resetTheme();
     try {
+      if (user?.id) {
+        await AsyncStorage.setItem("last_logged_in_user_id", String(user.id));
+      }
+
       if (tokenResponse?.refreshToken) {
         try {
           await revokeAsync(
@@ -259,22 +247,11 @@ export default function SettingsPage({ navigation }: Props) {
         }
       }
 
-      await AsyncStorage.multiRemove([
-        THEME_KEY,
-        BIOMETRICS_KEY,
-        "organizationOrder",
-        "canceledCardsShown",
-        "ttpDidOnboarding",
-        "hasSeenTapToPayBanner",
-        "cardOrder",
-      ]);
-      cache.clear();
       setTokenResponse(null);
     } catch (error) {
-      console.error("Error clearing storage during sign out", error, {
+      console.error("Error during sign out", error, {
         context: { action: "sign_out" },
       });
-      cache.clear();
       setTokenResponse(null);
     }
   };
@@ -579,6 +556,154 @@ export default function SettingsPage({ navigation }: Props) {
           )}
         </View>
 
+        {/* Support & Feedback Section */}
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            color: colors.text,
+            marginBottom: 14,
+            marginTop: 10,
+          }}
+        >
+          Support & Feedback
+        </Text>
+        <View
+          style={{
+            backgroundColor: colors.card,
+            borderRadius: 16,
+            paddingVertical: 0,
+            paddingHorizontal: 0,
+            marginBottom: 24,
+          }}
+        >
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={async () => {
+              if (user && intercomToken) {
+                try {
+                  await Intercom.logout();
+                  await Intercom.setUserJwt(intercomToken.token);
+                  await Intercom.loginUserWithUserAttributes({
+                    email: user.email,
+                  });
+                } catch (error) {
+                  await Intercom.loginUnidentifiedUser();
+                  console.error("Error logging in to Intercom", error);
+                }
+                await Intercom.present();
+              } else {
+                Toast.show({
+                  type: ALERT_TYPE.WARNING,
+                  title: "Unable to open support",
+                  textBody:
+                    "User information is not available. Please try again later.",
+                });
+              }
+            }}
+          >
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>
+              Contact Support
+            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: dividerColor,
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 18,
+              paddingHorizontal: 18,
+            }}
+            onPress={() => setFeedbackModalVisible(true)}
+          >
+            <Ionicons
+              name="create-outline"
+              size={22}
+              color={palette.muted}
+              style={{ marginRight: 12 }}
+            />
+            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={palette.muted}
+              style={{ marginLeft: "auto" }}
+            />
+          </Pressable>
+          {storeReviewAvailable && (
+            <>
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: dividerColor,
+                  marginLeft: 20,
+                  marginRight: 20,
+                }}
+              />
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 18,
+                  paddingHorizontal: 18,
+                }}
+                onPress={async () => {
+                  const storeUrl = StoreReview.storeUrl();
+                  if (storeUrl) {
+                    Linking.openURL(storeUrl);
+                  } else if (storeReviewAvailable) {
+                    try {
+                      await StoreReview.requestReview();
+                    } catch (error) {
+                      console.error("Error requesting store review", error);
+                    }
+                  }
+                }}
+              >
+                <Ionicons
+                  name="star-outline"
+                  size={22}
+                  color={palette.muted}
+                  style={{ marginRight: 12 }}
+                />
+                <Text style={{ color: colors.text, fontSize: 16 }}>
+                  Rate Us
+                </Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={palette.muted}
+                  style={{ marginLeft: "auto" }}
+                />
+              </Pressable>
+            </>
+          )}
+        </View>
+
         {/* Legal & Info Section */}
         <Text
           style={{
@@ -658,80 +783,6 @@ export default function SettingsPage({ navigation }: Props) {
               style={{ marginLeft: "auto" }}
             />
           </Pressable>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
-            }}
-          />
-
-          {/* Feedback */}
-
-          <Pressable
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 18,
-              paddingHorizontal: 18,
-            }}
-            onPress={() => setFeedbackModalVisible(true)}
-          >
-            <Ionicons
-              name="create-outline"
-              size={22}
-              color={palette.muted}
-              style={{ marginRight: 12 }}
-            />
-            <Text style={{ color: colors.text, fontSize: 16 }}>Feedback</Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={palette.muted}
-              style={{ marginLeft: "auto" }}
-            />
-          </Pressable>
-
-          {Platform.OS === "ios" && beacon?.signature && (
-            <>
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
-                }}
-              />
-              <Pressable
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 18,
-                  paddingHorizontal: 18,
-                }}
-                onPress={() => {
-                  HelpscoutBeacon.open(beacon?.signature);
-                }}
-              >
-                <Ionicons
-                  name="chatbox-ellipses-outline"
-                  size={22}
-                  color={palette.muted}
-                  style={{ marginRight: 12 }}
-                />
-                <Text style={{ color: colors.text, fontSize: 16 }}>
-                  Contact Support
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={palette.muted}
-                  style={{ marginLeft: "auto" }}
-                />
-              </Pressable>
-            </>
-          )}
         </View>
 
         {/* Sign Out Button */}
@@ -748,6 +799,8 @@ export default function SettingsPage({ navigation }: Props) {
         >
           Sign Out
         </Button>
+
+        {user?.auditor && <DevToolsButton colors={colors} />}
       </View>
 
       {/* Feedback Modal */}
@@ -785,5 +838,36 @@ export default function SettingsPage({ navigation }: Props) {
         }}
       />
     </ScrollView>
+  );
+}
+
+function DevToolsButton({
+  colors,
+}: {
+  colors: { primary: string; card: string; text: string };
+}) {
+  const { open } = useDevTools();
+
+  return (
+    <Pressable
+      style={{
+        marginBottom: 40,
+        backgroundColor: colors.card,
+        borderRadius: 16,
+        paddingVertical: 16,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#ff8c37",
+        borderStyle: "dashed",
+      }}
+      onPress={open}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <Ionicons name="bug" size={20} color="#ff8c37" />
+        <Text style={{ color: "#ff8c37", fontWeight: "600", fontSize: 16 }}>
+          Open Dev Tools
+        </Text>
+      </View>
+    </Pressable>
   );
 }

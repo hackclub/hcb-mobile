@@ -1,17 +1,22 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useTheme, useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { generate } from "hcb-geo-pattern";
 import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
 import {
   ScrollView,
   View,
+  TouchableOpacity,
   RefreshControl,
   Animated,
   Alert,
+  Platform,
 } from "react-native";
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
+import AddToWalletSection from "../../components/cards/AddToWalletSection";
 import CardDetails from "../../components/cards/CardDetails";
 import CardDisplay from "../../components/cards/CardDisplay";
 import CardError from "../../components/cards/CardError";
@@ -30,6 +35,7 @@ import Card from "../../lib/types/Card";
 import GrantCardType from "../../lib/types/GrantCard";
 import { OrganizationExpanded } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
+import useAddToWallet from "../../lib/useAddToWallet";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
@@ -42,6 +48,7 @@ import {
   toggleCardFrozen,
 } from "../../utils/cardActions";
 import * as Haptics from "../../utils/haptics";
+import { maybeRequestReview } from "../../utils/storeReview";
 import { normalizeSvg } from "../../utils/util";
 
 type Props = NativeStackScreenProps<
@@ -52,11 +59,12 @@ type Props = NativeStackScreenProps<
 export default function GrantCardPage({ route, navigation }: Props) {
   const { grantId, cardId } = route.params;
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
+  const { colors: themeColors } = useTheme();
 
   const { data: grantCard, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
     `card_grants/${fullGrantId}?expand=balance_cents`,
   );
-  const { data: user } = useOfflineSWR<User>(`user`);
+  const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const hcb = useClient();
 
   const {
@@ -64,11 +72,13 @@ export default function GrantCardPage({ route, navigation }: Props) {
     error: cardFetchError,
     mutate: mutateCard,
   } = useOfflineSWR<Card>(
-    cardId ? `cards/${cardId}?expand=last_frozen_by` : null,
+    cardId || grantCard?.card_id
+      ? `cards/${cardId || grantCard?.card_id}?expand=last_frozen_by`
+      : null,
     {
       onError: (err) => {
         console.error("Error fetching card", err, {
-          context: { cardId },
+          context: { cardId: cardId || grantCard?.card_id },
         });
         setCardError("Unable to load card details. Please try again later.");
       },
@@ -119,8 +129,71 @@ export default function GrantCardPage({ route, navigation }: Props) {
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
   const [isReturningGrant, setIsReturningGrant] = useState(false);
 
+  const wallet = useAddToWallet(card?.id || "", {
+    isVirtualCard: !!isVirtualCard,
+    isCardholder: !!isCardholder,
+  });
+  const {
+    setShowWalletModal,
+    ableToAddToWallet,
+    cardAddedToWallet,
+    showWalletModal,
+    refreshDigitalWallet,
+  } = wallet;
+
   const tabBarHeight = useBottomTabBarHeight();
   const { mutate } = useSWRConfig();
+
+  useEffect(() => {
+    if (
+      Platform.OS === "android" &&
+      card &&
+      (card.status === "active" || card.status === "frozen") &&
+      isVirtualCard &&
+      isCardholder
+    ) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => setShowWalletModal(true)}
+            style={{ padding: 8 }}
+          >
+            <Ionicons
+              name="wallet-outline"
+              size={24}
+              color={themeColors.text}
+            />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerRight: undefined,
+      });
+    }
+  }, [
+    navigation,
+    setShowWalletModal,
+    ableToAddToWallet,
+    cardAddedToWallet,
+    themeColors.text,
+    card,
+    card?.status,
+    isVirtualCard,
+    isCardholder,
+  ]);
+
+  useEffect(() => {
+    refreshDigitalWallet();
+  }, [showWalletModal, refreshDigitalWallet]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!showWalletModal) {
+        refreshDigitalWallet();
+      }
+    }, [refreshDigitalWallet, showWalletModal]),
+  );
 
   const {
     transactions,
@@ -130,7 +203,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
     loadMore,
     error: transactionsError,
     mutate: mutateTransactions,
-  } = useTransactions(cardId || card?.id || "", "cards");
+  } = useTransactions(cardId || card?.id || grantCard?.card_id || "", "cards");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -269,6 +342,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
         await reloadGrant();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert("Success", "Grant activated successfully!");
+        maybeRequestReview();
       } else {
         const data = (await response.json()) as { error?: string };
         Alert.alert("Error", data.error || "Failed to activate grant");
@@ -572,6 +646,15 @@ export default function GrantCardPage({ route, navigation }: Props) {
 
         {card?.status !== "canceled" && getGrantCardActionButtons()}
 
+        {isVirtualCard && isCardholder && (
+          <AddToWalletSection
+            {...wallet}
+            user={user}
+            cardNotCanceled={card?.status !== "canceled"}
+            description="HCB Grant Card"
+          />
+        )}
+
         {card && (
           <CardDetails
             card={card}
@@ -584,6 +667,7 @@ export default function GrantCardPage({ route, navigation }: Props) {
             detailsLoading={detailsLoading}
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
+            user={user}
           />
         )}
 

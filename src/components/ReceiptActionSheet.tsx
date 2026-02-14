@@ -8,6 +8,7 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import useClient from "../lib/client";
 import { useIsDark } from "../lib/useColorScheme";
 import { useOffline } from "../lib/useOffline";
+import { maybeRequestReview } from "../utils/storeReview";
 
 interface ReceiptActionSheetProps {
   orgId: string;
@@ -55,6 +56,7 @@ export function useReceiptActionSheet({
           title: "Receipt Uploaded!",
           textBody: "Your receipt has been uploaded successfully.",
         });
+        maybeRequestReview();
       } catch (e) {
         Toast.show({
           type: ALERT_TYPE.DANGER,

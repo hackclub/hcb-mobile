@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useTheme } from "@react-navigation/native";
+import { CommonActions, useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
@@ -154,12 +154,25 @@ export default function Navigator() {
             if (currentTab.name === "Home" && currentTab.state) {
               const homeStackState = currentTab.state;
               if (
-                homeStackState.index > 0 ||
-                homeStackState.routes[homeStackState.index].name !==
+                (homeStackState.index && homeStackState.index > 0) ||
+                homeStackState.routes[homeStackState.index ?? 0].name !==
                   "Organizations"
               ) {
                 e.preventDefault();
-                navigation.navigate("Home", { screen: "Organizations" });
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: "Home",
+                        state: {
+                          routes: [{ name: "Organizations" }],
+                          index: 0,
+                        },
+                      },
+                    ],
+                  }),
+                );
               }
             }
           }

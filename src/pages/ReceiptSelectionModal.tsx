@@ -21,6 +21,7 @@ import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
 import Receipt from "../lib/types/Receipt";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
+import { maybeRequestReview } from "../utils/storeReview";
 
 type Props = NativeStackScreenProps<
   ReceiptsStackParamList,
@@ -105,6 +106,7 @@ export default function ReceiptSelectionModal({
         textBody: `Successfully uploaded ${selectedReceipts.size} receipt(s) and removed them from receipt bin.`,
       });
 
+      maybeRequestReview();
       navigation.goBack();
     } catch (error) {
       console.error("Upload error", error, {

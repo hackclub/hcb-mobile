@@ -68,6 +68,10 @@ export default function CardChargeTransaction({
     <Badge icon="information-circle-outline" color={palette.info}>
       Pending
     </Badge>
+  ) : transaction.reversed ? (
+    <Badge icon="information-circle-outline" color={palette.info}>
+      Reversed
+    </Badge>
   ) : transaction.declined ? (
     <Badge icon="information-circle-outline" color={palette.primary}>
       Declined

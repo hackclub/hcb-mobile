@@ -1,4 +1,5 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   NavigationContainer,
@@ -8,6 +9,7 @@ import {
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -35,9 +37,13 @@ import { routingInstrumentation } from "../../App";
 import AuthContext from "../auth/auth";
 import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
 import SentryUserBridge from "../components/core/SentryUserBridge";
+import UserChangeDetector from "../components/core/UserChangeDetector";
+import { DevToolsPanel } from "../components/devtools";
 import useClient from "../lib/client";
+import { DevToolsProvider } from "../lib/devtools";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
+import { usePushNotifications } from "../lib/usePushNotifications";
 import {
   resetStripeTerminalInitialization,
   useStripeTerminalInit,
@@ -49,6 +55,7 @@ import { useLinkingPref } from "../providers/LinkingContext";
 import { useThemeContext } from "../providers/ThemeContext";
 import { lightTheme, theme } from "../styles/theme";
 import { getStateFromPath } from "../utils/getStateFromPath";
+import { trackAppOpen } from "../utils/storeReview";
 
 import { navRef } from "./navigationRef";
 import Navigator from "./Navigator";
@@ -84,13 +91,8 @@ export default function AppContent({
   scheme: ColorSchemeName;
   cache: CacheProvider;
 }) {
-  const {
-    tokenResponse,
-    codeVerifier,
-    refreshAccessToken,
-    setTokenResponse,
-    shouldRefreshToken,
-  } = useContext(AuthContext);
+  const { tokenResponse, codeVerifier, setTokenResponse } =
+    useContext(AuthContext);
 
   // Extract tokens from tokenResponse for backward compatibility
   const tokens = useMemo(
@@ -106,8 +108,9 @@ export default function AppContent({
   const isBiometricAuthInProgress = useRef(false);
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
-  const refreshPendingRef = useRef(false);
   const hcb = useClient();
+  const { register: registerPushNotifications } = usePushNotifications();
+  const pushNotificationsRegistered = useRef(false);
 
   useUpdateMonitor();
 
@@ -117,6 +120,26 @@ export default function AppContent({
     setLastTokenFetch(0);
     setCachedToken(null);
     setTokenExpiry(0);
+  }, []);
+
+  useEffect(() => {
+    const initializeIntercom = async () => {
+      try {
+        const apiKey = Platform.select({
+          ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+          android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+        });
+        await Intercom.initialize(
+          apiKey,
+          process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
+        );
+      } catch (error) {
+        console.error("Error initializing Intercom", error);
+      }
+    };
+    initializeIntercom().catch((error) => {
+      console.error("Error initializing Intercom", error);
+    });
   }, []);
 
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
@@ -131,7 +154,6 @@ export default function AppContent({
     const now = Date.now();
 
     if (cachedToken && now < tokenExpiry) {
-      console.log("Using cached Stripe Terminal connection token");
       return cachedToken;
     }
 
@@ -165,7 +187,6 @@ export default function AppContent({
     }
 
     try {
-      console.log("Fetching new Stripe Terminal connection token...");
       setLastTokenFetch(now);
       setTokenFetchAttempts((prev) => prev + 1);
 
@@ -184,9 +205,6 @@ export default function AppContent({
       setTokenExpiry(newExpiry);
       setTokenFetchAttempts(0);
 
-      console.log(
-        "Successfully fetched and cached Stripe Terminal connection token",
-      );
       return newToken;
     } catch (error) {
       console.error("Token fetch failed:", error);
@@ -233,6 +251,9 @@ export default function AppContent({
       }
     };
     setStatusBar();
+  }, [isDark, themePref]);
+
+  useEffect(() => {
     const checkAuth = async () => {
       if (tokens?.accessToken) {
         if (
@@ -242,8 +263,6 @@ export default function AppContent({
           console.log(
             "Already authenticated for this token, skipping biometric auth",
           );
-          setIsAuthenticated(true);
-          setAppIsReady(true);
           return;
         }
 
@@ -256,8 +275,6 @@ export default function AppContent({
             "Token refreshed, user already authenticated - updating token without re-prompting biometrics",
           );
           lastAuthenticatedToken.current = tokens.accessToken;
-          setIsAuthenticated(true);
-          setAppIsReady(true);
           return;
         }
 
@@ -274,7 +291,6 @@ export default function AppContent({
           );
 
           if (biometricsRequired !== "true") {
-            console.log("Biometric authentication not required, bypassing...");
             lastAuthenticatedToken.current = tokens.accessToken;
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
@@ -287,7 +303,6 @@ export default function AppContent({
           const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
           if (!hasHardware || !isEnrolled) {
-            console.log("Biometric authentication not available, bypassing...");
             lastAuthenticatedToken.current = tokens.accessToken;
             hasPassedBiometrics.current = true;
             setIsAuthenticated(true);
@@ -356,35 +371,72 @@ export default function AppContent({
     return () => {
       cancelled = true;
     };
-  }, [tokenResponse?.accessToken, setTokenResponse, isDark, themePref, tokens]);
+  }, [tokenResponse?.accessToken, setTokenResponse, tokens]);
 
   useEffect(() => {
-    if (tokenResponse) {
-      if (shouldRefreshToken(300)) {
-        if (refreshPendingRef.current) {
-          console.log(
-            "Token refresh already pending in this component, skipping duplicate preemptive refresh",
-          );
-          return;
-        }
-        console.log("Preemptively refreshing token before it expires");
-        refreshPendingRef.current = true;
-        refreshAccessToken()
-          .catch((error) => {
-            console.error("Failed to preemptively refresh token", error);
-          })
-          .finally(() => {
-            refreshPendingRef.current = false;
+    if (
+      tokens?.accessToken &&
+      isAuthenticated &&
+      appIsReady &&
+      !pushNotificationsRegistered.current
+    ) {
+      pushNotificationsRegistered.current = true;
+      console.log("registering push notifications");
+      registerPushNotifications().then((result) => {
+        console.log("result", result);
+        if (result.expoPushToken || result.nativePushToken) {
+          console.log("Push notifications registered successfully", {
+            expoPushToken: result.expoPushToken,
+            nativePushToken: result.nativePushToken,
+            nativePushTokenType: result.nativePushTokenType,
           });
-      } else {
-        // Reset the flag to allow preemptive refresh when token becomes near expiry again
-        refreshPendingRef.current = false;
-      }
-    } else {
-      console.log("Token state updated - user is logged out");
-      refreshPendingRef.current = false;
+          if (result.nativePushToken) {
+            Intercom.sendTokenToIntercom(result.nativePushToken);
+            console.log("Push token sent to Intercom", result.nativePushToken);
+          }
+          // TODO: Send tokens to backend when endpoint is available
+          // hcb.post("user/push_tokens", {
+          //   json: {
+          //     expo_push_token: result.expoPushToken,
+          //   },
+          // });
+        }
+      });
     }
-  }, [refreshAccessToken, tokenResponse, shouldRefreshToken]);
+  }, [
+    tokens?.accessToken,
+    isAuthenticated,
+    appIsReady,
+    registerPushNotifications,
+  ]);
+
+  useEffect(() => {
+    if (appIsReady) {
+      trackAppOpen();
+    }
+  }, [appIsReady]);
+
+  useEffect(() => {
+    Intercom.setInAppMessageVisibility("GONE");
+
+    const notifSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const contentData = response.notification.request.content.data as
+          | Record<string, unknown>
+          | undefined;
+        const trigger = response.notification.request.trigger as {
+          payload?: Record<string, unknown>;
+        } | null;
+        const data = contentData || trigger?.payload;
+        if (data?.intercom_push_type) {
+          Intercom.present();
+        }
+      });
+
+    return () => {
+      notifSubscription.remove();
+    };
+  }, []);
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
@@ -443,7 +495,8 @@ export default function AppContent({
           path.startsWith("/security") ||
           path.startsWith("/roles") ||
           path.startsWith("/wrapped") ||
-          path.startsWith("/mobile")
+          path.startsWith("/mobile") ||
+          path.startsWith("/applications")
         ) {
           Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
           return undefined;
@@ -528,7 +581,7 @@ export default function AppContent({
                 value={{
                   provider: () => cache,
                   fetcher,
-                  revalidateOnFocus: true,
+                  revalidateOnFocus: false,
                   revalidateOnReconnect: true,
                   revalidateIfStale: true,
                   dedupingInterval: 1000,
@@ -538,7 +591,7 @@ export default function AppContent({
                   errorRetryInterval: 500,
                   refreshInterval: 0,
                   loadingTimeout: 3000,
-                  focusThrottleInterval: 5000,
+                  focusThrottleInterval: 10000,
                   onErrorRetry: (
                     error,
                     key,
@@ -593,23 +646,27 @@ export default function AppContent({
                   },
                 }}
               >
-                <SentryUserBridge />
-                <ActionSheetProvider>
-                  <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                    <NavigationContainer
-                      ref={navigationRef}
-                      theme={navTheme}
-                      linking={linking}
-                      onReady={onNavigationReady}
-                    >
-                      {tokens?.accessToken && isAuthenticated ? (
-                        <Navigator />
-                      ) : (
-                        <Login />
-                      )}
-                    </NavigationContainer>
-                  </AlertNotificationRoot>
-                </ActionSheetProvider>
+                <DevToolsProvider>
+                  <SentryUserBridge />
+                  <UserChangeDetector />
+                  <ActionSheetProvider>
+                    <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
+                      <NavigationContainer
+                        ref={navigationRef}
+                        theme={navTheme}
+                        linking={linking}
+                        onReady={onNavigationReady}
+                      >
+                        {tokens?.accessToken && isAuthenticated ? (
+                          <Navigator />
+                        ) : (
+                          <Login />
+                        )}
+                      </NavigationContainer>
+                    </AlertNotificationRoot>
+                  </ActionSheetProvider>
+                  <DevToolsPanel />
+                </DevToolsProvider>
               </SWRConfig>
             </GestureHandlerRootView>
           </View>

@@ -20,6 +20,7 @@ import { StackParamList } from "../lib/NavigatorParamList";
 import Organization from "../lib/types/Organization";
 import Transaction from "../lib/types/Transaction";
 import { palette } from "../styles/theme";
+import { maybeRequestReview } from "../utils/storeReview";
 import { renderMoney } from "../utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "ShareIntentModal">;
@@ -284,6 +285,7 @@ export default function ShareIntentModal({
         textBody: message,
       });
 
+      maybeRequestReview();
       navigation.goBack();
     } catch (error) {
       console.error("Upload error", error, {

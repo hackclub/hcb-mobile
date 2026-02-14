@@ -61,9 +61,6 @@ export default function OrganizationDonationPage({
   );
   const readerRef = useRef<Reader.Type | undefined>(reader);
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState<string | null>(
-    softwareUpdateProgress,
-  );
 
   const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
   const {
@@ -74,9 +71,6 @@ export default function OrganizationDonationPage({
   } = useStripeTerminal({
     onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
       if (!reader && readers.length > 0) setReader(readers[0]);
-    },
-    onDidReportReaderSoftwareUpdateProgress: (progress: string) => {
-      if (!isUpdatingReaderSoftware) setCurrentProgress(progress);
     },
   });
 
@@ -113,12 +107,6 @@ export default function OrganizationDonationPage({
       setReader(preDiscoveredReaders[0]);
     }
   }, [preDiscoveredReaders, reader]);
-
-  useEffect(() => {
-    setCurrentProgress(
-      isUpdatingReaderSoftware ? softwareUpdateProgress : null,
-    );
-  }, [softwareUpdateProgress, isUpdatingReaderSoftware]);
 
   // Disconnect reader if org changed
   useEffect(() => {
@@ -201,7 +189,6 @@ export default function OrganizationDonationPage({
         "tapToPay",
       );
 
-      setCurrentProgress(null);
       if (error) {
         if (
           (error as { code?: string }).code == "AlreadyConnectedToReader" ||
@@ -221,7 +208,6 @@ export default function OrganizationDonationPage({
       }
 
       await AsyncStorage.setItem("lastConnectedOrgId", orgId);
-      setCurrentProgress(null);
       return true;
     } catch (error) {
       if (
@@ -244,7 +230,6 @@ export default function OrganizationDonationPage({
     }
   }
 
-  // Navigate to NewDonation screen
   const navigateToNewDonation = () => {
     navigation.navigate("NewDonation", {
       orgId,
@@ -252,7 +237,6 @@ export default function OrganizationDonationPage({
     });
   };
 
-  // Handle Get Started button
   const handleGetStarted = async () => {
     // Dev mode - skip reader connection
     if (__DEV__) {
@@ -519,41 +503,19 @@ export default function OrganizationDonationPage({
             >
               Updating reader software...
             </Text>
-            {currentProgress && (
-              <View style={{ width: "100%", maxWidth: 240 }}>
-                <Progress.Bar
-                  progress={parseFloat(currentProgress)}
-                  color={palette.primary}
-                  width={null}
-                  height={6}
-                  borderRadius={3}
-                  unfilledColor={isDark ? colors.card : "#e2e8f0"}
-                  borderWidth={0}
-                />
-              </View>
-            )}
+            <View style={{ width: "100%", maxWidth: 240 }}>
+              <Progress.Bar
+                progress={parseFloat(softwareUpdateProgress ?? "0")}
+                color={palette.primary}
+                width={null}
+                height={6}
+                borderRadius={3}
+                unfilledColor={isDark ? colors.card : "#e2e8f0"}
+                borderWidth={0}
+              />
+            </View>
           </View>
         )}
-
-        {currentProgress && !isUpdatingReaderSoftware ? (
-          <View
-            style={{
-              marginTop: 32,
-              width: "100%",
-              paddingHorizontal: 40,
-            }}
-          >
-            <Progress.Bar
-              progress={parseFloat(currentProgress || "0")}
-              color={palette.primary}
-              width={null}
-              height={6}
-              borderRadius={3}
-              unfilledColor={isDark ? colors.card : "#e2e8f0"}
-              borderWidth={0}
-            />
-          </View>
-        ) : null}
       </View>
 
       <Button
