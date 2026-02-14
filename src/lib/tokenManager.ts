@@ -24,12 +24,18 @@ export class TokenManager {
 
   async load(): Promise<void> {
     try {
-      const tokenResponseStr = await SecureStore.getItemAsync(TOKEN_RESPONSE_KEY, {
-        keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-      });
-      const codeVerifierStr = await SecureStore.getItemAsync(CODE_VERIFIER_KEY, {
-        keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-      });
+      const tokenResponseStr = await SecureStore.getItemAsync(
+        TOKEN_RESPONSE_KEY,
+        {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        },
+      );
+      const codeVerifierStr = await SecureStore.getItemAsync(
+        CODE_VERIFIER_KEY,
+        {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        },
+      );
 
       if (tokenResponseStr) {
         const tokenData = JSON.parse(tokenResponseStr);
@@ -49,7 +55,10 @@ export class TokenManager {
     }
   }
 
-  async save(tokenResponse: TokenResponse, codeVerifier?: string): Promise<void> {
+  async save(
+    tokenResponse: TokenResponse,
+    codeVerifier?: string,
+  ): Promise<void> {
     try {
       const tokenData = {
         accessToken: tokenResponse.accessToken,
@@ -122,13 +131,17 @@ export class TokenManager {
           Date.now() + 5 * 60 * 1000);
 
     if (needsRefresh) {
-      console.log("[TokenManager] Token expired or expiring soon, refreshing...");
+      console.log(
+        "[TokenManager] Token expired or expiring soon, refreshing...",
+      );
       const refreshed = await this.refresh();
       if (refreshed?.accessToken) {
         console.log("[TokenManager] Token refreshed successfully");
         return refreshed.accessToken;
       }
-      console.warn("[TokenManager] Token refresh failed, no access token available");
+      console.warn(
+        "[TokenManager] Token refresh failed, no access token available",
+      );
       return null;
     }
 
@@ -183,10 +196,13 @@ export class TokenManager {
         );
 
         if (!result.accessToken || !result.refreshToken) {
-          console.error("[TokenManager] Token refresh returned incomplete response", {
-            hasAccessToken: !!result.accessToken,
-            hasRefreshToken: !!result.refreshToken,
-          });
+          console.error(
+            "[TokenManager] Token refresh returned incomplete response",
+            {
+              hasAccessToken: !!result.accessToken,
+              hasRefreshToken: !!result.refreshToken,
+            },
+          );
           Sentry.captureMessage("Token refresh returned incomplete response", {
             level: "error",
           });
@@ -198,7 +214,10 @@ export class TokenManager {
         console.log("[TokenManager] Token refresh successful");
         return result;
       } catch (error: unknown) {
-        const errorObj = error as { code?: string; params?: { error?: string } };
+        const errorObj = error as {
+          code?: string;
+          params?: { error?: string };
+        };
         const oauthError = errorObj.code || errorObj.params?.error;
 
         if (
@@ -206,10 +225,13 @@ export class TokenManager {
           oauthError === "invalid_client" ||
           oauthError === "unauthorized_client"
         ) {
-          console.error("[TokenManager] Token refresh failed with OAuth error", {
-            oauthError,
-            error: error instanceof Error ? error.message : String(error),
-          });
+          console.error(
+            "[TokenManager] Token refresh failed with OAuth error",
+            {
+              oauthError,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
           Sentry.captureException(error, {
             level: "error",
             tags: { oauth_error: oauthError },
@@ -218,10 +240,13 @@ export class TokenManager {
           return null;
         }
 
-        console.error("[TokenManager] Token refresh failed with unknown error", {
-          error: error instanceof Error ? error.message : String(error),
-          errorName: error instanceof Error ? error.name : "Unknown",
-        });
+        console.error(
+          "[TokenManager] Token refresh failed with unknown error",
+          {
+            error: error instanceof Error ? error.message : String(error),
+            errorName: error instanceof Error ? error.name : "Unknown",
+          },
+        );
         Sentry.captureException(error, {
           level: "error",
           tags: { issue_type: "token_refresh_unknown_error" },
@@ -241,7 +266,7 @@ export class TokenManager {
       reason: reason || "unknown",
       timestamp: new Date().toISOString(),
     });
-    
+
     if (this.tokenResponse?.refreshToken) {
       try {
         console.log("[TokenManager] Revoking refresh token...");
@@ -254,11 +279,14 @@ export class TokenManager {
         );
         console.log("[TokenManager] Refresh token revoked successfully");
       } catch (error) {
-        console.warn("[TokenManager] Failed to revoke refresh token (non-critical)", error);
+        console.warn(
+          "[TokenManager] Failed to revoke refresh token (non-critical)",
+          error,
+        );
         // Ignore revocation errors - we still want to clear local state
       }
     }
-    
+
     refreshPromise = null;
     await this.clear();
   }

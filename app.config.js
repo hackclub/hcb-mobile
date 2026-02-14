@@ -195,7 +195,7 @@ export default {
           // appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
           // androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
           // iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
-          useManualInit: true
+          useManualInit: true,
         },
       ],
       [

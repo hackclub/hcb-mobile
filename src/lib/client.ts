@@ -30,10 +30,13 @@ export function getClient(): KyInstance {
             if (token) {
               request.headers.set("Authorization", `Bearer ${token}`);
             } else {
-              console.warn("[HTTP Client] No access token available for request", {
-                url: request.url,
-                method: request.method,
-              });
+              console.warn(
+                "[HTTP Client] No access token available for request",
+                {
+                  url: request.url,
+                  method: request.method,
+                },
+              );
             }
           },
         ],
@@ -48,7 +51,9 @@ export function getClient(): KyInstance {
 
               // Prevent multiple simultaneous refresh attempts
               if (refreshInProgress) {
-                console.log("[HTTP Client] Refresh already in progress, waiting...");
+                console.log(
+                  "[HTTP Client] Refresh already in progress, waiting...",
+                );
                 // Wait for ongoing refresh to complete
                 while (refreshInProgress) {
                   await new Promise((resolve) => setTimeout(resolve, 100));
@@ -56,7 +61,9 @@ export function getClient(): KyInstance {
                 // Retry with fresh token
                 const token = await tokenManager.getValidAccessToken();
                 if (token) {
-                  console.log("[HTTP Client] Retrying request after refresh completed");
+                  console.log(
+                    "[HTTP Client] Retrying request after refresh completed",
+                  );
                   return clientInstance!.extend({
                     headers: { Authorization: `Bearer ${token}` },
                   })(request.url, {
@@ -65,17 +72,23 @@ export function getClient(): KyInstance {
                     headers: options.headers,
                   });
                 }
-                console.warn("[HTTP Client] No token available after refresh, returning 401");
+                console.warn(
+                  "[HTTP Client] No token available after refresh, returning 401",
+                );
                 return response;
               }
 
               refreshInProgress = true;
               try {
-                console.log("[HTTP Client] Starting token refresh due to 401...");
+                console.log(
+                  "[HTTP Client] Starting token refresh due to 401...",
+                );
                 const refreshed = await tokenManager.refresh();
 
                 if (refreshed?.accessToken) {
-                  console.log("[HTTP Client] Token refreshed, retrying original request");
+                  console.log(
+                    "[HTTP Client] Token refreshed, retrying original request",
+                  );
                   // Clone request body if it exists (FormData, Blob, etc. can't be reused)
                   let retryBody: BodyInit | null = null;
                   if (request.body) {
@@ -98,10 +111,19 @@ export function getClient(): KyInstance {
 
                   // Retry using ky to maintain consistency
                   const retryClient = clientInstance!.extend({
-                    headers: { Authorization: `Bearer ${refreshed.accessToken}` },
+                    headers: {
+                      Authorization: `Bearer ${refreshed.accessToken}`,
+                    },
                   });
-                  
-                  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+
+                  type HttpMethod =
+                    | "GET"
+                    | "POST"
+                    | "PUT"
+                    | "DELETE"
+                    | "PATCH"
+                    | "HEAD"
+                    | "OPTIONS";
                   const retryResponse = await retryClient(request.url, {
                     method: request.method as HttpMethod,
                     body: retryBody || options.body,
@@ -115,7 +137,9 @@ export function getClient(): KyInstance {
                   return retryResponse;
                 } else {
                   // Refresh failed, logout
-                  console.error("[HTTP Client] Token refresh failed, logging out");
+                  console.error(
+                    "[HTTP Client] Token refresh failed, logging out",
+                  );
                   await tokenManager.logout("401_refresh_failed");
                   return response;
                 }

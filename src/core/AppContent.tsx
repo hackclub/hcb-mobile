@@ -125,18 +125,21 @@ export default function AppContent({
   useEffect(() => {
     const initializeIntercom = async () => {
       try {
-      const apiKey = Platform.select({
-        ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
-        android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
-      });
-      await Intercom.initialize(apiKey, process.env.EXPO_PUBLIC_INTERCOM_APP_ID);
-    } catch (error) {
+        const apiKey = Platform.select({
+          ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+          android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+        });
+        await Intercom.initialize(
+          apiKey,
+          process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
+        );
+      } catch (error) {
+        console.error("Error initializing Intercom", error);
+      }
+    };
+    initializeIntercom().catch((error) => {
       console.error("Error initializing Intercom", error);
-    }
-  };
-  initializeIntercom().catch((error) => {
-    console.error("Error initializing Intercom", error);
-  });
+    });
   }, []);
 
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
