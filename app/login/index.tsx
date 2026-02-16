@@ -1,22 +1,22 @@
 import {
-  useAuthRequest,
-  makeRedirectUri,
-  exchangeCodeAsync,
   DiscoveryDocument,
+  exchangeCodeAsync,
+  makeRedirectUri,
+  useAuthRequest,
 } from "expo-auth-session";
-import { ImageBackground, Image } from "expo-image";
+import * as Haptics from "expo-haptics";
+import { Image, ImageBackground } from "expo-image";
 import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Text, View, Animated, useColorScheme, Platform } from "react-native";
+import { Animated, Platform, Text, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AuthContext from "../auth/auth";
-import Button from "../components/Button";
-import { useIsDark } from "../lib/useColorScheme";
-import { palette } from "../styles/theme";
-import * as Haptics from "../utils/haptics";
+import AuthContext from "../../src/auth/auth";
+import Button from "../../src/components/Button";
+import { useIsDark } from "../../src/lib/useColorScheme";
+import { palette } from "../../src/styles/theme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
