@@ -10,13 +10,13 @@ import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
 import { useColorScheme } from "react-native";
 
-import { AuthProvider } from "./src/auth/AuthProvider";
-import { CustomAlertProvider } from "./src/components/alert/CustomAlertProvider";
-import AppContent from "./src/core/AppContent";
-import { useCache } from "./src/providers/cacheProvider";
-import { LinkingProvider } from "./src/providers/LinkingContext";
-import { ShareIntentProvider } from "./src/providers/ShareIntentContext";
-import { ThemeProvider } from "./src/providers/ThemeContext";
+import { AuthProvider } from "../src/auth/AuthProvider";
+import { CustomAlertProvider } from "../src/components/alert/CustomAlertProvider";
+import AppContent from "../src/core/AppContent";
+import { useCache } from "../src/providers/cacheProvider";
+import { LinkingProvider } from "../src/providers/LinkingContext";
+import { ShareIntentProvider } from "../src/providers/ShareIntentContext";
+import { ThemeProvider } from "../src/providers/ThemeContext";
 
 const routingInstrumentation = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: true,
@@ -75,12 +75,12 @@ export const setupBackgroundUpdates = async () => {
 
 setupBackgroundUpdates();
 
-function App() {
+function Layout() {
   const [fontsLoaded] = useFonts({
-    "JetBrainsMono-Regular": require("./assets/fonts/JetBrainsMono-Regular.ttf"),
-    "JetBrainsMono-Bold": require("./assets/fonts/JetBrainsMono-Bold.ttf"),
-    "Consolas-Bold": require("./assets/fonts/CONSOLAB.ttf"),
-    Damion: require("./assets/fonts/Damion-Regular.ttf"),
+    "JetBrainsMono-Regular": require("../assets/fonts/JetBrainsMono-Regular.ttf"),
+    "JetBrainsMono-Bold": require("../assets/fonts/JetBrainsMono-Bold.ttf"),
+    "Consolas-Bold": require("../assets/fonts/CONSOLAB.ttf"),
+    Damion: require("../assets/fonts/Damion-Regular.ttf"),
   });
 
   const scheme = useColorScheme();
@@ -109,4 +109,4 @@ function App() {
   );
 }
 
-export default Sentry.wrap(App);
+export default Sentry.wrap(Layout);

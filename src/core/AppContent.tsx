@@ -2,7 +2,6 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  NavigationContainer,
   LinkingOptions,
   NavigationContainerRef,
 } from "@react-navigation/native";
@@ -10,30 +9,31 @@ import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import {
-  useRef,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
-  ColorSchemeName,
-  View,
   ActivityIndicator,
-  Platform,
   Appearance,
+  ColorSchemeName,
+  Platform,
+  View,
 } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
-import { routingInstrumentation } from "../../App";
+import { routingInstrumentation } from "../../app/_layout";
 import AuthContext from "../auth/auth";
 import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
 import SentryUserBridge from "../components/core/SentryUserBridge";
@@ -49,7 +49,6 @@ import {
   useStripeTerminalInit,
 } from "../lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "../lib/useUpdateMonitor";
-import Login from "../pages/login";
 import { CacheProvider } from "../providers/cacheProvider";
 import { useLinkingPref } from "../providers/LinkingContext";
 import { useThemeContext } from "../providers/ThemeContext";
@@ -58,7 +57,6 @@ import { getStateFromPath } from "../utils/getStateFromPath";
 import { trackAppOpen } from "../utils/storeReview";
 
 import { navRef } from "./navigationRef";
-import Navigator from "./Navigator";
 
 interface HTTPError extends Error {
   status?: number;
@@ -651,7 +649,8 @@ export default function AppContent({
                   <UserChangeDetector />
                   <ActionSheetProvider>
                     <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                      <NavigationContainer
+                      <Stack />
+                      {/*<NavigationContainer
                         ref={navigationRef}
                         theme={navTheme}
                         linking={linking}
@@ -662,7 +661,7 @@ export default function AppContent({
                         ) : (
                           <Login />
                         )}
-                      </NavigationContainer>
+                      </NavigationContainer>*/}
                     </AlertNotificationRoot>
                   </ActionSheetProvider>
                   <DevToolsPanel />
