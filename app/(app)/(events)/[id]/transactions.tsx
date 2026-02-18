@@ -6,14 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { useSWRConfig } from "swr";
 
 import AccessDenied from "@/components/organizations/AccessDenied";
@@ -39,8 +32,7 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 
@@ -60,49 +52,6 @@ type ListItemType =
       isLast: boolean;
     };
 
-const ListItemButton = ({
-  children,
-  badge,
-  onPress,
-}: {
-  children?: React.ReactNode;
-  badge?: number;
-  onPress?: () => void;
-}) => {
-  return (
-    <Pressable
-      style={{
-        flexDirection: "row",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: "center",
-        gap: 8,
-      }}
-      onPress={onPress}
-    >
-      {children}
-      {badge && (
-        <Text style={{ marginLeft: "auto", opacity: 0.4 }}>{badge}</Text>
-      )}
-    </Pressable>
-  );
-};
-
-const ListItemText = ({
-  primary,
-  secondary,
-}: {
-  primary: string;
-  secondary?: string;
-}) => {
-  return (
-    <View style={{ flex: 1 }}>
-      <Text style={{ fontSize: 15 }}>{primary}</Text>
-      {secondary && <Text style={{ opacity: 0.6 }}>{secondary}</Text>}
-    </View>
-  );
-};
-
 export default function Page() {
   const navigation = useNavigation();
   const params = useLocalSearchParams();
@@ -111,6 +60,7 @@ export default function Page() {
   const {
     data: organization,
     error: organizationError,
+    isLoading: organizationLoading,
     mutate: mutateOrganization,
   } = useOfflineSWR<Organization | OrganizationExpanded>(
     `organizations/${params.id}`,
@@ -166,28 +116,6 @@ export default function Page() {
   const isRefreshingRef = useRef(false);
 
   useEffect(() => {
-    const isOfflineNoData = organizationError && !isOnline && !organization;
-
-    if (isAccessDenied) {
-      navigation.setOptions({
-        title: "Access Denied",
-      });
-    } else if (isOfflineNoData) {
-      navigation.setOptions({
-        title: "Offline",
-      });
-    } else if (organization) {
-      navigation.setOptions({
-        title: organization.name || "Organization",
-      });
-    }
-  }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
-
-  useEffect(() => {
-    navigation.setOptions({ title: organization?.name || "Organization" });
-  }, [organization, navigation]);
-
-  useEffect(() => {
     const checkTapToPayBanner = async () => {
       try {
         const hasSeenBanner = await AsyncStorage.getItem(
@@ -236,27 +164,12 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (organization && user && !isAccessDenied) {
-      navigation.setOptions({
-        title: organization.name,
-        headerRight: () => (
-          <Menu
-            user={user}
-            navigation={navigation}
-            organization={organization}
-            supportsTapToPay={supportsTapToPay}
-          />
-        ),
-      });
-    }
-  }, [organization, navigation, user, supportsTapToPay]);
-
-  useEffect(() => {
     if (organizationErrorStatus?.toString().includes("401")) {
       mutateOrganization();
     }
   }, [organizationErrorStatus, mutateOrganization]);
 
+  const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
@@ -368,6 +281,17 @@ export default function Page() {
     }, [onRefresh, isLoading, isAccessDenied]),
   );
 
+  const renderListFooter = useCallback(() => {
+    if (isLoadingMore && !isLoading && !playgroundMode) {
+      return (
+        <View style={{ padding: 20, alignItems: "center" }}>
+          <ActivityIndicator size="small" color={themeColors.primary} />
+        </View>
+      );
+    }
+    return null;
+  }, [isLoadingMore, isLoading, playgroundMode, themeColors.primary]);
+
   const renderListHeader = useCallback(() => {
     if (!organization) return null;
 
@@ -402,63 +326,130 @@ export default function Page() {
     isOnline,
   ]);
 
-  return (
-    <ScrollView style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {renderListHeader()}
-      <View style={{ paddingHorizontal: 20 }}>
-        <View
-          style={{
-            backgroundColor: themeColors.card,
-            borderRadius: 16,
-          }}
-        >
-          {[
-            {
-              name: "Transactions",
-              badge: 100,
-              path: "/(events)/[id]/transactions",
-            },
-            {
-              name: "Team members",
-              badge: 100,
-              path: "/(events)/[id]/transactions",
-            },
-            {
-              name: "Collect donations",
-              path: "/(events)/[id]/transactions",
-            },
-            {
-              name: "Account details",
-              path: "/(events)/[id]/transactions",
-            },
-            {
-              name: "Transfer money",
-              path: "/(events)/[id]/transactions",
-            },
-          ].map((button, i) => (
-            <ListItemButton
-              key={i}
-              onPress={() => {
-                router.push({
-                  pathname: button.path,
-                  params: {
-                    id: params.id,
-                    fallbackData: params.fallbackData,
-                  },
-                });
-              }}
-            >
-              <ListItemText primary={button.name} />
-              <Text style={{ opacity: 0.6 }}>{button.badge}</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={24}
-                color={themeColors.text}
-              />
-            </ListItemButton>
-          ))}
+  const renderItem = useCallback(
+    ({ item }: { item: ListItemType }) => {
+      if (item.type === "header") {
+        return (
+          <View style={{ paddingHorizontal: 20 }}>
+            <SectionHeader title={item.title} />
+          </View>
+        );
+      }
+
+      if (item.type === "mockTransaction") {
+        return (
+          <MockTransaction
+            transaction={item.transaction}
+            top={item.isFirst}
+            bottom={item.isLast}
+          />
+        );
+      }
+
+      return (
+        <View style={{ paddingHorizontal: 20 }}>
+          <TransactionWrapper
+            item={item.transaction as ITransaction}
+            user={user}
+            organization={organization}
+            navigation={navigation}
+            orgId={params.id}
+            isFirst={item.isFirst}
+            isLast={item.isLast}
+          />
         </View>
+      );
+    },
+    [user, organization, navigation, params],
+  );
+
+  const getItemType = useCallback((item: ListItemType) => {
+    if (item.type === "header") {
+      return "header";
+    }
+
+    if (item.type === "mockTransaction") {
+      return "mockTransaction";
+    }
+
+    const transaction = item.transaction as TransactionWithoutId;
+    return `transaction-${transaction.code}`;
+  }, []);
+
+  const keyExtractor = useCallback((item: ListItemType, index: number) => {
+    if (item.type === "header") {
+      return `header-${item.title}`;
+    }
+    if (
+      "transaction" in item &&
+      "id" in item.transaction &&
+      item.transaction.id
+    ) {
+      return item.transaction.id;
+    }
+    return `item-${index}`;
+  }, []);
+
+  if (organizationLoading || userLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          padding: 20,
+        }}
+      >
+        <LoadingSkeleton />
       </View>
-    </ScrollView>
+    );
+  }
+
+  // Check for offline with no cached data
+  const isOfflineNoData = organizationError && !isOnline && !organization;
+
+  if (isAccessDenied) {
+    return (
+      <AccessDenied orgId={params.id} onGoBack={() => navigation.goBack()} />
+    );
+  }
+
+  if (isOfflineNoData) {
+    return (
+      <OfflineNoData
+        onRetry={() => {
+          if (isOnline) {
+            mutateOrganization();
+          }
+        }}
+        onGoBack={() => navigation.goBack()}
+      />
+    );
+  }
+
+  return (
+    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+      {organization !== undefined ? (
+        <FlashList
+          data={flatListData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          getItemType={getItemType}
+          stickyHeaderIndices={stickyHeaderIndices}
+          ListHeaderComponent={renderListHeader}
+          ListFooterComponent={renderListFooter}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.2}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          contentContainerStyle={{
+            paddingBottom: tabBarSize + 20,
+          }}
+          showsVerticalScrollIndicator={true}
+          drawDistance={400}
+        />
+      ) : (
+        <LoadingSkeleton />
+      )}
+    </View>
   );
 }
