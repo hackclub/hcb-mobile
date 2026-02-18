@@ -5,6 +5,10 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+    },
   },
   "extends": "expo/tsconfig.base",
   "include": ["src/**/*", "app/App.tsx", "env.d.ts", "app"],

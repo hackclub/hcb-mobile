@@ -1,5 +1,5 @@
 import { Text } from "react-native";
 
 export default function Page() {
-  return <Text>Test!</Text>;
+  return <Text>Receipts</Text>;
 }
