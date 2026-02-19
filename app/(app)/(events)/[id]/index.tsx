@@ -6,7 +6,13 @@ import { Text } from "components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { useSWRConfig } from "swr";
 
 import { EmptyState } from "@/components/organizations/EmptyState";
@@ -87,7 +93,7 @@ export default function Page() {
     },
   );
 
-  const { data: user, isLoading: userLoading } = useOfflineSWR<User>("user");
+  const { data: user } = useOfflineSWR<User>("user");
   const [showMockData, setShowMockData] = useState(false);
   const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
   const { supportsTapToPay } = useStripeTerminalInit({
@@ -117,14 +123,10 @@ export default function Page() {
     [organizationError],
   );
 
-  const {
-    transactions: _transactions,
-    isLoading,
-    mutate: mutateTransactions,
-  } = useTransactions(params.id, "organizations");
-  const { mutate } = useSWRConfig();
-  const [refreshing, setRefreshing] = useState(false);
-  const isRefreshingRef = useRef(false);
+  const { transactions: _transactions, isLoading } = useTransactions(
+    params.id,
+    "organizations",
+  );
 
   useEffect(() => {
     const isOfflineNoData = organizationError && !isOnline && !organization;
@@ -222,51 +224,6 @@ export default function Page() {
     [transactions],
   );
 
-  const onRefresh = useCallback(
-    async (showRefreshIndicator = true) => {
-      if (!isOnline || isRefreshingRef.current || isAccessDenied) return;
-
-      isRefreshingRef.current = true;
-      if (showRefreshIndicator) {
-        setRefreshing(true);
-      }
-      try {
-        await mutate(
-          (key) =>
-            typeof key === "string" &&
-            key.startsWith(`organizations/${params.id}/transactions`),
-        );
-        await mutateTransactions();
-        await mutateOrganization();
-      } catch (err) {
-        if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
-          console.error("Error refreshing organization data:", err);
-        }
-      } finally {
-        isRefreshingRef.current = false;
-        if (showRefreshIndicator) {
-          setRefreshing(false);
-        }
-      }
-    },
-    [
-      isOnline,
-      params,
-      mutate,
-      mutateTransactions,
-      mutateOrganization,
-      isAccessDenied,
-    ],
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!isLoading && !isRefreshingRef.current && !isAccessDenied) {
-        onRefresh(false);
-      }
-    }, [onRefresh, isLoading, isAccessDenied]),
-  );
-
   const renderListHeader = useCallback(() => {
     if (!organization) return null;
 
@@ -284,7 +241,7 @@ export default function Page() {
           showMockData={showMockData}
           setShowMockData={setShowMockData}
         />
-        {isLoading && <LoadingSkeleton />}
+        {isLoading && <ActivityIndicator />}
         {!isLoading && sections.length === 0 && !showMockData && (
           <EmptyState isOnline={isOnline} />
         )}
