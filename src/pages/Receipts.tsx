@@ -3,16 +3,16 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useMemo, useLayoutEffect, useRef, useCallback } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   RefreshControl,
-  Text,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";

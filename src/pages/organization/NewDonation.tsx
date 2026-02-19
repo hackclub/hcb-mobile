@@ -8,7 +8,6 @@ import {
 import Icon from "@thedev132/hackclub-icons-rn";
 import { useRef, useState } from "react";
 import {
-  Text,
   View,
   TextInput,
   Keyboard as RNKeyboard,
@@ -16,6 +15,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { Text } from "components/Text";
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";

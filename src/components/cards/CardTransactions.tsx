@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import { TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { Text } from "components/Text";
 
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";

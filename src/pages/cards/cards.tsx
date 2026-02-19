@@ -6,13 +6,8 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, useColorScheme, View } from "react-native";
+import { Text } from "components/Text";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,

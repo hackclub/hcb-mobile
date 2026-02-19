@@ -1,13 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, Platform } from "react-native";
+import { Text } from "components/Text";
 
 export default function Tutorials() {
   const { colors } = useTheme();

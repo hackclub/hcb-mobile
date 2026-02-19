@@ -3,7 +3,8 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { capitalize } from "lodash";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, View } from "react-native";
+import { Text } from "components/Text";
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";

@@ -90,6 +90,9 @@ function Layout() {
     "JetBrainsMono-Bold": require("../assets/fonts/JetBrainsMono-Bold.ttf"),
     "Consolas-Bold": require("../assets/fonts/CONSOLAB.ttf"),
     Damion: require("../assets/fonts/Damion-Regular.ttf"),
+    Regular: require("../assets/fonts/Regular.ttf"),
+    Italic: require("../assets/fonts/Italic.ttf"),
+    Bold: require("../assets/fonts/Bold.ttf"),
   });
 
   const scheme = useColorScheme();

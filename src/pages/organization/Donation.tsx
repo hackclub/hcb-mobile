@@ -9,7 +9,8 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Platform, ActivityIndicator, Linking, Text, View } from "react-native";
+import { Platform, ActivityIndicator, Linking, View } from "react-native";
+import { Text } from "components/Text";
 import * as Progress from "react-native-progress";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

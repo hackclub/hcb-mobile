@@ -5,8 +5,8 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
-import { View, Text, Platform, ScrollView } from "react-native";
-
+import { View, Platform, ScrollView } from "react-native";
+import { Text } from "components/Text";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useThemeContext } from "../../providers/ThemeContext";
 import { palette } from "../../styles/theme";

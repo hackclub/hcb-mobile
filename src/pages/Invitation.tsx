@@ -4,13 +4,13 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import {
   View,
-  Text,
   StatusBar,
   TouchableHighlight,
   ActivityIndicator,
 } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import { Text } from "components/Text";
 
 import Button from "../components/Button";
 import { showAlert } from "../lib/alertUtils";

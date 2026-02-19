@@ -1,11 +1,11 @@
+import { Text } from "components/Text";
 import React from "react";
 import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
+    Dimensions,
+    Modal,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { useIsDark } from "../../lib/useColorScheme";

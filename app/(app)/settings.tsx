@@ -1,4 +1,4 @@
-import { Text } from "react-native";
+import { Text } from "components/Text";
 
 export default function Page() {
   return <Text>Settings</Text>;

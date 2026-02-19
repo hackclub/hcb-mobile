@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
-import { Switch, View, Text, ActivityIndicator } from "react-native";
+import { Switch, View, ActivityIndicator } from "react-native";
+import { Text } from "components/Text";
 
 import { useLinkingPref } from "../../providers/LinkingContext";
 import { palette } from "../../styles/theme";

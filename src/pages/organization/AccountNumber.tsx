@@ -3,7 +3,8 @@ import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button, Linking, Platform } from "react-native";
+import { View, StatusBar, Button, Linking, Platform } from "react-native";
+import { Text } from "components/Text";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { OrganizationExpanded } from "../../lib/types/Organization";

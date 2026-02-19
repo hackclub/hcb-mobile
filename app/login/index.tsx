@@ -1,3 +1,4 @@
+import { Text } from "components/Text";
 import {
   DiscoveryDocument,
   exchangeCodeAsync,
@@ -10,7 +11,7 @@ import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Platform, Text, useColorScheme, View } from "react-native";
+import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import AuthContext from "../../src/auth/auth";

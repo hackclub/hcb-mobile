@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   View,
-  Text,
   Linking,
   RefreshControl,
   KeyboardAvoidingView,
@@ -14,6 +13,8 @@ import {
   Share,
   TouchableOpacity,
 } from "react-native";
+import { Text } from "components/Text";
+
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 

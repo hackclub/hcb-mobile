@@ -2,18 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import {
-  NativeStackScreenProps,
   NativeStackNavigationProp,
+  NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, memo, useMemo, useCallback } from "react";
-import {
-  Text,
-  View,
-  useColorScheme,
-  RefreshControl,
-  Platform,
-} from "react-native";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Platform, RefreshControl, View, useColorScheme } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {

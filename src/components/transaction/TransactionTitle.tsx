@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import { PropsWithChildren, ReactNode } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "components/Text";
 
 import { palette } from "../../styles/theme";
 

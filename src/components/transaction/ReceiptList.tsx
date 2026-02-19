@@ -2,12 +2,13 @@ import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
-import { useState, useRef, useEffect } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import Animated, { Easing, withTiming, Layout } from "react-native-reanimated";
+import Animated, { Easing, Layout, withTiming } from "react-native-reanimated";
 import useSWR from "swr";
 
 import { showAlert } from "../../lib/alertUtils";

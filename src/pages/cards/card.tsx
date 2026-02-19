@@ -1,19 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme, useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
 import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
+    NativeStackNavigationProp,
+    NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { generate } from "hcb-geo-pattern";
-import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
+import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
-  ScrollView,
-  View,
-  TouchableOpacity,
-  RefreshControl,
-  Animated,
-  Platform,
+    Animated,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSWRConfig } from "swr";
 
@@ -37,10 +37,10 @@ import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import useStripeCardDetails from "../../lib/useStripeCardDetails";
 import { palette } from "../../styles/theme";
 import {
-  handleActivate,
-  handleBurnCard,
-  toggleCardDetails,
-  toggleCardFrozen,
+    handleActivate,
+    handleBurnCard,
+    toggleCardDetails,
+    toggleCardFrozen,
 } from "../../utils/cardActions";
 import * as Haptics from "../../utils/haptics";
 import { normalizeSvg } from "../../utils/util";

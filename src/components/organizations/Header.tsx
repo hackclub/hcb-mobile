@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
-import { View, Text, Platform } from "react-native";
-
+import { View, Platform } from "react-native";
+import { Text } from "components/Text";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -62,6 +62,7 @@ export default function Header({
               letterSpacing: 0.8,
               marginBottom: 6,
             }}
+            bold
           >
             Account Balance
           </Text>
@@ -73,6 +74,7 @@ export default function Header({
               letterSpacing: -1.5,
               fontVariant: ["tabular-nums"],
             }}
+            bold
           >
             {formattedBalance}
           </Text>

@@ -1,10 +1,10 @@
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import {
-  StyleProp,
-  Text,
-  View,
-  StyleSheet,
   ImageStyle,
+  StyleProp,
+  StyleSheet,
+  View,
   ViewStyle,
 } from "react-native";
 

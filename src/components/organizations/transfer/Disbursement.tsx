@@ -2,12 +2,12 @@ import { useTheme } from "@react-navigation/native";
 import { useContext, useEffect, useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
+import { Text } from "components/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 

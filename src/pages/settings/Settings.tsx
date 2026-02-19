@@ -15,7 +15,6 @@ import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   Linking,
-  Text,
   View,
   Pressable,
   ScrollView,
@@ -24,6 +23,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
+import { Text } from "components/Text";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { mutate } from "swr";
 

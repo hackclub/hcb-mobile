@@ -1,64 +1,26 @@
 /* eslint-disable react/prop-types */
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FlashList } from "@shopify/flash-list";
-import groupBy from "lodash/groupBy";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import { useSWRConfig } from "swr";
-
-import AccessDenied from "@/components/organizations/AccessDenied";
 import { EmptyState } from "@/components/organizations/EmptyState";
 import Header from "@/components/organizations/Header";
 import { LoadingSkeleton } from "@/components/organizations/LoadingSkeleton";
-import Menu from "@/components/organizations/Menu";
-import OfflineNoData from "@/components/organizations/OfflineNoData";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
-import SectionHeader from "@/components/organizations/SectionHeader";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
-import TransactionWrapper from "@/components/organizations/TransactionWrapper";
-import MockTransaction, {
-  MockTransactionType,
-} from "@/components/transaction/MockTransaction";
-import { StackParamList } from "@/lib/NavigatorParamList";
-import MockTransactionEngine from "@/lib/organization/useMockTransactionEngine";
 import useTransactions from "@/lib/organization/useTransactions";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
-import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
+import { TransactionWithoutId } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
-type Props = NativeStackScreenProps<StackParamList, "Event">;
-
-// FlashList item types
-type ListItemType =
-  | { type: "header"; title: string }
-  | {
-      type: "transaction";
-      transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
-    }
-  | {
-      type: "mockTransaction";
-      transaction: MockTransactionType;
-      isFirst: boolean;
-      isLast: boolean;
-    };
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import groupBy from "lodash/groupBy";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Platform, Pressable, ScrollView, View } from "react-native";
+import { useSWRConfig } from "swr";
 
 const ListItemButton = ({
   children,
@@ -156,8 +118,6 @@ export default function Page() {
 
   const {
     transactions: _transactions,
-    isLoadingMore,
-    loadMore,
     isLoading,
     mutate: mutateTransactions,
   } = useTransactions(params.id, "organizations");
@@ -236,22 +196,6 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (organization && user && !isAccessDenied) {
-      navigation.setOptions({
-        title: organization.name,
-        headerRight: () => (
-          <Menu
-            user={user}
-            navigation={navigation}
-            organization={organization}
-            supportsTapToPay={supportsTapToPay}
-          />
-        ),
-      });
-    }
-  }, [organization, navigation, user, supportsTapToPay]);
-
-  useEffect(() => {
     if (organizationErrorStatus?.toString().includes("401")) {
       mutateOrganization();
     }
@@ -276,52 +220,6 @@ export default function Page() {
       })),
     [transactions],
   );
-
-  const mockTransactions = useMemo(
-    () => new MockTransactionEngine().generateMockTransactionList(),
-    [],
-  );
-  const mockSections: { title: string; data: MockTransactionType[] }[] =
-    useMemo(() => {
-      return Object.entries(groupBy(mockTransactions, (t) => t.date))
-        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
-        .map(([title, data]) => ({
-          title: renderDate(title),
-          data,
-        }));
-    }, [mockTransactions]);
-
-  const { flatListData, stickyHeaderIndices } = useMemo(() => {
-    const sectionsToUse =
-      playgroundMode && showMockData ? mockSections : sections;
-    const result: ListItemType[] = [];
-    const headerIndices: number[] = [];
-
-    sectionsToUse.forEach((section) => {
-      headerIndices.push(result.length);
-      result.push({ type: "header", title: section.title });
-
-      section.data.forEach((item, index) => {
-        if (playgroundMode && showMockData) {
-          result.push({
-            type: "mockTransaction",
-            transaction: item as MockTransactionType,
-            isFirst: index === 0,
-            isLast: index === section.data.length - 1,
-          });
-        } else {
-          result.push({
-            type: "transaction",
-            transaction: item as TransactionWithoutId,
-            isFirst: index === 0,
-            isLast: index === section.data.length - 1,
-          });
-        }
-      });
-    });
-
-    return { flatListData: result, stickyHeaderIndices: headerIndices };
-  }, [sections, mockSections, playgroundMode, showMockData]);
 
   const onRefresh = useCallback(
     async (showRefreshIndicator = true) => {

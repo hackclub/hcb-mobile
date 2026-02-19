@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "components/Text";
 
 import { palette } from "../../styles/theme";
 import Button from "../Button";

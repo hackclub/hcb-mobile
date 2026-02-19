@@ -5,18 +5,18 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { useShareIntentContext } from "expo-share-intent";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Platform,
   RefreshControl,
-  Text,
   TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
-import { Gesture, Pressable } from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
@@ -337,9 +337,9 @@ export default function App({ navigation }: Props) {
             <Text
               style={{
                 fontSize: 30,
-                fontWeight: "bold",
                 marginBottom: 10,
                 marginTop: 35,
+                fontFamily: "Bold",
               }}
             >
               Organizations

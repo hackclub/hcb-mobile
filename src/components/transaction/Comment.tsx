@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import { Text } from "components/Text";
 
 import IComment from "../../lib/types/Comment";
 import { useIsDark } from "../../lib/useColorScheme";

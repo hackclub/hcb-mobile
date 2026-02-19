@@ -1,7 +1,8 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { useState } from "react";
-import { View, Text, TouchableHighlight, Alert } from "react-native";
+import { Alert, TouchableHighlight, View } from "react-native";
 
 import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";

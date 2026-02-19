@@ -1,15 +1,14 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
-  Text,
   View,
   ViewProps,
 } from "react-native";
-
 import { palette } from "../styles/theme";
 import * as Haptics from "../utils/haptics";
 

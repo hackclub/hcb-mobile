@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, Pressable, Platform } from "react-native";
+import { View, Pressable, Platform } from "react-native";
+import { Text } from "components/Text";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { useIsDark } from "../../lib/useColorScheme";

@@ -2,14 +2,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { memo } from "react";
-import {
-  View,
-  Text,
-  TouchableHighlight,
-  StyleSheet,
-  ViewProps,
-} from "react-native";
+import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
 import useSWR from "swr";
+import { Text } from "components/Text";
 
 import Invitation from "../../lib/types/Invitation";
 import Organization, {
@@ -121,6 +116,7 @@ const Event = memo(
                 fontWeight: "700",
                 letterSpacing: -0.3,
               }}
+              bold
             >
               {event.name}
             </Text>

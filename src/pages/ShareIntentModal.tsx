@@ -5,12 +5,12 @@ import { Image } from "expo-image";
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
   Platform,
 } from "react-native";
+import { Text } from "components/Text";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 

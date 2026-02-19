@@ -1,15 +1,15 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
-  Text,
+  AppState,
+  Image as RNImage,
+  useWindowDimensions,
   View,
   ViewProps,
   type AppStateStatus,
-  AppState,
-  useWindowDimensions,
-  Image as RNImage,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 

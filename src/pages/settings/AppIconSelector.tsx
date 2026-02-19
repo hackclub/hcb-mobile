@@ -3,7 +3,8 @@ import { useTheme } from "@react-navigation/native";
 import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image } from "react-native";
+import { View, Pressable, ScrollView, Image } from "react-native";
+import { Text } from "components/Text";
 
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 
