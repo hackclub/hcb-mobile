@@ -2,19 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ScrollView,
-  View,
-  Linking,
-  RefreshControl,
   KeyboardAvoidingView,
+  Linking,
   Platform,
+  RefreshControl,
+  ScrollView,
   Share,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { Text } from "components/Text";
-
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 

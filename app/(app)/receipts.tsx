@@ -33,6 +33,8 @@ import { useIsDark } from "../../src/lib/useColorScheme";
 import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
 import p from "../../src/styles/palette";
 import { palette } from "../../src/styles/theme";
+import Page from "./(events)/[id]/transactions";
+import PageTitle from "components/PageTitle";
 
 function OrganizationSection({
   organization,
@@ -545,10 +547,11 @@ export default function ReceiptsPage() {
       data={listData}
       renderItem={renderItem}
       keyExtractor={(item, index) => `${item.type}-${index}`}
-      contentContainerStyle={{ padding: 20 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 62 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      ListHeaderComponent={() => <PageTitle title="Receipts" />}
       ListFooterComponent={() => (
         <FileViewerModal
           fileUrl={selectedReceipt?.url || null}

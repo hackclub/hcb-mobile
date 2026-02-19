@@ -103,8 +103,8 @@ export default function PaymentCard({
               : "white"
             : themeColors.card,
         padding: 30,
-        width: width * 0.86,
-        height: (width * 0.86) / 1.588,
+        width: width - 40,
+        height: (width - 40) / 1.588,
         borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
@@ -122,8 +122,8 @@ export default function PaymentCard({
             position: "absolute",
             flexDirection: "row",
             flexWrap: "wrap",
-            width: width * 0.86,
-            height: (width * 0.86) / 1.5,
+            width: width - 40,
+            height: (width - 40) / 1.5,
           }}
         >
           <SvgXml xml={pattern} width="100%" height="100%" />

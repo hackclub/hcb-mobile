@@ -3,11 +3,11 @@ import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { memo, useEffect, useState } from "react";
 import {
-    GestureResponderEvent,
-    Linking,
-    Pressable,
-    StyleSheet,
-    View,
+  GestureResponderEvent,
+  Linking,
+  Pressable,
+  StyleSheet,
+  View,
 } from "react-native";
 
 import User from "../lib/types/User";

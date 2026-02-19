@@ -1,11 +1,25 @@
+import Event from "@/components/organizations/Event";
+import GrantInvite from "@/components/organizations/GrantInvite";
+import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
+import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
+import PromoBanner from "@/components/PromoBanner";
+import { StackParamList } from "@/lib/NavigatorParamList";
+import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
+import GrantCard from "@/lib/types/GrantCard";
+import Invitation from "@/lib/types/Invitation";
+import Organization from "@/lib/types/Organization";
+import ITransaction from "@/lib/types/Transaction";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { organizationOrderEqual } from "@/utils/util";
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
+import { router } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -24,34 +38,14 @@ import ReorderableList, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
-import Event from "@/components/organizations/Event";
-import GrantInvite from "@/components/organizations/GrantInvite";
-import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
-import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
-import PromoBanner from "@/components/PromoBanner";
-import { StackParamList } from "@/lib/NavigatorParamList";
-import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
-import GrantCard from "@/lib/types/GrantCard";
-import Invitation from "@/lib/types/Invitation";
-import Organization from "@/lib/types/Organization";
-import ITransaction from "@/lib/types/Transaction";
-import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
-import { organizationOrderEqual } from "@/utils/util";
-import { router } from "expo-router";
-import PageTitle from "components/PageTitle";
-
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 const EventItem = memo(
   ({
     organization,
-    navigation,
     orgCount,
   }: {
     organization: Organization;
-    navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
     orgCount: number;
   }) => {
     const drag = useReorderableDrag();
@@ -60,7 +54,8 @@ const EventItem = memo(
         pathname: "[id]",
         params: {
           id: organization.id,
-          fallbackData: organization,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fallbackData: organization as any,
         },
       });
       // navigation.navigate("Event", {
@@ -272,11 +267,7 @@ export default function App({ navigation }: Props) {
 
   const renderItem = useCallback(
     ({ item: organization }: { item: Organization }) => (
-      <EventItem
-        organization={organization}
-        navigation={navigation}
-        orgCount={orgCount}
-      />
+      <EventItem organization={organization} orgCount={orgCount} />
     ),
     [navigation, orgCount],
   );

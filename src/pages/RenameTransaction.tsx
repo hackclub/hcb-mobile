@@ -1,12 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  StatusBar,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, StatusBar, TextInput, View } from "react-native";
 import { Text } from "components/Text";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";

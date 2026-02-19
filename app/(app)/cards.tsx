@@ -4,7 +4,9 @@ import { MenuView } from "@react-native-menu/menu";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
+import { useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, RefreshControl, useColorScheme, View } from "react-native";
@@ -25,8 +27,6 @@ import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
 import { palette } from "../../src/styles/theme";
 import * as Haptics from "../../src/utils/haptics";
 import { normalizeSvg } from "../../src/utils/util";
-import { useNavigation } from "expo-router";
-import PageTitle from "components/PageTitle";
 
 type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
 
@@ -60,7 +60,9 @@ const CardItem = ({
     >
       <PaymentCard
         card={item}
-        style={{ marginHorizontal: 20, marginBottom: 10 }}
+        style={{
+          marginBottom: 10,
+        }}
         pattern={pattern}
         patternDimensions={patternDimensions}
       />
@@ -376,7 +378,6 @@ export default function Page() {
         ListHeaderComponent={() => (
           <View
             style={{
-              paddingHorizontal: 20,
               paddingTop: 62,
             }}
           >
@@ -395,6 +396,7 @@ export default function Page() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        contentContainerStyle={{ paddingHorizontal: 20 }}
         panGesture={panGesture}
         renderItem={({ item }) => (
           <CardItem
