@@ -367,6 +367,8 @@ export default function CardDetails({
                     fontSize: 16,
                     fontWeight: "500",
                     fontFamily: "JetBrainsMono-Regular",
+                    textAlign: "right",
+                    paddingLeft: 50,
                   }}
                 >
                   {
@@ -764,6 +766,7 @@ export default function CardDetails({
             <Text
               style={{
                 fontSize: 12,
+                textAlign: "right",
                 color: palette.muted,
                 textTransform: "uppercase",
               }}
@@ -775,6 +778,7 @@ export default function CardDetails({
                 fontSize: 16,
                 fontWeight: "600",
                 color: themeColors.text,
+                textAlign: "right",
               }}
             >
               {renderMoney(card?.total_spent_cents)}

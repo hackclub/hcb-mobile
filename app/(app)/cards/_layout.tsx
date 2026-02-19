@@ -7,7 +7,7 @@ function TabBarStyling() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname !== "/")
+    if (pathname !== "/cards")
       navigation.setOptions({ tabBarStyle: { display: "none" } });
     return () => navigation.setOptions({ tabBarStyle: { display: "flex" } });
   }, [pathname, navigation]);
@@ -27,10 +27,7 @@ export default function Layout() {
           name="index"
           options={{ headerShown: false, title: "" }}
         />
-        <Stack.Screen
-          name="[id]/transactions"
-          options={{ title: "Transactions" }}
-        />
+        <Stack.Screen name="[id]" options={{ title: "Transactions" }} />
       </Stack>
       <TabBarStyling />
     </>

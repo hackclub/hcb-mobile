@@ -17,33 +17,34 @@ import {
 } from "react-native";
 import { useSWRConfig } from "swr";
 
-import Button from "../../components/Button";
-import AddToWalletSection from "../../components/cards/AddToWalletSection";
-import CardDetails from "../../components/cards/CardDetails";
-import CardDisplay from "../../components/cards/CardDisplay";
-import CardError from "../../components/cards/CardError";
-import CardSkeleton from "../../components/cards/CardSkeleton";
-import CardTransactions from "../../components/cards/CardTransactions";
-import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
-import useClient from "../../lib/client";
-import { CardsStackParamList } from "../../lib/NavigatorParamList";
-import useTransactions from "../../lib/organization/useTransactions";
-import Card from "../../lib/types/Card";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import User from "../../lib/types/User";
-import useAddToWallet from "../../lib/useAddToWallet";
-import { useIsDark } from "../../lib/useColorScheme";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import useStripeCardDetails from "../../lib/useStripeCardDetails";
-import { palette } from "../../styles/theme";
+import Button from "../../../src/components/Button";
+import AddToWalletSection from "../../../src/components/cards/AddToWalletSection";
+import CardDetails from "../../../src/components/cards/CardDetails";
+import CardDisplay from "../../../src/components/cards/CardDisplay";
+import CardError from "../../../src/components/cards/CardError";
+import CardSkeleton from "../../../src/components/cards/CardSkeleton";
+import CardTransactions from "../../../src/components/cards/CardTransactions";
+import ActivateCardModal from "../../../src/components/cards/modals/ActivateCardModal";
+import useClient from "../../../src/lib/client";
+import { CardsStackParamList } from "../../../src/lib/NavigatorParamList";
+import useTransactions from "../../../src/lib/organization/useTransactions";
+import Card from "../../../src/lib/types/Card";
+import { OrganizationExpanded } from "../../../src/lib/types/Organization";
+import User from "../../../src/lib/types/User";
+import useAddToWallet from "../../../src/lib/useAddToWallet";
+import { useIsDark } from "../../../src/lib/useColorScheme";
+import { useOfflineSWR } from "../../../src/lib/useOfflineSWR";
+import useStripeCardDetails from "../../../src/lib/useStripeCardDetails";
+import { palette } from "../../../src/styles/theme";
 import {
   handleActivate,
   handleBurnCard,
   toggleCardDetails,
   toggleCardFrozen,
-} from "../../utils/cardActions";
-import * as Haptics from "../../utils/haptics";
-import { normalizeSvg } from "../../utils/util";
+} from "../../../src/utils/cardActions";
+import * as Haptics from "../../../src/utils/haptics";
+import { normalizeSvg } from "../../../src/utils/util";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 
 type CardPageProps = {
   cardId?: string;
@@ -51,16 +52,20 @@ type CardPageProps = {
   navigation: NativeStackNavigationProp<CardsStackParamList>;
 };
 
-export default function CardPage(
-  props: CardPageProps | NativeStackScreenProps<CardsStackParamList, "Card">,
-) {
-  const cardId = "route" in props ? props.route.params.cardId : props.cardId;
-  const _card = "route" in props ? props.route.params.card : props.card;
-  const navigation = "route" in props ? props.navigation : props.navigation;
+export default function CardPage() {
+  const { card: _card } = useLocalSearchParams();
+  const navigation = useNavigation();
+
+  const paramCard = _card
+    ? typeof _card === "string"
+      ? JSON.parse(_card)
+      : _card
+    : undefined;
+
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const id = _card?.id ?? `crd_${cardId}`;
+  const id = paramCard?.id ?? `crd_${paramCard.id}`;
   const {
     data: card,
     error: cardFetchError,
@@ -73,7 +78,7 @@ export default function CardPage(
   });
   const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${_card?.organization.id || card?.organization.id}`,
+    `organizations/${paramCard?.organization.id || card?.organization.id}`,
   );
 
   const {
@@ -81,7 +86,7 @@ export default function CardPage(
     toggle: toggleDetailsRevealed,
     revealed: detailsRevealed,
     loading: detailsLoading,
-  } = useStripeCardDetails(_card?.id || card?.id || "");
+  } = useStripeCardDetails(card?.id || "");
 
   const isCardholder = user?.id == card?.user?.id;
   const isManagerOrAdmin =
@@ -108,7 +113,7 @@ export default function CardPage(
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
   const isDark = useIsDark();
-  const wallet = useAddToWallet(_card?.id || card?.id || "", {
+  const wallet = useAddToWallet(card?.id || card?.id || "", {
     isVirtualCard: !!isVirtualCard,
     isCardholder: !!isCardholder,
   });
@@ -549,7 +554,7 @@ export default function CardPage(
             transactionError={transactionError}
             isLoadingMore={isLoadingMore || false}
             card={card as Card}
-            _card={_card as Card}
+            _card={card as Card}
             navigation={navigation}
           />
         )}

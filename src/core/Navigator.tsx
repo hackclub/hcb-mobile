@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import CardPage from "../../app/(app)/cards/[id]";
+import ReceiptsPage from "../../app/(app)/receipts";
 import { navRef } from "../core/navigationRef";
 import {
   CardsStackParamList,
@@ -21,7 +23,6 @@ import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import { useIsDark } from "../lib/useColorScheme";
 import CardsPage from "../pages/cards";
-import CardPage from "../pages/cards/card";
 import GrantCardPage from "../pages/cards/GrantCard";
 import OrderCardPage from "../pages/cards/OrderCard";
 import Home from "../pages/index";
@@ -33,7 +34,6 @@ import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
-import ReceiptsPage from "../../app/(app)/receipts";
 import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
 import RenameTransactionPage from "../pages/RenameTransaction";
 import About from "../pages/settings/About";

@@ -1,18 +1,3 @@
-import Event from "@/components/organizations/Event";
-import GrantInvite from "@/components/organizations/GrantInvite";
-import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
-import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
-import PromoBanner from "@/components/PromoBanner";
-import { StackParamList } from "@/lib/NavigatorParamList";
-import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
-import GrantCard from "@/lib/types/GrantCard";
-import Invitation from "@/lib/types/Invitation";
-import Organization from "@/lib/types/Organization";
-import ITransaction from "@/lib/types/Transaction";
-import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
-import { organizationOrderEqual } from "@/utils/util";
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
@@ -37,6 +22,22 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
+
+import Event from "@/components/organizations/Event";
+import GrantInvite from "@/components/organizations/GrantInvite";
+import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
+import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
+import PromoBanner from "@/components/PromoBanner";
+import { StackParamList } from "@/lib/NavigatorParamList";
+import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
+import GrantCard from "@/lib/types/GrantCard";
+import Invitation from "@/lib/types/Invitation";
+import Organization from "@/lib/types/Organization";
+import ITransaction from "@/lib/types/Transaction";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { organizationOrderEqual } from "@/utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
