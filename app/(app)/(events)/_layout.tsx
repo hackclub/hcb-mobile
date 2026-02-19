@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "components/Text";
-import { Stack } from "expo-router";
+import { Stack, useNavigation, usePathname } from "expo-router";
+import { useEffect } from "react";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -33,18 +34,37 @@ function Navbar({ t }: { t: any }) {
   );
 }
 
+function TabBarStyling() {
+  const navigation = useNavigation();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname !== "/")
+      navigation.setOptions({ tabBarStyle: { display: "none" } });
+    return () => navigation.setOptions({ tabBarStyle: { display: "flex" } });
+  }, [pathname, navigation]);
+
+  return null;
+}
+
 export default function Layout() {
   return (
-    <Stack
-      screenOptions={{
-        header: (t) => <Navbar t={t} />,
-      }}
-    >
-      <Stack.Screen name="index" options={{ headerShown: false, title: "" }} />
-      <Stack.Screen
-        name="[id]/transactions"
-        options={{ title: "Transactions" }}
-      />
-    </Stack>
+    <>
+      <Stack
+        screenOptions={{
+          header: (t) => <Navbar t={t} />,
+        }}
+      >
+        <Stack.Screen
+          name="index"
+          options={{ headerShown: false, title: "" }}
+        />
+        <Stack.Screen
+          name="[id]/transactions"
+          options={{ title: "Transactions" }}
+        />
+      </Stack>
+      <TabBarStyling />
+    </>
   );
 }

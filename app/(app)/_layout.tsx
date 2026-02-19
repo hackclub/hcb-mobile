@@ -2,9 +2,9 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    LinkingOptions,
-    NavigationContainerRef,
-    ThemeProvider,
+  LinkingOptions,
+  NavigationContainerRef,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
@@ -12,17 +12,17 @@ import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { ActivityIndicator, Appearance, Platform, View } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
@@ -44,8 +44,8 @@ import { TabParamList } from "@/lib/NavigatorParamList";
 import { useIsDark } from "@/lib/useColorScheme";
 import { usePushNotifications } from "@/lib/usePushNotifications";
 import {
-    resetStripeTerminalInitialization,
-    useStripeTerminalInit,
+  resetStripeTerminalInitialization,
+  useStripeTerminalInit,
 } from "@/lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
 import { useLinkingPref } from "@/providers/LinkingContext";

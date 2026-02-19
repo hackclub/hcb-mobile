@@ -6,6 +6,7 @@ export function Text(props: TextProps & { bold?: boolean; italic?: boolean }) {
       {...props}
       style={[
         {
+          fontSize: 16,
           fontFamily: props.bold ? "Bold" : props.italic ? "Italic" : "Regular",
         },
         props.style,

@@ -59,7 +59,7 @@ const ListItemText = ({
 }) => {
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ fontSize: 15 }}>{primary}</Text>
+      <Text>{primary}</Text>
       {secondary && <Text style={{ opacity: 0.6 }}>{secondary}</Text>}
     </View>
   );
