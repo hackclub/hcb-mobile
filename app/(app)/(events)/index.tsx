@@ -40,6 +40,7 @@ import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { organizationOrderEqual } from "@/utils/util";
 import { router } from "expo-router";
+import PageTitle from "components/PageTitle";
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
@@ -316,7 +317,7 @@ export default function App({ navigation }: Props) {
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         contentContainerStyle={{
-          padding: 20,
+          paddingHorizontal: 20,
           paddingBottom: tabBarHeight,
         }}
         contentInsetAdjustmentBehavior="automatic"
@@ -334,16 +335,7 @@ export default function App({ navigation }: Props) {
         ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
-            <Text
-              style={{
-                fontSize: 30,
-                marginBottom: 10,
-                marginTop: 35,
-                fontFamily: "Bold",
-              }}
-            >
-              Organizations
-            </Text>
+            <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
             (grantInvites && grantInvites.length > 0) ? (

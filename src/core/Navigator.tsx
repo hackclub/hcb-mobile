@@ -11,17 +11,17 @@ import useSWR, { useSWRConfig } from "swr";
 
 import { navRef } from "../core/navigationRef";
 import {
-  StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
-  TabParamList,
   SettingsStackParamList,
+  StackParamList,
+  TabParamList,
 } from "../lib/NavigatorParamList";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import { useIsDark } from "../lib/useColorScheme";
+import CardsPage from "../pages/cards";
 import CardPage from "../pages/cards/card";
-import CardsPage from "../pages/cards/cards";
 import GrantCardPage from "../pages/cards/GrantCard";
 import OrderCardPage from "../pages/cards/OrderCard";
 import Home from "../pages/index";
@@ -33,7 +33,7 @@ import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
-import ReceiptsPage from "../pages/Receipts";
+import ReceiptsPage from "../../app/(app)/receipts";
 import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
 import RenameTransactionPage from "../pages/RenameTransaction";
 import About from "../pages/settings/About";

@@ -703,18 +703,6 @@ export default function Layout() {
                           />
                         </Tabs>
                       </ThemeProvider>
-                      {/*<NavigationContainer
-                        ref={navigationRef}
-                        theme={navTheme}
-                        linking={linking}
-                        onReady={onNavigationReady}
-                      >
-                        {tokens?.accessToken && isAuthenticated ? (
-                          <Navigator />
-                        ) : (
-                          <Login />
-                        )}
-                      </NavigationContainer>*/}
                     </AlertNotificationRoot>
                   </ActionSheetProvider>
                   <DevToolsPanel />
