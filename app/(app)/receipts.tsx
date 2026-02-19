@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -26,7 +25,6 @@ import MissingReceiptTransaction from "../../src/components/receipts/MissingRece
 import { ZoomAndFadeIn } from "../../src/components/transaction/ReceiptList";
 import { showAlert } from "../../src/lib/alertUtils";
 import useClient from "../../src/lib/client";
-import { ReceiptsStackParamList } from "../../src/lib/NavigatorParamList";
 import Organization from "../../src/lib/types/Organization";
 import Receipt from "../../src/lib/types/Receipt";
 import { TransactionCardCharge } from "../../src/lib/types/Transaction";
@@ -34,8 +32,6 @@ import { useIsDark } from "../../src/lib/useColorScheme";
 import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
 import p from "../../src/styles/palette";
 import { palette } from "../../src/styles/theme";
-
-import Page from "./(events)/[id]/transactions";
 
 function OrganizationSection({
   organization,

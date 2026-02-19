@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 
@@ -56,11 +57,14 @@ function TransactionWrapper({
         grantId: item.transfer.card_grant_id,
       });
     } else {
-      navigation.navigate("Transaction", {
-        transactionId: item.id!,
-        orgId,
-        transaction: item as ITransaction,
-        title: getTransactionTitle(item as ITransaction),
+      router.push({
+        pathname: "/[id]/transaction/[transactionId]",
+        params: {
+          transactionId: item.id!,
+          orgId,
+          transaction: JSON.stringify(item as ITransaction),
+          title: getTransactionTitle(item as ITransaction),
+        },
       });
     }
   };

@@ -31,6 +31,10 @@ export default function Layout() {
           name="[id]/transactions"
           options={{ title: "Transactions" }}
         />
+        <Stack.Screen
+          name="[id]/transaction/[transactionId]"
+          options={{ title: "Transaction" }}
+        />
       </Stack>
       <TabBarStyling />
     </>
