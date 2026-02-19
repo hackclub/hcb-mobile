@@ -5,6 +5,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
@@ -38,7 +39,6 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useThemeContext } from "@/providers/ThemeContext";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
-import PageTitle from "components/PageTitle";
 
 const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 

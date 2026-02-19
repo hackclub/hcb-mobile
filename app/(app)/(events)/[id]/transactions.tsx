@@ -4,6 +4,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
@@ -32,7 +33,6 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { useLocalSearchParams, useNavigation } from "expo-router";
 
 type Props = NativeStackScreenProps<StackParamList, "Event">;
 

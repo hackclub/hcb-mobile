@@ -3,6 +3,7 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
@@ -33,8 +34,8 @@ import { useIsDark } from "../../src/lib/useColorScheme";
 import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
 import p from "../../src/styles/palette";
 import { palette } from "../../src/styles/theme";
+
 import Page from "./(events)/[id]/transactions";
-import PageTitle from "components/PageTitle";
 
 function OrganizationSection({
   organization,

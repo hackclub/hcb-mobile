@@ -5,6 +5,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -44,7 +45,6 @@ import {
 } from "../../../src/utils/cardActions";
 import * as Haptics from "../../../src/utils/haptics";
 import { normalizeSvg } from "../../../src/utils/util";
-import { useLocalSearchParams, useNavigation } from "expo-router";
 
 type CardPageProps = {
   cardId?: string;

@@ -1,4 +1,14 @@
 /* eslint-disable react/prop-types */
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import groupBy from "lodash/groupBy";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Platform, Pressable, ScrollView, View } from "react-native";
+import { useSWRConfig } from "swr";
+
 import { EmptyState } from "@/components/organizations/EmptyState";
 import Header from "@/components/organizations/Header";
 import { LoadingSkeleton } from "@/components/organizations/LoadingSkeleton";
@@ -12,15 +22,6 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import groupBy from "lodash/groupBy";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, View } from "react-native";
-import { useSWRConfig } from "swr";
 
 const ListItemButton = ({
   children,
