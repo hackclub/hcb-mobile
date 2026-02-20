@@ -438,7 +438,7 @@ export default function App({ navigation }: Props) {
                 size={24}
                 color={themeColors.text}
               />
-              <Text>Create</Text>
+              <Text style={{ color: themeColors.text }}>Create</Text>
             </TouchableOpacity>
 
             {organizations && organizations.length > 2 && (
