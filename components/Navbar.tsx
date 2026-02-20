@@ -1,11 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "./Text";
 
-export function Navbar({ t }: { t: any }) {
+export function Navbar({ options, navigation }: { options: any; navigation: any }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+
   return (
     <View
       style={{
@@ -16,8 +19,8 @@ export function Navbar({ t }: { t: any }) {
         paddingHorizontal: 10,
       }}
     >
-      <Pressable onPress={() => t.navigation.goBack()} style={{ padding: 16 }}>
-        <Ionicons name="chevron-back" size={24} color="black" />
+      <Pressable onPress={() => navigation.goBack()} style={{ padding: 16 }}>
+        <Ionicons name="chevron-back" size={24} color={colors.text} />
       </Pressable>
       <Text
         style={{
@@ -27,7 +30,7 @@ export function Navbar({ t }: { t: any }) {
           paddingRight: 50,
         }}
       >
-        {t.options.title}
+        {options?.title}
       </Text>
     </View>
   );

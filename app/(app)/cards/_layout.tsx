@@ -18,11 +18,7 @@ function TabBarStyling() {
 export default function Layout() {
   return (
     <>
-      <Stack
-        screenOptions={{
-          header: (t) => <Navbar t={t} />,
-        }}
-      >
+      <Stack screenOptions={{ header: Navbar }}>
         <Stack.Screen
           name="index"
           options={{ headerShown: false, title: "" }}
