@@ -41,7 +41,11 @@ import { palette } from "@/styles/theme";
 
 export default function TransactionPage() {
   const navigation = useNavigation();
-  const { transactionId, orgId: _orgId, transaction: _transactionParam } = useLocalSearchParams<{
+  const {
+    transactionId,
+    orgId: _orgId,
+    transaction: _transactionParam,
+  } = useLocalSearchParams<{
     transactionId: string;
     orgId?: string;
     transaction?: string;
