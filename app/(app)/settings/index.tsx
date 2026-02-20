@@ -769,7 +769,7 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => navigation.navigate("About")}
+            onPress={() => router.push("./about")}
           >
             <Ionicons
               name="information-circle-outline"

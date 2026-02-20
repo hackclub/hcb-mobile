@@ -2,14 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import Constants from "expo-constants";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
-import { View, Platform, ScrollView } from "react-native";
-import { Text } from "components/Text";
-import { useIsDark } from "../../lib/useColorScheme";
-import { useThemeContext } from "../../providers/ThemeContext";
-import { palette } from "../../styles/theme";
+import { Platform, ScrollView, View } from "react-native";
+
+import { useIsDark } from "@/lib/useColorScheme";
+import { useThemeContext } from "@/providers/ThemeContext";
+import { palette } from "@/styles/theme";
 
 export default function About() {
   const { colors } = useTheme();

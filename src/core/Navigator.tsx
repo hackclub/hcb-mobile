@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import About from "@/app/(app)/settings/About";
 import CardPage from "../../app/(app)/cards/[id]";
 import ReceiptsPage from "../../app/(app)/receipts";
 import { navRef } from "../core/navigationRef";
@@ -36,7 +37,6 @@ import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
 import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
 import RenameTransactionPage from "../pages/RenameTransaction";
-import About from "../pages/settings/About";
 import AppIconSelector from "../pages/settings/AppIconSelector";
 import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
 import SettingsPage from "../pages/settings/Settings";
