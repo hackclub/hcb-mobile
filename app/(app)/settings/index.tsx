@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
 import PageTitle from "components/PageTitle";
@@ -12,6 +11,7 @@ import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
+import { router } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -32,7 +32,6 @@ import AuthContext from "@/auth/auth";
 import Button from "@/components/Button";
 import FeedbackModal from "@/components/FeedbackModal";
 import { useDevTools } from "@/lib/devtools/DevToolsContext";
-import { SettingsStackParamList } from "@/lib/NavigatorParamList";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -76,9 +75,7 @@ function isTapToPaySupported() {
   return false;
 }
 
-type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
-
-export default function SettingsPage({ navigation }: Props) {
+export default function SettingsPage() {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
   const { data: intercomToken } = useOfflineSWR<{ token: string }>(
@@ -472,7 +469,7 @@ export default function SettingsPage({ navigation }: Props) {
                   alignItems: "center",
                   padding: 18,
                 }}
-                onPress={() => navigation.navigate("AppIconSelector")}
+                onPress={() => router.push("/settings/app-icon")}
               >
                 <Ionicons
                   name="color-palette-outline"
@@ -503,7 +500,7 @@ export default function SettingsPage({ navigation }: Props) {
 
           <Pressable
             style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
-            onPress={() => navigation.navigate("DeepLinkingSettings")}
+            onPress={() => router.push("/settings/deep-linking")}
           >
             <Ionicons
               name="link"
@@ -538,7 +535,7 @@ export default function SettingsPage({ navigation }: Props) {
                   alignItems: "center",
                   padding: 18,
                 }}
-                onPress={() => navigation.navigate("Tutorials")}
+                onPress={() => router.push("/settings/tutorials")}
               >
                 <Ionicons
                   name="book-outline"
@@ -769,7 +766,7 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => router.push("./about")}
+            onPress={() => router.push("/settings/about")}
           >
             <Ionicons
               name="information-circle-outline"

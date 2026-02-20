@@ -1,17 +1,19 @@
 import { useTheme } from "@react-navigation/native";
-import { Switch, View, ActivityIndicator } from "react-native";
 import { Text } from "components/Text";
+import { ActivityIndicator, Switch, View } from "react-native";
 
-import { useLinkingPref } from "../../providers/LinkingContext";
-import { palette } from "../../styles/theme";
-import * as Haptics from "../../utils/haptics";
+import { useLinkingPref } from "@/providers/LinkingContext";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import PageTitle from "components/PageTitle";
 
-export default function DeepLinkingSettings() {
+export default function Page() {
   const { enabled, setEnabled } = useLinkingPref();
   const { colors } = useTheme();
 
   return (
-    <View style={{ backgroundColor: colors.background, padding: 32 }}>
+    <View style={{ backgroundColor: colors.background, paddingHorizontal: 20 }}>
+      <PageTitle title="Deep linking" />
       <View style={{ width: "100%" }}>
         <View
           style={{

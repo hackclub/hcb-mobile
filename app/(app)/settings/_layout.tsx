@@ -7,7 +7,7 @@ function TabBarStyling() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (pathname !== "/cards")
+    if (pathname !== "/settings")
       navigation.setOptions({ tabBarStyle: { display: "none" } });
     return () => navigation.setOptions({ tabBarStyle: { display: "flex" } });
   }, [pathname, navigation]);

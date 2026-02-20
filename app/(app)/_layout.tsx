@@ -24,10 +24,20 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Appearance, Platform, View } from "react-native";
+import {
+  ActivityIndicator,
+  Appearance,
+  Dimensions,
+  Platform,
+  View,
+} from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
 import { routingInstrumentation, SWRCacheProvider } from "../_layout";
@@ -53,6 +63,7 @@ import { useThemeContext } from "@/providers/ThemeContext";
 import { lightTheme, theme } from "@/styles/theme";
 import { getStateFromPath } from "@/utils/getStateFromPath";
 import { trackAppOpen } from "@/utils/storeReview";
+import { BlurView } from "expo-blur";
 
 interface HTTPError extends Error {
   status?: number;
@@ -88,6 +99,7 @@ export default function Layout() {
     () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
     [tokenResponse, codeVerifier],
   );
+  const insets = useSafeAreaInsets();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -641,6 +653,17 @@ export default function Layout() {
                   <ActionSheetProvider>
                     <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                       <ThemeProvider value={navTheme}>
+                        <BlurView
+                          intensity={20}
+                          style={{
+                            height: insets.top,
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            zIndex: 1,
+                          }}
+                        />
                         <Tabs
                           ref={navigationRef}
                           screenOptions={{
