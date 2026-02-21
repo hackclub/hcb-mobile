@@ -283,7 +283,7 @@ export default function Page() {
             },
             {
               name: "Account details",
-              path: "/(events)/[id]/transactions",
+              path: "/(events)/[id]/account-numbers",
             },
             {
               name: "Transfer money",

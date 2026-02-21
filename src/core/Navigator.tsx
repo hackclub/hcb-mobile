@@ -10,6 +10,7 @@ import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
 import About from "@/app/(app)/settings/About";
+import AccountNumberPage from "../../app/(app)/(events)/[id]/account-numbers";
 import CardPage from "../../app/(app)/cards/[id]";
 import ReceiptsPage from "../../app/(app)/receipts";
 import { navRef } from "../core/navigationRef";
@@ -29,7 +30,6 @@ import OrderCardPage from "../pages/cards/OrderCard";
 import Home from "../pages/index";
 import InvitationPage from "../pages/Invitation";
 import OrganizationPage from "../pages/organization";
-import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
 import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
@@ -119,18 +119,18 @@ export default function Navigator() {
         headerShown: false,
         ...(Platform.OS === "android"
           ? {
-              tabBarStyle: {
-                position: "absolute",
-                paddingBottom: 5,
-                height: 50,
-                elevation: 0,
-              },
-            }
+            tabBarStyle: {
+              position: "absolute",
+              paddingBottom: 5,
+              height: 50,
+              elevation: 0,
+            },
+          }
           : {
-              tabBarStyle: {
-                position: "absolute",
-              },
-            }),
+            tabBarStyle: {
+              position: "absolute",
+            },
+          }),
         tabBarHideOnKeyboard: true,
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
@@ -156,7 +156,7 @@ export default function Navigator() {
               if (
                 (homeStackState.index && homeStackState.index > 0) ||
                 homeStackState.routes[homeStackState.index ?? 0].name !==
-                  "Organizations"
+                "Organizations"
               ) {
                 e.preventDefault();
                 navigation.dispatch(
