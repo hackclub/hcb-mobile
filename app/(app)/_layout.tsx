@@ -64,6 +64,7 @@ import { lightTheme, theme } from "@/styles/theme";
 import { getStateFromPath } from "@/utils/getStateFromPath";
 import { trackAppOpen } from "@/utils/storeReview";
 import { BlurView } from "expo-blur";
+import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
 
 interface HTTPError extends Error {
   status?: number;
@@ -194,10 +195,10 @@ export default function Layout() {
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-        terminal_connection_token: {
-          secret: string;
+          terminal_connection_token: {
+            secret: string;
+          };
         };
-      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
@@ -668,6 +669,7 @@ export default function Layout() {
                           ref={navigationRef}
                           screenOptions={{
                             headerShown: false,
+                            tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE
                           }}
                           screenListeners={{
                             tabPress: () =>

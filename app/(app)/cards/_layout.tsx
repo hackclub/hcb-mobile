@@ -1,19 +1,7 @@
 import { Navbar } from "components/Navbar";
-import { Stack, useNavigation, usePathname } from "expo-router";
-import { useEffect } from "react";
+import { Stack } from "expo-router";
 
-function TabBarStyling() {
-  const navigation = useNavigation();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (pathname !== "/cards")
-      navigation.setOptions({ tabBarStyle: { display: "none" } });
-    return () => navigation.setOptions({ tabBarStyle: { display: "flex" } });
-  }, [pathname, navigation]);
-
-  return null;
-}
+import { TabBarStyling } from '../../../components/TabBarStyling';
 
 export default function Layout() {
   return (
@@ -25,7 +13,7 @@ export default function Layout() {
         />
         <Stack.Screen name="[id]" options={{ title: "Transactions" }} />
       </Stack>
-      <TabBarStyling />
+      <TabBarStyling enabledPage="/cards" />
     </>
   );
 }

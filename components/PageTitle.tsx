@@ -1,12 +1,13 @@
+import { useTheme } from "@react-navigation/native";
+
 import { Text } from "./Text";
 
-import { theme } from "@/styles/theme";
-
 export default function PageTitle({ title }: { title: string }) {
+  const { colors } = useTheme();
   return (
     <Text
       style={{
-        color: theme.colors.text,
+        color: colors.text,
         fontSize: 30,
         marginBottom: 10,
         marginTop: 35,
