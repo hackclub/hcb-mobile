@@ -5,7 +5,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Text } from "./Text";
 
-export function Navbar({ options, navigation }: { options: any; navigation: any }) {
+export function Navbar({
+  options,
+  navigation,
+}: {
+  options: any;
+  navigation: any;
+}) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 

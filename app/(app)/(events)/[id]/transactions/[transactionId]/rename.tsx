@@ -1,27 +1,23 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, StatusBar, TextInput, View } from "react-native";
-import { Text } from "components/Text";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
 import useClient from "../../../../../../src/lib/client";
-import { StackParamList } from "../../../../../../src/lib/NavigatorParamList";
 import { getKey } from "../../../../../../src/lib/organization/useTransactions";
 import Transaction from "../../../../../../src/lib/types/Transaction";
 import { useOfflineSWR } from "../../../../../../src/lib/useOfflineSWR";
 import { palette } from "../../../../../../src/styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "RenameTransaction">;
+export default function Page() {
+  const { id, transaction: _transaction } = useLocalSearchParams();
+  const transaction: Transaction =
+    typeof _transaction === "string" ? JSON.parse(_transaction) : _transaction;
 
-export default function Page({
-  route: {
-    params: { transaction, orgId },
-  },
-  navigation,
-}: Props) {
   const { colors: themeColors } = useTheme();
   const { mutate } = useSWRConfig();
   const hcb = useClient();
@@ -31,7 +27,7 @@ export default function Page({
     isLoading,
     isValidating,
   } = useOfflineSWR<string[]>(
-    `organizations/${orgId}/transactions/${transaction.id}/memo_suggestions`,
+    `organizations/${id}/transactions/${transaction.id}/memo_suggestions`,
     { revalidateOnMount: true },
   );
 
@@ -40,10 +36,10 @@ export default function Page({
   );
 
   const { trigger } = useSWRMutation(
-    `organizations/${orgId}/transactions/${transaction.id}`,
+    `organizations/${id}/transactions/${transaction.id}`,
     () =>
       hcb
-        .patch(`organizations/${orgId}/transactions/${transaction.id}`, {
+        .patch(`organizations/${id}/transactions/${transaction.id}`, {
           json: { memo },
         })
         .json(),
@@ -53,15 +49,13 @@ export default function Page({
       },
       populateCache: true,
       onSuccess() {
-        mutate(unstable_serialize(getKey(orgId, "organizations")));
+        mutate(unstable_serialize(getKey(id, "organizations")));
       },
     },
   );
 
   return (
     <View style={{ padding: 30 }}>
-      <StatusBar barStyle="light-content" />
-
       <TextInput
         style={{
           color: themeColors.text,
@@ -80,7 +74,7 @@ export default function Page({
         returnKeyType="done"
         onSubmitEditing={() => {
           trigger();
-          navigation.goBack();
+          router.back();
         }}
       />
 

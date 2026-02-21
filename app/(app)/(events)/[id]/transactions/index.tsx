@@ -40,17 +40,17 @@ type Props = NativeStackScreenProps<StackParamList, "Event">;
 type ListItemType =
   | { type: "header"; title: string }
   | {
-    type: "transaction";
-    transaction: TransactionWithoutId;
-    isFirst: boolean;
-    isLast: boolean;
-  }
+      type: "transaction";
+      transaction: TransactionWithoutId;
+      isFirst: boolean;
+      isLast: boolean;
+    }
   | {
-    type: "mockTransaction";
-    transaction: MockTransactionType;
-    isFirst: boolean;
-    isLast: boolean;
-  };
+      type: "mockTransaction";
+      transaction: MockTransactionType;
+      isFirst: boolean;
+      isLast: boolean;
+    };
 
 export default function Page() {
   const navigation = useNavigation();

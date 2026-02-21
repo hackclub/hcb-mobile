@@ -16,8 +16,12 @@ export default function Layout() {
           options={{ title: "Transactions" }}
         />
         <Stack.Screen
-          name="[id]/transaction/[transactionId]"
+          name="[id]/transactions/[transactionId]"
           options={{ title: "Transaction" }}
+        />
+        <Stack.Screen
+          name="[id]/transactions/[transactionId]/rename"
+          options={{ title: "Rename transaction" }}
         />
         <Stack.Screen
           name="[id]/account-numbers"

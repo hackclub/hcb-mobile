@@ -1,7 +1,7 @@
 import { Navbar } from "components/Navbar";
 import { Stack } from "expo-router";
 
-import { TabBarStyling } from '../../../components/TabBarStyling';
+import { TabBarStyling } from "../../../components/TabBarStyling";
 
 export default function Layout() {
   return (

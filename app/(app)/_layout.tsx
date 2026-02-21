@@ -195,10 +195,10 @@ export default function Layout() {
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-          terminal_connection_token: {
-            secret: string;
-          };
+        terminal_connection_token: {
+          secret: string;
         };
+      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
@@ -669,7 +669,7 @@ export default function Layout() {
                           ref={navigationRef}
                           screenOptions={{
                             headerShown: false,
-                            tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE
+                            tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
                           }}
                           screenListeners={{
                             tabPress: () =>

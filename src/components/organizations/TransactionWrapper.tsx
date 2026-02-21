@@ -58,7 +58,7 @@ function TransactionWrapper({
       });
     } else {
       router.push({
-        pathname: "/[id]/transaction/[transactionId]",
+        pathname: "/[id]/transactions/[transactionId]",
         params: {
           transactionId: item.id!,
           orgId,

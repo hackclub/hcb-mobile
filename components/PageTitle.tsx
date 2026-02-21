@@ -1,20 +1,38 @@
 import { useTheme } from "@react-navigation/native";
 
 import { Text } from "./Text";
+import { View } from "react-native";
 
-export default function PageTitle({ title }: { title: string }) {
+export default function PageTitle({
+  title,
+  children,
+}: {
+  title: string;
+  children?: React.ReactNode;
+}) {
   const { colors } = useTheme();
+
   return (
-    <Text
+    <View
       style={{
-        color: colors.text,
-        fontSize: 30,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
         marginBottom: 10,
         marginTop: 35,
-        fontFamily: "Bold",
       }}
     >
-      {title}
-    </Text>
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: 30,
+          fontFamily: "Bold",
+          flex: 1,
+        }}
+      >
+        {title}
+      </Text>
+      {children}
+    </View>
   );
 }

@@ -189,7 +189,6 @@ export default function AccountNumberPage() {
           title="SWIFT BIC code"
           value={organization?.swift_bic_code}
         />
-
       </View>
     </View>
   );
