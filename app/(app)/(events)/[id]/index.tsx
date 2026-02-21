@@ -275,7 +275,7 @@ export default function Page() {
             {
               name: "Team members",
               badge: 100,
-              path: "/(events)/[id]/transactions",
+              path: "/(events)/[id]/team",
             },
             {
               name: "Collect donations",

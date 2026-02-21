@@ -14,6 +14,7 @@ import { OrganizationExpanded } from "../../lib/types/Organization";
 import { OrgUser } from "../../lib/types/User";
 import { useOfflineSWR } from "../../lib/useOfflineSWR";
 import { palette } from "../../styles/theme";
+import { useLocalSearchParams } from "expo-router";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationTeam">;
 
@@ -31,15 +32,12 @@ function MemberRole(props: { role: OrgUser["role"] }) {
   );
 }
 
-export default function OrganizationTeamPage({
-  route: {
-    params: { orgId },
-  },
-}: Props) {
+export default function Page() {
+  const { id } = useLocalSearchParams();
   const { cache } = useSWRConfig();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${orgId}?avatar_size=50`,
-    { fallbackData: cache.get(`organizations/${orgId}`)?.data },
+    `organizations/${id}?avatar_size=50`,
+    { fallbackData: cache.get(`organizations/${id}`)?.data },
   );
 
   const tabBarHeight = useBottomTabBarHeight();
