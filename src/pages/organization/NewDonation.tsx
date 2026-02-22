@@ -6,16 +6,16 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { useRef, useState } from "react";
 import {
-  View,
-  TextInput,
   Keyboard as RNKeyboard,
-  TouchableWithoutFeedback,
   ScrollView,
+  TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import { Text } from "components/Text";
 
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
@@ -138,7 +138,7 @@ export default function NewDonationPage({
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-            error.message,
+          error.message,
         );
         return false;
       }

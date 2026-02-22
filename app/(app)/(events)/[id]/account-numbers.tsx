@@ -1,21 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
-import { useEffect, useState } from "react";
-import { Button, Linking, Platform, StatusBar, View } from "react-native";
-
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import { useNavigation } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
-import { StackParamList } from "../../../../src/lib/NavigatorParamList";
+import { useEffect, useState } from "react";
+import { Button, Linking, Platform, View } from "react-native";
 import { OrganizationExpanded } from "../../../../src/lib/types/Organization";
 import { useOfflineSWR } from "../../../../src/lib/useOfflineSWR";
 import { palette } from "../../../../src/styles/theme";
-import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import PageTitle from "components/PageTitle";
-
-type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
 
 function AccountDetail({
   title,
