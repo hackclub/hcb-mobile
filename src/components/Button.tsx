@@ -18,17 +18,17 @@ export interface ButtonProps {
   iconColor?: string;
   fontSize?: number;
   fontWeight?:
-    | "normal"
-    | "bold"
-    | "100"
-    | "200"
-    | "300"
-    | "400"
-    | "500"
-    | "600"
-    | "700"
-    | "800"
-    | "900";
+  | "normal"
+  | "bold"
+  | "100"
+  | "200"
+  | "300"
+  | "400"
+  | "500"
+  | "600"
+  | "700"
+  | "800"
+  | "900";
   loading?: boolean;
   disabled?: boolean;
   icon?: React.ComponentProps<typeof Icon>["glyph"];
@@ -146,10 +146,10 @@ export default function Button(
         ...(props.style as object),
         ...(props.disabled
           ? {
-              backgroundColor: palette.muted,
-              borderColor: palette.muted,
-              opacity: 0.6,
-            }
+            backgroundColor: palette.muted,
+            borderColor: palette.muted,
+            opacity: 0.6,
+          }
           : {}),
       }}
       onPress={() => {

@@ -5,13 +5,14 @@ import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as BackgroundTask from "expo-background-task";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Redirect, Slot, Stack } from "expo-router";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import { ColorSchemeName, useColorScheme } from "react-native";
 
+import AuthContext from "../src/auth/auth";
 import { AuthProvider } from "../src/auth/AuthProvider";
 import { CustomAlertProvider } from "../src/components/alert/CustomAlertProvider";
 import { useCache } from "../src/providers/cacheProvider";

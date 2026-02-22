@@ -32,6 +32,7 @@ import { useIsDark } from "../../src/lib/useColorScheme";
 import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
 import p from "../../src/styles/palette";
 import { palette } from "../../src/styles/theme";
+import { TabBarStyling } from "components/TabBarStyling";
 
 function OrganizationSection({
   organization,
@@ -103,7 +104,7 @@ function OrganizationSection({
   );
 }
 
-export default function ReceiptsPage() {
+export default function Page() {
   const { colors: themeColors } = useTheme();
   const { data, mutate, isLoading } = useOfflineSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
@@ -540,26 +541,29 @@ export default function ReceiptsPage() {
   };
 
   return (
-    <FlashList
-      data={listData}
-      renderItem={renderItem}
-      keyExtractor={(item, index) => `${item.type}-${index}`}
-      contentContainerStyle={{ padding: 20, paddingTop: 62 }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      ListHeaderComponent={() => <PageTitle title="Receipts" />}
-      ListFooterComponent={() => (
-        <FileViewerModal
-          fileUrl={selectedReceipt?.url || null}
-          filename={selectedReceipt?.filename || null}
-          visible={isImageViewerVisible}
-          onRequestClose={() => {
-            setIsImageViewerVisible(false);
-            setSelectedReceipt(null);
-          }}
-        />
-      )}
-    />
+    <>
+      <FlashList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => `${item.type}-${index}`}
+        contentContainerStyle={{ padding: 20, paddingTop: 62 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponent={() => <PageTitle title="Receipts" />}
+        ListFooterComponent={() => (
+          <FileViewerModal
+            fileUrl={selectedReceipt?.url || null}
+            filename={selectedReceipt?.filename || null}
+            visible={isImageViewerVisible}
+            onRequestClose={() => {
+              setIsImageViewerVisible(false);
+              setSelectedReceipt(null);
+            }}
+          />
+        )}
+      />
+      <TabBarStyling enabledPage="/receipts" />
+    </>
   );
 }

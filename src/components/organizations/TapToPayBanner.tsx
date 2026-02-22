@@ -207,7 +207,7 @@ export default function TapToPayBanner({
                 color: labelColor,
                 fontSize: 11,
                 fontWeight: "700",
-                letterSpacing: 1.5,
+                letterSpacing: 0.7,
               }}
             >
               TAP TO PAY {Platform.OS === "ios" ? "ON iPHONE" : ""}

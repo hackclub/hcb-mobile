@@ -227,6 +227,11 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     try {
+      mutate(
+        () => true,
+        undefined,
+        { revalidate: false }
+      );
       if (user?.id) {
         await AsyncStorage.setItem("last_logged_in_user_id", String(user.id));
       }

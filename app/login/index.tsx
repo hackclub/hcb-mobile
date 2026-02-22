@@ -18,6 +18,8 @@ import AuthContext from "../../src/auth/auth";
 import Button from "../../src/components/Button";
 import { useIsDark } from "../../src/lib/useColorScheme";
 import { palette } from "../../src/styles/theme";
+import { router } from "expo-router";
+import { useSWRConfig } from "swr";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -131,6 +133,7 @@ export default function Login() {
         }
         setTokenResponse(tokenResponse, codeVerifier);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        router.replace("/")
       })
       .catch((error) => {
         console.error("Error exchanging code for token:", error);
@@ -250,18 +253,18 @@ export default function Login() {
               style={{
                 color: isDark ? "#FFFFFF" : "#17171E",
                 fontSize: 34,
-                fontWeight: "800",
                 letterSpacing: -1,
                 marginBottom: 8,
               }}
+              bold
             >
-              Welcome to <Text style={{ color: palette.primary }}>HCB</Text>.
+              Welcome to <Text style={{ color: palette.primary, fontSize: 34 }} bold>HCB.</Text>
             </Text>
             <Text
               style={{
                 color: isDark ? "#8b95a5" : "#52606d",
-                fontSize: 17,
-                lineHeight: 24,
+                fontSize: 20,
+                lineHeight: 27,
                 letterSpacing: -0.2,
               }}
             >
@@ -276,7 +279,8 @@ export default function Login() {
               openInAppBrowser("https://hackclub.com/fiscal-sponsorship/")
             }
             style={{
-              paddingVertical: 8,
+              marginTop: -10,
+              paddingBottom: 8,
               paddingHorizontal: 0,
               alignSelf: "flex-start",
             }}

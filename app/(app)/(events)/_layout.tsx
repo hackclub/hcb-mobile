@@ -1,11 +1,26 @@
 import { Navbar } from "components/Navbar";
-import { Stack } from "expo-router";
+import { TabBarStyling } from "components/TabBarStyling";
+import { router, Stack } from "expo-router";
+import { useContext, useEffect } from "react";
 
-import { TabBarStyling } from "../../../components/TabBarStyling";
+import AuthContext from "@/auth/auth";
+
+function AuthRedirect() {
+  const { tokenResponse } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!tokenResponse)
+      router.replace("/login")
+
+  }, [tokenResponse]);
+
+  return null;
+}
 
 export default function Layout() {
   return (
     <>
+      <AuthRedirect />
       <Stack screenOptions={{ header: Navbar }}>
         <Stack.Screen
           name="index"
