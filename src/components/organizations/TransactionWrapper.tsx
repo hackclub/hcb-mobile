@@ -50,7 +50,7 @@ function TransactionWrapper({
       item.transfer?.card_grant_id
     ) {
       router.push({
-        pathname: "/card-grants/[id]",
+        pathname: "/cards/card-grants/[id]",
         params: {
           id: item.transfer.card_grant_id,
         }

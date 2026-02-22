@@ -2,13 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   ConnectTapToPayParams,
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import { Text } from "components/Text";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Platform, View } from "react-native";
 import * as Progress from "react-native-progress";
@@ -18,7 +18,6 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "@/components/Button";
 import { showAlert } from "@/lib/alertUtils";
-import { StackParamList } from "@/lib/NavigatorParamList";
 import Organization from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useLocation } from "@/lib/useLocation";
@@ -26,21 +25,15 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
-
-export default function OrganizationDonationPage({
-  route: {
-    params: { orgId },
-  },
-  navigation,
-}: Props) {
+export default function Page() {
+  const { id } = useLocalSearchParams();
   const isDark = useIsDark();
   const { colors } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
 
   const { data: organization, isLoading: organizationLoading } =
-    useOfflineSWR<Organization>(`organizations/${orgId}`);
+    useOfflineSWR<Organization>(`organizations/${id}`);
   const { accessDenied } = useLocation();
 
   const {
@@ -51,7 +44,7 @@ export default function OrganizationDonationPage({
     isUpdatingReaderSoftware,
     updateProgress: softwareUpdateProgress,
   } = useStripeTerminalInit({
-    organizationId: orgId,
+    organizationId: id,
     enabled: true,
     enableReaderPreConnection: true,
     enableSoftwareUpdates: false,
@@ -113,17 +106,17 @@ export default function OrganizationDonationPage({
   useEffect(() => {
     (async () => {
       const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
-      if (connectedReader && storedOrgId !== orgId) {
+      if (connectedReader && storedOrgId !== id) {
         try {
           await disconnectReader();
         } catch (e) {
           console.error("Error disconnecting reader on page load", e, {
-            context: { orgId, action: "disconnect_reader" },
+            context: { orgId: id, action: "disconnect_reader" },
           });
         }
       }
     })();
-  }, [connectedReader, disconnectReader, orgId]);
+  }, [connectedReader, disconnectReader, id]);
 
   // Discover readers
   useEffect(() => {
@@ -138,13 +131,13 @@ export default function OrganizationDonationPage({
         }
       } catch (error) {
         console.error("Error discovering readers", error, {
-          context: { orgId, action: "discover_readers" },
+          context: { orgId: id, action: "discover_readers" },
         });
       }
     })();
   }, [
     discoverReaders,
-    orgId,
+    id,
     isStripeInitialized,
     preDiscoveredReaders.length,
   ]);
@@ -199,7 +192,7 @@ export default function OrganizationDonationPage({
           return true;
         }
         console.error("connectReader error", error, {
-          context: { orgId, action: "connect_reader" },
+          context: { orgId: id, action: "connect_reader" },
         });
         showAlert(
           "Connection Error",
@@ -208,7 +201,7 @@ export default function OrganizationDonationPage({
         return false;
       }
 
-      await AsyncStorage.setItem("lastConnectedOrgId", orgId);
+      await AsyncStorage.setItem("lastConnectedOrgId", id);
       return true;
     } catch (error) {
       if (
@@ -219,7 +212,7 @@ export default function OrganizationDonationPage({
         return true;
       }
       console.error("connectReader error", error, {
-        context: { orgId, action: "connect_reader" },
+        context: { orgId: id, action: "connect_reader" },
       });
       showAlert(
         "Connection Error",
@@ -232,10 +225,10 @@ export default function OrganizationDonationPage({
   }
 
   const navigateToNewDonation = () => {
-    navigation.navigate("NewDonation", {
-      orgId,
-      orgSlug: organization?.slug || "",
-    });
+    router.replace({
+      pathname: `/[id]/donations/new`,
+      params: { orgId: id, orgSlug: organization?.slug || "" },
+    })
   };
 
   const handleGetStarted = async () => {
