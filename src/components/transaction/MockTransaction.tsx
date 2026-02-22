@@ -2,8 +2,9 @@ import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { memo } from "react";
-import { View, Text, ViewProps, StyleSheet } from "react-native";
+import { StyleSheet, View, ViewProps } from "react-native";
 
 import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../styles/theme";

@@ -1,8 +1,9 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { formatDistanceToNow } from "date-fns";
-import { memo, useState, useRef } from "react";
-import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import { memo, useRef, useState } from "react";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 
 import Organization from "../../lib/types/Organization";
 import { TransactionCardCharge } from "../../lib/types/Transaction";

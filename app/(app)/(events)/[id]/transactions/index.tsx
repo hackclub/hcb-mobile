@@ -1,66 +1,52 @@
 /* eslint-disable react/prop-types */
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, ActivityIndicator, Platform } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { useSWRConfig } from "swr";
 
-import AccessDenied from "../../components/organizations/AccessDenied";
-import { EmptyState } from "../../components/organizations/EmptyState";
-import Header from "../../components/organizations/Header";
-import { LoadingSkeleton } from "../../components/organizations/LoadingSkeleton";
-import Menu from "../../components/organizations/Menu";
-import OfflineNoData from "../../components/organizations/OfflineNoData";
-import PlaygroundBanner from "../../components/organizations/PlaygroundBanner";
-import SectionHeader from "../../components/organizations/SectionHeader";
-import TapToPayBanner from "../../components/organizations/TapToPayBanner";
-import TransactionWrapper from "../../components/organizations/TransactionWrapper";
+import AccessDenied from "@/components/organizations/AccessDenied";
+import { EmptyState } from "@/components/organizations/EmptyState";
+import Header from "@/components/organizations/Header";
+import { LoadingSkeleton } from "@/components/organizations/LoadingSkeleton";
+import OfflineNoData from "@/components/organizations/OfflineNoData";
+import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
+import SectionHeader from "@/components/organizations/SectionHeader";
+import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import MockTransaction, {
   MockTransactionType,
-} from "../../components/transaction/MockTransaction";
-import { StackParamList } from "../../lib/NavigatorParamList";
-import MockTransactionEngine from "../../lib/organization/useMockTransactionEngine";
-import useTransactions from "../../lib/organization/useTransactions";
-import Organization, {
-  OrganizationExpanded,
-} from "../../lib/types/Organization";
-import ITransaction, {
-  TransactionWithoutId,
-} from "../../lib/types/Transaction";
-import User from "../../lib/types/User";
-import { useOffline } from "../../lib/useOffline";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
-import { addPendingFeeToTransactions, renderDate } from "../../utils/util";
-
-type Props = NativeStackScreenProps<StackParamList, "Event">;
+} from "@/components/transaction/MockTransaction";
+import MockTransactionEngine from "@/lib/organization/useMockTransactionEngine";
+import useTransactions from "@/lib/organization/useTransactions";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
+import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
+import User from "@/lib/types/User";
+import { useOffline } from "@/lib/useOffline";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 
 // FlashList item types
 type ListItemType =
   | { type: "header"; title: string }
   | {
-      type: "transaction";
-      transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
-    }
+    type: "transaction";
+    transaction: TransactionWithoutId;
+    isFirst: boolean;
+    isLast: boolean;
+  }
   | {
-      type: "mockTransaction";
-      transaction: MockTransactionType;
-      isFirst: boolean;
-      isLast: boolean;
-    };
+    type: "mockTransaction";
+    transaction: MockTransactionType;
+    isFirst: boolean;
+    isLast: boolean;
+  };
 
-export default function OrganizationPage({
-  route: {
-    params: { orgId, organization: _organization },
-  },
-  navigation,
-}: Props) {
+export default function Page() {
+  const navigation = useNavigation();
+  const params = useLocalSearchParams();
   const { isOnline } = useOffline();
 
   const {
@@ -69,12 +55,12 @@ export default function OrganizationPage({
     isLoading: organizationLoading,
     mutate: mutateOrganization,
   } = useOfflineSWR<Organization | OrganizationExpanded>(
-    `organizations/${orgId}`,
+    `organizations/${params.id}`,
     {
-      fallbackData: _organization,
+      fallbackData: params.fallbackData,
       onError: (err) => {
         console.error("Error fetching organization:", err, {
-          context: { orgId, isOnline },
+          context: { orgId: params.id, isOnline },
         });
       },
     },
@@ -82,24 +68,8 @@ export default function OrganizationPage({
 
   const { data: user, isLoading: userLoading } = useOfflineSWR<User>("user");
   const [showMockData, setShowMockData] = useState(false);
-  const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
-  const { supportsTapToPay } = useStripeTerminalInit({
-    organizationId: organization?.id,
-    enabled: !!(organization && !organization.playground_mode),
-  });
-  const userinOrganization = useMemo(() => {
-    return (
-      organization &&
-      "users" in organization &&
-      organization.users.some((u) => u.id === user?.id)
-    );
-  }, [organization, user]);
   const playgroundMode = useMemo(
     () => organization?.playground_mode,
-    [organization],
-  );
-  const donationPageAvailable = useMemo(
-    () => organization?.donation_page_available,
     [organization],
   );
   const organizationErrorStatus = useMemo(() => {
@@ -116,92 +86,10 @@ export default function OrganizationPage({
     loadMore,
     isLoading,
     mutate: mutateTransactions,
-  } = useTransactions(orgId, "organizations");
+  } = useTransactions(params.id, "organizations");
   const { mutate } = useSWRConfig();
   const [refreshing, setRefreshing] = useState(false);
   const isRefreshingRef = useRef(false);
-
-  useEffect(() => {
-    const isOfflineNoData = organizationError && !isOnline && !organization;
-
-    if (isAccessDenied) {
-      navigation.setOptions({
-        title: "Access Denied",
-      });
-    } else if (isOfflineNoData) {
-      navigation.setOptions({
-        title: "Offline",
-      });
-    } else if (organization) {
-      navigation.setOptions({
-        title: organization.name || "Organization",
-      });
-    }
-  }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
-
-  useEffect(() => {
-    const checkTapToPayBanner = async () => {
-      try {
-        const hasSeenBanner = await AsyncStorage.getItem(
-          "hasSeenTapToPayBanner",
-        );
-
-        if (
-          !hasSeenBanner &&
-          userinOrganization &&
-          !playgroundMode &&
-          supportsTapToPay &&
-          donationPageAvailable &&
-          Platform.OS === "ios"
-        ) {
-          setShowTapToPayBanner(true);
-        } else {
-          setShowTapToPayBanner(false);
-        }
-      } catch (error) {
-        console.error("Error checking tap to pay banner status", error, {
-          context: { action: "check_ttp_banner" },
-        });
-        setShowTapToPayBanner(false);
-      }
-    };
-    checkTapToPayBanner();
-  }, [
-    supportsTapToPay,
-    userinOrganization,
-    organization,
-    playgroundMode,
-    donationPageAvailable,
-    user,
-  ]);
-
-  const handleDismissTapToPayBanner = async () => {
-    try {
-      await AsyncStorage.setItem("hasSeenTapToPayBanner", "true");
-      setShowTapToPayBanner(false);
-    } catch (error) {
-      console.error("Error saving tap to pay banner dismiss status", error, {
-        context: { action: "dismiss_ttp_banner" },
-      });
-      setShowTapToPayBanner(false);
-    }
-  };
-
-  useEffect(() => {
-    if (organization && user && !isAccessDenied) {
-      navigation.setOptions({
-        title: organization.name,
-        headerRight: () => (
-          <Menu
-            user={user}
-            navigation={navigation}
-            organization={organization}
-            supportsTapToPay={supportsTapToPay}
-          />
-        ),
-      });
-    }
-  }, [organization, navigation, user, supportsTapToPay]);
 
   useEffect(() => {
     if (organizationErrorStatus?.toString().includes("401")) {
@@ -288,7 +176,7 @@ export default function OrganizationPage({
         await mutate(
           (key) =>
             typeof key === "string" &&
-            key.startsWith(`organizations/${orgId}/transactions`),
+            key.startsWith(`organizations/${params.id}/transactions`),
         );
         await mutateTransactions();
         await mutateOrganization();
@@ -305,7 +193,7 @@ export default function OrganizationPage({
     },
     [
       isOnline,
-      orgId,
+      params,
       mutate,
       mutateTransactions,
       mutateOrganization,
@@ -337,12 +225,6 @@ export default function OrganizationPage({
 
     return (
       <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
-        {showTapToPayBanner && (
-          <TapToPayBanner
-            onDismiss={handleDismissTapToPayBanner}
-            orgId={orgId}
-          />
-        )}
         {playgroundMode && <PlaygroundBanner />}
         <Header
           organization={organization}
@@ -356,8 +238,6 @@ export default function OrganizationPage({
       </View>
     );
   }, [
-    showTapToPayBanner,
-    orgId,
     playgroundMode,
     organization,
     showMockData,
@@ -393,14 +273,14 @@ export default function OrganizationPage({
             user={user}
             organization={organization}
             navigation={navigation}
-            orgId={orgId}
+            orgId={params.id}
             isFirst={item.isFirst}
             isLast={item.isLast}
           />
         </View>
       );
     },
-    [user, organization, navigation, orgId],
+    [user, organization, navigation, params],
   );
 
   const getItemType = useCallback((item: ListItemType) => {
@@ -448,7 +328,9 @@ export default function OrganizationPage({
   const isOfflineNoData = organizationError && !isOnline && !organization;
 
   if (isAccessDenied) {
-    return <AccessDenied orgId={orgId} onGoBack={() => navigation.goBack()} />;
+    return (
+      <AccessDenied orgId={params.id} onGoBack={() => navigation.goBack()} />
+    );
   }
 
   if (isOfflineNoData) {

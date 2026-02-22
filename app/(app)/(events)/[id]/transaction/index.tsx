@@ -8,22 +8,23 @@ import {
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
+import { Text } from "components/Text";
 import { useEffect, useRef, useState } from "react";
-import { Platform, ActivityIndicator, Linking, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Platform, View } from "react-native";
 import * as Progress from "react-native-progress";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
-import Button from "../../components/Button";
-import { showAlert } from "../../lib/alertUtils";
-import { StackParamList } from "../../lib/NavigatorParamList";
-import Organization from "../../lib/types/Organization";
-import { useIsDark } from "../../lib/useColorScheme";
-import { useLocation } from "../../lib/useLocation";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
-import { palette } from "../../styles/theme";
+import Button from "@/components/Button";
+import { showAlert } from "@/lib/alertUtils";
+import { StackParamList } from "@/lib/NavigatorParamList";
+import Organization from "@/lib/types/Organization";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useLocation } from "@/lib/useLocation";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
+import { palette } from "@/styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
@@ -193,7 +194,7 @@ export default function OrganizationDonationPage({
         if (
           (error as { code?: string }).code == "AlreadyConnectedToReader" ||
           (error as { code?: string }).code ==
-            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
         ) {
           return true;
         }
@@ -213,7 +214,7 @@ export default function OrganizationDonationPage({
       if (
         (error as { code?: string }).code == "AlreadyConnectedToReader" ||
         (error as { code?: string }).code ==
-          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+        "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
       ) {
         return true;
       }

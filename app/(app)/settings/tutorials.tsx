@@ -1,15 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
+import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
 
-export default function Tutorials() {
+export default function Page() {
   const { colors } = useTheme();
 
   const handleTapToPayEducation = async () => {
@@ -19,8 +15,9 @@ export default function Tutorials() {
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ flexGrow: 1, padding: 32 }}
+      contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20 }}
     >
+      <PageTitle title="Tutorials" />
       <View style={{ width: "100%" }}>
         <TouchableOpacity
           onPress={handleTapToPayEducation}

@@ -1,27 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { showAlert } from "../lib/alertUtils";
-import useClient from "../lib/client";
-import { StackParamList } from "../lib/NavigatorParamList";
-import Organization from "../lib/types/Organization";
-import Transaction from "../lib/types/Transaction";
-import { palette } from "../styles/theme";
-import { maybeRequestReview } from "../utils/storeReview";
-import { renderMoney } from "../utils/util";
+import { showAlert } from "@/lib/alertUtils";
+import useClient from "@/lib/client";
+import { StackParamList } from "@/lib/NavigatorParamList";
+import Organization from "@/lib/types/Organization";
+import Transaction from "@/lib/types/Transaction";
+import { palette } from "@/styles/theme";
+import { maybeRequestReview } from "@/utils/storeReview";
+import { renderMoney } from "@/utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "ShareIntentModal">;
 
@@ -121,10 +121,10 @@ export default function ShareIntentModal({
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: transaction.id,
-              orgId: transaction.organization.id,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: transaction.id,
+            orgId: transaction.organization.id,
+          }
           : assignment,
       ),
     );
@@ -150,11 +150,11 @@ export default function ShareIntentModal({
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: null,
-              orgId: null,
-              isReceiptBin: true,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: null,
+            orgId: null,
+            isReceiptBin: true,
+          }
           : assignment,
       ),
     );
@@ -178,11 +178,11 @@ export default function ShareIntentModal({
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: null,
-              orgId: null,
-              isReceiptBin: false,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: null,
+            orgId: null,
+            isReceiptBin: false,
+          }
           : assignment,
       ),
     );

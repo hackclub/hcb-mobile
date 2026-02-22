@@ -1,38 +1,38 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useMemo, useLayoutEffect, useRef, useCallback } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   RefreshControl,
-  Text,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import FileViewerModal from "../components/FileViewerModal";
-import UploadIcon from "../components/icons/UploadIcon";
-import { useReceiptActionSheet } from "../components/ReceiptActionSheet";
-import MissingReceiptTransaction from "../components/receipts/MissingReceiptTransaction";
-import { ZoomAndFadeIn } from "../components/transaction/ReceiptList";
-import { showAlert } from "../lib/alertUtils";
-import useClient from "../lib/client";
-import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
-import Organization from "../lib/types/Organization";
-import Receipt from "../lib/types/Receipt";
-import { TransactionCardCharge } from "../lib/types/Transaction";
-import { useIsDark } from "../lib/useColorScheme";
-import { useOfflineSWR } from "../lib/useOfflineSWR";
-import p from "../styles/palette";
-import { palette } from "../styles/theme";
+import FileViewerModal from "../../src/components/FileViewerModal";
+import UploadIcon from "../../src/components/icons/UploadIcon";
+import { useReceiptActionSheet } from "../../src/components/ReceiptActionSheet";
+import MissingReceiptTransaction from "../../src/components/receipts/MissingReceiptTransaction";
+import { ZoomAndFadeIn } from "../../src/components/transaction/ReceiptList";
+import { showAlert } from "../../src/lib/alertUtils";
+import useClient from "../../src/lib/client";
+import Organization from "../../src/lib/types/Organization";
+import Receipt from "../../src/lib/types/Receipt";
+import { TransactionCardCharge } from "../../src/lib/types/Transaction";
+import { useIsDark } from "../../src/lib/useColorScheme";
+import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
+import p from "../../src/styles/palette";
+import { palette } from "../../src/styles/theme";
+import { TabBarStyling } from "components/TabBarStyling";
 
 function OrganizationSection({
   organization,
@@ -104,12 +104,7 @@ function OrganizationSection({
   );
 }
 
-type Props = NativeStackScreenProps<
-  ReceiptsStackParamList,
-  "MissingReceiptList"
->;
-
-export default function ReceiptsPage({ navigation }: Props) {
+export default function Page() {
   const { colors: themeColors } = useTheme();
   const { data, mutate, isLoading } = useOfflineSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
@@ -125,13 +120,6 @@ export default function ReceiptsPage({ navigation }: Props) {
   const isDark = useIsDark();
   const hcb = useClient();
   const uploadButtonRef = useRef(null);
-
-  // Set navigation title
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Receipts",
-    });
-  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -553,25 +541,29 @@ export default function ReceiptsPage({ navigation }: Props) {
   };
 
   return (
-    <FlashList
-      data={listData}
-      renderItem={renderItem}
-      keyExtractor={(item, index) => `${item.type}-${index}`}
-      contentContainerStyle={{ padding: 20 }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      ListFooterComponent={() => (
-        <FileViewerModal
-          fileUrl={selectedReceipt?.url || null}
-          filename={selectedReceipt?.filename || null}
-          visible={isImageViewerVisible}
-          onRequestClose={() => {
-            setIsImageViewerVisible(false);
-            setSelectedReceipt(null);
-          }}
-        />
-      )}
-    />
+    <>
+      <FlashList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => `${item.type}-${index}`}
+        contentContainerStyle={{ padding: 20, paddingTop: 62 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListHeaderComponent={() => <PageTitle title="Receipts" />}
+        ListFooterComponent={() => (
+          <FileViewerModal
+            fileUrl={selectedReceipt?.url || null}
+            filename={selectedReceipt?.filename || null}
+            visible={isImageViewerVisible}
+            onRequestClose={() => {
+              setIsImageViewerVisible(false);
+              setSelectedReceipt(null);
+            }}
+          />
+        )}
+      />
+      <TabBarStyling enabledPage="/receipts" />
+    </>
   );
 }

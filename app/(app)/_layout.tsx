@@ -2,63 +2,68 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  NavigationContainer,
   LinkingOptions,
   NavigationContainerRef,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
+import Icon from "@thedev132/hackclub-icons-rn";
+import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
+import { Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import {
-  useRef,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
-  ColorSchemeName,
-  View,
   ActivityIndicator,
-  Platform,
   Appearance,
+  Platform,
+  View
 } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
-import { routingInstrumentation } from "../../App";
-import AuthContext from "../auth/auth";
-import { tokenResponseToLegacyTokens } from "../auth/tokenUtils";
-import SentryUserBridge from "../components/core/SentryUserBridge";
-import UserChangeDetector from "../components/core/UserChangeDetector";
-import { DevToolsPanel } from "../components/devtools";
-import useClient from "../lib/client";
-import { DevToolsProvider } from "../lib/devtools";
-import { TabParamList } from "../lib/NavigatorParamList";
-import { useIsDark } from "../lib/useColorScheme";
-import { usePushNotifications } from "../lib/usePushNotifications";
+import { SWRCacheProvider } from "../_layout";
+
+import AuthContext from "@/auth/auth";
+import { tokenResponseToLegacyTokens } from "@/auth/tokenUtils";
+import SentryUserBridge from "@/components/core/SentryUserBridge";
+import UserChangeDetector from "@/components/core/UserChangeDetector";
+import { DevToolsPanel } from "@/components/devtools";
+import { navRef } from "@/core/navigationRef";
+import useClient from "@/lib/client";
+import { DevToolsProvider } from "@/lib/devtools";
+import { TabParamList } from "@/lib/NavigatorParamList";
+import { useIsDark } from "@/lib/useColorScheme";
+import { usePushNotifications } from "@/lib/usePushNotifications";
 import {
   resetStripeTerminalInitialization,
   useStripeTerminalInit,
-} from "../lib/useStripeTerminalInit";
-import { useUpdateMonitor } from "../lib/useUpdateMonitor";
-import Login from "../pages/login";
-import { CacheProvider } from "../providers/cacheProvider";
-import { useLinkingPref } from "../providers/LinkingContext";
-import { useThemeContext } from "../providers/ThemeContext";
-import { lightTheme, theme } from "../styles/theme";
-import { getStateFromPath } from "../utils/getStateFromPath";
-import { trackAppOpen } from "../utils/storeReview";
-
-import { navRef } from "./navigationRef";
-import Navigator from "./Navigator";
+} from "@/lib/useStripeTerminalInit";
+import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
+import { useLinkingPref } from "@/providers/LinkingContext";
+import { useThemeContext } from "@/providers/ThemeContext";
+import { lightTheme, theme } from "@/styles/theme";
+import { getStateFromPath } from "@/utils/getStateFromPath";
+import { trackAppOpen } from "@/utils/storeReview";
 
 interface HTTPError extends Error {
   status?: number;
@@ -84,13 +89,8 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-export default function AppContent({
-  scheme,
-  cache,
-}: {
-  scheme: ColorSchemeName;
-  cache: CacheProvider;
-}) {
+export default function Layout() {
+  const { scheme, cache } = useContext(SWRCacheProvider);
   const { tokenResponse, codeVerifier, setTokenResponse } =
     useContext(AuthContext);
 
@@ -99,6 +99,7 @@ export default function AppContent({
     () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
     [tokenResponse, codeVerifier],
   );
+  const insets = useSafeAreaInsets();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -193,10 +194,10 @@ export default function AppContent({
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-        terminal_connection_token: {
-          secret: string;
+          terminal_connection_token: {
+            secret: string;
+          };
         };
-      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
@@ -232,11 +233,6 @@ export default function AppContent({
   };
   useEffect(() => {
     navRef.current = navigationRef.current;
-  }, []);
-
-  const onNavigationReady = useCallback(() => {
-    navRef.current = navigationRef.current;
-    routingInstrumentation.registerNavigationContainer(navigationRef);
   }, []);
 
   useEffect(() => {
@@ -651,18 +647,81 @@ export default function AppContent({
                   <UserChangeDetector />
                   <ActionSheetProvider>
                     <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                      <NavigationContainer
-                        ref={navigationRef}
-                        theme={navTheme}
-                        linking={linking}
-                        onReady={onNavigationReady}
-                      >
-                        {tokens?.accessToken && isAuthenticated ? (
-                          <Navigator />
-                        ) : (
-                          <Login />
-                        )}
-                      </NavigationContainer>
+                      <ThemeProvider value={navTheme}>
+                        <BlurView
+                          intensity={20}
+                          style={{
+                            height: insets.top,
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            zIndex: 1,
+                          }}
+                        />
+                        <Tabs
+                          ref={navigationRef}
+                          screenOptions={{
+                            headerShown: false,
+                            tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
+                          }}
+                          screenListeners={{
+                            tabPress: () =>
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Rigid,
+                              ),
+                          }}
+                        >
+                          <Tabs.Screen
+                            name="(events)"
+                            options={{
+                              title: "Home",
+                              tabBarAccessibilityLabel: "Home Tab",
+                              tabBarIcon: ({ color }) => (
+                                <Icon glyph="home" size={28} color={color} />
+                              ),
+                            }}
+                          />
+                          <Tabs.Screen
+                            name="cards"
+                            options={{
+                              title: "Cards",
+                              tabBarAccessibilityLabel: "Cards Tab",
+                              tabBarIcon: ({ color }) => (
+                                <Icon glyph="card" size={28} color={color} />
+                              ),
+                            }}
+                          />
+                          <Tabs.Screen
+                            name="receipts"
+                            options={{
+                              title: "Receipts",
+                              tabBarAccessibilityLabel: "Receipts Tab",
+                              tabBarIcon: ({ color }) => (
+                                <Icon
+                                  glyph="payment-docs"
+                                  size={28}
+                                  color={color}
+                                />
+                              ),
+                            }}
+                          />
+                          <Tabs.Screen
+                            name="settings"
+                            options={{
+                              title: "Settings",
+                              tabBarAccessibilityLabel: "Settings Tab",
+                              tabBarIcon: ({ color }) => (
+                                <Icon
+                                  glyph="settings"
+                                  size={28}
+                                  color={color}
+                                />
+                              ),
+                            }}
+                          />
+                        </Tabs>
+                      </ThemeProvider>
                     </AlertNotificationRoot>
                   </ActionSheetProvider>
                   <DevToolsPanel />

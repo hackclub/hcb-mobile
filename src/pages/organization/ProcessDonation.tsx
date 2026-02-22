@@ -6,7 +6,6 @@ import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
 import {
   View,
-  Text,
   StatusBar,
   Button,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import {
   Alert,
   ViewStyle,
 } from "react-native";
+import { Text } from "components/Text";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
 import {

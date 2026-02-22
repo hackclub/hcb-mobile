@@ -3,14 +3,13 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   Alert,
   Pressable,
 } from "react-native";
 import useSWR, { mutate, useSWRConfig } from "swr";
-
+import { Text } from "components/Text";
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
 import { palette } from "../../../styles/theme";

@@ -1,44 +1,40 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useTheme, useFocusEffect } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
-import { useEffect, useState, useCallback, useRef, cloneElement } from "react";
+import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import {
-  ScrollView,
-  View,
-  TouchableOpacity,
-  RefreshControl,
-  Animated,
   Alert,
+  Animated,
   Platform,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSWRConfig } from "swr";
 
-import Button from "../../components/Button";
-import AddToWalletSection from "../../components/cards/AddToWalletSection";
-import CardDetails from "../../components/cards/CardDetails";
-import CardDisplay from "../../components/cards/CardDisplay";
-import CardError from "../../components/cards/CardError";
-import CardSkeleton from "../../components/cards/CardSkeleton";
-import CardTransactions from "../../components/cards/CardTransactions";
-import SetPurposeModal from "../../components/cards/modals/SetPurposeModal";
-import TopupModal from "../../components/cards/modals/TopupModal";
-import GrantWithoutCard from "../../components/grants/grantWithoutCard";
-import useClient from "../../lib/client";
-import {
-  CardsStackParamList,
-  StackParamList,
-} from "../../lib/NavigatorParamList";
-import useTransactions from "../../lib/organization/useTransactions";
-import Card from "../../lib/types/Card";
-import GrantCardType from "../../lib/types/GrantCard";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import User from "../../lib/types/User";
-import useAddToWallet from "../../lib/useAddToWallet";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import useStripeCardDetails from "../../lib/useStripeCardDetails";
-import { palette } from "../../styles/theme";
+import Button from "@/components/Button";
+import AddToWalletSection from "@/components/cards/AddToWalletSection";
+import CardDetails from "@/components/cards/CardDetails";
+import CardDisplay from "@/components/cards/CardDisplay";
+import CardError from "@/components/cards/CardError";
+import CardSkeleton from "@/components/cards/CardSkeleton";
+import CardTransactions from "@/components/cards/CardTransactions";
+import SetPurposeModal from "@/components/cards/modals/SetPurposeModal";
+import TopupModal from "@/components/cards/modals/TopupModal";
+import GrantWithoutCard from "@/components/grants/grantWithoutCard";
+import useClient from "@/lib/client";
+import useTransactions from "@/lib/organization/useTransactions";
+import Card from "@/lib/types/Card";
+import GrantCardType from "@/lib/types/GrantCard";
+import { OrganizationExpanded } from "@/lib/types/Organization";
+import User from "@/lib/types/User";
+import useAddToWallet from "@/lib/useAddToWallet";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import useStripeCardDetails from "@/lib/useStripeCardDetails";
+import { palette } from "@/styles/theme";
 import {
   handleOneTimeUse,
   handleSetPurpose,
@@ -46,18 +42,15 @@ import {
   returnGrant,
   toggleCardDetails,
   toggleCardFrozen,
-} from "../../utils/cardActions";
-import * as Haptics from "../../utils/haptics";
-import { maybeRequestReview } from "../../utils/storeReview";
-import { normalizeSvg } from "../../utils/util";
+} from "@/utils/cardActions";
+import * as Haptics from "@/utils/haptics";
+import { maybeRequestReview } from "@/utils/storeReview";
+import { normalizeSvg } from "@/utils/util";
 
-type Props = NativeStackScreenProps<
-  CardsStackParamList | StackParamList,
-  "GrantCard"
->;
 
-export default function GrantCardPage({ route, navigation }: Props) {
-  const { grantId, cardId } = route.params;
+export default function GrantCardPage() {
+  const navigation = useNavigation();
+  const { id: grantId, cardId } = useLocalSearchParams();
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
   const { colors: themeColors } = useTheme();
 

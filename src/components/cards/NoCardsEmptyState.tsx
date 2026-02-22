@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { View, Text, Platform } from "react-native";
+import { View, Platform } from "react-native";
+import { Text } from "components/Text";
 
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import { useIsDark } from "../../lib/useColorScheme";

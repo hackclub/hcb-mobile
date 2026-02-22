@@ -4,7 +4,8 @@ import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import * as ScreenCapture from "expo-screen-capture";
 import { useEffect } from "react";
-import { View, Text, Animated, Platform, TouchableOpacity } from "react-native";
+import { View, Animated, Platform, TouchableOpacity } from "react-native";
+import { Text } from "components/Text";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import Card from "../../lib/types/Card";
@@ -366,6 +367,8 @@ export default function CardDetails({
                     fontSize: 16,
                     fontWeight: "500",
                     fontFamily: "JetBrainsMono-Regular",
+                    textAlign: "right",
+                    paddingLeft: 50,
                   }}
                 >
                   {
@@ -763,6 +766,7 @@ export default function CardDetails({
             <Text
               style={{
                 fontSize: 12,
+                textAlign: "right",
                 color: palette.muted,
                 textTransform: "uppercase",
               }}
@@ -774,6 +778,7 @@ export default function CardDetails({
                 fontSize: 16,
                 fontWeight: "600",
                 color: themeColors.text,
+                textAlign: "right",
               }}
             >
               {renderMoney(card?.total_spent_cents)}

@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { useEffect } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
   StatusBar,
   TouchableHighlight,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";

@@ -2,42 +2,42 @@ import { Ionicons } from "@expo/vector-icons";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
+import { router } from "expo-router";
 import * as StoreReview from "expo-store-review";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Linking,
-  Text,
-  View,
+  Platform,
   Pressable,
   ScrollView,
-  Animated,
-  useColorScheme as useSystemColorScheme,
-  Platform,
   Switch,
+  useColorScheme as useSystemColorScheme,
+  View,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { mutate } from "swr";
 
-import AuthContext from "../../auth/auth";
-import Button from "../../components/Button";
-import FeedbackModal from "../../components/FeedbackModal";
-import { useDevTools } from "../../lib/devtools/DevToolsContext";
-import { SettingsStackParamList } from "../../lib/NavigatorParamList";
-import User from "../../lib/types/User";
-import { useIsDark } from "../../lib/useColorScheme";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { useThemeContext } from "../../providers/ThemeContext";
-import { palette } from "../../styles/theme";
-import * as Haptics from "../../utils/haptics";
+import AuthContext from "@/auth/auth";
+import Button from "@/components/Button";
+import FeedbackModal from "@/components/FeedbackModal";
+import { useDevTools } from "@/lib/devtools/DevToolsContext";
+import User from "@/lib/types/User";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { useThemeContext } from "@/providers/ThemeContext";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
 
 const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
 
@@ -75,9 +75,7 @@ function isTapToPaySupported() {
   return false;
 }
 
-type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsMain">;
-
-export default function SettingsPage({ navigation }: Props) {
+export default function SettingsPage() {
   const { tokenResponse, setTokenResponse } = useContext(AuthContext);
   const { data: user } = useOfflineSWR<User>("user");
   const { data: intercomToken } = useOfflineSWR<{ token: string }>(
@@ -229,6 +227,11 @@ export default function SettingsPage({ navigation }: Props) {
 
   const handleSignOut = async () => {
     try {
+      mutate(
+        () => true,
+        undefined,
+        { revalidate: false }
+      );
       if (user?.id) {
         await AsyncStorage.setItem("last_logged_in_user_id", String(user.id));
       }
@@ -264,7 +267,10 @@ export default function SettingsPage({ navigation }: Props) {
       contentContainerStyle={{ paddingBottom: 40 }}
       style={{ backgroundColor: colors.background }}
     >
-      <View style={{ padding: 20 }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: 62 }}>
+        <PageTitle title="Settings" />
+      </View>
+      <View style={{ padding: 20, paddingTop: 0 }}>
         {/* Profile Card */}
         <View
           style={{
@@ -438,7 +444,7 @@ export default function SettingsPage({ navigation }: Props) {
                         marginTop: 2,
                       }}
                     >
-                      Use Face ID or Touch ID to unlock the app
+                      Use Face ID or Touch ID to{"\n"} unlock the app
                     </Text>
                   </View>
                 </View>
@@ -468,7 +474,7 @@ export default function SettingsPage({ navigation }: Props) {
                   alignItems: "center",
                   padding: 18,
                 }}
-                onPress={() => navigation.navigate("AppIconSelector")}
+                onPress={() => router.push("/settings/app-icon")}
               >
                 <Ionicons
                   name="color-palette-outline"
@@ -499,7 +505,7 @@ export default function SettingsPage({ navigation }: Props) {
 
           <Pressable
             style={{ flexDirection: "row", alignItems: "center", padding: 18 }}
-            onPress={() => navigation.navigate("DeepLinkingSettings")}
+            onPress={() => router.push("/settings/deep-linking")}
           >
             <Ionicons
               name="link"
@@ -534,7 +540,7 @@ export default function SettingsPage({ navigation }: Props) {
                   alignItems: "center",
                   padding: 18,
                 }}
-                onPress={() => navigation.navigate("Tutorials")}
+                onPress={() => router.push("/settings/tutorials")}
               >
                 <Ionicons
                   name="book-outline"
@@ -765,7 +771,7 @@ export default function SettingsPage({ navigation }: Props) {
               paddingVertical: 18,
               paddingHorizontal: 18,
             }}
-            onPress={() => navigation.navigate("About")}
+            onPress={() => router.push("/settings/about")}
           >
             <Ionicons
               name="information-circle-outline"

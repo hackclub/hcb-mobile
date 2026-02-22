@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
+import { useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
-import { View, Text, StatusBar, Button, Linking, Platform } from "react-native";
-
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { palette } from "../../styles/theme";
-
-type Props = NativeStackScreenProps<StackParamList, "AccountNumber">;
+import { Button, Linking, Platform, View } from "react-native";
+import { OrganizationExpanded } from "../../../../src/lib/types/Organization";
+import { useOfflineSWR } from "../../../../src/lib/useOfflineSWR";
+import { palette } from "../../../../src/styles/theme";
 
 function AccountDetail({
   title,
@@ -52,6 +52,7 @@ function AccountDetail({
           underlayColor={themeColors.background}
           onPress={() => {
             if (value) {
+              impactAsync(ImpactFeedbackStyle.Heavy);
               Clipboard.setStringAsync(value);
               setCopied(true);
             }
@@ -62,15 +63,13 @@ function AccountDetail({
   );
 }
 
-export default function AccountNumberPage({
-  navigation,
-  route: {
-    params: { orgId, organization: _organization },
-  },
-}: Props) {
+export default function AccountNumberPage() {
+  const navigation = useNavigation();
+  const params = useLocalSearchParams();
+
   const { data: organization, isLoading: organizationLoading } =
-    useOfflineSWR<OrganizationExpanded>(`organizations/${orgId}`, {
-      fallbackData: _organization,
+    useOfflineSWR<OrganizationExpanded>(`organizations/${params.id}`, {
+      fallbackData: params.fallbackData,
     });
 
   useEffect(() => {
@@ -116,7 +115,6 @@ export default function AccountNumberPage({
           flex: 1,
         }}
       >
-        <StatusBar barStyle="light-content" />
         <View style={{ alignItems: "center", maxWidth: 320 }}>
           <Ionicons
             name="document-text-outline"
@@ -164,16 +162,16 @@ export default function AccountNumberPage({
   return (
     <View
       style={{
-        padding: Platform.OS === "android" ? 40 : 20,
+        paddingHorizontal: 20,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         flex: 1,
       }}
     >
-      <StatusBar barStyle="light-content" />
-
-      <View style={{ flexDirection: "column" }}>
+      <PageTitle title="Account numbers" />
+      <Text style={{ fontSize: 16, color: palette.muted, marginBottom: 20 }}>
+        Use these details to receive ACH and wire transfers.
+      </Text>
+      <View style={{ flexDirection: "column", paddingTop: 10 }}>
         <AccountDetail
           title="Routing number"
           value={organization?.routing_number}
@@ -186,18 +184,6 @@ export default function AccountNumberPage({
           title="SWIFT BIC code"
           value={organization?.swift_bic_code}
         />
-
-        <View style={{ flexDirection: "row" }}>
-          <Ionicons
-            name="information-circle-outline"
-            color={palette.muted}
-            size={20}
-            style={{ marginRight: 10 }}
-          />
-          <Text style={{ alignSelf: "center", color: palette.muted }}>
-            Use these details to receive ACH and wire transfers.
-          </Text>
-        </View>
       </View>
     </View>
   );

@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, Pressable, Platform } from "react-native";
+import { View, Pressable, Platform } from "react-native";
+import { Text } from "components/Text";
 
 import { StackParamList } from "../../lib/NavigatorParamList";
 import { useIsDark } from "../../lib/useColorScheme";
@@ -206,7 +207,7 @@ export default function TapToPayBanner({
                 color: labelColor,
                 fontSize: 11,
                 fontWeight: "700",
-                letterSpacing: 1.5,
+                letterSpacing: 0.7,
               }}
             >
               TAP TO PAY {Platform.OS === "ios" ? "ON iPHONE" : ""}

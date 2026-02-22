@@ -1,13 +1,12 @@
 import { useTheme } from "@react-navigation/native";
 import { PropsWithChildren, ReactNode } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Text } from "components/Text";
 
 import { palette } from "../../styles/theme";
 
 export function Muted({ children }: PropsWithChildren) {
-  return (
-    <Text style={{ color: palette.muted, fontWeight: "400" }}>{children}</Text>
-  );
+  return <Text style={{ color: palette.muted, fontSize: 30 }}>{children}</Text>;
 }
 
 export default function TransactionTitle({
@@ -20,11 +19,11 @@ export default function TransactionTitle({
     <View style={{ alignItems: "center" }}>
       {badge && <View style={{ marginBottom: 5 }}>{badge}</View>}
       <Text
+        bold
         style={{
           color: themeColors.text,
           textAlign: "center",
           fontSize: 30,
-          fontWeight: "700",
           marginBottom: 20,
         }}
       >

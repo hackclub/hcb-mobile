@@ -1,42 +1,37 @@
-import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { CommonActions, useTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
-import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import OrganizationTeamPage from "@/app/(app)/(events)/[id]/Team";
+import RenameTransactionPage from "@/app/(app)/(events)/[id]/transaction/[transactionId]/rename";
+import About from "@/app/(app)/settings/about";
+import CardPage from "../../app/(app)/cards/[id]";
+import ReceiptsPage from "../../app/(app)/receipts";
 import { navRef } from "../core/navigationRef";
 import {
-  StackParamList,
   CardsStackParamList,
   ReceiptsStackParamList,
-  TabParamList,
   SettingsStackParamList,
+  StackParamList,
+  TabParamList,
 } from "../lib/NavigatorParamList";
 import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import { useIsDark } from "../lib/useColorScheme";
-import CardPage from "../pages/cards/card";
-import CardsPage from "../pages/cards/cards";
+import CardsPage from "../pages/cards";
 import GrantCardPage from "../pages/cards/GrantCard";
 import OrderCardPage from "../pages/cards/OrderCard";
-import Home from "../pages/index";
 import InvitationPage from "../pages/Invitation";
-import OrganizationPage from "../pages/organization";
-import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
 import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
-import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
-import ReceiptsPage from "../pages/Receipts";
 import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
-import RenameTransactionPage from "../pages/RenameTransaction";
-import About from "../pages/settings/About";
 import AppIconSelector from "../pages/settings/AppIconSelector";
 import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
 import SettingsPage from "../pages/settings/Settings";
@@ -44,7 +39,6 @@ import Tutorials from "../pages/settings/Tutorials";
 import ShareIntentModal from "../pages/ShareIntentModal";
 import TransactionPage from "../pages/Transaction";
 import { useShareIntentContext } from "../providers/ShareIntentContext";
-import { palette } from "../styles/theme";
 import * as Haptics from "../utils/haptics";
 
 const Stack = createNativeStackNavigator<StackParamList>();
@@ -193,62 +187,12 @@ export default function Navigator() {
             }}
           >
             <Stack.Screen
-              name="Organizations"
-              component={Home}
-              options={{
-                title: "Home",
-                headerLargeTitle: true,
-                headerTransparent: Platform.OS === "ios",
-                headerRight: () => (
-                  <Ionicons.Button
-                    name="add-circle-outline"
-                    backgroundColor="transparent"
-                    size={24}
-                    underlayColor={themeColors.card}
-                    color={themeColors.text}
-                    iconStyle={{ marginRight: 0 }}
-                    accessibilityLabel="Apply for new organization"
-                    accessibilityHint="Opens the HCB application form in browser"
-                    accessibilityRole="button"
-                    onPress={() => {
-                      WebBrowser.openBrowserAsync(
-                        "https://hackclub.com/hcb/apply",
-                        {
-                          presentationStyle:
-                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                          controlsColor: palette.primary,
-                          dismissButtonStyle: "cancel",
-                        },
-                      ).then(() => {
-                        mutate("user/organizations");
-                        mutate("user/invitations");
-                      });
-                    }}
-                  />
-                ),
-              }}
-            />
-            <Stack.Screen
               name="Invitation"
               component={InvitationPage}
               options={{
                 presentation: "modal",
                 headerShown: false,
               }}
-            />
-            <Stack.Screen
-              name="Event"
-              options={({ route }) => ({
-                // headerTitle: () => <OrganizationTitle {...route.params} />,
-                title: route.params.organization?.name || "Organization",
-                headerBackTitle: "Back",
-              })}
-              component={OrganizationPage}
-            />
-            <Stack.Screen
-              name="AccountNumber"
-              component={AccountNumberPage}
-              options={{ presentation: "modal", title: "Account Details" }}
             />
             <Stack.Screen
               name="OrganizationTeam"
@@ -282,14 +226,6 @@ export default function Navigator() {
                 title: "Process Donation",
                 headerTitle: "Process Donation",
               }}
-            />
-            <Stack.Screen
-              options={({ route }) => ({
-                headerBackTitle: "Back",
-                title: route.params?.title || "Transaction",
-              })}
-              name="Transaction"
-              component={TransactionPage}
             />
             <Stack.Screen
               name="RenameTransaction"

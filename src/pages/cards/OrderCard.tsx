@@ -7,7 +7,6 @@ import { Image } from "expo-image";
 import { useState, useMemo, useEffect } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   TextInput,
   ScrollView,
@@ -15,6 +14,8 @@ import {
   Platform,
   Linking,
 } from "react-native";
+import { Text } from "components/Text";
+
 import RNPickerSelect from "react-native-picker-select";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { useSWRConfig } from "swr";

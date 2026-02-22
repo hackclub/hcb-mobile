@@ -1,15 +1,15 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
-  Text,
+  AppState,
+  Image as RNImage,
+  useWindowDimensions,
   View,
   ViewProps,
   type AppStateStatus,
-  AppState,
-  useWindowDimensions,
-  Image as RNImage,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -80,8 +80,8 @@ export default function PaymentCard({
         style={{
           backgroundColor: dark ? "#222" : "#eee",
           padding: 30,
-          width: width * 0.86,
-          height: (width * 0.86) / 1.588,
+          width: width,
+          height: width / 1.588,
           borderRadius: 15,
           justifyContent: "center",
           alignItems: "center",
@@ -103,8 +103,8 @@ export default function PaymentCard({
               : "white"
             : themeColors.card,
         padding: 30,
-        width: width * 0.86,
-        height: (width * 0.86) / 1.588,
+        width: width - 40,
+        height: (width - 40) / 1.588,
         borderRadius: 15,
         flexDirection: "column",
         justifyContent: "flex-end",
@@ -122,8 +122,8 @@ export default function PaymentCard({
             position: "absolute",
             flexDirection: "row",
             flexWrap: "wrap",
-            width: width * 0.86,
-            height: (width * 0.86) / 1.5,
+            width: width - 40,
+            height: (width - 40) / 1.5,
           }}
         >
           <SvgXml xml={pattern} width="100%" height="100%" />
@@ -186,8 +186,8 @@ export default function PaymentCard({
               position: "absolute",
               top: 0,
               left: 0,
-              width: width * 0.86,
-              height: (width * 0.86) / 1.588,
+              width: width,
+              height: width / 1.588,
               opacity: 0.32,
               borderRadius: 15,
               objectFit: "cover",

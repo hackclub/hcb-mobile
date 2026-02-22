@@ -1,58 +1,69 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ScrollView,
-  View,
-  Text,
-  Linking,
-  RefreshControl,
   KeyboardAvoidingView,
+  Linking,
   Platform,
+  RefreshControl,
+  ScrollView,
   Share,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
-import AdminTools from "../components/AdminTools";
-import Comment from "../components/transaction/Comment";
-import CommentField from "../components/transaction/comment/CommentField";
-import TransactionSkeleton from "../components/transaction/TransactionSkeleton";
-import AchTransferTransaction from "../components/transaction/types/AchTransferTransaction";
-import BankAccountTransaction from "../components/transaction/types/BankAccountTransaction";
-import BankFeeTransaction from "../components/transaction/types/BankFeeTransaction";
-import CardChargeTransaction from "../components/transaction/types/CardChargeTransaction";
-import CheckDepositTransaction from "../components/transaction/types/CheckDepositTransaction";
-import CheckTransaction from "../components/transaction/types/CheckTransaction";
-import DonationTransaction from "../components/transaction/types/DonationTransaction";
-import ExpensePayoutTransaction from "../components/transaction/types/ExpensePayoutTransaction";
-import InvoiceTransaction from "../components/transaction/types/InvoiceTransaction";
-import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
-import TransferTransaction from "../components/transaction/types/TransferTransaction";
-import WiseTransaction from "../components/transaction/types/WiseTransaction";
-import { StackParamList } from "../lib/NavigatorParamList";
-import IComment from "../lib/types/Comment";
-import Organization, { OrganizationExpanded } from "../lib/types/Organization";
-import Transaction, { TransactionType } from "../lib/types/Transaction";
-import User from "../lib/types/User";
-import { useOfflineSWR } from "../lib/useOfflineSWR";
-import { palette } from "../styles/theme";
+import AdminTools from "@/components/AdminTools";
+import Comment from "@/components/transaction/Comment";
+import CommentField from "@/components/transaction/comment/CommentField";
+import TransactionSkeleton from "@/components/transaction/TransactionSkeleton";
+import AchTransferTransaction from "@/components/transaction/types/AchTransferTransaction";
+import BankAccountTransaction from "@/components/transaction/types/BankAccountTransaction";
+import BankFeeTransaction from "@/components/transaction/types/BankFeeTransaction";
+import CardChargeTransaction from "@/components/transaction/types/CardChargeTransaction";
+import CheckDepositTransaction from "@/components/transaction/types/CheckDepositTransaction";
+import CheckTransaction from "@/components/transaction/types/CheckTransaction";
+import DonationTransaction from "@/components/transaction/types/DonationTransaction";
+import ExpensePayoutTransaction from "@/components/transaction/types/ExpensePayoutTransaction";
+import InvoiceTransaction from "@/components/transaction/types/InvoiceTransaction";
+import TransferTransaction from "@/components/transaction/types/TransferTransaction";
+import WiseTransaction from "@/components/transaction/types/WiseTransaction";
+import IComment from "@/lib/types/Comment";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
+import Transaction, { TransactionType } from "@/lib/types/Transaction";
+import User from "@/lib/types/User";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "Transaction">;
+export default function TransactionPage() {
+  const navigation = useNavigation();
+  const {
+    transactionId,
+    orgId: _orgId,
+    transaction: _transactionParam,
+  } = useLocalSearchParams<{
+    transactionId: string;
+    orgId?: string;
+    transaction?: string;
+  }>();
 
-export default function TransactionPage({
-  route: {
-    params: { transactionId, transaction: _transaction, orgId },
-  },
-  navigation,
-}: Props) {
+  const _transaction: Transaction | undefined = _transactionParam
+    ? typeof _transactionParam === "string"
+      ? JSON.parse(_transactionParam)
+      : _transactionParam
+    : undefined;
+
+  const orgId = _orgId as string | undefined;
+
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
-  //filter in case of deeplink with #commentId
+  // filter in case of deeplink with #commentId
   const txnId = transactionId.split("#")[0];
+
   const { data: transaction, isLoading } = useOfflineSWR<
     Transaction & { organization?: Organization }
   >(
@@ -141,7 +152,7 @@ export default function TransactionPage({
     return <TransactionSkeleton />;
   }
 
-  const transactionViewProps: Omit<TransactionViewProps, "transaction"> = {
+  const transactionViewProps = {
     orgId: currentOrgId,
     navigation,
   };

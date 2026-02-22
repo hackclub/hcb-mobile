@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text, View } from "react-native";
+import { Text } from "components/Text";
+import { View } from "react-native";
 
 import User from "../lib/types/User";
 

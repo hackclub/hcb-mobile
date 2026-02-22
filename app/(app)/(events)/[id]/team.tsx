@@ -1,20 +1,19 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
+import { useLocalSearchParams } from "expo-router";
 import { capitalize } from "lodash";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, View } from "react-native";
 import { useSWRConfig } from "swr";
 
-import Button from "../../components/Button";
-import UserAvatar from "../../components/UserAvatar";
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import { OrgUser } from "../../lib/types/User";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { palette } from "../../styles/theme";
-
-type Props = NativeStackScreenProps<StackParamList, "OrganizationTeam">;
+import Button from "@/components/Button";
+import UserAvatar from "@/components/UserAvatar";
+import { OrganizationExpanded } from "@/lib/types/Organization";
+import { OrgUser } from "@/lib/types/User";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import PageTitle from "components/PageTitle";
 
 function MemberRole(props: { role: OrgUser["role"] }) {
   return (
@@ -30,15 +29,12 @@ function MemberRole(props: { role: OrgUser["role"] }) {
   );
 }
 
-export default function OrganizationTeamPage({
-  route: {
-    params: { orgId },
-  },
-}: Props) {
+export default function Page() {
+  const { id } = useLocalSearchParams();
   const { cache } = useSWRConfig();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${orgId}?avatar_size=50`,
-    { fallbackData: cache.get(`organizations/${orgId}`)?.data },
+    `organizations/${id}?avatar_size=50`,
+    { fallbackData: cache.get(`organizations/${id}`)?.data },
   );
 
   const tabBarHeight = useBottomTabBarHeight();
@@ -48,7 +44,10 @@ export default function OrganizationTeamPage({
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: tabBarHeight + 20,
+      }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
     >
       <View
@@ -59,19 +58,20 @@ export default function OrganizationTeamPage({
           marginBottom: 8,
         }}
       >
-        <Text style={{ color: themeColors.text, fontSize: 18 }}>Members</Text>
-        <Button
-          icon="member-add"
-          iconSize={28}
-          iconOffset={2}
-          onPress={() =>
-            Linking.openURL(
-              `https://hcb.hackclub.com/${organization.slug}/invites/new`,
-            )
-          }
-        >
-          Invite
-        </Button>
+        <PageTitle title="Team">
+          <Button
+            icon="member-add"
+            iconSize={28}
+            iconOffset={2}
+            onPress={() =>
+              Linking.openURL(
+                `https://hcb.hackclub.com/${organization.slug}/invites/new`,
+              )
+            }
+          >
+            Invite
+          </Button>
+        </PageTitle>
       </View>
       <View
         style={{

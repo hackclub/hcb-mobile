@@ -1,18 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
-import {
-  NativeStackScreenProps,
-  NativeStackNavigationProp,
-} from "@react-navigation/native-stack";
+import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
+import { router } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
-import { useEffect, useState, memo, useMemo, useCallback } from "react";
+import * as WebBrowser from "expo-web-browser";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Text,
+  Platform,
+  RefreshControl,
+  TouchableOpacity,
   View,
   useColorScheme,
-  RefreshControl,
-  Platform,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -22,41 +23,47 @@ import ReorderableList, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
-import Event from "../components/organizations/Event";
-import GrantInvite from "../components/organizations/GrantInvite";
-import { HomeLoadingSkeleton } from "../components/organizations/HomeLoadingSkeleton";
-import { NoOrganizationsEmptyState } from "../components/organizations/NoOrganizationsEmptyState";
-import PromoBanner from "../components/PromoBanner";
-import { StackParamList } from "../lib/NavigatorParamList";
-import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
-import GrantCard from "../lib/types/GrantCard";
-import Invitation from "../lib/types/Invitation";
-import Organization from "../lib/types/Organization";
-import ITransaction from "../lib/types/Transaction";
-import { useOfflineSWR } from "../lib/useOfflineSWR";
-import { palette } from "../styles/theme";
-import * as Haptics from "../utils/haptics";
-import { organizationOrderEqual } from "../utils/util";
+import Event from "@/components/organizations/Event";
+import GrantInvite from "@/components/organizations/GrantInvite";
+import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
+import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
+import PromoBanner from "@/components/PromoBanner";
+import { StackParamList } from "@/lib/NavigatorParamList";
+import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
+import GrantCard from "@/lib/types/GrantCard";
+import Invitation from "@/lib/types/Invitation";
+import Organization from "@/lib/types/Organization";
+import ITransaction from "@/lib/types/Transaction";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { organizationOrderEqual } from "@/utils/util";
 
 type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 const EventItem = memo(
   ({
     organization,
-    navigation,
     orgCount,
   }: {
     organization: Organization;
-    navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
     orgCount: number;
   }) => {
     const drag = useReorderableDrag();
     const handlePress = useCallback(() => {
-      navigation.navigate("Event", {
-        orgId: organization.id,
-        organization,
+      router.push({
+        pathname: "[id]",
+        params: {
+          id: organization.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fallbackData: organization as any,
+        },
       });
-    }, [navigation, organization]);
+      // navigation.navigate("Event", {
+      //   orgId: organization.id,
+      //   organization,
+      // });
+    }, [organization]);
 
     return (
       <Event
@@ -211,6 +218,7 @@ export default function App({ navigation }: Props) {
 
   const { fetcher, mutate } = useSWRConfig();
   const tabBarHeight = useBottomTabBarHeight();
+  const { colors: themeColors } = useTheme();
   const scheme = useColorScheme();
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
@@ -260,11 +268,7 @@ export default function App({ navigation }: Props) {
 
   const renderItem = useCallback(
     ({ item: organization }: { item: Organization }) => (
-      <EventItem
-        organization={organization}
-        navigation={navigation}
-        orgCount={orgCount}
-      />
+      <EventItem organization={organization} orgCount={orgCount} />
     ),
     [navigation, orgCount],
   );
@@ -305,7 +309,7 @@ export default function App({ navigation }: Props) {
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight }}
         contentContainerStyle={{
-          padding: 20,
+          paddingHorizontal: 20,
           paddingBottom: tabBarHeight,
         }}
         contentInsetAdjustmentBehavior="automatic"
@@ -323,6 +327,7 @@ export default function App({ navigation }: Props) {
         ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
+            <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
             (grantInvites && grantInvites.length > 0) ? (
@@ -399,21 +404,57 @@ export default function App({ navigation }: Props) {
           </>
         )}
         renderItem={renderItem}
-        ListFooterComponent={() =>
-          organizations &&
-          organizations.length > 2 && (
-            <Text
+        ListFooterComponent={() => (
+          <>
+            <TouchableOpacity
+              accessibilityLabel="Apply for new organization"
+              accessibilityHint="Opens the HCB application form in browser"
+              accessibilityRole="button"
+              onPress={() => {
+                WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
+                  presentationStyle:
+                    WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                  controlsColor: palette.primary,
+                  dismissButtonStyle: "cancel",
+                }).then(() => {
+                  mutate("user/organizations");
+                  mutate("user/invitations");
+                });
+              }}
               style={{
-                color: palette.muted,
-                textAlign: "center",
-                marginTop: 10,
-                marginBottom: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                marginTop: 15,
+                paddingHorizontal: 15,
+                paddingVertical: 12,
+                borderRadius: 8,
+                justifyContent: "center",
+                backgroundColor: "rgba(200,200,200,0.3)",
               }}
             >
-              Drag to reorder organizations
-            </Text>
-          )
-        }
+              <Ionicons
+                name="add-circle-outline"
+                size={24}
+                color={themeColors.text}
+              />
+              <Text style={{ color: themeColors.text }}>Create</Text>
+            </TouchableOpacity>
+
+            {organizations && organizations.length > 2 && (
+              <Text
+                style={{
+                  color: palette.muted,
+                  textAlign: "center",
+                  marginTop: 10,
+                  marginBottom: 10,
+                }}
+              >
+                Drag to reorder organizations
+              </Text>
+            )}
+          </>
+        )}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       />
     </SafeAreaView>

@@ -1,37 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuView } from "@react-native-menu/menu";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
+import { router, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, useColorScheme, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 
-import CardListSkeleton from "../../components/cards/CardListSkeleton";
-import { NoCardsEmptyState } from "../../components/cards/NoCardsEmptyState";
-import PaymentCard from "../../components/PaymentCard";
-import { CardsStackParamList } from "../../lib/NavigatorParamList";
-import Card from "../../lib/types/Card";
-import GrantCard from "../../lib/types/GrantCard";
-import Organization from "../../lib/types/Organization";
-import User from "../../lib/types/User";
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
-import { palette } from "../../styles/theme";
-import * as Haptics from "../../utils/haptics";
-import { normalizeSvg } from "../../utils/util";
-
-type Props = NativeStackScreenProps<CardsStackParamList, "CardList">;
+import CardListSkeleton from "@/../src/components/cards/CardListSkeleton";
+import { NoCardsEmptyState } from "@/../src/components/cards/NoCardsEmptyState";
+import PaymentCard from "@/../src/components/PaymentCard";
+import Card from "@/../src/lib/types/Card";
+import GrantCard from "@/../src/lib/types/GrantCard";
+import Organization from "@/../src/lib/types/Organization";
+import User from "@/../src/lib/types/User";
+import { useOfflineSWR } from "@/../src/lib/useOfflineSWR";
+import { palette } from "@/../src/styles/theme";
+import * as Haptics from "@/../src/utils/haptics";
+import { normalizeSvg } from "@/../src/utils/util";
 
 type CardWithGrant = Card &
   Required<Pick<Card, "last4">> & { grant_id?: string };
@@ -63,7 +55,9 @@ const CardItem = ({
     >
       <PaymentCard
         card={item}
-        style={{ marginHorizontal: 20, marginVertical: 8 }}
+        style={{
+          marginBottom: 10,
+        }}
         pattern={pattern}
         patternDimensions={patternDimensions}
       />
@@ -71,7 +65,8 @@ const CardItem = ({
   );
 };
 
-export default function CardsPage({ navigation }: Props) {
+export default function Page() {
+  const navigation = useNavigation();
   const { data: cards, mutate: reloadCards } =
     useOfflineSWR<(Card & Required<Pick<Card, "last4">>)[]>("user/cards");
   const { data: grantCards, mutate: reloadGrantCards } =
@@ -79,7 +74,6 @@ export default function CardsPage({ navigation }: Props) {
   const { data: user } = useOfflineSWR<User>("user");
   const { data: organizations } =
     useOfflineSWR<Organization[]>("user/organizations");
-  const tabBarHeight = useBottomTabBarHeight();
   const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
   // Cache for card patterns
@@ -375,6 +369,15 @@ export default function CardsPage({ navigation }: Props) {
       <ReorderableList
         data={filteredCards}
         keyExtractor={(item) => item.id}
+        ListHeaderComponent={() => (
+          <View
+            style={{
+              paddingTop: 62,
+            }}
+          >
+            <PageTitle title="Cards" />
+          </View>
+        )}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
           const newCards = [...sortedCards];
@@ -383,15 +386,11 @@ export default function CardsPage({ navigation }: Props) {
           setSortedCards(newCards);
           saveCardOrder(newCards);
         }}
-        contentContainerStyle={{
-          paddingBottom: tabBarHeight + 20,
-          paddingTop: 20,
-          alignItems: "center",
-        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        contentContainerStyle={{ paddingHorizontal: 20 }}
         panGesture={panGesture}
         renderItem={({ item }) => (
           <CardItem
@@ -403,8 +402,9 @@ export default function CardsPage({ navigation }: Props) {
                     grantId: card.grant_id,
                     cardId: card.id,
                   })
-                : navigation.navigate("Card", {
-                    card,
+                : router.push({
+                    pathname: "/cards/[id]",
+                    params: { card: JSON.stringify(card) },
                   })
             }
             pattern={patternCache[item.id]?.pattern}

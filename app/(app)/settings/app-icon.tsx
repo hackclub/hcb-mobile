@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { setAlternateAppIcon, getAppIconName } from "expo-alternate-app-icons";
+import { Text } from "components/Text";
+import { getAppIconName, setAlternateAppIcon } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Image } from "react-native";
+import { Image, Pressable, ScrollView, View } from "react-native";
 
-import { useOfflineSWR } from "../../lib/useOfflineSWR";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import PageTitle from "components/PageTitle";
 
 const icons: { [key: string]: number | null } = {
   default: require("../../../assets/icons/default.png"),
@@ -72,7 +74,7 @@ const isChristmasSeason = () => {
   return month === 11; // December
 };
 
-export default function AppIconSelector() {
+export default function Page() {
   const { colors } = useTheme();
   const [currentIcon, setCurrentIcon] = useState<string>("default");
   const { data: availableIcons } = useOfflineSWR<Record<string, boolean>>(
@@ -162,20 +164,10 @@ export default function AppIconSelector() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
     >
       <View style={{ gap: 12 }}>
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.text,
-            marginBottom: 14,
-            marginTop: 10,
-          }}
-        >
-          Choose App Icon
-        </Text>
+        <PageTitle title="App icon" />
         <View style={{ gap: 12 }}>
           {iconList.map(({ key, value }) => (
             <Pressable
