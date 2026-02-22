@@ -8,6 +8,8 @@ import {
 } from "@react-navigation/native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
+import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -39,7 +41,7 @@ import {
 } from "react-native-safe-area-context";
 import { SWRConfig } from "swr";
 
-import { routingInstrumentation, SWRCacheProvider } from "../_layout";
+import { SWRCacheProvider } from "../_layout";
 
 import AuthContext from "@/auth/auth";
 import { tokenResponseToLegacyTokens } from "@/auth/tokenUtils";
@@ -62,8 +64,6 @@ import { useThemeContext } from "@/providers/ThemeContext";
 import { lightTheme, theme } from "@/styles/theme";
 import { getStateFromPath } from "@/utils/getStateFromPath";
 import { trackAppOpen } from "@/utils/storeReview";
-import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
-import { BlurView } from "expo-blur";
 
 interface HTTPError extends Error {
   status?: number;
@@ -233,11 +233,6 @@ export default function Layout() {
   };
   useEffect(() => {
     navRef.current = navigationRef.current;
-  }, []);
-
-  const onNavigationReady = useCallback(() => {
-    navRef.current = navigationRef.current;
-    routingInstrumentation.registerNavigationContainer(navigationRef);
   }, []);
 
   useEffect(() => {

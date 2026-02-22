@@ -1,6 +1,7 @@
 import { BlurView } from "expo-blur";
 import { useNavigation, usePathname } from "expo-router";
 import { useEffect } from "react";
+import { ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const DEFAULT_BOTTOM_NAV_STYLE = {
@@ -10,7 +11,7 @@ export const DEFAULT_BOTTOM_NAV_STYLE = {
   position: "absolute",
   bottom: 0,
   left: 0,
-};
+} as ViewStyle;
 
 export function TabBarStyling({ enabledPage }: { enabledPage: string }) {
   const navigation = useNavigation();

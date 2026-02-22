@@ -1,10 +1,8 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { router } from "expo-router";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
@@ -17,7 +15,6 @@ interface TransactionWrapperProps {
   item: ITransaction;
   user: User | undefined;
   organization: Organization | OrganizationExpanded | undefined;
-  navigation: NativeStackNavigationProp<StackParamList, "Event">;
   orgId: `org_${string}`;
   index?: number;
   isFirst?: boolean;
@@ -28,7 +25,6 @@ function TransactionWrapper({
   item,
   user,
   organization,
-  navigation,
   orgId,
   isFirst = false,
   isLast = false,
@@ -37,8 +33,8 @@ function TransactionWrapper({
 
   const userinOrganization = Boolean(
     organization &&
-      "users" in organization &&
-      organization.users.some((u) => u.id === user?.id),
+    "users" in organization &&
+    organization.users.some((u) => u.id === user?.id),
   );
 
   const canViewTransaction = Boolean(
@@ -53,9 +49,12 @@ function TransactionWrapper({
       "transfer" in item &&
       item.transfer?.card_grant_id
     ) {
-      navigation.navigate("GrantCard", {
-        grantId: item.transfer.card_grant_id,
-      });
+      router.push({
+        pathname: "/card-grants/[id]",
+        params: {
+          id: item.transfer.card_grant_id,
+        }
+      })
     } else {
       router.push({
         pathname: "/[id]/transactions/[transactionId]",
