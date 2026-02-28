@@ -1,7 +1,5 @@
 import { useTheme } from "@react-navigation/native";
-import {
-  NativeStackNavigationProp
-} from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { useNavigation } from "expo-router";
@@ -24,18 +22,15 @@ import RepIcon from "@/components/cards/RepIcon";
 import useClient from "@/lib/client";
 import { CardsStackParamList } from "@/lib/NavigatorParamList";
 import CardDesign from "@/lib/types/CardDesign";
-import Organization, {
-  OrganizationExpanded,
-} from "@/lib/types/Organization";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import useOfflineSWR from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
 
-
 export default function Page() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const [isLoading, setIsLoading] = useState(false);

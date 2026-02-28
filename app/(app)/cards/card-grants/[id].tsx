@@ -47,7 +47,6 @@ import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { normalizeSvg } from "@/utils/util";
 
-
 export default function Page() {
   const navigation = useNavigation();
   const { id: grantId, cardId } = useLocalSearchParams();

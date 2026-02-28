@@ -223,7 +223,10 @@ export default function Page() {
     [transactions],
   );
 
-  const recentTransactions = useMemo(() => transactions.slice(0, 7), [transactions]);
+  const recentTransactions = useMemo(
+    () => transactions.slice(0, 7),
+    [transactions],
+  );
 
   const renderListHeader = useCallback(() => {
     if (!organization) return null;
@@ -264,11 +267,13 @@ export default function Page() {
       {renderListHeader()}
       <View style={{ paddingHorizontal: 20, gap: 16 }}>
         {recentTransactions.length > 0 && (
-          <View style={{
-            backgroundColor: themeColors.card,
-            borderRadius: 16,
-            overflow: "hidden",
-          }}>
+          <View
+            style={{
+              backgroundColor: themeColors.card,
+              borderRadius: 16,
+              overflow: "hidden",
+            }}
+          >
             <Pressable
               style={{
                 flexDirection: "row",
@@ -287,7 +292,7 @@ export default function Page() {
               <Text style={{ fontSize: 18, fontWeight: "600" }}>
                 Transactions
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }} >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={{ opacity: 0.5 }}>View all</Text>
                 <Ionicons
                   name="chevron-forward"

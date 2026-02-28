@@ -9,9 +9,7 @@ function AuthRedirect() {
   const { tokenResponse } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!tokenResponse)
-      router.replace("/login")
-
+    if (!tokenResponse) router.replace("/login");
   }, [tokenResponse]);
 
   return null;

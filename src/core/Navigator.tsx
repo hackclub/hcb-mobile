@@ -102,18 +102,18 @@ export default function Navigator() {
         headerShown: false,
         ...(Platform.OS === "android"
           ? {
-            tabBarStyle: {
-              position: "absolute",
-              paddingBottom: 5,
-              height: 50,
-              elevation: 0,
-            },
-          }
+              tabBarStyle: {
+                position: "absolute",
+                paddingBottom: 5,
+                height: 50,
+                elevation: 0,
+              },
+            }
           : {
-            tabBarStyle: {
-              position: "absolute",
-            },
-          }),
+              tabBarStyle: {
+                position: "absolute",
+              },
+            }),
         tabBarHideOnKeyboard: true,
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
@@ -139,7 +139,7 @@ export default function Navigator() {
               if (
                 (homeStackState.index && homeStackState.index > 0) ||
                 homeStackState.routes[homeStackState.index ?? 0].name !==
-                "Organizations"
+                  "Organizations"
               ) {
                 e.preventDefault();
                 navigation.dispatch(

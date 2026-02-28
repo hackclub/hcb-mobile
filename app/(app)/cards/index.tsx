@@ -199,7 +199,7 @@ export default function Page() {
             iconStyle={{ marginRight: 0 }}
             onPress={() => {
               if (user && organizations) {
-                router.push("/cards/order")
+                router.push("/cards/order");
               }
             }}
             underlayColor={"transparent"}
@@ -400,13 +400,17 @@ export default function Page() {
             onPress={(card) =>
               card.grant_id
                 ? router.push({
-                  pathname: "/cards/card-grants/[id]",
-                  params: { card: JSON.stringify(card), id: card.grant_id, cardId: card.id },
-                })
+                    pathname: "/cards/card-grants/[id]",
+                    params: {
+                      card: JSON.stringify(card),
+                      id: card.grant_id,
+                      cardId: card.id,
+                    },
+                  })
                 : router.push({
-                  pathname: "/cards/[id]",
-                  params: { card: JSON.stringify(card) },
-                })
+                    pathname: "/cards/[id]",
+                    params: { card: JSON.stringify(card) },
+                  })
             }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}

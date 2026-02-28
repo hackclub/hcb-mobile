@@ -14,7 +14,7 @@ export const NoCardsEmptyState = () => {
   const isDark = useIsDark();
 
   const handleOrderCard = () => {
-    router.push("/cards/order")
+    router.push("/cards/order");
   };
 
   return (

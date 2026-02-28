@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { getAppIconName, setAlternateAppIcon } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
@@ -7,7 +8,6 @@ import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import PageTitle from "components/PageTitle";
 
 const icons: { [key: string]: number | null } = {
   default: require("../../../assets/icons/default.png"),
