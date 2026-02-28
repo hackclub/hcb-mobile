@@ -2,18 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
 import {
-  View,
-  StatusBar,
-  Button,
   ActivityIndicator,
-  Platform,
   Alert,
+  Button,
+  Platform,
+  StatusBar,
+  View,
   ViewStyle,
 } from "react-native";
-import { Text } from "components/Text";
 // @ts-expect-error no types
 import QRCodeStyled from "react-native-qrcode-styled";
 import {

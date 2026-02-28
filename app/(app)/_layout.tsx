@@ -39,7 +39,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { SWRConfig } from "swr";
+import useSWR, { SWRConfig } from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
@@ -52,6 +52,7 @@ import { navRef } from "@/core/navigationRef";
 import useClient from "@/lib/client";
 import { DevToolsProvider } from "@/lib/devtools";
 import { TabParamList } from "@/lib/NavigatorParamList";
+import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import { useIsDark } from "@/lib/useColorScheme";
 import { usePushNotifications } from "@/lib/usePushNotifications";
 import {
@@ -88,6 +89,77 @@ SplashScreen.setOptions({
   duration: 500,
   fade: true,
 });
+
+function Navigation({ navigationRef }: { navigationRef: React.RefObject<NavigationContainerRef<TabParamList>> }) {
+  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>("user/transactions/missing_receipt");
+
+  return (
+    <Tabs
+      ref={navigationRef}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
+      }}
+      screenListeners={{
+        tabPress: () =>
+          Haptics.impactAsync(
+            Haptics.ImpactFeedbackStyle.Rigid,
+          ),
+      }}
+    >
+      <Tabs.Screen
+        name="(events)"
+        options={{
+          title: "Home",
+          tabBarAccessibilityLabel: "Home Tab",
+          tabBarIcon: ({ color }) => (
+            <Icon glyph="home" size={28} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cards"
+        options={{
+          title: "Cards",
+          tabBarAccessibilityLabel: "Cards Tab",
+          tabBarIcon: ({ color }) => (
+            <Icon glyph="card" size={28} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="receipts"
+        options={{
+          tabBarBadge: missingReceiptData?.total_count || undefined,
+          title: "Receipts",
+          tabBarBadgeStyle: { fontFamily: "Regular" },
+          tabBarAccessibilityLabel: "Receipts Tab",
+          tabBarIcon: ({ color }) => (
+            <Icon
+              glyph="payment-docs"
+              size={28}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarAccessibilityLabel: "Settings Tab",
+          tabBarIcon: ({ color }) => (
+            <Icon
+              glyph="settings"
+              size={36}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tabs>
+  )
+}
 
 export default function Layout() {
   const { scheme, cache } = useContext(SWRCacheProvider);
@@ -150,6 +222,10 @@ export default function Layout() {
   const TOKEN_FETCH_COOLDOWN = 5000;
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
   const TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>("user/transactions/missing_receipt");
+
+  console.log(missingReceiptData)
 
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
@@ -659,68 +735,7 @@ export default function Layout() {
                             zIndex: 1,
                           }}
                         />
-                        <Tabs
-                          ref={navigationRef}
-                          screenOptions={{
-                            headerShown: false,
-                            tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
-                          }}
-                          screenListeners={{
-                            tabPress: () =>
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Rigid,
-                              ),
-                          }}
-                        >
-                          <Tabs.Screen
-                            name="(events)"
-                            options={{
-                              title: "Home",
-                              tabBarAccessibilityLabel: "Home Tab",
-                              tabBarIcon: ({ color }) => (
-                                <Icon glyph="home" size={28} color={color} />
-                              ),
-                            }}
-                          />
-                          <Tabs.Screen
-                            name="cards"
-                            options={{
-                              title: "Cards",
-                              tabBarAccessibilityLabel: "Cards Tab",
-                              tabBarIcon: ({ color }) => (
-                                <Icon glyph="card" size={28} color={color} />
-                              ),
-                            }}
-                          />
-                          <Tabs.Screen
-                            name="receipts"
-                            options={{
-                              title: "Receipts",
-                              tabBarAccessibilityLabel: "Receipts Tab",
-                              tabBarIcon: ({ color }) => (
-                                <Icon
-                                  glyph="payment-docs"
-                                  size={28}
-                                  color={color}
-                                />
-                              ),
-                            }}
-                          />
-                          <Tabs.Screen
-                            name="settings"
-                            options={{
-                              title: "Settings",
-                              tabBarAccessibilityLabel: "Settings Tab",
-                              tabBarIcon: ({ color }) => (
-                                <Icon
-                                  glyph="settings"
-                                  size={28}
-                                  color={color}
-                                />
-                              ),
-                            }}
-                          />
-                        </Tabs>
+                        <Navigation navigationRef={navigationRef} />
                       </ThemeProvider>
                     </AlertNotificationRoot>
                   </ActionSheetProvider>

@@ -13,12 +13,13 @@ export const DEFAULT_BOTTOM_NAV_STYLE = {
   left: 0,
 } as ViewStyle;
 
-export function TabBarStyling({ enabledPage }: { enabledPage: string }) {
+export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
   const navigation = useNavigation();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
+    if (!enabledPage) return;
     if (pathname !== enabledPage)
       navigation.setOptions({ tabBarStyle: { display: "none" } });
     return () =>
@@ -26,7 +27,7 @@ export function TabBarStyling({ enabledPage }: { enabledPage: string }) {
   }, [pathname, navigation, enabledPage]);
 
   return (
-    pathname === enabledPage && (
+    ((pathname === enabledPage) || !enabledPage) && (
       <BlurView
         style={{
           pointerEvents: "none",

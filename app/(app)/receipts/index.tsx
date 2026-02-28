@@ -3,9 +3,11 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
 import PageTitle from "components/PageTitle";
+import { TabBarStyling } from "components/TabBarStyling";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,21 +20,22 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import FileViewerModal from "../../src/components/FileViewerModal";
-import UploadIcon from "../../src/components/icons/UploadIcon";
-import { useReceiptActionSheet } from "../../src/components/ReceiptActionSheet";
-import MissingReceiptTransaction from "../../src/components/receipts/MissingReceiptTransaction";
-import { ZoomAndFadeIn } from "../../src/components/transaction/ReceiptList";
-import { showAlert } from "../../src/lib/alertUtils";
-import useClient from "../../src/lib/client";
-import Organization from "../../src/lib/types/Organization";
-import Receipt from "../../src/lib/types/Receipt";
-import { TransactionCardCharge } from "../../src/lib/types/Transaction";
-import { useIsDark } from "../../src/lib/useColorScheme";
-import { useOfflineSWR } from "../../src/lib/useOfflineSWR";
-import p from "../../src/styles/palette";
-import { palette } from "../../src/styles/theme";
-import { TabBarStyling } from "components/TabBarStyling";
+import FileViewerModal from "@/components/FileViewerModal";
+import UploadIcon from "@/components/icons/UploadIcon";
+import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
+import MissingReceiptTransaction from "@/components/receipts/MissingReceiptTransaction";
+import { ZoomAndFadeIn } from "@/components/transaction/ReceiptList";
+import { showAlert } from "@/lib/alertUtils";
+import useClient from "@/lib/client";
+import Organization from "@/lib/types/Organization";
+import Receipt from "@/lib/types/Receipt";
+import { TransactionCardCharge } from "@/lib/types/Transaction";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import p from "@/styles/palette";
+import { palette } from "@/styles/theme";
+
+
 
 function OrganizationSection({
   organization,
@@ -232,11 +235,13 @@ export default function Page() {
       });
 
       if (!result.canceled && result.assets.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (navigation as any).navigate("ShareIntentModal", {
-          images: result.assets.map((asset) => asset.uri),
-          missingTransactions: [transaction],
-        });
+        router.push({
+          pathname: "/share-intent",
+          params: {
+            images: result.assets.map((asset) => asset.uri),
+            missingTransactions: JSON.stringify([transaction]),
+          }
+        })
       }
     } catch (error) {
       Toast.show({
@@ -250,20 +255,25 @@ export default function Page() {
   const handleTransactionSelect = (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
-    navigation.navigate("ReceiptSelectionModal", {
-      transaction,
-    });
+    router.push({
+      pathname: "/receipts/selection",
+      params: {
+        transaction: JSON.stringify(transaction),
+      },
+    })
   };
 
   const handleTransactionPress = (
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
-    navigation.navigate("ReceiptTransaction", {
-      transactionId: transaction.id,
-      orgId: transaction.organization.id,
-      transaction: transaction,
-      title: transaction.memo,
-    });
+    router.push({
+      pathname: "[id]/transactions/[transactionId]",
+      params: {
+        id: transaction.organization.id,
+        transactionId: transaction.id,
+        transaction: JSON.stringify(transaction)
+      },
+    })
   };
 
   if (isLoading) {
@@ -563,7 +573,6 @@ export default function Page() {
           />
         )}
       />
-      <TabBarStyling enabledPage="/receipts" />
     </>
   );
 }

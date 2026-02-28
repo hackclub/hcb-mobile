@@ -1,17 +1,17 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { CommonActions, useTheme } from "@react-navigation/native";
+import { CommonActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { BlurView } from "expo-blur";
 import { useEffect } from "react";
 import { Platform, StyleSheet } from "react-native";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 
 import OrganizationTeamPage from "@/app/(app)/(events)/[id]/Team";
 import RenameTransactionPage from "@/app/(app)/(events)/[id]/transaction/[transactionId]/rename";
 import About from "@/app/(app)/settings/about";
 import CardPage from "../../app/(app)/cards/[id]";
-import ReceiptsPage from "../../app/(app)/receipts";
+import ReceiptsPage from "../../app/(app)/receipts/receipts";
 import { navRef } from "../core/navigationRef";
 import {
   CardsStackParamList,
@@ -20,7 +20,6 @@ import {
   StackParamList,
   TabParamList,
 } from "../lib/NavigatorParamList";
-import { PaginatedResponse } from "../lib/types/HcbApiObject";
 import Invitation from "../lib/types/Invitation";
 import { useIsDark } from "../lib/useColorScheme";
 import CardsPage from "../pages/cards";
@@ -31,7 +30,6 @@ import OrganizationDonationPage from "../pages/organization/Donation";
 import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import TransferPage from "../pages/organization/transfer";
-import ReceiptSelectionModal from "../pages/ReceiptSelectionModal";
 import AppIconSelector from "../pages/settings/AppIconSelector";
 import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
 import SettingsPage from "../pages/settings/Settings";
@@ -49,14 +47,8 @@ const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function Navigator() {
-  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
-    `user/transactions/missing_receipt`,
-  );
   const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
 
-  const { colors: themeColors } = useTheme();
-
-  const { mutate } = useSWRConfig();
   const isDark = useIsDark();
 
   const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } =
@@ -113,18 +105,18 @@ export default function Navigator() {
         headerShown: false,
         ...(Platform.OS === "android"
           ? {
-              tabBarStyle: {
-                position: "absolute",
-                paddingBottom: 5,
-                height: 50,
-                elevation: 0,
-              },
-            }
+            tabBarStyle: {
+              position: "absolute",
+              paddingBottom: 5,
+              height: 50,
+              elevation: 0,
+            },
+          }
           : {
-              tabBarStyle: {
-                position: "absolute",
-              },
-            }),
+            tabBarStyle: {
+              position: "absolute",
+            },
+          }),
         tabBarHideOnKeyboard: true,
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
@@ -150,7 +142,7 @@ export default function Navigator() {
               if (
                 (homeStackState.index && homeStackState.index > 0) ||
                 homeStackState.routes[homeStackState.index ?? 0].name !==
-                  "Organizations"
+                "Organizations"
               ) {
                 e.preventDefault();
                 navigation.dispatch(
@@ -313,7 +305,6 @@ export default function Navigator() {
       <Tab.Screen
         name="Receipts"
         options={{
-          tabBarBadge: missingReceiptData?.total_count || undefined,
           tabBarLabel: "Receipts",
         }}
       >
@@ -323,16 +314,6 @@ export default function Navigator() {
               name="MissingReceiptList"
               options={{ title: "Missing Receipts" }}
               component={ReceiptsPage}
-            />
-            <ReceiptsStack.Screen
-              name="ReceiptSelectionModal"
-              component={ReceiptSelectionModal}
-              options={{
-                presentation: "modal",
-                title: "Select Receipts",
-                headerShown: false,
-                animation: "slide_from_bottom",
-              }}
             />
             <ReceiptsStack.Screen
               name="ReceiptTransaction"

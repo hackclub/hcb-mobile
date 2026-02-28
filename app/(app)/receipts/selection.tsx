@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -15,25 +15,17 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mutate } from "swr";
 
-import { showAlert } from "../lib/alertUtils";
-import useClient from "../lib/client";
-import { ReceiptsStackParamList } from "../lib/NavigatorParamList";
-import Receipt from "../lib/types/Receipt";
-import { useOfflineSWR } from "../lib/useOfflineSWR";
-import { palette } from "../styles/theme";
-import { maybeRequestReview } from "../utils/storeReview";
+import { showAlert } from "@/lib/alertUtils";
+import useClient from "@/lib/client";
+import Receipt from "@/lib/types/Receipt";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import { maybeRequestReview } from "@/utils/storeReview";
 
-type Props = NativeStackScreenProps<
-  ReceiptsStackParamList,
-  "ReceiptSelectionModal"
->;
+export default function Page() {
+  const { transaction: _transaction } = useLocalSearchParams();
+  const transaction = JSON.stringify(_transaction);
 
-export default function ReceiptSelectionModal({
-  route: {
-    params: { transaction },
-  },
-  navigation,
-}: Props) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
@@ -107,7 +99,7 @@ export default function ReceiptSelectionModal({
       });
 
       maybeRequestReview();
-      navigation.goBack();
+      router.back();
     } catch (error) {
       console.error("Upload error", error, {
         transactionId: transaction.id,

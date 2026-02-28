@@ -22,6 +22,7 @@ import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { renderMoney } from "@/utils/util";
+import { useLocalSearchParams } from "expo-router";
 
 type Props = NativeStackScreenProps<StackParamList, "ShareIntentModal">;
 
@@ -32,12 +33,10 @@ interface ImageAssignment {
   isReceiptBin?: boolean;
 }
 
-export default function ShareIntentModal({
-  route: {
-    params: { images, missingTransactions },
-  },
-  navigation,
-}: Props) {
+export default function Page() {
+  const { images: _images, missingTransactions } = useLocalSearchParams();
+  const images = JSON.parse(_images);
+
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
