@@ -13,7 +13,7 @@ import DisbursementScreen from "@/components/organizations/transfer/Disbursement
 import { theme } from "@/styles/theme";
 
 export default function Page() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const { organization: _organization } = useLocalSearchParams();
   const organization = JSON.parse(_organization as string);
 
@@ -49,7 +49,9 @@ export default function Page() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior for platform
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 0 }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 0 }}
+      >
         {/* Transfer Type Buttons */}
         {/* <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
           <Button

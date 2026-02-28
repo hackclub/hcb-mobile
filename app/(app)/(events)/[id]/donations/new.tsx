@@ -25,7 +25,10 @@ import { setPaymentData } from "@/lib/paymentStore";
 import { palette } from "@/styles/theme";
 
 export default function Page() {
-  const { id, orgSlug } = useLocalSearchParams<{ id: string; orgSlug: string }>();
+  const { id, orgSlug } = useLocalSearchParams<{
+    id: string;
+    orgSlug: string;
+  }>();
   const { colors } = useTheme();
   const hcb = useClient();
 
@@ -94,7 +97,7 @@ export default function Page() {
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-          error.message,
+            error.message,
         );
         return false;
       }
@@ -420,20 +423,20 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
       style={() => ({
         flexGrow: 1,
         paddingVertical: 6,
-      })} >
+      })}
+    >
       <Text
         style={{
           color: theme.colors.text,
           fontSize: 26,
           textAlign: "center",
           fontFamily: "JetBrainsMono-Regular",
-
         }}
       >
         {number}
         {symbol}
       </Text>
-    </Pressable >
+    </Pressable>
   );
 
   return (

@@ -350,7 +350,9 @@ export default function Page() {
                 router.push({
                   pathname: button.path,
                   params: {
-                    ...button.name === 'Transfer money' ? { organization: JSON.stringify(organization) } : {},
+                    ...(button.name === "Transfer money"
+                      ? { organization: JSON.stringify(organization) }
+                      : {}),
                     id: params.id,
                     fallbackData: params.fallbackData,
                   },

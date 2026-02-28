@@ -67,7 +67,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
     try {
       const response = await fetch(
         process.env.EXPO_PUBLIC_API_BASE +
-        `/organizations/${organization.id}/transfers`,
+          `/organizations/${organization.id}/transfers`,
         {
           method: "POST",
           headers: {
@@ -89,7 +89,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         showAlert(
           "Error",
           errorData.message ||
-          "Failed to complete the transfer. Please try again.",
+            "Failed to complete the transfer. Please try again.",
         );
       } else {
         showAlert("Success", "Transfer completed successfully!");

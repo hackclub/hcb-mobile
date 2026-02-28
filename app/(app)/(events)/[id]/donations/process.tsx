@@ -366,10 +366,7 @@ export default function Page() {
               </View>
             )}
             <ButtonGroup>
-              <ActionButton
-                onPress={router.back}
-                style={{ marginBottom: 0 }}
-              >
+              <ActionButton onPress={router.back} style={{ marginBottom: 0 }}>
                 Done
               </ActionButton>
             </ButtonGroup>

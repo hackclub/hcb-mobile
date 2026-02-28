@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { useNavigation, useLocalSearchParams } from "expo-router";
@@ -28,7 +29,6 @@ import { useIsDark } from "@/lib/useColorScheme";
 import useOfflineSWR from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
-import PageTitle from "components/PageTitle";
 
 export default function Page() {
   const navigation = useNavigation();
@@ -155,7 +155,7 @@ export default function Page() {
     >
       <ScrollView
         contentContainerStyle={{
-          paddingHorizontal: 20
+          paddingHorizontal: 20,
         }}
       >
         <PageTitle title="Order a Card" />
@@ -450,9 +450,7 @@ export default function Page() {
                       >
                         {design.name}
                       </Text>
-                      <View
-                        style={{ alignSelf: "flex-start", width: "100%" }}
-                      >
+                      <View style={{ alignSelf: "flex-start", width: "100%" }}>
                         <View
                           style={{
                             backgroundColor: design.color,
@@ -522,8 +520,8 @@ export default function Page() {
           >
             cardholder terms
           </Text>
-          . Your name, birthday, and contact information is shared with them
-          and their banking partners.
+          . Your name, birthday, and contact information is shared with them and
+          their banking partners.
         </Text>
 
         <TouchableOpacity
