@@ -398,14 +398,14 @@ export default function Page() {
             isActive={false}
             onPress={(card) =>
               card.grant_id
-                ? navigation.navigate("GrantCard", {
-                    grantId: card.grant_id,
-                    cardId: card.id,
-                  })
+                ? router.push({
+                  pathname: "/cards/card-grants/[id]",
+                  params: { card: JSON.stringify(card), id: card.grant_id, cardId: card.id },
+                })
                 : router.push({
-                    pathname: "/cards/[id]",
-                    params: { card: JSON.stringify(card) },
-                  })
+                  pathname: "/cards/[id]",
+                  params: { card: JSON.stringify(card) },
+                })
             }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}

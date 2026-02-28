@@ -48,9 +48,10 @@ import { maybeRequestReview } from "@/utils/storeReview";
 import { normalizeSvg } from "@/utils/util";
 
 
-export default function GrantCardPage() {
+export default function Page() {
   const navigation = useNavigation();
   const { id: grantId, cardId } = useLocalSearchParams();
+  console.log(`Grant id: ${grantId}, Card id: ${cardId}`);
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
   const { colors: themeColors } = useTheme();
 
