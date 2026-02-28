@@ -18,9 +18,10 @@ import { EmptyState } from "@/components/organizations/EmptyState";
 import Header from "@/components/organizations/Header";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
+import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import useTransactions from "@/lib/organization/useTransactions";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
-import { TransactionWithoutId } from "@/lib/types/Transaction";
+import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -222,6 +223,8 @@ export default function Page() {
     [transactions],
   );
 
+  const recentTransactions = useMemo(() => transactions.slice(0, 7), [transactions]);
+
   const renderListHeader = useCallback(() => {
     if (!organization) return null;
 
@@ -259,22 +262,62 @@ export default function Page() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: themeColors.background }}>
       {renderListHeader()}
-      <View style={{ paddingHorizontal: 20 }}>
+      <View style={{ paddingHorizontal: 20, gap: 16 }}>
+        {recentTransactions.length > 0 && (
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 18, fontWeight: "600" }}>
+                Recent transactions
+              </Text>
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/(events)/[id]/transactions",
+                    params: { id: params.id, fallbackData: params.fallbackData },
+                  })
+                }
+              >
+                <Text style={{ opacity: 0.5 }}>View all</Text>
+              </Pressable>
+            </View>
+            <View
+              style={{
+                backgroundColor: themeColors.card,
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
+              {recentTransactions.map((transaction, index) => (
+                <TransactionWrapper
+                  key={(transaction as ITransaction).id || index}
+                  item={transaction as ITransaction}
+                  user={user}
+                  organization={organization}
+                  orgId={params.id as `org_${string}`}
+                  isFirst={index === 0}
+                  isLast={index === recentTransactions.length - 1}
+                />
+              ))}
+            </View>
+          </View>
+        )}
         <View
           style={{
             backgroundColor: themeColors.card,
             borderRadius: 16,
+            marginBottom: 32,
           }}
         >
           {[
             {
-              name: "Transactions",
-              badge: 100,
-              path: "/(events)/[id]/transactions",
-            },
-            {
               name: "Team members",
-              badge: 100,
               path: "/(events)/[id]/team",
             },
             {
@@ -303,7 +346,6 @@ export default function Page() {
               }}
             >
               <ListItemText primary={button.name} />
-              <Text style={{ opacity: 0.6 }}>{button.badge}</Text>
               <Ionicons
                 name="chevron-forward"
                 size={24}
