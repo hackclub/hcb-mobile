@@ -339,6 +339,10 @@ export default function Page() {
               name: "Transfer money",
               path: "/(events)/[id]/transfer",
             },
+            {
+              name: "Order a card",
+              path: "/(events)/[id]/cards/order",
+            },
           ].map((button, i) => (
             <ListItemButton
               key={i}
