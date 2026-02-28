@@ -264,36 +264,40 @@ export default function Page() {
       {renderListHeader()}
       <View style={{ paddingHorizontal: 20, gap: 16 }}>
         {recentTransactions.length > 0 && (
-          <View>
-            <View
+          <View style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 16,
+            overflow: "hidden",
+          }}>
+            <Pressable
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 8,
+                paddingHorizontal: 20,
+                paddingVertical: 15,
               }}
+              onPress={() =>
+                router.push({
+                  pathname: "/(events)/[id]/transactions",
+                  params: { id: params.id, fallbackData: params.fallbackData },
+                })
+              }
             >
               <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                Recent transactions
+                Transactions
               </Text>
-              <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/(events)/[id]/transactions",
-                    params: { id: params.id, fallbackData: params.fallbackData },
-                  })
-                }
-              >
+              <View style={{ flexDirection: "row", alignItems: "center" }} >
                 <Text style={{ opacity: 0.5 }}>View all</Text>
-              </Pressable>
-            </View>
-            <View
-              style={{
-                backgroundColor: themeColors.card,
-                borderRadius: 16,
-                overflow: "hidden",
-              }}
-            >
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color={themeColors.text}
+                  style={{ marginLeft: 4, opacity: 0.5 }}
+                />
+              </View>
+            </Pressable>
+            <View>
               {recentTransactions.map((transaction, index) => (
                 <TransactionWrapper
                   key={(transaction as ITransaction).id || index}
@@ -301,8 +305,6 @@ export default function Page() {
                   user={user}
                   organization={organization}
                   orgId={params.id as `org_${string}`}
-                  isFirst={index === 0}
-                  isLast={index === recentTransactions.length - 1}
                 />
               ))}
             </View>
