@@ -329,7 +329,7 @@ export default function Page() {
             },
             {
               name: "Collect donations",
-              path: "/(events)/[id]/transactions",
+              path: "/(events)/[id]/donations",
             },
             {
               name: "Account details",

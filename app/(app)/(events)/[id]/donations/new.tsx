@@ -9,6 +9,7 @@ import { Text } from "components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  Pressable,
   Keyboard as RNKeyboard,
   ScrollView,
   TextInput,
@@ -93,7 +94,7 @@ export default function Page() {
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-            error.message,
+          error.message,
         );
         return false;
       }
@@ -408,15 +409,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
   }
 
   const Number = ({ number, symbol, onPress }: NumberProps) => (
-    <Text
-      style={{
-        color: theme.colors.text,
-        fontSize: 26,
-        textAlign: "center",
-        fontFamily: "JetBrainsMono-Regular",
-        flexGrow: 1,
-        paddingVertical: 6,
-      }}
+    <Pressable
       onPress={() => {
         if (onPress) {
           onPress();
@@ -424,10 +417,24 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
           pressNumber(amount, number as number);
         }
       }}
-    >
-      {number}
-      {symbol}
-    </Text>
+      style={({ pressed }) => ({
+        flexGrow: 1,
+        paddingVertical: 6,
+        
+      })} >
+      <Text
+        style={{
+          color: theme.colors.text,
+          fontSize: 26,
+          textAlign: "center",
+          fontFamily: "JetBrainsMono-Regular",
+
+        }}
+      >
+        {number}
+        {symbol}
+      </Text>
+    </Pressable >
   );
 
   return (
@@ -452,7 +459,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
         }}
       >
         {amount}
-        {amount == "$" && <Text>0</Text>}
+        {amount == "$" && <Text style={{ fontSize: 72 }}>0</Text>}
         {amount[amount.length - 1] == "." && (
           <Text style={{ color: palette.muted }}>00</Text>
         )}
