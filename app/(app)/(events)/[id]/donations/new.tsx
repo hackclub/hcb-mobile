@@ -6,7 +6,7 @@ import {
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
   Keyboard as RNKeyboard,
@@ -20,10 +20,11 @@ import {
 import Button from "@/components/Button";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import { setPaymentData } from "@/lib/paymentStore";
 import { palette } from "@/styles/theme";
 
 export default function Page() {
-  const { id } = useLocalSearchParams();
+  const { id, orgSlug } = useLocalSearchParams<{ id: string; orgSlug: string }>();
   const { colors } = useTheme();
   const hcb = useClient();
 
@@ -66,6 +67,76 @@ export default function Page() {
     }
   };
 
+  async function collectPayment(
+    localPayment: PaymentIntent.Type,
+  ): Promise<boolean> {
+    let output: boolean;
+    try {
+      if (!collectPaymentMethod) {
+        console.error(
+          "collectPaymentMethod not available",
+          new Error("Method not initialized"),
+          {
+            context: { orgId: id, action: "collect_payment" },
+          },
+        );
+        return false;
+      }
+
+      const { error } = await collectPaymentMethod({
+        paymentIntent: localPayment,
+      });
+      if (error) {
+        console.error("collectPaymentMethod error", error, {
+          context: { orgId: id, action: "collect_payment" },
+        });
+        showAlert(
+          "Error collecting payment",
+          "Failed to collect payment. Please try again. Error: " +
+            error.message,
+        );
+        return false;
+      }
+      output = (await confirmPayment(localPayment)) ?? false;
+    } catch (error) {
+      console.error("collectPayment error", error, {
+        context: { orgId: id, action: "collect_payment" },
+      });
+      output = false;
+    }
+    return output;
+  }
+
+  async function confirmPayment(localPayment: PaymentIntent.Type) {
+    let success;
+    try {
+      if (!confirmPaymentIntent) {
+        console.error(
+          "confirmPaymentIntent not available",
+          new Error("Method not initialized"),
+          {
+            context: { orgId: id, action: "confirm_payment" },
+          },
+        );
+        return false;
+      }
+
+      const { error } = await confirmPaymentIntent({
+        paymentIntent: localPayment,
+      });
+      if (error) {
+        return;
+      }
+      success = true;
+    } catch (error) {
+      console.error("confirmPayment error", error, {
+        context: { orgId: id, action: "confirm_payment" },
+      });
+      success = false;
+    }
+    return success;
+  }
+
   async function paymentIntent({ donation_id }: { donation_id: string }) {
     try {
       const { error, paymentIntent } = await createPaymentIntent({
@@ -87,92 +158,23 @@ export default function Page() {
         });
         return false;
       }
-      navigation.navigate("ProcessDonation", {
-        orgId: id,
-        payment: paymentIntent,
-        collectPayment: async () => {
-          return await collectPayment(paymentIntent);
-        },
+      setPaymentData({
+        paymentIntent,
+        collectPayment: async () => collectPayment(paymentIntent),
         name,
         email,
         slug: orgSlug || "",
       });
+      router.push({
+        pathname: "/[id]/donations/process",
+        params: { id },
+      });
       return paymentIntent;
     } catch (error) {
       console.error("paymentIntent error", error, {
-        context: { orgId, donation_id, action: "payment_intent" },
+        context: { orgId: id, donation_id: "", action: "payment_intent" },
       });
     }
-  }
-
-  async function collectPayment(
-    localPayment: PaymentIntent.Type,
-  ): Promise<boolean> {
-    let output: boolean;
-    try {
-      if (!collectPaymentMethod) {
-        console.error(
-          "collectPaymentMethod not available",
-          new Error("Method not initialized"),
-          {
-            context: { orgId, action: "collect_payment" },
-          },
-        );
-        return false;
-      }
-
-      const { error } = await collectPaymentMethod({
-        paymentIntent: localPayment,
-      });
-      if (error) {
-        console.error("collectPaymentMethod error", error, {
-          context: { orgId, action: "collect_payment" },
-        });
-        showAlert(
-          "Error collecting payment",
-          "Failed to collect payment. Please try again. Error: " +
-            error.message,
-        );
-        return false;
-      }
-      output = (await confirmPayment(localPayment)) ?? false;
-    } catch (error) {
-      console.error("collectPayment error", error, {
-        context: { orgId, action: "collect_payment" },
-      });
-      output = false;
-    }
-    return output;
-  }
-
-  async function confirmPayment(localPayment: PaymentIntent.Type) {
-    let success;
-    try {
-      if (!confirmPaymentIntent) {
-        console.error(
-          "confirmPaymentIntent not available",
-          new Error("Method not initialized"),
-          {
-            context: { orgId, action: "confirm_payment" },
-          },
-        );
-        return false;
-      }
-
-      const { error } = await confirmPaymentIntent({
-        paymentIntent: localPayment,
-      });
-      if (error) {
-        return;
-      }
-      success = true;
-    } catch (error) {
-      console.error("confirmPayment error", error, {
-        context: { orgId, action: "confirm_payment" },
-      });
-      success = false;
-    }
-    return success;
   }
 
   // Dev mode check
@@ -308,20 +310,24 @@ export default function Page() {
               }
               if (isDevMode) {
                 // In dev mode, navigate with mock payment data
-                navigation.navigate("ProcessDonation", {
-                  orgId,
-                  payment: {
-                    amount: Math.round(value * 100),
-                  } as PaymentIntent.Type,
+                const mockPayment = {
+                  amount: Math.round(value * 100),
+                } as PaymentIntent.Type;
+                setPaymentData({
+                  paymentIntent: mockPayment,
                   collectPayment: async () => {
                     // Mock payment function - simulates success after 2 seconds
-                    return new Promise((resolve) =>
+                    return new Promise<boolean>((resolve) =>
                       setTimeout(() => resolve(true), 2000),
                     );
                   },
                   name: name || "Dev Test User",
                   email: email || "dev@example.com",
                   slug: orgSlug || "test-org",
+                });
+                router.push({
+                  pathname: "/[id]/donations/process",
+                  params: { id },
                 });
                 return;
               }
@@ -331,7 +337,7 @@ export default function Page() {
               } catch (error) {
                 console.error("createDonation error", error, {
                   context: {
-                    orgId,
+                    orgId: id,
                     amount: value * 100,
                     action: "create_donation",
                   },
