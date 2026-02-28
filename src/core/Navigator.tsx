@@ -26,9 +26,6 @@ import CardsPage from "../pages/cards";
 import GrantCardPage from "../pages/cards/GrantCard";
 import OrderCardPage from "../pages/cards/OrderCard";
 import InvitationPage from "../pages/Invitation";
-import OrganizationDonationPage from "../pages/organization/Donation";
-import NewDonationPage from "../pages/organization/NewDonation";
-import ProcessDonationPage from "../pages/organization/ProcessDonation";
 import TransferPage from "../pages/organization/transfer";
 import AppIconSelector from "../pages/settings/AppIconSelector";
 import DeepLinkingSettings from "../pages/settings/DeepLinkingSettings";
@@ -192,31 +189,6 @@ export default function Navigator() {
               options={{
                 headerBackTitle: "Back",
                 title: "Team",
-              }}
-            />
-            <Stack.Screen
-              name="OrganizationDonation"
-              component={OrganizationDonationPage}
-              options={{
-                headerBackTitle: "Back",
-                title: "Collect Donations",
-              }}
-            />
-            <Stack.Screen
-              name="NewDonation"
-              component={NewDonationPage}
-              options={{
-                headerBackTitle: "Back",
-                title: "New Donation",
-              }}
-            />
-            <Stack.Screen
-              name="ProcessDonation"
-              component={ProcessDonationPage}
-              options={{
-                presentation: "modal",
-                title: "Process Donation",
-                headerTitle: "Process Donation",
               }}
             />
             <Stack.Screen

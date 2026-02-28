@@ -348,7 +348,7 @@ export default function Page() {
         >
           Unable to initialize the payment system. Please try again later.
         </Text>
-        <Button onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
+        <Button onPress={() => router.back()} style={{ marginTop: 20 }}>
           Go Back
         </Button>
       </View>

@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
+import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -21,13 +21,11 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-import StyledButton from "../../components/Button";
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../styles/theme";
-import * as Haptics from "../../utils/haptics";
-
-type Props = NativeStackScreenProps<StackParamList, "ProcessDonation">;
+import StyledButton from "@/components/Button";
+import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
+import { useIsDark } from "@/lib/useColorScheme";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
 
 // Component for QR Code display
 function QRCodeCard({
@@ -181,23 +179,29 @@ function ActionButton({
   );
 }
 
-export default function ProcessDonationPage({
-  navigation,
-  route: {
-    params: { payment, collectPayment, email, name, slug },
-  },
-}: Props) {
+export default function Page() {
+  const paymentData = getPaymentData();
+  const { payment, collectPayment, name, email, slug } = {
+    payment: paymentData?.paymentIntent,
+    collectPayment: paymentData?.collectPayment,
+    name: paymentData?.name ?? "",
+    email: paymentData?.email ?? "",
+    slug: paymentData?.slug ?? "",
+  };
+
   const [status, setStatus] = useState<
     "ready" | "loading" | "success" | "error"
   >("ready");
   const [showQR, setShowQR] = useState(false);
   const theme = useTheme();
   const isDark = useIsDark();
+  const navigation = useNavigation();
 
   const donationUrl = `https://hcb.hackclub.com/donations/start/${slug}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
-  const donationAmount = `$${(payment?.amount / 100).toFixed(2)}`;
+  const donationAmount = `$${((payment?.amount ?? 0) / 100).toFixed(2)}`;
 
   const handlePayment = async () => {
+    if (!collectPayment) return;
     setStatus("loading");
     const success = await collectPayment();
     setStatus(success ? "success" : "error");
@@ -224,20 +228,27 @@ export default function ProcessDonationPage({
                 name="arrow-back"
                 size={24}
                 color={theme.colors.text}
-                onPress={() => navigation.goBack()}
+                onPress={() => router.back()}
               />
             </View>
           ) : (
             <Button
               title="Done"
               color={theme.colors.text}
-              onPress={() => navigation.goBack()}
+              onPress={() => router.back()}
             />
           )}
         </>
       ),
     });
   }, [showQR, status, navigation, theme.colors.text]);
+
+  // Clear payment data when leaving the screen
+  useEffect(() => {
+    return () => {
+      clearPaymentData();
+    };
+  }, []);
 
   const renderContent = () => {
     switch (status) {
@@ -356,7 +367,7 @@ export default function ProcessDonationPage({
             )}
             <ButtonGroup>
               <ActionButton
-                onPress={navigation.goBack}
+                onPress={router.back}
                 style={{ marginBottom: 0 }}
               >
                 Done

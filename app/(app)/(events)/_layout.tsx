@@ -42,6 +42,18 @@ export default function Layout() {
           name="[id]/account-numbers"
           options={{ title: "Account numbers" }}
         />
+        <Stack.Screen
+          name="[id]/donations/index"
+          options={{ title: "Collect Donations" }}
+        />
+        <Stack.Screen
+          name="[id]/donations/new"
+          options={{ title: "New Donation" }}
+        />
+        <Stack.Screen
+          name="[id]/donations/process"
+          options={{ presentation: "modal", title: "Process Donation" }}
+        />
       </Stack>
       <TabBarStyling enabledPage="/" />
     </>
