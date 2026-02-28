@@ -11,15 +11,18 @@ import {
 } from "react-native";
 import useSWR from "swr";
 
+import { PaginatedResponse } from "../../lib/types/HcbApiObject";
 import Invitation from "../../lib/types/Invitation";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
+import ITransaction, { TransactionWithoutId } from "../../lib/types/Transaction";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useStripeTerminalInit } from "../../lib/useStripeTerminalInit";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
 import { orgColor } from "../../utils/util";
+import Transaction from "../transaction/Transaction";
 
 import EventBalance from "./EventBalance";
 
@@ -32,7 +35,7 @@ const Event = memo(
     isActive,
     style,
     invitation,
-    // showTransactions = false,
+    showTransactions = false,
   }: ViewProps & {
     event: Organization;
     hideBalance?: boolean;
@@ -46,6 +49,13 @@ const Event = memo(
       hideBalance ? null : `organizations/${event.id}`,
       { keepPreviousData: true },
     );
+
+    const { data: transactionsData } = useSWR<PaginatedResponse<ITransaction>>(
+      showTransactions ? `organizations/${event.id}/transactions?limit=35` : null,
+      { keepPreviousData: true },
+    );
+
+    const recentTransactions = (transactionsData?.data?.slice(0, 7) ?? []) as TransactionWithoutId[];
 
     const { colors: themeColors } = useTheme();
     useStripeTerminalInit({
@@ -168,6 +178,21 @@ const Event = memo(
             />
           </View>
         </View>
+        {showTransactions && recentTransactions.length > 0 && (
+          <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
+            {recentTransactions.map((transaction, index) => (
+              <Transaction
+                key={transaction.id ?? index}
+                transaction={transaction}
+                orgId={event.id}
+                top={index === 0}
+                bottom={index === recentTransactions.length - 1}
+                hideMissingReceipt
+                hideAvatar
+              />
+            ))}
+          </View>
+        )}
       </>
     );
 
@@ -249,6 +274,7 @@ const Event = memo(
       prevProps.event.background_image === nextProps.event.background_image &&
       prevProps.hideBalance === nextProps.hideBalance &&
       prevProps.isActive === nextProps.isActive &&
+      prevProps.showTransactions === nextProps.showTransactions &&
       prevProps.invitation?.id === nextProps.invitation?.id
     );
   },

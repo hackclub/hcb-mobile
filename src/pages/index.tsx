@@ -44,11 +44,9 @@ const EventItem = memo(
   ({
     organization,
     navigation,
-    orgCount,
   }: {
     organization: Organization;
     navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
-    orgCount: number;
   }) => {
     const drag = useReorderableDrag();
     const handlePress = useCallback(() => {
@@ -63,7 +61,7 @@ const EventItem = memo(
         event={organization}
         drag={drag}
         isActive={false}
-        showTransactions={orgCount <= 2}
+        showTransactions
         onPress={handlePress}
       />
     );
@@ -72,8 +70,7 @@ const EventItem = memo(
     prev.organization.id === next.organization.id &&
     prev.organization.name === next.organization.name &&
     prev.organization.icon === next.organization.icon &&
-    prev.organization.background_image === next.organization.background_image &&
-    prev.orgCount === next.orgCount,
+    prev.organization.background_image === next.organization.background_image,
 );
 
 EventItem.displayName = "EventItem";
@@ -256,17 +253,14 @@ export default function App({ navigation }: Props) {
     }, [mutate]),
   );
 
-  const orgCount = organizations?.length ?? 0;
-
   const renderItem = useCallback(
     ({ item: organization }: { item: Organization }) => (
       <EventItem
         organization={organization}
         navigation={navigation}
-        orgCount={orgCount}
       />
     ),
-    [navigation, orgCount],
+    [navigation],
   );
 
   // Show cached data even if there's an error
