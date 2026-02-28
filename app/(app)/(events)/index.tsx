@@ -330,7 +330,7 @@ export default function App({ navigation }: Props) {
             <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
-            (grantInvites && grantInvites.length > 0) ? (
+              (grantInvites && grantInvites.length > 0) ? (
               <View
                 style={{
                   marginTop: 10,
@@ -362,9 +362,12 @@ export default function App({ navigation }: Props) {
                         }}
                         event={invitation.organization}
                         onPress={() =>
-                          navigation.navigate("Invitation", {
-                            inviteId: invitation.id,
-                            invitation,
+                          router.push({
+                            pathname: "/invitation/[id]",
+                            params: {
+                              id: invitation.id,
+                              invitation: JSON.parse(JSON.stringify(invitation)),
+                            }
                           })
                         }
                         hideBalance

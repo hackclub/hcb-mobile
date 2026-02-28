@@ -3,7 +3,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { useNavigation, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -14,8 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
-import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { useSWRConfig } from "swr";
 
 import CardIcon from "@/components/cards/CardIcon";
