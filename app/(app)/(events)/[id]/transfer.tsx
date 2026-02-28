@@ -1,25 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Button as NativeButton,
-  View,
-  ScrollView,
   Platform,
+  ScrollView,
+  View,
 } from "react-native";
 
-import DisbursementScreen from "../../components/organizations/transfer/Disbursement";
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
-import { theme } from "../../styles/theme";
+import DisbursementScreen from "@/components/organizations/transfer/Disbursement";
+import { theme } from "@/styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "Transfer">;
-
-export default function TransferPage({ navigation, route }: Props) {
-  const { organization } = route.params as {
-    organization: OrganizationExpanded;
-  }; // Grab the organization value from the route params
+export default function Page() {
+  const navigation = useNavigation()
+  const { organization: _organization } = useLocalSearchParams();
+  const organization = JSON.parse(_organization as string);
 
   useEffect(() => {
     navigation.setOptions({
@@ -53,7 +49,7 @@ export default function TransferPage({ navigation, route }: Props) {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior for platform
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 0 }}>
         {/* Transfer Type Buttons */}
         {/* <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
           <Button

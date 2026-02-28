@@ -417,10 +417,9 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
           pressNumber(amount, number as number);
         }
       }}
-      style={({ pressed }) => ({
+      style={() => ({
         flexGrow: 1,
         paddingVertical: 6,
-        
       })} >
       <Text
         style={{

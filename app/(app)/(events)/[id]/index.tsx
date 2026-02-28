@@ -337,7 +337,7 @@ export default function Page() {
             },
             {
               name: "Transfer money",
-              path: "/(events)/[id]/transactions",
+              path: "/(events)/[id]/transfer",
             },
           ].map((button, i) => (
             <ListItemButton
@@ -346,6 +346,7 @@ export default function Page() {
                 router.push({
                   pathname: button.path,
                   params: {
+                    ...button.name === 'Transfer money' ? { organization: JSON.stringify(organization) } : {},
                     id: params.id,
                     fallbackData: params.fallbackData,
                   },
