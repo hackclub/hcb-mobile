@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,15 +16,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import { StackParamList } from "@/lib/NavigatorParamList";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { renderMoney } from "@/utils/util";
-import { useLocalSearchParams } from "expo-router";
-
-type Props = NativeStackScreenProps<StackParamList, "ShareIntentModal">;
 
 interface ImageAssignment {
   imageUri: string;
@@ -34,14 +30,15 @@ interface ImageAssignment {
 }
 
 export default function Page() {
+  const navigation = useNavigation();
   const { images: _images, missingTransactions } = useLocalSearchParams();
-  const images = JSON.parse(_images);
+  const images = JSON.parse(_images as string);
 
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
   const validImages = useMemo(
-    () => images?.filter((img) => img && typeof img === "string") || [],
+    () => images?.filter((img: unknown) => img && typeof img === "string") || [],
     [images],
   );
 
@@ -50,8 +47,9 @@ export default function Page() {
   >([]);
 
   useEffect(() => {
-    if (missingTransactions && missingTransactions.length > 0) {
-      transactionsRef.current = missingTransactions.filter((t) => t && t.id);
+    if (missingTransactions && Array.isArray(missingTransactions) && missingTransactions.length > 0) {
+      // @ts-expect-error - ignore
+      transactionsRef.current = missingTransactions.filter((t: unknown) => t && t.id);
       setTransactionsInitialized(true);
     }
   }, [missingTransactions]);
@@ -416,7 +414,7 @@ export default function Page() {
             showsHorizontalScrollIndicator={false}
             style={{ marginBottom: 20 }}
           >
-            {validImages.map((imageUri, index) => {
+            {validImages.map((imageUri: string, index: number) => {
               const assignment = getAssignmentForImage(imageUri);
 
               if (!assignment) {

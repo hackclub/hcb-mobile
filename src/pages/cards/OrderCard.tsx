@@ -1,20 +1,20 @@
 import { useTheme } from "@react-navigation/native";
 import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
+    NativeStackNavigationProp,
+    NativeStackScreenProps,
 } from "@react-navigation/native-stack";
-import { Image } from "expo-image";
-import { useState, useMemo, useEffect } from "react";
-import {
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Linking,
-} from "react-native";
 import { Text } from "components/Text";
+import { Image } from "expo-image";
+import { useEffect, useMemo, useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 import RNPickerSelect from "react-native-picker-select";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,7 +26,7 @@ import useClient from "../../lib/client";
 import { CardsStackParamList } from "../../lib/NavigatorParamList";
 import CardDesign from "../../lib/types/CardDesign";
 import Organization, {
-  OrganizationExpanded,
+    OrganizationExpanded,
 } from "../../lib/types/Organization";
 import User from "../../lib/types/User";
 import { useIsDark } from "../../lib/useColorScheme";

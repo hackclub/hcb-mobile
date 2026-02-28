@@ -199,7 +199,7 @@ export default function Page() {
             iconStyle={{ marginRight: 0 }}
             onPress={() => {
               if (user && organizations) {
-                navigation.navigate("OrderCard");
+                router.push("/cards/order")
               }
             }}
             underlayColor={"transparent"}
@@ -208,6 +208,7 @@ export default function Page() {
       ),
     });
   }, [
+    themeColors,
     navigation,
     canceledCardsShown,
     frozenCardsShown,
