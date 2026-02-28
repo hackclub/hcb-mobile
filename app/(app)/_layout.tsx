@@ -26,12 +26,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  ActivityIndicator,
-  Appearance,
-  Platform,
-  View
-} from "react-native";
+import { ActivityIndicator, Appearance, Platform, View } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -90,8 +85,14 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-function Navigation({ navigationRef }: { navigationRef: React.RefObject<NavigationContainerRef<TabParamList>> }) {
-  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>("user/transactions/missing_receipt");
+function Navigation({
+  navigationRef,
+}: {
+  navigationRef: React.RefObject<NavigationContainerRef<TabParamList>>;
+}) {
+  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
+    "user/transactions/missing_receipt",
+  );
 
   return (
     <Tabs
@@ -101,10 +102,7 @@ function Navigation({ navigationRef }: { navigationRef: React.RefObject<Navigati
         tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
       }}
       screenListeners={{
-        tabPress: () =>
-          Haptics.impactAsync(
-            Haptics.ImpactFeedbackStyle.Rigid,
-          ),
+        tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
       }}
     >
       <Tabs.Screen
@@ -135,11 +133,7 @@ function Navigation({ navigationRef }: { navigationRef: React.RefObject<Navigati
           tabBarBadgeStyle: { fontFamily: "Regular" },
           tabBarAccessibilityLabel: "Receipts Tab",
           tabBarIcon: ({ color }) => (
-            <Icon
-              glyph="payment-docs"
-              size={28}
-              color={color}
-            />
+            <Icon glyph="payment-docs" size={28} color={color} />
           ),
         }}
       />
@@ -149,16 +143,12 @@ function Navigation({ navigationRef }: { navigationRef: React.RefObject<Navigati
           title: "Settings",
           tabBarAccessibilityLabel: "Settings Tab",
           tabBarIcon: ({ color }) => (
-            <Icon
-              glyph="settings"
-              size={36}
-              color={color}
-            />
+            <Icon glyph="settings" size={36} color={color} />
           ),
         }}
       />
     </Tabs>
-  )
+  );
 }
 
 export default function Layout() {
@@ -223,9 +213,11 @@ export default function Layout() {
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
   const TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
-  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>("user/transactions/missing_receipt");
+  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
+    "user/transactions/missing_receipt",
+  );
 
-  console.log(missingReceiptData)
+  console.log(missingReceiptData);
 
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
@@ -270,10 +262,10 @@ export default function Layout() {
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-          terminal_connection_token: {
-            secret: string;
-          };
+        terminal_connection_token: {
+          secret: string;
         };
+      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;

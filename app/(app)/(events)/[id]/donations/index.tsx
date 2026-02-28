@@ -135,12 +135,7 @@ export default function Page() {
         });
       }
     })();
-  }, [
-    discoverReaders,
-    id,
-    isStripeInitialized,
-    preDiscoveredReaders.length,
-  ]);
+  }, [discoverReaders, id, isStripeInitialized, preDiscoveredReaders.length]);
 
   // Location access
   async function handleRequestLocation() {
@@ -187,7 +182,7 @@ export default function Page() {
         if (
           (error as { code?: string }).code == "AlreadyConnectedToReader" ||
           (error as { code?: string }).code ==
-          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
         ) {
           return true;
         }
@@ -207,7 +202,7 @@ export default function Page() {
       if (
         (error as { code?: string }).code == "AlreadyConnectedToReader" ||
         (error as { code?: string }).code ==
-        "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
       ) {
         return true;
       }
@@ -228,7 +223,7 @@ export default function Page() {
     router.replace({
       pathname: `/[id]/donations/new`,
       params: { orgId: id, orgSlug: organization?.slug || "" },
-    })
+    });
   };
 
   const handleGetStarted = async () => {

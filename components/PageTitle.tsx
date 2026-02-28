@@ -1,7 +1,7 @@
 import { useTheme } from "@react-navigation/native";
+import { View } from "react-native";
 
 import { Text } from "./Text";
-import { View } from "react-native";
 
 export default function PageTitle({
   title,

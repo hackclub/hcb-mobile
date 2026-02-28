@@ -35,8 +35,6 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import p from "@/styles/palette";
 import { palette } from "@/styles/theme";
 
-
-
 function OrganizationSection({
   organization,
   transactions,
@@ -240,8 +238,8 @@ export default function Page() {
           params: {
             images: result.assets.map((asset) => asset.uri),
             missingTransactions: JSON.stringify([transaction]),
-          }
-        })
+          },
+        });
       }
     } catch (error) {
       Toast.show({
@@ -260,7 +258,7 @@ export default function Page() {
       params: {
         transaction: JSON.stringify(transaction),
       },
-    })
+    });
   };
 
   const handleTransactionPress = (
@@ -271,9 +269,9 @@ export default function Page() {
       params: {
         id: transaction.organization.id,
         transactionId: transaction.id,
-        transaction: JSON.stringify(transaction)
+        transaction: JSON.stringify(transaction),
       },
-    })
+    });
   };
 
   if (isLoading) {

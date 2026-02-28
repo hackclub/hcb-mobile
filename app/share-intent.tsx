@@ -38,7 +38,8 @@ export default function Page() {
   const hcb = useClient();
 
   const validImages = useMemo(
-    () => images?.filter((img: unknown) => img && typeof img === "string") || [],
+    () =>
+      images?.filter((img: unknown) => img && typeof img === "string") || [],
     [images],
   );
 
@@ -47,9 +48,15 @@ export default function Page() {
   >([]);
 
   useEffect(() => {
-    if (missingTransactions && Array.isArray(missingTransactions) && missingTransactions.length > 0) {
+    if (
+      missingTransactions &&
+      Array.isArray(missingTransactions) &&
+      missingTransactions.length > 0
+    ) {
       // @ts-expect-error - ignore
-      transactionsRef.current = missingTransactions.filter((t: unknown) => t && t.id);
+      transactionsRef.current = missingTransactions.filter(
+        (t: unknown) => t && t.id,
+      );
       setTransactionsInitialized(true);
     }
   }, [missingTransactions]);
@@ -118,10 +125,10 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: transaction.id,
-            orgId: transaction.organization.id,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: transaction.id,
+              orgId: transaction.organization.id,
+            }
           : assignment,
       ),
     );
@@ -147,11 +154,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: null,
-            orgId: null,
-            isReceiptBin: true,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: true,
+            }
           : assignment,
       ),
     );
@@ -175,11 +182,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: null,
-            orgId: null,
-            isReceiptBin: false,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: false,
+            }
           : assignment,
       ),
     );

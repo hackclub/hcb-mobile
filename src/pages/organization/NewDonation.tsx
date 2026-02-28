@@ -138,7 +138,7 @@ export default function NewDonationPage({
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-          error.message,
+            error.message,
         );
         return false;
       }

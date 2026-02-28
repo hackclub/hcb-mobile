@@ -6,6 +6,7 @@ import {
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
+import { useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
   Keyboard as RNKeyboard,
@@ -20,10 +21,9 @@ import Button from "@/components/Button";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { palette } from "@/styles/theme";
-import { useLocalSearchParams } from "expo-router";
 
 export default function Page() {
-  const { id } = useLocalSearchParams()
+  const { id } = useLocalSearchParams();
   const { colors } = useTheme();
   const hcb = useClient();
 
@@ -131,7 +131,7 @@ export default function Page() {
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-          error.message,
+            error.message,
         );
         return false;
       }

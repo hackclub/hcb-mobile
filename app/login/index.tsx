@@ -8,18 +8,18 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image, ImageBackground } from "expo-image";
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSWRConfig } from "swr";
 
 import AuthContext from "../../src/auth/auth";
 import Button from "../../src/components/Button";
 import { useIsDark } from "../../src/lib/useColorScheme";
 import { palette } from "../../src/styles/theme";
-import { router } from "expo-router";
-import { useSWRConfig } from "swr";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,
@@ -133,7 +133,7 @@ export default function Login() {
         }
         setTokenResponse(tokenResponse, codeVerifier);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.replace("/")
+        router.replace("/");
       })
       .catch((error) => {
         console.error("Error exchanging code for token:", error);
@@ -258,7 +258,10 @@ export default function Login() {
               }}
               bold
             >
-              Welcome to <Text style={{ color: palette.primary, fontSize: 34 }} bold>HCB.</Text>
+              Welcome to{" "}
+              <Text style={{ color: palette.primary, fontSize: 34 }} bold>
+                HCB.
+              </Text>
             </Text>
             <Text
               style={{

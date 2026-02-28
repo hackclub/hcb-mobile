@@ -7,7 +7,10 @@ export default function Layout() {
   return (
     <>
       <Stack screenOptions={{ header: Navbar }}>
-        <Stack.Screen name="index" options={{ headerShown: false, title: "" }} />
+        <Stack.Screen
+          name="index"
+          options={{ headerShown: false, title: "" }}
+        />
         <Stack.Screen
           name="selection"
           options={{

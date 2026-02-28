@@ -27,7 +27,7 @@ export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
   }, [pathname, navigation, enabledPage]);
 
   return (
-    ((pathname === enabledPage) || !enabledPage) && (
+    (pathname === enabledPage || !enabledPage) && (
       <BlurView
         style={{
           pointerEvents: "none",

@@ -1,5 +1,6 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
+import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { useLocalSearchParams } from "expo-router";
@@ -13,7 +14,6 @@ import { OrganizationExpanded } from "@/lib/types/Organization";
 import { OrgUser } from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import PageTitle from "components/PageTitle";
 
 function MemberRole(props: { role: OrgUser["role"] }) {
   return (
