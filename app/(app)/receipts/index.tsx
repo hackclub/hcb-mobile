@@ -124,7 +124,7 @@ export default function Page() {
   useFocusEffect(
     useCallback(() => {
       onRefresh(false);
-    }, []),
+    }, [onRefresh]),
   );
 
   // Group transactions by organization
@@ -157,7 +157,7 @@ export default function Page() {
     return Object.values(groups);
   }, [data?.data]);
 
-  const onRefresh = async (showIndicator = true) => {
+  const onRefresh = useCallback(async (showIndicator = true) => {
     if (showIndicator) {
       setRefreshing(true);
     }
@@ -166,7 +166,7 @@ export default function Page() {
     if (showIndicator) {
       setRefreshing(false);
     }
-  };
+  }, [mutate, refreshReceipts]);
 
   const { handleActionSheet } = useReceiptActionSheet({
     orgId: "",
@@ -264,7 +264,7 @@ export default function Page() {
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
     router.push({
-      pathname: "[id]/transactions/[transactionId]",
+      pathname: "/(events)/[id]/transactions/[transactionId]",
       params: {
         id: transaction.organization.id,
         transactionId: transaction.id,

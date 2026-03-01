@@ -72,9 +72,6 @@ export default function Page() {
     () => organization?.playground_mode,
     [organization],
   );
-  const organizationErrorStatus = useMemo(() => {
-    return organizationError?.toString().includes("403");
-  }, [organizationError]);
   const isAccessDenied = useMemo(
     () => organizationError?.toString().includes("403"),
     [organizationError],
@@ -92,10 +89,10 @@ export default function Page() {
   const isRefreshingRef = useRef(false);
 
   useEffect(() => {
-    if (organizationErrorStatus?.toString().includes("401")) {
+    if (organizationError?.toString().includes("401")) {
       mutateOrganization();
     }
-  }, [organizationErrorStatus, mutateOrganization]);
+  }, [organizationError, mutateOrganization]);
 
   const tabBarSize = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();

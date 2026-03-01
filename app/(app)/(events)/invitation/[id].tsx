@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   StatusBar,
@@ -22,28 +21,21 @@ import { palette as themePalette } from "@/styles/theme"
 
 export default function Page() {
   const hcb = useClient();
-  const navigation = useNavigation();
   const { id: inviteId, invitation: _invitation } = useLocalSearchParams();
+
+  let fallbackInvitation: Invitation | undefined;
+  try {
+    fallbackInvitation = _invitation
+      ? JSON.parse(_invitation as string)
+      : undefined;
+  } catch {
+    fallbackInvitation = undefined;
+  }
 
   const { data: invitation } = useOfflineSWR<Invitation>(
     `user/invitations/${inviteId}`,
-    { fallbackData: JSON.parse(_invitation as string) },
+    { fallbackData: fallbackInvitation },
   );
-
-  useEffect(() => {
-    if (invitation?.accepted) {
-      setTimeout(() => {
-        router.push({
-          pathname: "[id]",
-          params: {
-            id: invitation.organization.id,
-            fallbackData: invitation.organization as string,
-          },
-        });
-      }, 200)
-      router.back()
-    }
-  }, [invitation, navigation]);
 
   const { mutate } = useSWRConfig();
 
@@ -62,19 +54,16 @@ export default function Page() {
       populateCache: (_, invitations) =>
         invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => {
-        setTimeout(() => {
-          if (!invitation) return
-          router.push({
-            pathname: "[id]",
-            params: {
-              id: invitation.organization.id,
-              fallbackData: invitation.organization as string,
-            },
-          });
-        }, 200)
-        router.back();
         mutate(`user/organizations`);
         mutate("user/invitations");
+        if (invitation) {
+          router.replace({
+            pathname: "/(events)/[id]",
+            params: { id: invitation.organization.id },
+          });
+        } else {
+          router.back();
+        }
       },
       onError: () => {
         showAlert(
