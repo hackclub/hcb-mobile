@@ -56,7 +56,9 @@ export default function Page() {
   const readerRef = useRef<Reader.Type | undefined>(reader);
   const [loadingConnectingReader, setLoadingConnectingReader] = useState(false);
 
-  const locationIdStripeMock = "tml_FWRkngENcVS5Pd";
+  // TODO: fetch the actual Stripe Terminal location from the organization's
+  // Stripe account instead of using this hardcoded value.
+  const stripeTerminalLocationId = "tml_FWRkngENcVS5Pd";
   const {
     discoverReaders,
     connectReader: connectReaderTapToPay,
@@ -172,7 +174,7 @@ export default function Page() {
       const { error } = await connectReaderTapToPay(
         {
           reader: selectedReader,
-          locationId: locationIdStripeMock,
+          locationId: stripeTerminalLocationId,
           merchantDisplayName: organization?.name || "HCB",
         } as ConnectTapToPayParams,
         "tapToPay",
@@ -221,8 +223,8 @@ export default function Page() {
 
   const navigateToNewDonation = () => {
     router.replace({
-      pathname: `/[id]/donations/new`,
-      params: { orgId: id, orgSlug: organization?.slug || "" },
+      pathname: "/(events)/[id]/donations/new",
+      params: { id, orgSlug: organization?.slug || "" },
     });
   };
 

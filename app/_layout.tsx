@@ -12,14 +12,12 @@ import * as Updates from "expo-updates";
 import { createContext } from "react";
 import { ColorSchemeName, useColorScheme } from "react-native";
 
-import { AuthProvider } from "../src/auth/AuthProvider";
-import { CustomAlertProvider } from "../src/components/alert/CustomAlertProvider";
-import { useCache } from "../src/providers/cacheProvider";
-import { LinkingProvider } from "../src/providers/LinkingContext";
-import { ShareIntentProvider } from "../src/providers/ShareIntentContext";
-import { ThemeProvider } from "../src/providers/ThemeContext";
-
-import { CacheProvider } from "@/providers/cacheProvider";
+import { AuthProvider } from "@/auth/AuthProvider";
+import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
+import { CacheProvider, useCache } from "@/providers/cacheProvider";
+import { LinkingProvider } from "@/providers/LinkingContext";
+import { ShareIntentProvider } from "@/providers/ShareIntentContext";
+import { ThemeProvider } from "@/providers/ThemeContext";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SWRCacheProvider = createContext<{

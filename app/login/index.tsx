@@ -16,10 +16,10 @@ import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
-import AuthContext from "../../src/auth/auth";
-import Button from "../../src/components/Button";
-import { useIsDark } from "../../src/lib/useColorScheme";
-import { palette } from "../../src/styles/theme";
+import AuthContext from "@/auth/auth";
+import Button from "@/components/Button";
+import { useIsDark } from "@/lib/useColorScheme";
+import { palette } from "@/styles/theme";
 
 export const discovery: DiscoveryDocument = {
   authorizationEndpoint: `${process.env.EXPO_PUBLIC_API_BASE}/oauth/authorize`,

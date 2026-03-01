@@ -115,9 +115,6 @@ export default function Page() {
     () => organization?.donation_page_available,
     [organization],
   );
-  const organizationErrorStatus = useMemo(() => {
-    return organizationError?.toString().includes("403");
-  }, [organizationError]);
   const isAccessDenied = useMemo(
     () => organizationError?.toString().includes("403"),
     [organizationError],
@@ -145,10 +142,6 @@ export default function Page() {
       });
     }
   }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
-
-  useEffect(() => {
-    navigation.setOptions({ title: organization?.name || "Organization" });
-  }, [organization, navigation]);
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
@@ -199,10 +192,10 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (organizationErrorStatus?.toString().includes("401")) {
+    if (organizationError?.toString().includes("401")) {
       mutateOrganization();
     }
-  }, [organizationErrorStatus, mutateOrganization]);
+  }, [organizationError, mutateOrganization]);
 
   const { colors: themeColors } = useTheme();
 
@@ -369,9 +362,8 @@ export default function Page() {
                       fallbackData: params.fallbackData,
                     },
                   });
-                }
-                catch (e) {
-                  console.log(e)
+                } catch {
+                  // navigation cancelled by beforePress (e.g. unsupported device)
                 }
               }}
             >

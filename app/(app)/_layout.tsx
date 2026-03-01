@@ -1,11 +1,7 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  LinkingOptions,
-  NavigationContainerRef,
-  ThemeProvider,
-} from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
@@ -45,7 +41,6 @@ import UserChangeDetector from "@/components/core/UserChangeDetector";
 import { DevToolsPanel } from "@/components/devtools";
 import useClient from "@/lib/client";
 import { DevToolsProvider } from "@/lib/devtools";
-import { StackParamList, TabParamList } from "@/lib/NavigatorParamList";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -59,7 +54,6 @@ import { useLinkingPref } from "@/providers/LinkingContext";
 import { useShareIntentContext } from "@/providers/ShareIntentContext";
 import { useThemeContext } from "@/providers/ThemeContext";
 import { lightTheme, theme } from "@/styles/theme";
-import { getStateFromPath } from "@/utils/getStateFromPath";
 import { trackAppOpen } from "@/utils/storeReview";
 
 interface HTTPError extends Error {
@@ -86,16 +80,11 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-function Navigation({
-  navigationRef,
-}: {
-  navigationRef: React.RefObject<NavigationContainerRef<TabParamList>>;
-}) {
+function Navigation() {
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     "user/transactions/missing_receipt",
   );
   const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
-  console.log("INVITATIONS", JSON.stringify(invitations))
 
   const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } =
     useShareIntentContext();
@@ -109,7 +98,7 @@ function Navigation({
     ) {
       router.navigate({
         pathname: "/share-intent",
-        params: pendingShareIntent as StackParamList["ShareIntentModal"],
+        params: pendingShareIntent as Record<string, string>,
       });
       clearPendingShareIntent();
     }
@@ -117,7 +106,6 @@ function Navigation({
 
   return (
     <Tabs
-      ref={navigationRef}
       screenOptions={{
         headerShown: false,
         tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
@@ -189,7 +177,6 @@ export default function Layout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [appIsReady, setAppIsReady] = useState(false);
   const isDark = useIsDark();
-  const navigationRef = useRef<NavigationContainerRef<TabParamList>>(null);
   const isBiometricAuthInProgress = useRef(false);
   const lastAuthenticatedToken = useRef<string | null>(null);
   const hasPassedBiometrics = useRef(false);
@@ -521,107 +508,51 @@ export default function Layout() {
     }
   }, [appIsReady]);
 
-  const linking: LinkingOptions<TabParamList> = useMemo(
-    () => ({
-      prefixes: [
-        Linking.createURL("/"),
-        "https://bank.hackclub.com",
-        "https://hcb.hackclub.com",
-        "http://bank.hackclub.com",
-        "http://hcb.hackclub.com",
-      ],
-      config: {
-        screens: {
-          Home: {
-            initialRouteName: "Organizations",
-            screens: {
-              Invitation: "invites/:inviteId",
-              Transaction: {
-                path: "hcb/:transactionId/:attachReceipt?",
-                parse: {
-                  transactionId: (id) => `txn_${id}`,
-                  attachReceipt: (attachReceipt) => attachReceipt,
-                },
-              },
-              Event: ":orgId",
-            },
-          },
-          Cards: {
-            initialRouteName: "CardList",
-            screens: {
-              CardList: "my/cards",
-              Card: {
-                path: "stripe_cards/:cardId",
-                parse: { cardId: (id: string) => id },
-              },
-              GrantCard: {
-                path: "grants/:grantId",
-                parse: { grantId: (id: string) => id },
-              },
-            },
-          },
-          Receipts: "my/inbox",
-        },
-      },
-      getStateFromPath: (path, options) => {
-        if (path.includes("dataUrl=hcbShareKey")) {
-          return undefined;
-        }
-        if (
-          path.startsWith("/branding") ||
-          path.startsWith("/security") ||
-          path.startsWith("/roles") ||
-          path.startsWith("/wrapped") ||
-          path.startsWith("/mobile") ||
-          path.startsWith("/applications")
-        ) {
-          Linking.openURL(new URL(path, "https://hcb.hackclub.com").toString());
-          return undefined;
-        }
-        return getStateFromPath(path, options);
-      },
-      getInitialURL: async () => {
-        if (isUniversalLinkingEnabled === null) {
-          await new Promise((resolve) => {
-            const check = setInterval(() => {
-              if (isUniversalLinkingEnabled !== null) {
-                clearInterval(check);
-                resolve(undefined);
-              }
-            }, 50);
-          });
-        }
+  // Handle incoming URLs: redirect to browser for blocked paths and when universal
+  // linking is disabled. Note: cold-start deep link handling requires configuring
+  // Expo Router's linking in app.json / the root layout.
+  useEffect(() => {
+    if (isUniversalLinkingEnabled === null) return;
 
-        const url = await Linking.getInitialURL();
-        if (url && isUniversalLinkingEnabled === false) {
-          Linking.openURL(url).catch((err) =>
+    const blockedPaths = [
+      "/branding",
+      "/security",
+      "/roles",
+      "/wrapped",
+      "/mobile",
+      "/applications",
+    ];
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      if (!url || url.includes("dataUrl=hcbShareKey")) return;
+
+      try {
+        const parsed = new URL(url);
+        if (blockedPaths.some((p) => parsed.pathname.startsWith(p))) {
+          Linking.openURL(
+            new URL(parsed.pathname, "https://hcb.hackclub.com").toString(),
+          ).catch((err) =>
             console.error("Failed to open URL in browser", err, {
               context: { url },
             }),
           );
-          return null;
+          return;
         }
-        return url;
-      },
-      subscribe: (listener) => {
-        const subscription = Linking.addEventListener("url", ({ url }) => {
-          if (url && !isUniversalLinkingEnabled) {
-            Linking.openURL(url).catch((err) =>
-              console.error("Failed to open URL in browser", err, {
-                context: { url },
-              }),
-            );
-          } else {
-            listener(url);
-          }
-        });
-        return () => {
-          subscription.remove();
-        };
-      },
-    }),
-    [isUniversalLinkingEnabled],
-  );
+      } catch {
+        // Ignore URL parse errors
+      }
+
+      if (!isUniversalLinkingEnabled) {
+        Linking.openURL(url).catch((err) =>
+          console.error("Failed to open URL in browser", err, {
+            context: { url },
+          }),
+        );
+      }
+    });
+
+    return () => subscription.remove();
+  }, [isUniversalLinkingEnabled]);
 
   const fetcher = (url: string, options?: RequestInit) => {
     return hcb(url, options).json();
@@ -740,7 +671,7 @@ export default function Layout() {
                             zIndex: 1,
                           }}
                         />
-                        <Navigation navigationRef={navigationRef} />
+                        <Navigation />
                       </ThemeProvider>
                     </AlertNotificationRoot>
                   </ActionSheetProvider>
