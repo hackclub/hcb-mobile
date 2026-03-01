@@ -14,7 +14,7 @@ import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
-import { router, Tabs, useRouter } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -43,7 +43,6 @@ import { tokenResponseToLegacyTokens } from "@/auth/tokenUtils";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
 import { DevToolsPanel } from "@/components/devtools";
-import { navRef } from "@/core/navigationRef";
 import useClient from "@/lib/client";
 import { DevToolsProvider } from "@/lib/devtools";
 import { StackParamList, TabParamList } from "@/lib/NavigatorParamList";
@@ -316,9 +315,6 @@ export default function Layout() {
       throw error;
     }
   };
-  useEffect(() => {
-    navRef.current = navigationRef.current;
-  }, []);
 
   useEffect(() => {
     const setStatusBar = async () => {
