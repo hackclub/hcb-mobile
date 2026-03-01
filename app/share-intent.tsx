@@ -19,7 +19,7 @@ import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
 import { maybeRequestReview } from "@/utils/storeReview";
-import { palette } from "@/utils/styles/theme";
+import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/util";
 
 interface ImageAssignment {

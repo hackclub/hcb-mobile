@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { Platform, Pressable, View } from "react-native";
 
 import { useIsDark } from "@/lib/useColorScheme";
-import { palette } from "@/utils/styles/theme";
+import { palette } from "@/styles/theme";
 
 
 export default function TapToPayBanner({

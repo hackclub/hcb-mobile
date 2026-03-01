@@ -2,16 +2,16 @@ import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, StatusBar, TextInput, View } from "react-native";
+import { ActivityIndicator, TextInput, View } from "react-native";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
-import useClient from "../../../../../../src/lib/client";
-import { getKey } from "../../../../../../src/lib/organization/useTransactions";
-import Transaction from "../../../../../../src/lib/types/Transaction";
-import { useOfflineSWR } from "../../../../../../src/lib/useOfflineSWR";
-import { palette } from "../../../../../../src/styles/theme";
+import useClient from "@/lib/client";
+import { getKey } from "@/lib/organization/useTransactions";
+import Transaction from "@/lib/types/Transaction";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
 
 export default function Page() {
   const { id, transaction: _transaction } = useLocalSearchParams();

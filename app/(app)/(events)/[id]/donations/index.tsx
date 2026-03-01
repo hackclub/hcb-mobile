@@ -23,7 +23,7 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useLocation } from "@/lib/useLocation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { palette } from "@/styles/theme";
+import { palette } from "@/styles/theme"
 
 export default function Page() {
   const { id } = useLocalSearchParams();
@@ -182,7 +182,7 @@ export default function Page() {
         if (
           (error as { code?: string }).code == "AlreadyConnectedToReader" ||
           (error as { code?: string }).code ==
-            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
         ) {
           return true;
         }
@@ -202,7 +202,7 @@ export default function Page() {
       if (
         (error as { code?: string }).code == "AlreadyConnectedToReader" ||
         (error as { code?: string }).code ==
-          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+        "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
       ) {
         return true;
       }

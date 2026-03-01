@@ -3,6 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -25,7 +26,6 @@ import StyledButton from "@/components/Button";
 import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
 
 // Component for QR Code display
 function QRCodeCard({

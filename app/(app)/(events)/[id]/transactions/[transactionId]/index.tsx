@@ -37,7 +37,7 @@ import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import { palette } from "@/styles/theme"
 
 export default function TransactionPage() {
   const navigation = useNavigation();
@@ -191,17 +191,17 @@ export default function TransactionPage() {
         {
           /* prettier-ignore */
           match(transaction)
-          .with({ card_charge: P.any },            (tx) => <CardChargeTransaction   transaction={tx} {...transactionViewProps} />)
-          .with({ check: P.any },                  (tx) => <CheckTransaction        transaction={tx} {...transactionViewProps} />)
-          .with({ transfer: P.any },               (tx) => <TransferTransaction     transaction={tx} {...transactionViewProps} />)
-          .with({ donation: P.any },               (tx) => <DonationTransaction     transaction={tx} {...transactionViewProps} />)
-          .with({ ach_transfer: P.any },           (tx) => <AchTransferTransaction  transaction={tx} {...transactionViewProps} />)
-          .with({ wise_transfer: P.any },          (tx) => <WiseTransaction         transaction={tx} {...transactionViewProps} />)
-          .with({ check_deposit: P.any },          (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
-          .with({ invoice: P.any },                (tx) => <InvoiceTransaction      transaction={tx} {...transactionViewProps} />)
-          .with({ expense_payout: P.any },         (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
-          .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction      transaction={tx} {...transactionViewProps} />)
-          .otherwise(                              (tx) => <BankAccountTransaction  transaction={tx} {...transactionViewProps} />)
+            .with({ card_charge: P.any }, (tx) => <CardChargeTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ check: P.any }, (tx) => <CheckTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ transfer: P.any }, (tx) => <TransferTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ donation: P.any }, (tx) => <DonationTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ ach_transfer: P.any }, (tx) => <AchTransferTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ wise_transfer: P.any }, (tx) => <WiseTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ check_deposit: P.any }, (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ invoice: P.any }, (tx) => <InvoiceTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ expense_payout: P.any }, (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
+            .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction transaction={tx} {...transactionViewProps} />)
+            .otherwise((tx) => <BankAccountTransaction transaction={tx} {...transactionViewProps} />)
         }
 
         <View style={{ gap: 12 }}>

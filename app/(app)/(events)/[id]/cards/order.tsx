@@ -25,8 +25,8 @@ import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import useOfflineSWR from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
-import { palette } from "@/utils/styles/theme";
 
 export default function Page() {
   const navigation = useNavigation();

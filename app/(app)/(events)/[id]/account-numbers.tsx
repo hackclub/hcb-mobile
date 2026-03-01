@@ -9,9 +9,9 @@ import { useLocalSearchParams } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
 import { Button, Linking, Platform, View } from "react-native";
 
-import { OrganizationExpanded } from "../../../../src/lib/types/Organization";
-import { useOfflineSWR } from "../../../../src/lib/useOfflineSWR";
-import { palette } from "../../../../src/styles/theme";
+import { OrganizationExpanded } from "@/lib/types/Organization";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
 
 function AccountDetail({
   title,
