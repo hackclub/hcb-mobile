@@ -270,7 +270,7 @@ export default function App({ navigation }: Props) {
     ({ item: organization }: { item: Organization }) => (
       <EventItem organization={organization} orgCount={orgCount} />
     ),
-    [navigation, orgCount],
+    [orgCount],
   );
 
   // Show cached data even if there's an error

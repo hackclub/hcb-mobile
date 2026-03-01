@@ -1,14 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { ReactElement } from "react";
-import { View, TouchableHighlight } from "react-native";
 import { Text } from "components/Text";
-
+import { router } from "expo-router";
+import React, { ReactElement } from "react";
+import { TouchableHighlight, View } from "react-native";
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";
-import { router } from "expo-router";
 
 interface Detail {
   label: string;

@@ -9,6 +9,7 @@ import Card from "../../lib/types/Card";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";
 import TransactionComponent from "../transaction/Transaction";
+import { router } from "expo-router";
 
 interface CardTransactionsProps {
   transactions: Transaction[];
@@ -138,11 +139,14 @@ export default function CardTransactions({
           <TouchableOpacity
             key={transaction.id}
             onPress={() => {
-              navigation.navigate("Transaction", {
-                orgId: card?.organization?.id || _card?.organization?.id,
-                transaction: transaction,
-                transactionId: transaction.id,
-                title: getTransactionTitle(transaction),
+              router.push({
+                pathname: "/(events)/[id]/transactions/[transactionId]",
+                params: {
+                  id: card?.organization?.id || _card?.organization?.id,
+                  transaction: JSON.stringify(transaction),
+                  transactionId: transaction.id,
+                  title: getTransactionTitle(transaction),
+                }
               });
             }}
             style={[
