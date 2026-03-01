@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -112,7 +112,7 @@ export default function Page() {
       showAlert(
         "Invalid Share Intent",
         "No valid images were provided. Please try sharing again.",
-        [{ text: "OK", onPress: () => navigation.goBack() }],
+        [{ text: "OK", onPress: () => router.back() }],
       );
     }
   }, [validImages, validTransactions, navigation, transactionsInitialized]);
@@ -290,7 +290,7 @@ export default function Page() {
       });
 
       maybeRequestReview();
-      navigation.goBack();
+      router.back();
     } catch (error) {
       console.error("Upload error", error, {
         action: "share_intent_upload",
@@ -359,7 +359,7 @@ export default function Page() {
         <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
           {Platform.OS === "android" && (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => router.back()}
               style={{
                 marginRight: 16,
                 padding: 8,

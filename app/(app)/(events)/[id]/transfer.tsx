@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -27,14 +27,14 @@ export default function Page() {
                 name="arrow-back"
                 size={24}
                 color={theme.colors.text}
-                onPress={() => navigation.goBack()}
+                onPress={() => router.back()}
               />
             </View>
           ) : (
             <NativeButton
               title="Done"
               color={theme.colors.text}
-              onPress={() => navigation.goBack()}
+              onPress={() => router.back()}
             />
           )}
         </>

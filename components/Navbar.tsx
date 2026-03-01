@@ -3,6 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { router } from "expo-router";
 import { Text } from "./Text";
 
 export function Navbar({
@@ -25,7 +26,7 @@ export function Navbar({
         paddingHorizontal: 10,
       }}
     >
-      <Pressable onPress={() => navigation.goBack()} style={{ padding: 16 }}>
+      <Pressable onPress={() => router.back()} style={{ padding: 16 }}>
         <Ionicons name="chevron-back" size={24} color={colors.text} />
       </Pressable>
       <Text

@@ -9,6 +9,7 @@ import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
 
+import { router } from "expo-router";
 import { validateFields } from "./cardHelpers";
 import * as Haptics from "./haptics";
 import { renderMoney } from "./util";
@@ -214,7 +215,7 @@ export const returnGrant = async (
             );
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await mutate("user/cards");
-            navigation.goBack();
+            router.back();
           } catch (err) {
             console.error("Error returning grant", err, {
               cardId: card.id,
@@ -372,7 +373,7 @@ export const handleCreateCard = async (
         title: "Card created!",
         textBody: "Your card has been created successfully.",
       });
-      navigation.goBack();
+      router.back();
     } else {
       const data = (await response.json()) as { error?: string };
       Alert.alert("Error", data.error || "Failed to create card");

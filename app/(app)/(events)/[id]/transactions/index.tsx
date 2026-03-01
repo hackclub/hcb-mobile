@@ -2,7 +2,7 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -32,17 +32,17 @@ import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 type ListItemType =
   | { type: "header"; title: string }
   | {
-      type: "transaction";
-      transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
-    }
+    type: "transaction";
+    transaction: TransactionWithoutId;
+    isFirst: boolean;
+    isLast: boolean;
+  }
   | {
-      type: "mockTransaction";
-      transaction: MockTransactionType;
-      isFirst: boolean;
-      isLast: boolean;
-    };
+    type: "mockTransaction";
+    transaction: MockTransactionType;
+    isFirst: boolean;
+    isLast: boolean;
+  };
 
 export default function Page() {
   const navigation = useNavigation();
@@ -329,7 +329,7 @@ export default function Page() {
 
   if (isAccessDenied) {
     return (
-      <AccessDenied orgId={params.id} onGoBack={() => navigation.goBack()} />
+      <AccessDenied orgId={params.id} onGoBack={() => router.back()} />
     );
   }
 
@@ -341,7 +341,7 @@ export default function Page() {
             mutateOrganization();
           }
         }}
-        onGoBack={() => navigation.goBack()}
+        onGoBack={() => router.back()}
       />
     );
   }

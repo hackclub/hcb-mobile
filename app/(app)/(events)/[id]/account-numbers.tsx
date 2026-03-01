@@ -4,7 +4,7 @@ import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
 import { Button, Linking, Platform, View } from "react-native";
@@ -83,14 +83,14 @@ export default function AccountNumberPage() {
                 name="arrow-back"
                 size={24}
                 color={themeColors.text}
-                onPress={() => navigation.goBack()}
+                onPress={() => router.back()}
               />
             </View>
           ) : (
             <Button
               title="Done"
               color={themeColors.text}
-              onPress={() => navigation.goBack()}
+              onPress={() => router.back()}
             />
           )}
         </>

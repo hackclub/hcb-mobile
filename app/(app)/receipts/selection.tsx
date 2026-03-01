@@ -172,7 +172,7 @@ export default function Page() {
             transaction.
           </Text>
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
             style={{
               backgroundColor: palette.primary,
               paddingHorizontal: 24,
@@ -206,7 +206,7 @@ export default function Page() {
         <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
           {Platform.OS === "android" && (
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => router.back()}
               style={{
                 marginRight: 16,
                 padding: 8,

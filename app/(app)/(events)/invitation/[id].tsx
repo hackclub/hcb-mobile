@@ -104,7 +104,7 @@ export default function Page() {
         invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => {
         mutate("user/invitations");
-        navigation.goBack();
+        router.back();
       },
     },
   );
@@ -122,7 +122,7 @@ export default function Page() {
       <StatusBar barStyle="light-content" />
 
       <TouchableHighlight
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
         style={{ position: "absolute", top: 16, right: 16 }}
         underlayColor={themeColors.background}
       >
