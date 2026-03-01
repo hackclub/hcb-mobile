@@ -1,16 +1,13 @@
 import { MenuAction } from "@react-native-menu/menu";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import words from "lodash/words";
-import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 
-import { StackParamList } from "../lib/NavigatorParamList";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction, {
   TransactionType,
   TransactionWithoutId,
 } from "../lib/types/Transaction";
 import User from "../lib/types/User";
-import { Merchant, Category } from "../lib/yellowpages";
+import { Category, Merchant } from "../lib/yellowpages";
 import { palette } from "../styles/theme";
 
 export function renderMoney(cents: number) {

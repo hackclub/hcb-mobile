@@ -28,6 +28,7 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
+import { showAlert } from "@/lib/alertUtils";
 
 const ListItemButton = ({
   children,
@@ -332,14 +333,11 @@ export default function Page() {
               name: "Collect donations",
               path: "/(events)/[id]/donations",
               beforePress: () => {
-                if (!supportsTapToPay) {
-                  Dialog.show({
-                    type: ALERT_TYPE.DANGER,
-                    title: "Unsupported Device",
-                    textBody:
-                      "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
-                    button: "Ok",
-                  });
+                if (supportsTapToPay) {
+                  showAlert(
+                    "Unsupported Device",
+                    "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                  )
                   throw new Error("Tap to pay unsupported")
                 }
               }

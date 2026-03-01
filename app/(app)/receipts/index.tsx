@@ -3,7 +3,6 @@ import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
 import PageTitle from "components/PageTitle";
-import { TabBarStyling } from "components/TabBarStyling";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
