@@ -18,7 +18,7 @@ import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
-import { palette } from "@/styles/theme";
+import { palette } from "@/utils/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { renderMoney } from "@/utils/util";
 
@@ -125,10 +125,10 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: transaction.id,
-              orgId: transaction.organization.id,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: transaction.id,
+            orgId: transaction.organization.id,
+          }
           : assignment,
       ),
     );
@@ -154,11 +154,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: null,
-              orgId: null,
-              isReceiptBin: true,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: null,
+            orgId: null,
+            isReceiptBin: true,
+          }
           : assignment,
       ),
     );
@@ -182,11 +182,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-              imageUri: assignment.imageUri,
-              transactionId: null,
-              orgId: null,
-              isReceiptBin: false,
-            }
+            imageUri: assignment.imageUri,
+            transactionId: null,
+            orgId: null,
+            isReceiptBin: false,
+          }
           : assignment,
       ),
     );

@@ -14,7 +14,7 @@ import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
-import { Tabs } from "expo-router";
+import { router, Tabs, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -46,8 +46,9 @@ import { DevToolsPanel } from "@/components/devtools";
 import { navRef } from "@/core/navigationRef";
 import useClient from "@/lib/client";
 import { DevToolsProvider } from "@/lib/devtools";
-import { TabParamList } from "@/lib/NavigatorParamList";
+import { StackParamList, TabParamList } from "@/lib/NavigatorParamList";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
+import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
 import { usePushNotifications } from "@/lib/usePushNotifications";
 import {
@@ -56,10 +57,11 @@ import {
 } from "@/lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
 import { useLinkingPref } from "@/providers/LinkingContext";
+import { useShareIntentContext } from "@/providers/ShareIntentContext";
 import { useThemeContext } from "@/providers/ThemeContext";
-import { lightTheme, theme } from "@/styles/theme";
 import { getStateFromPath } from "@/utils/getStateFromPath";
 import { trackAppOpen } from "@/utils/storeReview";
+import { lightTheme, theme } from "@/utils/styles/theme";
 
 interface HTTPError extends Error {
   status?: number;
@@ -93,6 +95,26 @@ function Navigation({
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     "user/transactions/missing_receipt",
   );
+  const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
+  console.log("INVITATIONS", JSON.stringify(invitations))
+
+  const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } =
+    useShareIntentContext();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (
+      hasPendingShareIntent &&
+      pendingShareIntent
+    ) {
+      router.navigate({
+        pathname: "/share-intent",
+        params: pendingShareIntent as StackParamList["ShareIntentModal"],
+      });
+      clearPendingShareIntent();
+    }
+  }, [hasPendingShareIntent, pendingShareIntent, clearPendingShareIntent]);
 
   return (
     <Tabs
@@ -108,6 +130,7 @@ function Navigation({
       <Tabs.Screen
         name="(events)"
         options={{
+          tabBarBadge: invitations?.length || undefined,
           title: "Home",
           tabBarAccessibilityLabel: "Home Tab",
           tabBarIcon: ({ color }) => (
@@ -213,12 +236,6 @@ export default function Layout() {
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
   const TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
-  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
-    "user/transactions/missing_receipt",
-  );
-
-  console.log(missingReceiptData);
-
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
 
@@ -262,10 +279,10 @@ export default function Layout() {
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-        terminal_connection_token: {
-          secret: string;
+          terminal_connection_token: {
+            secret: string;
+          };
         };
-      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
