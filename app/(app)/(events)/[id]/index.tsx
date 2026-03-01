@@ -27,6 +27,7 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
+import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
 
 const ListItemButton = ({
   children,
@@ -224,7 +225,7 @@ export default function Page() {
   );
 
   const recentTransactions = useMemo(
-    () => transactions.slice(0, 7),
+    () => transactions.slice(0, 4),
     [transactions],
   );
 
@@ -330,6 +331,18 @@ export default function Page() {
             {
               name: "Collect donations",
               path: "/(events)/[id]/donations",
+              beforePress: () => {
+                if (!supportsTapToPay) {
+                  Dialog.show({
+                    type: ALERT_TYPE.DANGER,
+                    title: "Unsupported Device",
+                    textBody:
+                      "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                    button: "Ok",
+                  });
+                  throw new Error("Tap to pay unsupported")
+                }
+              }
             },
             {
               name: "Account details",
@@ -347,16 +360,22 @@ export default function Page() {
             <ListItemButton
               key={i}
               onPress={() => {
-                router.push({
-                  pathname: button.path,
-                  params: {
-                    ...(button.name === "Transfer money"
-                      ? { organization: JSON.stringify(organization) }
-                      : {}),
-                    id: params.id,
-                    fallbackData: params.fallbackData,
-                  },
-                });
+                try {
+                  button.beforePress?.();
+                  router.push({
+                    pathname: button.path,
+                    params: {
+                      ...(button.name === "Transfer money"
+                        ? { organization: JSON.stringify(organization) }
+                        : {}),
+                      id: params.id,
+                      fallbackData: params.fallbackData,
+                    },
+                  });
+                }
+                catch (e) {
+                  console.log(e)
+                }
               }}
             >
               <ListItemText primary={button.name} />

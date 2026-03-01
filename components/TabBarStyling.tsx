@@ -35,6 +35,7 @@ export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
           position: "absolute",
           bottom: 0,
           left: 0,
+          backgroundColor: "rgba(255,255,255,0.5)",
           width: "100%",
           zIndex: 1,
         }}
