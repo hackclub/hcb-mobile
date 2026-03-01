@@ -19,6 +19,7 @@ import Header from "@/components/organizations/Header";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
+import { showAlert } from "@/lib/alertUtils";
 import useTransactions from "@/lib/organization/useTransactions";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
@@ -27,8 +28,6 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { ALERT_TYPE, Dialog } from "react-native-alert-notification";
-import { showAlert } from "@/lib/alertUtils";
 
 const ListItemButton = ({
   children,
@@ -333,7 +332,7 @@ export default function Page() {
               name: "Collect donations",
               path: "/(events)/[id]/donations",
               beforePress: () => {
-                if (supportsTapToPay) {
+                if (!supportsTapToPay) {
                   showAlert(
                     "Unsupported Device",
                     "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
