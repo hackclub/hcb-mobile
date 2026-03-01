@@ -1,15 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { LinearGradient } from "expo-linear-gradient";
-import { View, Pressable, Platform } from "react-native";
 import { Text } from "components/Text";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { Platform, Pressable, View } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { palette } from "@/utils/styles/theme";
 
-type NavigationProp = NativeStackNavigationProp<StackParamList>;
 
 export default function TapToPayBanner({
   onDismiss,
@@ -19,12 +16,12 @@ export default function TapToPayBanner({
   orgId: `org_${string}`;
 }) {
   const isDark = useIsDark();
-  const navigation = useNavigation<NavigationProp>();
 
   const handlePress = () => {
-    navigation.navigate("OrganizationDonation", {
-      orgId: orgId,
-    });
+    router.push({
+      pathname: "/(events)/[id]/donations",
+      params: { id: orgId }
+    })
   };
 
   const gradientColors = isDark

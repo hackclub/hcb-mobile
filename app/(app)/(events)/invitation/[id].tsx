@@ -62,11 +62,17 @@ export default function Page() {
       populateCache: (_, invitations) =>
         invitations?.filter((i) => i.id != inviteId) || [],
       onSuccess: () => {
-        navigation.goBack(); // Close modal
-        navigation.navigate("Event", {
-          orgId: invitation!.organization.id,
-          organization: invitation!.organization,
-        });
+        setTimeout(() => {
+          if (!invitation) return
+          router.push({
+            pathname: "[id]",
+            params: {
+              id: invitation.organization.id,
+              fallbackData: invitation.organization as string,
+            },
+          });
+        }, 200)
+        router.back();
         mutate(`user/organizations`);
         mutate("user/invitations");
       },
