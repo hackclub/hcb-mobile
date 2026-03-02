@@ -3,6 +3,7 @@ import { useNavigation, usePathname } from "expo-router";
 import { useEffect } from "react";
 import { ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "react-native";
 
 export const DEFAULT_BOTTOM_NAV_STYLE = {
   zIndex: 99,
@@ -14,6 +15,7 @@ export const DEFAULT_BOTTOM_NAV_STYLE = {
 } as ViewStyle;
 
 export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
+  const isDark = useColorScheme() === "dark";
   const navigation = useNavigation();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
@@ -35,7 +37,7 @@ export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
           position: "absolute",
           bottom: 0,
           left: 0,
-          backgroundColor: "rgba(255,255,255,0.5)",
+          backgroundColor: isDark ? "rgba(23, 23, 29,0.5)" : "rgba(255,255,255,0.5)",
           width: "100%",
           zIndex: 1,
         }}
