@@ -49,7 +49,7 @@ export default function Page() {
       },
       populateCache: true,
       onSuccess() {
-        mutate(unstable_serialize(getKey(id, "organizations")));
+        mutate(unstable_serialize(getKey(id as string, "organizations")));
       },
     },
   );
