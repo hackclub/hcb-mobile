@@ -40,13 +40,11 @@ export default function Page() {
 
   const uploadFile = async (receipt: Receipt) => {
     const body = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     body.append("file", {
       uri: receipt.url,
       name: receipt.filename || "receipt.jpg",
       type: "image/jpeg",
-    });
+    } as unknown as Blob);
 
     if (transaction) {
       body.append("transaction_id", transaction.id);

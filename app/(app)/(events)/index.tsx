@@ -55,8 +55,7 @@ const EventItem = memo(
         pathname: "[id]",
         params: {
           id: organization.id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          fallbackData: organization as any,
+          fallbackData: organization as unknown,
         },
       });
       // navigation.navigate("Event", {
@@ -85,7 +84,6 @@ const EventItem = memo(
 
 EventItem.displayName = "EventItem";
 
-/* eslint-disable react/prop-types */
 export default function App({ navigation }: Props) {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
@@ -255,7 +253,6 @@ export default function App({ navigation }: Props) {
     } finally {
       setRefreshing(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadOrganizations, reloadInvitations, reloadGrantCards, mutate]);
 
   useFocusEffect(

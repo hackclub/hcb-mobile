@@ -202,13 +202,11 @@ export default function Page() {
     transactionId: string,
   ) => {
     const body = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
     body.append("file", {
       uri: file.uri,
       name: file.fileName || "receipt.jpg",
       type: file.mimeType || "image/jpeg",
-    });
+    } as unknown as Blob);
 
     // Only append transaction_id if it's provided (for receipt bin uploads, it won't be)
     if (transactionId && transactionId.trim() !== "") {

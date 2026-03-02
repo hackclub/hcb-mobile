@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { Text } from "components/Text";
 
@@ -18,8 +17,6 @@ interface CardTransactionsProps {
   isLoadingMore: boolean;
   card: Card;
   _card: Card;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: NativeStackNavigationProp<any>;
 }
 
 export default function CardTransactions({
@@ -29,7 +26,6 @@ export default function CardTransactions({
   isLoadingMore,
   card,
   _card,
-  navigation,
 }: CardTransactionsProps) {
   const { colors: themeColors } = useTheme();
 

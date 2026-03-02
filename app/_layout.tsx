@@ -20,7 +20,6 @@ import { LinkingProvider } from "@/providers/LinkingContext";
 import { ShareIntentProvider } from "@/providers/ShareIntentContext";
 import { ThemeProvider } from "@/providers/ThemeContext";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SWRCacheProvider = createContext<{
   scheme: ColorSchemeName;
   cache: CacheProvider;

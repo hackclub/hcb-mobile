@@ -97,9 +97,9 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
       }, 600);
       return () => clearTimeout(timer);
     }
-    // only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Run only once on component mount. attachReceipt and actionSheetIsOnline are expected
+    // to be stable across renders for this effect to work correctly.
+  }, []); // eslint-disable-next-line react-hooks/exhaustive-deps
 
   const handleDeleteReceipt = withOfflineCheck(async (receipt: Receipt) => {
     showAlert(

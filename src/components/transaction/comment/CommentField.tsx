@@ -73,45 +73,43 @@ export default function CommentField({
       }
 
       if (selectedFile) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
         body.append("file", {
           uri: selectedFile.uri,
           name: selectedFile.name,
           type: selectedFile.mimeType,
-        });
+        } as unknown as Blob);
+
+        await hcb.post(
+          `organizations/${orgId}/transactions/${transactionId}/comments`,
+          {
+            body,
+          },
+        );
+
+        setComment("");
+        setSelectedFile(null);
+        setAdminOnly(false);
+
+        const commentKey = `organizations/${orgId}/transactions/${transactionId}/comments`;
+        await Promise.all([
+          mutate(commentKey),
+          globalMutate(commentKey),
+          globalMutate(
+            (key) =>
+              typeof key === "string" &&
+              key.includes(`/transactions/${transactionId}/comments`),
+          ),
+        ]);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        maybeRequestReview();
       }
-
-      await hcb.post(
-        `organizations/${orgId}/transactions/${transactionId}/comments`,
-        {
-          body,
-        },
-      );
-
-      setComment("");
-      setSelectedFile(null);
-      setAdminOnly(false);
-
-      const commentKey = `organizations/${orgId}/transactions/${transactionId}/comments`;
-      await Promise.all([
-        mutate(commentKey),
-        globalMutate(commentKey),
-        globalMutate(
-          (key) =>
-            typeof key === "string" &&
-            key.includes(`/transactions/${transactionId}/comments`),
-        ),
-      ]);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      maybeRequestReview();
     } catch (error) {
       console.error("Error adding comment:", error);
       Alert.alert("Error", "Failed to add comment");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   if (!user) {
     return null;

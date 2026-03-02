@@ -187,8 +187,7 @@ export const returnGrant = async (
   mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: NativeStackNavigationProp<any>,
+  navigation: NativeStackNavigationProp<Record<string, unknown>>,
 ) => {
   if (!card || !card.id) {
     showAlert("Error", "Cannot update card status. Please try again.");

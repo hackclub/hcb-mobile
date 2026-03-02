@@ -166,8 +166,7 @@ export default function Login() {
     ) {
       doPrompt();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSignup, request]);
+  }, [pendingSignup, request, doPrompt]);
 
   const animation = useRef(new Animated.Value(0)).current;
 

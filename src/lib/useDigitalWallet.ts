@@ -99,7 +99,7 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
           status: walletDetails?.status || null,
           androidCardToken:
             walletDetails?.token?.status ===
-            "TOKEN_STATE_NEEDS_IDENTITY_VERIFICATION"
+              "TOKEN_STATE_NEEDS_IDENTITY_VERIFICATION"
               ? walletDetails.token
               : null,
           error: null,
@@ -117,8 +117,8 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
   useEffect(() => {
     if (Platform.OS === "ios") {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { getIsPaired } = require("react-native-watch-connectivity");
+        const watchConnectivity = require("react-native-watch-connectivity");
+        const { getIsPaired } = watchConnectivity as { getIsPaired: () => Promise<boolean> };
         getIsPaired().then((isPaired: boolean) => {
           setIsPaired(isPaired);
         });
@@ -145,22 +145,22 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
 
   return {
     ...state,
-    refresh: isPhysical ? () => {} : fetchCardDetails,
+    refresh: isPhysical ? () => { } : fetchCardDetails,
     ephemeralKey: ephemeralKey
       ? {
-          id: ephemeralKey.ephemeralKeyId,
-          object: "ephemeral_key",
-          associated_objects: [
-            {
-              id: ephemeralKey.stripe_id,
-              type: "issuing.card",
-            },
-          ],
-          created: ephemeralKey.ephemeralKeyCreated,
-          expires: ephemeralKey.ephemeralKeyExpires,
-          livemode: true,
-          secret: ephemeralKey.ephemeralKeySecret,
-        }
+        id: ephemeralKey.ephemeralKeyId,
+        object: "ephemeral_key",
+        associated_objects: [
+          {
+            id: ephemeralKey.stripe_id,
+            type: "issuing.card",
+          },
+        ],
+        created: ephemeralKey.ephemeralKeyCreated,
+        expires: ephemeralKey.ephemeralKeyExpires,
+        livemode: true,
+        secret: ephemeralKey.ephemeralKeySecret,
+      }
       : null,
     card,
   };

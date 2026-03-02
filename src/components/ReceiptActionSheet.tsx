@@ -34,13 +34,11 @@ export function useReceiptActionSheet({
       } | null,
     ) => {
       const body = new FormData();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
       body.append("file", {
         uri: file?.uri,
         name: file?.fileName || "receipt.jpg",
         type: file?.mimeType || "image/jpeg",
-      });
+      } as unknown as Blob);
 
       if (transactionId) {
         body.append("transaction_id", transactionId);

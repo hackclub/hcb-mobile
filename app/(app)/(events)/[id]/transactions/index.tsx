@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
