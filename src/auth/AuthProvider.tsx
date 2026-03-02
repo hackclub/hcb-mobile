@@ -5,7 +5,13 @@ import { tokenManager } from "../lib/tokenManager";
 
 import AuthContext from "./auth";
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+  onAuthReady,
+}: {
+  children: React.ReactNode;
+  onAuthReady?: () => void;
+}) {
   const [tokenResponse, setTokenResponseState] = useState<TokenResponse | null>(
     null,
   );
@@ -20,21 +26,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setTokenResponseState(tokenManager.getToken());
       setCodeVerifierState(tokenManager.getCodeVerifier());
       setIsLoading(false);
+      onAuthReady?.();
     };
     loadTokens();
-  }, []);
+  }, [onAuthReady]);
 
   useEffect(() => {
     const syncInterval = setInterval(() => {
       const currentToken = tokenManager.getToken();
-      if (currentToken !== tokenResponse) {
+      // Compare access tokens instead of whole objects to detect changes
+      if (currentToken?.accessToken !== tokenResponse?.accessToken) {
         setTokenResponseState(currentToken);
         setCodeVerifierState(tokenManager.getCodeVerifier());
       }
     }, 1000);
 
     return () => clearInterval(syncInterval);
-  }, [tokenResponse]);
+  }, [tokenResponse?.accessToken]);
 
   const setTokenResponse = async (
     newTokenResponse: TokenResponse | null,

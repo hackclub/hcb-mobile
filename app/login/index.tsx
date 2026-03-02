@@ -133,7 +133,8 @@ export default function Login() {
         }
         setTokenResponse(tokenResponse, codeVerifier);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.replace("/");
+        // Don't manually navigate here - let the routing guard handle it
+        // router.replace("/");
       })
       .catch((error) => {
         console.error("Error exchanging code for token:", error);

@@ -121,37 +121,6 @@ export default function Page() {
   const hcb = useClient();
   const uploadButtonRef = useRef(null);
 
-  const onRefresh = useCallback(
-    (showSpinner: boolean = true) => {
-      if (showSpinner) {
-        setRefreshing(true);
-      }
-
-      // Existing refresh logic for receipts and transactions would go here.
-      // This body should be identical to the original onRefresh definition
-      // that previously appeared later in this component.
-
-      Promise.all([mutate(), refreshReceipts()])
-        .catch(() => {
-          showAlert(
-            "Error",
-            "Failed to refresh receipts. Please try again.",
-            ALERT_TYPE.DANGER,
-          );
-        })
-        .finally(() => {
-          setRefreshing(false);
-        });
-    },
-    [mutate, refreshReceipts],
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      onRefresh(false);
-    }, [onRefresh]),
-  );
-
   // Group transactions by organization
   const groupedTransactions = useMemo(() => {
     if (!data?.data) return [];
@@ -192,6 +161,12 @@ export default function Page() {
       setRefreshing(false);
     }
   }, [mutate, refreshReceipts]);
+
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh(false);
+    }, [onRefresh]),
+  );
 
   const { handleActionSheet } = useReceiptActionSheet({
     orgId: "",
