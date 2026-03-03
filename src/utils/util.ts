@@ -1,4 +1,5 @@
 import { MenuAction } from "@react-native-menu/menu";
+import { router } from "expo-router";
 import words from "lodash/words";
 
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
@@ -7,6 +8,7 @@ import ITransaction, {
   TransactionWithoutId,
 } from "../lib/types/Transaction";
 import User from "../lib/types/User";
+import { showAlert } from "../lib/alertUtils";
 import { Category, Merchant } from "../lib/yellowpages";
 import { palette } from "../styles/theme";
 
@@ -223,4 +225,57 @@ export function handleMenuActions(
     }
   }
   return menuActions;
+}
+
+export function handleMenuActionEvent(
+  event: string,
+  _navigation: unknown,
+  organization: Organization | OrganizationExpanded | undefined,
+  supportsTapToPay?: boolean,
+) {
+  if (!organization?.id) return;
+
+  const baseParams = {
+    id: organization.id,
+    fallbackData: organization as unknown,
+  };
+
+  switch (event) {
+    case "accountNumber":
+      router.push({
+        pathname: "/(events)/[id]/account-numbers",
+        params: baseParams,
+      });
+      return;
+    case "transfer":
+      router.push({
+        pathname: "/(events)/[id]/transfer",
+        params: {
+          ...baseParams,
+          organization: JSON.stringify(organization),
+        },
+      });
+      return;
+    case "team":
+      router.push({
+        pathname: "/(events)/[id]/team",
+        params: baseParams,
+      });
+      return;
+    case "donation":
+      if (!supportsTapToPay) {
+        showAlert(
+          "Unsupported Device",
+          "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+        );
+        return;
+      }
+      router.push({
+        pathname: "/(events)/[id]/donations",
+        params: baseParams,
+      });
+      return;
+    default:
+      return;
+  }
 }

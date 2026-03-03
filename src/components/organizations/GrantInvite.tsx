@@ -1,11 +1,10 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text } from "components/Text";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, TouchableHighlight, View } from "react-native";
 
 import useClient from "../../lib/client";
-import { StackParamList } from "../../lib/NavigatorParamList";
 import GrantCard from "../../lib/types/GrantCard";
 import { palette } from "../../styles/theme";
 import * as Haptics from "../../utils/haptics";
@@ -14,13 +13,11 @@ import { renderMoney } from "../../utils/util";
 
 interface GrantInviteProps {
   grant: GrantCard;
-  navigation: NativeStackNavigationProp<StackParamList, "Organizations">;
   style?: object;
 }
 
 export default function GrantInvite({
   grant,
-  navigation,
   style,
 }: GrantInviteProps) {
   const { colors: themeColors } = useTheme();
@@ -36,8 +33,9 @@ export default function GrantInvite({
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         maybeRequestReview();
 
-        navigation.navigate("GrantCard", {
-          grantId: grant.id,
+        router.push({
+          pathname: "/cards/card-grants/[id]",
+          params: { id: grant.id },
         });
       } else {
         const errorData = (await response.json()) as { error?: string };

@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { router } from "expo-router";
@@ -28,7 +27,6 @@ import GrantInvite from "@/components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
 import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
 import PromoBanner from "@/components/PromoBanner";
-import { StackParamList } from "@/lib/NavigatorParamList";
 import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
 import GrantCard from "@/lib/types/GrantCard";
 import Invitation from "@/lib/types/Invitation";
@@ -38,8 +36,6 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { organizationOrderEqual } from "@/utils/util";
-
-type Props = NativeStackScreenProps<StackParamList, "Organizations">;
 
 const EventItem = memo(
   ({
@@ -84,7 +80,7 @@ const EventItem = memo(
 
 EventItem.displayName = "EventItem";
 
-export default function App({ navigation }: Props) {
+export default function App() {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
 
@@ -128,9 +124,12 @@ export default function App({ navigation }: Props) {
       if (imageUrls.length > 0) {
         // If we have missing receipt data, show the modal with transactions
         if (missingReceiptData?.data && missingReceiptData.data.length > 0) {
-          navigation.navigate("ShareIntentModal", {
-            images: imageUrls,
-            missingTransactions: missingReceiptData.data,
+          router.navigate({
+            pathname: "/share-intent",
+            params: {
+              images: JSON.stringify(imageUrls),
+              missingTransactions: JSON.stringify(missingReceiptData.data),
+            },
           });
           setShareIntentProcessed(true);
           resetShareIntent();
@@ -147,9 +146,12 @@ export default function App({ navigation }: Props) {
             refetchMissingReceipts();
           } else {
             // No missing receipts, but still show modal for receipt bin upload
-            navigation.navigate("ShareIntentModal", {
-              images: imageUrls,
-              missingTransactions: [],
+            router.navigate({
+              pathname: "/share-intent",
+              params: {
+                images: JSON.stringify(imageUrls),
+                missingTransactions: JSON.stringify([]),
+              },
             });
             setShareIntentProcessed(true);
             resetShareIntent();
@@ -162,7 +164,6 @@ export default function App({ navigation }: Props) {
     shareIntent,
     missingReceiptData,
     missingReceiptError,
-    navigation,
     resetShareIntent,
     shareIntentProcessed,
     refetchMissingReceipts,
@@ -327,7 +328,7 @@ export default function App({ navigation }: Props) {
             <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
-            (grantInvites && grantInvites.length > 0) ? (
+              (grantInvites && grantInvites.length > 0) ? (
               <View
                 style={{
                   marginTop: 10,
@@ -393,7 +394,6 @@ export default function App({ navigation }: Props) {
                       <GrantInvite
                         key={grant.id}
                         grant={grant}
-                        navigation={navigation}
                         style={{
                           marginBottom: 10,
                         }}

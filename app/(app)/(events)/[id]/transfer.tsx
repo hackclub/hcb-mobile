@@ -10,12 +10,32 @@ import {
 } from "react-native";
 
 import DisbursementScreen from "@/components/organizations/transfer/Disbursement";
+import { showAlert } from "@/lib/alertUtils";
 import { theme } from "@/styles/theme";
 
 export default function Page() {
   const navigation = useNavigation();
   const { organization: _organization } = useLocalSearchParams();
-  const organization = JSON.parse(_organization as string);
+  const organization =
+    typeof _organization === "string"
+      ? (() => {
+        try {
+          return JSON.parse(_organization);
+        } catch {
+          return null;
+        }
+      })()
+      : null;
+
+  useEffect(() => {
+    if (organization) return;
+
+    showAlert(
+      "Unable to Open Transfer",
+      "We couldn't load organization details for this transfer. Please go back and try again.",
+      [{ text: "OK", onPress: () => router.back() }],
+    );
+  }, [organization]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -87,7 +107,7 @@ export default function Page() {
         </View> */}
 
         {/* Display transfer screen based on transfer type */}
-        {transferType === "hcb" && (
+        {transferType === "hcb" && organization && (
           <DisbursementScreen organization={organization} />
         )}
       </ScrollView>
