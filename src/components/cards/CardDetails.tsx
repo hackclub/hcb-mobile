@@ -1,11 +1,11 @@
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { format } from "date-fns";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import * as ScreenCapture from "expo-screen-capture";
 import { useEffect } from "react";
 import { View, Animated, Platform, TouchableOpacity } from "react-native";
-import { Text } from "components/Text";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import Card from "../../lib/types/Card";

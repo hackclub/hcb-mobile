@@ -37,7 +37,7 @@ import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme"
+import { palette } from "@/styles/theme";
 
 export default function TransactionPage() {
   const navigation = useNavigation();

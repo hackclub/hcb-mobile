@@ -3,7 +3,7 @@ import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -23,8 +23,15 @@ import { palette } from "@/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
 
 export default function Page() {
-  const { transaction: _transaction } = useLocalSearchParams();
-  const transaction = JSON.stringify(_transaction);
+  const { transaction: rawTransaction } = useLocalSearchParams();
+  const transaction = useMemo(() => {
+    if (typeof rawTransaction !== "string") return null;
+    try {
+      return JSON.parse(rawTransaction) as { id?: string } | null;
+    } catch {
+      return null;
+    }
+  }, [rawTransaction]);
 
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
@@ -46,7 +53,7 @@ export default function Page() {
       type: "image/jpeg",
     } as unknown as Blob);
 
-    if (transaction) {
+    if (transaction?.id) {
       body.append("transaction_id", transaction.id);
     }
 
@@ -60,6 +67,14 @@ export default function Page() {
   };
 
   const handleUpload = async () => {
+    if (!transaction?.id) {
+      showAlert(
+        "Missing Transaction",
+        "We couldn't identify the transaction for this upload. Please go back and try again.",
+      );
+      return;
+    }
+
     if (selectedReceipts.size === 0) {
       showAlert(
         "No Receipts Selected",
@@ -100,7 +115,7 @@ export default function Page() {
       router.back();
     } catch (error) {
       console.error("Upload error", error, {
-        transactionId: transaction.id,
+        transactionId: transaction?.id,
         receiptCount: selectedReceipts.size,
       });
       Toast.show({

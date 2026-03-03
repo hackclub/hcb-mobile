@@ -327,7 +327,7 @@ export default function App({ navigation }: Props) {
             <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
-              (grantInvites && grantInvites.length > 0) ? (
+            (grantInvites && grantInvites.length > 0) ? (
               <View
                 style={{
                   marginTop: 10,
@@ -363,8 +363,10 @@ export default function App({ navigation }: Props) {
                             pathname: "/invitation/[id]",
                             params: {
                               id: invitation.id,
-                              invitation: JSON.parse(JSON.stringify(invitation)),
-                            }
+                              invitation: JSON.parse(
+                                JSON.stringify(invitation),
+                              ),
+                            },
                           })
                         }
                         hideBalance

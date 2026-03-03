@@ -151,6 +151,16 @@ export default function Page() {
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
   const panGesture = usePanGesture();
 
+  const handleOrderCard = useCallback(() => {
+    const firstOrganizationId = organizations?.[0]?.id;
+    if (!firstOrganizationId) return;
+
+    router.push({
+      pathname: "/(events)/[id]/cards/order",
+      params: { id: firstOrganizationId },
+    });
+  }, [organizations]);
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -199,7 +209,7 @@ export default function Page() {
             iconStyle={{ marginRight: 0 }}
             onPress={() => {
               if (user && organizations) {
-                router.push("/cards/order");
+                handleOrderCard();
               }
             }}
             underlayColor={"transparent"}
@@ -215,6 +225,7 @@ export default function Page() {
     scheme,
     user,
     organizations,
+    handleOrderCard,
   ]);
 
   const combineCards = useCallback(() => {
@@ -363,7 +374,7 @@ export default function Page() {
     });
 
     if (filteredCards.length === 0) {
-      return <NoCardsEmptyState />;
+      return <NoCardsEmptyState onOrderCard={handleOrderCard} />;
     }
 
     return (

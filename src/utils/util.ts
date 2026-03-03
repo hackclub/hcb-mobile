@@ -31,11 +31,11 @@ export function renderDate(date: string) {
 }
 
 export function statusColor(status: string) {
-  if (status == "deposited" || status == "completed") {
+  if (status === "deposited" || status === "completed") {
     return palette.success;
-  } else if (status == "in_transit" || status == "issued") {
+  } else if (status === "in_transit" || status === "issued") {
     return palette.info;
-  } else if (status == "rejected") {
+  } else if (status === "rejected") {
     return palette.primary;
   } else {
     return palette.muted;
@@ -78,60 +78,29 @@ export const normalizeSvg = (
 
 export function organizationOrderEqual(a: Organization[], b: Organization[]) {
   if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; ++i) {
-    if (a[i].id !== b[i].id) return false;
-  }
-  return true;
+  return a.every((org, i) => org.id === b[i].id);
 }
 
-export const formatMerchantNames = (merchantIds: string[] | undefined) => {
-  if (!merchantIds || merchantIds.length === 0) {
-    return "All";
-  }
+/** Shared helper that resolves display names from a list of IDs using a lookup function. */
+function formatEntityNames(
+  ids: string[] | undefined,
+  lookup: (id: string) => {
+    inDataset: () => boolean;
+    getName: () => string | null;
+  },
+  unnamedLabel: string,
+): string {
+  if (!ids || ids.length === 0) return "All";
 
   try {
-    const merchantNames: string[] = [];
-    const validIds = merchantIds.filter((id): id is string => !!id);
+    const names: string[] = [];
+    const validIds = ids.filter((id): id is string => !!id);
     const unnamedCount = validIds.filter((id) => {
-      const merchant = Merchant.lookup({ networkId: id });
-      if (merchant.inDataset()) {
-        const name = merchant.getName();
-        if (name && !merchantNames.includes(name)) {
-          merchantNames.push(name);
-        }
-        return false;
-      }
-      return true;
-    }).length;
-
-    // Add unnamed merchants count if any
-    if (unnamedCount > 0) {
-      merchantNames.push(`Unnamed Merchants (${unnamedCount})`);
-    }
-
-    return merchantNames.join(", ");
-  } catch (error) {
-    console.error("Error formatting merchant names", error, {
-      context: { merchantIds: merchantIds },
-    });
-    return "Loading...";
-  }
-};
-
-export const formatCategoryNames = (categoryIds: string[] | undefined) => {
-  if (!categoryIds || categoryIds.length === 0) {
-    return "All";
-  }
-
-  try {
-    const categoryNames: string[] = [];
-    const validIds = categoryIds.filter((id): id is string => !!id);
-    const unnamedCount = validIds.filter((id) => {
-      const category = Category.lookup({ key: id });
-      if (category.inDataset()) {
-        const name = category.getName();
-        if (name && !categoryNames.includes(name)) {
-          categoryNames.push(name);
+      const entity = lookup(id);
+      if (entity.inDataset()) {
+        const name = entity.getName();
+        if (name && !names.includes(name)) {
+          names.push(name);
         }
         return false;
       }
@@ -139,17 +108,31 @@ export const formatCategoryNames = (categoryIds: string[] | undefined) => {
     }).length;
 
     if (unnamedCount > 0) {
-      categoryNames.push(`Unnamed Categories (${unnamedCount})`);
+      names.push(`${unnamedLabel} (${unnamedCount})`);
     }
 
-    return categoryNames.join(", ");
+    return names.join(", ");
   } catch (error) {
-    console.error("Error formatting category names", error, {
-      context: { categoryIds: categoryIds },
+    console.error(`Error formatting ${unnamedLabel.toLowerCase()}`, error, {
+      context: { ids },
     });
     return "Loading...";
   }
-};
+}
+
+export const formatMerchantNames = (merchantIds: string[] | undefined) =>
+  formatEntityNames(
+    merchantIds,
+    (id) => Merchant.lookup({ networkId: id }),
+    "Unnamed Merchants",
+  );
+
+export const formatCategoryNames = (categoryIds: string[] | undefined) =>
+  formatEntityNames(
+    categoryIds,
+    (id) => Category.lookup({ key: id }),
+    "Unnamed Categories",
+  );
 
 export function addPendingFeeToTransactions(
   transactions: ITransaction[],
@@ -176,9 +159,9 @@ export function addPendingFeeToTransactions(
       },
       ...transactions,
     ];
-  } else {
-    return transactions;
   }
+
+  return transactions;
 }
 
 export function handleMenuActions(

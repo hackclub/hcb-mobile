@@ -1,5 +1,5 @@
-import { View } from "react-native";
 import { Text } from "components/Text";
+import { View } from "react-native";
 import useSWR from "swr";
 
 import Organization from "../../../lib/types/Organization";

@@ -1,9 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import {
-  NativeStackNavigationProp
-} from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";

@@ -5,6 +5,7 @@ import { Text } from "components/Text";
 import { router } from "expo-router";
 import React, { ReactElement } from "react";
 import { TouchableHighlight, View } from "react-native";
+
 import { StackParamList } from "../../lib/NavigatorParamList";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";

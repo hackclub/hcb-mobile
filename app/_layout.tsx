@@ -10,10 +10,10 @@ import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-inten
 import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
 import React, { createContext, useContext, useEffect } from "react";
-import { ActivityIndicator, ColorSchemeName, useColorScheme, View } from "react-native";
+import { ColorSchemeName, useColorScheme } from "react-native";
 
-import { AuthProvider } from "@/auth/AuthProvider";
 import AuthContext from "@/auth/auth";
+import { AuthProvider } from "@/auth/AuthProvider";
 import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import { CacheProvider, useCache } from "@/providers/cacheProvider";
 import { LinkingProvider } from "@/providers/LinkingContext";
@@ -25,7 +25,9 @@ export const SWRCacheProvider = createContext<{
   cache: CacheProvider;
 } | null>(null);
 
-export const ReadyContext = createContext<[boolean, (ready: boolean) => void] | null>(null);
+export const ReadyContext = createContext<
+  [boolean, (ready: boolean) => void] | null
+>(null);
 
 const routingInstrumentation = Sentry.reactNavigationIntegration({
   enableTimeToInitialDisplay: true,

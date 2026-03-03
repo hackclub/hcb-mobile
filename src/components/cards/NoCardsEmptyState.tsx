@@ -9,12 +9,20 @@ import Button from "../Button";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
-export const NoCardsEmptyState = () => {
+export const NoCardsEmptyState = ({
+  onOrderCard,
+}: {
+  onOrderCard?: () => void;
+}) => {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
 
   const handleOrderCard = () => {
-    router.push("/cards/order");
+    if (onOrderCard) {
+      onOrderCard();
+      return;
+    }
+    router.push("/(events)");
   };
 
   return (

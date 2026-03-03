@@ -7,7 +7,6 @@ import { Platform, Pressable, View } from "react-native";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
-
 export default function TapToPayBanner({
   onDismiss,
   orgId,
@@ -20,8 +19,8 @@ export default function TapToPayBanner({
   const handlePress = () => {
     router.push({
       pathname: "/(events)/[id]/donations",
-      params: { id: orgId }
-    })
+      params: { id: orgId },
+    });
   };
 
   const gradientColors = isDark

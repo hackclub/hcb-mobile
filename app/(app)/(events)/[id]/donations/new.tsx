@@ -22,7 +22,7 @@ import Button from "@/components/Button";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { setPaymentData } from "@/lib/paymentStore";
-import { palette } from "@/styles/theme"
+import { palette } from "@/styles/theme";
 
 export default function Page() {
   const { id, orgSlug } = useLocalSearchParams<{
@@ -97,7 +97,7 @@ export default function Page() {
         showAlert(
           "Error collecting payment",
           "Failed to collect payment. Please try again. Error: " +
-          error.message,
+            error.message,
         );
         return false;
       }

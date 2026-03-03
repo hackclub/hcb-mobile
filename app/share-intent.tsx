@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -18,8 +18,8 @@ import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
-import { maybeRequestReview } from "@/utils/storeReview";
 import { palette } from "@/styles/theme";
+import { maybeRequestReview } from "@/utils/storeReview";
 import { renderMoney } from "@/utils/util";
 
 interface ImageAssignment {
@@ -29,10 +29,58 @@ interface ImageAssignment {
   isReceiptBin?: boolean;
 }
 
+const parseJsonParam = <T,>(value: unknown): T | null => {
+  if (typeof value !== "string") return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeImageParam = (value: unknown): string[] => {
+  const rawValue = Array.isArray(value)
+    ? value
+    : parseJsonParam<unknown>(value);
+  if (!Array.isArray(rawValue)) return [];
+  return rawValue.filter(
+    (img): img is string => typeof img === "string" && img.length > 0,
+  );
+};
+
+const normalizeMissingTransactionsParam = (
+  value: unknown,
+): Array<Transaction & { organization: Organization }> => {
+  const rawValue = Array.isArray(value)
+    ? value
+    : parseJsonParam<unknown>(value);
+  if (!Array.isArray(rawValue)) return [];
+
+  return rawValue.filter(
+    (
+      transaction,
+    ): transaction is Transaction & { organization: Organization } => {
+      if (!transaction || typeof transaction !== "object") return false;
+      const maybeTransaction = transaction as Partial<Transaction> & {
+        organization?: Partial<Organization>;
+      };
+      return (
+        typeof maybeTransaction.id === "string" &&
+        typeof maybeTransaction.organization?.id === "string"
+      );
+    },
+  );
+};
+
 export default function Page() {
-  const navigation = useNavigation();
-  const { images: _images, missingTransactions } = useLocalSearchParams();
-  const images = JSON.parse(_images as string);
+  const { images: rawImages, missingTransactions: rawMissingTransactions } =
+    useLocalSearchParams();
+
+  const images = useMemo(() => normalizeImageParam(rawImages), [rawImages]);
+  const validTransactions = useMemo(
+    () => normalizeMissingTransactionsParam(rawMissingTransactions),
+    [rawMissingTransactions],
+  );
 
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
@@ -42,26 +90,6 @@ export default function Page() {
       images?.filter((img: unknown) => img && typeof img === "string") || [],
     [images],
   );
-
-  const transactionsRef = useRef<
-    Array<Transaction & { organization: Organization }>
-  >([]);
-
-  useEffect(() => {
-    if (
-      missingTransactions &&
-      Array.isArray(missingTransactions) &&
-      missingTransactions.length > 0
-    ) {
-      // @ts-expect-error - ignore
-      transactionsRef.current = missingTransactions.filter(
-        (t: unknown) => t && t.id,
-      );
-      setTransactionsInitialized(true);
-    }
-  }, [missingTransactions]);
-
-  const validTransactions = transactionsRef.current;
 
   const [assignments, setAssignments] = useState<ImageAssignment[]>(
     validImages.map((uri) => ({
@@ -74,7 +102,6 @@ export default function Page() {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   );
-  const [transactionsInitialized, setTransactionsInitialized] = useState(false);
 
   useEffect(() => {
     if (validImages.length > 0 && assignments.length !== validImages.length) {
@@ -98,7 +125,6 @@ export default function Page() {
       imagesCount: validImages.length,
       images: validImages,
       missingTransactionsCount: validTransactions.length,
-      transactionsInitialized: transactionsInitialized,
       missingTransactions: validTransactions.map((t) => ({
         id: t.id,
         memo: t.memo,
@@ -115,7 +141,7 @@ export default function Page() {
         [{ text: "OK", onPress: () => router.back() }],
       );
     }
-  }, [validImages, validTransactions, navigation, transactionsInitialized]);
+  }, [validImages, validTransactions]);
 
   const handleImageSelect = (
     imageIndex: number,
@@ -125,10 +151,10 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: transaction.id,
-            orgId: transaction.organization.id,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: transaction.id,
+              orgId: transaction.organization.id,
+            }
           : assignment,
       ),
     );
@@ -154,11 +180,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: null,
-            orgId: null,
-            isReceiptBin: true,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: true,
+            }
           : assignment,
       ),
     );
@@ -182,11 +208,11 @@ export default function Page() {
       prev.map((assignment, index) =>
         index === imageIndex
           ? {
-            imageUri: assignment.imageUri,
-            transactionId: null,
-            orgId: null,
-            isReceiptBin: false,
-          }
+              imageUri: assignment.imageUri,
+              transactionId: null,
+              orgId: null,
+              isReceiptBin: false,
+            }
           : assignment,
       ),
     );

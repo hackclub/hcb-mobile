@@ -40,7 +40,7 @@ export default function PaymentCard({
 }) {
   const { colors: themeColors, dark } = useTheme();
   const appState = useRef(AppState.currentState);
-  const [isAppInBackground, setisAppInBackground] = useState(appState.current);
+  const [isAppInBackground, setIsAppInBackground] = useState(appState.current);
   const { width } = useWindowDimensions();
   const [logoWidth, setLogoWidth] = useState(80);
   const [logoHeight, setLogoHeight] = useState(40);
@@ -63,7 +63,7 @@ export default function PaymentCard({
       "change",
       (nextAppState: AppStateStatus) => {
         appState.current = nextAppState;
-        setisAppInBackground(appState.current);
+        setIsAppInBackground(appState.current);
       },
     );
 
@@ -73,6 +73,12 @@ export default function PaymentCard({
   if ((card as GrantCard)?.amount_cents) {
     card.type = "virtual";
   }
+
+  const isPhysical = card.type === "physical";
+  const isVirtual = card.type === "virtual";
+  const isBlackCard = card.personalization?.color === "black";
+  const cardTextColor = isBlackCard || isVirtual ? "white" : "black";
+  const cardIconColor = isBlackCard ? "white" : "black";
 
   if (!isCardDataValid) {
     return (
@@ -96,12 +102,11 @@ export default function PaymentCard({
   return (
     <View
       style={{
-        backgroundColor:
-          card.type == "physical"
-            ? card.personalization?.color == "black"
-              ? "black"
-              : "white"
-            : themeColors.card,
+        backgroundColor: isPhysical
+          ? isBlackCard
+            ? "black"
+            : "white"
+          : themeColors.card,
         padding: 30,
         width: width - 40,
         height: (width - 40) / 1.588,
@@ -116,7 +121,7 @@ export default function PaymentCard({
         overflow: "hidden",
       }}
     >
-      {card.type == "virtual" && pattern && (
+      {isVirtual && pattern && (
         <View
           style={{
             position: "absolute",
@@ -130,7 +135,7 @@ export default function PaymentCard({
         </View>
       )}
 
-      {card.type == "physical" && !card.personalization?.logo_url && (
+      {isPhysical && !card.personalization?.logo_url && (
         <View
           style={{
             position: "absolute",
@@ -143,15 +148,11 @@ export default function PaymentCard({
             overflow: "hidden",
           }}
         >
-          <Icon
-            glyph="bank-account"
-            size={40}
-            color={card.personalization?.color == "black" ? "white" : "black"}
-          />
+          <Icon glyph="bank-account" size={40} color={cardIconColor} />
         </View>
       )}
 
-      {card.type == "physical" && card.personalization?.logo_url && (
+      {isPhysical && card.personalization?.logo_url && (
         <View
           style={{
             position: "absolute",
@@ -166,19 +167,18 @@ export default function PaymentCard({
           <Image
             contentFit="contain"
             cachePolicy="memory-disk"
-            source={{ uri: card.personalization?.logo_url }}
+            source={{ uri: card.personalization.logo_url }}
             style={{
               width: "auto",
               height: 40,
-              tintColor:
-                card.personalization?.color == "black" ? "white" : "black",
+              tintColor: cardIconColor,
               aspectRatio: logoWidth / logoHeight,
             }}
           />
         </View>
       )}
 
-      {card.status == "frozen" && (
+      {card.status === "frozen" && (
         <>
           <Image
             source={require("../../assets/card-frost.png")}
@@ -197,17 +197,17 @@ export default function PaymentCard({
             <Icon
               glyph="freeze"
               size={32}
-              color={card.personalization?.color == "black" ? "white" : "black"}
+              color={cardIconColor}
               opacity={0.5}
             />
           </View>
         </>
       )}
 
-      {card.type == "physical" && <CardChip />}
+      {isPhysical && <CardChip />}
       <Text
         style={{
-          color: card.personalization?.color == "white" ? "black" : "white",
+          color: cardTextColor,
           fontSize: 18,
           marginBottom: 4,
           fontFamily: "Consolas-Bold",
@@ -221,7 +221,7 @@ export default function PaymentCard({
         <View>
           <Text
             style={{
-              color: card.personalization?.color == "white" ? "black" : "white",
+              color: cardTextColor,
               fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
@@ -236,15 +236,14 @@ export default function PaymentCard({
         <View style={{ position: "absolute", right: 0 }}>
           <Text
             style={{
-              color: card.personalization?.color == "white" ? "black" : "white",
+              color: cardTextColor,
               fontSize: 14,
               fontFamily: "Consolas-Bold",
               fontWeight: 700,
               textTransform: "uppercase",
-              backgroundColor:
-                card.type == "virtual"
-                  ? "rgba(255, 255, 255, 0.05)"
-                  : "rgba(255, 255, 255, 0.08)",
+              backgroundColor: isVirtual
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(255, 255, 255, 0.08)",
               borderRadius: 15,
               paddingHorizontal: 10,
               paddingVertical: 3,

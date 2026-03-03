@@ -16,8 +16,8 @@ import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Invitation from "@/lib/types/Invitation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import palette from "@/styles/palette"
-import { palette as themePalette } from "@/styles/theme"
+import palette from "@/styles/palette";
+import { palette as themePalette } from "@/styles/theme";
 
 export default function Page() {
   const hcb = useClient();

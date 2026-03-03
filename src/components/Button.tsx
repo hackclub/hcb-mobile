@@ -9,6 +9,7 @@ import {
   View,
   ViewProps,
 } from "react-native";
+
 import { palette } from "../styles/theme";
 import * as Haptics from "../utils/haptics";
 
@@ -68,76 +69,64 @@ export default function Button(
   const { variant = "primary" } = props;
 
   const getVariantStyles = () => {
-    if (props.variant) {
-      const variantBaseStyle = {
-        ...styles.button,
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-      };
+    const variantBaseStyle = {
+      ...styles.button,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+    };
 
-      switch (variant) {
-        case "secondary":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: theme.colors.card,
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-          };
-        case "outline":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: "transparent",
-            borderWidth: 2,
-            borderColor: palette.primary,
-          };
-        case "ghost":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: "transparent",
-            borderWidth: 0,
-            borderColor: "transparent",
-          };
-        case "primary":
-        default:
-          return variantBaseStyle;
-      }
+    switch (variant) {
+      case "secondary":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+        };
+      case "outline":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "transparent",
+          borderWidth: 2,
+          borderColor: palette.primary,
+        };
+      case "ghost":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "transparent",
+          borderWidth: 0,
+          borderColor: "transparent",
+        };
+      case "primary":
+      default:
+        return variantBaseStyle;
     }
-
-    return styles.button;
   };
 
   const getTextColor = () => {
     if (props.color) return props.color;
 
-    if (props.variant) {
-      switch (variant) {
-        case "secondary":
-          return theme.colors.text;
-        case "outline":
-          return palette.primary;
-        case "ghost":
-          return theme.colors.text;
-        case "primary":
-        default:
-          return "#FFFFFF";
-      }
+    switch (variant) {
+      case "secondary":
+        return theme.colors.text;
+      case "outline":
+        return palette.primary;
+      case "ghost":
+        return theme.colors.text;
+      case "primary":
+      default:
+        return "#FFFFFF";
     }
-
-    return styles.buttonText.color;
   };
 
-  const getTextStyles = () => {
-    const baseTextStyle = {
-      ...styles.buttonText,
-      color: getTextColor(),
-      fontSize: props.fontSize || styles.buttonText.fontSize,
-      fontWeight: props.fontWeight || styles.buttonText.fontWeight,
-      opacity: props.loading ? 0 : props.variant === "ghost" ? 0.8 : 1,
-    };
-
-    return baseTextStyle;
-  };
+  const getTextStyles = () => ({
+    ...styles.buttonText,
+    color: getTextColor(),
+    fontSize: props.fontSize || styles.buttonText.fontSize,
+    fontWeight: props.fontWeight || styles.buttonText.fontWeight,
+    opacity: props.loading ? 0 : variant === "ghost" ? 0.8 : 1,
+  });
 
   return (
     <Pressable
@@ -156,7 +145,7 @@ export default function Button(
         if (props.hapticFeedback !== false) {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
         }
-        props.onPress && props.onPress();
+        props.onPress?.();
       }}
       disabled={props.loading || props.disabled}
       accessible={true}

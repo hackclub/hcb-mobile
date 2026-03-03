@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
-import { View, Platform } from "react-native";
 import { Text } from "components/Text";
+import { View, Platform } from "react-native";
+
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";

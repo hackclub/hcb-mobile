@@ -1,10 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
 import useSWR from "swr";
-import { Text } from "components/Text";
 
 import Invitation from "../../lib/types/Invitation";
 import Organization, {

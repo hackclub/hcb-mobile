@@ -328,10 +328,10 @@ export default function Page() {
                   showAlert(
                     "Unsupported Device",
                     "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
-                  )
-                  throw new Error("Tap to pay unsupported")
+                  );
+                  throw new Error("Tap to pay unsupported");
                 }
-              }
+              },
             },
             {
               name: "Account details",

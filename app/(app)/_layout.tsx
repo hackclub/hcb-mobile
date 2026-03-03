@@ -92,17 +92,24 @@ function Navigation() {
   const router = useRouter();
 
   useEffect(() => {
-    if (
-      hasPendingShareIntent &&
-      pendingShareIntent
-    ) {
+    if (hasPendingShareIntent && pendingShareIntent) {
       router.navigate({
         pathname: "/share-intent",
-        params: pendingShareIntent as Record<string, string>,
+        params: {
+          images: JSON.stringify(pendingShareIntent.images),
+          missingTransactions: JSON.stringify(
+            pendingShareIntent.missingTransactions,
+          ),
+        },
       });
       clearPendingShareIntent();
     }
-  }, [hasPendingShareIntent, pendingShareIntent, clearPendingShareIntent]);
+  }, [
+    hasPendingShareIntent,
+    pendingShareIntent,
+    clearPendingShareIntent,
+    router,
+  ]);
 
   return (
     <Tabs
@@ -265,10 +272,10 @@ export default function Layout() {
       const token = (await hcb
         .get("stripe_terminal_connection_token")
         .json()) as {
-          terminal_connection_token: {
-            secret: string;
-          };
+        terminal_connection_token: {
+          secret: string;
         };
+      };
 
       const newToken = token.terminal_connection_token.secret;
       const newExpiry = now + TOKEN_CACHE_DURATION;
@@ -399,6 +406,7 @@ export default function Layout() {
             hasPassedBiometrics.current = false;
             lastAuthenticatedToken.current = null;
             setIsAuthenticated(false);
+            void setTokenResponse(null);
           }
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
@@ -409,6 +417,7 @@ export default function Layout() {
           hasPassedBiometrics.current = false;
           lastAuthenticatedToken.current = null;
           setIsAuthenticated(false);
+          void setTokenResponse(null);
           setAppIsReady(true);
           isBiometricAuthInProgress.current = false;
         }
@@ -427,6 +436,7 @@ export default function Layout() {
       if (!cancelled) {
         console.error("Unexpected error in checkAuth", error);
         setIsAuthenticated(false);
+        void setTokenResponse(null);
         setAppIsReady(true);
         isBiometricAuthInProgress.current = false;
       }
@@ -565,6 +575,10 @@ export default function Layout() {
 
   if (isUniversalLinkingEnabled === null) {
     return <ActivityIndicator color="white" />;
+  }
+
+  if (tokens?.accessToken && !isAuthenticated) {
+    return <ActivityIndicator color={isDark ? "white" : "black"} />;
   }
 
   if (!appIsReady) {

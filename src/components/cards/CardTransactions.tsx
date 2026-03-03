@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { Text } from "components/Text";
+import { router } from "expo-router";
+import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";
 import TransactionComponent from "../transaction/Transaction";
-import { router } from "expo-router";
+
 
 interface CardTransactionsProps {
   transactions: Transaction[];
@@ -142,7 +143,7 @@ export default function CardTransactions({
                   transaction: JSON.stringify(transaction),
                   transactionId: transaction.id,
                   title: getTransactionTitle(transaction),
-                }
+                },
               });
             }}
             style={[

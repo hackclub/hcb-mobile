@@ -1,17 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { router } from "expo-router";
 import { Text } from "./Text";
 
 export function Navbar({
   options,
   navigation,
 }: {
-  options: any;
-  navigation: any;
+  options: unknown;
+  navigation: unknown;
 }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();

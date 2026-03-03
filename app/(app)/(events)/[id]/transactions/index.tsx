@@ -31,17 +31,17 @@ import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 type ListItemType =
   | { type: "header"; title: string }
   | {
-    type: "transaction";
-    transaction: TransactionWithoutId;
-    isFirst: boolean;
-    isLast: boolean;
-  }
+      type: "transaction";
+      transaction: TransactionWithoutId;
+      isFirst: boolean;
+      isLast: boolean;
+    }
   | {
-    type: "mockTransaction";
-    transaction: MockTransactionType;
-    isFirst: boolean;
-    isLast: boolean;
-  };
+      type: "mockTransaction";
+      transaction: MockTransactionType;
+      isFirst: boolean;
+      isLast: boolean;
+    };
 
 export default function Page() {
   const navigation = useNavigation();
@@ -324,9 +324,7 @@ export default function Page() {
   const isOfflineNoData = organizationError && !isOnline && !organization;
 
   if (isAccessDenied) {
-    return (
-      <AccessDenied orgId={params.id} onGoBack={() => router.back()} />
-    );
+    return <AccessDenied orgId={params.id} onGoBack={() => router.back()} />;
   }
 
   if (isOfflineNoData) {

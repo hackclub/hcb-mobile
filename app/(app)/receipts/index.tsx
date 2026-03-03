@@ -151,16 +151,19 @@ export default function Page() {
     return Object.values(groups);
   }, [data?.data]);
 
-  const onRefresh = useCallback(async (showIndicator = true) => {
-    if (showIndicator) {
-      setRefreshing(true);
-    }
-    await mutate();
-    await refreshReceipts();
-    if (showIndicator) {
-      setRefreshing(false);
-    }
-  }, [mutate, refreshReceipts]);
+  const onRefresh = useCallback(
+    async (showIndicator = true) => {
+      if (showIndicator) {
+        setRefreshing(true);
+      }
+      await mutate();
+      await refreshReceipts();
+      if (showIndicator) {
+        setRefreshing(false);
+      }
+    },
+    [mutate, refreshReceipts],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -235,7 +238,7 @@ export default function Page() {
         router.push({
           pathname: "/share-intent",
           params: {
-            images: result.assets.map((asset) => asset.uri),
+            images: JSON.stringify(result.assets.map((asset) => asset.uri)),
             missingTransactions: JSON.stringify([transaction]),
           },
         });

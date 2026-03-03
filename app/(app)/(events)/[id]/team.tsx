@@ -13,7 +13,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { OrgUser } from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme"
+import { palette } from "@/styles/theme";
 
 function MemberRole(props: { role: OrgUser["role"] }) {
   return (

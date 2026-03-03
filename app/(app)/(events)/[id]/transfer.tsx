@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import DisbursementScreen from "@/components/organizations/transfer/Disbursement";
-import { theme } from "@/styles/theme"
+import { theme } from "@/styles/theme";
 
 export default function Page() {
   const navigation = useNavigation();

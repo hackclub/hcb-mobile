@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { useState } from "react";
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Pressable,
 } from "react-native";
 import useSWR, { mutate, useSWRConfig } from "swr";
-import { Text } from "components/Text";
+
 import useClient from "../../../lib/client";
 import User from "../../../lib/types/User";
 import { palette } from "../../../styles/theme";
@@ -109,7 +110,7 @@ export default function CommentField({
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   if (!user) {
     return null;

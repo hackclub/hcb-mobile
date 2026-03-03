@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 import { KyInstance } from "ky";
-import { Alert } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { showAlert } from "../lib/alertUtils";
@@ -9,7 +9,6 @@ import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
 
-import { router } from "expo-router";
 import { validateFields } from "./cardHelpers";
 import * as Haptics from "./haptics";
 import { renderMoney } from "./util";
@@ -183,7 +182,7 @@ export const returnGrant = async (
   card: Card,
   isCardholder: boolean,
   grantCard: GrantCard,
-  setisReturningGrant: (isReturningGrant: boolean) => void,
+  setIsReturningGrant: (isReturningGrant: boolean) => void,
   mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
@@ -208,7 +207,7 @@ export const returnGrant = async (
         style: "destructive",
         onPress: async () => {
           try {
-            setisReturningGrant(true);
+            setIsReturningGrant(true);
             await hcb.post(
               `card_grants/${grantId || grantCard.grant_id}/cancel`,
             );
@@ -226,7 +225,7 @@ export const returnGrant = async (
               [{ text: "OK" }],
             );
           } finally {
-            setisReturningGrant(false);
+            setIsReturningGrant(false);
           }
         },
       },
@@ -375,12 +374,12 @@ export const handleCreateCard = async (
       router.back();
     } else {
       const data = (await response.json()) as { error?: string };
-      Alert.alert("Error", data.error || "Failed to create card");
+      showAlert("Error", data.error || "Failed to create card");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   } catch (err) {
     console.error("Error creating card:", err);
-    Alert.alert("Error", "Failed to create card. Please try again later.");
+    showAlert("Error", "Failed to create card. Please try again later.");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {
     setIsLoading(false);

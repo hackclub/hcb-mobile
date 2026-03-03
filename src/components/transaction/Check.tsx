@@ -1,6 +1,5 @@
-import { View, Image, StyleSheet, Dimensions } from "react-native";
 import { Text } from "components/Text";
-
+import { View, Image, StyleSheet, Dimensions } from "react-native";
 import useSWR from "swr";
 import { ToWords } from "to-words";
 

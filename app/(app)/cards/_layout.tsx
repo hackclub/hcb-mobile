@@ -11,7 +11,11 @@ export default function Layout() {
           name="index"
           options={{ headerShown: false, title: "" }}
         />
-        <Stack.Screen name="[id]" options={{ title: "Transactions" }} />
+        <Stack.Screen name="[id]" options={{ title: "Card" }} />
+        <Stack.Screen
+          name="card-grants/[id]"
+          options={{ title: "Grant Card" }}
+        />
       </Stack>
       <TabBarStyling enabledPage="/cards" />
     </>

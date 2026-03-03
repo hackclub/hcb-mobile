@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import { palette } from "../styles/theme";
 
 import Button from "./Button";
