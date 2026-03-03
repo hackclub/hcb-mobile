@@ -73,6 +73,8 @@ export default function AccountNumberPage() {
       fallbackData: params.fallbackData,
     });
 
+  const { colors: themeColors } = useTheme();
+
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -96,9 +98,7 @@ export default function AccountNumberPage() {
         </>
       ),
     });
-  }, [navigation]);
-
-  const { colors: themeColors } = useTheme();
+  }, [navigation, themeColors]);
 
   if (
     !organizationLoading &&

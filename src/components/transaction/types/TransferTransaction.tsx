@@ -58,7 +58,7 @@ export default function TransferTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           ...(transfer.sender
             ? [
               {

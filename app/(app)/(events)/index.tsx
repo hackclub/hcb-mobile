@@ -364,9 +364,7 @@ export default function App() {
                             pathname: "/invitation/[id]",
                             params: {
                               id: invitation.id,
-                              invitation: JSON.parse(
-                                JSON.stringify(invitation),
-                              ),
+                              invitation: JSON.stringify(invitation),
                             },
                           })
                         }

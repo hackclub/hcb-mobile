@@ -43,11 +43,11 @@ export default function WiseTransaction({
           },
           ...(wise_transfer.recipient_email
             ? [
-                {
-                  label: "Recipient Email",
-                  value: wise_transfer.recipient_email,
-                },
-              ]
+              {
+                label: "Recipient Email",
+                value: wise_transfer.recipient_email,
+              },
+            ]
             : []),
           {
             label: "Recipient Country",
@@ -62,20 +62,20 @@ export default function WiseTransaction({
             value: [
               `${renderMoney(Math.abs(wise_transfer.amount_cents)).slice(1)} ${wise_transfer.currency}`,
               wise_transfer.usd_amount_cents &&
-                `(${renderMoney(wise_transfer.usd_amount_cents)} USD)`,
+              `(${renderMoney(wise_transfer.usd_amount_cents)} USD)`,
             ]
               .filter(Boolean)
               .join(" "),
           },
           ...(wise_transfer.return_reason
             ? [
-                {
-                  label: "Return Reason",
-                  value: wise_transfer.return_reason,
-                },
-              ]
+              {
+                label: "Return Reason",
+                value: wise_transfer.return_reason,
+              },
+            ]
             : []),
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: "Sent",
             value: [
@@ -87,11 +87,11 @@ export default function WiseTransaction({
           },
           ...(wise_transfer.sender
             ? [
-                {
-                  label: "Sent by",
-                  value: <UserMention user={wise_transfer.sender} />,
-                },
-              ]
+              {
+                label: "Sent by",
+                value: <UserMention user={wise_transfer.sender} />,
+              },
+            ]
             : []),
         ]}
       />

@@ -1,11 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { MenuView } from "@react-native-menu/menu";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -15,14 +13,12 @@ import { handleMenuActionEvent, handleMenuActions } from "../../utils/util";
 
 interface MenuProps {
   user: User;
-  navigation: NativeStackNavigationProp<StackParamList, "Event">;
   organization: Organization | OrganizationExpanded | undefined;
   supportsTapToPay: boolean | undefined;
 }
 
 export default function Menu({
   user,
-  navigation,
   organization,
   supportsTapToPay,
 }: MenuProps) {
@@ -51,7 +47,7 @@ export default function Menu({
         Haptics.selectionAsync();
         handleMenuActionEvent(
           event,
-          navigation,
+          null,
           organization,
           supportsTapToPay,
         );

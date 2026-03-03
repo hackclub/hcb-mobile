@@ -33,8 +33,8 @@ function TransactionWrapper({
 
   const userinOrganization = Boolean(
     organization &&
-      "users" in organization &&
-      organization.users.some((u) => u.id === user?.id),
+    "users" in organization &&
+    organization.users.some((u) => u.id === user?.id),
   );
 
   const canViewTransaction = Boolean(
@@ -57,12 +57,12 @@ function TransactionWrapper({
       });
     } else {
       router.push({
-        pathname: "/[id]/transactions/[transactionId]",
+        pathname: "/(events)/[id]/transactions/[transactionId]",
         params: {
+          id: orgId,
           transactionId: item.id!,
           orgId,
           transaction: JSON.stringify(item as ITransaction),
-          title: getTransactionTitle(item as ITransaction),
         },
       });
     }

@@ -25,6 +25,22 @@ export default function Layout() {
           options={{ headerShown: false, title: "" }}
         />
         <Stack.Screen
+          name="[id]"
+          options={{ title: "" }}
+        />
+        <Stack.Screen
+          name="[id]/team"
+          options={{ title: "Team" }}
+        />
+        <Stack.Screen
+          name="[id]/transfer"
+          options={{ title: "Transfer Money" }}
+        />
+        <Stack.Screen
+          name="[id]/cards/order"
+          options={{ title: "Order a Card" }}
+        />
+        <Stack.Screen
           name="[id]/transactions"
           options={{ title: "Transactions" }}
         />
@@ -51,6 +67,10 @@ export default function Layout() {
         <Stack.Screen
           name="[id]/donations/process"
           options={{ presentation: "modal", title: "Process Donation" }}
+        />
+        <Stack.Screen
+          name="invitation/[id]"
+          options={{ title: "Invitation" }}
         />
       </Stack>
       <TabBarStyling enabledPage="/" />

@@ -80,22 +80,22 @@ export default function DonationTransaction({
           },
           ...(donation.recurring && donation.donor.recurring_donor_id
             ? [
-                {
-                  label: "Recurring ID",
-                  value: donation.donor.recurring_donor_id,
-                  fontFamily: "JetBrainsMono-Regular",
-                },
-              ]
+              {
+                label: "Recurring ID",
+                value: donation.donor.recurring_donor_id,
+                fontFamily: "JetBrainsMono-Regular",
+              },
+            ]
             : []),
           ...(donation.message
             ? [
-                {
-                  label: "Message",
-                  value: donation.message,
-                },
-              ]
+              {
+                label: "Message",
+                value: donation.message,
+              },
+            ]
             : []),
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: "Donated on",
             value: format(
@@ -105,11 +105,11 @@ export default function DonationTransaction({
           },
           ...(attributionString
             ? [
-                {
-                  label: "Attribution",
-                  value: attributionString,
-                },
-              ]
+              {
+                label: "Attribution",
+                value: attributionString,
+              },
+            ]
             : []),
         ]}
       />

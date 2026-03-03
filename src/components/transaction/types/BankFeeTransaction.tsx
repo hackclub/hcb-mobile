@@ -25,7 +25,7 @@ export default function BankFeeTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           { label: "Charged on", value: renderDate(transaction.date) },
         ]}
       />

@@ -556,7 +556,6 @@ export default function Page() {
               mutate,
               hcb,
               fullGrantId,
-              navigation,
             )
           }
           loading={!!isReturningGrant}

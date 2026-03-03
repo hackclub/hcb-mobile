@@ -49,7 +49,7 @@ export default function ExpensePayoutTransaction({
               </TouchableHighlight>
             ),
           },
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />

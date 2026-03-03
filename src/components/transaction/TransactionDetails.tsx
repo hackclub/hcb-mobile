@@ -1,12 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Text } from "components/Text";
 import { router } from "expo-router";
 import React, { ReactElement } from "react";
 import { TouchableHighlight, View } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
 import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";
 
@@ -21,7 +19,6 @@ interface Detail {
 export function descriptionDetail(
   org: string,
   transaction: Transaction,
-  navigation: NativeStackNavigationProp<StackParamList, "Transaction">,
 ): Detail {
   return {
     label: "Memo",
@@ -29,7 +26,11 @@ export function descriptionDetail(
     onPress() {
       router.push({
         pathname: "/(app)/(events)/[id]/transactions/[transactionId]/rename",
-        params: { id: org, transaction: JSON.stringify(transaction) },
+        params: {
+          id: org,
+          transactionId: transaction.id,
+          transaction: JSON.stringify(transaction),
+        },
       });
     },
   };

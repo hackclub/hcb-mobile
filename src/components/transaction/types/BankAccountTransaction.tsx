@@ -30,7 +30,7 @@ export default function BankAccountTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />

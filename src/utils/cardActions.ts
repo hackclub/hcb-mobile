@@ -1,10 +1,8 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { router } from "expo-router";
 import { KyInstance } from "ky";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { showAlert } from "../lib/alertUtils";
-import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
@@ -186,7 +184,6 @@ export const returnGrant = async (
   mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
-  navigation: NativeStackNavigationProp<Record<string, unknown>>,
 ) => {
   if (!card || !card.id) {
     showAlert("Error", "Cannot update card status. Please try again.");
@@ -328,7 +325,6 @@ export const handleCreateCard = async (
   hcb: KyInstance,
   user: User,
   setIsLoading: (isLoading: boolean) => void,
-  navigation: NativeStackNavigationProp<CardsStackParamList>,
 ) => {
   if (
     !validateFields(

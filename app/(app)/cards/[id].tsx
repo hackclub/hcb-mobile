@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
@@ -24,7 +23,6 @@ import CardSkeleton from "../../../src/components/cards/CardSkeleton";
 import CardTransactions from "../../../src/components/cards/CardTransactions";
 import ActivateCardModal from "../../../src/components/cards/modals/ActivateCardModal";
 import useClient from "../../../src/lib/client";
-import { CardsStackParamList } from "../../../src/lib/NavigatorParamList";
 import useTransactions from "../../../src/lib/organization/useTransactions";
 import Card from "../../../src/lib/types/Card";
 import { OrganizationExpanded } from "../../../src/lib/types/Organization";
@@ -42,12 +40,6 @@ import {
 } from "../../../src/utils/cardActions";
 import * as Haptics from "../../../src/utils/haptics";
 import { normalizeSvg } from "../../../src/utils/util";
-
-type CardPageProps = {
-  cardId?: string;
-  card?: Card;
-  navigation: NativeStackNavigationProp<CardsStackParamList>;
-};
 
 export default function CardPage() {
   const { card: _card } = useLocalSearchParams();

@@ -31,17 +31,17 @@ import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 type ListItemType =
   | { type: "header"; title: string }
   | {
-      type: "transaction";
-      transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
-    }
+    type: "transaction";
+    transaction: TransactionWithoutId;
+    isFirst: boolean;
+    isLast: boolean;
+  }
   | {
-      type: "mockTransaction";
-      transaction: MockTransactionType;
-      isFirst: boolean;
-      isLast: boolean;
-    };
+    type: "mockTransaction";
+    transaction: MockTransactionType;
+    isFirst: boolean;
+    isLast: boolean;
+  };
 
 export default function Page() {
   const navigation = useNavigation();
@@ -268,7 +268,6 @@ export default function Page() {
             item={item.transaction as ITransaction}
             user={user}
             organization={organization}
-            navigation={navigation}
             orgId={params.id}
             isFirst={item.isFirst}
             isLast={item.isLast}
@@ -276,7 +275,7 @@ export default function Page() {
         </View>
       );
     },
-    [user, organization, navigation, params],
+    [user, organization, params],
   );
 
   const getItemType = useCallback((item: ListItemType) => {

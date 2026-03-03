@@ -1,5 +1,4 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
@@ -19,7 +18,6 @@ import useSWR, { useSWRConfig } from "swr";
 import CardIcon from "@/components/cards/CardIcon";
 import RepIcon from "@/components/cards/RepIcon";
 import useClient from "@/lib/client";
-import { CardsStackParamList } from "@/lib/NavigatorParamList";
 import CardDesign from "@/lib/types/CardDesign";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
@@ -142,7 +140,6 @@ export default function Page() {
       hcb,
       user,
       setIsLoading,
-      navigation as unknown as NativeStackNavigationProp<CardsStackParamList>,
     );
   };
 
