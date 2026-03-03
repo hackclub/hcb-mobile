@@ -50,7 +50,6 @@ import { normalizeSvg } from "@/utils/util";
 export default function Page() {
   const navigation = useNavigation();
   const { id: grantId, cardId } = useLocalSearchParams();
-  console.log(`Grant id: ${grantId}, Card id: ${cardId}`);
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
   const { colors: themeColors } = useTheme();
 
@@ -671,7 +670,6 @@ export default function Page() {
             isLoadingMore={isLoadingMore || false}
             card={card as Card}
             _card={card as Card}
-            navigation={navigation}
           />
         )}
       </ScrollView>

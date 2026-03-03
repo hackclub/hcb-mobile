@@ -4,8 +4,7 @@ import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import { router, useNavigation } from "expo-router";
-import { useLocalSearchParams } from "expo-router/build/hooks";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, Linking, Platform, View } from "react-native";
 
