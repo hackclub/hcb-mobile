@@ -544,7 +544,6 @@ export default function CardPage() {
             isLoadingMore={isLoadingMore || false}
             card={card as Card}
             _card={card as Card}
-            navigation={navigation}
           />
         )}
       </ScrollView>
