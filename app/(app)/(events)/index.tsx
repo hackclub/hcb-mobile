@@ -48,16 +48,12 @@ const EventItem = memo(
     const drag = useReorderableDrag();
     const handlePress = useCallback(() => {
       router.push({
-        pathname: "[id]",
+        pathname: "/(events)/[id]",
         params: {
           id: organization.id,
           fallbackData: JSON.stringify(organization),
         },
       });
-      // navigation.navigate("Event", {
-      //   orgId: organization.id,
-      //   organization,
-      // });
     }, [organization]);
 
     return (

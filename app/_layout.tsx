@@ -9,7 +9,7 @@ import { router, Slot } from "expo-router";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useEffect } from "react";
 import { ColorSchemeName, useColorScheme } from "react-native";
 
 import AuthContext from "@/auth/auth";
@@ -135,6 +135,7 @@ function Layout() {
   const scheme = useColorScheme();
   const cache = useCache();
   const [isReady, setIsReady] = React.useState(false);
+  const handleAuthReady = useCallback(() => setIsReady(true), []);
 
   if (!fontsLoaded) {
     return null;
@@ -144,7 +145,7 @@ function Layout() {
     <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_API_KEY}>
       <ExpoShareIntentProvider>
         <ThemeProvider>
-          <AuthProvider onAuthReady={() => setIsReady(true)}>
+          <AuthProvider onAuthReady={handleAuthReady}>
             <ReadyContext.Provider value={[isReady, setIsReady]}>
               <ShareIntentProvider>
                 <LinkingProvider>
