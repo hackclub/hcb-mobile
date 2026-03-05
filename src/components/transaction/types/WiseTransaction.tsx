@@ -13,7 +13,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function WiseTransaction({
   transaction: { wise_transfer, ...transaction },
   orgId,
-  navigation,
 }: TransactionViewProps<TransactionWise>) {
   const badge = transaction.pending ? (
     <Badge icon="information-circle-outline" color={palette.info}>

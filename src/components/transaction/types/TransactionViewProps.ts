@@ -4,5 +4,4 @@ export type TransactionViewProps<T extends TransactionBase = TransactionBase> =
   {
     transaction: T;
     orgId: string;
-    navigation?: unknown;
   };

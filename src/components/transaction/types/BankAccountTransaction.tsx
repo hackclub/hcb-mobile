@@ -11,7 +11,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function BankAccountTransaction({
   transaction,
-  navigation,
   ...props
 }: TransactionViewProps) {
   return (

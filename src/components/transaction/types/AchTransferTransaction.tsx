@@ -13,7 +13,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function AchTransferTransaction({
   transaction: { ach_transfer, ...transaction },
   orgId,
-  navigation,
 }: TransactionViewProps<TransactionAchTransfer>) {
   const isIncoming = transaction.amount_cents > 0;
 

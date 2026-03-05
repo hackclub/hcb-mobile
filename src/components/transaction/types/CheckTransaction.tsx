@@ -13,7 +13,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },
-  navigation,
   ...props
 }: TransactionViewProps<TransactionCheck>) {
   return (

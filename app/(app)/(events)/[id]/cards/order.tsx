@@ -2,7 +2,7 @@ import { useTheme } from "@react-navigation/native";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -27,7 +27,6 @@ import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
 
 export default function Page() {
-  const navigation = useNavigation();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const [isLoading, setIsLoading] = useState(false);

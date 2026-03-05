@@ -16,7 +16,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },
-  navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);

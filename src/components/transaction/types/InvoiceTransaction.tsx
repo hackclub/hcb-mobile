@@ -13,7 +13,6 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function InvoiceTransaction({
   transaction: { invoice, ...transaction },
   orgId,
-  navigation,
 }: TransactionViewProps<TransactionInvoice>) {
   const isPaid = !!invoice.paid_at;
   const isOverdue = !isPaid && new Date(invoice.due_date) < new Date();

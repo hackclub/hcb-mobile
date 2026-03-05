@@ -154,7 +154,6 @@ export default function TransactionPage() {
 
   const transactionViewProps = {
     orgId: currentOrgId,
-    navigation,
   };
 
   return (

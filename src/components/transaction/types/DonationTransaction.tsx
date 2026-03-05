@@ -40,7 +40,6 @@ function getAttributionString(
 export default function DonationTransaction({
   transaction: { donation, ...transaction },
   orgId,
-  navigation,
 }: TransactionViewProps<TransactionDonation>) {
   const attributionString = getAttributionString(donation.attribution);
 
