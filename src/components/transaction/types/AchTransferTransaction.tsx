@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function AchTransferTransaction({
   transaction: { ach_transfer, ...transaction },
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps<TransactionAchTransfer>) {
   const isIncoming = transaction.amount_cents > 0;
 
@@ -45,11 +45,11 @@ export default function AchTransferTransaction({
           },
           ...(ach_transfer.recipient_email
             ? [
-                {
-                  label: "Email",
-                  value: ach_transfer.recipient_email,
-                },
-              ]
+              {
+                label: "Email",
+                value: ach_transfer.recipient_email,
+              },
+            ]
             : []),
           {
             label: "Bank",
@@ -57,38 +57,38 @@ export default function AchTransferTransaction({
           },
           ...(ach_transfer.account_number_last4
             ? [
-                {
-                  label: "Account",
-                  value: `•••• ${ach_transfer.account_number_last4}`,
-                  fontFamily: "JetBrainsMono-Regular",
-                },
-              ]
+              {
+                label: "Account",
+                value: `•••• ${ach_transfer.account_number_last4}`,
+                fontFamily: "JetBrainsMono-Regular",
+              },
+            ]
             : []),
           ...(ach_transfer.routing_number
             ? [
-                {
-                  label: "Routing",
-                  value: ach_transfer.routing_number,
-                  fontFamily: "JetBrainsMono-Regular",
-                },
-              ]
+              {
+                label: "Routing",
+                value: ach_transfer.routing_number,
+                fontFamily: "JetBrainsMono-Regular",
+              },
+            ]
             : []),
           {
             label: "Purpose",
             value: ach_transfer.payment_for,
           },
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: isIncoming ? "Received on" : "Sent on",
             value: renderDate(transaction.date),
           },
           ...(ach_transfer.sender
             ? [
-                {
-                  label: isIncoming ? "Received by" : "Sent by",
-                  value: <UserMention user={ach_transfer.sender} />,
-                },
-              ]
+              {
+                label: isIncoming ? "Received by" : "Sent by",
+                value: <UserMention user={ach_transfer.sender} />,
+              },
+            ]
             : []),
         ]}
       />

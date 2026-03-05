@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "components/Text";
+import { View } from "react-native";
 import useSWR from "swr";
 
 import Organization from "../../../lib/types/Organization";
@@ -12,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function BankFeeTransaction({
   transaction,
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps) {
   const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
 
@@ -24,7 +25,7 @@ export default function BankFeeTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           { label: "Charged on", value: renderDate(transaction.date) },
         ]}
       />

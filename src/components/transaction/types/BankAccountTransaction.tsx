@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text } from "components/Text";
+import { View } from "react-native";
 
 import { palette } from "../../../styles/theme";
 import { renderDate, renderMoney } from "../../../utils/util";
@@ -10,7 +11,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function BankAccountTransaction({
   transaction,
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps) {
   return (
@@ -29,7 +30,7 @@ export default function BankAccountTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />

@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function InvoiceTransaction({
   transaction: { invoice, ...transaction },
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps<TransactionInvoice>) {
   const isPaid = !!invoice.paid_at;
   const isOverdue = !isPaid && new Date(invoice.due_date) < new Date();
@@ -61,7 +61,7 @@ export default function InvoiceTransaction({
             label: "Email",
             value: invoice.sponsor.email,
           },
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: "Sent on",
             value: format(new Date(invoice.sent_at), "MMM d, yyyy 'at' h:mm a"),
@@ -72,14 +72,14 @@ export default function InvoiceTransaction({
           },
           ...(invoice.paid_at
             ? [
-                {
-                  label: "Paid on",
-                  value: format(
-                    new Date(invoice.paid_at),
-                    "MMM d, yyyy 'at' h:mm a",
-                  ),
-                },
-              ]
+              {
+                label: "Paid on",
+                value: format(
+                  new Date(invoice.paid_at),
+                  "MMM d, yyyy 'at' h:mm a",
+                ),
+              },
+            ]
             : []),
         ]}
       />

@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionCheck>) {
   return (
@@ -48,33 +48,31 @@ export default function CheckTransaction({
       </View>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           ...(check.sender
             ? [
-                {
-                  label: "Sent by",
-                  value: <UserMention user={check.sender} />,
-                },
-                { label: "Sent to", value: check.recipient_name },
-                {
-                  label: "Recipient email",
-                  value: check.recipient_email ?? "",
-                },
-                ...(check.check_number
-                  ? [{ label: "Check number", value: check.check_number }]
-                  : []),
-                ...(check.payment_for
-                  ? [{ label: "Payment Purpose", value: check.payment_for }]
-                  : []),
-                {
-                  label: "Addressed to",
-                  value: `${check.address_line1 ?? ""} ${
-                    check.address_line2 ?? ""
-                  }, ${check.address_city ?? ""}, ${check.address_state ?? ""} ${
-                    check.address_zip ?? ""
+              {
+                label: "Sent by",
+                value: <UserMention user={check.sender} />,
+              },
+              { label: "Sent to", value: check.recipient_name },
+              {
+                label: "Recipient email",
+                value: check.recipient_email ?? "",
+              },
+              ...(check.check_number
+                ? [{ label: "Check number", value: check.check_number }]
+                : []),
+              ...(check.payment_for
+                ? [{ label: "Payment Purpose", value: check.payment_for }]
+                : []),
+              {
+                label: "Addressed to",
+                value: `${check.address_line1 ?? ""} ${check.address_line2 ?? ""
+                  }, ${check.address_city ?? ""}, ${check.address_state ?? ""} ${check.address_zip ?? ""
                   }`,
-                },
-              ]
+              },
+            ]
             : []),
         ]}
       />

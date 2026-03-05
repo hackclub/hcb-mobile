@@ -43,7 +43,7 @@ export default function CheckDepositTransaction(
 
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, props.transaction, props.navigation),
+          descriptionDetail(props.orgId, props.transaction),
           {
             label: "Deposited by",
             value: (

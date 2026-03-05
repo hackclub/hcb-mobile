@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
   Pressable,
   ScrollView,
-  Text,
   TextInput,
   View,
 } from "react-native";

@@ -118,7 +118,10 @@ export default function useDigitalWallet(cardId: string, isPhysical: boolean) {
     if (Platform.OS === "ios") {
       try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { getIsPaired } = require("react-native-watch-connectivity");
+        const watchConnectivity = require("react-native-watch-connectivity");
+        const { getIsPaired } = watchConnectivity as {
+          getIsPaired: () => Promise<boolean>;
+        };
         getIsPaired().then((isPaired: boolean) => {
           setIsPaired(isPaired);
         });

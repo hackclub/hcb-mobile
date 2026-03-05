@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "components/Text";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
-  Modal,
-  View,
-  TouchableOpacity,
-  Text,
   ActivityIndicator,
+  Modal,
   Platform,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import ImageView from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

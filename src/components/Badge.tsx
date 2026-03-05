@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "components/Text";
 import { PropsWithChildren } from "react";
-import { View, Text, ViewStyle } from "react-native";
+import { View, ViewStyle } from "react-native";
 
 import { palette } from "../styles/theme";
 

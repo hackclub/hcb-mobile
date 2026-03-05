@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
-import { useEffect, useState, memo } from "react";
+import { Text } from "components/Text";
+import { memo, useEffect, useState } from "react";
 import {
   GestureResponderEvent,
   Linking,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 

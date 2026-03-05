@@ -11,7 +11,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function ExpensePayoutTransaction({
   transaction: { expense_payout, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionExpensePayout>) {
   return (
@@ -49,7 +49,7 @@ export default function ExpensePayoutTransaction({
               </TouchableHighlight>
             ),
           },
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           { label: "Transaction date", value: renderDate(transaction.date) },
         ]}
       />

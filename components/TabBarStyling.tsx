@@ -1,0 +1,48 @@
+import { BlurView } from "expo-blur";
+import { useNavigation, usePathname } from "expo-router";
+import { useEffect } from "react";
+import { useColorScheme, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export const DEFAULT_BOTTOM_NAV_STYLE = {
+  zIndex: 99,
+  backgroundColor: "transparent",
+  display: "flex",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+} as ViewStyle;
+
+export function TabBarStyling({ enabledPage }: { enabledPage?: string }) {
+  const isDark = useColorScheme() === "dark";
+  const navigation = useNavigation();
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (!enabledPage) return;
+    if (pathname !== enabledPage)
+      navigation.setOptions({ tabBarStyle: { display: "none" } });
+    return () =>
+      navigation.setOptions({ tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE });
+  }, [pathname, navigation, enabledPage]);
+
+  return (
+    (pathname === enabledPage || !enabledPage) && (
+      <BlurView
+        style={{
+          pointerEvents: "none",
+          height: insets.bottom + 50,
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          backgroundColor: isDark
+            ? "rgba(23, 23, 29,0.5)"
+            : "rgba(255,255,255,0.5)",
+          width: "100%",
+          zIndex: 1,
+        }}
+      />
+    )
+  );
+}

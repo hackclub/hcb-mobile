@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
@@ -15,7 +16,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);
@@ -28,9 +29,9 @@ export default function TransferTransaction({
 
   const handleGrantCardNavigation = () => {
     if (transfer.card_grant_id) {
-      // Navigate to the GrantCard screen in the same stack
-      navigation.navigate("GrantCard", {
-        grantId: transfer.card_grant_id,
+      router.push({
+        pathname: "/cards/card-grants/[id]",
+        params: { id: transfer.card_grant_id },
       });
     }
   };
@@ -57,23 +58,23 @@ export default function TransferTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           ...(transfer.sender
             ? [
-                {
-                  label: "Transferred by",
-                  value: <UserMention user={transfer.sender} />,
-                },
-              ]
+              {
+                label: "Transferred by",
+                value: <UserMention user={transfer.sender} />,
+              },
+            ]
             : []),
           ...(transfer.card_grant_id
             ? [
-                {
-                  label: "Grant Card",
-                  value: "View Grant Card",
-                  onPress: handleGrantCardNavigation,
-                },
-              ]
+              {
+                label: "Grant Card",
+                value: "View Grant Card",
+                onPress: handleGrantCardNavigation,
+              },
+            ]
             : []),
         ]}
       />
@@ -84,12 +85,12 @@ export default function TransferTransaction({
             value: transfer.from.name,
             onPress:
               (userInFromOrg || user?.auditor) &&
-              transfer.from.id != props.orgId
+                transfer.from.id != props.orgId
                 ? () =>
-                    navigation.push("Event", {
-                      orgId: transfer.from.id,
-                      organization: transfer.from,
-                    })
+                  router.push({
+                    pathname: "/(events)/[id]",
+                    params: { id: transfer.from.id },
+                  })
                 : undefined,
           },
           {
@@ -98,10 +99,10 @@ export default function TransferTransaction({
             onPress:
               (userInToOrg || user?.auditor) && transfer.to.id != props.orgId
                 ? () =>
-                    navigation.push("Event", {
-                      orgId: transfer.to.id,
-                      organization: transfer.to,
-                    })
+                  router.push({
+                    pathname: "/(events)/[id]",
+                    params: { id: transfer.to.id },
+                  })
                 : undefined,
           },
         ]}
