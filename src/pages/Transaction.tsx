@@ -33,7 +33,10 @@ import InvoiceTransaction from "../components/transaction/types/InvoiceTransacti
 import { TransactionViewProps } from "../components/transaction/types/TransactionViewProps";
 import TransferTransaction from "../components/transaction/types/TransferTransaction";
 import WiseTransaction from "../components/transaction/types/WiseTransaction";
-import { StackParamList } from "../lib/NavigatorParamList";
+import {
+  CardsStackParamList,
+  StackParamList,
+} from "../lib/NavigatorParamList";
 import IComment from "../lib/types/Comment";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import Transaction, { TransactionType } from "../lib/types/Transaction";
@@ -41,14 +44,24 @@ import User from "../lib/types/User";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "Transaction">;
+type Props =
+  | NativeStackScreenProps<StackParamList, "Transaction">
+  | NativeStackScreenProps<CardsStackParamList, "Transaction">;
 
 export default function TransactionPage({
   route: {
     params: { transactionId, transaction: _transaction, orgId },
   },
-  navigation,
+  navigation: _navigation,
 }: Props) {
+  // Cast to StackParamList navigation for sub-component compatibility. Both stacks
+  // share Transaction, RenameTransaction, and GrantCard routes used by sub-components.
+  // Routes exclusive to StackParamList (e.g. Event) will bubble up through React
+  // Navigation's hierarchy to the Home tab when called from within the Cards stack.
+  const navigation = _navigation as NativeStackScreenProps<
+    StackParamList,
+    "Transaction"
+  >["navigation"];
   const [refreshing, setRefreshing] = useState(false);
   const { mutate: globalMutate } = useSWRConfig();
   //filter in case of deeplink with #commentId

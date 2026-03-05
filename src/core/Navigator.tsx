@@ -355,7 +355,7 @@ export default function Navigator() {
                 headerTransparent: true,
               }}
             />
-            <Stack.Screen
+            <CardsStack.Screen
               options={({ route }) => ({
                 headerBackTitle: "Back",
                 title: route.params?.title || "Transaction",
@@ -363,7 +363,7 @@ export default function Navigator() {
               name="Transaction"
               component={TransactionPage}
             />
-            <Stack.Screen
+            <CardsStack.Screen
               name="RenameTransaction"
               component={RenameTransactionPage}
               options={{
