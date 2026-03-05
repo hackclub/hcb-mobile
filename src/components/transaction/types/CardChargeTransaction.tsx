@@ -78,6 +78,10 @@ export default function CardChargeTransaction({
     </Badge>
   ) : null;
 
+  const declineReasonLabel = card_charge.decline_reason
+    ? card_charge.decline_reason.replace(/_/g, " ")
+    : null;
+
   return (
     <View>
       <View style={{ flexDirection: "column", alignItems: "center" }}>
@@ -98,6 +102,14 @@ export default function CardChargeTransaction({
             label: "Method",
             value: getChargeMethodLabel(card_charge.charge_method),
           },
+          ...(transaction.declined && declineReasonLabel
+            ? [
+                {
+                  label: "Decline reason",
+                  value: declineReasonLabel,
+                },
+              ]
+            : []),
           ...(walletLabel
             ? [
                 {

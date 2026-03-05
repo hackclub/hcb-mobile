@@ -50,11 +50,14 @@ export interface CardCharge {
     smart_name?: string;
     country: string;
     network_id: string;
+    category?: string;
   };
   charge_method?: "keyed_in" | "swipe" | "chip" | "contactless" | "online";
   spent_at: string;
   wallet?: "apple_pay" | "google_pay" | "samsung_pay";
   card: Card & { user: User };
+  status?: "pending" | "closed" | "reversed" | "declined";
+  decline_reason?: string | null;
 }
 
 export interface TransactionCardCharge extends TransactionBase {
