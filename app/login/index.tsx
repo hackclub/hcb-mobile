@@ -14,7 +14,6 @@ import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSWRConfig } from "swr";
 
 import AuthContext from "@/auth/auth";
 import Button from "@/components/Button";

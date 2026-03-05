@@ -54,7 +54,7 @@ export default function CardPage() {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const id = paramCard?.id ?? `crd_${paramCard.id}`;
+  const id = paramCard?.id ?? "";
   const {
     data: card,
     error: cardFetchError,
