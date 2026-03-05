@@ -13,13 +13,18 @@ import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
 import useClient from "../lib/client";
-import { StackParamList } from "../lib/NavigatorParamList";
+import {
+  CardsStackParamList,
+  StackParamList,
+} from "../lib/NavigatorParamList";
 import { getKey } from "../lib/organization/useTransactions";
 import Transaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
 
-type Props = NativeStackScreenProps<StackParamList, "RenameTransaction">;
+type Props =
+  | NativeStackScreenProps<StackParamList, "RenameTransaction">
+  | NativeStackScreenProps<CardsStackParamList, "RenameTransaction">;
 
 export default function RenameTransactionPage({
   route: {
