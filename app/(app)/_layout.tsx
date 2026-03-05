@@ -169,7 +169,9 @@ function Navigation() {
 }
 
 export default function Layout() {
-  const { scheme, cache } = useContext(SWRCacheProvider);
+  // SWRCacheProvider is always provided by the parent _layout.tsx
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const { scheme, cache } = useContext(SWRCacheProvider)!;
   const { tokenResponse, codeVerifier, setTokenResponse } =
     useContext(AuthContext);
 

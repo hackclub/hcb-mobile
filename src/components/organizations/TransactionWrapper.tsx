@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 
-import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";

@@ -65,11 +65,13 @@ function AccountDetail({
 
 export default function AccountNumberPage() {
   const navigation = useNavigation();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
 
   const { data: organization, isLoading: organizationLoading } =
     useOfflineSWR<OrganizationExpanded>(`organizations/${params.id}`, {
-      fallbackData: params.fallbackData,
+      fallbackData: params.fallbackData
+        ? (JSON.parse(params.fallbackData) as OrganizationExpanded)
+        : undefined,
     });
 
   const { colors: themeColors } = useTheme();

@@ -73,7 +73,7 @@ const ListItemText = ({
 
 export default function Page() {
   const navigation = useNavigation();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
   const { isOnline } = useOffline();
 
   const {
@@ -83,7 +83,9 @@ export default function Page() {
   } = useOfflineSWR<Organization | OrganizationExpanded>(
     `organizations/${params.id}`,
     {
-      fallbackData: params.fallbackData,
+      fallbackData: params.fallbackData
+        ? (JSON.parse(params.fallbackData) as Organization | OrganizationExpanded)
+        : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {
           context: { orgId: params.id, isOnline },
@@ -229,7 +231,7 @@ export default function Page() {
         {showTapToPayBanner && (
           <TapToPayBanner
             onDismiss={handleDismissTapToPayBanner}
-            orgId={params.id}
+            orgId={params.id as `org_${string}`}
           />
         )}
         {playgroundMode && <PlaygroundBanner />}
