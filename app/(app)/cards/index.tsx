@@ -146,7 +146,7 @@ export default function Page() {
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
   const [allCards, setAllCards] = useState<CardWithGrant[]>();
   const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
-  const [refreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const usePanGesture = () =>
     useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
   const panGesture = usePanGesture();
@@ -333,12 +333,16 @@ export default function Page() {
 
   const onRefresh = async () => {
     try {
+      setRefreshing(true);
       await reloadCards();
       await reloadGrantCards();
     } catch (error) {
       console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
       });
+    }
+    finally {
+      setRefreshing(false);
     }
   };
 

@@ -152,10 +152,7 @@ export default function TransactionPage() {
     return <TransactionSkeleton />;
   }
 
-  const transactionViewProps = {
-    orgId: currentOrgId,
-    navigation,
-  };
+  const transactionViewProps = { orgId };
 
   return (
     <KeyboardAvoidingView
