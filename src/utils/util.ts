@@ -2,13 +2,13 @@ import { MenuAction } from "@react-native-menu/menu";
 import { router } from "expo-router";
 import words from "lodash/words";
 
+import { showAlert } from "../lib/alertUtils";
 import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction, {
   TransactionType,
   TransactionWithoutId,
 } from "../lib/types/Transaction";
 import User from "../lib/types/User";
-import { showAlert } from "../lib/alertUtils";
 import { Category, Merchant } from "../lib/yellowpages";
 import { palette } from "../styles/theme";
 
@@ -88,7 +88,7 @@ function formatEntityNames(
   ids: string[] | undefined,
   lookup: (id: string) => {
     inDataset: () => boolean;
-    getName: () => string | null;
+    getName: () => string | null | undefined;
   },
   unnamedLabel: string,
 ): string {
@@ -237,7 +237,7 @@ export function handleMenuActionEvent(
 
   const baseParams = {
     id: organization.id,
-    fallbackData: organization as unknown,
+    fallbackData: JSON.stringify(organization),
   };
 
   switch (event) {

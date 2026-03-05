@@ -8,9 +8,9 @@ import { Text } from "./Text";
 
 export function Navbar({
   options,
-  navigation,
+  navigation: _navigation,
 }: {
-  options: unknown;
+  options: { title?: string };
   navigation: unknown;
 }) {
   const insets = useSafeAreaInsets();

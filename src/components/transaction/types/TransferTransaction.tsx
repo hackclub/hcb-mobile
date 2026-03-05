@@ -1,5 +1,5 @@
-import humanizeString from "humanize-string";
 import { router } from "expo-router";
+import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
 
@@ -16,7 +16,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);

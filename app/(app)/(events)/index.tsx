@@ -51,7 +51,7 @@ const EventItem = memo(
         pathname: "[id]",
         params: {
           id: organization.id,
-          fallbackData: organization as unknown,
+          fallbackData: JSON.stringify(organization),
         },
       });
       // navigation.navigate("Event", {

@@ -44,8 +44,8 @@ type ListItemType =
   };
 
 export default function Page() {
-  const navigation = useNavigation();
-  const params = useLocalSearchParams();
+  const _navigation = useNavigation();
+  const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
   const { isOnline } = useOffline();
 
   const {
@@ -56,7 +56,9 @@ export default function Page() {
   } = useOfflineSWR<Organization | OrganizationExpanded>(
     `organizations/${params.id}`,
     {
-      fallbackData: params.fallbackData,
+      fallbackData: params.fallbackData
+        ? (JSON.parse(params.fallbackData) as Organization | OrganizationExpanded)
+        : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {
           context: { orgId: params.id, isOnline },
@@ -268,8 +270,7 @@ export default function Page() {
             item={item.transaction as ITransaction}
             user={user}
             organization={organization}
-            orgId={params.id}
-            isFirst={item.isFirst}
+            orgId={params.id as `org_${string}`}
             isLast={item.isLast}
           />
         </View>

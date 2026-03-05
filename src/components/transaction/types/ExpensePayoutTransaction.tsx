@@ -11,7 +11,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function ExpensePayoutTransaction({
   transaction: { expense_payout, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionExpensePayout>) {
   return (

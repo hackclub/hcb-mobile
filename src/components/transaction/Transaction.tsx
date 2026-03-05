@@ -105,7 +105,7 @@ function TransactionIcon({
 
   return (
     <Icon
-      // @ts-expect-error it is checked above
+      // @ts-ignore it is checked above
       glyph={iconName}
       color={iconColor}
       size={22}

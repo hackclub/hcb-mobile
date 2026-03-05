@@ -27,7 +27,7 @@ import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
 
 export default function Page() {
-  const navigation = useNavigation();
+  const _navigation = useNavigation();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +105,7 @@ export default function Page() {
   }, [organizations, fetcher, currentUserId]);
 
   // Filter organizations where user is NOT a reader
-  const eligibleOrganizations = useMemo(() => {
+  const _eligibleOrganizations = useMemo(() => {
     if (!organizations || !currentUserId) return [];
 
     return organizations

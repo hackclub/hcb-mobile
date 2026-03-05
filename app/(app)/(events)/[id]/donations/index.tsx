@@ -26,7 +26,7 @@ import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
 
 export default function Page() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const isDark = useIsDark();
   const { colors } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();

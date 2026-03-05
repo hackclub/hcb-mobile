@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function BankFeeTransaction({
   transaction,
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps) {
   const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
 

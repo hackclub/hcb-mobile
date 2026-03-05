@@ -27,7 +27,7 @@ export default function Page() {
   const transaction = useMemo(() => {
     if (typeof rawTransaction !== "string") return null;
     try {
-      return JSON.parse(rawTransaction) as { id?: string } | null;
+      return JSON.parse(rawTransaction) as { id?: string; memo?: string } | null;
     } catch {
       return null;
     }
@@ -239,7 +239,7 @@ export default function Page() {
               Select Receipts
             </Text>
             <Text style={{ color: palette.muted, fontSize: 14, marginTop: 2 }}>
-              {transaction.memo}
+              {transaction?.memo}
             </Text>
           </View>
         </View>
