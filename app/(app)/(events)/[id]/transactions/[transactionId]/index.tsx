@@ -40,12 +40,14 @@ import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
-export default function TransactionPage({ data }: {
+export default function TransactionPage({
+  data,
+}: {
   data: {
     transactionId: string;
     orgId?: string;
     transaction?: Transaction;
-  }
+  };
 }) {
   const navigation = useNavigation();
   const t = useLocalSearchParams<{
@@ -58,7 +60,7 @@ export default function TransactionPage({ data }: {
     transactionId,
     orgId: _orgId,
     transaction: _transactionParam,
-  } = { ...t, ...data }
+  } = { ...t, ...data };
 
   const _transaction: Transaction | undefined = _transactionParam
     ? typeof _transactionParam === "string"
