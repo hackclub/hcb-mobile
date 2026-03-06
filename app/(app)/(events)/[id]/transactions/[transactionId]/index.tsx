@@ -46,7 +46,7 @@ export default function TransactionPage({
   data: {
     transactionId: string;
     orgId?: string;
-    transaction?: Transaction;
+    transaction?: Transaction | string;
   };
 }) {
   const navigation = useNavigation();
@@ -163,7 +163,7 @@ export default function TransactionPage({
     return <TransactionSkeleton />;
   }
 
-  const transactionViewProps = { orgId };
+  const transactionViewProps = { orgId: currentOrgId };
 
   return (
     <KeyboardAvoidingView
