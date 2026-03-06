@@ -24,14 +24,8 @@ export default function Layout() {
           name="index"
           options={{ headerShown: false, title: "" }}
         />
-        <Stack.Screen
-          name="[id]"
-          options={{ title: "" }}
-        />
-        <Stack.Screen
-          name="[id]/team"
-          options={{ title: "Team" }}
-        />
+        <Stack.Screen name="[id]" options={{ title: "" }} />
+        <Stack.Screen name="[id]/team" options={{ title: "Team" }} />
         <Stack.Screen
           name="[id]/transfer"
           options={{ title: "Transfer Money" }}

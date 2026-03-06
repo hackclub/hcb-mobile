@@ -340,8 +340,7 @@ export default function Page() {
       console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
       });
-    }
-    finally {
+    } finally {
       setRefreshing(false);
     }
   };
@@ -415,17 +414,17 @@ export default function Page() {
             onPress={(card) =>
               card.grant_id
                 ? router.push({
-                  pathname: "/cards/card-grants/[id]",
-                  params: {
-                    card: JSON.stringify(card),
-                    id: card.grant_id,
-                    cardId: card.id,
-                  },
-                })
+                    pathname: "/cards/card-grants/[id]",
+                    params: {
+                      card: JSON.stringify(card),
+                      id: card.grant_id,
+                      cardId: card.id,
+                    },
+                  })
                 : router.push({
-                  pathname: "/cards/[id]",
-                  params: { id: card.id, card: JSON.stringify(card) },
-                })
+                    pathname: "/cards/[id]",
+                    params: { id: card.id, card: JSON.stringify(card) },
+                  })
             }
             pattern={patternCache[item.id]?.pattern}
             patternDimensions={patternCache[item.id]?.dimensions}

@@ -16,10 +16,7 @@ interface GrantInviteProps {
   style?: object;
 }
 
-export default function GrantInvite({
-  grant,
-  style,
-}: GrantInviteProps) {
+export default function GrantInvite({ grant, style }: GrantInviteProps) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   const [isCreatingCard, setIsCreatingCard] = useState(false);

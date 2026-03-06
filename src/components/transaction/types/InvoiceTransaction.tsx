@@ -72,14 +72,14 @@ export default function InvoiceTransaction({
           },
           ...(invoice.paid_at
             ? [
-              {
-                label: "Paid on",
-                value: format(
-                  new Date(invoice.paid_at),
-                  "MMM d, yyyy 'at' h:mm a",
-                ),
-              },
-            ]
+                {
+                  label: "Paid on",
+                  value: format(
+                    new Date(invoice.paid_at),
+                    "MMM d, yyyy 'at' h:mm a",
+                  ),
+                },
+              ]
             : []),
         ]}
       />

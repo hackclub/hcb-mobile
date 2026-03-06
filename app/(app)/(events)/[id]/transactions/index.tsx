@@ -31,17 +31,17 @@ import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
 type ListItemType =
   | { type: "header"; title: string }
   | {
-    type: "transaction";
-    transaction: TransactionWithoutId;
-    isFirst: boolean;
-    isLast: boolean;
-  }
+      type: "transaction";
+      transaction: TransactionWithoutId;
+      isFirst: boolean;
+      isLast: boolean;
+    }
   | {
-    type: "mockTransaction";
-    transaction: MockTransactionType;
-    isFirst: boolean;
-    isLast: boolean;
-  };
+      type: "mockTransaction";
+      transaction: MockTransactionType;
+      isFirst: boolean;
+      isLast: boolean;
+    };
 
 export default function Page() {
   const _navigation = useNavigation();
@@ -57,7 +57,9 @@ export default function Page() {
     `organizations/${params.id}`,
     {
       fallbackData: params.fallbackData
-        ? (JSON.parse(params.fallbackData) as Organization | OrganizationExpanded)
+        ? (JSON.parse(params.fallbackData) as
+            | Organization
+            | OrganizationExpanded)
         : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {

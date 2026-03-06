@@ -100,11 +100,11 @@ export default function CardChargeTransaction({
           },
           ...(walletLabel
             ? [
-              {
-                label: "Wallet",
-                value: walletLabel,
-              },
-            ]
+                {
+                  label: "Wallet",
+                  value: walletLabel,
+                },
+              ]
             : []),
           descriptionDetail(orgId, transaction),
           {
@@ -120,12 +120,12 @@ export default function CardChargeTransaction({
           },
           ...(card_charge.card.last4
             ? [
-              {
-                label: "Card",
-                value: `•••• ${card_charge.card.last4}`,
-                fontFamily: "JetBrainsMono-Regular",
-              },
-            ]
+                {
+                  label: "Card",
+                  value: `•••• ${card_charge.card.last4}`,
+                  fontFamily: "JetBrainsMono-Regular",
+                },
+              ]
             : []),
         ]}
       />

@@ -1,3 +1,4 @@
+/** eslint-disable react/prop-types */
 import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
@@ -39,7 +40,13 @@ import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
-export default function TransactionPage({ data }) {
+export default function TransactionPage({ data }: {
+  data: {
+    transactionId: string;
+    orgId?: string;
+    transaction?: Transaction;
+  }
+}) {
   const navigation = useNavigation();
   const t = useLocalSearchParams<{
     transactionId: string;

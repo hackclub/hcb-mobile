@@ -328,7 +328,7 @@ export default function App() {
             <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
-              (grantInvites && grantInvites.length > 0) ? (
+            (grantInvites && grantInvites.length > 0) ? (
               <View
                 style={{
                   marginTop: 10,

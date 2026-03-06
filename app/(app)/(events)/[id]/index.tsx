@@ -84,7 +84,9 @@ export default function Page() {
     `organizations/${params.id}`,
     {
       fallbackData: params.fallbackData
-        ? (JSON.parse(params.fallbackData) as Organization | OrganizationExpanded)
+        ? (JSON.parse(params.fallbackData) as
+            | Organization
+            | OrganizationExpanded)
         : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {

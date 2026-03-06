@@ -53,7 +53,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     attachReceipt?: string;
   }>();
   const orgId =
-    params.orgId || params.id || (transaction as Transaction).organization?.id || "";
+    params.orgId ||
+    params.id ||
+    (transaction as Transaction).organization?.id ||
+    "";
   const attachReceipt = params.attachReceipt;
 
   const {

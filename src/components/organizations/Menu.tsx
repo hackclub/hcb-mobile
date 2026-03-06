@@ -45,12 +45,7 @@ export default function Menu({
       themeVariant={scheme || undefined}
       onPressAction={({ nativeEvent: { event } }) => {
         Haptics.selectionAsync();
-        handleMenuActionEvent(
-          event,
-          null,
-          organization,
-          supportsTapToPay,
-        );
+        handleMenuActionEvent(event, null, organization, supportsTapToPay);
       }}
     >
       <Ionicons.Button

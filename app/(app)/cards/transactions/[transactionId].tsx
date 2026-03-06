@@ -3,5 +3,5 @@ import { useLocalSearchParams } from "expo-router";
 
 export default function Page() {
   const params = useLocalSearchParams();
-  return <TransactionPage data={params} />
+  return <TransactionPage data={params} />;
 }

@@ -32,8 +32,8 @@ function TransactionWrapper({
 
   const userinOrganization = Boolean(
     organization &&
-    "users" in organization &&
-    organization.users.some((u) => u.id === user?.id),
+      "users" in organization &&
+      organization.users.some((u) => u.id === user?.id),
   );
 
   const canViewTransaction = Boolean(

@@ -49,7 +49,10 @@ import { normalizeSvg } from "@/utils/util";
 
 export default function Page() {
   const navigation = useNavigation();
-  const { id: grantId, cardId } = useLocalSearchParams<{ id: string; cardId?: string }>();
+  const { id: grantId, cardId } = useLocalSearchParams<{
+    id: string;
+    cardId?: string;
+  }>();
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
   const { colors: themeColors } = useTheme();
 

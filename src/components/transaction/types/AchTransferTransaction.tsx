@@ -45,11 +45,11 @@ export default function AchTransferTransaction({
           },
           ...(ach_transfer.recipient_email
             ? [
-              {
-                label: "Email",
-                value: ach_transfer.recipient_email,
-              },
-            ]
+                {
+                  label: "Email",
+                  value: ach_transfer.recipient_email,
+                },
+              ]
             : []),
           {
             label: "Bank",
@@ -57,21 +57,21 @@ export default function AchTransferTransaction({
           },
           ...(ach_transfer.account_number_last4
             ? [
-              {
-                label: "Account",
-                value: `•••• ${ach_transfer.account_number_last4}`,
-                fontFamily: "JetBrainsMono-Regular",
-              },
-            ]
+                {
+                  label: "Account",
+                  value: `•••• ${ach_transfer.account_number_last4}`,
+                  fontFamily: "JetBrainsMono-Regular",
+                },
+              ]
             : []),
           ...(ach_transfer.routing_number
             ? [
-              {
-                label: "Routing",
-                value: ach_transfer.routing_number,
-                fontFamily: "JetBrainsMono-Regular",
-              },
-            ]
+                {
+                  label: "Routing",
+                  value: ach_transfer.routing_number,
+                  fontFamily: "JetBrainsMono-Regular",
+                },
+              ]
             : []),
           {
             label: "Purpose",
@@ -84,11 +84,11 @@ export default function AchTransferTransaction({
           },
           ...(ach_transfer.sender
             ? [
-              {
-                label: isIncoming ? "Received by" : "Sent by",
-                value: <UserMention user={ach_transfer.sender} />,
-              },
-            ]
+                {
+                  label: isIncoming ? "Received by" : "Sent by",
+                  value: <UserMention user={ach_transfer.sender} />,
+                },
+              ]
             : []),
         ]}
       />

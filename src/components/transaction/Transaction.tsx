@@ -103,13 +103,7 @@ function TransactionIcon({
     return <WiseIcon color={iconColor} size={22} />;
   }
 
-  return (
-    <Icon
-      glyph={iconName}
-      color={iconColor}
-      size={22}
-    />
-  );
+  return <Icon glyph={iconName} color={iconColor} size={22} />;
 }
 
 function Transaction({

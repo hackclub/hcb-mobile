@@ -10,7 +10,6 @@ import Transaction from "../../lib/types/Transaction";
 import { palette } from "../../styles/theme";
 import TransactionComponent from "../transaction/Transaction";
 
-
 interface CardTransactionsProps {
   transactions: Transaction[];
   transactionsLoading: boolean;

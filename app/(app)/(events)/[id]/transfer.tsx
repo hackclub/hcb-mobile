@@ -19,12 +19,12 @@ export default function Page() {
   const organization =
     typeof _organization === "string"
       ? (() => {
-        try {
-          return JSON.parse(_organization);
-        } catch {
-          return null;
-        }
-      })()
+          try {
+            return JSON.parse(_organization);
+          } catch {
+            return null;
+          }
+        })()
       : null;
 
   useEffect(() => {
