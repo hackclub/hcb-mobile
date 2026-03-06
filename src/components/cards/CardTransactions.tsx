@@ -137,7 +137,7 @@ export default function CardTransactions({
             key={transaction.id}
             onPress={() => {
               router.push({
-                pathname: "/(events)/[id]/transactions/[transactionId]",
+                pathname: "/cards/transactions/[transactionId]",
                 params: {
                   id: card?.organization?.id || _card?.organization?.id,
                   transaction: JSON.stringify(transaction),

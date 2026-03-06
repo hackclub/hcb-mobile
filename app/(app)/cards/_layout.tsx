@@ -16,6 +16,10 @@ export default function Layout() {
           name="card-grants/[id]"
           options={{ title: "Grant Card" }}
         />
+        <Stack.Screen
+          name="transactions/[transactionId]"
+          options={{ title: "Transaction" }}
+        />
       </Stack>
       <TabBarStyling enabledPage="/cards" />
     </>

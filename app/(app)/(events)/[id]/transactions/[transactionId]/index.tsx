@@ -39,17 +39,19 @@ import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
-export default function TransactionPage() {
+export default function TransactionPage({ data }) {
   const navigation = useNavigation();
-  const {
-    transactionId,
-    orgId: _orgId,
-    transaction: _transactionParam,
-  } = useLocalSearchParams<{
+  const t = useLocalSearchParams<{
     transactionId: string;
     orgId?: string;
     transaction?: string;
   }>();
+
+  const {
+    transactionId,
+    orgId: _orgId,
+    transaction: _transactionParam,
+  } = { ...t, ...data }
 
   const _transaction: Transaction | undefined = _transactionParam
     ? typeof _transactionParam === "string"
