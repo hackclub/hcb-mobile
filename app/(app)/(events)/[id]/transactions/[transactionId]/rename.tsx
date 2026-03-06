@@ -14,7 +14,10 @@ import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
 export default function Page() {
-  const { id, transaction: _transaction } = useLocalSearchParams();
+  const { id, transaction: _transaction } = useLocalSearchParams<{
+    id: string;
+    transaction: string;
+  }>();
   const transaction: Transaction =
     typeof _transaction === "string" ? JSON.parse(_transaction) : _transaction;
 

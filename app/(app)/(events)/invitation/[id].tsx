@@ -21,7 +21,10 @@ import { palette as themePalette } from "@/styles/theme";
 
 export default function Page() {
   const hcb = useClient();
-  const { id: inviteId, invitation: _invitation } = useLocalSearchParams();
+  const { id: inviteId, invitation: _invitation } = useLocalSearchParams<{
+    id: string;
+    invitation?: string;
+  }>();
 
   let fallbackInvitation: Invitation | undefined;
   try {

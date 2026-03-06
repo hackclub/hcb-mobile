@@ -30,7 +30,7 @@ function MemberRole(props: { role: OrgUser["role"] }) {
 }
 
 export default function Page() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { cache } = useSWRConfig();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}?avatar_size=50`,

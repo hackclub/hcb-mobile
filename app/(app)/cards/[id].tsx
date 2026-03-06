@@ -42,7 +42,10 @@ import * as Haptics from "../../../src/utils/haptics";
 import { normalizeSvg } from "../../../src/utils/util";
 
 export default function CardPage() {
-  const { card: _card } = useLocalSearchParams();
+  const { card: _card, id: _routeId } = useLocalSearchParams<{
+    card?: string;
+    id?: string;
+  }>();
   const navigation = useNavigation();
 
   const paramCard = _card
@@ -54,7 +57,7 @@ export default function CardPage() {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const id = paramCard?.id ?? `crd_${paramCard.id}`;
+  const id = (paramCard?.id ?? _routeId) as string;
   const {
     data: card,
     error: cardFetchError,

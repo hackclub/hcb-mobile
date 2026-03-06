@@ -10,7 +10,7 @@ import { Image, ImageBackground } from "expo-image";
 import * as Linking from "expo-linking";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -33,13 +33,13 @@ export default function Login() {
   const isDark = useIsDark();
 
   const [loading, setLoading] = useState(false);
-  const [isPrompting, setIsPrompting] = useState(false);
   const [pendingSignup, setPendingSignup] = useState<boolean | null>(null);
 
   // Prevent duplicate token exchanges
   const isProcessingRef = useRef(false);
   const processedCodesRef = useRef<Set<string>>(new Set());
   const codeVerifierRef = useRef<string | null>(null);
+  const isPromptingRef = useRef(false);
 
   const { setTokenResponse } = useContext(AuthContext);
 
@@ -143,19 +143,18 @@ export default function Login() {
       });
   }, [response, request, setTokenResponse]);
 
-  const doPrompt = async () => {
-    if (isPrompting) return;
-
-    setIsPrompting(true);
+  const doPrompt = useCallback(async () => {
+    if (isPromptingRef.current) return;
+    isPromptingRef.current = true;
     isProcessingRef.current = false;
 
     try {
       await promptAsync({ createTask: false });
     } finally {
-      setIsPrompting(false);
+      isPromptingRef.current = false;
       setPendingSignup(null);
     }
-  };
+  }, [promptAsync]);
 
   useEffect(() => {
     if (
