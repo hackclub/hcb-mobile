@@ -12,12 +12,12 @@ export default function CardListSkeleton() {
       Animated.sequence([
         Animated.timing(shimmerAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: 1000,
           useNativeDriver: true,
         }),
         Animated.timing(shimmerAnim, {
           toValue: 0,
-          duration: 2000,
+          duration: 1000,
           useNativeDriver: true,
         }),
       ]),
@@ -26,7 +26,7 @@ export default function CardListSkeleton() {
 
   const shimmerOpacity = shimmerAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.6, 0.8],
+    outputRange: [0.4, 0.8],
   });
 
   const cardWidth = width * 0.86;

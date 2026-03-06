@@ -6,7 +6,7 @@ import * as Clipboard from "expo-clipboard";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, Linking, Platform, View } from "react-native";
+import { ActivityIndicator, Button, Linking, Platform, View } from "react-native";
 
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -100,6 +100,14 @@ export default function AccountNumberPage() {
       ),
     });
   }, [navigation, themeColors]);
+
+  if (organizationLoading && !organization) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   if (
     !organizationLoading &&

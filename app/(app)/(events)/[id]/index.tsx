@@ -242,7 +242,9 @@ export default function Page() {
           showMockData={showMockData}
           setShowMockData={setShowMockData}
         />
-        {isLoading && <ActivityIndicator />}
+        {isLoading && (
+          <ActivityIndicator style={{ marginTop: 20, marginBottom: 8 }} />
+        )}
         {!isLoading && sections.length === 0 && !showMockData && (
           <EmptyState isOnline={isOnline} />
         )}
