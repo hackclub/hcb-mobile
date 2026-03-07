@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import groupBy from "lodash/groupBy";
@@ -27,6 +28,7 @@ import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
+import { icon } from "@fortawesome/fontawesome-svg-core";
 
 const ListItemButton = ({
   children,
@@ -41,8 +43,8 @@ const ListItemButton = ({
     <Pressable
       style={{
         flexDirection: "row",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
         alignItems: "center",
         gap: 8,
       }}
@@ -276,8 +278,8 @@ export default function Page() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                paddingHorizontal: 20,
-                paddingVertical: 15,
+                paddingHorizontal: 15,
+                paddingVertical: 12,
               }}
               onPress={() =>
                 router.push({
@@ -286,9 +288,12 @@ export default function Page() {
                 })
               }
             >
-              <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                Transactions
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <Icon glyph="bank-account" size={30} color={themeColors.text} />
+                <Text style={{ fontSize: 18, fontWeight: "600" }}>
+                  Transactions
+                </Text>
+              </View>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={{ opacity: 0.5 }}>View all</Text>
                 <Ionicons
@@ -321,10 +326,12 @@ export default function Page() {
         >
           {[
             {
+              icon: "profile",
               name: "Team members",
               path: "/(events)/[id]/team",
             },
             {
+              icon: "transactions",
               name: "Collect donations",
               path: "/(events)/[id]/donations",
               beforePress: () => {
@@ -338,14 +345,17 @@ export default function Page() {
               },
             },
             {
+              icon: "bank-circle",
               name: "Account details",
               path: "/(events)/[id]/account-numbers",
             },
             {
+              icon: "payment-transfer",
               name: "Transfer money",
               path: "/(events)/[id]/transfer",
             },
             {
+              icon: "card",
               name: "Order a card",
               path: "/(events)/[id]/cards/order",
             },
@@ -370,6 +380,7 @@ export default function Page() {
                 }
               }}
             >
+              <Icon glyph={button.icon} size={30} color={themeColors.text} />
               <ListItemText primary={button.name} />
               <Ionicons
                 name="chevron-forward"
