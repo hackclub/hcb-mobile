@@ -85,8 +85,8 @@ export default function Page() {
     {
       fallbackData: params.fallbackData
         ? (JSON.parse(params.fallbackData) as
-            | Organization
-            | OrganizationExpanded)
+          | Organization
+          | OrganizationExpanded)
         : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {
@@ -242,9 +242,7 @@ export default function Page() {
           showMockData={showMockData}
           setShowMockData={setShowMockData}
         />
-        {isLoading && (
-          <ActivityIndicator style={{ marginTop: 20, marginBottom: 8 }} />
-        )}
+        {isLoading && <ActivityIndicator />}
         {!isLoading && sections.length === 0 && !showMockData && (
           <EmptyState isOnline={isOnline} />
         )}
