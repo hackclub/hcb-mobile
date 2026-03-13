@@ -110,6 +110,7 @@ export default function About() {
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: 80 }}
       showsVerticalScrollIndicator={false}

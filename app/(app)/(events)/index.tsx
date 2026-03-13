@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { router } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
@@ -19,7 +17,7 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
 import Event from "@/components/organizations/Event";
@@ -216,7 +214,6 @@ export default function App() {
   }, [grantCards]);
 
   const { fetcher, mutate } = useSWRConfig();
-  const tabBarHeight = useBottomTabBarHeight();
   const { colors: themeColors } = useTheme();
   const scheme = useColorScheme();
   const usePanGesture = () =>
@@ -293,7 +290,6 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
       <ReorderableList
         keyExtractor={(item) => item.id}
         onReorder={({ from, to }) => {
@@ -305,10 +301,10 @@ export default function App() {
             setSortedOrgs(newOrgs);
           }
         }}
-        scrollIndicatorInsets={{ bottom: tabBarHeight }}
+        // scrollIndicatorInsets={{ bottom: tabBarHeight }}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: tabBarHeight,
+          paddingBottom: 20,
         }}
         contentInsetAdjustmentBehavior="automatic"
         data={sortedOrgs}
@@ -325,7 +321,6 @@ export default function App() {
         ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
-            <PageTitle title="Organizations" />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
             (grantInvites && grantInvites.length > 0) ? (
@@ -457,6 +452,5 @@ export default function App() {
         )}
         ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
       />
-    </SafeAreaView>
   );
 }

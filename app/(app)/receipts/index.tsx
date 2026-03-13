@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
-import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
@@ -556,11 +555,11 @@ export default function Page() {
         data={listData}
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.type}-${index}`}
-        contentContainerStyle={{ padding: 20, paddingTop: 62 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ padding: 20 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        ListHeaderComponent={() => <PageTitle title="Receipts" />}
         ListFooterComponent={() => (
           <FileViewerModal
             fileUrl={selectedReceipt?.url || null}

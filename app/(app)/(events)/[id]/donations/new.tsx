@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import {
   PaymentIntent,
@@ -183,12 +183,13 @@ export default function Page() {
 
   // Dev mode check
   const isDevMode = __DEV__ && !connectedReader;
-  const bottomTabBarHeight = useBottomTabBarHeight();
+  const { bottom: bottomTabBarHeight } = useSafeAreaInsets();
 
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
       <ScrollView
         style={{ flex: 1 }}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           paddingBottom: bottomTabBarHeight + 16,
           flexGrow: 1,

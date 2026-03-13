@@ -1,6 +1,6 @@
 /** eslint-disable react/prop-types */
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -93,12 +93,13 @@ export default function TransactionPage({
   const isUserInOrganizationOrAuditor = useMemo(() => {
     return organization?.users.some((u) => u.id === user?.id) || user?.auditor;
   }, [organization, user]);
-  const tabBarHeight = useBottomTabBarHeight();
+  const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
 
   useEffect(() => {
     if (transaction) {
       navigation.setOptions({
+        title: transaction.memo,
         headerRight: () => (
           <TouchableOpacity
             onPress={async () => {
@@ -171,6 +172,7 @@ export default function TransactionPage({
       behavior={Platform.OS === "ios" ? "position" : "height"}
     >
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           padding: 20,
           paddingBottom: tabBarHeight + 20,

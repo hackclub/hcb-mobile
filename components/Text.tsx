@@ -11,7 +11,7 @@ export function Text(props: TextProps & { bold?: boolean; italic?: boolean }) {
         {
           fontSize: 16,
           color: colors.text,
-          fontFamily: props.bold ? "Bold" : props.italic ? "Italic" : "Regular",
+          // fontFamily: props.bold ? "Bold" : props.italic ? "Italic" : "Regular",
         },
         props.style,
       ]}

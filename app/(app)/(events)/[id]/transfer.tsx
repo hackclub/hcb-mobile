@@ -70,7 +70,8 @@ export default function Page() {
       behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior for platform
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 0 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ flexGrow: 1, padding: 20 }}
       >
         {/* Transfer Type Buttons */}
         {/* <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>

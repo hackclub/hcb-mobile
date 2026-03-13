@@ -1,5 +1,3 @@
-import { Navbar } from "components/Navbar";
-import { TabBarStyling } from "components/TabBarStyling";
 import { router, Stack } from "expo-router";
 import { useContext, useEffect } from "react";
 
@@ -19,12 +17,21 @@ export default function Layout() {
   return (
     <>
       <AuthRedirect />
-      <Stack screenOptions={{ header: Navbar }}>
+      <Stack
+        screenOptions={{
+          headerTransparent: true,
+          headerBlurEffect: "none",
+          headerShadowVisible: false,
+          headerLargeTitleShadowVisible: false,
+          headerLargeStyle: { backgroundColor: "transparent" },
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      >
         <Stack.Screen
           name="index"
-          options={{ headerShown: false, title: "" }}
+          options={{ title: "Organizations", headerLargeTitle: true }}
         />
-        <Stack.Screen name="[id]" options={{ title: "" }} />
+        <Stack.Screen name="[id]/index" options={{ title: "" }} />
         <Stack.Screen name="[id]/team" options={{ title: "Team" }} />
         <Stack.Screen
           name="[id]/transfer"
@@ -35,20 +42,20 @@ export default function Layout() {
           options={{ title: "Order a Card" }}
         />
         <Stack.Screen
-          name="[id]/transactions"
+          name="[id]/transactions/index"
           options={{ title: "Transactions" }}
         />
         <Stack.Screen
-          name="[id]/transactions/[transactionId]"
+          name="[id]/transactions/[transactionId]/index"
           options={{ title: "Transaction" }}
         />
         <Stack.Screen
           name="[id]/transactions/[transactionId]/rename"
-          options={{ title: "Rename transaction" }}
+          options={{ title: "Rename Transaction" }}
         />
         <Stack.Screen
           name="[id]/account-numbers"
-          options={{ title: "Account numbers" }}
+          options={{ title: "Account Numbers" }}
         />
         <Stack.Screen
           name="[id]/donations/index"
@@ -67,7 +74,6 @@ export default function Layout() {
           options={{ title: "Invitation" }}
         />
       </Stack>
-      <TabBarStyling enabledPage="/" />
     </>
   );
 }

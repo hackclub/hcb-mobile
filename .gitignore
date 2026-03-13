@@ -29,3 +29,5 @@ android/
 
 src/lib/yellowpages/data.json
 src/lib/yellowpages/.last-updated
+
+.claude/

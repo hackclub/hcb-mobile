@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
-import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
@@ -260,12 +259,10 @@ export default function SettingsPage() {
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ paddingBottom: 40 }}
       style={{ backgroundColor: colors.background }}
     >
-      <View style={{ paddingHorizontal: 20, paddingTop: 62 }}>
-        <PageTitle title="Settings" />
-      </View>
       <View style={{ padding: 20, paddingTop: 0 }}>
         {/* Profile Card */}
         <View

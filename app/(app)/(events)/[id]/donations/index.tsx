@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import {
   ConnectTapToPayParams,
@@ -29,7 +28,6 @@ export default function Page() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isDark = useIsDark();
   const { colors } = useTheme();
-  const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
 
   const { data: organization, isLoading: organizationLoading } =
@@ -361,7 +359,7 @@ export default function Page() {
         alignItems: "center",
         justifyContent: "space-between",
         flex: 1,
-        paddingBottom: Math.max(tabBarHeight, insets.bottom) + 24,
+        paddingBottom: insets.bottom + 24 + 49,
       }}
     >
       <View

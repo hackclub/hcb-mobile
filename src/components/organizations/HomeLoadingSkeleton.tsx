@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, Platform } from "react-native";
@@ -7,7 +7,7 @@ import { useIsDark } from "../../lib/useColorScheme";
 
 export const HomeLoadingSkeleton = () => {
   const { colors: themeColors } = useTheme();
-  const tabBarHeight = useBottomTabBarHeight();
+  const { bottom: tabBarHeight } = useSafeAreaInsets();
   const isDark = useIsDark();
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 

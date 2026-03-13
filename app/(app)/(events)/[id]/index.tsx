@@ -262,7 +262,7 @@ export default function Page() {
   ]);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: themeColors.background }}>
+    <ScrollView style={{ flex: 1, backgroundColor: themeColors.background }} contentInsetAdjustmentBehavior="automatic">
       {renderListHeader()}
       <View style={{ paddingHorizontal: 20, gap: 16 }}>
         {recentTransactions.length > 0 && (

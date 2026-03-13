@@ -149,6 +149,7 @@ export default function Page() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           paddingHorizontal: 20,
         }}

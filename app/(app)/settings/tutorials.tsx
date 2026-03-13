@@ -14,6 +14,7 @@ export default function Page() {
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20 }}
     >

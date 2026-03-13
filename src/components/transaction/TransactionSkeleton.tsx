@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, StyleProp, ViewStyle } from "react-native";
@@ -41,7 +41,7 @@ function SkeletonBox({ style }: { style?: StyleProp<ViewStyle> }) {
 }
 
 export default function TransactionSkeleton() {
-  const tabBarHeight = useBottomTabBarHeight();
+  const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
 
   return (

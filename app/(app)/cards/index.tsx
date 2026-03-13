@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuView } from "@react-native-menu/menu";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { router, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
@@ -384,15 +383,6 @@ export default function Page() {
       <ReorderableList
         data={filteredCards}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={() => (
-          <View
-            style={{
-              paddingTop: 62,
-            }}
-          >
-            <PageTitle title="Cards" />
-          </View>
-        )}
         onReorder={({ from, to }) => {
           Haptics.selectionAsync();
           const newCards = [...sortedCards];

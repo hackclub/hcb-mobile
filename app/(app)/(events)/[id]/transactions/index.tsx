@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
@@ -97,7 +97,7 @@ export default function Page() {
     }
   }, [organizationError, mutateOrganization]);
 
-  const tabBarSize = useBottomTabBarHeight();
+  const { bottom: tabBarSize } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
@@ -343,7 +343,7 @@ export default function Page() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+    <>
       {organization !== undefined ? (
         <FlashList
           data={flatListData}
@@ -357,6 +357,7 @@ export default function Page() {
           onEndReachedThreshold={0.2}
           refreshing={refreshing}
           onRefresh={onRefresh}
+          contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{
             paddingBottom: tabBarSize + 20,
           }}
@@ -366,6 +367,6 @@ export default function Page() {
       ) : (
         <LoadingSkeleton />
       )}
-    </View>
+    </>
   );
 }

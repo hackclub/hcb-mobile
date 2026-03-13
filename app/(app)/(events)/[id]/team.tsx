@@ -1,4 +1,4 @@
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
@@ -37,13 +37,14 @@ export default function Page() {
     { fallbackData: cache.get(`organizations/${id}`)?.data },
   );
 
-  const tabBarHeight = useBottomTabBarHeight();
+  const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
 
   if (!organization) return null;
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
         paddingBottom: tabBarHeight + 20,

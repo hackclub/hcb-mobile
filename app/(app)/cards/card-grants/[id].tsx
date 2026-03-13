@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
@@ -136,7 +136,7 @@ export default function Page() {
     refreshDigitalWallet,
   } = wallet;
 
-  const tabBarHeight = useBottomTabBarHeight();
+  const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { mutate } = useSWRConfig();
 
   useEffect(() => {
@@ -593,6 +593,7 @@ export default function Page() {
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           padding: 20,
           paddingBottom: tabBarHeight + 20,

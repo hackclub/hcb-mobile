@@ -3,14 +3,11 @@ import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider } from "@react-navigation/native";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
-import Icon from "@thedev132/hackclub-icons-rn";
-import { DEFAULT_BOTTOM_NAV_STYLE } from "components/TabBarStyling";
-import { BlurView } from "expo-blur";
-import * as Haptics from "expo-haptics";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
-import { Tabs, useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -28,7 +25,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaProvider,
   SafeAreaView,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import useSWR, { SWRConfig } from "swr";
 
@@ -80,6 +76,8 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+const ROOT_TABS = ["/", "/cards", "/receipts", "/settings"];
+
 function Navigation() {
   const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
     "user/transactions/missing_receipt",
@@ -90,6 +88,9 @@ function Navigation() {
     useShareIntentContext();
 
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isAtRoot = ROOT_TABS.includes(pathname);
 
   useEffect(() => {
     if (hasPendingShareIntent && pendingShareIntent) {
@@ -112,59 +113,28 @@ function Navigation() {
   ]);
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: DEFAULT_BOTTOM_NAV_STYLE,
-      }}
-      screenListeners={{
-        tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
-      }}
-    >
-      <Tabs.Screen
-        name="(events)"
-        options={{
-          tabBarBadge: invitations?.length || undefined,
-          title: "Home",
-          tabBarAccessibilityLabel: "Home Tab",
-          tabBarIcon: ({ color }) => (
-            <Icon glyph="home" size={28} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="cards"
-        options={{
-          title: "Cards",
-          tabBarAccessibilityLabel: "Cards Tab",
-          tabBarIcon: ({ color }) => (
-            <Icon glyph="card" size={28} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="receipts"
-        options={{
-          tabBarBadge: missingReceiptData?.total_count || undefined,
-          title: "Receipts",
-          tabBarBadgeStyle: { fontFamily: "Regular" },
-          tabBarAccessibilityLabel: "Receipts Tab",
-          tabBarIcon: ({ color }) => (
-            <Icon glyph="payment-docs" size={28} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarAccessibilityLabel: "Settings Tab",
-          tabBarIcon: ({ color }) => (
-            <Icon glyph="settings" size={36} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    <NativeTabs tintColor="#ec3750" hidden={!isAtRoot}>
+      <NativeTabs.Trigger name="(events)">
+        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/home.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        {!!invitations?.length && <NativeTabs.Trigger.Badge>{invitations.length.toString()}</NativeTabs.Trigger.Badge>}
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="cards">
+        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/card.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Label>Cards</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="receipts">
+        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/payment-docs.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Label>Receipts</NativeTabs.Trigger.Label>
+        {!!missingReceiptData?.total_count && (
+          <NativeTabs.Trigger.Badge>{missingReceiptData.total_count.toString()}</NativeTabs.Trigger.Badge>
+        )}
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/settings.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
 
@@ -180,7 +150,6 @@ export default function Layout() {
     () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
     [tokenResponse, codeVerifier],
   );
-  const insets = useSafeAreaInsets();
   const { theme: themePref } = useThemeContext();
   const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -676,17 +645,6 @@ export default function Layout() {
                   <ActionSheetProvider>
                     <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
                       <ThemeProvider value={navTheme}>
-                        <BlurView
-                          intensity={20}
-                          style={{
-                            height: insets.top,
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            zIndex: 1,
-                          }}
-                        />
                         <Navigation />
                       </ThemeProvider>
                     </AlertNotificationRoot>
