@@ -320,13 +320,13 @@ export default function Layout() {
           return;
         }
 
-        // if (__DEV__) {
-        //   // bypass auth for development
-        //   lastAuthenticatedToken.current = tokens.accessToken;
-        //   setIsAuthenticated(true);
-        //   setAppIsReady(true);
-        //   return;
-        // }
+        if (__DEV__) {
+          // bypass auth for development
+          lastAuthenticatedToken.current = tokens.accessToken;
+          setIsAuthenticated(true);
+          setAppIsReady(true);
+          return;
+        }
         try {
           const biometricsRequired = await AsyncStorage.getItem(
             "biometrics_required",
@@ -485,6 +485,7 @@ export default function Layout() {
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
+      console.log("appIsReady", appIsReady);
       SplashScreen.hide();
     }
   }, [appIsReady]);

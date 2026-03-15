@@ -8,6 +8,7 @@ import Organization, {
 import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../styles/theme";
 import { renderMoney } from "../../utils/util";
+import BalanceChart from "./BalanceChart";
 import Button from "../Button";
 
 interface HeaderProps {
@@ -35,6 +36,7 @@ export default function Header({
         borderRadius: 16,
         padding: 20,
         marginBottom: 24,
+        overflow: "hidden",
         ...(Platform.OS === "ios" && {
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
@@ -102,6 +104,7 @@ export default function Header({
           </Button>
         )}
       </View>
+      <BalanceChart organizationId={organization.id} />
     </View>
   );
 }

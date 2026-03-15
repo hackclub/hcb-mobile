@@ -8,6 +8,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image, ImageBackground } from "expo-image";
 import * as Linking from "expo-linking";
+import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -167,6 +168,10 @@ export default function Login() {
   }, [pendingSignup, request, doPrompt]);
 
   const animation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   useEffect(() => {
     Animated.timing(animation, {
