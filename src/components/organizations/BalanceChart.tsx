@@ -19,6 +19,7 @@ export default function BalanceChart({ organizationId }: BalanceChartProps) {
     `organizations/${organizationId}/balance_by_date`,
   );
 
+  console.log(data)
   const chartWidth = Dimensions.get("window").width - 80; // account for card padding
   const chartHeight = 140;
 

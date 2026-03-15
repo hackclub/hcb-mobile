@@ -1,5 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useContext, useEffect } from "react";
+import { Pressable } from "react-native";
 
 import AuthContext from "@/auth/auth";
 
@@ -55,7 +57,21 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/account-numbers"
-          options={{ title: "Account Numbers" }}
+          options={{
+            presentation: "formSheet",
+            title: "Account Numbers",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.5, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
         />
         <Stack.Screen
           name="[id]/donations/index"

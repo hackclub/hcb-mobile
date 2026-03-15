@@ -1,12 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import * as Clipboard from "expo-clipboard";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Button, Linking, Platform, View } from "react-native";
+import { ActivityIndicator, Button, Linking, View } from "react-native";
 
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -31,15 +30,15 @@ function AccountDetail({
 
   return (
     <View>
-      <Text style={{ color: palette.muted, fontSize: 16 }}>{title}</Text>
+      <Text style={{ color: palette.muted, fontSize: 14 }}>{title}</Text>
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}
       >
         <Text
           style={{
             color: themeColors.text,
             fontFamily: "JetBrainsMono-Regular",
-            fontSize: 30,
+            fontSize: 26,
           }}
         >
           {value}
@@ -64,7 +63,6 @@ function AccountDetail({
 }
 
 export default function AccountNumberPage() {
-  const navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
 
   const { data: organization, isLoading: organizationLoading } =
@@ -75,31 +73,6 @@ export default function AccountNumberPage() {
     });
 
   const { colors: themeColors } = useTheme();
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <>
-          {Platform.OS === "android" ? (
-            <View style={{ marginRight: 20 }}>
-              <Ionicons
-                name="arrow-back"
-                size={24}
-                color={themeColors.text}
-                onPress={() => router.back()}
-              />
-            </View>
-          ) : (
-            <Button
-              title="Done"
-              color={themeColors.text}
-              onPress={() => router.back()}
-            />
-          )}
-        </>
-      ),
-    });
-  }, [navigation, themeColors]);
 
   if (organizationLoading && !organization) {
     return (
@@ -119,7 +92,6 @@ export default function AccountNumberPage() {
       <View
         style={{
           padding: 20,
-          display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flex: 1,
@@ -128,28 +100,28 @@ export default function AccountNumberPage() {
         <View style={{ alignItems: "center", maxWidth: 320 }}>
           <Ionicons
             name="document-text-outline"
-            size={80}
+            size={64}
             color={palette.muted}
-            style={{ marginBottom: 24 }}
+            style={{ marginBottom: 20 }}
           />
           <Text
             style={{
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: "600",
               color: themeColors.text,
               textAlign: "center",
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             Account Details Not Available
           </Text>
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 15,
               color: palette.muted,
               textAlign: "center",
-              lineHeight: 24,
-              marginBottom: 32,
+              lineHeight: 22,
+              marginBottom: 24,
             }}
           >
             Your account details haven't been generated yet. Please generate
@@ -173,15 +145,14 @@ export default function AccountNumberPage() {
     <View
       style={{
         paddingHorizontal: 20,
-        display: "flex",
+        paddingTop: 16,
         flex: 1,
       }}
     >
-      <PageTitle title="Account numbers" />
-      <Text style={{ fontSize: 16, color: palette.muted, marginBottom: 20 }}>
+      <Text style={{ fontSize: 15, color: palette.muted, marginBottom: 20 }}>
         Use these details to receive ACH and wire transfers.
       </Text>
-      <View style={{ flexDirection: "column", paddingTop: 10 }}>
+      <View style={{ flexDirection: "column" }}>
         <AccountDetail
           title="Routing number"
           value={organization?.routing_number}
