@@ -227,11 +227,9 @@ export default function App() {
     preload("user/cards", fetcher!);
 
     organizations.forEach((org) => {
-      const orgKey = `organizations/${org.id}`;
-      const transactionsKey = `organizations/${org.id}/transactions?limit=35`;
-
-      preload(orgKey, fetcher!);
-      preload(transactionsKey, fetcher!);
+      preload(`organizations/${org.id}`, fetcher!);
+      preload(`organizations/${org.id}/transactions?limit=35`, fetcher!);
+      preload(`organizations/${org.id}/balance_by_date`, fetcher!);
     });
   }, [organizations, fetcher]);
 

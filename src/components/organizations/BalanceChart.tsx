@@ -19,24 +19,22 @@ export default function BalanceChart({ organizationId }: BalanceChartProps) {
     `organizations/${organizationId}/balance_by_date`,
   );
 
-  console.log(data)
-  const chartWidth = Dimensions.get("window").width - 80; // account for card padding
+  const chartWidth = Dimensions.get("window").width - 40; // full card width (screen minus outer horizontal padding)
   const chartHeight = 140;
 
   const { linePath, areaPath } = useMemo(() => {
     if (!data || data.length < 2) return { linePath: "", areaPath: "" };
 
     const amounts = data.map((p) => p.amount);
-    const minVal = Math.min(...amounts);
     const maxVal = Math.max(...amounts);
-    const range = maxVal - minVal || 1;
+    const range = maxVal || 1;
 
-    const padding = 2; // small vertical padding
+    const padding = 2;
     const drawHeight = chartHeight - padding * 2;
 
     const points = data.map((point, i) => {
       const x = (i / (data.length - 1)) * chartWidth;
-      const y = padding + drawHeight - ((point.amount - minVal) / range) * drawHeight;
+      const y = padding + drawHeight - (point.amount / range) * drawHeight;
       return { x, y };
     });
 
@@ -53,7 +51,7 @@ export default function BalanceChart({ organizationId }: BalanceChartProps) {
 
   return (
     <View style={{ marginTop: 16, marginHorizontal: -20, marginBottom: -20 }}>
-      <Svg width={chartWidth + 40} height={chartHeight} viewBox={`-20 0 ${chartWidth + 40} ${chartHeight}`}>
+      <Svg width={chartWidth} height={chartHeight}>
         <Defs>
           <LinearGradient id="fillGradient" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={palette.success} stopOpacity="0.4" />
