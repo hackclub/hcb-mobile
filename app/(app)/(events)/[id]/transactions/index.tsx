@@ -230,6 +230,7 @@ export default function Page() {
           organization={organization}
           showMockData={showMockData}
           setShowMockData={setShowMockData}
+          showChart={false}
         />
         {isLoading && <LoadingSkeleton />}
         {!isLoading && sections.length === 0 && !showMockData && (
@@ -249,11 +250,7 @@ export default function Page() {
   const renderItem = useCallback(
     ({ item }: { item: ListItemType }) => {
       if (item.type === "header") {
-        return (
-          <View style={{ paddingHorizontal: 20 }}>
-            <SectionHeader title={item.title} />
-          </View>
-        );
+        return <SectionHeader title={item.title} />;
       }
 
       if (item.type === "mockTransaction") {
@@ -273,6 +270,7 @@ export default function Page() {
             user={user}
             organization={organization}
             orgId={params.id as `org_${string}`}
+            isFirst={item.isFirst}
             isLast={item.isLast}
           />
         </View>
@@ -350,7 +348,7 @@ export default function Page() {
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           getItemType={getItemType}
-          stickyHeaderIndices={stickyHeaderIndices}
+          // stickyHeaderIndices disabled — transparent nav bar causes headers to stick behind it
           ListHeaderComponent={renderListHeader}
           ListFooterComponent={renderListFooter}
           onEndReached={loadMore}

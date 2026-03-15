@@ -266,9 +266,9 @@ export default function Page() {
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
     router.push({
-      pathname: "/(events)/[id]/transactions/[transactionId]",
+      pathname: "/receipts/transactions/[transactionId]",
       params: {
-        id: transaction.organization.id,
+        orgId: transaction.organization.id,
         transactionId: transaction.id,
         transaction: JSON.stringify(transaction),
       },

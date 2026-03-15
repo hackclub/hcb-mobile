@@ -25,6 +25,10 @@ export default function Layout() {
         name="transactions/[transactionId]"
         options={{ title: "Transaction" }}
       />
+      <Stack.Screen
+        name="order/[id]"
+        options={{ title: "Order a Card" }}
+      />
     </Stack>
   );
 }

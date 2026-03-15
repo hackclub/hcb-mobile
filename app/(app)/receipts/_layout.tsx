@@ -25,6 +25,10 @@ export default function Layout() {
           animation: "slide_from_bottom",
         }}
       />
+      <Stack.Screen
+        name="transactions/[transactionId]"
+        options={{ title: "Transaction" }}
+      />
     </Stack>
   );
 }

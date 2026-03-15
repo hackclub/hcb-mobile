@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
@@ -21,6 +21,8 @@ export default function TransferTransaction({
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);
   const { data: user } = useSWR<User>("user");
+  const segments = useSegments();
+  const isInEventsTab = segments.includes("(events)" as never);
 
   const userInFromOrg =
     user?.admin || userOrgs?.some((org) => org.id == transfer.from.id);
@@ -30,7 +32,9 @@ export default function TransferTransaction({
   const handleGrantCardNavigation = () => {
     if (transfer.card_grant_id) {
       router.push({
-        pathname: "/cards/card-grants/[id]",
+        pathname: isInEventsTab
+          ? "/(events)/card-grants/[id]"
+          : "/cards/card-grants/[id]",
         params: { id: transfer.card_grant_id },
       });
     }

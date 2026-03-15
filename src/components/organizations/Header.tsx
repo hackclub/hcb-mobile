@@ -15,12 +15,14 @@ interface HeaderProps {
   organization: Organization | OrganizationExpanded;
   showMockData: boolean;
   setShowMockData: React.Dispatch<React.SetStateAction<boolean>>;
+  showChart?: boolean;
 }
 
 export default function Header({
   organization,
   showMockData,
   setShowMockData,
+  showChart = true,
 }: HeaderProps) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
@@ -104,7 +106,7 @@ export default function Header({
           </Button>
         )}
       </View>
-      <BalanceChart organizationId={organization.id} />
+      {showChart && <BalanceChart organizationId={organization.id} />}
     </View>
   );
 }

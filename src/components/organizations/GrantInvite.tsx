@@ -31,7 +31,7 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
         maybeRequestReview();
 
         router.push({
-          pathname: "/cards/card-grants/[id]",
+          pathname: "/(events)/card-grants/[id]",
           params: { id: grant.id },
         });
       } else {

@@ -155,7 +155,7 @@ export default function Page() {
     if (!firstOrganizationId) return;
 
     router.push({
-      pathname: "/(events)/[id]/cards/order",
+      pathname: "/cards/order/[id]",
       params: { id: firstOrganizationId },
     });
   }, [organizations]);

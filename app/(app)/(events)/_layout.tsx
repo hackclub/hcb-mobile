@@ -86,6 +86,10 @@ export default function Layout() {
           options={{ presentation: "modal", title: "Process Donation" }}
         />
         <Stack.Screen
+          name="card-grants/[id]"
+          options={{ title: "Grant Card" }}
+        />
+        <Stack.Screen
           name="invitation/[id]"
           options={{ title: "Invitation" }}
         />
