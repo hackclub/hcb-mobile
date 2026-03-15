@@ -2,6 +2,13 @@ import { Alert } from "react-native";
 
 import * as Haptics from "./haptics";
 
+/** Show a validation error alert and trigger error haptics. */
+function validationError(message: string): false {
+  Alert.alert("Error", message);
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  return false;
+}
+
 export const validateFields = (
   organizationId: string,
   cardType: string,
@@ -12,37 +19,17 @@ export const validateFields = (
   zipCode: string,
 ) => {
   if (!organizationId) {
-    Alert.alert("Error", "Please select an organization");
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    return false;
+    return validationError("Please select an organization");
   }
 
   if (cardType === "plastic") {
-    if (!shippingName.trim()) {
-      Alert.alert("Error", "Please enter a shipping name");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
-    if (!addressLine1.trim()) {
-      Alert.alert("Error", "Please enter an address");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
-    if (!city.trim()) {
-      Alert.alert("Error", "Please enter a city");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
-    if (!stateProvince.trim()) {
-      Alert.alert("Error", "Please enter a state/province");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
-    if (!zipCode.trim()) {
-      Alert.alert("Error", "Please enter a ZIP code");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return false;
-    }
+    if (!shippingName.trim())
+      return validationError("Please enter a shipping name");
+    if (!addressLine1.trim()) return validationError("Please enter an address");
+    if (!city.trim()) return validationError("Please enter a city");
+    if (!stateProvince.trim())
+      return validationError("Please enter a state/province");
+    if (!zipCode.trim()) return validationError("Please enter a ZIP code");
   }
 
   return true;

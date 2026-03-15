@@ -1,22 +1,29 @@
 import { useTheme } from "@react-navigation/native";
-import { Text } from "react-native";
+import { Text } from "components/Text";
+import { View } from "react-native";
 
 import { palette } from "../../styles/theme";
 
 export default function SectionHeader({ title }: { title: string }) {
   const { colors: themeColors } = useTheme();
   return (
-    <Text
+    <View
       style={{
-        color: palette.muted,
         backgroundColor: themeColors.background,
+        paddingHorizontal: 20,
         paddingTop: 10,
         paddingBottom: 5,
-        fontSize: 10,
-        textTransform: "uppercase",
       }}
     >
-      {title}
-    </Text>
+      <Text
+        style={{
+          color: palette.muted,
+          fontSize: 10,
+          textTransform: "uppercase",
+        }}
+      >
+        {title}
+      </Text>
+    </View>
   );
 }

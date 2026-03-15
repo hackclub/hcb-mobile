@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect, useMemo } from "react";
+import { Text } from "components/Text";
+import { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
   FlatList,
-  Pressable,
   Modal,
+  Pressable,
   ScrollView,
-  TextInput,
   StyleSheet,
+  TextInput,
+  View,
 } from "react-native";
 
 import { NetworkLog, networkLogger } from "../../lib/devtools/networkLogger";

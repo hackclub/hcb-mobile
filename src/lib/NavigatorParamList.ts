@@ -16,17 +16,7 @@ export type StackParamList = {
     orgId: Organization["id"];
     organization?: OrganizationExpanded;
   };
-  ProcessDonation: {
-    orgId: Organization["id"];
-    payment: { amount: number };
-    collectPayment: () => Promise<boolean>;
-    name: string;
-    email: string;
-    slug: string;
-  };
   OrganizationTeam: { orgId: Organization["id"] };
-  OrganizationDonation: { orgId: Organization["id"] };
-  NewDonation: { orgId: Organization["id"]; orgSlug: string };
   Transaction: {
     transactionId: Transaction["id"];
     orgId?: Organization["id"];

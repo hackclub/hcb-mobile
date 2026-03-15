@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import * as WebBrowser from "expo-web-browser";
-import { View, Text, ScrollView, Platform } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 import { useSWRConfig } from "swr";
 
 import { useIsDark } from "../../lib/useColorScheme";

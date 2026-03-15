@@ -1,14 +1,14 @@
 import { useTheme } from "@react-navigation/native";
+import PageTitle from "components/PageTitle";
+import { Text } from "components/Text";
 import { useContext, useEffect, useState } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
-import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import AuthContext from "../../../auth/auth";
@@ -127,7 +127,8 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <>
+      <PageTitle title="New HCB transfer" />
       <View style={{ flex: 1, backgroundColor: themeColors.background }}>
         {/* From Section */}
         <Text
@@ -296,7 +297,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           )}
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </>
   );
 };
 

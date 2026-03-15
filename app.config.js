@@ -82,6 +82,7 @@ export default {
       url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
     },
     plugins: [
+      "expo-router",
       [
         "expo-image-picker",
         {

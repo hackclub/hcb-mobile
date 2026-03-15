@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 export default function AchTransferTransaction({
   transaction: { ach_transfer, ...transaction },
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps<TransactionAchTransfer>) {
   const isIncoming = transaction.amount_cents > 0;
 
@@ -77,7 +77,7 @@ export default function AchTransferTransaction({
             label: "Purpose",
             value: ach_transfer.payment_for,
           },
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: isIncoming ? "Received on" : "Sent on",
             value: renderDate(transaction.date),

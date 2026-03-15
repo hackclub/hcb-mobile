@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { TouchableOpacity, View, Text, ActivityIndicator } from "react-native";
+import { Text } from "components/Text";
+import { router } from "expo-router";
+import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 
 import { getTransactionTitle } from "../../lib/transactionTitle";
 import Card from "../../lib/types/Card";
@@ -16,8 +17,6 @@ interface CardTransactionsProps {
   isLoadingMore: boolean;
   card: Card;
   _card: Card;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: NativeStackNavigationProp<any>;
 }
 
 export default function CardTransactions({
@@ -27,7 +26,6 @@ export default function CardTransactions({
   isLoadingMore,
   card,
   _card,
-  navigation,
 }: CardTransactionsProps) {
   const { colors: themeColors } = useTheme();
 
@@ -137,11 +135,14 @@ export default function CardTransactions({
           <TouchableOpacity
             key={transaction.id}
             onPress={() => {
-              navigation.navigate("Transaction", {
-                orgId: card?.organization?.id || _card?.organization?.id,
-                transaction: transaction,
-                transactionId: transaction.id,
-                title: getTransactionTitle(transaction),
+              router.push({
+                pathname: "/cards/transactions/[transactionId]",
+                params: {
+                  id: card?.organization?.id || _card?.organization?.id,
+                  transaction: JSON.stringify(transaction),
+                  transactionId: transaction.id,
+                  title: getTransactionTitle(transaction),
+                },
               });
             }}
             style={[

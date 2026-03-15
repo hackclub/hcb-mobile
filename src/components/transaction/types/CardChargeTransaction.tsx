@@ -57,7 +57,7 @@ export default function CardChargeTransaction({
     ...transaction
   },
   orgId,
-  navigation,
+  navigation: _navigation,
 }: TransactionViewProps<TransactionCardCharge>) {
   const isRefund = transaction.amount_cents > 0;
   const walletLabel = getWalletLabel(card_charge.wallet);
@@ -106,7 +106,7 @@ export default function CardChargeTransaction({
                 },
               ]
             : []),
-          descriptionDetail(orgId, transaction, navigation),
+          descriptionDetail(orgId, transaction),
           {
             label: isRefund ? "Refunded on" : "Spent on",
             value: format(

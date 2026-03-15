@@ -1,10 +1,8 @@
 import { useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 
-import { StackParamList } from "../../lib/NavigatorParamList";
-import { getTransactionTitle } from "../../lib/transactionTitle";
 import Organization, {
   OrganizationExpanded,
 } from "../../lib/types/Organization";
@@ -16,7 +14,6 @@ interface TransactionWrapperProps {
   item: ITransaction;
   user: User | undefined;
   organization: Organization | OrganizationExpanded | undefined;
-  navigation: NativeStackNavigationProp<StackParamList, "Event">;
   orgId: `org_${string}`;
   index?: number;
   isFirst?: boolean;
@@ -27,7 +24,6 @@ function TransactionWrapper({
   item,
   user,
   organization,
-  navigation,
   orgId,
   isFirst = false,
   isLast = false,
@@ -52,15 +48,21 @@ function TransactionWrapper({
       "transfer" in item &&
       item.transfer?.card_grant_id
     ) {
-      navigation.navigate("GrantCard", {
-        grantId: item.transfer.card_grant_id,
+      router.push({
+        pathname: "/(events)/card-grants/[id]",
+        params: {
+          id: item.transfer.card_grant_id,
+        },
       });
     } else {
-      navigation.navigate("Transaction", {
-        transactionId: item.id!,
-        orgId,
-        transaction: item as ITransaction,
-        title: getTransactionTitle(item as ITransaction),
+      router.push({
+        pathname: "/(events)/[id]/transactions/[transactionId]",
+        params: {
+          id: orgId,
+          transactionId: item.id!,
+          orgId,
+          transaction: JSON.stringify(item as ITransaction),
+        },
       });
     }
   };

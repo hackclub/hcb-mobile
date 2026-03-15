@@ -13,7 +13,7 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionCheck>) {
   return (
@@ -48,7 +48,7 @@ export default function CheckTransaction({
       </View>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           ...(check.sender
             ? [
                 {

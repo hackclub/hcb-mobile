@@ -1,10 +1,8 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { router } from "expo-router";
 import { KyInstance } from "ky";
-import { Alert } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { showAlert } from "../lib/alertUtils";
-import { CardsStackParamList } from "../lib/NavigatorParamList";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
@@ -182,12 +180,10 @@ export const returnGrant = async (
   card: Card,
   isCardholder: boolean,
   grantCard: GrantCard,
-  setisReturningGrant: (isReturningGrant: boolean) => void,
+  setIsReturningGrant: (isReturningGrant: boolean) => void,
   mutate: (key: string) => Promise<unknown>,
   hcb: KyInstance,
   grantId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  navigation: NativeStackNavigationProp<any>,
 ) => {
   if (!card || !card.id) {
     showAlert("Error", "Cannot update card status. Please try again.");
@@ -208,13 +204,13 @@ export const returnGrant = async (
         style: "destructive",
         onPress: async () => {
           try {
-            setisReturningGrant(true);
+            setIsReturningGrant(true);
             await hcb.post(
               `card_grants/${grantId || grantCard.grant_id}/cancel`,
             );
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await mutate("user/cards");
-            navigation.goBack();
+            router.back();
           } catch (err) {
             console.error("Error returning grant", err, {
               cardId: card.id,
@@ -226,7 +222,7 @@ export const returnGrant = async (
               [{ text: "OK" }],
             );
           } finally {
-            setisReturningGrant(false);
+            setIsReturningGrant(false);
           }
         },
       },
@@ -329,7 +325,6 @@ export const handleCreateCard = async (
   hcb: KyInstance,
   user: User,
   setIsLoading: (isLoading: boolean) => void,
-  navigation: NativeStackNavigationProp<CardsStackParamList>,
 ) => {
   if (
     !validateFields(
@@ -372,15 +367,15 @@ export const handleCreateCard = async (
         title: "Card created!",
         textBody: "Your card has been created successfully.",
       });
-      navigation.goBack();
+      router.back();
     } else {
       const data = (await response.json()) as { error?: string };
-      Alert.alert("Error", data.error || "Failed to create card");
+      showAlert("Error", data.error || "Failed to create card");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   } catch (err) {
     console.error("Error creating card:", err);
-    Alert.alert("Error", "Failed to create card. Please try again later.");
+    showAlert("Error", "Failed to create card. Please try again later.");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {
     setIsLoading(false);

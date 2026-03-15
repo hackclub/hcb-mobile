@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
-import { View, Text, Platform } from "react-native";
+import { Text } from "components/Text";
+import { View, Platform } from "react-native";
 
 import Organization, {
   OrganizationExpanded,
@@ -7,18 +8,21 @@ import Organization, {
 import { useIsDark } from "../../lib/useColorScheme";
 import { palette } from "../../styles/theme";
 import { renderMoney } from "../../utils/util";
+import BalanceChart from "./BalanceChart";
 import Button from "../Button";
 
 interface HeaderProps {
   organization: Organization | OrganizationExpanded;
   showMockData: boolean;
   setShowMockData: React.Dispatch<React.SetStateAction<boolean>>;
+  showChart?: boolean;
 }
 
 export default function Header({
   organization,
   showMockData,
   setShowMockData,
+  showChart = true,
 }: HeaderProps) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
@@ -33,7 +37,7 @@ export default function Header({
         backgroundColor: themeColors.card,
         borderRadius: 16,
         padding: 20,
-        marginBottom: 24,
+        overflow: "hidden",
         ...(Platform.OS === "ios" && {
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
@@ -62,6 +66,7 @@ export default function Header({
               letterSpacing: 0.8,
               marginBottom: 6,
             }}
+            bold
           >
             Account Balance
           </Text>
@@ -73,6 +78,7 @@ export default function Header({
               letterSpacing: -1.5,
               fontVariant: ["tabular-nums"],
             }}
+            bold
           >
             {formattedBalance}
           </Text>
@@ -99,6 +105,7 @@ export default function Header({
           </Button>
         )}
       </View>
+      {showChart && <BalanceChart organizationId={organization.id} />}
     </View>
   );
 }

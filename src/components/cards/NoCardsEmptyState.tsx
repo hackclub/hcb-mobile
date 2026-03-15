@@ -1,25 +1,28 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useTheme } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { View, Text, Platform } from "react-native";
+import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
+import { router } from "expo-router";
+import { Platform, View } from "react-native";
 
-import { CardsStackParamList } from "../../lib/NavigatorParamList";
-import { useIsDark } from "../../lib/useColorScheme";
-import { palette } from "../../styles/theme";
 import Button from "../Button";
 
-type NavigationProp = NativeStackNavigationProp<
-  CardsStackParamList,
-  "CardList"
->;
+import { useIsDark } from "@/lib/useColorScheme";
+import { palette } from "@/styles/theme";
 
-export const NoCardsEmptyState = () => {
+export const NoCardsEmptyState = ({
+  onOrderCard,
+}: {
+  onOrderCard?: () => void;
+}) => {
   const { colors: themeColors } = useTheme();
-  const navigation = useNavigation<NavigationProp>();
   const isDark = useIsDark();
 
   const handleOrderCard = () => {
-    navigation.navigate("OrderCard");
+    if (onOrderCard) {
+      onOrderCard();
+      return;
+    }
+    router.push("/(events)");
   };
 
   return (

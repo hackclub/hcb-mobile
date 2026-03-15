@@ -1,5 +1,6 @@
 import { useTheme } from "@react-navigation/native";
-import { Modal, View, Text, TextInput } from "react-native";
+import { Text } from "components/Text";
+import { Modal, TextInput, View } from "react-native";
 
 import Button from "../../Button";
 

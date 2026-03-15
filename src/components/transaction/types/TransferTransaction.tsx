@@ -1,3 +1,4 @@
+import { router, useSegments } from "expo-router";
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
@@ -15,11 +16,13 @@ import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },
-  navigation,
+  navigation: _navigation,
   ...props
 }: TransactionViewProps<TransactionTransfer>) {
   const { data: userOrgs } = useSWR<Organization[]>(`user/organizations`);
   const { data: user } = useSWR<User>("user");
+  const segments = useSegments();
+  const isInEventsTab = segments.includes("(events)" as never);
 
   const userInFromOrg =
     user?.admin || userOrgs?.some((org) => org.id == transfer.from.id);
@@ -28,9 +31,11 @@ export default function TransferTransaction({
 
   const handleGrantCardNavigation = () => {
     if (transfer.card_grant_id) {
-      // Navigate to the GrantCard screen in the same stack
-      navigation.navigate("GrantCard", {
-        grantId: transfer.card_grant_id,
+      router.push({
+        pathname: isInEventsTab
+          ? "/(events)/card-grants/[id]"
+          : "/cards/card-grants/[id]",
+        params: { id: transfer.card_grant_id },
       });
     }
   };
@@ -57,7 +62,7 @@ export default function TransferTransaction({
       </TransactionTitle>
       <TransactionDetails
         details={[
-          descriptionDetail(props.orgId, transaction, navigation),
+          descriptionDetail(props.orgId, transaction),
           ...(transfer.sender
             ? [
                 {
@@ -86,9 +91,9 @@ export default function TransferTransaction({
               (userInFromOrg || user?.auditor) &&
               transfer.from.id != props.orgId
                 ? () =>
-                    navigation.push("Event", {
-                      orgId: transfer.from.id,
-                      organization: transfer.from,
+                    router.push({
+                      pathname: "/(events)/[id]",
+                      params: { id: transfer.from.id },
                     })
                 : undefined,
           },
@@ -98,9 +103,9 @@ export default function TransferTransaction({
             onPress:
               (userInToOrg || user?.auditor) && transfer.to.id != props.orgId
                 ? () =>
-                    navigation.push("Event", {
-                      orgId: transfer.to.id,
-                      organization: transfer.to,
+                    router.push({
+                      pathname: "/(events)/[id]",
+                      params: { id: transfer.to.id },
                     })
                 : undefined,
           },

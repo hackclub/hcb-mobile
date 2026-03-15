@@ -2,9 +2,10 @@ import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
-import { View, Text, ViewProps, StyleSheet } from "react-native";
+import { StyleSheet, View, ViewProps } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { match } from "ts-pattern";
 
@@ -79,10 +80,13 @@ function TransactionIcon({
 }) {
   if (hideIcon) return null;
 
+  const iconName = transactionIcon(transaction);
   const iconColor =
-    transaction.appearance == "hackathon_grant" ? palette.black : palette.muted;
+    transaction.appearance === "hackathon_grant"
+      ? palette.black
+      : palette.muted;
 
-  if (!hideAvatar && transaction.code == TransactionType.StripeCard) {
+  if (!hideAvatar && transaction.code === TransactionType.StripeCard) {
     return (
       <UserAvatar
         user={(transaction as TransactionCardCharge).card_charge.card.user}
@@ -91,22 +95,15 @@ function TransactionIcon({
     );
   }
 
-  if (transactionIcon(transaction) == "paypal") {
+  if (iconName === "paypal") {
     return <FontAwesomeIcon color={iconColor} icon={faPaypal} size={20} />;
   }
 
-  if (transactionIcon(transaction) == "wise") {
+  if (iconName === "wise") {
     return <WiseIcon color={iconColor} size={22} />;
   }
 
-  return (
-    <Icon
-      // @ts-expect-error it is checked above
-      glyph={transactionIcon(transaction)}
-      color={iconColor}
-      size={22}
-    />
-  );
+  return <Icon glyph={iconName} color={iconColor} size={22} />;
 }
 
 function Transaction({
@@ -159,16 +156,62 @@ function Transaction({
 
   // Standardized text color
   const textColor =
-    transaction.appearance == "hackathon_grant"
+    transaction.appearance === "hackathon_grant"
       ? palette.black
       : transaction.pending
         ? palette.muted
         : themeColors.text;
 
   const amountColor =
-    transaction.appearance == "hackathon_grant"
+    transaction.appearance === "hackathon_grant"
       ? palette.black
       : themeColors.text;
+
+  const badgeBase = {
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 4,
+  } as const;
+
+  const reversedBadgeStyle = {
+    ...badgeBase,
+    backgroundColor: isDark ? "#2A394C" : "#D5E0EF",
+    borderWidth: 1,
+    borderColor: isDark ? "#2A394C" : "#D5E0EF",
+  };
+
+  const declinedBadgeStyle = {
+    ...badgeBase,
+    backgroundColor: isDark ? "#401A23" : "#891A2A",
+    borderWidth: 1,
+    borderColor: isDark ? "#401A23" : "#891A2A",
+  };
+
+  const pendingBadgeStyle = {
+    ...badgeBase,
+    borderWidth: 1,
+    borderStyle: "dashed" as const,
+    borderColor: "#8492a6",
+  };
+
+  const reversedTextStyle = {
+    color: isDark ? "#338eda" : "#D5E0EF",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
+
+  const declinedTextStyle = {
+    color: isDark ? "#891A2A" : "#fff",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
+
+  const pendingTextStyle = {
+    color: "#8492a6",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
 
   return (
     <View
@@ -189,7 +232,7 @@ function Transaction({
         style,
       )}
     >
-      {transaction.appearance == "hackathon_grant" && (
+      {transaction.appearance === "hackathon_grant" && (
         <LinearGradient
           colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
           style={{
@@ -226,51 +269,19 @@ function Transaction({
           <View
             style={
               transaction.reversed
-                ? {
-                    backgroundColor: isDark ? "#2A394C" : "#D5E0EF",
-                    borderWidth: 1,
-                    borderColor: isDark ? "#2A394C" : "#D5E0EF",
-                    borderRadius: 10,
-                    paddingHorizontal: 8,
-                    paddingVertical: 2,
-                    marginRight: 4,
-                  }
+                ? reversedBadgeStyle
                 : transaction.declined
-                  ? {
-                      backgroundColor: isDark ? "#401A23" : "#891A2A",
-                      borderWidth: 1,
-                      borderColor: isDark ? "#401A23" : "#891A2A",
-                      borderRadius: 10,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      marginRight: 4,
-                    }
-                  : {
-                      borderWidth: 1,
-                      borderStyle: "dashed",
-                      borderColor: "#8492a6",
-                      borderRadius: 10,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      marginRight: 4,
-                    }
+                  ? declinedBadgeStyle
+                  : pendingBadgeStyle
             }
           >
             <Text
               style={
                 transaction.reversed
-                  ? {
-                      color: isDark ? "#338eda" : "#D5E0EF",
-                      fontSize: 12,
-                      fontWeight: "bold",
-                    }
+                  ? reversedTextStyle
                   : transaction.declined
-                    ? {
-                        color: isDark ? "#891A2A" : "#fff",
-                        fontSize: 12,
-                        fontWeight: "bold",
-                      }
-                    : { color: "#8492a6", fontSize: 12, fontWeight: "bold" }
+                    ? declinedTextStyle
+                    : pendingTextStyle
               }
             >
               {transaction.reversed

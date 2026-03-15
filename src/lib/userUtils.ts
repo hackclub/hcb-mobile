@@ -10,6 +10,7 @@ export function nameParts(name: string) {
 
 export function userInitials(name: string) {
   const { firstName, lastName } = nameParts(name);
+  if (!firstName) return "";
   return firstName[0] + (lastName ? lastName[0] : "");
 }
 
