@@ -37,7 +37,6 @@ export default function Header({
         backgroundColor: themeColors.card,
         borderRadius: 16,
         padding: 20,
-        marginBottom: 24,
         overflow: "hidden",
         ...(Platform.OS === "ios" && {
           shadowColor: "#000",

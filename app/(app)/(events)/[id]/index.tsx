@@ -4,13 +4,13 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import groupBy from "lodash/groupBy";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   View,
 } from "react-native";
 
@@ -19,59 +19,212 @@ import Header from "@/components/organizations/Header";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
+import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
 import useTransactions from "@/lib/organization/useTransactions";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
-import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
-import User from "@/lib/types/User";
+import ITransaction from "@/lib/types/Transaction";
+import User, { OrgUser } from "@/lib/types/User";
+import { useIsDark } from "@/lib/useColorScheme";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { addPendingFeeToTransactions, renderDate } from "@/utils/util";
-import { icon } from "@fortawesome/fontawesome-svg-core";
+import { palette } from "@/styles/theme";
+import { addPendingFeeToTransactions } from "@/utils/util";
 
-const ListItemButton = ({
-  children,
-  badge,
+// --- 2x2 Grid Action Tile ---
+function ActionTile({
+  icon,
+  label,
   onPress,
 }: {
-  children?: React.ReactNode;
-  badge?: number;
-  onPress?: () => void;
-}) => {
+  icon: string;
+  label: string;
+  onPress: () => void;
+}) {
+  const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
   return (
     <Pressable
-      style={{
-        flexDirection: "row",
-        paddingVertical: 12,
-        paddingHorizontal: 15,
-        alignItems: "center",
-        gap: 8,
-      }}
       onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        backgroundColor: themeColors.card,
+        borderRadius: 14,
+        paddingVertical: 18,
+        paddingHorizontal: 14,
+        gap: 10,
+        opacity: pressed ? 0.6 : 1,
+      })}
     >
-      {children}
-      {badge && (
-        <Text style={{ marginLeft: "auto", opacity: 0.4 }}>{badge}</Text>
-      )}
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          backgroundColor: isDark
+            ? "rgba(255,255,255,0.07)"
+            : "rgba(0,0,0,0.05)",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon glyph={icon} size={20} color={themeColors.text} />
+      </View>
+      <Text
+        style={{
+          color: themeColors.text,
+          fontSize: 15,
+          fontWeight: "600",
+        }}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
-};
+}
 
-const ListItemText = ({
-  primary,
-  secondary,
+// --- Small horizontal chip ---
+function ActionChip({
+  icon,
+  label,
+  onPress,
 }: {
-  primary: string;
-  secondary?: string;
-}) => {
+  icon: string;
+  label: string;
+  onPress: () => void;
+}) {
+  const { colors: themeColors } = useTheme();
   return (
-    <View style={{ flex: 1 }}>
-      <Text>{primary}</Text>
-      {secondary && <Text style={{ opacity: 0.6 }}>{secondary}</Text>}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: themeColors.card,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <Icon glyph={icon} size={16} color={palette.muted} />
+      <Text
+        style={{ color: themeColors.text, fontSize: 14, fontWeight: "500" }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// --- Section Card wrapper ---
+function SectionCard({
+  title,
+  onSeeAll,
+  children,
+}: {
+  title: string;
+  onSeeAll?: () => void;
+  children: React.ReactNode;
+}) {
+  const { colors: themeColors } = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: themeColors.card,
+        borderRadius: 16,
+        overflow: "hidden",
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 12,
+        }}
+      >
+        <Text
+          style={{ fontSize: 17, fontWeight: "700", color: themeColors.text }}
+        >
+          {title}
+        </Text>
+        {onSeeAll && (
+          <Pressable
+            onPress={onSeeAll}
+            hitSlop={8}
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 2,
+              opacity: pressed ? 0.5 : 1,
+            })}
+          >
+            <Text style={{ color: palette.muted, fontSize: 14 }}>See all</Text>
+            <Ionicons name="chevron-forward" size={16} color={palette.muted} />
+          </Pressable>
+        )}
+      </View>
+      {children}
     </View>
   );
-};
+}
+
+// --- Team Avatars Row ---
+function TeamAvatars({ users }: { users: OrgUser[] }) {
+  const { colors: themeColors } = useTheme();
+  const MAX_SHOWN = 8;
+  const shown = users.slice(0, MAX_SHOWN);
+  const overflow = users.length - MAX_SHOWN;
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+      }}
+    >
+      {shown.map((u, i) => (
+        <View
+          key={u.id}
+          style={{
+            marginLeft: i === 0 ? 0 : -6,
+            borderRadius: 999,
+            borderWidth: 2,
+            borderColor: themeColors.card,
+          }}
+        >
+          <UserAvatar user={u} size={36} />
+        </View>
+      ))}
+      {overflow > 0 && (
+        <View
+          style={{
+            marginLeft: -6,
+            width: 36,
+            height: 36,
+            borderRadius: 999,
+            backgroundColor: palette.slate,
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 2,
+            borderColor: themeColors.card,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
+            +{overflow}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function Page() {
   const navigation = useNavigation();
@@ -87,8 +240,8 @@ export default function Page() {
     {
       fallbackData: params.fallbackData
         ? (JSON.parse(params.fallbackData) as
-          | Organization
-          | OrganizationExpanded)
+            | Organization
+            | OrganizationExpanded)
         : undefined,
       onError: (err) => {
         console.error("Error fetching organization:", err, {
@@ -134,17 +287,11 @@ export default function Page() {
     const isOfflineNoData = organizationError && !isOnline && !organization;
 
     if (isAccessDenied) {
-      navigation.setOptions({
-        title: "Access Denied",
-      });
+      navigation.setOptions({ title: "Access Denied" });
     } else if (isOfflineNoData) {
-      navigation.setOptions({
-        title: "Offline",
-      });
+      navigation.setOptions({ title: "Offline" });
     } else if (organization) {
-      navigation.setOptions({
-        title: organization.name || "Organization",
-      });
+      navigation.setOptions({ title: organization.name || "Organization" });
     }
   }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
 
@@ -154,7 +301,6 @@ export default function Page() {
         const hasSeenBanner = await AsyncStorage.getItem(
           "hasSeenTapToPayBanner",
         );
-
         if (
           !hasSeenBanner &&
           userinOrganization &&
@@ -209,29 +355,53 @@ export default function Page() {
     [_transactions, organization],
   );
 
-  const sections: { title: string; data: TransactionWithoutId[] }[] = useMemo(
-    () =>
-      Object.entries(
-        groupBy(transactions, (t) =>
-          t?.pending ? "Pending" : renderDate(t?.date),
-        ),
-      ).map(([title, data]) => ({
-        title,
-        data,
-      })),
-    [transactions],
-  );
-
   const recentTransactions = useMemo(
-    () => transactions.slice(0, 4),
+    () => transactions.slice(0, 6),
     [transactions],
   );
 
-  const renderListHeader = useCallback(() => {
-    if (!organization) return null;
+  const teamUsers = useMemo(() => {
+    if (organization && "users" in organization) {
+      return organization.users;
+    }
+    return [];
+  }, [organization]);
 
+  // Navigation helper
+  const navTo = (path: string | null, extraParams?: Record<string, string>) => {
+    if (!path) {
+      showAlert("Coming Soon", "This feature is coming soon.");
+      return;
+    }
+    router.push({
+      pathname: path,
+      params: { id: params.id, ...extraParams },
+    });
+  };
+
+  if (!organization) {
     return (
-      <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: themeColors.background }}
+      contentInsetAdjustmentBehavior="automatic"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Banners + Header */}
+      <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 16 }}>
         {showTapToPayBanner && (
           <TapToPayBanner
             onDismiss={handleDismissTapToPayBanner}
@@ -244,66 +414,46 @@ export default function Page() {
           showMockData={showMockData}
           setShowMockData={setShowMockData}
         />
-        {isLoading && <ActivityIndicator />}
-        {!isLoading && sections.length === 0 && !showMockData && (
-          <EmptyState isOnline={isOnline} />
-        )}
       </View>
-    );
-  }, [
-    showTapToPayBanner,
-    params,
-    playgroundMode,
-    organization,
-    showMockData,
-    isLoading,
-    sections.length,
-    isOnline,
-  ]);
 
-  return (
-    <ScrollView style={{ flex: 1, backgroundColor: themeColors.background }} contentInsetAdjustmentBehavior="automatic">
-      {renderListHeader()}
-      <View style={{ paddingHorizontal: 20, gap: 16 }}>
-        {recentTransactions.length > 0 && (
-          <View
-            style={{
-              backgroundColor: themeColors.card,
-              borderRadius: 16,
-              overflow: "hidden",
-            }}
+      {/* Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          gap: 8,
+          paddingVertical: 16,
+        }}
+      >
+        <ActionChip
+          icon="briefcase"
+          label="Deposit a check"
+          onPress={() => navTo(null)}
+        />
+        <ActionChip
+          icon="bank-circle"
+          label="Account Numbers"
+          onPress={() => navTo("/(events)/[id]/account-numbers")}
+        />
+      </ScrollView>
+
+      <View style={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
+        {/* Recent Transactions */}
+        {isLoading ? (
+          <View style={{ padding: 20, alignItems: "center" }}>
+            <ActivityIndicator />
+          </View>
+        ) : recentTransactions.length > 0 ? (
+          <SectionCard
+            title="Recent transactions"
+            onSeeAll={() =>
+              router.push({
+                pathname: "/(events)/[id]/transactions",
+                params: { id: params.id, fallbackData: params.fallbackData },
+              })
+            }
           >
-            <Pressable
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingHorizontal: 15,
-                paddingVertical: 12,
-              }}
-              onPress={() =>
-                router.push({
-                  pathname: "/(events)/[id]/transactions",
-                  params: { id: params.id, fallbackData: params.fallbackData },
-                })
-              }
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <Icon glyph="bank-account" size={30} color={themeColors.text} />
-                <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                  Transactions
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={{ opacity: 0.5 }}>View all</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={themeColors.text}
-                  style={{ marginLeft: 4, opacity: 0.5 }}
-                />
-              </View>
-            </Pressable>
             <View>
               {recentTransactions.map((transaction, index) => (
                 <TransactionWrapper
@@ -312,84 +462,71 @@ export default function Page() {
                   user={user}
                   organization={organization}
                   orgId={params.id as `org_${string}`}
+                  isFirst={index === 0}
+                  isLast={index === recentTransactions.length - 1}
                 />
               ))}
             </View>
-          </View>
+          </SectionCard>
+        ) : (
+          !showMockData && <EmptyState isOnline={isOnline} />
         )}
-        <View
-          style={{
-            backgroundColor: themeColors.card,
-            borderRadius: 16,
-            marginBottom: 32,
-          }}
-        >
-          {[
-            {
-              icon: "profile",
-              name: "Team members",
-              path: "/(events)/[id]/team",
-            },
-            {
-              icon: "transactions",
-              name: "Collect donations",
-              path: "/(events)/[id]/donations",
-              beforePress: () => {
+
+        {/* 2x2 Action Grid */}
+        <View style={{ gap: 10 }}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <ActionTile
+              icon="payment-transfer"
+              label="Transfer"
+              onPress={() =>
+                navTo("/(events)/[id]/transfer", {
+                  organization: JSON.stringify(organization),
+                })
+              }
+            />
+            <ActionTile
+              icon="card"
+              label="Cards"
+              onPress={() => navTo("/(events)/[id]/cards/order")}
+            />
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <ActionTile
+              icon="support"
+              label="Donations"
+              onPress={() => {
                 if (!supportsTapToPay) {
                   showAlert(
                     "Unsupported Device",
-                    "Collecting donations is only supported on iOS 16.4 and later. Please update your device to use this feature.",
+                    "Collecting donations is only supported on iOS 16.4 and later.",
                   );
-                  throw new Error("Tap to pay unsupported");
+                  return;
                 }
-              },
-            },
-            {
-              icon: "bank-circle",
-              name: "Account details",
-              path: "/(events)/[id]/account-numbers",
-            },
-            {
-              icon: "payment-transfer",
-              name: "Transfer money",
-              path: "/(events)/[id]/transfer",
-            },
-            {
-              icon: "card",
-              name: "Order a card",
-              path: "/(events)/[id]/cards/order",
-            },
-          ].map((button, i) => (
-            <ListItemButton
-              key={i}
-              onPress={() => {
-                try {
-                  button.beforePress?.();
-                  router.push({
-                    pathname: button.path,
-                    params: {
-                      ...(button.name === "Transfer money"
-                        ? { organization: JSON.stringify(organization) }
-                        : {}),
-                      id: params.id,
-                      fallbackData: params.fallbackData,
-                    },
-                  });
-                } catch {
-                  // navigation cancelled by beforePress (e.g. unsupported device)
-                }
+                navTo("/(events)/[id]/donations");
               }}
-            >
-              <Icon glyph={button.icon} size={30} color={themeColors.text} />
-              <ListItemText primary={button.name} />
-              <Ionicons
-                name="chevron-forward"
-                size={24}
-                color={themeColors.text}
-              />
-            </ListItemButton>
-          ))}
+            />
+            <ActionTile
+              icon="attachment"
+              label="Reimburse"
+              onPress={() => navTo(null)}
+            />
+          </View>
         </View>
+
+        {/* Team Members */}
+        {teamUsers.length > 0 && (
+          <SectionCard
+            title="Team members"
+            onSeeAll={() =>
+              router.push({
+                pathname: "/(events)/[id]/team",
+                params: { id: params.id },
+              })
+            }
+          >
+            <TeamAvatars users={teamUsers} />
+          </SectionCard>
+        )}
       </View>
     </ScrollView>
   );
