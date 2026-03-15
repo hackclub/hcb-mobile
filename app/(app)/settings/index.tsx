@@ -20,6 +20,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Switch,
   useColorScheme as useSystemColorScheme,
   View,
@@ -313,11 +314,13 @@ export default function SettingsPage() {
         {/* Theme Section */}
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.text,
-            marginBottom: 14,
-            marginTop: 10,
+            fontSize: 13,
+            fontWeight: "600",
+            color: palette.muted,
+            marginBottom: 8,
+            marginTop: 16,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
           }}
         >
           Theme
@@ -387,11 +390,13 @@ export default function SettingsPage() {
         {/* App Settings Section */}
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.text,
-            marginBottom: 14,
-            marginTop: 10,
+            fontSize: 13,
+            fontWeight: "600",
+            color: palette.muted,
+            marginBottom: 8,
+            marginTop: 16,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
           }}
         >
           App Settings
@@ -451,10 +456,9 @@ export default function SettingsPage() {
               </View>
               <View
                 style={{
-                  height: 1,
+                  height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
+                  marginLeft: 52,
                 }}
               />
             </>
@@ -487,10 +491,9 @@ export default function SettingsPage() {
               </Pressable>
               <View
                 style={{
-                  height: 1,
+                  height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
+                  marginLeft: 52,
                 }}
               />
             </>
@@ -521,10 +524,9 @@ export default function SettingsPage() {
             <>
               <View
                 style={{
-                  height: 1,
+                  height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
+                  marginLeft: 52,
                 }}
               />
               <Pressable
@@ -558,11 +560,13 @@ export default function SettingsPage() {
         {/* Support & Feedback Section */}
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.text,
-            marginBottom: 14,
-            marginTop: 10,
+            fontSize: 13,
+            fontWeight: "600",
+            color: palette.muted,
+            marginBottom: 8,
+            marginTop: 16,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
           }}
         >
           Support & Feedback
@@ -657,10 +661,9 @@ export default function SettingsPage() {
             <>
               <View
                 style={{
-                  height: 1,
+                  height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 20,
-                  marginRight: 20,
+                  marginLeft: 52,
                 }}
               />
               <Pressable
@@ -706,11 +709,13 @@ export default function SettingsPage() {
         {/* Legal & Info Section */}
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.text,
-            marginBottom: 14,
-            marginTop: 10,
+            fontSize: 13,
+            fontWeight: "600",
+            color: palette.muted,
+            marginBottom: 8,
+            marginTop: 16,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
           }}
         >
           Legal & Info
