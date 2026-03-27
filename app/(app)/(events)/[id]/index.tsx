@@ -487,7 +487,7 @@ export default function Page() {
             <ActionTile
               icon="card"
               label="Cards"
-              onPress={() => navTo("/(events)/[id]/cards/order")}
+              onPress={() => navTo("/(events)/[id]/cards")}
             />
           </View>
           <View style={{ flexDirection: "row", gap: 10 }}>

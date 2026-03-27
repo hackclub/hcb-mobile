@@ -67,7 +67,7 @@ export default function CardPage() {
   });
   const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${paramCard?.organization.id || card?.organization.id}`,
+    `organizations/${paramCard?.organization?.id || card?.organization?.id}`,
   );
 
   const {
