@@ -42,7 +42,7 @@ export default function NewDonationPage({
   const emailRef = useRef<TextInput>(null);
 
   const {
-    createPaymentIntent,
+    retrievePaymentIntent,
     collectPaymentMethod,
     confirmPaymentIntent,
     connectedReader,
@@ -75,21 +75,13 @@ export default function NewDonationPage({
 
   async function paymentIntent({ donation_id }: { donation_id: string }) {
     try {
-      const { error, paymentIntent } = await createPaymentIntent({
-        amount: Number((value * 100).toFixed()),
-        currency: "usd",
-        paymentMethodTypes: ["card_present"],
-        offlineBehavior: "prefer_online",
-        captureMethod: "automatic",
-        metadata: {
-          donation_id,
-          donation: "true",
-          event_id: orgId,
-        },
-        statementDescriptor: `HCB DONATION`.substring(0, 22),
-      });
+      const intent = await hcb.post('donations/payment_intent', {
+        json: { amount_cents: Number((value * 100).toFixed()), donation_id },
+      }).json() as { client_secret: string };
+      const { error, paymentIntent } = await retrievePaymentIntent(intent.client_secret)
+
       if (error) {
-        console.error("createPaymentIntent error", error, {
+        console.error("retrievePaymentIntent error", error, {
           context: { orgId, donation_id, action: "payment_intent" },
         });
         return false;
