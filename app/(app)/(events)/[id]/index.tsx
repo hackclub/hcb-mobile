@@ -4,9 +4,10 @@ import { useTheme } from "@react-navigation/native";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   Platform,
   Pressable,
   ScrollView,
@@ -21,8 +22,8 @@ import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
-import useTransactions from "@/lib/organization/useTransactions";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
+import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import ITransaction from "@/lib/types/Transaction";
 import User, { OrgUser } from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -226,6 +227,127 @@ function TeamAvatars({ users }: { users: OrgUser[] }) {
   );
 }
 
+function RecentTransactionsSkeleton() {
+  const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [shimmerAnim]);
+
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
+  const shapeColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const dividerColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)";
+
+  return (
+    <View
+      style={{
+        backgroundColor: themeColors.card,
+        borderRadius: 16,
+        overflow: "hidden",
+      }}
+    >
+      {/* Title placeholder */}
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 12,
+        }}
+      >
+        <Animated.View
+          style={{
+            height: 16,
+            width: "45%",
+            backgroundColor: shapeColor,
+            borderRadius: 6,
+            opacity: shimmerOpacity,
+          }}
+        />
+      </View>
+      {/* Divider under title */}
+      <View style={{ height: 1, backgroundColor: dividerColor }} />
+      {/* Transaction row placeholders */}
+      {[1, 2, 3, 4].map((item, index) => (
+        <View key={item}>
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              opacity: shimmerOpacity,
+            }}
+          >
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                backgroundColor: shapeColor,
+              }}
+            />
+            <View style={{ flex: 1, gap: 6 }}>
+              <View
+                style={{
+                  height: 13,
+                  width: "60%",
+                  backgroundColor: shapeColor,
+                  borderRadius: 4,
+                }}
+              />
+              <View
+                style={{
+                  height: 11,
+                  width: "35%",
+                  backgroundColor: shapeColor,
+                  borderRadius: 4,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                height: 13,
+                width: 50,
+                backgroundColor: shapeColor,
+                borderRadius: 4,
+              }}
+            />
+          </Animated.View>
+          {index < 3 && (
+            <View
+              style={{
+                height: 1,
+                backgroundColor: dividerColor,
+                marginLeft: 64,
+              }}
+            />
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function Page() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
@@ -278,10 +400,9 @@ export default function Page() {
     [organizationError],
   );
 
-  const { transactions: _transactions, isLoading } = useTransactions(
-    params.id,
-    "organizations",
-  );
+  const { data: transactionsPage, isLoading } = useOfflineSWR<
+    PaginatedResponse<ITransaction>
+  >(`organizations/${params.id}/transactions?limit=35`);
 
   useEffect(() => {
     const isOfflineNoData = organizationError && !isOnline && !organization;
@@ -350,14 +471,13 @@ export default function Page() {
 
   const { colors: themeColors } = useTheme();
 
-  const transactions = useMemo(
-    () => addPendingFeeToTransactions(_transactions, organization),
-    [_transactions, organization],
-  );
-
   const recentTransactions = useMemo(
-    () => transactions.slice(0, 6),
-    [transactions],
+    () =>
+      addPendingFeeToTransactions(
+        transactionsPage?.data ?? [],
+        organization,
+      ).slice(0, 6),
+    [transactionsPage, organization],
   );
 
   const teamUsers = useMemo(() => {
@@ -420,15 +540,15 @@ export default function Page() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={{ paddingVertical: 16 }}
         contentContainerStyle={{
           paddingHorizontal: 20,
           gap: 8,
-          paddingVertical: 16,
         }}
       >
         <ActionChip
           icon="briefcase"
-          label="Deposit a check"
+          label="Deposit Check"
           onPress={() => navTo(null)}
         />
         <ActionChip
@@ -436,14 +556,22 @@ export default function Page() {
           label="Account Numbers"
           onPress={() => navTo("/(events)/[id]/account-numbers")}
         />
+        {supportsTapToPay &&
+          donationPageAvailable &&
+          userinOrganization &&
+          !playgroundMode && (
+            <ActionChip
+              icon="support"
+              label="Collect Donations"
+              onPress={() => navTo("/(events)/[id]/donations")}
+            />
+          )}
       </ScrollView>
 
-      <View style={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
+      <View style={{ paddingHorizontal: 20, gap: 16, paddingTop: 4, paddingBottom: 40 }}>
         {/* Recent Transactions */}
         {isLoading ? (
-          <View style={{ padding: 20, alignItems: "center" }}>
-            <ActivityIndicator />
-          </View>
+          <RecentTransactionsSkeleton />
         ) : recentTransactions.length > 0 ? (
           <SectionCard
             title="Recent transactions"

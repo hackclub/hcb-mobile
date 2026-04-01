@@ -313,6 +313,7 @@ export default function Page() {
           flex: 1,
           backgroundColor: themeColors.background,
           padding: 20,
+          marginTop: 20
         }}
       >
         <LoadingSkeleton />
@@ -363,7 +364,9 @@ export default function Page() {
           drawDistance={400}
         />
       ) : (
-        <LoadingSkeleton />
+          <View style={{ flex: 1, marginTop: 20 }}>
+            <LoadingSkeleton />
+          </View>
       )}
     </>
   );
