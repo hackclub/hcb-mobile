@@ -82,6 +82,24 @@ export default function Layout() {
           }}
         />
         <Stack.Screen
+          name="[id]/invite"
+          options={{
+            presentation: "formSheet",
+            title: "Invite a Teammate",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
           name="[id]/donations/index"
           options={{ title: "Collect Donations" }}
         />
