@@ -103,6 +103,7 @@ function RootLayoutNav() {
     }
 
     lastAuthState.current = hasToken;
+    console.log(tokenResponse?.accessToken)
 
     // If user has a token, navigate to the app
     if (hasToken) {

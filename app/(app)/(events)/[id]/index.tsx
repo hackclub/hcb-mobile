@@ -549,7 +549,7 @@ export default function Page() {
         <ActionChip
           icon="briefcase"
           label="Deposit Check"
-          onPress={() => navTo(null)}
+          onPress={() => navTo("/(events)/[id]/check-deposits/new")}
         />
         <ActionChip
           icon="bank-circle"
