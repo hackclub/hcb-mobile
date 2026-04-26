@@ -59,7 +59,7 @@ export default function NewDonationPage({
           amount_cents: value * 100,
           name,
           email,
-          tax_deductable: isTaxDeductable,
+          tax_deductible: isTaxDeductable,
         },
       });
       const data = (await response.json()) as { id: string };
