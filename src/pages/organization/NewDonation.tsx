@@ -208,10 +208,7 @@ export default function NewDonationPage({
 
   const handleCreateDonation = async () => {
     if (value <= 0) {
-      showAlert(
-        "Error creating donation",
-        "Amount must be greater than 0.",
-      );
+      showAlert("Error creating donation", "Amount must be greater than 0.");
       return;
     }
     if (isDevMode) {

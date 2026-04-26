@@ -316,11 +316,7 @@ export default function OrganizationDonationPage({
   useEffect(() => {
     if (autoStartedRef.current) return;
     const hasAllPrefill =
-      amount !== undefined &&
-      amount > 0 &&
-      !!name &&
-      !!email &&
-      !!message;
+      amount !== undefined && amount > 0 && !!name && !!email && !!message;
     if (!hasAllPrefill) return;
     if (organizationLoading || !organization) return;
     if (isStripeInitializing) return;
