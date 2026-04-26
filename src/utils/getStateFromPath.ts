@@ -93,7 +93,12 @@ function buildDonationStartRoutes(
   const match = pathname.match(/^\/?donations\/start\/([^/?#]+)\/?$/);
   if (!match) return undefined;
 
-  const slug = decodeURIComponent(match[1]);
+  let slug: string;
+  try {
+    slug = decodeURIComponent(match[1]);
+  } catch {
+    return undefined;
+  }
   const params = new URLSearchParams(search);
 
   const amountRaw = params.get("amount");
