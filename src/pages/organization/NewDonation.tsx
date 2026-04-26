@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -38,8 +39,10 @@ export default function NewDonationPage({
   const value = parseFloat(amount.replace("$", "0"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [donationMessage, setDonationMessage] = useState("");
   const [isTaxDeductable, setIsTaxDeductable] = useState(false);
   const emailRef = useRef<TextInput>(null);
+  const messageRef = useRef<TextInput>(null);
 
   const {
     createPaymentIntent,
@@ -59,6 +62,7 @@ export default function NewDonationPage({
           amount_cents: value * 100,
           name,
           email,
+          message: donationMessage,
           tax_deductible: isTaxDeductable,
         },
       });
@@ -103,6 +107,7 @@ export default function NewDonationPage({
         name,
         email,
         slug: orgSlug || "",
+        message: donationMessage,
       });
       return paymentIntent;
     } catch (error) {
@@ -270,6 +275,41 @@ export default function NewDonationPage({
                 value={email}
                 onChangeText={setEmail}
                 ref={emailRef}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  messageRef.current?.focus();
+                }}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: colors.card,
+                borderRadius: 12,
+                paddingHorizontal: 14,
+              }}
+            >
+              <Ionicons
+                name="chatbubble-outline"
+                size={22}
+                color={palette.muted}
+              />
+              <TextInput
+                style={{
+                  color: colors.text,
+                  paddingVertical: 14,
+                  paddingHorizontal: 12,
+                  fontSize: 16,
+                  flex: 1,
+                }}
+                selectTextOnFocus
+                clearButtonMode="while-editing"
+                placeholder="Message (optional)"
+                placeholderTextColor={palette.muted}
+                value={donationMessage}
+                onChangeText={setDonationMessage}
+                ref={messageRef}
               />
             </View>
 
@@ -329,6 +369,7 @@ export default function NewDonationPage({
                   name: name || "Dev Test User",
                   email: email || "dev@example.com",
                   slug: orgSlug || "test-org",
+                  message: donationMessage,
                 });
                 return;
               }

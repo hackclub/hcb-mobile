@@ -23,6 +23,7 @@ export type StackParamList = {
     name: string;
     email: string;
     slug: string;
+    message?: string;
   };
   OrganizationTeam: { orgId: Organization["id"] };
   OrganizationDonation: { orgId: Organization["id"] };
