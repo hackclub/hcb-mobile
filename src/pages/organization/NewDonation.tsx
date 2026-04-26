@@ -26,21 +26,36 @@ import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "NewDonation">;
 
+const formatPrefillAmount = (cents?: number) => {
+  if (cents === undefined || !Number.isFinite(cents) || cents <= 0) {
+    return "$";
+  }
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
 export default function NewDonationPage({
   route: {
-    params: { orgId, orgSlug },
+    params: {
+      orgId,
+      orgSlug,
+      amount: prefillAmount,
+      name: prefillName,
+      email: prefillEmail,
+      message: prefillMessage,
+      goods: prefillGoods,
+    },
   },
   navigation,
 }: Props) {
   const { colors } = useTheme();
   const hcb = useClient();
 
-  const [amount, setAmount] = useState("$");
+  const [amount, setAmount] = useState(formatPrefillAmount(prefillAmount));
   const value = parseFloat(amount.replace("$", "0"));
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [donationMessage, setDonationMessage] = useState("");
-  const [isTaxDeductable, setIsTaxDeductable] = useState(false);
+  const [name, setName] = useState(prefillName ?? "");
+  const [email, setEmail] = useState(prefillEmail ?? "");
+  const [donationMessage, setDonationMessage] = useState(prefillMessage ?? "");
+  const [isTaxDeductable, setIsTaxDeductable] = useState(prefillGoods ?? false);
   const emailRef = useRef<TextInput>(null);
   const messageRef = useRef<TextInput>(null);
 

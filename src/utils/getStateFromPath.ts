@@ -8,6 +8,21 @@ import { Linking } from "react-native";
 import { StackParamList } from "../lib/NavigatorParamList";
 
 export const getStateFromPath: typeof _getStateFromPath = (path, options) => {
+  const donationRoutes = buildDonationStartRoutes(path);
+  if (donationRoutes) {
+    return {
+      routes: [
+        {
+          name: "Home",
+          state: {
+            routes: donationRoutes,
+            index: donationRoutes.length - 1,
+          },
+        },
+      ],
+    };
+  }
+
   const state = _getStateFromPath(path, options);
   if (state) return state;
 
@@ -69,4 +84,40 @@ function extractOrgName(
   } else {
     return { orgId: match[1] };
   }
+}
+
+function buildDonationStartRoutes(
+  path: string,
+): PartialRoute<Route<keyof StackParamList>>[] | undefined {
+  const [pathname, search = ""] = path.split("?");
+  const match = pathname.match(/^\/?donations\/start\/([^/?#]+)\/?$/);
+  if (!match) return undefined;
+
+  const slug = decodeURIComponent(match[1]);
+  const params = new URLSearchParams(search);
+
+  const amountRaw = params.get("amount");
+  const amount =
+    amountRaw !== null && amountRaw !== "" && !Number.isNaN(Number(amountRaw))
+      ? Number(amountRaw)
+      : undefined;
+  const name = params.get("name") ?? undefined;
+  const email = params.get("email") ?? undefined;
+  const message = params.get("message") ?? undefined;
+  const goodsRaw = params.get("goods");
+  const goods =
+    goodsRaw === null ? undefined : goodsRaw === "true" || goodsRaw === "1";
+
+  const donationParams: Record<string, unknown> = { orgId: slug };
+  if (amount !== undefined) donationParams.amount = amount;
+  if (name !== undefined) donationParams.name = name;
+  if (email !== undefined) donationParams.email = email;
+  if (message !== undefined) donationParams.message = message;
+  if (goods !== undefined) donationParams.goods = goods;
+
+  return [
+    { name: "Organizations" },
+    { name: "Event", params: { orgId: slug } },
+    { name: "OrganizationDonation", params: donationParams },
+  ];
 }

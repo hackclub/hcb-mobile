@@ -29,7 +29,7 @@ type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
 export default function OrganizationDonationPage({
   route: {
-    params: { orgId },
+    params: { orgId, amount, name, email, message, goods },
   },
   navigation,
 }: Props) {
@@ -234,6 +234,11 @@ export default function OrganizationDonationPage({
     navigation.navigate("NewDonation", {
       orgId,
       orgSlug: organization?.slug || "",
+      amount,
+      name,
+      email,
+      message,
+      goods,
     });
   };
 
