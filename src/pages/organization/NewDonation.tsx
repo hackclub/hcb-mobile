@@ -7,7 +7,7 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
@@ -206,6 +206,64 @@ export default function NewDonationPage({
   const isDevMode = __DEV__ && !connectedReader;
   const bottomTabBarHeight = useBottomTabBarHeight();
 
+  const handleCreateDonation = async () => {
+    if (value <= 0) {
+      showAlert(
+        "Error creating donation",
+        "Amount must be greater than 0.",
+      );
+      return;
+    }
+    if (isDevMode) {
+      // In dev mode, navigate with mock payment data
+      navigation.navigate("ProcessDonation", {
+        orgId,
+        payment: {
+          amount: Math.round(value * 100),
+        } as PaymentIntent.Type,
+        collectPayment: async () => {
+          // Mock payment function - simulates success after 2 seconds
+          return new Promise((resolve) =>
+            setTimeout(() => resolve(true), 2000),
+          );
+        },
+        name: name || "Dev Test User",
+        email: email || "dev@example.com",
+        slug: orgSlug || "test-org",
+        message: donationMessage,
+      });
+      return;
+    }
+    try {
+      const donation_id = await createDonation();
+      await paymentIntent({ donation_id });
+    } catch (error) {
+      console.error("createDonation error", error, {
+        context: {
+          orgId,
+          amount: value * 100,
+          action: "create_donation",
+        },
+      });
+      showAlert("Error creating donation", "Please try again.");
+    }
+  };
+
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    const hasAllPrefill =
+      !!prefillAmount &&
+      prefillAmount > 0 &&
+      !!prefillName &&
+      !!prefillEmail &&
+      !!prefillMessage;
+    if (!hasAllPrefill) return;
+    autoStartedRef.current = true;
+    handleCreateDonation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillAmount, prefillName, prefillEmail, prefillMessage]);
+
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
       <ScrollView
@@ -360,48 +418,7 @@ export default function NewDonationPage({
           </View>
 
           <Button
-            onPress={async () => {
-              if (value <= 0) {
-                showAlert(
-                  "Error creating donation",
-                  "Amount must be greater than 0.",
-                );
-                return;
-              }
-              if (isDevMode) {
-                // In dev mode, navigate with mock payment data
-                navigation.navigate("ProcessDonation", {
-                  orgId,
-                  payment: {
-                    amount: Math.round(value * 100),
-                  } as PaymentIntent.Type,
-                  collectPayment: async () => {
-                    // Mock payment function - simulates success after 2 seconds
-                    return new Promise((resolve) =>
-                      setTimeout(() => resolve(true), 2000),
-                    );
-                  },
-                  name: name || "Dev Test User",
-                  email: email || "dev@example.com",
-                  slug: orgSlug || "test-org",
-                  message: donationMessage,
-                });
-                return;
-              }
-              try {
-                const donation_id = await createDonation();
-                await paymentIntent({ donation_id });
-              } catch (error) {
-                console.error("createDonation error", error, {
-                  context: {
-                    orgId,
-                    amount: value * 100,
-                    action: "create_donation",
-                  },
-                });
-                showAlert("Error creating donation", "Please try again.");
-              }
-            }}
+            onPress={handleCreateDonation}
             style={{
               width: "100%",
               marginTop: 12,
