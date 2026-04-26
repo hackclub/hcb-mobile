@@ -3,10 +3,20 @@ const fs = require("fs");
 const path = require("path");
 
 function isPrivateSDKAvailable(privateSDKPath) {
-  return (
-    fs.existsSync(privateSDKPath) &&
-    fs.readdirSync(privateSDKPath).length > 0
-  );
+  try {
+    if (!fs.existsSync(privateSDKPath)) {
+      return false;
+    }
+
+    const stats = fs.statSync(privateSDKPath);
+    if (!stats.isDirectory()) {
+      return false;
+    }
+
+    return fs.readdirSync(privateSDKPath).length > 0;
+  } catch {
+    return false;
+  }
 }
 
 /**
