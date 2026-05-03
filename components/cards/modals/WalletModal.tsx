@@ -6,8 +6,8 @@ import {
 import { Image } from "expo-image";
 import { Modal, View, Text } from "react-native";
 
-import { useIsDark } from "@/lib/useColorScheme";
 import Button from "@/components/Button";
+import { useIsDark } from "@/lib/useColorScheme";
 
 interface WalletModalProps {
   visible: boolean;

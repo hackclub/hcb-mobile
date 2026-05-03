@@ -1,23 +1,23 @@
 import useSWR from "swr";
+
+import Card from "../types/Card";
+import Comment from "../types/Comment";
+import GrantCard from "../types/GrantCard";
+import Invitation from "../types/Invitation";
 import { OrganizationExpanded } from "../types/Organization";
+import Receipt from "../types/Receipt";
 import Transaction, {
   TransactionAchTransfer,
   TransactionCheckDeposit,
   TransactionDonation,
   TransactionInvoice,
   TransactionCheck,
-  TransactionCardCharge,
   TransactionType,
 } from "../types/Transaction";
-import Card from "../types/Card";
-import GrantCard from "../types/GrantCard";
-import Comment from "../types/Comment";
-import Invitation from "../types/Invitation";
-import Receipt from "../types/Receipt";
 import User from "../types/User";
 
-import { ApplicationPolicy } from "./ApplicationPolicy";
 import { AchTransferPolicy } from "./AchTransferPolicy";
+import { ApplicationPolicy } from "./ApplicationPolicy";
 import { CardGrantPolicy } from "./CardGrantPolicy";
 import { CardPolicy } from "./CardPolicy";
 import { CheckDepositPolicy } from "./CheckDepositPolicy";
@@ -66,10 +66,7 @@ export function usePolicy(
   record: GrantCard,
   org: OrganizationExpanded,
 ): CardGrantPolicy;
-export function usePolicy(
-  record: Card,
-  org: OrganizationExpanded,
-): CardPolicy;
+export function usePolicy(record: Card, org: OrganizationExpanded): CardPolicy;
 export function usePolicy(
   record: Comment,
   org: OrganizationExpanded,
@@ -87,7 +84,10 @@ export function usePolicy(
 // Implementation
 // ---------------------------------------------------------------------------
 
-export function usePolicy(record: unknown, org?: OrganizationExpanded): unknown {
+export function usePolicy(
+  record: unknown,
+  org?: OrganizationExpanded,
+): unknown {
   const { data: user } = useSWR<User>("user");
   const u = user ?? null;
   const o = org ?? null;

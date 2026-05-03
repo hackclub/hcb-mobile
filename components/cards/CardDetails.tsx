@@ -8,6 +8,10 @@ import { useEffect } from "react";
 import { View, Animated, Platform, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
+import { CardStatus } from "./CardStatus";
+
+import Divider from "@/components/Divider";
+import UserAvatar from "@/components/UserAvatar";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
@@ -20,10 +24,6 @@ import {
   renderCardNumber,
   renderMoney,
 } from "@/utils/util";
-import Divider from "@/components/Divider";
-import UserAvatar from "@/components/UserAvatar";
-
-import { CardStatus } from "./CardStatus";
 
 interface CardDetailsProps {
   card: Card;

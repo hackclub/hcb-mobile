@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
-import { Text } from "components/Text";
 import UserMention from "@/components/UserMention";
+import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney, statusColor } from "@/utils/util";
-import User from "@/lib/types/User";
 
 interface CheckDepositDetail {
   id: string;
@@ -28,7 +28,13 @@ interface CheckDepositDetail {
   submitter: User | null;
 }
 
-function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+function DetailRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   const { colors: themeColors } = useTheme();
   return (
     <View
@@ -60,7 +66,10 @@ function Divider() {
 }
 
 export default function CheckDepositDetailPage() {
-  const { id, depositId } = useLocalSearchParams<{ id: string; depositId: string }>();
+  const { id, depositId } = useLocalSearchParams<{
+    id: string;
+    depositId: string;
+  }>();
   const { colors: themeColors } = useTheme();
 
   const { data: deposit, isLoading } = useOfflineSWR<CheckDepositDetail>(
@@ -88,11 +97,18 @@ export default function CheckDepositDetailPage() {
     <ScrollView
       style={{ flex: 1, backgroundColor: themeColors.background }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40, gap: 20 }}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 40,
+        gap: 20,
+      }}
     >
       <View style={{ gap: 8 }}>
         <Badge color={statusColor(deposit.status)}>{statusLabel}</Badge>
-        <Text style={{ fontSize: 32, fontWeight: "700", color: themeColors.text }}>
+        <Text
+          style={{ fontSize: 32, fontWeight: "700", color: themeColors.text }}
+        >
           {renderMoney(deposit.amount_cents)}
         </Text>
       </View>
@@ -106,7 +122,9 @@ export default function CheckDepositDetailPage() {
             gap: 4,
           }}
         >
-          <Text style={{ color: palette.primary, fontWeight: "700", fontSize: 14 }}>
+          <Text
+            style={{ color: palette.primary, fontWeight: "700", fontSize: 14 }}
+          >
             Rejected: {deposit.rejection.reason.replace(/_/g, " ")}
           </Text>
           {deposit.rejection.description && (
@@ -121,24 +139,50 @@ export default function CheckDepositDetailPage() {
         <View style={{ gap: 12 }}>
           {deposit.front_url && (
             <View style={{ gap: 6 }}>
-              <Text style={{ color: palette.muted, fontSize: 13, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.4 }}>
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 13,
+                  fontWeight: "600",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.4,
+                }}
+              >
                 Front
               </Text>
               <Image
                 source={{ uri: deposit.front_url }}
-                style={{ width: "100%", height: 160, borderRadius: 12, backgroundColor: themeColors.card }}
+                style={{
+                  width: "100%",
+                  height: 160,
+                  borderRadius: 12,
+                  backgroundColor: themeColors.card,
+                }}
                 contentFit="cover"
               />
             </View>
           )}
           {deposit.back_url && (
             <View style={{ gap: 6 }}>
-              <Text style={{ color: palette.muted, fontSize: 13, fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.4 }}>
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 13,
+                  fontWeight: "600",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.4,
+                }}
+              >
                 Back
               </Text>
               <Image
                 source={{ uri: deposit.back_url }}
-                style={{ width: "100%", height: 160, borderRadius: 12, backgroundColor: themeColors.card }}
+                style={{
+                  width: "100%",
+                  height: 160,
+                  borderRadius: 12,
+                  backgroundColor: themeColors.card,
+                }}
                 contentFit="cover"
               />
             </View>
@@ -197,7 +241,9 @@ export default function CheckDepositDetailPage() {
         })}
       >
         <Ionicons name="list-outline" size={18} color={palette.muted} />
-        <Text style={{ color: themeColors.text, fontSize: 15, fontWeight: "500" }}>
+        <Text
+          style={{ color: themeColors.text, fontSize: 15, fontWeight: "500" }}
+        >
           View all deposits
         </Text>
       </Pressable>

@@ -22,8 +22,8 @@ import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
 import { OrgPolicy } from "@/lib/policies";
-import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
 import User, { OrgUser } from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -529,15 +529,22 @@ export default function Page() {
           onPress={() => navTo("/(events)/[id]/account-numbers")}
         />
         {supportsTapToPay && orgPolicy?.donationPage() && orgPolicy?.show() && (
-            <ActionChip
-              icon="support"
-              label="Collect Donations"
-              onPress={() => navTo("/(events)/[id]/donations")}
-            />
-          )}
+          <ActionChip
+            icon="support"
+            label="Collect Donations"
+            onPress={() => navTo("/(events)/[id]/donations")}
+          />
+        )}
       </ScrollView>
 
-      <View style={{ paddingHorizontal: 20, gap: 16, paddingTop: 4, paddingBottom: 40 }}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          gap: 16,
+          paddingTop: 4,
+          paddingBottom: 40,
+        }}
+      >
         {isLoading ? (
           <RecentTransactionsSkeleton />
         ) : recentTransactions.length > 0 ? (

@@ -90,7 +90,9 @@ export function getClient(): KyInstance {
 
                   return retryResponse;
                 } else {
-                  console.error("[HTTP Client] Token refresh failed, logging out");
+                  console.error(
+                    "[HTTP Client] Token refresh failed, logging out",
+                  );
                   await tokenManager.logout("401_refresh_failed");
                   return response;
                 }

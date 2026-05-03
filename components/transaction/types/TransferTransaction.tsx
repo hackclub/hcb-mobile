@@ -3,16 +3,20 @@ import humanizeString from "humanize-string";
 import { View } from "react-native";
 import useSWR from "swr";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import UserMention from "@/components/UserMention";
 import Organization from "@/lib/types/Organization";
 import { TransactionTransfer } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { renderMoney, statusColor } from "@/utils/util";
-import Badge from "@/components/Badge";
-import UserMention from "@/components/UserMention";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },

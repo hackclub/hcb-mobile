@@ -163,9 +163,7 @@ export default function About() {
                   overflow: "hidden",
                 }}
               >
-                {section.rows.map((row, idx) =>
-                  renderRow(row, idx === 0),
-                )}
+                {section.rows.map((row, idx) => renderRow(row, idx === 0))}
               </View>
             </View>
           ))}

@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
-import { Text } from "components/Text";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney, statusColor } from "@/utils/util";
@@ -129,11 +129,17 @@ export default function CheckDepositsPage() {
                     {renderDate(deposit.created_at)}
                   </Text>
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+                >
                   <Badge color={statusColor(deposit.status)}>
                     {deposit.status.replace(/_/g, " ")}
                   </Badge>
-                  <Ionicons name="chevron-forward" size={16} color={palette.muted} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={16}
+                    color={palette.muted}
+                  />
                 </View>
               </Pressable>
             </View>

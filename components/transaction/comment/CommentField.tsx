@@ -11,18 +11,18 @@ import {
 } from "react-native";
 import useSWR, { mutate, useSWRConfig } from "swr";
 
+import {
+  useCommentFileActionSheet,
+  SelectedFile,
+} from "./CommentFileActionSheet";
+
+import Button from "@/components/Button";
+import UserMention from "@/components/UserMention";
 import useClient from "@/lib/client";
 import User from "@/lib/types/User";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
-import Button from "@/components/Button";
-import UserMention from "@/components/UserMention";
-
-import {
-  useCommentFileActionSheet,
-  SelectedFile,
-} from "./CommentFileActionSheet";
 
 interface CommentFieldProps {
   orgId: string;
@@ -143,38 +143,38 @@ export default function CommentField({
       </View>
 
       {(user?.admin || user?.auditor) && (
-          <Pressable
-            onPress={() => setAdminOnly(!adminOnly)}
+        <Pressable
+          onPress={() => setAdminOnly(!adminOnly)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderWidth: 1,
+            borderColor: "#ff8c37",
+            borderStyle: "dashed",
+            borderRadius: 8,
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            backgroundColor: "#ff8c3710",
+          }}
+        >
+          <Text
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              borderWidth: 1,
-              borderColor: "#ff8c37",
-              borderStyle: "dashed",
-              borderRadius: 8,
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              backgroundColor: "#ff8c3710",
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#ff8c37",
+              flex: 1,
             }}
           >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "500",
-                color: "#ff8c37",
-                flex: 1,
-              }}
-            >
-              Admin only comment
-            </Text>
-            <Icon
-              glyph={adminOnly ? "checkmark" : "checkbox"}
-              color="#ff8c37"
-              size={32}
-            />
-          </Pressable>
-        )}
+            Admin only comment
+          </Text>
+          <Icon
+            glyph={adminOnly ? "checkmark" : "checkbox"}
+            color="#ff8c37"
+            size={32}
+          />
+        </Pressable>
+      )}
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <TouchableOpacity

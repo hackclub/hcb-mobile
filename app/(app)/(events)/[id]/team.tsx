@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
@@ -14,6 +13,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
@@ -239,10 +239,9 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
   const { data: organization, mutate: reloadOrganization } =
-    useOfflineSWR<OrganizationExpanded>(
-      `organizations/${id}?avatar_size=50`,
-      { fallbackData: cache.get(`organizations/${id}`)?.data },
-    );
+    useOfflineSWR<OrganizationExpanded>(`organizations/${id}?avatar_size=50`, {
+      fallbackData: cache.get(`organizations/${id}`)?.data,
+    });
 
   const { data: currentUser } = useOfflineSWR<User>("user");
 
@@ -256,9 +255,9 @@ export default function Page() {
     isLoading: invitationsLoading,
   } = useOfflineSWR<OrgInvitation[]>(
     canManage ? `organizations/${id}/invitations` : null,
-    );
+  );
 
-  console.log(invitations)
+  console.log(invitations);
 
   useFocusEffect(
     useCallback(() => {
@@ -305,21 +304,25 @@ export default function Page() {
 
   const cancelInvitation = useCallback(
     (inviteId: string) => {
-      Alert.alert("Cancel invitation?", "This will revoke the pending invite.", [
-        { text: "Keep" },
-        {
-          text: "Cancel invite",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await hcb.delete(`organizations/${id}/invitations/${inviteId}`);
-              reloadInvitations();
-            } catch {
-              showAlert("Failed to cancel", "Please try again.");
-            }
+      Alert.alert(
+        "Cancel invitation?",
+        "This will revoke the pending invite.",
+        [
+          { text: "Keep" },
+          {
+            text: "Cancel invite",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await hcb.delete(`organizations/${id}/invitations/${inviteId}`);
+                reloadInvitations();
+              } catch {
+                showAlert("Failed to cancel", "Please try again.");
+              }
+            },
           },
-        },
-      ]);
+        ],
+      );
     },
     [hcb, id, reloadInvitations],
   );

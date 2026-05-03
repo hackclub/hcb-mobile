@@ -1,11 +1,12 @@
 import { AddToWalletButton } from "@stripe/stripe-react-native";
 import { Platform } from "react-native";
 
-import { useIsDark } from "@/lib/useColorScheme";
+import WalletModal from "./modals/WalletModal";
+
 import type User from "@/lib/types/User";
 import type { UseAddToWalletReturn } from "@/lib/useAddToWallet";
 
-import WalletModal from "./modals/WalletModal";
+import { useIsDark } from "@/lib/useColorScheme";
 
 export interface AddToWalletSectionProps extends UseAddToWalletReturn {
   user: User | undefined;

@@ -1,7 +1,7 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, StyleProp, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function SkeletonBox({ style }: { style?: StyleProp<ViewStyle> }) {
   const { colors: themeColors } = useTheme();

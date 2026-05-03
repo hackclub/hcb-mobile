@@ -1,13 +1,17 @@
 import { Text } from "components/Text";
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import ReceiptList from "@/components/transaction/ReceiptList";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/util";
-import ReceiptList from "@/components/transaction/ReceiptList";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function BankAccountTransaction({
   transaction,

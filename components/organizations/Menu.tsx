@@ -4,9 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 
-import Organization, {
-  OrganizationExpanded,
-} from "@/lib/types/Organization";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import * as Haptics from "@/utils/haptics";
 import { handleMenuActionEvent, handleMenuActions } from "@/utils/util";

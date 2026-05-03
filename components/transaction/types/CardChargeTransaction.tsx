@@ -1,16 +1,20 @@
 import { format } from "date-fns";
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import ReceiptList from "@/components/transaction/ReceiptList";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import UserMention from "@/components/UserMention";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/util";
-import Badge from "@/components/Badge";
-import UserMention from "@/components/UserMention";
-import ReceiptList from "@/components/transaction/ReceiptList";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 function getCountryFlag(countryCode: string) {
   // Convert country code to flag emoji

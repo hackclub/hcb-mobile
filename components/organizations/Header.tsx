@@ -2,14 +2,13 @@ import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { View, Platform } from "react-native";
 
-import Organization, {
-  OrganizationExpanded,
-} from "@/lib/types/Organization";
+import BalanceChart from "./BalanceChart";
+
+import Button from "@/components/Button";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/util";
-import Button from "@/components/Button";
-import BalanceChart from "./BalanceChart";
 
 interface HeaderProps {
   organization: Organization | OrganizationExpanded;

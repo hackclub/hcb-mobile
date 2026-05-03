@@ -3,13 +3,11 @@ import { router } from "expo-router";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 
+import Transaction from "@/components/transaction/Transaction";
 import { TransactionPolicy } from "@/lib/policies";
-import Organization, {
-  OrganizationExpanded,
-} from "@/lib/types/Organization";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import ITransaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
-import Transaction from "@/components/transaction/Transaction";
 
 interface TransactionWrapperProps {
   item: ITransaction;

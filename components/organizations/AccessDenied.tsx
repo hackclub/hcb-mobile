@@ -4,8 +4,8 @@ import { Text } from "components/Text";
 import * as Linking from "expo-linking";
 import { View } from "react-native";
 
-import { palette } from "@/styles/theme";
 import Button from "@/components/Button";
+import { palette } from "@/styles/theme";
 
 interface AccessDeniedProps {
   orgId: string;

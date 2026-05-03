@@ -13,13 +13,13 @@ import {
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 
+import CardChip from "./cards/CardChip";
+
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails } from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import { redactedCardNumber, renderCardNumber } from "@/utils/util";
-
-import CardChip from "./cards/CardChip";
 
 export default function PaymentCard({
   card,

@@ -5,9 +5,9 @@ import * as WebBrowser from "expo-web-browser";
 import { Platform, ScrollView, View } from "react-native";
 import { useSWRConfig } from "swr";
 
+import Button from "@/components/Button";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
-import Button from "@/components/Button";
 
 export const NoOrganizationsEmptyState = () => {
   const { colors: themeColors } = useTheme();

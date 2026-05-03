@@ -22,10 +22,7 @@ import {
 import { ActivityIndicator, Appearance, Platform, View } from "react-native";
 import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { SWRConfig } from "swr";
 
 import { SWRCacheProvider } from "../_layout";
@@ -115,23 +112,41 @@ function Navigation() {
   return (
     <NativeTabs tintColor="#ec3750" hidden={!isAtRoot}>
       <NativeTabs.Trigger name="(events)">
-        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/home.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/home.png")}
+          renderingMode="template"
+        />
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        {!!invitations?.length && <NativeTabs.Trigger.Badge>{invitations.length.toString()}</NativeTabs.Trigger.Badge>}
+        {!!invitations?.length && (
+          <NativeTabs.Trigger.Badge>
+            {invitations.length.toString()}
+          </NativeTabs.Trigger.Badge>
+        )}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="cards">
-        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/card.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/card.png")}
+          renderingMode="template"
+        />
         <NativeTabs.Trigger.Label>Cards</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="receipts">
-        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/payment-docs.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/payment-docs.png")}
+          renderingMode="template"
+        />
         <NativeTabs.Trigger.Label>Receipts</NativeTabs.Trigger.Label>
         {!!missingReceiptData?.total_count && (
-          <NativeTabs.Trigger.Badge>{missingReceiptData.total_count.toString()}</NativeTabs.Trigger.Badge>
+          <NativeTabs.Trigger.Badge>
+            {missingReceiptData.total_count.toString()}
+          </NativeTabs.Trigger.Badge>
         )}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
-        <NativeTabs.Trigger.Icon src={require("../../assets/tab-icons/settings.png")} renderingMode="template" />
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/settings.png")}
+          renderingMode="template"
+        />
         <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>

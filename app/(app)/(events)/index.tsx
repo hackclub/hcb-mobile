@@ -17,7 +17,6 @@ import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
 import Event from "@/components/organizations/Event";
@@ -209,7 +208,10 @@ export default function App() {
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();
   const scheme = useColorScheme();
-  const panGesture = useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = useMemo(
+    () => Gesture.Pan().activateAfterLongPress(520),
+    [],
+  );
 
   useEffect(() => {
     if (!organizations?.length) return;
@@ -278,166 +280,165 @@ export default function App() {
   }
 
   return (
-      <ReorderableList
-        keyExtractor={(item) => item.id}
-        onReorder={({ from, to }) => {
-          Haptics.selectionAsync();
-          const newOrgs = [...sortedOrgs];
-          const [removed] = newOrgs.splice(from, 1);
-          newOrgs.splice(to, 0, removed);
-          if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
-            setSortedOrgs(newOrgs);
-          }
-        }}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 20,
-        }}
-        contentInsetAdjustmentBehavior="automatic"
-        data={sortedOrgs}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            enabled={refreshEnabled}
-          />
+    <ReorderableList
+      keyExtractor={(item) => item.id}
+      onReorder={({ from, to }) => {
+        Haptics.selectionAsync();
+        const newOrgs = [...sortedOrgs];
+        const [removed] = newOrgs.splice(from, 1);
+        newOrgs.splice(to, 0, removed);
+        if (!organizationOrderEqual(newOrgs, sortedOrgs)) {
+          setSortedOrgs(newOrgs);
         }
-        panGesture={panGesture}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        ListEmptyComponent={() => <NoOrganizationsEmptyState />}
-        ListHeaderComponent={() => (
-          <>
-            <PromoBanner />
-            {(invitations && invitations.length > 0) ||
-            (grantInvites && grantInvites.length > 0) ? (
-              <View
-                style={{
-                  marginTop: 10,
-                  marginBottom: 20,
-                  borderRadius: 10,
-                }}
-              >
-                {invitations && invitations.length > 0 && (
-                  <>
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 12,
-                        textTransform: "uppercase",
-                        marginBottom: 10,
-                      }}
-                    >
-                      Pending invitations
-                    </Text>
-                    {invitations.map((invitation) => (
-                      <Event
-                        key={invitation.id}
-                        invitation={invitation}
-                        style={{
-                          borderWidth: 2,
-                          borderColor:
-                            scheme == "dark" ? palette.primary : palette.muted,
-                          marginBottom: 10,
-                        }}
-                        event={invitation.organization}
-                        onPress={() =>
-                          router.push({
-                            pathname: "/invitation/[id]",
-                            params: {
-                              id: invitation.id,
-                              invitation: JSON.stringify(invitation),
-                            },
-                          })
-                        }
-                        hideBalance
-                      />
-                    ))}
-                  </>
-                )}
-
-                {grantInvites && grantInvites.length > 0 && (
-                  <>
-                    <Text
-                      style={{
-                        color: palette.muted,
-                        fontSize: 12,
-                        textTransform: "uppercase",
-                        marginBottom: 10,
-                        marginTop:
-                          invitations && invitations.length > 0 ? 20 : 0,
-                      }}
-                    >
-                      Available grants
-                    </Text>
-                    {grantInvites.map((grant) => (
-                      <GrantInvite
-                        key={grant.id}
-                        grant={grant}
-                        style={{
-                          marginBottom: 10,
-                        }}
-                      />
-                    ))}
-                  </>
-                )}
-              </View>
-            ) : null}
-          </>
-        )}
-        renderItem={renderItem}
-        ListFooterComponent={() => (
-          <>
-            <TouchableOpacity
-              accessibilityLabel="Apply for new organization"
-              accessibilityHint="Opens the HCB application form in browser"
-              accessibilityRole="button"
-              onPress={() => {
-                WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
-                  presentationStyle:
-                    WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                  controlsColor: palette.primary,
-                  dismissButtonStyle: "cancel",
-                }).then(() => {
-                  mutate("user/organizations");
-                  mutate("user/invitations");
-                });
-              }}
+      }}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+      }}
+      contentInsetAdjustmentBehavior="automatic"
+      data={sortedOrgs}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          enabled={refreshEnabled}
+        />
+      }
+      panGesture={panGesture}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      ListEmptyComponent={() => <NoOrganizationsEmptyState />}
+      ListHeaderComponent={() => (
+        <>
+          <PromoBanner />
+          {(invitations && invitations.length > 0) ||
+          (grantInvites && grantInvites.length > 0) ? (
+            <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                marginTop: 15,
-                paddingHorizontal: 15,
-                paddingVertical: 12,
-                borderRadius: 8,
-                justifyContent: "center",
-                backgroundColor: "rgba(200,200,200,0.3)",
+                marginTop: 10,
+                marginBottom: 20,
+                borderRadius: 10,
               }}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={24}
-                color={themeColors.text}
-              />
-              <Text style={{ color: themeColors.text }}>Create</Text>
-            </TouchableOpacity>
+              {invitations && invitations.length > 0 && (
+                <>
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                      marginBottom: 10,
+                    }}
+                  >
+                    Pending invitations
+                  </Text>
+                  {invitations.map((invitation) => (
+                    <Event
+                      key={invitation.id}
+                      invitation={invitation}
+                      style={{
+                        borderWidth: 2,
+                        borderColor:
+                          scheme == "dark" ? palette.primary : palette.muted,
+                        marginBottom: 10,
+                      }}
+                      event={invitation.organization}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/invitation/[id]",
+                          params: {
+                            id: invitation.id,
+                            invitation: JSON.stringify(invitation),
+                          },
+                        })
+                      }
+                      hideBalance
+                    />
+                  ))}
+                </>
+              )}
 
-            {organizations && organizations.length > 2 && (
-              <Text
-                style={{
-                  color: palette.muted,
-                  textAlign: "center",
-                  marginTop: 10,
-                  marginBottom: 10,
-                }}
-              >
-                Drag to reorder organizations
-              </Text>
-            )}
-          </>
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
-      />
+              {grantInvites && grantInvites.length > 0 && (
+                <>
+                  <Text
+                    style={{
+                      color: palette.muted,
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                      marginBottom: 10,
+                      marginTop: invitations && invitations.length > 0 ? 20 : 0,
+                    }}
+                  >
+                    Available grants
+                  </Text>
+                  {grantInvites.map((grant) => (
+                    <GrantInvite
+                      key={grant.id}
+                      grant={grant}
+                      style={{
+                        marginBottom: 10,
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </View>
+          ) : null}
+        </>
+      )}
+      renderItem={renderItem}
+      ListFooterComponent={() => (
+        <>
+          <TouchableOpacity
+            accessibilityLabel="Apply for new organization"
+            accessibilityHint="Opens the HCB application form in browser"
+            accessibilityRole="button"
+            onPress={() => {
+              WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
+                presentationStyle:
+                  WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                controlsColor: palette.primary,
+                dismissButtonStyle: "cancel",
+              }).then(() => {
+                mutate("user/organizations");
+                mutate("user/invitations");
+              });
+            }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 15,
+              paddingHorizontal: 15,
+              paddingVertical: 12,
+              borderRadius: 8,
+              justifyContent: "center",
+              backgroundColor: "rgba(200,200,200,0.3)",
+            }}
+          >
+            <Ionicons
+              name="add-circle-outline"
+              size={24}
+              color={themeColors.text}
+            />
+            <Text style={{ color: themeColors.text }}>Create</Text>
+          </TouchableOpacity>
+
+          {organizations && organizations.length > 2 && (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder organizations
+            </Text>
+          )}
+        </>
+      )}
+      ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+    />
   );
 }

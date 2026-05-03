@@ -9,6 +9,8 @@ import { StyleSheet, View, ViewProps } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { match } from "ts-pattern";
 
+import WiseIcon from "@/components/icons/WiseIcon";
+import UserAvatar from "@/components/UserAvatar";
 import {
   TransactionCardCharge,
   TransactionType,
@@ -18,8 +20,6 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useMerchantIcon } from "@/lib/useMerchantIcon";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/util";
-import WiseIcon from "@/components/icons/WiseIcon";
-import UserAvatar from "@/components/UserAvatar";
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {

@@ -1,14 +1,18 @@
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import UserMention from "@/components/UserMention";
 import { TransactionWise } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/util";
-import Badge from "@/components/Badge";
-import UserMention from "@/components/UserMention";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function WiseTransaction({
   transaction: { wise_transfer, ...transaction },

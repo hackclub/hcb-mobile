@@ -28,7 +28,8 @@ import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/util";
 
-type CardWithGrant = Card & Required<Pick<Card, "last4">> & { grant_id?: string };
+type CardWithGrant = Card &
+  Required<Pick<Card, "last4">> & { grant_id?: string };
 
 type CardItemProps = {
   item: CardWithGrant;
@@ -103,7 +104,10 @@ export default function Page() {
   const [reorderedCards, setReorderedCards] = useState<CardWithGrant[]>();
   const [refreshing, setRefreshing] = useState(false);
   const [patternCache, setPatternCache] = useState<
-    Record<string, { pattern: string; dimensions: { width: number; height: number } }>
+    Record<
+      string,
+      { pattern: string; dimensions: { width: number; height: number } }
+    >
   >({});
 
   useFocusEffect(
@@ -122,14 +126,22 @@ export default function Page() {
     if (!cards) return undefined;
     if (reorderedCards) return reorderedCards;
     return [...cards]
-      .filter((card): card is CardWithGrant => !!card.last4 && !grantCardIds.has(card.id))
-      .sort((a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5));
+      .filter(
+        (card): card is CardWithGrant =>
+          !!card.last4 && !grantCardIds.has(card.id),
+      )
+      .sort(
+        (a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5),
+      );
   }, [cards, reorderedCards, grantCardIds]);
 
   const filteredCards = useMemo(() => {
     if (!sortedCards) return [];
     return sortedCards.filter((c) => {
-      if (!canceledCardsShown && (c.status === "canceled" || c.status === "expired"))
+      if (
+        !canceledCardsShown &&
+        (c.status === "canceled" || c.status === "expired")
+      )
         return false;
       if (!frozenCardsShown && c.status === "frozen") return false;
       return true;
@@ -149,12 +161,23 @@ export default function Page() {
           const patternData = await generate({
             input: card.id,
             grayScale:
-              card.status !== "active" ? (card.status === "frozen" ? 0.23 : 1) : 0,
+              card.status !== "active"
+                ? card.status === "frozen"
+                  ? 0.23
+                  : 1
+                : 0,
           });
           return {
             id: card.id,
-            pattern: normalizeSvg(patternData.toSVG(), patternData.width, patternData.height),
-            dimensions: { width: patternData.width, height: patternData.height },
+            pattern: normalizeSvg(
+              patternData.toSVG(),
+              patternData.width,
+              patternData.height,
+            ),
+            dimensions: {
+              width: patternData.width,
+              height: patternData.height,
+            },
           };
         } catch (error) {
           console.error("Error generating pattern for card", error, {
@@ -231,7 +254,14 @@ export default function Page() {
         </View>
       ),
     });
-  }, [themeColors, navigation, canceledCardsShown, frozenCardsShown, scheme, params.id]);
+  }, [
+    themeColors,
+    navigation,
+    canceledCardsShown,
+    frozenCardsShown,
+    scheme,
+    params.id,
+  ]);
 
   const onRefresh = useCallback(async () => {
     try {
@@ -277,7 +307,11 @@ export default function Page() {
     return (
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        contentContainerStyle={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <CardListSkeleton />
       </ScrollView>

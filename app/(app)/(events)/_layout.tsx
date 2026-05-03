@@ -43,10 +43,7 @@ export default function Layout() {
           name="[id]/cards/index"
           options={{ title: "Cards", headerLargeTitle: true }}
         />
-        <Stack.Screen
-          name="[id]/cards/[cardId]"
-          options={{ title: "" }}
-        />
+        <Stack.Screen name="[id]/cards/[cardId]" options={{ title: "" }} />
         <Stack.Screen
           name="[id]/cards/order"
           options={{ title: "Order a Card" }}

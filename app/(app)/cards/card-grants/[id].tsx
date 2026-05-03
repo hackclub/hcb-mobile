@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
@@ -13,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
@@ -27,11 +27,11 @@ import TopupModal from "@/components/cards/modals/TopupModal";
 import GrantWithoutCard from "@/components/grants/grantWithoutCard";
 import useClient from "@/lib/client";
 import useTransactions from "@/lib/organization/useTransactions";
+import { CardGrantPolicy, CardPolicy } from "@/lib/policies";
 import Card from "@/lib/types/Card";
 import GrantCardType from "@/lib/types/GrantCard";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
-import { CardGrantPolicy, CardPolicy } from "@/lib/policies";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
@@ -98,7 +98,9 @@ export default function Page() {
       ? new CardGrantPolicy(user ?? null, grantCard, organization)
       : null;
   const cardPolicy =
-    card && organization ? new CardPolicy(user ?? null, card, organization) : null;
+    card && organization
+      ? new CardPolicy(user ?? null, card, organization)
+      : null;
   const isVirtualCard = card?.type === "virtual";
 
   const [isActivating, setIsActivating] = useState(false);
@@ -418,7 +420,10 @@ export default function Page() {
   function getGrantCardActionButtons() {
     const buttons = [];
 
-    if ((cardPolicy?.freeze() || cardPolicy?.defrost()) && card?.status !== "inactive") {
+    if (
+      (cardPolicy?.freeze() || cardPolicy?.defrost()) &&
+      card?.status !== "inactive"
+    ) {
       buttons.push(
         <Button
           key="freeze"

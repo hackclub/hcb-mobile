@@ -11,5 +11,15 @@
     }
   },
   "extends": "expo/tsconfig.base",
-  "include": ["auth/**/*", "lib/**/*", "providers/**/*", "styles/**/*", "utils/**/*", "components/**/*", "app/App.tsx", "env.d.ts", "app"]
+  "include": [
+    "auth/**/*",
+    "lib/**/*",
+    "providers/**/*",
+    "styles/**/*",
+    "utils/**/*",
+    "components/**/*",
+    "app/App.tsx",
+    "env.d.ts",
+    "app"
+  ]
 }

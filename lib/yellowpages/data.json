@@ -2,9 +2,7 @@
   "merchants": [
     {
       "name": "Rocket Rides",
-      "network_ids": [
-        "1234567890"
-      ],
+      "network_ids": ["1234567890"],
       "icon": null,
       "website": null
     },
@@ -39,11 +37,7 @@
     },
     {
       "name": "Amazon Pay",
-      "network_ids": [
-        "470000087081873",
-        "AMONCYBS",
-        "14CPM0000001975"
-      ],
+      "network_ids": ["470000087081873", "AMONCYBS", "14CPM0000001975"],
       "icon": null,
       "website": null
     },
@@ -65,17 +59,13 @@
     },
     {
       "name": "PayPal Personal",
-      "network_ids": [
-        "000174030072998"
-      ],
+      "network_ids": ["000174030072998"],
       "icon": null,
       "website": null
     },
     {
       "name": "DigitalOcean",
-      "network_ids": [
-        "T8LQCJF1R5GHLTR"
-      ],
+      "network_ids": ["T8LQCJF1R5GHLTR"],
       "icon": null,
       "website": null
     },
@@ -92,29 +82,19 @@
     },
     {
       "name": "PayPal Business",
-      "network_ids": [
-        "000174030076999"
-      ],
+      "network_ids": ["000174030076999"],
       "icon": null,
       "website": null
     },
     {
       "name": "Pirate Ship",
-      "network_ids": [
-        "000445532591994",
-        "03-8036071077",
-        "000767211761881"
-      ],
+      "network_ids": ["000445532591994", "03-8036071077", "000767211761881"],
       "icon": null,
       "website": null
     },
     {
       "name": "Lyft",
-      "network_ids": [
-        "000445385180994",
-        "000844212028881",
-        "ML8VGZKUUFD4FEM"
-      ],
+      "network_ids": ["000445385180994", "000844212028881", "ML8VGZKUUFD4FEM"],
       "icon": null,
       "website": null
     },
@@ -142,188 +122,133 @@
     },
     {
       "name": "Facebook",
-      "network_ids": [
-        "420429000200589"
-      ],
+      "network_ids": ["420429000200589"],
       "icon": null,
       "website": null
     },
     {
       "name": "StickerMule",
-      "network_ids": [
-        "JNFNPXAA0DZETZY"
-      ],
+      "network_ids": ["JNFNPXAA0DZETZY"],
       "icon": null,
       "website": null
     },
     {
       "name": "Shelburne Market",
-      "network_ids": [
-        "00621900013RN71"
-      ],
+      "network_ids": ["00621900013RN71"],
       "icon": null,
       "website": null
     },
     {
       "name": "Presidential Service Award",
-      "network_ids": [
-        "000425250069993"
-      ],
+      "network_ids": ["000425250069993"],
       "icon": null,
       "website": null
     },
     {
       "name": "United Airlines",
-      "network_ids": [
-        "210996000015342",
-        "210993000015342"
-      ],
+      "network_ids": ["210996000015342", "210993000015342"],
       "icon": null,
       "website": null
     },
     {
       "name": "Zoom",
-      "network_ids": [
-        "ZIOVZAH4PQAVCEI",
-        "000445601192997"
-      ],
+      "network_ids": ["ZIOVZAH4PQAVCEI", "000445601192997"],
       "icon": null,
       "website": null
     },
     {
       "name": "New York City MTA",
-      "network_ids": [
-        "350086000284343"
-      ],
+      "network_ids": ["350086000284343"],
       "icon": null,
       "website": null
     },
     {
       "name": "JLCPCB",
-      "network_ids": [
-        "PCHKYPXKE7JJJ7G",
-        "000000000525623",
-        "453022000204162"
-      ],
+      "network_ids": ["PCHKYPXKE7JJJ7G", "000000000525623", "453022000204162"],
       "icon": null,
       "website": null
     },
     {
       "name": "AndyMark",
-      "network_ids": [
-        "000992203619885",
-        "BUEKAHKE5L6VSTT"
-      ],
+      "network_ids": ["000992203619885", "BUEKAHKE5L6VSTT"],
       "icon": null,
       "website": null
     },
     {
       "name": "goBILDA",
-      "network_ids": [
-        "000446027916993",
-        "000526448660880"
-      ],
+      "network_ids": ["000446027916993", "000526448660880"],
       "icon": null,
       "website": null
     },
     {
       "name": "Squarespace",
-      "network_ids": [
-        "IAMND6350ILIORH"
-      ],
+      "network_ids": ["IAMND6350ILIORH"],
       "icon": null,
       "website": null
     },
     {
       "name": "Zomato",
-      "network_ids": [
-        "14CPM0000003735",
-        "38RR00000482336"
-      ],
+      "network_ids": ["14CPM0000003735", "38RR00000482336"],
       "icon": null,
       "website": null
     },
     {
       "name": "Canva",
-      "network_ids": [
-        "UDG7MDCO5H1VUKW"
-      ],
+      "network_ids": ["UDG7MDCO5H1VUKW"],
       "icon": null,
       "website": null
     },
     {
       "name": "Venmo",
-      "network_ids": [
-        "000425242858990"
-      ],
+      "network_ids": ["000425242858990"],
       "icon": null,
       "website": null
     },
     {
       "name": "Vercel",
-      "network_ids": [
-        "YODNEM7UA0WHUAV"
-      ],
+      "network_ids": ["YODNEM7UA0WHUAV"],
       "icon": null,
       "website": null
     },
     {
       "name": "Porkbun",
-      "network_ids": [
-        "BIGQEGVYNMN4O0C"
-      ],
+      "network_ids": ["BIGQEGVYNMN4O0C"],
       "icon": null,
       "website": null
     },
     {
       "name": "OpenAI",
-      "network_ids": [
-        "SXONGQUGQWWJUTM"
-      ],
+      "network_ids": ["SXONGQUGQWWJUTM"],
       "icon": null,
       "website": null
     },
     {
       "name": "Namecheap",
-      "network_ids": [
-        "PL7WUQLGJ9RI3YX"
-      ],
+      "network_ids": ["PL7WUQLGJ9RI3YX"],
       "icon": null,
       "website": null
     },
     {
       "name": "VistaPrint",
-      "network_ids": [
-        "000445487534999",
-        "000767200331886"
-      ],
+      "network_ids": ["000445487534999", "000767200331886"],
       "icon": null,
       "website": null
     },
     {
       "name": "eBay",
-      "network_ids": [
-        "420429000208822"
-      ],
+      "network_ids": ["420429000208822"],
       "icon": null,
       "website": null
     },
     {
       "name": "Airbnb",
-      "network_ids": [
-        "000445519153990",
-        "373583000202167",
-        "000767202823880"
-      ],
+      "network_ids": ["000445519153990", "373583000202167", "000767202823880"],
       "icon": null,
       "website": null
     },
     {
       "name": "Shelburne Country Store",
-      "network_ids": [
-        "QLKVWDFJOCS7CNQ",
-        "EB6ZUJWIJUWNM6H"
-      ],
+      "network_ids": ["QLKVWDFJOCS7CNQ", "EB6ZUJWIJUWNM6H"],
       "icon": null,
       "website": null
     },
@@ -340,17 +265,13 @@
     },
     {
       "name": "Comcast",
-      "network_ids": [
-        "228201000213249"
-      ],
+      "network_ids": ["228201000213249"],
       "icon": null,
       "website": null
     },
     {
       "name": "McMaster-Carr",
-      "network_ids": [
-        "84870007600474"
-      ],
+      "network_ids": ["84870007600474"],
       "icon": null,
       "website": null
     },
@@ -369,85 +290,61 @@
     },
     {
       "name": "Costco Wholesale",
-      "network_ids": [
-        "345002124880",
-        "345856909881",
-        "131730000127761"
-      ],
+      "network_ids": ["345002124880", "345856909881", "131730000127761"],
       "icon": null,
       "website": null
     },
     {
       "name": "Heroku",
-      "network_ids": [
-        "000445201721997",
-        "JYTT05N3GZQUC8J"
-      ],
+      "network_ids": ["000445201721997", "JYTT05N3GZQUC8J"],
       "icon": null,
       "website": null
     },
     {
       "name": "Adafruit",
-      "network_ids": [
-        "536385460049638",
-        "9M4YMRJXF76Y6TD"
-      ],
+      "network_ids": ["536385460049638", "9M4YMRJXF76Y6TD"],
       "icon": null,
       "website": null
     },
     {
       "name": "Village Wine and Coffee",
-      "network_ids": [
-        "17-8031944641"
-      ],
+      "network_ids": ["17-8031944641"],
       "icon": null,
       "website": null
     },
     {
       "name": "Aubuchon Hardware",
-      "network_ids": [
-        "4445022994319"
-      ],
+      "network_ids": ["4445022994319"],
       "icon": null,
       "website": null
     },
     {
       "name": "AWS",
-      "network_ids": [
-        "185119000762203"
-      ],
+      "network_ids": ["185119000762203"],
       "icon": null,
       "website": null
     },
     {
       "name": "ShipStation",
-      "network_ids": [
-        "371098000956037"
-      ],
+      "network_ids": ["371098000956037"],
       "icon": null,
       "website": null
     },
     {
       "name": "Typeform",
-      "network_ids": [
-        "U3MI60HFBGMF3EB"
-      ],
+      "network_ids": ["U3MI60HFBGMF3EB"],
       "icon": null,
       "website": null
     },
     {
       "name": "Printful",
-      "network_ids": [
-        "420429000211040"
-      ],
+      "network_ids": ["420429000211040"],
       "icon": null,
       "website": null
     },
     {
       "name": "Webflow",
-      "network_ids": [
-        "VHWLO7VF91VFRZF"
-      ],
+      "network_ids": ["VHWLO7VF91VFRZF"],
       "icon": null,
       "website": null
     },
@@ -479,138 +376,97 @@
     },
     {
       "name": "Mailchimp",
-      "network_ids": [
-        "196794000194591",
-        "479338001271673"
-      ],
+      "network_ids": ["196794000194591", "479338001271673"],
       "icon": null,
       "website": null
     },
     {
       "name": "FIRST",
-      "network_ids": [
-        "899000000345346"
-      ],
+      "network_ids": ["899000000345346"],
       "icon": null,
       "website": null
     },
     {
       "name": "GoodHire",
-      "network_ids": [
-        "217795000024161"
-      ],
+      "network_ids": ["217795000024161"],
       "icon": null,
       "website": null
     },
     {
       "name": "GoDaddy",
-      "network_ids": [
-        "395700028300",
-        "000311035200881"
-      ],
+      "network_ids": ["395700028300", "000311035200881"],
       "icon": null,
       "website": null
     },
     {
       "name": "AliExpress",
-      "network_ids": [
-        "420429000206339",
-        "420429000203260",
-        "401846000385272"
-      ],
+      "network_ids": ["420429000206339", "420429000203260", "401846000385272"],
       "icon": null,
       "website": null
     },
     {
       "name": "DigiKey",
-      "network_ids": [
-        "717074000713081",
-        "322143000713081",
-        "328953000713081"
-      ],
+      "network_ids": ["717074000713081", "322143000713081", "328953000713081"],
       "icon": null,
       "website": null
     },
     {
       "name": "Discord",
-      "network_ids": [
-        "W9JEIROWXKO5PEO"
-      ],
+      "network_ids": ["W9JEIROWXKO5PEO"],
       "icon": null,
       "website": null
     },
     {
       "name": "The New York Times",
-      "network_ids": [
-        "067623000079893"
-      ],
+      "network_ids": ["067623000079893"],
       "icon": null,
       "website": null
     },
     {
       "name": "Shippo",
-      "network_ids": [
-        "PJ6EPJEEPOYQDFS"
-      ],
+      "network_ids": ["PJ6EPJEEPOYQDFS"],
       "icon": null,
       "website": null
     },
     {
       "name": "Vermont Gas",
-      "network_ids": [
-        "000445537108992",
-        "000767204256881"
-      ],
+      "network_ids": ["000445537108992", "000767204256881"],
       "icon": null,
       "website": null
     },
     {
       "name": "Intuit",
-      "network_ids": [
-        "325136000756346"
-      ],
+      "network_ids": ["325136000756346"],
       "icon": null,
       "website": null
     },
     {
       "name": "Endicia",
-      "network_ids": [
-        "4445034776278",
-        "324263000956037"
-      ],
+      "network_ids": ["4445034776278", "324263000956037"],
       "icon": null,
       "website": null
     },
     {
       "name": "Shopify",
-      "network_ids": [
-        "UWCO0DIVT3OAA9R"
-      ],
+      "network_ids": ["UWCO0DIVT3OAA9R"],
       "icon": null,
       "website": null
     },
     {
       "name": "Airtable",
-      "network_ids": [
-        "WUE8R8DSVX4EVFC"
-      ],
+      "network_ids": ["WUE8R8DSVX4EVFC"],
       "icon": null,
       "website": null
     },
     {
       "name": "Linode",
-      "network_ids": [
-        "000445496499994",
-        "000526375168881"
-      ],
+      "network_ids": ["000445496499994", "000526375168881"],
       "icon": null,
       "website": null
     },
     {
       "name": "Green Mountain Power",
-      "network_ids": [
-        "207481000119835"
-      ],
+      "network_ids": ["207481000119835"],
       "icon": null,
       "website": null
     },
@@ -627,25 +483,19 @@
     },
     {
       "name": "Mastercard Gift Card",
-      "network_ids": [
-        "000437200575888"
-      ],
+      "network_ids": ["000437200575888"],
       "icon": null,
       "website": null
     },
     {
       "name": "Swiggy",
-      "network_ids": [
-        "38RR00000519133"
-      ],
+      "network_ids": ["38RR00000519133"],
       "icon": null,
       "website": null
     },
     {
       "name": "JetBlue",
-      "network_ids": [
-        "000341163970880"
-      ],
+      "network_ids": ["000341163970880"],
       "icon": null,
       "website": null
     },
@@ -663,102 +513,73 @@
     },
     {
       "name": "Twilio SendGrid",
-      "network_ids": [
-        "PGHTNMORBEERSHB"
-      ],
+      "network_ids": ["PGHTNMORBEERSHB"],
       "icon": null,
       "website": null
     },
     {
       "name": "Best Buy",
-      "network_ids": [
-        "050300000009944",
-        "029500000003608"
-      ],
+      "network_ids": ["050300000009944", "029500000003608"],
       "icon": null,
       "website": null
     },
     {
       "name": "Stamps.com",
-      "network_ids": [
-        "968453000956037"
-      ],
+      "network_ids": ["968453000956037"],
       "icon": null,
       "website": null
     },
     {
       "name": "Clipper",
-      "network_ids": [
-        "4445024897746"
-      ],
+      "network_ids": ["4445024897746"],
       "icon": null,
       "website": null
     },
     {
       "name": "Instacart",
-      "network_ids": [
-        "YJAFPWST3ICXIAV",
-        "000445492789992",
-        "000767202745885"
-      ],
+      "network_ids": ["YJAFPWST3ICXIAV", "000445492789992", "000767202745885"],
       "icon": null,
       "website": null
     },
     {
       "name": "Printify",
-      "network_ids": [
-        "VUWJW1EPYIK00TL"
-      ],
+      "network_ids": ["VUWJW1EPYIK00TL"],
       "icon": null,
       "website": null
     },
     {
       "name": "Casella Waste Systems",
-      "network_ids": [
-        "000958206811886"
-      ],
+      "network_ids": ["000958206811886"],
       "icon": null,
       "website": null
     },
     {
       "name": "Air Canada",
-      "network_ids": [
-        "324969000322864",
-        "03-8003219386"
-      ],
+      "network_ids": ["324969000322864", "03-8003219386"],
       "icon": null,
       "website": null
     },
     {
       "name": "Southwest Airlines",
-      "network_ids": [
-        "205953000182343",
-        "425586000423740"
-      ],
+      "network_ids": ["205953000182343", "425586000423740"],
       "icon": null,
       "website": null
     },
     {
       "name": "Hannaford",
-      "network_ids": [
-        "425545000167955"
-      ],
+      "network_ids": ["425545000167955"],
       "icon": null,
       "website": null
     },
     {
       "name": "Figma",
-      "network_ids": [
-        "POLKQATDE4V1NYX"
-      ],
+      "network_ids": ["POLKQATDE4V1NYX"],
       "icon": null,
       "website": null
     },
     {
       "name": "Lowe's",
-      "network_ids": [
-        "012504000111695"
-      ],
+      "network_ids": ["012504000111695"],
       "icon": null,
       "website": null
     },
@@ -777,94 +598,67 @@
     },
     {
       "name": "Vex Robotics",
-      "network_ids": [
-        "000445472871992",
-        "000526476243880"
-      ],
+      "network_ids": ["000445472871992", "000526476243880"],
       "icon": null,
       "website": null
     },
     {
       "name": "Dialpad",
-      "network_ids": [
-        "000445204769993",
-        "000767201357880"
-      ],
+      "network_ids": ["000445204769993", "000767201357880"],
       "icon": null,
       "website": null
     },
     {
       "name": "Calendly",
-      "network_ids": [
-        "6VQMY6JIV5D8VOU"
-      ],
+      "network_ids": ["6VQMY6JIV5D8VOU"],
       "icon": null,
       "website": null
     },
     {
       "name": "Google Cloud",
-      "network_ids": [
-        "18777015",
-        "420429000211339"
-      ],
+      "network_ids": ["18777015", "420429000211339"],
       "icon": null,
       "website": null
     },
     {
       "name": "Front Porch Forum",
-      "network_ids": [
-        "BUOK0IRK7MSQAJ6"
-      ],
+      "network_ids": ["BUOK0IRK7MSQAJ6"],
       "icon": null,
       "website": null
     },
     {
       "name": "City Market",
-      "network_ids": [
-        "06812620001RN71",
-        "334791070884"
-      ],
+      "network_ids": ["06812620001RN71", "334791070884"],
       "icon": null,
       "website": null
     },
     {
       "name": "Visible",
-      "network_ids": [
-        "000445517667991"
-      ],
+      "network_ids": ["000445517667991"],
       "icon": null,
       "website": null
     },
     {
       "name": "Goodwill",
-      "network_ids": [
-        "68880021668228"
-      ],
+      "network_ids": ["68880021668228"],
       "icon": null,
       "website": null
     },
     {
       "name": "GitHub",
-      "network_ids": [
-        "OCYSREKSTJVUPVX",
-        "KA3GP5EPWAQ7BLQ"
-      ],
+      "network_ids": ["OCYSREKSTJVUPVX", "KA3GP5EPWAQ7BLQ"],
       "icon": null,
       "website": null
     },
     {
       "name": "1Password",
-      "network_ids": [
-        "BHF6E5ONJSHHWZT"
-      ],
+      "network_ids": ["BHF6E5ONJSHHWZT"],
       "icon": null,
       "website": null
     },
     {
       "name": "USPS Click-N-Ship",
-      "network_ids": [
-        "4445022836221"
-      ],
+      "network_ids": ["4445022836221"],
       "icon": null,
       "website": null
     },
@@ -881,18 +675,13 @@
     },
     {
       "name": "FedEx",
-      "network_ids": [
-        "074100000011007",
-        "006900000001719"
-      ],
+      "network_ids": ["074100000011007", "006900000001719"],
       "icon": null,
       "website": null
     },
     {
       "name": "Hilton Garden Inn",
-      "network_ids": [
-        "21-8031690566"
-      ],
+      "network_ids": ["21-8031690566"],
       "icon": null,
       "website": null
     },
@@ -910,10 +699,7 @@
     },
     {
       "name": "Wall Street Journal",
-      "network_ids": [
-        "062428000005881",
-        "414700000005881"
-      ],
+      "network_ids": ["062428000005881", "414700000005881"],
       "icon": null,
       "website": null
     },
@@ -930,210 +716,151 @@
     },
     {
       "name": "Allianz",
-      "network_ids": [
-        "000445531728993"
-      ],
+      "network_ids": ["000445531728993"],
       "icon": null,
       "website": null
     },
     {
       "name": "The Home Depot",
-      "network_ids": [
-        "671070055637909",
-        "671070900374736",
-        "671070900374574"
-      ],
+      "network_ids": ["671070055637909", "671070900374736", "671070900374574"],
       "icon": null,
       "website": null
     },
     {
       "name": "McDonald's",
-      "network_ids": [
-        "06674441729MDF1",
-        "06281651157MDF1",
-        "06281652242MDF1"
-      ],
+      "network_ids": ["06674441729MDF1", "06281651157MDF1", "06281652242MDF1"],
       "icon": null,
       "website": null
     },
     {
       "name": "British Airways",
-      "network_ids": [
-        "520334509055539"
-      ],
+      "network_ids": ["520334509055539"],
       "icon": null,
       "website": null
     },
     {
       "name": "Work Louder",
-      "network_ids": [
-        "A029UNH7PAS9WTV"
-      ],
+      "network_ids": ["A029UNH7PAS9WTV"],
       "icon": null,
       "website": null
     },
     {
       "name": "Ryanair",
-      "network_ids": [
-        "020287208"
-      ],
+      "network_ids": ["020287208"],
       "icon": null,
       "website": null
     },
     {
       "name": "Kiwi",
-      "network_ids": [
-        "72030468048565"
-      ],
+      "network_ids": ["72030468048565"],
       "icon": null,
       "website": null
     },
     {
       "name": "Raspberry Pi",
-      "network_ids": [
-        "000526454596887"
-      ],
+      "network_ids": ["000526454596887"],
       "icon": null,
       "website": null
     },
     {
       "name": "Delta Airlines",
-      "network_ids": [
-        "2100010008",
-        "03-9508471480",
-        "03-9508471472"
-      ],
+      "network_ids": ["2100010008", "03-9508471480", "03-9508471472"],
       "icon": null,
       "website": null
     },
     {
       "name": "Zapier",
-      "network_ids": [
-        "5IR2QXJCAREIWRD"
-      ],
+      "network_ids": ["5IR2QXJCAREIWRD"],
       "icon": null,
       "website": null
     },
     {
       "name": "Paysend",
-      "network_ids": [
-        "VMT200911026070"
-      ],
+      "network_ids": ["VMT200911026070"],
       "icon": null,
       "website": null
     },
     {
       "name": "Burger King",
-      "network_ids": [
-        "612010401638099"
-      ],
+      "network_ids": ["612010401638099"],
       "icon": null,
       "website": null
     },
     {
       "name": "Appsignal",
-      "network_ids": [
-        "R2P5HXNOM5CLTX4"
-      ],
+      "network_ids": ["R2P5HXNOM5CLTX4"],
       "icon": null,
       "website": null
     },
     {
       "name": "Indeed",
-      "network_ids": [
-        "479338001326857"
-      ],
+      "network_ids": ["479338001326857"],
       "icon": null,
       "website": null
     },
     {
       "name": "Adobe",
-      "network_ids": [
-        "000445493416991"
-      ],
+      "network_ids": ["000445493416991"],
       "icon": null,
       "website": null
     },
     {
       "name": "Emirates",
-      "network_ids": [
-        "K92254"
-      ],
+      "network_ids": ["K92254"],
       "icon": null,
       "website": null
     },
     {
       "name": "In-N-Out",
-      "network_ids": [
-        "470282000467566"
-      ],
+      "network_ids": ["470282000467566"],
       "icon": null,
       "website": null
     },
     {
       "name": "7-Eleven",
-      "network_ids": [
-        "650000004794015",
-        "650000004769744"
-      ],
+      "network_ids": ["650000004794015", "650000004769744"],
       "icon": null,
       "website": null
     },
     {
       "name": "MBTA",
-      "network_ids": [
-        "000844026759887",
-        "000844027422881",
-        "000844033703886"
-      ],
+      "network_ids": ["000844026759887", "000844027422881", "000844033703886"],
       "icon": null,
       "website": null
     },
     {
       "name": "Airalo",
-      "network_ids": [
-        "3KT5MLSAQIFOOJO"
-      ],
+      "network_ids": ["3KT5MLSAQIFOOJO"],
       "icon": null,
       "website": null
     },
     {
       "name": "Culligan Water",
-      "network_ids": [
-        "4445029666487"
-      ],
+      "network_ids": ["4445029666487"],
       "icon": null,
       "website": null
     },
     {
       "name": "Pine64",
-      "network_ids": [
-        "NH1ZWAXFNEROZSW"
-      ],
+      "network_ids": ["NH1ZWAXFNEROZSW"],
       "icon": null,
       "website": null
     },
     {
       "name": "Fillout",
-      "network_ids": [
-        "0RAJFJX30CZG7UI"
-      ],
+      "network_ids": ["0RAJFJX30CZG7UI"],
       "icon": null,
       "website": null
     },
     {
       "name": "X",
-      "network_ids": [
-        "UTKZU3DZR5BG0BJ"
-      ],
+      "network_ids": ["UTKZU3DZR5BG0BJ"],
       "icon": null,
       "website": null
     },
     {
       "name": "Contabo",
-      "network_ids": [
-        "OAUGYWS8QLWTF2J"
-      ],
+      "network_ids": ["OAUGYWS8QLWTF2J"],
       "icon": null,
       "website": null
     },
@@ -1150,94 +877,67 @@
     },
     {
       "name": "Browserless",
-      "network_ids": [
-        "BXPU2FTJYLKK2NG"
-      ],
+      "network_ids": ["BXPU2FTJYLKK2NG"],
       "icon": null,
       "website": null
     },
     {
       "name": "TFL",
-      "network_ids": [
-        "1022701"
-      ],
+      "network_ids": ["1022701"],
       "icon": null,
       "website": null
     },
     {
       "name": "Chipotle",
-      "network_ids": [
-        "000345650163883",
-        "345072499881"
-      ],
+      "network_ids": ["000345650163883", "345072499881"],
       "icon": null,
       "website": null
     },
     {
       "name": "Greyhound",
-      "network_ids": [
-        "479338001187655"
-      ],
+      "network_ids": ["479338001187655"],
       "icon": null,
       "website": null
     },
     {
       "name": "Leatherman",
-      "network_ids": [
-        "479338000222115"
-      ],
+      "network_ids": ["479338000222115"],
       "icon": null,
       "website": null
     },
     {
       "name": "Kru Coffee",
-      "network_ids": [
-        "479338001612579"
-      ],
+      "network_ids": ["479338001612579"],
       "icon": null,
       "website": null
     },
     {
       "name": "Panera Bread",
-      "network_ids": [
-        "631601401748305"
-      ],
+      "network_ids": ["631601401748305"],
       "icon": null,
       "website": null
     },
     {
       "name": "Hetzner",
-      "network_ids": [
-        "105139245",
-        "472721821",
-        "DE0100000306272",
-        "472885243"
-      ],
+      "network_ids": ["105139245", "472721821", "DE0100000306272", "472885243"],
       "icon": null,
       "website": null
     },
     {
       "name": "Olive Garden",
-      "network_ids": [
-        "000737075554888"
-      ],
+      "network_ids": ["000737075554888"],
       "icon": null,
       "website": null
     },
     {
       "name": "Flipper",
-      "network_ids": [
-        "8TSMJLH3DEKQVVL"
-      ],
+      "network_ids": ["8TSMJLH3DEKQVVL"],
       "icon": null,
       "website": null
     },
     {
       "name": "Green Mountain Transit",
-      "network_ids": [
-        "582087000392222",
-        "582086000392222"
-      ],
+      "network_ids": ["582087000392222", "582086000392222"],
       "icon": null,
       "website": null
     },
@@ -1257,33 +957,25 @@
     },
     {
       "name": "Uberspace",
-      "network_ids": [
-        "XKPH71LZ3KCA8SQ"
-      ],
+      "network_ids": ["XKPH71LZ3KCA8SQ"],
       "icon": null,
       "website": null
     },
     {
       "name": "Royal Mail",
-      "network_ids": [
-        "31431585"
-      ],
+      "network_ids": ["31431585"],
       "icon": null,
       "website": null
     },
     {
       "name": "dbrand",
-      "network_ids": [
-        "QSIOSLPTYEWNZVR"
-      ],
+      "network_ids": ["QSIOSLPTYEWNZVR"],
       "icon": null,
       "website": null
     },
     {
       "name": "Cloudflare",
-      "network_ids": [
-        "H6LVNPMMWPPT9VW"
-      ],
+      "network_ids": ["H6LVNPMMWPPT9VW"],
       "icon": null,
       "website": null
     },
@@ -1301,298 +993,217 @@
     },
     {
       "name": "Alaska Airlines",
-      "network_ids": [
-        "345020787882"
-      ],
+      "network_ids": ["345020787882"],
       "icon": null,
       "website": null
     },
     {
       "name": "Upwork",
-      "network_ids": [
-        "000767201491887"
-      ],
+      "network_ids": ["000767201491887"],
       "icon": null,
       "website": null
     },
     {
       "name": "Market 32",
-      "network_ids": [
-        "004161221991"
-      ],
+      "network_ids": ["004161221991"],
       "icon": null,
       "website": null
     },
     {
       "name": "Daraz",
-      "network_ids": [
-        "5586000012277"
-      ],
+      "network_ids": ["5586000012277"],
       "icon": null,
       "website": null
     },
     {
       "name": "Zepto",
-      "network_ids": [
-        "107193001001817",
-        "470000087113287",
-        "100000000001DPu"
-      ],
+      "network_ids": ["107193001001817", "470000087113287", "100000000001DPu"],
       "icon": null,
       "website": null
     },
     {
       "name": "Flipkart",
-      "network_ids": [
-        "470000087047460",
-        "470000087053553"
-      ],
+      "network_ids": ["470000087047460", "470000087053553"],
       "icon": null,
       "website": null
     },
     {
       "name": "Framework",
-      "network_ids": [
-        "N1VWJHWU8ER01FU"
-      ],
+      "network_ids": ["N1VWJHWU8ER01FU"],
       "icon": null,
       "website": null
     },
     {
       "name": "Shopee",
-      "network_ids": [
-        "104276479"
-      ],
+      "network_ids": ["104276479"],
       "icon": null,
       "website": null
     },
     {
       "name": "Lazada",
-      "network_ids": [
-        "9182087924",
-        "WJTYVIYBYQOXOIH"
-      ],
+      "network_ids": ["9182087924", "WJTYVIYBYQOXOIH"],
       "icon": null,
       "website": null
     },
     {
       "name": "Talabat",
-      "network_ids": [
-        "526805"
-      ],
+      "network_ids": ["526805"],
       "icon": null,
       "website": null
     },
     {
       "name": "Cursor",
-      "network_ids": [
-        "MZJ96QO0A3SN4BD"
-      ],
+      "network_ids": ["MZJ96QO0A3SN4BD"],
       "icon": null,
       "website": null
     },
     {
       "name": "LCSC",
-      "network_ids": [
-        "453022000202588"
-      ],
+      "network_ids": ["453022000202588"],
       "icon": null,
       "website": null
     },
     {
       "name": "Steam",
-      "network_ids": [
-        "420429000204094",
-        "395707494990",
-        "498750000218926"
-      ],
+      "network_ids": ["420429000204094", "395707494990", "498750000218926"],
       "icon": null,
       "website": null
     },
     {
       "name": "Waymo",
-      "network_ids": [
-        "000526450917889"
-      ],
+      "network_ids": ["000526450917889"],
       "icon": null,
       "website": null
     },
     {
       "name": "Jukebox",
-      "network_ids": [
-        "0030209421520"
-      ],
+      "network_ids": ["0030209421520"],
       "icon": null,
       "website": null
     },
     {
       "name": "Slack",
-      "network_ids": [
-        "TDBTRIMXI14FMHY"
-      ],
+      "network_ids": ["TDBTRIMXI14FMHY"],
       "icon": null,
       "website": null
     },
     {
       "name": "OpenRouter",
-      "network_ids": [
-        "SJUICQZSXRRIIQQ"
-      ],
+      "network_ids": ["SJUICQZSXRRIIQQ"],
       "icon": null,
       "website": null
     },
     {
       "name": "Staples",
-      "network_ids": [
-        "010500000209908",
-        "010500000101667"
-      ],
+      "network_ids": ["010500000209908", "010500000101667"],
       "icon": null,
       "website": null
     },
     {
       "name": "Sparrows Lock Picks",
-      "network_ids": [
-        "ETIHPV8Z2PTVR6O"
-      ],
+      "network_ids": ["ETIHPV8Z2PTVR6O"],
       "icon": null,
       "website": null
     },
     {
       "name": "Railway",
-      "network_ids": [
-        "P60LOXBWY2T6ENC"
-      ],
+      "network_ids": ["P60LOXBWY2T6ENC"],
       "icon": null,
       "website": null
     },
     {
       "name": "Amtrak",
-      "network_ids": [
-        "000451038004995"
-      ],
+      "network_ids": ["000451038004995"],
       "icon": null,
       "website": null
     },
     {
       "name": "DNSimple",
-      "network_ids": [
-        "B4F6ZOH9PRL5B71"
-      ],
+      "network_ids": ["B4F6ZOH9PRL5B71"],
       "icon": null,
       "website": null
     },
     {
       "name": "SendCutSend",
-      "network_ids": [
-        "000526456634884"
-      ],
+      "network_ids": ["000526456634884"],
       "icon": null,
       "website": null
     },
     {
       "name": "Vultr",
-      "network_ids": [
-        "4445025992545"
-      ],
+      "network_ids": ["4445025992545"],
       "icon": null,
       "website": null
     },
     {
       "name": "Spotify",
-      "network_ids": [
-        "420429000200209"
-      ],
+      "network_ids": ["420429000200209"],
       "icon": null,
       "website": null
     },
     {
       "name": "Fly.io",
-      "network_ids": [
-        "3BUXYLVBIKWXG1Y"
-      ],
+      "network_ids": ["3BUXYLVBIKWXG1Y"],
       "icon": null,
       "website": null
     },
     {
       "name": "Twilio",
-      "network_ids": [
-        "16C1CBPZVT0KCW0"
-      ],
+      "network_ids": ["16C1CBPZVT0KCW0"],
       "icon": null,
       "website": null
     },
     {
       "name": "Mouser",
-      "network_ids": [
-        "109869000109251"
-      ],
+      "network_ids": ["109869000109251"],
       "icon": null,
       "website": null
     },
     {
       "name": "LinkedIn",
-      "network_ids": [
-        "420429000203609"
-      ],
+      "network_ids": ["420429000203609"],
       "icon": null,
       "website": null
     },
     {
       "name": "REV Robotics",
-      "network_ids": [
-        "STPQHIHOZM5DB0Z"
-      ],
+      "network_ids": ["STPQHIHOZM5DB0Z"],
       "icon": null,
       "website": null
     },
     {
       "name": "Ubiquiti",
-      "network_ids": [
-        "2CTMSCNGWMR1G4C",
-        "YIUDJ0O4KR2J77T"
-      ],
+      "network_ids": ["2CTMSCNGWMR1G4C", "YIUDJ0O4KR2J77T"],
       "icon": null,
       "website": null
     },
     {
       "name": "Anthropic",
-      "network_ids": [
-        "Q0RRUWQV26H30SO"
-      ],
+      "network_ids": ["Q0RRUWQV26H30SO"],
       "icon": null,
       "website": null
     },
     {
       "name": "CustomInk",
-      "network_ids": [
-        "000445377882995",
-        "000767214928883"
-      ],
+      "network_ids": ["000445377882995", "000767214928883"],
       "icon": null,
       "website": null
     },
     {
       "name": "ElevenLabs",
-      "network_ids": [
-        "8MQI7NFNK0XTZ16"
-      ],
+      "network_ids": ["8MQI7NFNK0XTZ16"],
       "icon": null,
       "website": null
     },
     {
       "name": "Fiverr",
-      "network_ids": [
-        "395709390320"
-      ],
+      "network_ids": ["395709390320"],
       "icon": null,
       "website": null
     },
     {
       "name": "Framer",
-      "network_ids": [
-        "QR055TQLLZPLOR0"
-      ],
+      "network_ids": ["QR055TQLLZPLOR0"],
       "icon": null,
       "website": null
     }

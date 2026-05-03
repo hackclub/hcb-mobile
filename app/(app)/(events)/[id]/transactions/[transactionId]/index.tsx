@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
@@ -32,12 +32,12 @@ import ExpensePayoutTransaction from "@/components/transaction/types/ExpensePayo
 import InvoiceTransaction from "@/components/transaction/types/InvoiceTransaction";
 import TransferTransaction from "@/components/transaction/types/TransferTransaction";
 import WiseTransaction from "@/components/transaction/types/WiseTransaction";
+import { TransactionPolicy } from "@/lib/policies";
 import IComment from "@/lib/types/Comment";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { TransactionPolicy } from "@/lib/policies";
 import { palette } from "@/styles/theme";
 
 export default function TransactionPage({
@@ -92,7 +92,11 @@ export default function TransactionPage({
   const { data: user } = useOfflineSWR<User>(`user`);
   const canComment = useMemo(() => {
     if (!transaction || !organization) return false;
-    return new TransactionPolicy(user ?? null, transaction, organization).show();
+    return new TransactionPolicy(
+      user ?? null,
+      transaction,
+      organization,
+    ).show();
   }, [transaction, organization, user]);
   const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
@@ -200,18 +204,51 @@ export default function TransactionPage({
         </AdminTools>
 
         {match(transaction)
-            .with({ card_charge: P.any }, (tx) => <CardChargeTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ check: P.any }, (tx) => <CheckTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ transfer: P.any }, (tx) => <TransferTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ donation: P.any }, (tx) => <DonationTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ ach_transfer: P.any }, (tx) => <AchTransferTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ wise_transfer: P.any }, (tx) => <WiseTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ check_deposit: P.any }, (tx) => <CheckDepositTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ invoice: P.any }, (tx) => <InvoiceTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ expense_payout: P.any }, (tx) => <ExpensePayoutTransaction transaction={tx} {...transactionViewProps} />)
-            .with({ code: TransactionType.BankFee }, (tx) => <BankFeeTransaction transaction={tx} {...transactionViewProps} />)
-            .otherwise((tx) => <BankAccountTransaction transaction={tx} {...transactionViewProps} />)
-        }
+          .with({ card_charge: P.any }, (tx) => (
+            <CardChargeTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ check: P.any }, (tx) => (
+            <CheckTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ transfer: P.any }, (tx) => (
+            <TransferTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ donation: P.any }, (tx) => (
+            <DonationTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ ach_transfer: P.any }, (tx) => (
+            <AchTransferTransaction
+              transaction={tx}
+              {...transactionViewProps}
+            />
+          ))
+          .with({ wise_transfer: P.any }, (tx) => (
+            <WiseTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ check_deposit: P.any }, (tx) => (
+            <CheckDepositTransaction
+              transaction={tx}
+              {...transactionViewProps}
+            />
+          ))
+          .with({ invoice: P.any }, (tx) => (
+            <InvoiceTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .with({ expense_payout: P.any }, (tx) => (
+            <ExpensePayoutTransaction
+              transaction={tx}
+              {...transactionViewProps}
+            />
+          ))
+          .with({ code: TransactionType.BankFee }, (tx) => (
+            <BankFeeTransaction transaction={tx} {...transactionViewProps} />
+          ))
+          .otherwise((tx) => (
+            <BankAccountTransaction
+              transaction={tx}
+              {...transactionViewProps}
+            />
+          ))}
 
         <View style={{ gap: 12 }}>
           {comments && comments.length > 0 && (

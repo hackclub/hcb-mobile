@@ -251,7 +251,6 @@ export default function SettingsPage() {
       style={{ backgroundColor: colors.background }}
     >
       <View style={{ padding: 20, paddingTop: 0 }}>
-
         <View
           style={{
             flexDirection: "row",
@@ -296,7 +295,6 @@ export default function SettingsPage() {
             </Text>
           </View>
         </View>
-
 
         <Text
           style={{
@@ -372,7 +370,6 @@ export default function SettingsPage() {
             ))}
           </View>
         </View>
-
 
         <Text
           style={{
@@ -543,7 +540,6 @@ export default function SettingsPage() {
           )}
         </View>
 
-
         <Text
           style={{
             fontSize: 13,
@@ -692,7 +688,6 @@ export default function SettingsPage() {
           )}
         </View>
 
-
         <Text
           style={{
             fontSize: 13,
@@ -775,7 +770,6 @@ export default function SettingsPage() {
           </Pressable>
         </View>
 
-
         <Button
           style={{
             marginTop: 12,
@@ -792,7 +786,6 @@ export default function SettingsPage() {
 
         {user?.auditor && <DevToolsButton colors={colors} />}
       </View>
-
 
       <FeedbackModal
         visible={feedbackModalVisible}

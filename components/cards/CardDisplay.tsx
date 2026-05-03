@@ -1,11 +1,11 @@
 import { useTheme } from "@react-navigation/native";
 import { TouchableOpacity, View, Text } from "react-native";
 
+import PaymentCard from "@/components/PaymentCard";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
 import { renderMoney } from "@/utils/util";
-import PaymentCard from "@/components/PaymentCard";
 
 interface CardDisplayProps {
   card: Card;

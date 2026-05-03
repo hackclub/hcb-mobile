@@ -11,9 +11,9 @@ import {
   View,
 } from "react-native";
 
-import { palette } from "@/styles/theme";
-
 import Button from "./Button";
+
+import { palette } from "@/styles/theme";
 
 interface FeedbackModalProps {
   visible: boolean;

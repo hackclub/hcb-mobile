@@ -1,7 +1,7 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useIsDark } from "@/lib/useColorScheme";
 

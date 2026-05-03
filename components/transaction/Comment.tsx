@@ -5,11 +5,11 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 
+import FileViewerModal from "@/components/FileViewerModal";
+import UserMention from "@/components/UserMention";
 import IComment from "@/lib/types/Comment";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
-import FileViewerModal from "@/components/FileViewerModal";
-import UserMention from "@/components/UserMention";
 
 export default function Comment({ comment }: { comment: IComment }) {
   const { colors: themeColors } = useTheme();

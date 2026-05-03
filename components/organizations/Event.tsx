@@ -6,17 +6,15 @@ import { memo } from "react";
 import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
 import useSWR from "swr";
 
+import EventBalance from "./EventBalance";
+
 import Invitation from "@/lib/types/Invitation";
-import Organization, {
-  OrganizationExpanded,
-} from "@/lib/types/Organization";
+import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { orgColor } from "@/utils/util";
-
-import EventBalance from "./EventBalance";
 
 const Event = memo(
   function Event({

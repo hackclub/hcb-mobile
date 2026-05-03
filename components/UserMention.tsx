@@ -3,9 +3,9 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "components/Text";
 import { View } from "react-native";
 
-import User from "@/lib/types/User";
-
 import UserAvatar from "./UserAvatar";
+
+import User from "@/lib/types/User";
 
 export default function UserMention({
   user,

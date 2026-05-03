@@ -1,6 +1,7 @@
 import { useTheme } from "@react-navigation/native";
 import { View, Text } from "react-native";
 
+import Button from "@/components/Button";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
 import { palette } from "@/styles/theme";
@@ -9,7 +10,6 @@ import {
   formatMerchantNames,
   renderMoney,
 } from "@/utils/util";
-import Button from "@/components/Button";
 
 export default function GrantWithoutCard({
   grantCard,

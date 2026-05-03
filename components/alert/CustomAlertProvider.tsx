@@ -1,10 +1,10 @@
 import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { Platform } from "react-native";
 
+import { CustomAlert } from "./CustomAlert";
+
 import { setGlobalCustomAlert } from "@/lib/alertUtils";
 import { useCustomAlert } from "@/lib/useCustomAlert";
-
-import { CustomAlert } from "./CustomAlert";
 
 interface AlertButton {
   text: string;

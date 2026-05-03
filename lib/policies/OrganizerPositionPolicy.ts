@@ -1,6 +1,7 @@
 import User from "../types/User";
-import { OrgScopedPolicy } from "./OrgScopedPolicy";
+
 import { Role } from "./helpers";
+import { OrgScopedPolicy } from "./OrgScopedPolicy";
 
 /** Minimal OrganizerPosition shape used for policy checks. */
 export interface OrganizerPosition {
@@ -11,10 +12,16 @@ export interface OrganizerPosition {
 }
 
 export class OrganizerPositionPolicy extends OrgScopedPolicy<OrganizerPosition> {
-  override destroy(): boolean { return this.isAdmin || this.isSignee; }
+  override destroy(): boolean {
+    return this.isAdmin || this.isSignee;
+  }
 
-  setIndex(): boolean { return this.isSelf; }
-  markVisited(): boolean { return this.isSelf; }
+  setIndex(): boolean {
+    return this.isSelf;
+  }
+  markVisited(): boolean {
+    return this.isSelf;
+  }
 
   changePositionRole(): boolean {
     if (!this.user) return false;

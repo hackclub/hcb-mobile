@@ -1,14 +1,18 @@
 import { format } from "date-fns";
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
 import { TransactionDonation } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/util";
-import Badge from "@/components/Badge";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 function getAttributionString(
   attribution: TransactionDonation["donation"]["attribution"],

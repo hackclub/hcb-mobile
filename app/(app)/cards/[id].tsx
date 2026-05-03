@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
@@ -24,10 +24,10 @@ import CardTransactions from "@/components/cards/CardTransactions";
 import ActivateCardModal from "@/components/cards/modals/ActivateCardModal";
 import useClient from "@/lib/client";
 import useTransactions from "@/lib/organization/useTransactions";
+import { CardPolicy } from "@/lib/policies";
 import Card from "@/lib/types/Card";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
-import { CardPolicy } from "@/lib/policies";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -80,7 +80,9 @@ export default function CardPage() {
 
   const isCardholder = user?.id === card?.user?.id;
   const cardPolicy =
-    card && organization ? new CardPolicy(user ?? null, card, organization) : null;
+    card && organization
+      ? new CardPolicy(user ?? null, card, organization)
+      : null;
   const isVirtualCard = card?.type === "virtual";
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);

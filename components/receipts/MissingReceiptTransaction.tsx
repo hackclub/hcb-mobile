@@ -5,14 +5,14 @@ import { formatDistanceToNow } from "date-fns";
 import { memo, useRef, useState } from "react";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 
+import UploadIcon from "@/components/icons/UploadIcon";
+import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 import Organization from "@/lib/types/Organization";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
 import p from "@/styles/palette";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { renderMoney } from "@/utils/util";
-import UploadIcon from "@/components/icons/UploadIcon";
-import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 
 function MissingReceiptTransaction({
   transaction,

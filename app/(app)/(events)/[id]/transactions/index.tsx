@@ -1,10 +1,10 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
 import AccessDenied from "@/components/organizations/AccessDenied";
@@ -313,7 +313,7 @@ export default function Page() {
           flex: 1,
           backgroundColor: themeColors.background,
           padding: 20,
-          marginTop: 20
+          marginTop: 20,
         }}
       >
         <LoadingSkeleton />
@@ -363,9 +363,9 @@ export default function Page() {
           drawDistance={400}
         />
       ) : (
-          <View style={{ flex: 1, marginTop: 20 }}>
-            <LoadingSkeleton />
-          </View>
+        <View style={{ flex: 1, marginTop: 20 }}>
+          <LoadingSkeleton />
+        </View>
       )}
     </>
   );

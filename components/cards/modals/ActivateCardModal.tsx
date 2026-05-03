@@ -2,8 +2,8 @@ import { useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
 import { Modal, View, TextInput } from "react-native";
 
-import { palette } from "@/styles/theme";
 import Button from "@/components/Button";
+import { palette } from "@/styles/theme";
 
 interface ActivateCardModalProps {
   visible: boolean;

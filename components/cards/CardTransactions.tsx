@@ -4,11 +4,11 @@ import { Text } from "components/Text";
 import { router } from "expo-router";
 import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 
+import TransactionComponent from "@/components/transaction/Transaction";
 import { getTransactionTitle } from "@/lib/transactionTitle";
 import Card from "@/lib/types/Card";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import TransactionComponent from "@/components/transaction/Transaction";
 
 interface CardTransactionsProps {
   transactions: Transaction[];

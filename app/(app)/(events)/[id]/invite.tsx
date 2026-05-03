@@ -33,9 +33,7 @@ function RoleToggle({
       style={{
         flexDirection: "row",
         borderRadius: 10,
-        backgroundColor: isDark
-          ? "rgba(255,255,255,0.07)"
-          : "rgba(0,0,0,0.06)",
+        backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
         padding: 3,
       }}
     >

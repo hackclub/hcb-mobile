@@ -144,7 +144,10 @@ export default function Page() {
   const [allCards, setAllCards] = useState<CardWithGrant[]>();
   const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
   const [refreshing, setRefreshing] = useState(false);
-  const panGesture = useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
+  const panGesture = useMemo(
+    () => Gesture.Pan().activateAfterLongPress(520),
+    [],
+  );
 
   const handleOrderCard = useCallback(() => {
     const firstOrganizationId = organizations?.[0]?.id;

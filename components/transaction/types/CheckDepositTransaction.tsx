@@ -2,14 +2,18 @@ import { useTheme } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import UserMention from "@/components/UserMention";
 import { TransactionCheckDeposit } from "@/lib/types/Transaction";
 import { renderMoney, statusColor } from "@/utils/util";
-import Badge from "@/components/Badge";
-import UserMention from "@/components/UserMention";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckDepositTransaction(
   props: TransactionViewProps<TransactionCheckDeposit>,
@@ -30,16 +34,16 @@ export default function CheckDepositTransaction(
       </TransactionTitle>
 
       <View style={{ flex: 1 }}>
-      <Image
-        source={{ uri: props.transaction.check_deposit.front_url }}
-        style={{
-          width: "100%",
-          height: 150,
-          borderRadius: 8,
-          marginBottom: 30,
-          backgroundColor: themeColors.card,
-        }}
-        contentFit="cover"
+        <Image
+          source={{ uri: props.transaction.check_deposit.front_url }}
+          style={{
+            width: "100%",
+            height: 150,
+            borderRadius: 8,
+            marginBottom: 30,
+            backgroundColor: themeColors.card,
+          }}
+          contentFit="cover"
         />
         <Image
           source={{ uri: props.transaction.check_deposit.back_url }}
@@ -51,7 +55,7 @@ export default function CheckDepositTransaction(
             backgroundColor: themeColors.card,
           }}
           contentFit="cover"
-          />
+        />
       </View>
 
       <TransactionDetails

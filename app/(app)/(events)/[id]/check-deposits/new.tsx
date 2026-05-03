@@ -1,6 +1,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { Text } from "components/Text";
 import { Image } from "expo-image";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
@@ -17,7 +18,6 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import Button from "@/components/Button";
-import { Text } from "components/Text";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -74,7 +74,12 @@ function ImagePickerZone({
           />
         ) : (
           <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 8 }}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
           >
             <Ionicons name="camera-outline" size={28} color={palette.muted} />
             <Text style={{ color: palette.muted, fontSize: 14 }}>
@@ -127,7 +132,10 @@ export default function NewCheckDepositPage() {
         if (index === 0) {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
-            showAlert("Permission needed", "Camera access is required to take photos.");
+            showAlert(
+              "Permission needed",
+              "Camera access is required to take photos.",
+            );
             return;
           }
           const result = await ImagePicker.launchCameraAsync({
@@ -136,7 +144,11 @@ export default function NewCheckDepositPage() {
           });
           if (!result.canceled) {
             const asset = result.assets[0];
-            onSelect({ uri: asset.uri, fileName: asset.fileName ?? "check.jpg", mimeType: asset.mimeType ?? "image/jpeg" });
+            onSelect({
+              uri: asset.uri,
+              fileName: asset.fileName ?? "check.jpg",
+              mimeType: asset.mimeType ?? "image/jpeg",
+            });
           }
         } else if (index === 1) {
           const result = await ImagePicker.launchImageLibraryAsync({
@@ -145,7 +157,11 @@ export default function NewCheckDepositPage() {
           });
           if (!result.canceled) {
             const asset = result.assets[0];
-            onSelect({ uri: asset.uri, fileName: asset.fileName ?? "check.jpg", mimeType: asset.mimeType ?? "image/jpeg" });
+            onSelect({
+              uri: asset.uri,
+              fileName: asset.fileName ?? "check.jpg",
+              mimeType: asset.mimeType ?? "image/jpeg",
+            });
           }
         }
       },
@@ -170,8 +186,14 @@ export default function NewCheckDepositPage() {
     setSubmitting(true);
     try {
       const [frontJpeg, backJpeg] = await Promise.all([
-        manipulateAsync(front.uri, [], { compress: 0.85, format: SaveFormat.JPEG }),
-        manipulateAsync(back.uri, [], { compress: 0.85, format: SaveFormat.JPEG }),
+        manipulateAsync(front.uri, [], {
+          compress: 0.85,
+          format: SaveFormat.JPEG,
+        }),
+        manipulateAsync(back.uri, [], {
+          compress: 0.85,
+          format: SaveFormat.JPEG,
+        }),
       ]);
 
       const body = new FormData();
@@ -266,7 +288,9 @@ export default function NewCheckDepositPage() {
               gap: 6,
             }}
           >
-            <Text style={{ color: palette.muted, fontSize: 17, fontWeight: "500" }}>
+            <Text
+              style={{ color: palette.muted, fontSize: 17, fontWeight: "500" }}
+            >
               $
             </Text>
             <TextInput
@@ -284,11 +308,7 @@ export default function NewCheckDepositPage() {
           </View>
         </View>
 
-        <Button
-          variant="primary"
-          loading={submitting}
-          onPress={handleSubmit}
-        >
+        <Button variant="primary" loading={submitting} onPress={handleSubmit}>
           Submit deposit
         </Button>
       </ScrollView>

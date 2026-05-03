@@ -95,7 +95,7 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (!isReady) return;
-    console.log(tokenResponse?.accessToken)
+    console.log(tokenResponse?.accessToken);
 
     // Avoid infinite redirects when auth state hasn't changed
     if (lastAuthState.current === hasToken) {

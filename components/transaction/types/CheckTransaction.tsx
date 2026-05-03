@@ -1,15 +1,19 @@
 import humanizeString from "humanize-string";
 import { View } from "react-native";
 
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import Badge from "@/components/Badge";
+import CheckComponent from "@/components/transaction/Check";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import UserMention from "@/components/UserMention";
 import { TransactionCheck } from "@/lib/types/Transaction";
 import { renderMoney, statusColor } from "@/utils/util";
-import Badge from "@/components/Badge";
-import UserMention from "@/components/UserMention";
-import CheckComponent from "@/components/transaction/Check";
-import TransactionDetails, { descriptionDetail } from "@/components/transaction/TransactionDetails";
-import TransactionTitle, { Muted } from "@/components/transaction/TransactionTitle";
-
-import { TransactionViewProps } from "./TransactionViewProps";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },

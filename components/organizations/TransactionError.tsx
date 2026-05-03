@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { View, Text } from "react-native";
 
-import { palette } from "@/styles/theme";
 import Button from "@/components/Button";
+import { palette } from "@/styles/theme";
 
 interface TransactionErrorProps {
   onRetry: () => void;

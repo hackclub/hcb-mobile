@@ -5,7 +5,6 @@ import { router } from "expo-router";
 import { Platform, View } from "react-native";
 
 import Button from "@/components/Button";
-
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
