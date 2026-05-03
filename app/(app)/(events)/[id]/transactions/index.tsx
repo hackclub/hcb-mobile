@@ -1,7 +1,7 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -44,7 +44,6 @@ type ListItemType =
     };
 
 export default function Page() {
-  const _navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
   const { isOnline } = useOffline();
 
@@ -181,7 +180,8 @@ export default function Page() {
         await mutateTransactions();
         await mutateOrganization();
       } catch (err) {
-        if (err?.name !== "AbortError" && err?.name !== "NetworkError") {
+        const e = err as Error | undefined;
+        if (e?.name !== "AbortError" && e?.name !== "NetworkError") {
           console.error("Error refreshing organization data:", err);
         }
       } finally {
@@ -321,7 +321,6 @@ export default function Page() {
     );
   }
 
-  // Check for offline with no cached data
   const isOfflineNoData = organizationError && !isOnline && !organization;
 
   if (isAccessDenied) {

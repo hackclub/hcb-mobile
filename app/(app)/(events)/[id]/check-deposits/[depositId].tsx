@@ -90,7 +90,6 @@ export default function CheckDepositDetailPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40, gap: 20 }}
     >
-      {/* Status + amount header */}
       <View style={{ gap: 8 }}>
         <Badge color={statusColor(deposit.status)}>{statusLabel}</Badge>
         <Text style={{ fontSize: 32, fontWeight: "700", color: themeColors.text }}>
@@ -98,7 +97,6 @@ export default function CheckDepositDetailPage() {
         </Text>
       </View>
 
-      {/* Rejection notice */}
       {deposit.rejection && (
         <View
           style={{
@@ -119,7 +117,6 @@ export default function CheckDepositDetailPage() {
         </View>
       )}
 
-      {/* Check images */}
       {(deposit.front_url || deposit.back_url) && (
         <View style={{ gap: 12 }}>
           {deposit.front_url && (
@@ -149,7 +146,6 @@ export default function CheckDepositDetailPage() {
         </View>
       )}
 
-      {/* Details card */}
       <View
         style={{
           backgroundColor: themeColors.card,
@@ -182,7 +178,6 @@ export default function CheckDepositDetailPage() {
         )}
       </View>
 
-      {/* View all deposits */}
       <Pressable
         onPress={() =>
           router.push({

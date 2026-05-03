@@ -26,7 +26,7 @@ export default function PageTitle({
         style={{
           color: colors.text,
           fontSize: 37,
-          fontFamily: "Bold",
+          // fontFamily: "Bold",
           flex: 1,
         }}
       >

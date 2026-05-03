@@ -68,7 +68,6 @@ export default function Page() {
     },
   });
 
-  // Tap to Pay onboarding
   useEffect(() => {
     const getDidOnboarding = async () => {
       try {
@@ -102,7 +101,6 @@ export default function Page() {
     }
   }, [preDiscoveredReaders, reader]);
 
-  // Disconnect reader if org changed
   useEffect(() => {
     (async () => {
       const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
@@ -118,7 +116,6 @@ export default function Page() {
     })();
   }, [connectedReader, disconnectReader, id]);
 
-  // Discover readers
   useEffect(() => {
     (async () => {
       try {
@@ -137,7 +134,6 @@ export default function Page() {
     })();
   }, [discoverReaders, id, isStripeInitialized, preDiscoveredReaders.length]);
 
-  // Location access
   async function handleRequestLocation() {
     await Linking.openSettings();
   }
@@ -157,7 +153,6 @@ export default function Page() {
     }
   }, [accessDenied]);
 
-  // Connect reader function
   async function connectReader(selectedReader: Reader.Type) {
     if (!isStripeInitialized) {
       showAlert(
@@ -227,7 +222,6 @@ export default function Page() {
   };
 
   const handleGetStarted = async () => {
-    // Dev mode - skip reader connection
     if (__DEV__) {
       navigateToNewDonation();
       return;
@@ -248,7 +242,6 @@ export default function Page() {
       return false;
     };
 
-    // Try to connect with existing reader
     if (reader) {
       const connected = await connectReader(reader);
       if (connected) {
@@ -276,7 +269,6 @@ export default function Page() {
       return;
     }
 
-    // Discover and connect
     const readers = await discoverReaders({
       discoveryMethod: "tapToPay",
     });
@@ -287,7 +279,7 @@ export default function Page() {
         navigateToNewDonation();
       }
     } else {
-      console.error("No reader found", JSON.stringify(readers));
+      console.error("No reader found", readers);
       showAlert(
         "No reader found",
         "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
@@ -296,7 +288,6 @@ export default function Page() {
     setLoadingConnectingReader(false);
   };
 
-  // Loading state
   if (organizationLoading || !organization || isStripeInitializing) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -310,7 +301,6 @@ export default function Page() {
     );
   }
 
-  // Error state
   if (stripeInitError) {
     return (
       <View
@@ -350,12 +340,10 @@ export default function Page() {
     );
   }
 
-  // Main splash screen
   return (
     <View
       style={{
         padding: 24,
-        display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         flex: 1,
@@ -364,14 +352,12 @@ export default function Page() {
     >
       <View
         style={{
-          display: "flex",
           justifyContent: "center",
           alignItems: "center",
           flex: 1,
           width: "100%",
         }}
       >
-        {/* Hero Icon Container */}
         <View
           style={{
             width: 120,
@@ -426,7 +412,6 @@ export default function Page() {
           {Platform.OS === "ios" ? " on iPhone" : ""}
         </Text>
 
-        {/* Feature Pills */}
         <View
           style={{
             flexDirection: "row",
@@ -472,7 +457,6 @@ export default function Page() {
           ))}
         </View>
 
-        {/* Progress indicators */}
         {isUpdatingReaderSoftware && (
           <View
             style={{

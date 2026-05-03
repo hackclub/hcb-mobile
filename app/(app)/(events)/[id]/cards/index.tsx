@@ -18,14 +18,15 @@ import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 
-import CardListSkeleton from "@/../src/components/cards/CardListSkeleton";
-import { NoCardsEmptyState } from "@/../src/components/cards/NoCardsEmptyState";
-import PaymentCard from "@/../src/components/PaymentCard";
-import Card from "@/../src/lib/types/Card";
-import { useOfflineSWR } from "@/../src/lib/useOfflineSWR";
-import { palette } from "@/../src/styles/theme";
-import * as Haptics from "@/../src/utils/haptics";
-import { normalizeSvg } from "@/../src/utils/util";
+import CardListSkeleton from "@/components/cards/CardListSkeleton";
+import { NoCardsEmptyState } from "@/components/cards/NoCardsEmptyState";
+import PaymentCard from "@/components/PaymentCard";
+import Card from "@/lib/types/Card";
+import GrantCard from "@/lib/types/GrantCard";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { normalizeSvg } from "@/utils/util";
 
 type CardWithGrant = Card & Required<Pick<Card, "last4">> & { grant_id?: string };
 
@@ -84,6 +85,10 @@ export default function Page() {
     (Card & Required<Pick<Card, "last4">>)[]
   >(`organizations/${params.id}/cards`);
 
+  const { data: cardGrants } = useOfflineSWR<Pick<GrantCard, "card_id">[]>(
+    `organizations/${params.id}/card_grants`,
+  );
+
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
 
@@ -107,14 +112,19 @@ export default function Page() {
     }, [reloadCards]),
   );
 
+  const grantCardIds = useMemo(
+    () => new Set((cardGrants ?? []).map((g) => g.card_id).filter(Boolean)),
+    [cardGrants],
+  );
+
   // Derive sorted cards from API data; reset manual order when cards refresh
   const sortedCards = useMemo<CardWithGrant[] | undefined>(() => {
     if (!cards) return undefined;
     if (reorderedCards) return reorderedCards;
     return [...cards]
-      .filter((card): card is CardWithGrant => !!card.last4)
+      .filter((card): card is CardWithGrant => !!card.last4 && !grantCardIds.has(card.id))
       .sort((a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5));
-  }, [cards, reorderedCards]);
+  }, [cards, reorderedCards, grantCardIds]);
 
   const filteredCards = useMemo(() => {
     if (!sortedCards) return [];

@@ -181,7 +181,6 @@ export default function Page() {
     }
   }
 
-  // Dev mode check
   const isDevMode = __DEV__ && !connectedReader;
   const { bottom: bottomTabBarHeight } = useSafeAreaInsets();
 
@@ -208,7 +207,6 @@ export default function Page() {
             width: "100%",
           }}
         >
-          {/* Fields */}
           <View style={{ width: "100%", gap: 12, marginBottom: 12 }}>
             <View
               style={{
@@ -273,7 +271,6 @@ export default function Page() {
               />
             </View>
 
-            {/* Receiving Goods Toggle */}
             <TouchableOpacity
               style={{
                 flexDirection: "row",
@@ -299,7 +296,6 @@ export default function Page() {
             </TouchableOpacity>
           </View>
 
-          {/* Keyboard */}
           <View style={{ flex: 1, width: "100%", marginTop: 8 }}>
             <Keyboard amount={amount} setAmount={setAmount} />
           </View>
@@ -314,14 +310,12 @@ export default function Page() {
                 return;
               }
               if (isDevMode) {
-                // In dev mode, navigate with mock payment data
                 const mockPayment = {
                   amount: Math.round(value * 100),
                 } as PaymentIntent.Type;
                 setPaymentData({
                   paymentIntent: mockPayment,
                   collectPayment: async () => {
-                    // Mock payment function - simulates success after 2 seconds
                     return new Promise<boolean>((resolve) =>
                       setTimeout(() => resolve(true), 2000),
                     );

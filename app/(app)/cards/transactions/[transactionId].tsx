@@ -1,4 +1,4 @@
-import TransactionPage from "app/(app)/(events)/[id]/transactions/[transactionId]";
+import TransactionPage from "@/app/(app)/(events)/[id]/transactions/[transactionId]";
 import { useLocalSearchParams } from "expo-router";
 
 export default function Page() {

@@ -41,7 +41,6 @@ export default function CheckDepositsPage() {
         gap: 16,
       }}
     >
-      {/* New deposit button */}
       <Pressable
         onPress={() =>
           router.push({

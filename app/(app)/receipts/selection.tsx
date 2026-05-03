@@ -92,19 +92,16 @@ export default function Page() {
       const selectedReceiptList =
         receipts?.filter((receipt) => selectedReceipts.has(receipt.id)) || [];
 
-      // Upload all selected receipts
       for (const receipt of selectedReceiptList) {
         await uploadFile(receipt);
       }
 
-      // Delete all uploaded receipts from receipt bin
       setDeletingReceipts(new Set(selectedReceipts));
 
       for (const receiptId of selectedReceipts) {
         await deleteReceipt(receiptId);
       }
 
-      // Refresh the receipt bin data
       await mutate("receipts");
       await mutate("user/transactions/missing_receipt");
 
@@ -208,7 +205,6 @@ export default function Page() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {/* Header */}
       <View
         style={{
           padding: 20,
@@ -275,7 +271,6 @@ export default function Page() {
         </TouchableOpacity>
       </View>
 
-      {/* Selection Controls */}
       <View
         style={{
           padding: 16,
@@ -319,7 +314,6 @@ export default function Page() {
         </View>
       </View>
 
-      {/* Receipts Grid */}
       <ScrollView style={{ flex: 1, padding: 16 }}>
         <View
           style={{
@@ -358,7 +352,6 @@ export default function Page() {
                     contentFit="cover"
                   />
 
-                  {/* Selection indicator */}
                   {isSelected && (
                     <View
                       style={{
@@ -377,7 +370,6 @@ export default function Page() {
                     </View>
                   )}
 
-                  {/* Loading indicator */}
                   {(isUploading || isDeleting) && (
                     <View
                       style={{

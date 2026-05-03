@@ -139,13 +139,10 @@ function Navigation() {
 }
 
 export default function Layout() {
-  // SWRCacheProvider is always provided by the parent _layout.tsx
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { scheme, cache } = useContext(SWRCacheProvider)!;
   const { tokenResponse, codeVerifier, setTokenResponse } =
     useContext(AuthContext);
 
-  // Extract tokens from tokenResponse for backward compatibility
   const tokens = useMemo(
     () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
     [tokenResponse, codeVerifier],
@@ -198,7 +195,7 @@ export default function Layout() {
   const [tokenExpiry, setTokenExpiry] = useState<number>(0);
   const TOKEN_FETCH_COOLDOWN = 5000;
   const MAX_TOKEN_FETCH_ATTEMPTS = 3;
-  const TOKEN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+  const TOKEN_CACHE_DURATION = 10 * 60 * 1000;
 
   const fetchTokenProvider = async (): Promise<string> => {
     const now = Date.now();
@@ -214,9 +211,6 @@ export default function Layout() {
     if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
       const waitTime = Math.ceil(
         (TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000,
-      );
-      console.warn(
-        `Rate limited: Please wait ${waitTime} seconds before retrying`,
       );
       throw new Error(
         `Rate limited: Please wait ${waitTime} seconds before retrying`,
@@ -268,9 +262,6 @@ export default function Layout() {
         const backoffTime = Math.min(
           TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts),
           30000,
-        ); // Max 30 seconds
-        console.warn(
-          `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
         );
         throw new Error(
           `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
@@ -284,8 +275,7 @@ export default function Layout() {
   useEffect(() => {
     const setStatusBar = async () => {
       await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
-      // Only override Appearance when NOT using system theme
-      // When themePref is "system", set to null to use actual device theme
+      // When themePref is "system", defer to the device's actual color scheme
       if (themePref === "system") {
         Appearance.setColorScheme(null);
       } else {
@@ -302,26 +292,19 @@ export default function Layout() {
           lastAuthenticatedToken.current === tokens.accessToken &&
           hasPassedBiometrics.current
         ) {
-          console.log(
-            "Already authenticated for this token, skipping biometric auth",
-          );
           return;
         }
 
-        // If user was already authenticated (token refresh scenario), update token without re-prompting
+        // On token refresh, update the reference without re-prompting for biometrics
         if (
           lastAuthenticatedToken.current !== null &&
           hasPassedBiometrics.current
         ) {
-          console.log(
-            "Token refreshed, user already authenticated - updating token without re-prompting biometrics",
-          );
           lastAuthenticatedToken.current = tokens.accessToken;
           return;
         }
 
         if (__DEV__) {
-          // bypass auth for development
           lastAuthenticatedToken.current = tokens.accessToken;
           setIsAuthenticated(true);
           setAppIsReady(true);
@@ -340,7 +323,6 @@ export default function Layout() {
             return;
           }
 
-          // Check if biometric authentication is available
           const hasHardware = await LocalAuthentication.hasHardwareAsync();
           const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
@@ -353,15 +335,11 @@ export default function Layout() {
           }
 
           if (isBiometricAuthInProgress.current) {
-            console.log(
-              "Biometric authentication already in progress, skipping...",
-            );
             return;
           }
 
           isBiometricAuthInProgress.current = true;
 
-          // Keep splash screen visible during biometric authentication
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate to access HCB",
             cancelLabel: "Cancel",
@@ -393,7 +371,6 @@ export default function Layout() {
           isBiometricAuthInProgress.current = false;
         }
       } else {
-        console.log("No access token, skipping biometric authentication");
         lastAuthenticatedToken.current = null;
         hasPassedBiometrics.current = false;
         setIsAuthenticated(true);
@@ -426,25 +403,9 @@ export default function Layout() {
       !pushNotificationsRegistered.current
     ) {
       pushNotificationsRegistered.current = true;
-      console.log("registering push notifications");
       registerPushNotifications().then((result) => {
-        console.log("result", result);
-        if (result.expoPushToken || result.nativePushToken) {
-          console.log("Push notifications registered successfully", {
-            expoPushToken: result.expoPushToken,
-            nativePushToken: result.nativePushToken,
-            nativePushTokenType: result.nativePushTokenType,
-          });
-          if (result.nativePushToken) {
-            Intercom.sendTokenToIntercom(result.nativePushToken);
-            console.log("Push token sent to Intercom", result.nativePushToken);
-          }
-          // TODO: Send tokens to backend when endpoint is available
-          // hcb.post("user/push_tokens", {
-          //   json: {
-          //     expo_push_token: result.expoPushToken,
-          //   },
-          // });
+        if (result.nativePushToken) {
+          Intercom.sendTokenToIntercom(result.nativePushToken);
         }
       });
     }
@@ -485,14 +446,12 @@ export default function Layout() {
 
   const onLayoutRootView = useCallback(() => {
     if (appIsReady) {
-      console.log("appIsReady", appIsReady);
       SplashScreen.hide();
     }
   }, [appIsReady]);
 
-  // Handle incoming URLs: redirect to browser for blocked paths and when universal
-  // linking is disabled. Note: cold-start deep link handling requires configuring
-  // Expo Router's linking in app.json / the root layout.
+  // Redirect blocked paths to the browser and honour the universal linking toggle.
+  // Cold-start deep links are handled by Expo Router via app.json linking config.
   useEffect(() => {
     if (isUniversalLinkingEnabled === null) return;
 
@@ -618,16 +577,8 @@ export default function Layout() {
                     const timeout = Math.min(baseTimeout + jitter, 5000);
 
                     setTimeout(() => {
-                      console.log(
-                        `Global retry for ${key} (attempt ${retryCount + 1})`,
-                      );
                       revalidate({ retryCount });
                     }, timeout);
-                  },
-                  onSuccess: (_data, key) => {
-                    if (__DEV__) {
-                      console.log(`Successfully fetched: ${key}`);
-                    }
                   },
                   onError: (error, key) => {
                     if (

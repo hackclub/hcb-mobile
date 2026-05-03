@@ -14,32 +14,33 @@ import {
 } from "react-native";
 import { useSWRConfig } from "swr";
 
-import Button from "../../../src/components/Button";
-import AddToWalletSection from "../../../src/components/cards/AddToWalletSection";
-import CardDetails from "../../../src/components/cards/CardDetails";
-import CardDisplay from "../../../src/components/cards/CardDisplay";
-import CardError from "../../../src/components/cards/CardError";
-import CardSkeleton from "../../../src/components/cards/CardSkeleton";
-import CardTransactions from "../../../src/components/cards/CardTransactions";
-import ActivateCardModal from "../../../src/components/cards/modals/ActivateCardModal";
-import useClient from "../../../src/lib/client";
-import useTransactions from "../../../src/lib/organization/useTransactions";
-import Card from "../../../src/lib/types/Card";
-import { OrganizationExpanded } from "../../../src/lib/types/Organization";
-import User from "../../../src/lib/types/User";
-import useAddToWallet from "../../../src/lib/useAddToWallet";
-import { useIsDark } from "../../../src/lib/useColorScheme";
-import { useOfflineSWR } from "../../../src/lib/useOfflineSWR";
-import useStripeCardDetails from "../../../src/lib/useStripeCardDetails";
-import { palette } from "../../../src/styles/theme";
+import Button from "@/components/Button";
+import AddToWalletSection from "@/components/cards/AddToWalletSection";
+import CardDetails from "@/components/cards/CardDetails";
+import CardDisplay from "@/components/cards/CardDisplay";
+import CardError from "@/components/cards/CardError";
+import CardSkeleton from "@/components/cards/CardSkeleton";
+import CardTransactions from "@/components/cards/CardTransactions";
+import ActivateCardModal from "@/components/cards/modals/ActivateCardModal";
+import useClient from "@/lib/client";
+import useTransactions from "@/lib/organization/useTransactions";
+import Card from "@/lib/types/Card";
+import { OrganizationExpanded } from "@/lib/types/Organization";
+import User from "@/lib/types/User";
+import { CardPolicy } from "@/lib/policies";
+import useAddToWallet from "@/lib/useAddToWallet";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import useStripeCardDetails from "@/lib/useStripeCardDetails";
+import { palette } from "@/styles/theme";
 import {
   handleActivate,
   handleBurnCard,
   toggleCardDetails,
   toggleCardFrozen,
-} from "../../../src/utils/cardActions";
-import * as Haptics from "../../../src/utils/haptics";
-import { normalizeSvg } from "../../../src/utils/util";
+} from "@/utils/cardActions";
+import * as Haptics from "@/utils/haptics";
+import { normalizeSvg } from "@/utils/util";
 
 export default function CardPage() {
   const { card: _card } = useLocalSearchParams();
@@ -77,11 +78,9 @@ export default function CardPage() {
     loading: detailsLoading,
   } = useStripeCardDetails(card?.id || "");
 
-  const isCardholder = user?.id == card?.user?.id;
-  const isManagerOrAdmin =
-    organization?.users.some(
-      (orgUser) => orgUser.id === user?.id && orgUser.role === "manager",
-    ) || user?.admin;
+  const isCardholder = user?.id === card?.user?.id;
+  const cardPolicy =
+    card && organization ? new CardPolicy(user ?? null, card, organization) : null;
   const isVirtualCard = card?.type === "virtual";
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
@@ -102,7 +101,7 @@ export default function CardPage() {
   const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
   const isDark = useIsDark();
-  const wallet = useAddToWallet(card?.id || card?.id || "", {
+  const wallet = useAddToWallet(card?.id || "", {
     isVirtualCard: !!isVirtualCard,
     isCardholder: !!isCardholder,
   });
@@ -159,7 +158,6 @@ export default function CardPage() {
     navigation.setOptions({ title: cardName });
   }, [cardName, navigation, themeColors.text]);
 
-  // Set up wallet icon in header for Android
   useEffect(() => {
     if (
       Platform.OS === "android" &&
@@ -237,10 +235,8 @@ export default function CardPage() {
       status: updatedStatus,
     } as Card;
 
-    // Use bound mutate for card - optimistically update then revalidate
     mutateCard(updatedCard, { revalidate: true });
 
-    // Update user/cards list
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
@@ -282,13 +278,11 @@ export default function CardPage() {
     ).start();
   }, [skeletonAnim]);
 
-  // Create the interpolated background color for skeleton animation
   const skeletonBackground = skeletonAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["rgba(0, 0, 0, 0.03)", "rgba(0, 0, 0, 0.12)"],
   });
 
-  // Create a shared skeleton style for reuse
   const createSkeletonStyle = (
     width: number,
     height: number,
@@ -341,7 +335,6 @@ export default function CardPage() {
   function getCardActionButtons() {
     const buttons = [];
 
-    // Add activate/freeze button
     if (!isVirtualCard && card?.status === "inactive") {
       buttons.push(
         <Button
@@ -360,7 +353,7 @@ export default function CardPage() {
           Activate Card
         </Button>,
       );
-    } else if (isCardholder || isManagerOrAdmin) {
+    } else if (cardPolicy?.freeze() || cardPolicy?.defrost()) {
       buttons.push(
         <Button
           key="freeze"
@@ -390,7 +383,7 @@ export default function CardPage() {
     if (
       isVirtualCard &&
       (card?.status as Card["status"]) !== "canceled" &&
-      isCardholder
+      cardPolicy?.ephemeralKeys()
     ) {
       buttons.push(
         <Button
@@ -416,7 +409,7 @@ export default function CardPage() {
       );
     }
 
-    if (isManagerOrAdmin || isCardholder) {
+    if (cardPolicy?.cancel()) {
       buttons.push(
         <Button
           icon="fire"

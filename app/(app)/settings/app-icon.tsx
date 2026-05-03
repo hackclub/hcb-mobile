@@ -112,7 +112,6 @@ export default function Page() {
     try {
       await setAlternateAppIcon(configIconName);
       setCurrentIcon(iconName);
-      console.log(`Successfully set icon to: ${configIconName}`);
     } catch (error) {
       console.error(`Failed to set icon:`, error);
     }

@@ -31,6 +31,7 @@ import Card from "@/lib/types/Card";
 import GrantCardType from "@/lib/types/GrantCard";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
+import { CardGrantPolicy, CardPolicy } from "@/lib/policies";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
@@ -92,10 +93,12 @@ export default function Page() {
   } = useStripeCardDetails(card?.id || "");
 
   const isCardholder = user?.id === card?.user?.id;
-  const isManagerOrAdmin =
-    organization?.users.some(
-      (orgUser) => orgUser.id === user?.id && orgUser.role === "manager",
-    ) || user?.admin;
+  const grantPolicy =
+    grantCard && organization
+      ? new CardGrantPolicy(user ?? null, grantCard, organization)
+      : null;
+  const cardPolicy =
+    card && organization ? new CardPolicy(user ?? null, card, organization) : null;
   const isVirtualCard = card?.type === "virtual";
 
   const [isActivating, setIsActivating] = useState(false);
@@ -327,7 +330,6 @@ export default function Page() {
     ...extraStyles,
   });
 
-  // Handlers
   const handleActivateGrant = async () => {
     setIsActivating(true);
     try {
@@ -360,10 +362,8 @@ export default function Page() {
       status: updatedStatus,
     } as Card;
 
-    // Use bound mutate for card - optimistically update then revalidate
     mutateCard(updatedCard, { revalidate: true });
 
-    // Update user/cards list
     mutate(
       "user/cards",
       (list: Card[] | undefined) =>
@@ -418,7 +418,7 @@ export default function Page() {
   function getGrantCardActionButtons() {
     const buttons = [];
 
-    if (isManagerOrAdmin && card?.status !== "inactive") {
+    if ((cardPolicy?.freeze() || cardPolicy?.defrost()) && card?.status !== "inactive") {
       buttons.push(
         <Button
           key="freeze"
@@ -448,7 +448,7 @@ export default function Page() {
     if (
       isVirtualCard &&
       (card?.status as Card["status"]) !== "canceled" &&
-      isCardholder
+      cardPolicy?.ephemeralKeys()
     ) {
       buttons.push(
         <Button
@@ -474,7 +474,7 @@ export default function Page() {
       );
     }
 
-    if (isManagerOrAdmin && canTopupCard(card)) {
+    if (grantPolicy?.topup() && canTopupCard(card)) {
       buttons.push(
         <Button
           key="topup"
@@ -493,7 +493,7 @@ export default function Page() {
       );
     }
 
-    if (isManagerOrAdmin) {
+    if (grantPolicy?.toggleOneTimeUse()) {
       buttons.push(
         <Button
           icon="private"
@@ -518,7 +518,7 @@ export default function Page() {
       );
     }
 
-    if (isManagerOrAdmin) {
+    if (grantPolicy?.editPurpose()) {
       buttons.push(
         <Button
           icon="edit"
@@ -537,7 +537,7 @@ export default function Page() {
       );
     }
 
-    if (card?.status !== "canceled" && (isCardholder || isManagerOrAdmin)) {
+    if (card?.status !== "canceled" && grantPolicy?.cancel()) {
       buttons.push(
         <Button
           key="grant"

@@ -195,7 +195,6 @@ export default function InvitePage() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Email */}
         <View style={{ gap: 8 }}>
           <FieldLabel>Email</FieldLabel>
           <TextInput
@@ -223,13 +222,11 @@ export default function InvitePage() {
           )}
         </View>
 
-        {/* Role */}
         <View style={{ gap: 8 }}>
           <FieldLabel>Role</FieldLabel>
           <RoleToggle value={role} onChange={setRole} />
         </View>
 
-        {/* Spending controls — member only */}
         {role === "member" && (
           <View style={{ gap: 8 }}>
             <FieldLabel>Spending Controls</FieldLabel>

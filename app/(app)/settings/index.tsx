@@ -141,11 +141,6 @@ export default function SettingsPage() {
       (async () => {
         try {
           const shouldBeDark = deviceColorScheme === "dark";
-          console.log("System theme update:", {
-            theme,
-            deviceColorScheme,
-            shouldBeDark,
-          });
           await SystemUI.setBackgroundColorAsync(
             shouldBeDark ? "#252429" : "white",
           );
@@ -175,13 +170,6 @@ export default function SettingsPage() {
           value === "dark" ||
           (value === "system" && currentDeviceTheme === "dark");
 
-        console.log("Theme change:", {
-          value,
-          deviceColorScheme,
-          currentDeviceTheme,
-          shouldBeDark,
-        });
-
         await SystemUI.setBackgroundColorAsync(
           shouldBeDark ? "#252429" : "white",
         );
@@ -199,7 +187,6 @@ export default function SettingsPage() {
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
       if (!hasHardware || !isEnrolled) {
-        console.log("Biometric authentication not available");
         return;
       }
 
@@ -211,7 +198,6 @@ export default function SettingsPage() {
       });
 
       if (!result.success) {
-        console.log("Biometric authentication failed or cancelled");
         return;
       }
 
@@ -241,8 +227,8 @@ export default function SettingsPage() {
             },
             discovery,
           );
-        } catch (revokeError) {
-          console.warn("Failed to revoke token during sign out", revokeError);
+        } catch {
+          // Token revocation is non-critical; continue sign-out regardless
         }
       }
 
@@ -265,7 +251,7 @@ export default function SettingsPage() {
       style={{ backgroundColor: colors.background }}
     >
       <View style={{ padding: 20, paddingTop: 0 }}>
-        {/* Profile Card */}
+
         <View
           style={{
             flexDirection: "row",
@@ -311,7 +297,7 @@ export default function SettingsPage() {
           </View>
         </View>
 
-        {/* Theme Section */}
+
         <Text
           style={{
             fontSize: 13,
@@ -387,7 +373,7 @@ export default function SettingsPage() {
           </View>
         </View>
 
-        {/* App Settings Section */}
+
         <Text
           style={{
             fontSize: 13,
@@ -557,7 +543,7 @@ export default function SettingsPage() {
           )}
         </View>
 
-        {/* Support & Feedback Section */}
+
         <Text
           style={{
             fontSize: 13,
@@ -706,7 +692,7 @@ export default function SettingsPage() {
           )}
         </View>
 
-        {/* Legal & Info Section */}
+
         <Text
           style={{
             fontSize: 13,
@@ -789,7 +775,7 @@ export default function SettingsPage() {
           </Pressable>
         </View>
 
-        {/* Sign Out Button */}
+
         <Button
           style={{
             marginTop: 12,
@@ -807,7 +793,7 @@ export default function SettingsPage() {
         {user?.auditor && <DevToolsButton colors={colors} />}
       </View>
 
-      {/* Feedback Modal */}
+
       <FeedbackModal
         visible={feedbackModalVisible}
         onClose={() => setFeedbackModalVisible(false)}

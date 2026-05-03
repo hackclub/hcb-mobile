@@ -1,4 +1,3 @@
-/** eslint-disable react/prop-types */
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@react-navigation/native";
@@ -38,6 +37,7 @@ import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { TransactionPolicy } from "@/lib/policies";
 import { palette } from "@/styles/theme";
 
 export default function TransactionPage({
@@ -90,9 +90,10 @@ export default function TransactionPage({
     `organizations/${orgId || transaction?.organization?.id}`,
   );
   const { data: user } = useOfflineSWR<User>(`user`);
-  const isUserInOrganizationOrAuditor = useMemo(() => {
-    return organization?.users.some((u) => u.id === user?.id) || user?.auditor;
-  }, [organization, user]);
+  const canComment = useMemo(() => {
+    if (!transaction || !organization) return false;
+    return new TransactionPolicy(user ?? null, transaction, organization).show();
+  }, [transaction, organization, user]);
   const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
 
@@ -198,9 +199,7 @@ export default function TransactionPage({
           </Text>
         </AdminTools>
 
-        {
-          /* prettier-ignore */
-          match(transaction)
+        {match(transaction)
             .with({ card_charge: P.any }, (tx) => <CardChargeTransaction transaction={tx} {...transactionViewProps} />)
             .with({ check: P.any }, (tx) => <CheckTransaction transaction={tx} {...transactionViewProps} />)
             .with({ transfer: P.any }, (tx) => <TransferTransaction transaction={tx} {...transactionViewProps} />)
@@ -222,7 +221,7 @@ export default function TransactionPage({
               ))}
             </View>
           )}
-          {isUserInOrganizationOrAuditor && (
+          {canComment && (
             <CommentField orgId={currentOrgId} transactionId={txnId} />
           )}
         </View>

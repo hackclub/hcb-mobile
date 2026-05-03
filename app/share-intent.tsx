@@ -105,10 +105,6 @@ export default function Page() {
 
   useEffect(() => {
     if (validImages.length > 0 && assignments.length !== validImages.length) {
-      console.log("Syncing assignments array with validImages:", {
-        validImagesLength: validImages.length,
-        assignmentsLength: assignments.length,
-      });
       setAssignments(
         validImages.map((uri) => ({
           imageUri: uri,
@@ -120,21 +116,7 @@ export default function Page() {
   }, [validImages, assignments.length]);
 
   useEffect(() => {
-    console.log("=== SHARE INTENT MODAL DEBUG ===");
-    console.log("Modal opened with params:", {
-      imagesCount: validImages.length,
-      images: validImages,
-      missingTransactionsCount: validTransactions.length,
-      missingTransactions: validTransactions.map((t) => ({
-        id: t.id,
-        memo: t.memo,
-        amount: t.amount_cents,
-        org: t.organization.name,
-      })),
-    });
-
     if (validImages.length === 0) {
-      console.warn("No valid images provided to ShareIntentModal");
       showAlert(
         "Invalid Share Intent",
         "No valid images were provided. Please try sharing again.",
@@ -234,7 +216,6 @@ export default function Page() {
       type: file.mimeType || "image/jpeg",
     } as unknown as Blob);
 
-    // Only append transaction_id if it's provided (for receipt bin uploads, it won't be)
     if (transactionId && transactionId.trim() !== "") {
       body.append("transaction_id", transactionId);
     }
@@ -250,7 +231,6 @@ export default function Page() {
     );
     const receiptBinAssignments = assignments.filter((a) => a.isReceiptBin);
 
-    // If no assignments at all, show error
     if (
       transactionAssignments.length === 0 &&
       receiptBinAssignments.length === 0
@@ -265,7 +245,6 @@ export default function Page() {
     setUploading(true);
 
     try {
-      // Upload to transactions
       for (const assignment of transactionAssignments) {
         if (!assignment.transactionId || !assignment.orgId) continue;
 
@@ -280,7 +259,6 @@ export default function Page() {
         );
       }
 
-      // Upload to receipt bin
       for (const assignment of receiptBinAssignments) {
         await uploadFile(
           {
@@ -288,8 +266,8 @@ export default function Page() {
             fileName: `receipt_${Date.now()}.jpg`,
             mimeType: "image/jpeg",
           },
-          "", // No org ID for receipt bin upload
-          "", // No transaction ID for receipt bin upload
+          "",
+          "",
         );
       }
 
@@ -369,7 +347,6 @@ export default function Page() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
-      {/* Header */}
       <View
         style={{
           padding: 20,
@@ -427,7 +404,6 @@ export default function Page() {
       </View>
 
       <ScrollView style={{ flex: 1, padding: 20 }}>
-        {/* Images Section */}
         <View style={{ marginBottom: 30 }}>
           <Text
             style={{
@@ -448,12 +424,7 @@ export default function Page() {
             {validImages.map((imageUri: string, index: number) => {
               const assignment = getAssignmentForImage(imageUri);
 
-              if (!assignment) {
-                console.warn(
-                  `No assignment found for image ${index}: ${imageUri}`,
-                );
-                return null;
-              }
+              if (!assignment) return null;
 
               const assignedTransaction =
                 getTransactionForAssignment(assignment);
@@ -470,7 +441,6 @@ export default function Page() {
                     if (isSelected) {
                       setSelectedImageIndex(null);
                     } else if (assignedTransaction) {
-                      // If image is already assigned, unassign it and select it
                       handleUnassignImage(index);
                       setSelectedImageIndex(index);
                     } else {
@@ -550,7 +520,6 @@ export default function Page() {
           </ScrollView>
         </View>
 
-        {/* Missing Transactions Section */}
         <View>
           <Text
             style={{
@@ -588,7 +557,6 @@ export default function Page() {
             )}
           </Text>
 
-          {/* Receipt Bin Option - Always shown */}
           {(() => {
             const receiptBinAssignments = assignments.filter(
               (a) => a.isReceiptBin,
@@ -718,7 +686,6 @@ export default function Page() {
             );
           })()}
 
-          {/* Regular Transactions */}
           {validTransactions.map((transaction) => {
             const assignedImages = assignments.filter(
               (a) => a.transactionId === transaction.id,

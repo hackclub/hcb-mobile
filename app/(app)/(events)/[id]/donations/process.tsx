@@ -27,7 +27,6 @@ import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
-// Component for QR Code display
 function QRCodeCard({
   donationUrl,
   amount,
@@ -88,7 +87,6 @@ function QRCodeCard({
   );
 }
 
-// Component for status icons with background ring
 function StatusIcon({ status }: { status: string }) {
   const isDark = useIsDark();
   const color = status === "success" ? palette.success : palette.primary;
@@ -122,7 +120,6 @@ function StatusIcon({ status }: { status: string }) {
   );
 }
 
-// Component for button groups
 function ButtonGroup({
   children,
   style,
@@ -149,7 +146,6 @@ function ButtonGroup({
   );
 }
 
-// Simple wrapper to maintain consistent spacing for ProcessDonation buttons
 function ActionButton({
   onPress,
   children,
@@ -243,7 +239,6 @@ export default function Page() {
     });
   }, [showQR, status, navigation, theme.colors.text]);
 
-  // Clear payment data when leaving the screen
   useEffect(() => {
     return () => {
       clearPaymentData();
@@ -480,7 +475,6 @@ export default function Page() {
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            {/* Tap to Pay Icon */}
             <View
               style={{
                 width: 100,

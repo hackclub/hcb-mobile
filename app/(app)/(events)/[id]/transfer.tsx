@@ -67,47 +67,12 @@ export default function Page() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior for platform
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ flexGrow: 1, padding: 20 }}
       >
-        {/* Transfer Type Buttons */}
-        {/* <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
-          <Button
-            style={{
-              flex: 1,
-              backgroundColor: transferType === "hcb" ? palette.primary : palette.slate,
-              borderTopWidth: 0,
-            }}
-            onPress={() => setTransferType("hcb")}
-          >
-            HCB
-          </Button>
-          <Button
-            style={{
-              flex: 1,
-              backgroundColor: transferType === "ach" ? palette.primary : palette.slate,
-              borderTopWidth: 0,
-            }}
-            onPress={() => setTransferType("ach")}
-          >
-            ACH
-          </Button>
-          <Button
-            style={{
-              flex: 1,
-              backgroundColor: transferType === "check" ? palette.primary : palette.slate,
-              borderTopWidth: 0,
-            }}
-            onPress={() => setTransferType("check")}
-          >
-            Check
-          </Button>
-        </View> */}
-
-        {/* Display transfer screen based on transfer type */}
         {transferType === "hcb" && organization && (
           <DisbursementScreen organization={organization} />
         )}

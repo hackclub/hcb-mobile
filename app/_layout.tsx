@@ -86,7 +86,6 @@ export const setupBackgroundUpdates = async () => {
 
 setupBackgroundUpdates();
 
-// Routing guard component that handles navigation based on auth state
 function RootLayoutNav() {
   const { tokenResponse } = useContext(AuthContext);
   const readyContext = useContext(ReadyContext);
@@ -96,25 +95,22 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (!isReady) return;
+    console.log(tokenResponse?.accessToken)
 
-    // Only navigate if auth state has changed to avoid infinite redirects
+    // Avoid infinite redirects when auth state hasn't changed
     if (lastAuthState.current === hasToken) {
       return;
     }
 
     lastAuthState.current = hasToken;
-    console.log(tokenResponse?.accessToken)
 
-    // If user has a token, navigate to the app
     if (hasToken) {
       router.replace("/(app)/(events)/");
     } else {
-      // If no token, navigate to login
       router.replace("/login");
     }
   }, [hasToken, isReady]);
 
-  // Show nothing while initializing
   if (!isReady) {
     return null;
   }

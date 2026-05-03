@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useTheme } from "@react-navigation/native";
 import { Text } from "components/Text";
-import { format, formatDistanceToNowStrict, parseISO } from "date-fns";
+import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { router, useLocalSearchParams } from "expo-router";
 import { capitalize } from "lodash";
 import { useCallback, useMemo, useState } from "react";
@@ -20,6 +20,7 @@ import Button from "@/components/Button";
 import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import { OrgPolicy } from "@/lib/policies";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import User, { OrgUser } from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -75,7 +76,6 @@ function MemberCard({
         gap: 10,
       }}
     >
-      {/* Top row: avatar + name/role + actions */}
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <UserAvatar user={user} size={52} />
         <View style={{ flex: 1 }}>
@@ -121,7 +121,6 @@ function MemberCard({
         )}
       </View>
 
-      {/* Email */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
         <Ionicons name="mail-outline" size={13} color={subColor} />
         <Text
@@ -132,7 +131,6 @@ function MemberCard({
         </Text>
       </View>
 
-      {/* Joined */}
       <Text style={{ color: subColor, fontSize: 12 }}>
         Joined{" "}
         {formatDistanceToNowStrict(parseISO(user.joined_at), {
@@ -248,11 +246,9 @@ export default function Page() {
 
   const { data: currentUser } = useOfflineSWR<User>("user");
 
-  const currentUserRole = organization?.users.find(
-    (u) => u.id === currentUser?.id,
-  )?.role;
-  const canManage =
-    currentUserRole === "manager" || currentUser?.admin === true;
+  const canManage = organization
+    ? new OrgPolicy(currentUser ?? null, organization).canInviteUser()
+    : false;
 
   const {
     data: invitations,
@@ -260,7 +256,9 @@ export default function Page() {
     isLoading: invitationsLoading,
   } = useOfflineSWR<OrgInvitation[]>(
     canManage ? `organizations/${id}/invitations` : null,
-  );
+    );
+
+  console.log(invitations)
 
   useFocusEffect(
     useCallback(() => {
@@ -334,11 +332,7 @@ export default function Page() {
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      users = users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(q)
-          // || u.email.toLowerCase().includes(q),
-      );
+      users = users.filter((u) => u.name.toLowerCase().includes(q));
     }
     return users;
   }, [organization, activeTab, search]);
@@ -384,7 +378,6 @@ export default function Page() {
         if (item.type === "header") {
           return (
             <View style={{ gap: 12, paddingTop: 4 }}>
-              {/* Title row */}
               <View
                 style={{
                   flexDirection: "row",
@@ -442,7 +435,6 @@ export default function Page() {
                 )}
               </View>
 
-              {/* Search */}
               <View
                 style={{
                   flexDirection: "row",
@@ -478,7 +470,6 @@ export default function Page() {
                 )}
               </View>
 
-              {/* Filter tabs */}
               <View style={{ flexDirection: "row", gap: 6 }}>
                 {TABS.map((tab) => (
                   <Pressable

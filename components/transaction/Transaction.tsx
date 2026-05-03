@@ -1,0 +1,347 @@
+import { faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useTheme } from "@react-navigation/native";
+import Icon from "@thedev132/hackclub-icons-rn";
+import { Text } from "components/Text";
+import { LinearGradient } from "expo-linear-gradient";
+import { memo } from "react";
+import { StyleSheet, View, ViewProps } from "react-native";
+import { SvgXml } from "react-native-svg";
+import { match } from "ts-pattern";
+
+import {
+  TransactionCardCharge,
+  TransactionType,
+  TransactionWithoutId,
+} from "@/lib/types/Transaction";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useMerchantIcon } from "@/lib/useMerchantIcon";
+import { palette } from "@/styles/theme";
+import { renderMoney } from "@/utils/util";
+import WiseIcon from "@/components/icons/WiseIcon";
+import UserAvatar from "@/components/UserAvatar";
+
+function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
+  switch (code) {
+    case TransactionType.Donation:
+    case TransactionType.PartnerDonation:
+      return "support";
+    case TransactionType.Check:
+    case TransactionType.IncreaseCheck:
+      return "email";
+    case TransactionType.CheckDeposit:
+      return "briefcase";
+    case TransactionType.Disbursement:
+      if (transaction.memo.startsWith("Grant to")) {
+        return "purse-fill";
+      } else if (transaction.memo == "💰 Hackathon grant from Hack Club") {
+        return "purse";
+      }
+      if (transaction.amount_cents > 0) {
+        return "door-enter";
+      } else {
+        return "door-leave";
+      }
+    case TransactionType.StripeCard:
+    case TransactionType.StripeForceCapture:
+      if (transaction.amount_cents > 0) {
+        return "view-reload";
+      }
+      return "card";
+    case TransactionType.BankFee:
+      return "minus";
+    case TransactionType.FeeRevenue:
+      return "plus";
+    case TransactionType.Invoice:
+      return "briefcase";
+    case TransactionType.ExpensePayout:
+      return "attachment";
+    case TransactionType.Wire:
+      return "web";
+    case TransactionType.Paypal:
+      return "paypal";
+    case TransactionType.Wise:
+      return "wise";
+    case TransactionType.AchTransfer:
+      return "payment-transfer";
+    default:
+      return "payment-docs";
+  }
+}
+
+function TransactionIcon({
+  transaction,
+  hideAvatar,
+  hideIcon,
+}: {
+  transaction: TransactionWithoutId;
+  hideAvatar?: boolean;
+  hideIcon?: boolean;
+}) {
+  if (hideIcon) return null;
+
+  const iconName = transactionIcon(transaction);
+  const iconColor =
+    transaction.appearance === "hackathon_grant"
+      ? palette.black
+      : palette.muted;
+
+  if (!hideAvatar && transaction.code === TransactionType.StripeCard) {
+    return (
+      <UserAvatar
+        user={(transaction as TransactionCardCharge).card_charge.card.user}
+        size={20}
+      />
+    );
+  }
+
+  if (iconName === "paypal") {
+    return <FontAwesomeIcon color={iconColor} icon={faPaypal} size={20} />;
+  }
+
+  if (iconName === "wise") {
+    return <WiseIcon color={iconColor} size={22} />;
+  }
+
+  return <Icon glyph={iconName} color={iconColor} size={22} />;
+}
+
+function Transaction({
+  transaction,
+  top = false,
+  bottom = false,
+  hideAvatar,
+  hideIcon,
+  hidePendingLabel,
+  hideMissingReceipt,
+  showMerchantIcon,
+  style,
+}: ViewProps & {
+  transaction: TransactionWithoutId;
+  orgId: string;
+  top?: boolean;
+  bottom?: boolean;
+  hideAvatar?: boolean;
+  hideIcon?: boolean;
+  hidePendingLabel?: boolean;
+  hideMissingReceipt?: boolean;
+  showMerchantIcon?: boolean;
+}) {
+  const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
+
+  const networkId =
+    transaction.code === TransactionType.StripeCard
+      ? (transaction as TransactionCardCharge).card_charge?.merchant?.network_id
+      : undefined;
+  const autoMerchantIcon = useMerchantIcon(networkId);
+
+  const finalMerchantIcon = showMerchantIcon ? autoMerchantIcon : null;
+
+  const backgroundColor = transaction.reversed
+    ? isDark
+      ? "#252429"
+      : "#EAEDF1"
+    : transaction.declined || transaction.amount_cents < 0
+      ? isDark
+        ? "#351921"
+        : "#F9E3E7"
+      : transaction.amount_cents > 0
+        ? isDark
+          ? "#234740"
+          : "#d7f7ee"
+        : themeColors.card;
+
+  const textColor =
+    transaction.appearance === "hackathon_grant"
+      ? palette.black
+      : transaction.pending
+        ? palette.muted
+        : themeColors.text;
+
+  const amountColor =
+    transaction.appearance === "hackathon_grant"
+      ? palette.black
+      : themeColors.text;
+
+  const badgeBase = {
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 4,
+  } as const;
+
+  const reversedBadgeStyle = {
+    ...badgeBase,
+    backgroundColor: isDark ? "#2A394C" : "#D5E0EF",
+    borderWidth: 1,
+    borderColor: isDark ? "#2A394C" : "#D5E0EF",
+  };
+
+  const declinedBadgeStyle = {
+    ...badgeBase,
+    backgroundColor: isDark ? "#401A23" : "#891A2A",
+    borderWidth: 1,
+    borderColor: isDark ? "#401A23" : "#891A2A",
+  };
+
+  const pendingBadgeStyle = {
+    ...badgeBase,
+    borderWidth: 1,
+    borderStyle: "dashed" as const,
+    borderColor: "#8492a6",
+  };
+
+  const reversedTextStyle = {
+    color: isDark ? "#338eda" : "#D5E0EF",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
+
+  const declinedTextStyle = {
+    color: isDark ? "#891A2A" : "#fff",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
+
+  const pendingTextStyle = {
+    color: "#8492a6",
+    fontSize: 12,
+    fontWeight: "bold" as const,
+  };
+
+  return (
+    <View
+      style={StyleSheet.compose(
+        {
+          paddingVertical: 14,
+          paddingHorizontal: 12,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          backgroundColor,
+          borderTopLeftRadius: top ? 8 : 0,
+          borderTopRightRadius: top ? 8 : 0,
+          borderBottomLeftRadius: bottom ? 8 : 0,
+          borderBottomRightRadius: bottom ? 8 : 0,
+          overflow: "hidden",
+        },
+        style,
+      )}
+    >
+      {transaction.appearance === "hackathon_grant" && (
+        <LinearGradient
+          colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        />
+      )}
+
+      {finalMerchantIcon ? (
+        <SvgXml
+          xml={finalMerchantIcon}
+          width={20}
+          height={20}
+          fill={palette.muted}
+        />
+      ) : (
+        <TransactionIcon
+          transaction={transaction}
+          hideAvatar={hideAvatar}
+          hideIcon={hideIcon}
+        />
+      )}
+
+      {!hidePendingLabel &&
+        (transaction.reversed ||
+          transaction.declined ||
+          transaction.pending) && (
+          <View
+            style={
+              transaction.reversed
+                ? reversedBadgeStyle
+                : transaction.declined
+                  ? declinedBadgeStyle
+                  : pendingBadgeStyle
+            }
+          >
+            <Text
+              style={
+                transaction.reversed
+                  ? reversedTextStyle
+                  : transaction.declined
+                    ? declinedTextStyle
+                    : pendingTextStyle
+              }
+            >
+              {transaction.reversed
+                ? "Reversed"
+                : transaction.declined
+                  ? "Declined"
+                  : "Pending"}
+            </Text>
+          </View>
+        )}
+      <Text
+        numberOfLines={1}
+        style={{
+          fontSize: 14,
+          color: textColor,
+          overflow: "hidden",
+          flex: 1,
+        }}
+      >
+        {match(transaction)
+          .with(
+            { appearance: "hackathon_grant", has_custom_memo: false },
+            () => "💰 Hackathon grant",
+          )
+          .otherwise((tx) => tx.memo)
+          .replaceAll(/\s{2,}/g, " ")}
+      </Text>
+      {transaction.missing_receipt && !hideMissingReceipt && (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            borderWidth: 1,
+            borderColor: "#ff8c37",
+            borderRadius: 20,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
+            marginRight: 4,
+            backgroundColor: isDark ? "#2E161D" : "#FBEAED",
+          }}
+        >
+          <Icon glyph="payment-docs" color="#ff8c37" size={18} />
+          <Text
+            style={{
+              color: "#ff8c37",
+              fontSize: 12,
+              // fontFamily: "monospace",
+              fontWeight: "bold",
+            }}
+          >
+            0
+          </Text>
+        </View>
+      )}
+      <Text
+        style={{
+          color: amountColor,
+        }}
+      >
+        {renderMoney(transaction.amount_cents)}
+      </Text>
+    </View>
+  );
+}
+
+export default memo(Transaction);

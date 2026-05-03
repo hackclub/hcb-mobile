@@ -11,7 +11,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   View,
 } from "react-native";
 
@@ -22,6 +21,7 @@ import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
+import { OrgPolicy } from "@/lib/policies";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import ITransaction from "@/lib/types/Transaction";
@@ -33,7 +33,6 @@ import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
 import { addPendingFeeToTransactions } from "@/utils/util";
 
-// --- 2x2 Grid Action Tile ---
 function ActionTile({
   icon,
   label,
@@ -85,7 +84,6 @@ function ActionTile({
   );
 }
 
-// --- Small horizontal chip ---
 function ActionChip({
   icon,
   label,
@@ -120,7 +118,6 @@ function ActionChip({
   );
 }
 
-// --- Section Card wrapper ---
 function SectionCard({
   title,
   onSeeAll,
@@ -175,7 +172,6 @@ function SectionCard({
   );
 }
 
-// --- Team Avatars Row ---
 function TeamAvatars({ users }: { users: OrgUser[] }) {
   const { colors: themeColors } = useTheme();
   const MAX_SHOWN = 8;
@@ -265,7 +261,6 @@ function RecentTransactionsSkeleton() {
         overflow: "hidden",
       }}
     >
-      {/* Title placeholder */}
       <View
         style={{
           paddingHorizontal: 16,
@@ -283,9 +278,7 @@ function RecentTransactionsSkeleton() {
           }}
         />
       </View>
-      {/* Divider under title */}
       <View style={{ height: 1, backgroundColor: dividerColor }} />
-      {/* Transaction row placeholders */}
       {[1, 2, 3, 4].map((item, index) => (
         <View key={item}>
           <Animated.View
@@ -380,21 +373,11 @@ export default function Page() {
     organizationId: organization?.id,
     enabled: !!(organization && !organization.playground_mode),
   });
-  const userinOrganization = useMemo(() => {
-    return (
-      organization &&
-      "users" in organization &&
-      organization.users.some((u) => u.id === user?.id)
-    );
+  const orgPolicy = useMemo(() => {
+    if (!organization || !("users" in organization)) return null;
+    return new OrgPolicy(user ?? null, organization as OrganizationExpanded);
   }, [organization, user]);
-  const playgroundMode = useMemo(
-    () => organization?.playground_mode,
-    [organization],
-  );
-  const donationPageAvailable = useMemo(
-    () => organization?.donation_page_available,
-    [organization],
-  );
+  const playgroundMode = organization?.playground_mode;
   const isAccessDenied = useMemo(
     () => organizationError?.toString().includes("403"),
     [organizationError],
@@ -424,10 +407,9 @@ export default function Page() {
         );
         if (
           !hasSeenBanner &&
-          userinOrganization &&
-          !playgroundMode &&
+          orgPolicy?.donationPage() &&
+          orgPolicy?.show() &&
           supportsTapToPay &&
-          donationPageAvailable &&
           Platform.OS === "ios"
         ) {
           setShowTapToPayBanner(true);
@@ -442,14 +424,7 @@ export default function Page() {
       }
     };
     checkTapToPayBanner();
-  }, [
-    supportsTapToPay,
-    userinOrganization,
-    organization,
-    playgroundMode,
-    donationPageAvailable,
-    user,
-  ]);
+  }, [supportsTapToPay, orgPolicy, organization, user]);
 
   const handleDismissTapToPayBanner = async () => {
     try {
@@ -487,7 +462,6 @@ export default function Page() {
     return [];
   }, [organization]);
 
-  // Navigation helper
   const navTo = (path: string | null, extraParams?: Record<string, string>) => {
     if (!path) {
       showAlert("Coming Soon", "This feature is coming soon.");
@@ -520,7 +494,6 @@ export default function Page() {
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
     >
-      {/* Banners + Header */}
       <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 16 }}>
         {showTapToPayBanner && (
           <TapToPayBanner
@@ -536,7 +509,6 @@ export default function Page() {
         />
       </View>
 
-      {/* Chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -556,10 +528,7 @@ export default function Page() {
           label="Account Numbers"
           onPress={() => navTo("/(events)/[id]/account-numbers")}
         />
-        {supportsTapToPay &&
-          donationPageAvailable &&
-          userinOrganization &&
-          !playgroundMode && (
+        {supportsTapToPay && orgPolicy?.donationPage() && orgPolicy?.show() && (
             <ActionChip
               icon="support"
               label="Collect Donations"
@@ -569,7 +538,6 @@ export default function Page() {
       </ScrollView>
 
       <View style={{ paddingHorizontal: 20, gap: 16, paddingTop: 4, paddingBottom: 40 }}>
-        {/* Recent Transactions */}
         {isLoading ? (
           <RecentTransactionsSkeleton />
         ) : recentTransactions.length > 0 ? (
@@ -600,7 +568,6 @@ export default function Page() {
           !showMockData && <EmptyState isOnline={isOnline} />
         )}
 
-        {/* 2x2 Action Grid */}
         <View style={{ gap: 10 }}>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <ActionTile
@@ -641,7 +608,6 @@ export default function Page() {
           </View>
         </View>
 
-        {/* Team Members */}
         {teamUsers.length > 0 && (
           <SectionCard
             title="Team members"

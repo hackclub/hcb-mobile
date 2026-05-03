@@ -197,7 +197,7 @@ export default function NewCheckDepositPage() {
         params: { id, depositId: response.id },
       });
     } catch (err) {
-      console.error(err);
+      console.error("Check deposit submission failed", err);
       let message = "Please check your details and try again.";
       try {
         const body = await (err as { response?: Response }).response?.json();
@@ -243,7 +243,6 @@ export default function NewCheckDepositPage() {
           onPick={() => pickImage(setBack)}
         />
 
-        {/* Amount */}
         <View style={{ gap: 8 }}>
           <Text
             style={{

@@ -1,4 +1,4 @@
-import appIcons from "./src/lib/AppIconList";
+import appIcons from "./lib/AppIconList";
 const IS_DEV = false;
 
 export default {
@@ -183,19 +183,11 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
-      [
-        "expo-web-browser",
-        {
-          experimentalLauncherActivity: true,
-        },
-      ],
+      "expo-web-browser",
       "expo-background-task",
       [
         "@intercom/intercom-react-native",
         {
-          // appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
-          // androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
-          // iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
           useManualInit: true,
         },
       ],

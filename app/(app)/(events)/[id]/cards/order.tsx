@@ -2,8 +2,8 @@ import { useTheme } from "@react-navigation/native";
 import PageTitle from "components/PageTitle";
 import { Text } from "components/Text";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
@@ -27,7 +27,6 @@ import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
 
 export default function Page() {
-  const _navigation = useNavigation();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const [isLoading, setIsLoading] = useState(false);
@@ -103,27 +102,6 @@ export default function Page() {
 
     fetchOrganizations();
   }, [organizations, fetcher, currentUserId]);
-
-  // Filter organizations where user is NOT a reader
-  const _eligibleOrganizations = useMemo(() => {
-    if (!organizations || !currentUserId) return [];
-
-    return organizations
-      .filter((org) => org.playground_mode === false)
-      .filter((org) => {
-        const expandedOrg = expandedOrganizations[org.id];
-        if (!expandedOrg || !("users" in expandedOrg)) {
-          return true;
-        }
-
-        const userInOrg = expandedOrg.users.find((u) => u.id === currentUserId);
-        if (!userInOrg) {
-          return false;
-        }
-
-        return userInOrg.role !== "reader";
-      });
-  }, [organizations, expandedOrganizations, currentUserId]);
 
   const handleOrderCard = async () => {
     if (!user) return;

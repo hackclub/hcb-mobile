@@ -12,17 +12,17 @@ import ReorderableList, {
   useReorderableDrag,
 } from "react-native-reorderable-list";
 
-import CardListSkeleton from "@/../src/components/cards/CardListSkeleton";
-import { NoCardsEmptyState } from "@/../src/components/cards/NoCardsEmptyState";
-import PaymentCard from "@/../src/components/PaymentCard";
-import Card from "@/../src/lib/types/Card";
-import GrantCard from "@/../src/lib/types/GrantCard";
-import Organization from "@/../src/lib/types/Organization";
-import User from "@/../src/lib/types/User";
-import { useOfflineSWR } from "@/../src/lib/useOfflineSWR";
-import { palette } from "@/../src/styles/theme";
-import * as Haptics from "@/../src/utils/haptics";
-import { normalizeSvg } from "@/../src/utils/util";
+import CardListSkeleton from "@/components/cards/CardListSkeleton";
+import { NoCardsEmptyState } from "@/components/cards/NoCardsEmptyState";
+import PaymentCard from "@/components/PaymentCard";
+import Card from "@/lib/types/Card";
+import GrantCard from "@/lib/types/GrantCard";
+import Organization from "@/lib/types/Organization";
+import User from "@/lib/types/User";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { normalizeSvg } from "@/utils/util";
 
 type CardWithGrant = Card &
   Required<Pick<Card, "last4">> & { grant_id?: string };
@@ -75,7 +75,6 @@ export default function Page() {
     useOfflineSWR<Organization[]>("user/organizations");
   const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
-  // Cache for card patterns
   const [patternCache, setPatternCache] = useState<
     Record<
       string,
@@ -132,7 +131,6 @@ export default function Page() {
 
   useFocusEffect(
     useCallback(() => {
-      // Reload data when screen comes into focus
       const refreshData = async () => {
         await reloadCards();
         await reloadGrantCards();
@@ -146,9 +144,7 @@ export default function Page() {
   const [allCards, setAllCards] = useState<CardWithGrant[]>();
   const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
   const [refreshing, setRefreshing] = useState(false);
-  const usePanGesture = () =>
-    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
-  const panGesture = usePanGesture();
+  const panGesture = useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
 
   const handleOrderCard = useCallback(() => {
     const firstOrganizationId = organizations?.[0]?.id;

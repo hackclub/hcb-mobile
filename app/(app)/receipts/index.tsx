@@ -120,7 +120,6 @@ export default function Page() {
   const hcb = useClient();
   const uploadButtonRef = useRef(null);
 
-  // Group transactions by organization
   const groupedTransactions = useMemo(() => {
     if (!data?.data) return [];
 
@@ -205,7 +204,6 @@ export default function Page() {
                 textBody: "The receipt has been successfully deleted.",
               });
 
-              // Refresh the receipts list
               refreshReceipts();
             } catch (error) {
               console.error("Error deleting receipt", error, { receiptId });
@@ -289,7 +287,6 @@ export default function Page() {
     );
   }
 
-  // Create data structure for FlashList
   const listData = [
     { type: "receipts", data: receipts },
     { type: "upload", data: null },

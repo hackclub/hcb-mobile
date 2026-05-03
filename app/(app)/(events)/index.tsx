@@ -52,10 +52,6 @@ const EventItem = memo(
           fallbackData: JSON.stringify(organization),
         },
       });
-      // navigation.navigate("Event", {
-      //   orgId: organization.id,
-      //   organization,
-      // });
     }, [organization]);
 
     return (
@@ -132,7 +128,7 @@ export default function App() {
           setShareIntentProcessed(true);
           resetShareIntent();
         } else if (!missingReceiptError && !missingReceiptData) {
-          // Don't process yet, wait for data to load
+          // Wait for data to load before navigating
         } else {
           if (missingReceiptError) {
             console.error(
@@ -140,10 +136,8 @@ export default function App() {
               missingReceiptError,
               { context: { action: "missing_receipts_fetch" } },
             );
-            // Retry fetching missing receipts
             refetchMissingReceipts();
           } else {
-            // No missing receipts, but still show modal for receipt bin upload
             router.navigate({
               pathname: "/share-intent",
               params: {
@@ -204,7 +198,6 @@ export default function App() {
     fallbackData: [],
   });
 
-  // Filter grants that are active but don't have a card_id yet (need to create card)
   const grantInvites = useMemo(() => {
     return (
       grantCards?.filter(
@@ -216,9 +209,7 @@ export default function App() {
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();
   const scheme = useColorScheme();
-  const usePanGesture = () =>
-    useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
-  const panGesture = usePanGesture();
+  const panGesture = useMemo(() => Gesture.Pan().activateAfterLongPress(520), []);
 
   useEffect(() => {
     if (!organizations?.length) return;
@@ -266,7 +257,6 @@ export default function App() {
     [orgCount],
   );
 
-  // Show cached data even if there's an error
   if (error && !organizations?.length) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -299,7 +289,6 @@ export default function App() {
             setSortedOrgs(newOrgs);
           }
         }}
-        // scrollIndicatorInsets={{ bottom: tabBarHeight }}
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingBottom: 20,

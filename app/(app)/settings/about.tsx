@@ -69,7 +69,6 @@ export default function About() {
   const renderRow = (
     row: { label: string; value: string },
     isFirst: boolean,
-    _isLast: boolean,
   ) => (
     <View
       key={row.label}
@@ -165,13 +164,12 @@ export default function About() {
                 }}
               >
                 {section.rows.map((row, idx) =>
-                  renderRow(row, idx === 0, idx === section.rows.length - 1),
+                  renderRow(row, idx === 0),
                 )}
               </View>
             </View>
           ))}
 
-          {/* Tap to Pay Section */}
           <View>
             <Text
               style={{

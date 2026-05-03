@@ -127,13 +127,8 @@ export default function Login() {
       discovery,
     )
       .then((tokenResponse) => {
-        if (!tokenResponse.refreshToken) {
-          console.warn("No refresh token received from authorization server");
-        }
         setTokenResponse(tokenResponse, codeVerifier);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        // Don't manually navigate here - let the routing guard handle it
-        // router.replace("/");
       })
       .catch((error) => {
         console.error("Error exchanging code for token:", error);
@@ -200,7 +195,6 @@ export default function Login() {
           }}
         ></View>
 
-        {/* Main content */}
         <View
           style={{
             flexDirection: "column",
@@ -209,7 +203,6 @@ export default function Login() {
             paddingBottom: Platform.OS === "android" ? 20 : 8,
           }}
         >
-          {/* Logo */}
           <Animated.View
             style={[
               {
@@ -250,7 +243,6 @@ export default function Login() {
             </View>
           </Animated.View>
 
-          {/* Welcome text */}
           <View>
             <Text
               style={{
