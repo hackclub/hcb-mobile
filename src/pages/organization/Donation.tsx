@@ -292,7 +292,10 @@ export default function OrganizationDonationPage({
       discoveryMethod: "tapToPay",
     });
 
-    if (readers.error?.code === "AlreadyConnectedToReader") {
+    if (
+      (readers.error as { code?: string } | undefined)?.code ===
+      "AlreadyConnectedToReader"
+    ) {
       setLoadingConnectingReader(false);
       navigateToNewDonation();
       return;

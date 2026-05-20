@@ -75,8 +75,12 @@ export default function NewDonationPage({
 
   async function paymentIntent({ donation_id }: { donation_id: string }) {
     try {
-      const intent = await hcb.post(`organizations/${orgId}/donations/${donation_id}/payment_intent`).json() as { client_secret: string };
-      const { error, paymentIntent } = await retrievePaymentIntent(intent.client_secret)
+      const intent = (await hcb
+        .post(`organizations/${orgId}/donations/${donation_id}/payment_intent`)
+        .json()) as { client_secret: string };
+      const { error, paymentIntent } = await retrievePaymentIntent(
+        intent.client_secret,
+      );
 
       if (error) {
         console.error("retrievePaymentIntent error", error, {
