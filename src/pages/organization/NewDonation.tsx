@@ -75,9 +75,7 @@ export default function NewDonationPage({
 
   async function paymentIntent({ donation_id }: { donation_id: string }) {
     try {
-      const intent = await hcb.post('donations/payment_intent', {
-        json: { amount_cents: Number((value * 100).toFixed()), donation_id },
-      }).json() as { client_secret: string };
+      const intent = await hcb.post(`organizations/${orgId}/donations/${donation_id}/payment_intent`).json() as { client_secret: string };
       const { error, paymentIntent } = await retrievePaymentIntent(intent.client_secret)
 
       if (error) {
@@ -127,11 +125,11 @@ export default function NewDonationPage({
         console.error("collectPaymentMethod error", error, {
           context: { orgId, action: "collect_payment" },
         });
-        showAlert(
-          "Error collecting payment",
-          "Failed to collect payment. Please try again. Error: " +
-            error.message,
-        );
+        // showAlert(
+        //   "Error collecting payment",
+        //   "Failed to collect payment. Please try again. Error: " +
+        //     error.message,
+        // );
         return false;
       }
       output = (await confirmPayment(localPayment)) ?? false;

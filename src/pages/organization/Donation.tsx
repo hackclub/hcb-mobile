@@ -291,6 +291,11 @@ export default function OrganizationDonationPage({
     const readers = await discoverReaders({
       discoveryMethod: "tapToPay",
     });
+  
+    if (readers.error.code == "AlreadyConnectedToReader") {
+      navigateToNewDonation();
+    }
+
     const found = await waitForReader();
     if (found && readerRef.current) {
       const connected = await connectReader(readerRef.current);
