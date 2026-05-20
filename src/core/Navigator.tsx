@@ -211,15 +211,12 @@ export default function Navigator() {
                     accessibilityHint="Opens the HCB application form in browser"
                     accessibilityRole="button"
                     onPress={() => {
-                      WebBrowser.openBrowserAsync(
-                        "https://nonprofit.new",
-                        {
-                          presentationStyle:
-                            WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                          controlsColor: palette.primary,
-                          dismissButtonStyle: "cancel",
-                        },
-                      ).then(() => {
+                      WebBrowser.openBrowserAsync("https://nonprofit.new", {
+                        presentationStyle:
+                          WebBrowser.WebBrowserPresentationStyle.POPOVER,
+                        controlsColor: palette.primary,
+                        dismissButtonStyle: "cancel",
+                      }).then(() => {
                         mutate("user/organizations");
                         mutate("user/invitations");
                       });
