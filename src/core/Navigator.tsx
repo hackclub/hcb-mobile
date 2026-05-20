@@ -212,7 +212,7 @@ export default function Navigator() {
                     accessibilityRole="button"
                     onPress={() => {
                       WebBrowser.openBrowserAsync(
-                        "https://hackclub.com/hcb/apply",
+                        "https://nonprofit.new",
                         {
                           presentationStyle:
                             WebBrowser.WebBrowserPresentationStyle.POPOVER,
