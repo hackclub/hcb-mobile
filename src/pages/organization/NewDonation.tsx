@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -6,7 +7,7 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Text,
   View,
@@ -25,21 +26,38 @@ import { palette } from "../../styles/theme";
 
 type Props = NativeStackScreenProps<StackParamList, "NewDonation">;
 
+const formatPrefillAmount = (cents?: number) => {
+  if (cents === undefined || !Number.isFinite(cents) || cents <= 0) {
+    return "$";
+  }
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
 export default function NewDonationPage({
   route: {
-    params: { orgId, orgSlug },
+    params: {
+      orgId,
+      orgSlug,
+      amount: prefillAmount,
+      name: prefillName,
+      email: prefillEmail,
+      message: prefillMessage,
+      goods: prefillGoods,
+    },
   },
   navigation,
 }: Props) {
   const { colors } = useTheme();
   const hcb = useClient();
 
-  const [amount, setAmount] = useState("$");
+  const [amount, setAmount] = useState(formatPrefillAmount(prefillAmount));
   const value = parseFloat(amount.replace("$", "0"));
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isTaxDeductable, setIsTaxDeductable] = useState(false);
+  const [name, setName] = useState(prefillName ?? "");
+  const [email, setEmail] = useState(prefillEmail ?? "");
+  const [donationMessage, setDonationMessage] = useState(prefillMessage ?? "");
+  const [isTaxDeductable, setIsTaxDeductable] = useState(prefillGoods ?? false);
   const emailRef = useRef<TextInput>(null);
+  const messageRef = useRef<TextInput>(null);
 
   const {
     retrievePaymentIntent,
@@ -59,7 +77,8 @@ export default function NewDonationPage({
           amount_cents: value * 100,
           name,
           email,
-          tax_deductable: isTaxDeductable,
+          message: donationMessage,
+          tax_deductible: isTaxDeductable,
         },
       });
       const data = (await response.json()) as { id: string };
@@ -97,6 +116,7 @@ export default function NewDonationPage({
         name,
         email,
         slug: orgSlug || "",
+        message: donationMessage,
       });
       return paymentIntent;
     } catch (error) {
@@ -179,6 +199,61 @@ export default function NewDonationPage({
   // Dev mode check
   const isDevMode = __DEV__ && !connectedReader;
   const bottomTabBarHeight = useBottomTabBarHeight();
+
+  const handleCreateDonation = async () => {
+    if (value <= 0) {
+      showAlert("Error creating donation", "Amount must be greater than 0.");
+      return;
+    }
+    if (isDevMode) {
+      // In dev mode, navigate with mock payment data
+      navigation.navigate("ProcessDonation", {
+        orgId,
+        payment: {
+          amount: Math.round(value * 100),
+        } as PaymentIntent.Type,
+        collectPayment: async () => {
+          // Mock payment function - simulates success after 2 seconds
+          return new Promise((resolve) =>
+            setTimeout(() => resolve(true), 2000),
+          );
+        },
+        name: name || "Dev Test User",
+        email: email || "dev@example.com",
+        slug: orgSlug || "test-org",
+        message: donationMessage,
+      });
+      return;
+    }
+    try {
+      const donation_id = await createDonation();
+      await paymentIntent({ donation_id });
+    } catch (error) {
+      console.error("createDonation error", error, {
+        context: {
+          orgId,
+          amount: value * 100,
+          action: "create_donation",
+        },
+      });
+      showAlert("Error creating donation", "Please try again.");
+    }
+  };
+
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    const hasAllPrefill =
+      !!prefillAmount &&
+      prefillAmount > 0 &&
+      !!prefillName &&
+      !!prefillEmail &&
+      !!prefillMessage;
+    if (!hasAllPrefill) return;
+    autoStartedRef.current = true;
+    handleCreateDonation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillAmount, prefillName, prefillEmail, prefillMessage]);
 
   return (
     <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
@@ -264,6 +339,41 @@ export default function NewDonationPage({
                 value={email}
                 onChangeText={setEmail}
                 ref={emailRef}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  messageRef.current?.focus();
+                }}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: colors.card,
+                borderRadius: 12,
+                paddingHorizontal: 14,
+              }}
+            >
+              <Ionicons
+                name="chatbubble-outline"
+                size={22}
+                color={palette.muted}
+              />
+              <TextInput
+                style={{
+                  color: colors.text,
+                  paddingVertical: 14,
+                  paddingHorizontal: 12,
+                  fontSize: 16,
+                  flex: 1,
+                }}
+                selectTextOnFocus
+                clearButtonMode="while-editing"
+                placeholder="Message (optional)"
+                placeholderTextColor={palette.muted}
+                value={donationMessage}
+                onChangeText={setDonationMessage}
+                ref={messageRef}
               />
             </View>
 
@@ -299,47 +409,7 @@ export default function NewDonationPage({
           </View>
 
           <Button
-            onPress={async () => {
-              if (value <= 0) {
-                showAlert(
-                  "Error creating donation",
-                  "Amount must be greater than 0.",
-                );
-                return;
-              }
-              if (isDevMode) {
-                // In dev mode, navigate with mock payment data
-                navigation.navigate("ProcessDonation", {
-                  orgId,
-                  payment: {
-                    amount: Math.round(value * 100),
-                  } as PaymentIntent.Type,
-                  collectPayment: async () => {
-                    // Mock payment function - simulates success after 2 seconds
-                    return new Promise((resolve) =>
-                      setTimeout(() => resolve(true), 2000),
-                    );
-                  },
-                  name: name || "Dev Test User",
-                  email: email || "dev@example.com",
-                  slug: orgSlug || "test-org",
-                });
-                return;
-              }
-              try {
-                const donation_id = await createDonation();
-                await paymentIntent({ donation_id });
-              } catch (error) {
-                console.error("createDonation error", error, {
-                  context: {
-                    orgId,
-                    amount: value * 100,
-                    action: "create_donation",
-                  },
-                });
-                showAlert("Error creating donation", "Please try again.");
-              }
-            }}
+            onPress={handleCreateDonation}
             style={{
               width: "100%",
               marginTop: 12,

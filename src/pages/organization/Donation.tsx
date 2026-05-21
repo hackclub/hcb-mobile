@@ -29,7 +29,7 @@ type Props = NativeStackScreenProps<StackParamList, "OrganizationDonation">;
 
 export default function OrganizationDonationPage({
   route: {
-    params: { orgId },
+    params: { orgId, amount, name, email, message, goods },
   },
   navigation,
 }: Props) {
@@ -234,6 +234,11 @@ export default function OrganizationDonationPage({
     navigation.navigate("NewDonation", {
       orgId,
       orgSlug: organization?.slug || "",
+      amount,
+      name,
+      email,
+      message,
+      goods,
     });
   };
 
@@ -316,6 +321,27 @@ export default function OrganizationDonationPage({
     }
     setLoadingConnectingReader(false);
   };
+
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    const hasAllPrefill =
+      amount !== undefined && amount > 0 && !!name && !!email && !!message;
+    if (!hasAllPrefill) return;
+    if (organizationLoading || !organization) return;
+    if (isStripeInitializing) return;
+    autoStartedRef.current = true;
+    handleGetStarted();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    amount,
+    name,
+    email,
+    message,
+    organizationLoading,
+    organization,
+    isStripeInitializing,
+  ]);
 
   // Loading state
   if (organizationLoading || !organization || isStripeInitializing) {

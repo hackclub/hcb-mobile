@@ -2,6 +2,23 @@ const { withDangerousMod } = require("@expo/config-plugins");
 const fs = require("fs");
 const path = require("path");
 
+function isPrivateSDKAvailable(privateSDKPath) {
+  try {
+    if (!fs.existsSync(privateSDKPath)) {
+      return false;
+    }
+
+    const stats = fs.statSync(privateSDKPath);
+    if (!stats.isDirectory()) {
+      return false;
+    }
+
+    return fs.readdirSync(privateSDKPath).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Expo plugin to configure Google Play Services Tap and Pay private SDK
  * Following Google's official documentation for Android Push Provisioning API integration
@@ -23,8 +40,8 @@ function withPrivateSDK(config) {
       console.log("📦 Private SDK source:", privateSDKPath);
       console.log("🏗️  Android path:", androidPath);
 
-      // Check if private-sdk directory exists
-      if (!fs.existsSync(privateSDKPath)) {
+      // Check if private-sdk directory exists and has contents
+      if (!isPrivateSDKAvailable(privateSDKPath)) {
         // For EAS builds, we should still configure the dependencies but skip the Maven repo setup
         try {
           await verifyAppBuildGradle(appBuildGradlePath, privateSDKPath);
@@ -84,7 +101,7 @@ async function configureRootBuildGradle(
   let buildGradleContent = fs.readFileSync(buildGradlePath, "utf8");
 
   // Check if private SDK is available
-  const privateSDKAvailable = fs.existsSync(privateSDKPath);
+  const privateSDKAvailable = isPrivateSDKAvailable(privateSDKPath);
 
   if (!privateSDKAvailable) {
     console.log(
@@ -158,7 +175,7 @@ async function verifyAppBuildGradle(buildGradlePath, privateSDKPath) {
   let hasChanges = false;
 
   // Check if private SDK is available (regardless of build environment)
-  const privateSDKAvailable = fs.existsSync(privateSDKPath);
+  const privateSDKAvailable = isPrivateSDKAvailable(privateSDKPath);
 
   // Dependencies to add - only add private dependencies if private SDK is available
   const requiredDependencies = [];
@@ -321,7 +338,7 @@ async function verifyAppMavenRepository(buildGradlePath, privateSDKPath) {
   let buildGradleContent = fs.readFileSync(buildGradlePath, "utf8");
 
   // Check if private SDK is available
-  const privateSDKAvailable = fs.existsSync(privateSDKPath);
+  const privateSDKAvailable = isPrivateSDKAvailable(privateSDKPath);
 
   if (!privateSDKAvailable) {
     console.log(
