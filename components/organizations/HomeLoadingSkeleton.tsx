@@ -1,4 +1,4 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

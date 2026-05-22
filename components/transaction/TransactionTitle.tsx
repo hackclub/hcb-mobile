@@ -1,5 +1,5 @@
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { PropsWithChildren, ReactNode } from "react";
 import { View } from "react-native";
 

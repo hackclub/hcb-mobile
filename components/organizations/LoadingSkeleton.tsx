@@ -1,4 +1,4 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef } from "react";
 import { View, Animated } from "react-native";
 

@@ -1,5 +1,5 @@
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { View, Platform } from "react-native";
 
 import BalanceChart from "./BalanceChart";
@@ -8,7 +8,7 @@ import Button from "@/components/Button";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 interface HeaderProps {
   organization: Organization | OrganizationExpanded;

@@ -14,7 +14,7 @@ import TransactionTitle, {
 import UserMention from "@/components/UserMention";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 function getCountryFlag(countryCode: string) {
   // Convert country code to flag emoji

@@ -1,5 +1,5 @@
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, TouchableHighlight, View } from "react-native";
@@ -9,7 +9,7 @@ import GrantCard from "@/lib/types/GrantCard";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 interface GrantInviteProps {
   grant: GrantCard;

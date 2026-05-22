@@ -12,7 +12,7 @@ import TransactionTitle, {
 import UserMention from "@/components/UserMention";
 import { TransactionAchTransfer } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney } from "@/utils/util";
+import { renderDate, renderMoney } from "@/utils/format";
 
 export default function AchTransferTransaction({
   transaction: { ach_transfer, ...transaction },

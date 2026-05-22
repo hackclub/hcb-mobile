@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
@@ -46,7 +46,7 @@ import {
 } from "@/utils/cardActions";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
-import { normalizeSvg } from "@/utils/util";
+import { normalizeSvg } from "@/utils/format";
 
 export default function Page() {
   const navigation = useNavigation();

@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney, statusColor } from "@/utils/util";
+import { renderDate, renderMoney, statusColor } from "@/utils/format";
 
 interface CheckDepositSummary {
   id: string;
@@ -64,13 +64,11 @@ export default function CheckDepositsPage() {
           Deposit a check
         </Text>
       </Pressable>
-
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
           <ActivityIndicator />
         </View>
       )}
-
       {!isLoading && deposits.length === 0 && (
         <View style={{ alignItems: "center", paddingTop: 40, gap: 8 }}>
           <Ionicons name="document-outline" size={40} color={palette.muted} />
@@ -79,7 +77,6 @@ export default function CheckDepositsPage() {
           </Text>
         </View>
       )}
-
       {deposits.length > 0 && (
         <View
           style={{

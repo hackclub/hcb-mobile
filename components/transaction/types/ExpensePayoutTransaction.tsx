@@ -11,7 +11,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import { TransactionExpensePayout } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney } from "@/utils/util";
+import { renderDate, renderMoney } from "@/utils/format";
 
 export default function ExpensePayoutTransaction({
   transaction: { expense_payout, ...transaction },

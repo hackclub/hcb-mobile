@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
@@ -14,7 +14,7 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
-import { orgColor } from "@/utils/util";
+import { orgColor } from "@/utils/org";
 
 const Event = memo(
   function Event({

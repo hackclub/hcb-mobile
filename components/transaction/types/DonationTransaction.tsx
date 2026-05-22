@@ -12,7 +12,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import { TransactionDonation } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 function getAttributionString(
   attribution: TransactionDonation["donation"]["attribution"],

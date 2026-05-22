@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { useContext } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";

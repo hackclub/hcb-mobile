@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Modal, Pressable, ScrollView, View } from "react-native";

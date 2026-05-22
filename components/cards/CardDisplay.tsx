@@ -1,11 +1,11 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { TouchableOpacity, View, Text } from "react-native";
 
 import PaymentCard from "@/components/PaymentCard";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 interface CardDisplayProps {
   card: Card;

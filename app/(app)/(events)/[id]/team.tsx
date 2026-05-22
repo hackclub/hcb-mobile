@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { router, useLocalSearchParams } from "expo-router";
 import { capitalize } from "lodash";

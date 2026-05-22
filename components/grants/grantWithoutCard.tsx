@@ -1,15 +1,12 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { View, Text } from "react-native";
 
 import Button from "@/components/Button";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
 import { palette } from "@/styles/theme";
-import {
-  formatCategoryNames,
-  formatMerchantNames,
-  renderMoney,
-} from "@/utils/util";
+import { renderMoney } from "@/utils/format";
+import { formatCategoryNames, formatMerchantNames } from "@/utils/org";
 
 export default function GrantWithoutCard({
   grantCard,

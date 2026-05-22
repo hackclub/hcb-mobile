@@ -1,8 +1,8 @@
 import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
@@ -213,7 +213,6 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
       </Text>
       <View
         style={{
-          display: "flex",
           flexDirection: "row",
           gap: 20,
           flexWrap: "wrap",
@@ -304,7 +303,6 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               height: 200,
               borderRadius: 8,
               backgroundColor: themeColors.card,
-              display: "flex",
               alignItems: "center",
               justifyContent: "center",
               opacity: actionSheetIsOnline ? 1 : 0.7,

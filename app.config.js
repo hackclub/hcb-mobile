@@ -13,7 +13,6 @@ export default {
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
     assetBundlePatterns: ["**/*"],
-    newArchEnabled: true,
     ios: {
       icon: "./assets/icons/default.icon",
       supportsTablet: false,
@@ -83,6 +82,8 @@ export default {
     },
     plugins: [
       "expo-router",
+      ["@stripe/stripe-react-native", {}],
+      "expo-image",
       [
         "expo-image-picker",
         {
@@ -183,6 +184,8 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
+      "expo-font",
+      "expo-status-bar",
       "expo-web-browser",
       "expo-background-task",
       [

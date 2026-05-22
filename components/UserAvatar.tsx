@@ -1,4 +1,4 @@
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import {
   ImageStyle,
@@ -47,7 +47,6 @@ export default function UserAvatar({
             height: size,
             backgroundColor: userColor(user.id),
             borderRadius: 999,
-            display: "flex",
             alignItems: "center",
             justifyContent: "center",
           },

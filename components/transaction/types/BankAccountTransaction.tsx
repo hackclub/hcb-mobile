@@ -1,4 +1,4 @@
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { View } from "react-native";
 
 import { TransactionViewProps } from "./TransactionViewProps";
@@ -11,7 +11,7 @@ import TransactionTitle, {
   Muted,
 } from "@/components/transaction/TransactionTitle";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney } from "@/utils/util";
+import { renderDate, renderMoney } from "@/utils/format";
 
 export default function BankAccountTransaction({
   transaction,

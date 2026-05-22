@@ -204,12 +204,6 @@ export interface TransactionExpensePayout extends TransactionBase {
   expense_payout: ExpensePayout;
 }
 
-// |
-// |
-// v this is cool, i should finish this
-//
-// type SpecificTransaction<Code extends TransactionType, Key extends string, Obj> = TransactionBase & {code: Code; } & {[k in Key]: Obj}
-
 type Transaction =
   | TransactionCheckDeposit
   | TransactionInvoice

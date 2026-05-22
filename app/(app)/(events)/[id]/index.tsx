@@ -1,345 +1,34 @@
-import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "@react-navigation/native";
-import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Animated,
   Platform,
-  Pressable,
   ScrollView,
   View,
 } from "react-native";
 
+import ActionChip from "@/components/organizations/ActionChip";
+import ActionTile from "@/components/organizations/ActionTile";
 import { EmptyState } from "@/components/organizations/EmptyState";
 import Header from "@/components/organizations/Header";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
+import RecentTransactionsSkeleton from "@/components/organizations/RecentTransactionsSkeleton";
+import SectionCard from "@/components/organizations/SectionCard";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
+import TeamAvatars from "@/components/organizations/TeamAvatars";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
-import UserAvatar from "@/components/UserAvatar";
 import { showAlert } from "@/lib/alertUtils";
 import { OrgPolicy } from "@/lib/policies";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
-import User, { OrgUser } from "@/lib/types/User";
-import { useIsDark } from "@/lib/useColorScheme";
+import User from "@/lib/types/User";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { palette } from "@/styles/theme";
-import { addPendingFeeToTransactions } from "@/utils/util";
-
-function ActionTile({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  onPress: () => void;
-}) {
-  const { colors: themeColors } = useTheme();
-  const isDark = useIsDark();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flex: 1,
-        backgroundColor: themeColors.card,
-        borderRadius: 14,
-        paddingVertical: 18,
-        paddingHorizontal: 14,
-        gap: 10,
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <View
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
-          backgroundColor: isDark
-            ? "rgba(255,255,255,0.07)"
-            : "rgba(0,0,0,0.05)",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Icon glyph={icon} size={20} color={themeColors.text} />
-      </View>
-      <Text
-        style={{
-          color: themeColors.text,
-          fontSize: 15,
-          fontWeight: "600",
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function ActionChip({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: string;
-  label: string;
-  onPress: () => void;
-}) {
-  const { colors: themeColors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        backgroundColor: themeColors.card,
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 12,
-        opacity: pressed ? 0.6 : 1,
-      })}
-    >
-      <Icon glyph={icon} size={16} color={palette.muted} />
-      <Text
-        style={{ color: themeColors.text, fontSize: 14, fontWeight: "500" }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function SectionCard({
-  title,
-  onSeeAll,
-  children,
-}: {
-  title: string;
-  onSeeAll?: () => void;
-  children: React.ReactNode;
-}) {
-  const { colors: themeColors } = useTheme();
-  return (
-    <View
-      style={{
-        backgroundColor: themeColors.card,
-        borderRadius: 16,
-        overflow: "hidden",
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 12,
-        }}
-      >
-        <Text
-          style={{ fontSize: 17, fontWeight: "700", color: themeColors.text }}
-        >
-          {title}
-        </Text>
-        {onSeeAll && (
-          <Pressable
-            onPress={onSeeAll}
-            hitSlop={8}
-            style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 2,
-              opacity: pressed ? 0.5 : 1,
-            })}
-          >
-            <Text style={{ color: palette.muted, fontSize: 14 }}>See all</Text>
-            <Ionicons name="chevron-forward" size={16} color={palette.muted} />
-          </Pressable>
-        )}
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function TeamAvatars({ users }: { users: OrgUser[] }) {
-  const { colors: themeColors } = useTheme();
-  const MAX_SHOWN = 8;
-  const shown = users.slice(0, MAX_SHOWN);
-  const overflow = users.length - MAX_SHOWN;
-
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-      }}
-    >
-      {shown.map((u, i) => (
-        <View
-          key={u.id}
-          style={{
-            marginLeft: i === 0 ? 0 : -6,
-            borderRadius: 999,
-            borderWidth: 2,
-            borderColor: themeColors.card,
-          }}
-        >
-          <UserAvatar user={u} size={36} />
-        </View>
-      ))}
-      {overflow > 0 && (
-        <View
-          style={{
-            marginLeft: -6,
-            width: 36,
-            height: 36,
-            borderRadius: 999,
-            backgroundColor: palette.slate,
-            alignItems: "center",
-            justifyContent: "center",
-            borderWidth: 2,
-            borderColor: themeColors.card,
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-            +{overflow}
-          </Text>
-        </View>
-      )}
-    </View>
-  );
-}
-
-function RecentTransactionsSkeleton() {
-  const { colors: themeColors } = useTheme();
-  const isDark = useIsDark();
-  const shimmerAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmerAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shimmerAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-  }, [shimmerAnim]);
-
-  const shimmerOpacity = shimmerAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.5, 1],
-  });
-
-  const shapeColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
-  const dividerColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)";
-
-  return (
-    <View
-      style={{
-        backgroundColor: themeColors.card,
-        borderRadius: 16,
-        overflow: "hidden",
-      }}
-    >
-      <View
-        style={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 12,
-        }}
-      >
-        <Animated.View
-          style={{
-            height: 16,
-            width: "45%",
-            backgroundColor: shapeColor,
-            borderRadius: 6,
-            opacity: shimmerOpacity,
-          }}
-        />
-      </View>
-      <View style={{ height: 1, backgroundColor: dividerColor }} />
-      {[1, 2, 3, 4].map((item, index) => (
-        <View key={item}>
-          <Animated.View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 14,
-              opacity: shimmerOpacity,
-            }}
-          >
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                backgroundColor: shapeColor,
-              }}
-            />
-            <View style={{ flex: 1, gap: 6 }}>
-              <View
-                style={{
-                  height: 13,
-                  width: "60%",
-                  backgroundColor: shapeColor,
-                  borderRadius: 4,
-                }}
-              />
-              <View
-                style={{
-                  height: 11,
-                  width: "35%",
-                  backgroundColor: shapeColor,
-                  borderRadius: 4,
-                }}
-              />
-            </View>
-            <View
-              style={{
-                height: 13,
-                width: 50,
-                backgroundColor: shapeColor,
-                borderRadius: 4,
-              }}
-            />
-          </Animated.View>
-          {index < 3 && (
-            <View
-              style={{
-                height: 1,
-                backgroundColor: dividerColor,
-                marginLeft: 64,
-              }}
-            />
-          )}
-        </View>
-      ))}
-    </View>
-  );
-}
+import { addPendingFeeToTransactions } from "@/utils/org";
 
 export default function Page() {
   const navigation = useNavigation();
@@ -462,11 +151,7 @@ export default function Page() {
     return [];
   }, [organization]);
 
-  const navTo = (path: string | null, extraParams?: Record<string, string>) => {
-    if (!path) {
-      showAlert("Coming Soon", "This feature is coming soon.");
-      return;
-    }
+  const navTo = (path: string, extraParams?: Record<string, string>) => {
     router.push({
       pathname: path,
       params: { id: params.id, ...extraParams },
@@ -610,7 +295,9 @@ export default function Page() {
             <ActionTile
               icon="attachment"
               label="Reimburse"
-              onPress={() => navTo(null)}
+              onPress={() =>
+                showAlert("Coming Soon", "This feature is coming soon.")
+              }
             />
           </View>
         </View>

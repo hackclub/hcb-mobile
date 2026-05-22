@@ -1,6 +1,6 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,7 +19,7 @@ import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails } from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
-import { redactedCardNumber, renderCardNumber } from "@/utils/util";
+import { redactedCardNumber, renderCardNumber } from "@/utils/format";
 
 export default function PaymentCard({
   card,

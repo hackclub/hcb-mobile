@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -20,7 +20,7 @@ import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 interface ImageAssignment {
   imageUri: string;

@@ -1,6 +1,6 @@
-import { useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import PageTitle from "@/components/PageTitle";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";

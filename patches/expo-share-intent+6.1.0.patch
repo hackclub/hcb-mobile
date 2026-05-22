@@ -1,0 +1,13 @@
+diff --git a/node_modules/expo-share-intent/ios/ExpoShareIntentModule.podspec b/node_modules/expo-share-intent/ios/ExpoShareIntentModule.podspec
+index 814e383..ae1c832 100644
+--- a/node_modules/expo-share-intent/ios/ExpoShareIntentModule.podspec
++++ b/node_modules/expo-share-intent/ios/ExpoShareIntentModule.podspec
+@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
+   s.license        = package['license']
+   s.author         = package['author']
+   s.homepage       = package['homepage']
+-  s.platform       = :ios, '15.1'
++  s.platform       = :ios, '16.4'
+   s.swift_version  = '5.0'
+   s.source         = { git: 'https://github.com/achorein/expo-share-intent' }
+   s.static_framework = true

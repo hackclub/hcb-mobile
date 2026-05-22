@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MenuView } from "@react-native-menu/menu";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { MenuView } from "@expo/ui/community/menu";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,7 +26,7 @@ import GrantCard from "@/lib/types/GrantCard";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
-import { normalizeSvg } from "@/utils/util";
+import { normalizeSvg } from "@/utils/format";
 
 type CardWithGrant = Card &
   Required<Pick<Card, "last4">> & { grant_id?: string };

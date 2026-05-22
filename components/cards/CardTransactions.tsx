@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 
@@ -159,7 +159,7 @@ export default function CardTransactions({
             <TransactionComponent
               transaction={transaction}
               showMerchantIcon={true}
-              top={transactionIndex == 0}
+              top={transactionIndex === 0}
               bottom={transactionIndex == transactions.length - 1}
               hideAvatar
               orgId={card?.organization?.id || _card?.organization?.id || ""}

@@ -1,7 +1,7 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider } from "expo-router/react-navigation";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -534,7 +534,7 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        edges={Platform.OS == "android" ? ["bottom"] : []}
+        edges={Platform.OS === "android" ? ["bottom"] : []}
         style={{ flex: 1 }}
       >
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>

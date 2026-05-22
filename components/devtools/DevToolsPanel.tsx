@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { useState } from "react";
 import { Modal, Pressable, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

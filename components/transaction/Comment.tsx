@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
 import { View, TouchableOpacity } from "react-native";

@@ -1,4 +1,4 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { PropsWithChildren } from "react";
 import {
@@ -68,77 +68,65 @@ export default function Button(
   const theme = useTheme();
   const { variant = "primary" } = props;
 
+  const variantBaseStyle = {
+    ...styles.button,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  };
+
   const getVariantStyles = () => {
-    if (props.variant) {
-      const variantBaseStyle = {
-        ...styles.button,
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-      };
-
-      switch (variant) {
-        case "secondary":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: theme.colors.card,
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-          };
-        case "outline":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: "transparent",
-            borderWidth: 2,
-            borderColor: palette.primary,
-          };
-        case "ghost":
-          return {
-            ...variantBaseStyle,
-            backgroundColor: "transparent",
-            borderWidth: 0,
-            borderColor: "transparent",
-          };
-        case "primary":
-        default:
-          return variantBaseStyle;
-      }
+    switch (variant) {
+      case "secondary":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+        };
+      case "outline":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "transparent",
+          borderWidth: 2,
+          borderColor: palette.primary,
+        };
+      case "ghost":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "transparent",
+          borderWidth: 0,
+          borderColor: "transparent",
+        };
+      case "primary":
+      default:
+        return variantBaseStyle;
     }
-
-    return styles.button;
   };
 
   const getTextColor = () => {
     if (props.color) return props.color;
 
-    if (props.variant) {
-      switch (variant) {
-        case "secondary":
-          return theme.colors.text;
-        case "outline":
-          return palette.primary;
-        case "ghost":
-          return theme.colors.text;
-        case "primary":
-        default:
-          return "#FFFFFF";
-      }
+    switch (variant) {
+      case "secondary":
+        return theme.colors.text;
+      case "outline":
+        return palette.primary;
+      case "ghost":
+        return theme.colors.text;
+      case "primary":
+      default:
+        return "#FFFFFF";
     }
-
-    return styles.buttonText.color;
   };
 
-  const getTextStyles = () => {
-    const baseTextStyle = {
-      ...styles.buttonText,
-      color: getTextColor(),
-      fontSize: props.fontSize || styles.buttonText.fontSize,
-      fontWeight: props.fontWeight || styles.buttonText.fontWeight,
-      opacity: props.loading ? 0 : props.variant === "ghost" ? 0.8 : 1,
-    };
-
-    return baseTextStyle;
-  };
+  const getTextStyles = () => ({
+    ...styles.buttonText,
+    color: getTextColor(),
+    fontSize: props.fontSize || styles.buttonText.fontSize,
+    fontWeight: props.fontWeight || styles.buttonText.fontWeight,
+    opacity: props.loading ? 0 : variant === "ghost" ? 0.8 : 1,
+  });
 
   return (
     <Pressable
@@ -202,7 +190,6 @@ export default function Button(
             left: 0,
             bottom: 0,
             right: 0,
-            display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}

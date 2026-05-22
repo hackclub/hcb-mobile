@@ -1,10 +1,10 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import {
   PaymentIntent,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -94,11 +94,6 @@ export default function Page() {
         console.error("collectPaymentMethod error", error, {
           context: { orgId: id, action: "collect_payment" },
         });
-        showAlert(
-          "Error collecting payment",
-          "Failed to collect payment. Please try again. Error: " +
-            error.message,
-        );
         return false;
       }
       output = (await confirmPayment(localPayment)) ?? false;
@@ -200,7 +195,6 @@ export default function Page() {
         <View
           style={{
             padding: 20,
-            display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
             flex: 1,
@@ -378,8 +372,8 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
   function pressNumber(amount: string, number: number) {
     if (
       parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
-      (amount == "$" && number == 0) ||
-      amount[amount.length - 3] == "."
+      (amount === "$" && number === 0) ||
+      amount[amount.length - 3] === "."
     ) {
       setError(true);
       setTimeout(() => setError(false), 200);
@@ -389,7 +383,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
   }
 
   function pressDecimal(amount: string) {
-    if (amount.includes(".") || amount == "$") {
+    if (amount.includes(".") || amount === "$") {
       setError(true);
       setTimeout(() => setError(false), 200);
     } else {
@@ -398,7 +392,7 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
   }
 
   function pressBackspace(amount: string) {
-    if (amount == "$") {
+    if (amount === "$") {
       setError(true);
       setTimeout(() => setError(false), 200);
     } else {
@@ -439,7 +433,6 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
       style={{
         width: "100%",
         flexGrow: 1,
-        display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
         justifyContent: "space-around",
@@ -456,11 +449,11 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
         }}
       >
         {amount}
-        {amount == "$" && <Text style={{ fontSize: 72 }}>0</Text>}
-        {amount[amount.length - 1] == "." && (
+        {amount === "$" && <Text style={{ fontSize: 72 }}>0</Text>}
+        {amount[amount.length - 1] === "." && (
           <Text style={{ color: palette.muted }}>00</Text>
         )}
-        {amount[amount.length - 2] == "." && (
+        {amount[amount.length - 2] === "." && (
           <Text style={{ color: palette.muted }}>0</Text>
         )}
       </Text>

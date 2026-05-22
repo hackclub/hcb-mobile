@@ -12,7 +12,7 @@ import TransactionTitle, {
 import UserMention from "@/components/UserMention";
 import { TransactionWise } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney } from "@/utils/util";
+import { renderDate, renderMoney } from "@/utils/format";
 
 export default function WiseTransaction({
   transaction: { wise_transfer, ...transaction },

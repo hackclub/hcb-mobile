@@ -1,5 +1,5 @@
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { format } from "date-fns";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -18,12 +18,11 @@ import User from "@/lib/types/User";
 import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import {
-  formatCategoryNames,
-  formatMerchantNames,
   redactedCardNumber,
   renderCardNumber,
   renderMoney,
-} from "@/utils/util";
+} from "@/utils/format";
+import { formatCategoryNames, formatMerchantNames } from "@/utils/org";
 
 interface CardDetailsProps {
   card: Card;

@@ -1,18 +1,21 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { Text as NativeText, TextProps } from "react-native";
 
 export function Text(props: TextProps & { bold?: boolean; italic?: boolean }) {
   const { colors } = useTheme();
+  const { bold, italic, style, ...rest } = props;
 
   return (
     <NativeText
-      {...props}
+      {...rest}
       style={[
         {
           fontSize: 16,
           color: colors.text,
+          ...(bold && { fontWeight: "bold" }),
+          ...(italic && { fontStyle: "italic" }),
         },
-        props.style,
+        style,
       ]}
     />
   );

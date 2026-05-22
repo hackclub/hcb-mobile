@@ -1,8 +1,8 @@
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { LinearGradient } from "expo-linear-gradient";
 import { memo } from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
@@ -19,7 +19,82 @@ import {
 import { useIsDark } from "@/lib/useColorScheme";
 import { useMerchantIcon } from "@/lib/useMerchantIcon";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
+
+// Semantic colors for transaction states (dark / light pairs)
+const colors = {
+  reversedBg: { dark: "#252429", light: "#EAEDF1" },
+  declinedBg: { dark: "#351921", light: "#F9E3E7" },
+  positiveBg: { dark: "#234740", light: "#d7f7ee" },
+  reversedBadge: { dark: "#2A394C", light: "#D5E0EF" },
+  declinedBadge: { dark: "#401A23", light: "#891A2A" },
+  reversedBadgeText: { dark: palette.info, light: "#D5E0EF" },
+  declinedBadgeText: { dark: "#891A2A", light: "#fff" },
+  missingReceiptBg: { dark: "#2E161D", light: "#FBEAED" },
+} as const;
+
+const styles = StyleSheet.create({
+  row: {
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    overflow: "hidden",
+  },
+  hackathonGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  badgeBase: {
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 4,
+    borderWidth: 1,
+  },
+  pendingBadge: {
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 4,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: palette.muted,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  pendingBadgeText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: palette.muted,
+  },
+  memoText: {
+    fontSize: 14,
+    overflow: "hidden",
+    flex: 1,
+  },
+  missingReceiptBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: palette.warning,
+    borderRadius: 20,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    marginRight: 4,
+  },
+  missingReceiptText: {
+    color: palette.warning,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+});
 
 function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
   switch (code) {
@@ -34,7 +109,7 @@ function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
     case TransactionType.Disbursement:
       if (transaction.memo.startsWith("Grant to")) {
         return "purse-fill";
-      } else if (transaction.memo == "💰 Hackathon grant from Hack Club") {
+      } else if (transaction.memo === "💰 Hackathon grant from Hack Club") {
         return "purse";
       }
       if (transaction.amount_cents > 0) {
@@ -140,110 +215,59 @@ function Transaction({
 
   const backgroundColor = transaction.reversed
     ? isDark
-      ? "#252429"
-      : "#EAEDF1"
+      ? colors.reversedBg.dark
+      : colors.reversedBg.light
     : transaction.declined || transaction.amount_cents < 0
       ? isDark
-        ? "#351921"
-        : "#F9E3E7"
+        ? colors.declinedBg.dark
+        : colors.declinedBg.light
       : transaction.amount_cents > 0
         ? isDark
-          ? "#234740"
-          : "#d7f7ee"
+          ? colors.positiveBg.dark
+          : colors.positiveBg.light
         : themeColors.card;
 
-  const textColor =
-    transaction.appearance === "hackathon_grant"
-      ? palette.black
-      : transaction.pending
-        ? palette.muted
-        : themeColors.text;
+  const isHackathonGrant = transaction.appearance === "hackathon_grant";
 
-  const amountColor =
-    transaction.appearance === "hackathon_grant"
-      ? palette.black
+  const textColor = isHackathonGrant
+    ? palette.black
+    : transaction.pending
+      ? palette.muted
       : themeColors.text;
 
-  const badgeBase = {
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginRight: 4,
-  } as const;
+  const amountColor = isHackathonGrant ? palette.black : themeColors.text;
 
-  const reversedBadgeStyle = {
-    ...badgeBase,
-    backgroundColor: isDark ? "#2A394C" : "#D5E0EF",
-    borderWidth: 1,
-    borderColor: isDark ? "#2A394C" : "#D5E0EF",
-  };
-
-  const declinedBadgeStyle = {
-    ...badgeBase,
-    backgroundColor: isDark ? "#401A23" : "#891A2A",
-    borderWidth: 1,
-    borderColor: isDark ? "#401A23" : "#891A2A",
-  };
-
-  const pendingBadgeStyle = {
-    ...badgeBase,
-    borderWidth: 1,
-    borderStyle: "dashed" as const,
-    borderColor: "#8492a6",
-  };
-
-  const reversedTextStyle = {
-    color: isDark ? "#338eda" : "#D5E0EF",
-    fontSize: 12,
-    fontWeight: "bold" as const,
-  };
-
-  const declinedTextStyle = {
-    color: isDark ? "#891A2A" : "#fff",
-    fontSize: 12,
-    fontWeight: "bold" as const,
-  };
-
-  const pendingTextStyle = {
-    color: "#8492a6",
-    fontSize: 12,
-    fontWeight: "bold" as const,
-  };
+  const reversedBadgeColor = isDark
+    ? colors.reversedBadge.dark
+    : colors.reversedBadge.light;
+  const declinedBadgeColor = isDark
+    ? colors.declinedBadge.dark
+    : colors.declinedBadge.light;
 
   return (
     <View
       style={StyleSheet.compose(
-        {
-          paddingVertical: 14,
-          paddingHorizontal: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 12,
-          backgroundColor,
-          borderTopLeftRadius: top ? 8 : 0,
-          borderTopRightRadius: top ? 8 : 0,
-          borderBottomLeftRadius: bottom ? 8 : 0,
-          borderBottomRightRadius: bottom ? 8 : 0,
-          overflow: "hidden",
-        },
+        [
+          styles.row,
+          {
+            backgroundColor,
+            borderTopLeftRadius: top ? 8 : 0,
+            borderTopRightRadius: top ? 8 : 0,
+            borderBottomLeftRadius: bottom ? 8 : 0,
+            borderBottomRightRadius: bottom ? 8 : 0,
+          },
+        ],
         style,
       )}
     >
-      {transaction.appearance === "hackathon_grant" && (
+      {isHackathonGrant && (
         <LinearGradient
           colors={["#e2b142", "#fbe87a", "#e2b142", "#fbe87a"]}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
+          style={styles.hackathonGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         />
       )}
-
       {finalMerchantIcon ? (
         <SvgXml
           xml={finalMerchantIcon}
@@ -258,7 +282,6 @@ function Transaction({
           hideIcon={hideIcon}
         />
       )}
-
       {!hidePendingLabel &&
         (transaction.reversed ||
           transaction.declined ||
@@ -266,20 +289,39 @@ function Transaction({
           <View
             style={
               transaction.reversed
-                ? reversedBadgeStyle
+                ? [
+                    styles.badgeBase,
+                    {
+                      backgroundColor: reversedBadgeColor,
+                      borderColor: reversedBadgeColor,
+                    },
+                  ]
                 : transaction.declined
-                  ? declinedBadgeStyle
-                  : pendingBadgeStyle
+                  ? [
+                      styles.badgeBase,
+                      {
+                        backgroundColor: declinedBadgeColor,
+                        borderColor: declinedBadgeColor,
+                      },
+                    ]
+                  : styles.pendingBadge
             }
           >
             <Text
-              style={
-                transaction.reversed
-                  ? reversedTextStyle
-                  : transaction.declined
-                    ? declinedTextStyle
-                    : pendingTextStyle
-              }
+              style={[
+                styles.badgeText,
+                {
+                  color: transaction.reversed
+                    ? isDark
+                      ? colors.reversedBadgeText.dark
+                      : colors.reversedBadgeText.light
+                    : transaction.declined
+                      ? isDark
+                        ? colors.declinedBadgeText.dark
+                        : colors.declinedBadgeText.light
+                      : palette.muted,
+                },
+              ]}
             >
               {transaction.reversed
                 ? "Reversed"
@@ -291,12 +333,7 @@ function Transaction({
         )}
       <Text
         numberOfLines={1}
-        style={{
-          fontSize: 14,
-          color: textColor,
-          overflow: "hidden",
-          flex: 1,
-        }}
+        style={[styles.memoText, { color: textColor }]}
       >
         {match(transaction)
           .with(
@@ -308,36 +345,20 @@ function Transaction({
       </Text>
       {transaction.missing_receipt && !hideMissingReceipt && (
         <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: "#ff8c37",
-            borderRadius: 20,
-            paddingHorizontal: 5,
-            paddingVertical: 2,
-            marginRight: 4,
-            backgroundColor: isDark ? "#2E161D" : "#FBEAED",
-          }}
+          style={[
+            styles.missingReceiptBadge,
+            {
+              backgroundColor: isDark
+                ? colors.missingReceiptBg.dark
+                : colors.missingReceiptBg.light,
+            },
+          ]}
         >
-          <Icon glyph="payment-docs" color="#ff8c37" size={18} />
-          <Text
-            style={{
-              color: "#ff8c37",
-              fontSize: 12,
-              // fontFamily: "monospace",
-              fontWeight: "bold",
-            }}
-          >
-            0
-          </Text>
+          <Icon glyph="payment-docs" color={palette.warning} size={18} />
+          <Text style={styles.missingReceiptText}>0</Text>
         </View>
       )}
-      <Text
-        style={{
-          color: amountColor,
-        }}
-      >
+      <Text style={{ color: amountColor }}>
         {renderMoney(transaction.amount_cents)}
       </Text>
     </View>

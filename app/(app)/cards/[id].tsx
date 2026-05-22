@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
@@ -40,7 +40,7 @@ import {
   toggleCardFrozen,
 } from "@/utils/cardActions";
 import * as Haptics from "@/utils/haptics";
-import { normalizeSvg } from "@/utils/util";
+import { normalizeSvg } from "@/utils/format";
 
 export default function CardPage() {
   const { card: _card } = useLocalSearchParams();
@@ -163,7 +163,7 @@ export default function CardPage() {
   useEffect(() => {
     if (
       Platform.OS === "android" &&
-      (card?.status == "active" || card?.status == "frozen")
+      (card?.status === "active" || card?.status === "frozen")
     ) {
       navigation.setOptions({
         headerRight: () => (
@@ -377,7 +377,7 @@ export default function CardPage() {
           }
           loading={!!isUpdatingStatus}
         >
-          {card?.status == "active" ? "Freeze Card" : "Defrost Card"}
+          {card?.status === "active" ? "Freeze Card" : "Defrost Card"}
         </Button>,
       );
     }

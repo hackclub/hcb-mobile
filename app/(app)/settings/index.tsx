@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";

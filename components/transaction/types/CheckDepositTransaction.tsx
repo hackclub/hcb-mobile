@@ -1,4 +1,4 @@
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import { Image } from "expo-image";
 import { View } from "react-native";
 
@@ -13,7 +13,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import UserMention from "@/components/UserMention";
 import { TransactionCheckDeposit } from "@/lib/types/Transaction";
-import { renderMoney, statusColor } from "@/utils/util";
+import { renderMoney, statusColor } from "@/utils/format";
 
 export default function CheckDepositTransaction(
   props: TransactionViewProps<TransactionCheckDeposit>,

@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "@react-navigation/native";
+import { useTheme } from "expo-router/react-navigation";
 import {
   ConnectTapToPayParams,
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Platform, View } from "react-native";
@@ -272,6 +272,16 @@ export default function Page() {
     const readers = await discoverReaders({
       discoveryMethod: "tapToPay",
     });
+
+    if (
+      (readers.error as { code?: string } | undefined)?.code ===
+      "AlreadyConnectedToReader"
+    ) {
+      setLoadingConnectingReader(false);
+      navigateToNewDonation();
+      return;
+    }
+
     const found = await waitForReader();
     if (found && readerRef.current) {
       const connected = await connectReader(readerRef.current);

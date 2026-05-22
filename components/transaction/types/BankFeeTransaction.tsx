@@ -1,4 +1,4 @@
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { View } from "react-native";
 import useSWR from "swr";
 
@@ -12,7 +12,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import Organization from "@/lib/types/Organization";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney } from "@/utils/util";
+import { renderDate, renderMoney } from "@/utils/format";
 
 export default function BankFeeTransaction({
   transaction,

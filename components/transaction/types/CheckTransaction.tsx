@@ -13,7 +13,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import UserMention from "@/components/UserMention";
 import { TransactionCheck } from "@/lib/types/Transaction";
-import { renderMoney, statusColor } from "@/utils/util";
+import { renderMoney, statusColor } from "@/utils/format";
 
 export default function CheckTransaction({
   transaction: { check, ...transaction },

@@ -1,6 +1,6 @@
-import { useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import PageTitle from "@/components/PageTitle";
+import { Text } from "@/components/Text";
 import { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,17 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import { Picker } from "@expo/ui/community/picker";
 import useSWR from "swr";
 
 import AuthContext from "@/auth/auth";
 import { getAccessToken } from "@/auth/tokenUtils";
 import { showAlert } from "@/lib/alertUtils";
 import { OrganizationExpanded } from "@/lib/types/Organization";
-import { useIsDark } from "@/lib/useColorScheme";
 import { useOffline } from "@/lib/useOffline";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 type DisbursementScreenProps = {
   organization: OrganizationExpanded;
@@ -36,7 +35,6 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
   const accessToken = getAccessToken(tokenResponse);
   const { isOnline, withOfflineCheck } = useOffline();
-  const isDark = useIsDark();
 
   const validateInputs = () => {
     const numericAmount = Number(amount.replace("$", "").replace(",", ""));
@@ -169,39 +167,19 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
             marginBottom: 15,
           }}
         >
-          <RNPickerSelect
-            placeholder={{
-              label: "Select an organization",
-              value: "",
-              color: themeColors.text,
-            }}
-            onValueChange={(itemValue: string) => setOrganization(itemValue)}
-            darkTheme={isDark}
-            style={{
-              inputIOS: {
-                color: themeColors.text,
-                padding: 15,
-                fontSize: 16,
-                pointerEvents: "none",
-              },
-              inputAndroid: {
-                color: themeColors.text,
-                paddingHorizontal: 15,
-                fontSize: 16,
-              },
-            }}
-            useNativeAndroidPickerStyle={false}
-            items={[
-              ...organizations
-                .filter((org) => org.id !== organization.id)
-                .filter((org) => org.playground_mode === false)
-                .map((org) => ({
-                  label: org.name,
-                  value: org.id,
-                  color: themeColors.text,
-                })),
-            ]}
-          />
+          <Picker
+            selectedValue={chosenOrg}
+            onValueChange={(value) => setOrganization(value as string)}
+            style={{ color: themeColors.text, fontSize: 16 }}
+          >
+            <Picker.Item label="Select an organization" value="" />
+            {organizations
+              .filter((org) => org.id !== organization.id)
+              .filter((org) => org.playground_mode === false)
+              .map((org) => (
+                <Picker.Item key={org.id} label={org.name} value={org.id} />
+              ))}
+          </Picker>
         </View>
         <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
           You can transfer to any organization you're a part of.

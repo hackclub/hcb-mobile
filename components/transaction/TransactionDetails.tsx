@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import React, { ReactElement } from "react";
 import { TouchableHighlight, View } from "react-native";
@@ -81,22 +81,21 @@ export default function TransactionDetails({
             <View
               style={{
                 backgroundColor: themeColors.card,
-                display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "flex-start",
                 padding: 10,
-                borderTopLeftRadius: index == 0 ? 8 : 0,
-                borderTopRightRadius: index == 0 ? 8 : 0,
-                borderBottomLeftRadius: index == details.length - 1 ? 8 : 0,
-                borderBottomRightRadius: index == details.length - 1 ? 8 : 0,
+                borderTopLeftRadius: index === 0 ? 8 : 0,
+                borderTopRightRadius: index === 0 ? 8 : 0,
+                borderBottomLeftRadius: index === details.length - 1 ? 8 : 0,
+                borderBottomRightRadius: index === details.length - 1 ? 8 : 0,
                 maxHeight: 70,
               }}
             >
               <Text style={{ color: palette.muted, marginRight: 10 }}>
                 {label}
               </Text>
-              {typeof value == "string" ? (
+              {typeof value === "string" ? (
                 <Text
                   numberOfLines={2}
                   style={{

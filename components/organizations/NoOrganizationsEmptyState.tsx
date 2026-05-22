@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import * as WebBrowser from "expo-web-browser";
 import { Platform, ScrollView, View } from "react-native";
 import { useSWRConfig } from "swr";
@@ -16,7 +16,7 @@ export const NoOrganizationsEmptyState = () => {
 
   const handleApply = async () => {
     try {
-      await WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
+      await WebBrowser.openBrowserAsync("https://nonprofit.new", {
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
         controlsColor: palette.primary,
         dismissButtonStyle: "cancel",

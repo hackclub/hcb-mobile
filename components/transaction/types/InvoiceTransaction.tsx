@@ -12,7 +12,7 @@ import TransactionTitle, {
 } from "@/components/transaction/TransactionTitle";
 import { TransactionInvoice } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 export default function InvoiceTransaction({
   transaction: { invoice, ...transaction },

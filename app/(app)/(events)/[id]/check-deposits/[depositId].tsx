@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
@@ -10,7 +10,7 @@ import UserMention from "@/components/UserMention";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney, statusColor } from "@/utils/util";
+import { renderDate, renderMoney, statusColor } from "@/utils/format";
 
 interface CheckDepositDetail {
   id: string;
@@ -112,7 +112,6 @@ export default function CheckDepositDetailPage() {
           {renderMoney(deposit.amount_cents)}
         </Text>
       </View>
-
       {deposit.rejection && (
         <View
           style={{
@@ -134,7 +133,6 @@ export default function CheckDepositDetailPage() {
           )}
         </View>
       )}
-
       {(deposit.front_url || deposit.back_url) && (
         <View style={{ gap: 12 }}>
           {deposit.front_url && (
@@ -189,7 +187,6 @@ export default function CheckDepositDetailPage() {
           )}
         </View>
       )}
-
       <View
         style={{
           backgroundColor: themeColors.card,
@@ -221,7 +218,6 @@ export default function CheckDepositDetailPage() {
           </>
         )}
       </View>
-
       <Pressable
         onPress={() =>
           router.push({

@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
-import { renderMoney } from "@/utils/util";
+import { renderMoney } from "@/utils/format";
 
 export default function EventBalance({
   balance_cents,

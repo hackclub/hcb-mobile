@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "components/Text";
+import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";

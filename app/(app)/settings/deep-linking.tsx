@@ -1,6 +1,6 @@
-import { useTheme } from "@react-navigation/native";
-import PageTitle from "components/PageTitle";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import PageTitle from "@/components/PageTitle";
+import { Text } from "@/components/Text";
 import { ActivityIndicator, Switch, View } from "react-native";
 
 import { useLinkingPref } from "@/providers/LinkingContext";

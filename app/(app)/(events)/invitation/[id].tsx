@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
@@ -102,7 +102,6 @@ export default function Page() {
     <View
       style={{
         padding: 20,
-        display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flex: 1,

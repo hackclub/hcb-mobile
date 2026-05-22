@@ -125,18 +125,25 @@ global.fetch = async function (
       responseHeaders[key] = value;
     });
 
-    const clonedResponse = response.clone();
     let responseBody: string | undefined;
+    let responseToReturn: Response = response;
     try {
       const contentType = response.headers.get("content-type") || "";
       if (
         contentType.includes("application/json") ||
         contentType.includes("text/")
       ) {
-        responseBody = await clonedResponse.text();
-        if (responseBody.length > 10000) {
-          responseBody = responseBody.substring(0, 10000) + "... [truncated]";
-        }
+        const bodyText = await response.text();
+        responseBody =
+          bodyText.length > 10000
+            ? bodyText.substring(0, 10000) + "... [truncated]"
+            : bodyText;
+        // Reconstruct a fresh Response so the caller can still read the body
+        responseToReturn = new Response(bodyText, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
       } else {
         responseBody = `[${contentType || "Binary Data"}]`;
       }
@@ -153,7 +160,7 @@ global.fetch = async function (
       duration: endTime - startTime,
     });
 
-    return response;
+    return responseToReturn;
   } catch (error) {
     const endTime = Date.now();
     networkLogger.updateLog(id, {

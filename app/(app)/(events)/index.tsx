@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "@react-navigation/native";
-import { Text } from "components/Text";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 import * as WebBrowser from "expo-web-browser";
@@ -32,7 +32,7 @@ import ITransaction from "@/lib/types/Transaction";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
-import { organizationOrderEqual } from "@/utils/util";
+import { organizationOrderEqual } from "@/utils/org";
 
 const EventItem = memo(
   ({

@@ -16,7 +16,7 @@ import UserMention from "@/components/UserMention";
 import Organization from "@/lib/types/Organization";
 import { TransactionTransfer } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
-import { renderMoney, statusColor } from "@/utils/util";
+import { renderMoney, statusColor } from "@/utils/format";
 
 export default function TransferTransaction({
   transaction: { transfer, ...transaction },

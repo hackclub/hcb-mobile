@@ -1,4 +1,4 @@
-import { NavigatorScreenParams } from "@react-navigation/native";
+import { NavigatorScreenParams } from "expo-router/react-navigation";
 
 import Card from "./types/Card";
 import Invitation from "./types/Invitation";
