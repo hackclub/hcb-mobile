@@ -86,3 +86,26 @@ export const showDestructiveAlert = (
     { text: destructiveText, style: "destructive", onPress: onConfirm },
   ]);
 };
+
+/**
+ * Extracts the first error message from an API error response.
+ * The v4 API returns errors as `{ messages: string[] }`.
+ * Falls back to the provided fallback string if parsing fails.
+ */
+export async function parseApiError(
+  error: unknown,
+  fallback = "An unexpected error occurred. Please try again.",
+): Promise<string> {
+  if (error && typeof error === "object" && "response" in error) {
+    try {
+      const response = (error as { response: Response }).response;
+      const data = (await response.json()) as { messages?: string[] };
+      if (data.messages?.length) {
+        return data.messages[0];
+      }
+    } catch {
+      // JSON parsing failed, fall through to fallback
+    }
+  }
+  return fallback;
+}

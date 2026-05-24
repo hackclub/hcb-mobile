@@ -14,7 +14,7 @@ import {
 import useSWRMutation from "swr/mutation";
 
 import Button from "@/components/Button";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
@@ -142,11 +142,8 @@ export default function InvitePage() {
     },
     {
       onSuccess: () => router.back(),
-      onError: (err) => {
-        showAlert(
-          "Failed to send invite",
-          String((err as Error)?.message ?? "Please try again."),
-        );
+      onError: async (err) => {
+        showAlert("Failed to send invite", await parseApiError(err, "Please try again."));
       },
     },
   );

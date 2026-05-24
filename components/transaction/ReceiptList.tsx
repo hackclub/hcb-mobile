@@ -14,7 +14,7 @@ import useSWR from "swr";
 
 import FileViewerModal from "@/components/FileViewerModal";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Receipt from "@/lib/types/Receipt";
 import Transaction from "@/lib/types/Transaction";
@@ -143,7 +143,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",
-                textBody: "Failed to delete receipt. Please try again later.",
+                textBody: await parseApiError(error, "Failed to delete receipt. Please try again later."),
               });
             } finally {
               setDeletingReceiptId(null);
@@ -187,8 +187,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Failed",
-                textBody:
-                  "Failed to mark receipt as lost. Please try again later.",
+                textBody: await parseApiError(error, "Failed to mark receipt as lost. Please try again later."),
               });
             } finally {
               setIsMarkingLostReceipt(false);

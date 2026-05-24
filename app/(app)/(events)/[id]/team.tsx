@@ -18,7 +18,7 @@ import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
 import UserAvatar from "@/components/UserAvatar";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { OrgPolicy } from "@/lib/policies";
 import { OrganizationExpanded } from "@/lib/types/Organization";
@@ -254,10 +254,10 @@ export default function Page() {
     mutate: reloadInvitations,
     isLoading: invitationsLoading,
   } = useOfflineSWR<OrgInvitation[]>(
-    canManage ? `organizations/${id}/invitations` : null,
-  );
+    canManage ? `organizations/${id}/invitations?organization_id=${id}` : null,
+    );
 
-  console.log(invitations);
+  console.log("invitations", invitations);
 
   useFocusEffect(
     useCallback(() => {
@@ -291,8 +291,8 @@ export default function Page() {
               try {
                 await hcb.delete(`organizations/${id}/users/${user.id}`);
                 reloadOrganization();
-              } catch {
-                showAlert("Failed to remove", "Please try again.");
+              } catch (error) {
+                showAlert("Failed to remove", await parseApiError(error, "Please try again."));
               }
             },
           },
@@ -316,8 +316,8 @@ export default function Page() {
               try {
                 await hcb.delete(`organizations/${id}/invitations/${inviteId}`);
                 reloadInvitations();
-              } catch {
-                showAlert("Failed to cancel", "Please try again.");
+              } catch (error) {
+                showAlert("Failed to cancel", await parseApiError(error, "Please try again."));
               }
             },
           },

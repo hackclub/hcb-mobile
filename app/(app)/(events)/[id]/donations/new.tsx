@@ -19,7 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Button from "@/components/Button";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { setPaymentData } from "@/lib/paymentStore";
 import { palette } from "@/styles/theme";
@@ -335,7 +335,7 @@ export default function Page() {
                     action: "create_donation",
                   },
                 });
-                showAlert("Error creating donation", "Please try again.");
+                showAlert("Error creating donation", await parseApiError(error, "Please try again."));
               }
             }}
             style={{

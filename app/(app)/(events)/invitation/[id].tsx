@@ -12,7 +12,7 @@ import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import Button from "@/components/Button";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Invitation from "@/lib/types/Invitation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -65,15 +65,11 @@ export default function Page() {
           router.back();
         }
       },
-      onError: () => {
+      onError: async (err) => {
         showAlert(
           "Failed to Accept Invitation",
-          "You may have to sign the contract. Please contact HCB support if you believe this is an error.",
-          [
-            {
-              text: "OK",
-            },
-          ],
+          await parseApiError(err, "You may have to sign the contract. Please contact HCB support if you believe this is an error."),
+          [{ text: "OK" }],
         );
       },
     },

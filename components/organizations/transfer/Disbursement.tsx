@@ -13,7 +13,7 @@ import useSWR from "swr";
 
 import AuthContext from "@/auth/auth";
 import { getAccessToken } from "@/auth/tokenUtils";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOffline } from "@/lib/useOffline";
 import { palette } from "@/styles/theme";
@@ -85,8 +85,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         const errorData = await response.json();
         showAlert(
           "Error",
-          errorData.message ||
-            "Failed to complete the transfer. Please try again.",
+          errorData.messages?.[0] || "Failed to complete the transfer. Please try again.",
         );
       } else {
         showAlert("Success", "Transfer completed successfully!");
@@ -103,7 +102,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           action: "organization_transfer",
         },
       });
-      showAlert("Error", "An unexpected error occurred. Please try again.");
+      showAlert("Error", await parseApiError(error));
     } finally {
       setIsLoading(false);
     }

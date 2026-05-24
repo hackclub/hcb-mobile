@@ -18,6 +18,7 @@ import {
 
 import Button from "@/components/Button";
 import UserMention from "@/components/UserMention";
+import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import User from "@/lib/types/User";
 import { palette } from "@/styles/theme";
@@ -106,7 +107,7 @@ export default function CommentField({
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-      Alert.alert("Error", "Failed to add comment");
+      Alert.alert("Error", await parseApiError(error, "Failed to add comment"));
     } finally {
       setIsSubmitting(false);
     }

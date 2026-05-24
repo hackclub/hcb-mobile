@@ -15,7 +15,7 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mutate } from "swr";
 
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Receipt from "@/lib/types/Receipt";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -121,7 +121,7 @@ export default function Page() {
       Toast.show({
         type: ALERT_TYPE.DANGER,
         title: "Upload Failed",
-        textBody: "Some receipts failed to upload. Please try again.",
+        textBody: await parseApiError(error, "Some receipts failed to upload. Please try again."),
       });
     } finally {
       setUploading(false);

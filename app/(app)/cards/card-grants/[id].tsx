@@ -25,6 +25,7 @@ import CardTransactions from "@/components/cards/CardTransactions";
 import SetPurposeModal from "@/components/cards/modals/SetPurposeModal";
 import TopupModal from "@/components/cards/modals/TopupModal";
 import GrantWithoutCard from "@/components/grants/grantWithoutCard";
+import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import useTransactions from "@/lib/organization/useTransactions";
 import { CardGrantPolicy, CardPolicy } from "@/lib/policies";
@@ -343,13 +344,13 @@ export default function Page() {
         Alert.alert("Success", "Grant activated successfully!");
         maybeRequestReview();
       } else {
-        const data = (await response.json()) as { error?: string };
-        Alert.alert("Error", data.error || "Failed to activate grant");
+        const data = (await response.json()) as { messages?: string[]; error?: string };
+        Alert.alert("Error", data.messages?.[0] || data.error || "Failed to activate grant");
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
       console.error("Error activating grant", err, { grantId: fullGrantId });
-      Alert.alert("Error", "Failed to activate grant. Please try again later.");
+      Alert.alert("Error", await parseApiError(err, "Failed to activate grant. Please try again later."));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsActivating(false);

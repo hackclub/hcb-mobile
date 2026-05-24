@@ -23,7 +23,7 @@ import UploadIcon from "@/components/icons/UploadIcon";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 import MissingReceiptTransaction from "@/components/receipts/MissingReceiptTransaction";
 import { ZoomAndFadeIn } from "@/components/transaction/ReceiptList";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
 import Receipt from "@/lib/types/Receipt";
@@ -210,7 +210,7 @@ export default function Page() {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",
-                textBody: "Failed to delete receipt. Please try again later.",
+                textBody: await parseApiError(error, "Failed to delete receipt. Please try again later."),
               });
             } finally {
               setDeletingReceiptId(null);
