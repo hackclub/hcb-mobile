@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 
 import { useIsDark } from "@/lib/useColorScheme";
-import { useThemeContext } from "@/providers/ThemeContext";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { palette } from "@/styles/theme";
 
 export default function About() {

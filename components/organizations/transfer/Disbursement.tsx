@@ -11,8 +11,8 @@ import {
 import { Picker } from "@expo/ui/community/picker";
 import useSWR from "swr";
 
-import AuthContext from "@/auth/auth";
-import { getAccessToken } from "@/auth/tokenUtils";
+import AuthContext from "@/lib/auth/auth";
+import { getAccessToken } from "@/lib/auth/tokenUtils";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOffline } from "@/lib/useOffline";

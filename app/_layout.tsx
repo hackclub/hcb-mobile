@@ -12,13 +12,13 @@ import * as Updates from "expo-updates";
 import React, { createContext, useContext, useEffect } from "react";
 import { ColorSchemeName, useColorScheme } from "react-native";
 
-import AuthContext from "@/auth/auth";
-import { AuthProvider } from "@/auth/AuthProvider";
+import AuthContext from "@/lib/auth/auth";
+import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
-import { CacheProvider, useCache } from "@/providers/cacheProvider";
-import { LinkingProvider } from "@/providers/LinkingContext";
-import { ShareIntentProvider } from "@/providers/ShareIntentContext";
-import { ThemeProvider } from "@/providers/ThemeContext";
+import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
+import { LinkingProvider } from "@/lib/providers/LinkingContext";
+import { ShareIntentProvider } from "@/lib/providers/ShareIntentContext";
+import { ThemeProvider } from "@/lib/providers/ThemeContext";
 
 export const SWRCacheProvider = createContext<{
   scheme: ColorSchemeName;

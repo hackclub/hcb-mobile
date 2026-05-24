@@ -15,7 +15,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AuthContext from "@/auth/auth";
+import AuthContext from "@/lib/auth/auth";
 import Button from "@/components/Button";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";

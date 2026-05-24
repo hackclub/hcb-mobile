@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/react-native";
 import { memo, useContext, useEffect } from "react";
 import useSWR from "swr";
 
-import AuthContext from "@/auth/auth";
+import AuthContext from "@/lib/auth/auth";
 import User from "@/lib/types/User";
 
 function SentryUserBridge() {

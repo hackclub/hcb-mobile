@@ -27,8 +27,8 @@ import useSWR, { SWRConfig } from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
-import AuthContext from "@/auth/auth";
-import { tokenResponseToLegacyTokens } from "@/auth/tokenUtils";
+import AuthContext from "@/lib/auth/auth";
+import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
 import { DevToolsPanel } from "@/components/devtools";
@@ -43,9 +43,9 @@ import {
   useStripeTerminalInit,
 } from "@/lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
-import { useLinkingPref } from "@/providers/LinkingContext";
-import { useShareIntentContext } from "@/providers/ShareIntentContext";
-import { useThemeContext } from "@/providers/ThemeContext";
+import { useLinkingPref } from "@/lib/providers/LinkingContext";
+import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { lightTheme, theme } from "@/styles/theme";
 import { trackAppOpen } from "@/utils/storeReview";
 

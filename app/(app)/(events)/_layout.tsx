@@ -3,7 +3,7 @@ import { router, Stack } from "expo-router";
 import { useContext, useEffect } from "react";
 import { Pressable } from "react-native";
 
-import AuthContext from "@/auth/auth";
+import AuthContext from "@/lib/auth/auth";
 
 function AuthRedirect() {
   const { tokenResponse } = useContext(AuthContext);

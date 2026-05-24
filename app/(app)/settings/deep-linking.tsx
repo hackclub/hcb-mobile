@@ -3,7 +3,7 @@ import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { ActivityIndicator, Switch, View } from "react-native";
 
-import { useLinkingPref } from "@/providers/LinkingContext";
+import { useLinkingPref } from "@/lib/providers/LinkingContext";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 

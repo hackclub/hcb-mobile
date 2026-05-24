@@ -28,14 +28,14 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { mutate } from "swr";
 
-import AuthContext from "@/auth/auth";
+import AuthContext from "@/lib/auth/auth";
 import Button from "@/components/Button";
 import FeedbackModal from "@/components/FeedbackModal";
 import { useDevTools } from "@/lib/devtools/DevToolsContext";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { useThemeContext } from "@/providers/ThemeContext";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 
