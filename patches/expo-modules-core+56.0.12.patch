@@ -1,0 +1,18 @@
+diff --git a/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift b/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
+index bb2bdcd..9836ebf 100644
+--- a/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
++++ b/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
+@@ -30,11 +30,11 @@ internal final class SharedObjectPair: @unchecked Sendable {
+ /**
+  The registry of shared objects.
+  */
+-public final class SharedObjectRegistry: Sendable {
++public final class SharedObjectRegistry: @unchecked Sendable {
+   /**
+    Weak reference to the app context for the registry.
+    */
+-  private weak let appContext: AppContext?
++  private weak var appContext: AppContext?
+ 
+   internal struct State: Sendable {
+     /**

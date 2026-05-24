@@ -1,4 +1,4 @@
-import appIcons from "./src/lib/AppIconList";
+import appIcons from "./lib/AppIconList";
 const IS_DEV = false;
 
 export default {
@@ -13,7 +13,6 @@ export default {
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
     assetBundlePatterns: ["**/*"],
-    newArchEnabled: true,
     ios: {
       icon: "./assets/icons/default.icon",
       supportsTablet: false,
@@ -82,6 +81,9 @@ export default {
       url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
     },
     plugins: [
+      "expo-router",
+      ["@stripe/stripe-react-native", {}],
+      "expo-image",
       [
         "expo-image-picker",
         {
@@ -182,19 +184,13 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
-      [
-        "expo-web-browser",
-        {
-          experimentalLauncherActivity: true,
-        },
-      ],
+      "expo-font",
+      "expo-status-bar",
+      "expo-web-browser",
       "expo-background-task",
       [
         "@intercom/intercom-react-native",
         {
-          // appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
-          // androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
-          // iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
           useManualInit: true,
         },
       ],

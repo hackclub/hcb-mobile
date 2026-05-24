@@ -1,0 +1,44 @@
+import { Text } from "@/components/Text";
+import { View } from "react-native";
+import useSWR from "swr";
+
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import Organization from "@/lib/types/Organization";
+import { palette } from "@/styles/theme";
+import { renderDate, renderMoney } from "@/utils/format";
+
+export default function BankFeeTransaction({
+  transaction,
+  orgId,
+  navigation: _navigation,
+}: TransactionViewProps) {
+  const { data: organization } = useSWR<Organization>(`organizations/${orgId}`);
+
+  return (
+    <View>
+      <TransactionTitle>
+        <Muted>Fee payment of</Muted>{" "}
+        {renderMoney(Math.abs(transaction.amount_cents))}
+      </TransactionTitle>
+      <TransactionDetails
+        details={[
+          descriptionDetail(orgId, transaction),
+          { label: "Charged on", value: renderDate(transaction.date) },
+        ]}
+      />
+      {organization && organization.fee_percentage > 0 && (
+        <Text style={{ color: palette.muted, textAlign: "center" }}>
+          HCB charges a {Math.round(organization.fee_percentage * 100)}% fiscal
+          sponsorship fee on incoming funds.
+        </Text>
+      )}
+    </View>
+  );
+}

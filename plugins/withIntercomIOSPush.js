@@ -1,4 +1,4 @@
-const { withAppDelegate } = require("@expo/config-plugins");
+const { withAppDelegate } = require("expo/config-plugins");
 
 function withIntercomIOSPush(config) {
   console.log("🔧 Running withIntercomIOSPush plugin...");
