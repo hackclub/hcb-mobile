@@ -5,7 +5,7 @@ import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { router, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, RefreshControl, useColorScheme, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
@@ -35,13 +35,23 @@ type CardItemProps = {
   patternDimensions?: { width: number; height: number };
 };
 
-const CardItem = ({
+const STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  inactive: 1,
+  frozen: 2,
+  canceled: 3,
+  expired: 4,
+};
+
+const panGesture = Gesture.Pan().activateAfterLongPress(520);
+
+const CardItem = memo(function CardItem({
   item,
   isActive,
   onPress,
   pattern,
   patternDimensions,
-}: CardItemProps) => {
+}: CardItemProps) {
   const drag = useReorderableDrag();
   return (
     <Pressable
@@ -54,15 +64,13 @@ const CardItem = ({
     >
       <PaymentCard
         card={item}
-        style={{
-          marginBottom: 10,
-        }}
+        style={{ marginBottom: 10 }}
         pattern={pattern}
         patternDimensions={patternDimensions}
       />
     </Pressable>
   );
-};
+});
 
 export default function Page() {
   const navigation = useNavigation();
@@ -82,18 +90,68 @@ export default function Page() {
     >
   >({});
 
+  const [canceledCardsShown, setCanceledCardsShown] = useState(true);
+  const [frozenCardsShown, setFrozenCardsShown] = useState(true);
+  const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
-    const generatePatterns = async () => {
-      if (!cards) return;
+    AsyncStorage.multiGet(["canceledCardsShown", "frozenCardsShown"]).then(
+      ([[, canceled], [, frozen]]) => {
+        if (canceled !== null) setCanceledCardsShown(canceled === "true");
+        if (frozen !== null) setFrozenCardsShown(frozen === "true");
+      },
+    );
+  }, []);
 
-      const newPatternCache: Record<
-        string,
-        { pattern: string; dimensions: { width: number; height: number } }
-      > = {};
+  const allCards = useMemo<CardWithGrant[] | undefined>(() => {
+    if (!cards) return undefined;
 
-      for (const card of cards) {
-        if (card.type !== "virtual" || !card.last4) continue;
+    const grantCardMap = new Map<string, string>();
+    (grantCards ?? []).forEach((g) => {
+      if (g.card_id) grantCardMap.set(g.card_id, g.id);
+    });
 
+    return cards
+      .filter((card): card is Card & Required<Pick<Card, "last4">> => !!card.last4)
+      .map((card) => ({ ...card, grant_id: grantCardMap.get(card.id) }))
+      .sort((a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5));
+  }, [cards, grantCards]);
+
+  useEffect(() => {
+    if (!allCards) return;
+
+    AsyncStorage.getItem("cardOrder")
+      .then((savedOrder) => {
+        if (savedOrder) {
+          const orderMap: Record<string, number> = JSON.parse(savedOrder);
+          setSortedCards(
+            [...allCards].sort(
+              (a, b) =>
+                (orderMap[a.id] ?? Number.MAX_SAFE_INTEGER) -
+                (orderMap[b.id] ?? Number.MAX_SAFE_INTEGER),
+            ),
+          );
+        } else {
+          setSortedCards(allCards);
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading saved card order", error, {
+          context: { action: "load_card_order" },
+        });
+        setSortedCards(allCards);
+      });
+  }, [allCards]);
+
+  useEffect(() => {
+    if (!cards) return;
+
+    const virtualCards = cards.filter((c) => c.type === "virtual" && c.last4);
+    if (virtualCards.length === 0) return;
+
+    Promise.all(
+      virtualCards.map(async (card) => {
         try {
           const patternData = await generate({
             input: card.id,
@@ -104,13 +162,13 @@ export default function Page() {
                   : 1
                 : 0,
           });
-          const normalizedPattern = normalizeSvg(
-            patternData.toSVG(),
-            patternData.width,
-            patternData.height,
-          );
-          newPatternCache[card.id] = {
-            pattern: normalizedPattern,
+          return {
+            id: card.id,
+            pattern: normalizeSvg(
+              patternData.toSVG(),
+              patternData.width,
+              patternData.height,
+            ),
             dimensions: {
               width: patternData.width,
               height: patternData.height,
@@ -120,33 +178,23 @@ export default function Page() {
           console.error("Error generating pattern for card", error, {
             context: { cardId: card.id },
           });
+          return null;
         }
+      }),
+    ).then((results) => {
+      const cache: typeof patternCache = {};
+      for (const r of results) {
+        if (r) cache[r.id] = { pattern: r.pattern, dimensions: r.dimensions };
       }
-
-      setPatternCache(newPatternCache);
-    };
-
-    generatePatterns();
+      setPatternCache(cache);
+    });
   }, [cards]);
 
   useFocusEffect(
     useCallback(() => {
-      const refreshData = async () => {
-        await reloadCards();
-        await reloadGrantCards();
-      };
-      refreshData();
+      reloadCards();
+      reloadGrantCards();
     }, [reloadCards, reloadGrantCards]),
-  );
-
-  const [canceledCardsShown, setCanceledCardsShown] = useState(true);
-  const [frozenCardsShown, setFrozenCardsShown] = useState(true);
-  const [allCards, setAllCards] = useState<CardWithGrant[]>();
-  const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
-  const [refreshing, setRefreshing] = useState(false);
-  const panGesture = useMemo(
-    () => Gesture.Pan().activateAfterLongPress(520),
-    [],
   );
 
   const handleOrderCard = useCallback(() => {
@@ -179,14 +227,16 @@ export default function Page() {
             ]}
             onPressAction={({ nativeEvent: { event } }) => {
               if (event === "toggleCanceledCards") {
-                const newValue = !canceledCardsShown;
-                setCanceledCardsShown(newValue);
-                AsyncStorage.setItem("canceledCardsShown", newValue.toString());
+                setCanceledCardsShown((v) => {
+                  AsyncStorage.setItem("canceledCardsShown", String(!v));
+                  return !v;
+                });
               }
               if (event === "toggleFrozenCards") {
-                const newValue = !frozenCardsShown;
-                setFrozenCardsShown(newValue);
-                AsyncStorage.setItem("frozenCardsShown", newValue.toString());
+                setFrozenCardsShown((v) => {
+                  AsyncStorage.setItem("frozenCardsShown", String(!v));
+                  return !v;
+                });
               }
             }}
             themeVariant={scheme || undefined}
@@ -226,114 +276,20 @@ export default function Page() {
     handleOrderCard,
   ]);
 
-  const combineCards = useCallback(() => {
-    if (!cards) return;
-
-    const grantCardMap = new Map<string, string>();
-    (grantCards || []).forEach((grantCard) => {
-      if (grantCard.card_id) {
-        grantCardMap.set(grantCard.card_id, grantCard.id);
-      }
+  const filteredCards = useMemo(() => {
+    if (!sortedCards) return [];
+    return sortedCards.filter((c) => {
+      if (!canceledCardsShown && (c.status === "canceled" || c.status === "expired"))
+        return false;
+      if (!frozenCardsShown && c.status === "frozen") return false;
+      return true;
     });
+  }, [sortedCards, canceledCardsShown, frozenCardsShown]);
 
-    const combinedCards: CardWithGrant[] = cards
-      .filter((card): card is Card & Required<Pick<Card, "last4">> => {
-        return !!card.last4;
-      })
-      .map((card) => {
-        const grant_id = grantCardMap.get(card.id);
-        return {
-          ...card,
-          grant_id,
-        };
-      });
-
-    const statusOrder: Record<string, number> = {
-      active: 0,
-      inactive: 1,
-      frozen: 2,
-      canceled: 3,
-      expired: 4,
-    };
-    combinedCards.sort((a, b) => {
-      const orderA = statusOrder[a.status] ?? 5;
-      const orderB = statusOrder[b.status] ?? 5;
-      return orderA - orderB;
-    });
-
-    setAllCards(combinedCards);
-  }, [cards, grantCards]);
-
-  useEffect(() => {
-    const fetchCardsShown = async () => {
-      try {
-        const isCanceledCardsShown =
-          await AsyncStorage.getItem("canceledCardsShown");
-        if (isCanceledCardsShown) {
-          setCanceledCardsShown(isCanceledCardsShown === "true");
-          await AsyncStorage.setItem(
-            "canceledCardsShown",
-            (isCanceledCardsShown === "true").toString(),
-          );
-        }
-
-        const isFrozenCardsShown =
-          await AsyncStorage.getItem("frozenCardsShown");
-        if (isFrozenCardsShown) {
-          setFrozenCardsShown(isFrozenCardsShown === "true");
-          await AsyncStorage.setItem(
-            "frozenCardsShown",
-            (isFrozenCardsShown === "true").toString(),
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching cards shown status", error, {
-          context: { action: "fetch_cards_status" },
-        });
-      }
-    };
-
-    fetchCardsShown();
-
-    if (cards && grantCards) {
-      combineCards();
-    }
-  }, [cards, grantCards, combineCards]);
-
-  // Load and apply saved order when allCards changes
-  useEffect(() => {
-    const loadSavedOrder = async () => {
-      if (!allCards) return;
-
-      try {
-        const savedOrder = await AsyncStorage.getItem("cardOrder");
-        if (savedOrder) {
-          const orderMap = JSON.parse(savedOrder);
-          const sorted = [...allCards].sort((a, b) => {
-            const orderA = orderMap[a.id] ?? Number.MAX_SAFE_INTEGER;
-            const orderB = orderMap[b.id] ?? Number.MAX_SAFE_INTEGER;
-            return orderA - orderB;
-          });
-          setSortedCards(sorted);
-        } else {
-          setSortedCards(allCards);
-        }
-      } catch (error) {
-        console.error("Error loading saved card order", error, {
-          context: { action: "load_card_order" },
-        });
-        setSortedCards(allCards);
-      }
-    };
-
-    loadSavedOrder();
-  }, [allCards]);
-
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
-      await reloadCards();
-      await reloadGrantCards();
+      await Promise.all([reloadCards(), reloadGrantCards()]);
     } catch (error) {
       console.error("Error refreshing cards", error, {
         context: { action: "refresh_cards" },
@@ -341,9 +297,9 @@ export default function Page() {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [reloadCards, reloadGrantCards]);
 
-  const saveCardOrder = async (newOrder: CardWithGrant[]) => {
+  const saveCardOrder = useCallback(async (newOrder: CardWithGrant[]) => {
     try {
       const orderMap = newOrder.reduce(
         (acc, card, index) => {
@@ -358,88 +314,80 @@ export default function Page() {
         context: { action: "save_card_order" },
       });
     }
-  };
+  }, []);
 
-  if (sortedCards) {
-    const filteredCards = sortedCards.filter((c) => {
-      if (
-        !canceledCardsShown &&
-        (c.status === "canceled" || c.status === "expired")
-      ) {
-        return false;
-      }
-      if (!frozenCardsShown && c.status === "frozen") {
-        return false;
-      }
-      return true;
-    });
-
-    if (filteredCards.length === 0) {
-      return <NoCardsEmptyState onOrderCard={handleOrderCard} />;
+  const handleCardPress = useCallback((card: CardWithGrant) => {
+    if (card.grant_id) {
+      router.push({
+        pathname: "/cards/card-grants/[id]",
+        params: { card: JSON.stringify(card), id: card.grant_id, cardId: card.id },
+      });
+    } else {
+      router.push({
+        pathname: "/cards/[id]",
+        params: { id: card.id, card: JSON.stringify(card) },
+      });
     }
+  }, []);
 
-    return (
-      <ReorderableList
-        data={filteredCards}
-        keyExtractor={(item) => item.id}
-        onReorder={({ from, to }) => {
-          Haptics.selectionAsync();
-          const newCards = [...sortedCards];
-          const [removed] = newCards.splice(from, 1);
-          newCards.splice(to, 0, removed);
-          setSortedCards(newCards);
-          saveCardOrder(newCards);
-        }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={{ paddingHorizontal: 20 }}
-        panGesture={panGesture}
-        renderItem={({ item }) => (
-          <CardItem
-            item={item}
-            isActive={false}
-            onPress={(card) =>
-              card.grant_id
-                ? router.push({
-                    pathname: "/cards/card-grants/[id]",
-                    params: {
-                      card: JSON.stringify(card),
-                      id: card.grant_id,
-                      cardId: card.id,
-                    },
-                  })
-                : router.push({
-                    pathname: "/cards/[id]",
-                    params: { id: card.id, card: JSON.stringify(card) },
-                  })
-            }
-            pattern={patternCache[item.id]?.pattern}
-            patternDimensions={patternCache[item.id]?.dimensions}
-          />
-        )}
-        ListFooterComponent={() =>
-          sortedCards.length > 2 && (
-            <Text
-              style={{
-                color: palette.muted,
-                textAlign: "center",
-                marginTop: 10,
-                marginBottom: 10,
-              }}
-            >
-              Drag to reorder cards
-            </Text>
-          )
-        }
+  const renderItem = useCallback(
+    ({ item }: { item: CardWithGrant }) => (
+      <CardItem
+        item={item}
+        isActive={false}
+        onPress={handleCardPress}
+        pattern={patternCache[item.id]?.pattern}
+        patternDimensions={patternCache[item.id]?.dimensions}
       />
-    );
-  } else {
+    ),
+    [handleCardPress, patternCache],
+  );
+
+  if (!sortedCards) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <CardListSkeleton />
       </View>
     );
   }
+
+  if (filteredCards.length === 0) {
+    return <NoCardsEmptyState onOrderCard={handleOrderCard} />;
+  }
+
+  return (
+    <ReorderableList
+      data={filteredCards}
+      keyExtractor={(item) => item.id}
+      onReorder={({ from, to }) => {
+        Haptics.selectionAsync();
+        const newCards = [...sortedCards];
+        const [removed] = newCards.splice(from, 1);
+        newCards.splice(to, 0, removed);
+        setSortedCards(newCards);
+        saveCardOrder(newCards);
+      }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      contentContainerStyle={{ paddingHorizontal: 20 }}
+      panGesture={panGesture}
+      renderItem={renderItem}
+      ListFooterComponent={
+        sortedCards.length > 2 ? (
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+          >
+            Drag to reorder cards
+          </Text>
+        ) : null
+      }
+    />
+  );
 }

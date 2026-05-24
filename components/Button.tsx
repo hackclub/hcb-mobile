@@ -71,7 +71,7 @@ export default function Button(
   const variantBaseStyle = {
     ...styles.button,
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 20,
   };
 
