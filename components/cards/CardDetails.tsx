@@ -9,6 +9,7 @@ import { View, Animated, Platform, TouchableOpacity } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { CardStatus } from "./CardStatus";
+import CopyableRow from "./CopyableRow";
 
 import Divider from "@/components/Divider";
 import UserAvatar from "@/components/UserAvatar";
@@ -41,6 +42,7 @@ interface CardDetailsProps {
   ) => Record<string, unknown>;
   user?: User;
 }
+
 
 export default function CardDetails({
   card,
@@ -78,6 +80,8 @@ export default function CardDetails({
     });
   };
 
+  const billingAddress = user?.billing_address ?? card?.user?.billing_address;
+
   return (
     <View
       style={{
@@ -94,48 +98,17 @@ export default function CardDetails({
     >
       <CardStatus card={card} />
 
-      {card?.user?.id ? (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 15,
-            paddingRight: 90,
-          }}
-        >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 15,
+          paddingRight: 90,
+        }}
+      >
+        {card?.user?.id ? (
           <UserAvatar user={card.user} size={40} style={{ marginRight: 10 }} />
-          <View style={{ flex: 1, flexShrink: 1 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "600",
-                color: themeColors.text,
-              }}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {cardName}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: palette.muted,
-                marginTop: 2,
-              }}
-            >
-              {card?.type === "virtual" ? "Virtual Card" : "Physical Card"}
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 15,
-            paddingRight: 90,
-          }}
-        >
+        ) : (
           <View
             style={{
               width: 40,
@@ -145,28 +118,30 @@ export default function CardDetails({
               marginRight: 10,
             }}
           />
-          <View>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "600",
-                color: themeColors.text,
-              }}
-            >
-              {cardName}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: palette.muted,
-                marginTop: 2,
-              }}
-            >
-              {card?.type === "virtual" ? "Virtual Card" : "Physical Card"}
-            </Text>
-          </View>
+        )}
+        <View style={{ flex: 1, flexShrink: 1 }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "600",
+              color: themeColors.text,
+            }}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {cardName}
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: palette.muted,
+              marginTop: 2,
+            }}
+          >
+            {card?.type === "virtual" ? "Virtual Card" : "Physical Card"}
+          </Text>
         </View>
-      )}
+      </View>
 
       <Divider />
 
@@ -331,224 +306,40 @@ export default function CardDetails({
         </View>
       </View>
 
-      {user?.billing_address && isCardholder && (
+      {billingAddress && isCardholder && (
         <>
           <Divider />
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                flexShrink: 1,
-              }}
-            >
-              Address Line 1
-            </Text>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <TouchableOpacity
-                onPress={() =>
-                  handleCopy(
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.address_line1 || "",
-                    "Address line 1",
-                  )
-                }
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontFamily: "JetBrainsMono-Regular",
-                    textAlign: "right",
-                    paddingLeft: 50,
-                  }}
-                >
-                  {
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.address_line1
-                  }
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {user?.billing_address?.address_line2 && (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: themeColors.text,
-                  flexShrink: 1,
-                }}
-              >
-                Address Line 2
-              </Text>
-              <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <TouchableOpacity
-                  onPress={() =>
-                    handleCopy(
-                      (user?.billing_address || card?.user?.billing_address)
-                        ?.address_line2 || "",
-                      "Address line 2",
-                    )
-                  }
-                >
-                  <Text
-                    style={{
-                      color: palette.muted,
-                      fontSize: 16,
-                      fontWeight: "500",
-                      fontFamily: "JetBrainsMono-Regular",
-                    }}
-                  >
-                    {
-                      (user?.billing_address || card?.user?.billing_address)
-                        ?.address_line2
-                    }
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+          <CopyableRow
+            label="Address Line 1"
+            value={billingAddress.address_line1}
+            onCopy={() =>
+              handleCopy(billingAddress.address_line1, "Address line 1")
+            }
+          />
+          {billingAddress.address_line2 && (
+            <CopyableRow
+              label="Address Line 2"
+              value={billingAddress.address_line2}
+              onCopy={() =>
+                handleCopy(billingAddress.address_line2 ?? "", "Address line 2")
+              }
+            />
           )}
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                flexShrink: 1,
-              }}
-            >
-              City
-            </Text>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <TouchableOpacity
-                onPress={() =>
-                  handleCopy(
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.city || "",
-                    "City",
-                  )
-                }
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontFamily: "JetBrainsMono-Regular",
-                  }}
-                >
-                  {(user?.billing_address || card?.user?.billing_address)?.city}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                flexShrink: 1,
-              }}
-            >
-              State
-            </Text>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <TouchableOpacity
-                onPress={() =>
-                  handleCopy(
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.state || "",
-                    "State",
-                  )
-                }
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontFamily: "JetBrainsMono-Regular",
-                  }}
-                >
-                  {
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.state
-                  }
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                flexShrink: 1,
-              }}
-            >
-              Postal Code
-            </Text>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <TouchableOpacity
-                onPress={() =>
-                  handleCopy(
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.postal_code || "",
-                    "Postal code",
-                  )
-                }
-              >
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontFamily: "JetBrainsMono-Regular",
-                  }}
-                >
-                  {
-                    (user?.billing_address || card?.user?.billing_address)
-                      ?.postal_code
-                  }
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <CopyableRow
+            label="City"
+            value={billingAddress.city}
+            onCopy={() => handleCopy(billingAddress.city, "City")}
+          />
+          <CopyableRow
+            label="State"
+            value={billingAddress.state}
+            onCopy={() => handleCopy(billingAddress.state, "State")}
+          />
+          <CopyableRow
+            label="Postal Code"
+            value={billingAddress.postal_code}
+            onCopy={() => handleCopy(billingAddress.postal_code, "Postal code")}
+          />
         </>
       )}
 

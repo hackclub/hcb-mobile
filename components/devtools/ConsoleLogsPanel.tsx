@@ -4,7 +4,7 @@ import * as Clipboard from "expo-clipboard";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Modal, Pressable, ScrollView, View } from "react-native";
 
-import { ConsoleLog, consoleLogger } from "../../lib/devtools/consoleLogger";
+import { ConsoleLog, consoleLogger } from "@/lib/devtools/consoleLogger";
 
 interface Props {
   colors: {

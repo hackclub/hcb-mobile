@@ -2,16 +2,15 @@ import { View } from "react-native";
 
 import { TransactionViewProps } from "./TransactionViewProps";
 
-import Badge from "@/components/Badge";
 import TransactionDetails, {
   descriptionDetail,
 } from "@/components/transaction/TransactionDetails";
 import TransactionTitle, {
   Muted,
+  statusBadge,
 } from "@/components/transaction/TransactionTitle";
 import UserMention from "@/components/UserMention";
 import { TransactionAchTransfer } from "@/lib/types/Transaction";
-import { palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
 
 export default function AchTransferTransaction({
@@ -21,15 +20,7 @@ export default function AchTransferTransaction({
 }: TransactionViewProps<TransactionAchTransfer>) {
   const isIncoming = transaction.amount_cents > 0;
 
-  const badge = transaction.pending ? (
-    <Badge icon="information-circle-outline" color={palette.info}>
-      Pending
-    </Badge>
-  ) : transaction.declined ? (
-    <Badge icon="information-circle-outline" color={palette.primary}>
-      Declined
-    </Badge>
-  ) : null;
+  const badge = statusBadge(transaction);
 
   return (
     <View>

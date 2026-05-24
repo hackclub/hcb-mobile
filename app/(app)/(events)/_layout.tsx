@@ -128,7 +128,21 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/check-deposits/index"
-          options={{ title: "Check Deposits" }}
+          options={{
+            presentation: "formSheet",
+            title: "Check Deposits",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
         />
         <Stack.Screen
           name="[id]/check-deposits/[depositId]"

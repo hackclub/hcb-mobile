@@ -3,17 +3,16 @@ import { View } from "react-native";
 
 import { TransactionViewProps } from "./TransactionViewProps";
 
-import Badge from "@/components/Badge";
 import ReceiptList from "@/components/transaction/ReceiptList";
 import TransactionDetails, {
   descriptionDetail,
 } from "@/components/transaction/TransactionDetails";
 import TransactionTitle, {
   Muted,
+  statusBadge,
 } from "@/components/transaction/TransactionTitle";
 import UserMention from "@/components/UserMention";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
-import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
 function getCountryFlag(countryCode: string) {
@@ -68,19 +67,7 @@ export default function CardChargeTransaction({
   const merchantName = merchant.smart_name || merchant.name;
   const flag = getCountryFlag(merchant.country);
 
-  const badge = transaction.pending ? (
-    <Badge icon="information-circle-outline" color={palette.info}>
-      Pending
-    </Badge>
-  ) : transaction.reversed ? (
-    <Badge icon="information-circle-outline" color={palette.info}>
-      Reversed
-    </Badge>
-  ) : transaction.declined ? (
-    <Badge icon="information-circle-outline" color={palette.primary}>
-      Declined
-    </Badge>
-  ) : null;
+  const badge = statusBadge(transaction);
 
   return (
     <View>

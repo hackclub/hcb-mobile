@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 
-import { NetworkLog, networkLogger } from "../../lib/devtools/networkLogger";
+import { NetworkLog, networkLogger } from "@/lib/devtools/networkLogger";
 
 interface Props {
   colors: {

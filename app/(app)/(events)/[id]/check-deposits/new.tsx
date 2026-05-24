@@ -15,10 +15,9 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import Button from "@/components/Button";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
@@ -214,26 +213,17 @@ export default function NewCheckDepositPage() {
         .post("check_deposits", { body })
         .json<{ id: string }>();
 
-      router.replace({
+      router.dismiss();
+      router.push({
         pathname: "/(events)/[id]/check-deposits/[depositId]",
         params: { id, depositId: response.id },
       });
     } catch (err) {
       console.error("Check deposit submission failed", err);
-      let message = "Please check your details and try again.";
-      try {
-        const body = await (err as { response?: Response }).response?.json();
-        if (Array.isArray(body?.messages) && body.messages.length > 0) {
-          message = body.messages[0];
-        }
-      } catch {
-        // ignore parse errors, fall back to default message
-      }
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Submission failed",
-        textBody: message,
-      });
+      showAlert(
+        "Submission failed",
+        await parseApiError(err, "Please check your details and try again."),
+      );
     } finally {
       setSubmitting(false);
     }

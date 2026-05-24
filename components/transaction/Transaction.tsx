@@ -1,5 +1,3 @@
-import { faPaypal } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { Text } from "@/components/Text";
@@ -9,8 +7,7 @@ import { StyleSheet, View, ViewProps } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { match } from "ts-pattern";
 
-import WiseIcon from "@/components/icons/WiseIcon";
-import UserAvatar from "@/components/UserAvatar";
+import TransactionIcon from "@/components/transaction/TransactionIcon";
 import {
   TransactionCardCharge,
   TransactionType,
@@ -96,90 +93,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function transactionIcon({ code, ...transaction }: TransactionWithoutId) {
-  switch (code) {
-    case TransactionType.Donation:
-    case TransactionType.PartnerDonation:
-      return "support";
-    case TransactionType.Check:
-    case TransactionType.IncreaseCheck:
-      return "email";
-    case TransactionType.CheckDeposit:
-      return "briefcase";
-    case TransactionType.Disbursement:
-      if (transaction.memo.startsWith("Grant to")) {
-        return "purse-fill";
-      } else if (transaction.memo === "💰 Hackathon grant from Hack Club") {
-        return "purse";
-      }
-      if (transaction.amount_cents > 0) {
-        return "door-enter";
-      } else {
-        return "door-leave";
-      }
-    case TransactionType.StripeCard:
-    case TransactionType.StripeForceCapture:
-      if (transaction.amount_cents > 0) {
-        return "view-reload";
-      }
-      return "card";
-    case TransactionType.BankFee:
-      return "minus";
-    case TransactionType.FeeRevenue:
-      return "plus";
-    case TransactionType.Invoice:
-      return "briefcase";
-    case TransactionType.ExpensePayout:
-      return "attachment";
-    case TransactionType.Wire:
-      return "web";
-    case TransactionType.Paypal:
-      return "paypal";
-    case TransactionType.Wise:
-      return "wise";
-    case TransactionType.AchTransfer:
-      return "payment-transfer";
-    default:
-      return "payment-docs";
-  }
-}
-
-function TransactionIcon({
-  transaction,
-  hideAvatar,
-  hideIcon,
-}: {
-  transaction: TransactionWithoutId;
-  hideAvatar?: boolean;
-  hideIcon?: boolean;
-}) {
-  if (hideIcon) return null;
-
-  const iconName = transactionIcon(transaction);
-  const iconColor =
-    transaction.appearance === "hackathon_grant"
-      ? palette.black
-      : palette.muted;
-
-  if (!hideAvatar && transaction.code === TransactionType.StripeCard) {
-    return (
-      <UserAvatar
-        user={(transaction as TransactionCardCharge).card_charge.card.user}
-        size={20}
-      />
-    );
-  }
-
-  if (iconName === "paypal") {
-    return <FontAwesomeIcon color={iconColor} icon={faPaypal} size={20} />;
-  }
-
-  if (iconName === "wise") {
-    return <WiseIcon color={iconColor} size={22} />;
-  }
-
-  return <Icon glyph={iconName} color={iconColor} size={22} />;
-}
 
 function Transaction({
   transaction,

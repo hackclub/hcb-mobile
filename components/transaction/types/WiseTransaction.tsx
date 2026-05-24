@@ -2,16 +2,15 @@ import { View } from "react-native";
 
 import { TransactionViewProps } from "./TransactionViewProps";
 
-import Badge from "@/components/Badge";
 import TransactionDetails, {
   descriptionDetail,
 } from "@/components/transaction/TransactionDetails";
 import TransactionTitle, {
   Muted,
+  statusBadge,
 } from "@/components/transaction/TransactionTitle";
 import UserMention from "@/components/UserMention";
 import { TransactionWise } from "@/lib/types/Transaction";
-import { palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
 
 export default function WiseTransaction({
@@ -19,15 +18,7 @@ export default function WiseTransaction({
   orgId,
   navigation: _navigation,
 }: TransactionViewProps<TransactionWise>) {
-  const badge = transaction.pending ? (
-    <Badge icon="information-circle-outline" color={palette.info}>
-      Pending
-    </Badge>
-  ) : transaction.declined ? (
-    <Badge icon="information-circle-outline" color={palette.primary}>
-      Declined
-    </Badge>
-  ) : null;
+  const badge = statusBadge(transaction);
 
   return (
     <View>

@@ -3,7 +3,36 @@ import { Text } from "@/components/Text";
 import { PropsWithChildren, ReactNode } from "react";
 import { View } from "react-native";
 
+import Badge from "@/components/Badge";
+import { TransactionBase } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
+
+export function statusBadge(
+  transaction: Pick<TransactionBase, "pending" | "declined" | "reversed">,
+) {
+  if (transaction.pending) {
+    return (
+      <Badge icon="information-circle-outline" color={palette.info}>
+        Pending
+      </Badge>
+    );
+  }
+  if (transaction.reversed) {
+    return (
+      <Badge icon="information-circle-outline" color={palette.info}>
+        Reversed
+      </Badge>
+    );
+  }
+  if (transaction.declined) {
+    return (
+      <Badge icon="information-circle-outline" color={palette.primary}>
+        Declined
+      </Badge>
+    );
+  }
+  return null;
+}
 
 export function Muted({ children }: PropsWithChildren) {
   return <Text style={{ color: palette.muted, fontSize: 30 }}>{children}</Text>;

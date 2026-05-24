@@ -1,5 +1,12 @@
 import "expo-dev-client";
 
+// Polyfill AbortSignal.throwIfAborted which is missing in Hermes
+if (typeof AbortSignal !== "undefined" && !AbortSignal.prototype.throwIfAborted) {
+  AbortSignal.prototype.throwIfAborted = function () {
+    if (this.aborted) throw this.reason;
+  };
+}
+
 import * as SentryReact from "@sentry/react";
 import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";

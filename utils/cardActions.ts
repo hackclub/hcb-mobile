@@ -9,7 +9,7 @@ import User from "../lib/types/User";
 
 import { validateFields } from "./cardHelpers";
 import * as Haptics from "./haptics";
-import { renderMoney } from "./util";
+import { renderMoney } from "./format";
 
 export const toggleCardFrozen = (
   card: Card,

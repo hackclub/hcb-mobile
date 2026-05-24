@@ -1,7 +1,7 @@
 import { TokenResponse } from "expo-auth-session";
 import React, { useState, useEffect } from "react";
 
-import { tokenManager } from "../lib/tokenManager";
+import { tokenManager } from "../tokenManager";
 
 import AuthContext from "./auth";
 

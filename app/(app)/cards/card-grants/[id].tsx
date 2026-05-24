@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
-import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Animated,
@@ -17,6 +17,7 @@ import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
 import AddToWalletSection from "@/components/cards/AddToWalletSection";
+import ButtonGrid from "@/components/cards/ButtonGrid";
 import CardDetails from "@/components/cards/CardDetails";
 import CardDisplay from "@/components/cards/CardDisplay";
 import CardError from "@/components/cards/CardError";
@@ -35,6 +36,7 @@ import { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import useSkeletonAnimation from "@/lib/useSkeletonAnimation";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import {
@@ -45,6 +47,7 @@ import {
   toggleCardDetails,
   toggleCardFrozen,
 } from "@/utils/cardActions";
+import { getCardName } from "@/utils/cardHelpers";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { normalizeSvg } from "@/utils/format";
@@ -93,6 +96,7 @@ export default function Page() {
     loading: detailsLoading,
   } = useStripeCardDetails(card?.id || "");
 
+  const cardName = getCardName(card, "Grant Card");
   const isCardholder = user?.id === card?.user?.id;
   const grantPolicy =
     grantCard && organization
@@ -111,7 +115,7 @@ export default function Page() {
   const [cardExpanded, setCardExpanded] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const skeletonAnim = useRef(new Animated.Value(0)).current;
+  const createSkeletonStyle = useSkeletonAnimation();
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showTopupModal, setShowTopupModal] = useState(false);
   const [showPurposeModal, setShowPurposeModal] = useState(false);
@@ -125,7 +129,6 @@ export default function Page() {
     width: number;
     height: number;
   }>();
-  const [cardName, setCardName] = useState("");
   const [cardLoaded, setCardLoaded] = useState(false);
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
   const [isReturningGrant, setIsReturningGrant] = useState(false);
@@ -233,24 +236,6 @@ export default function Page() {
   }, [fadeAnim]);
 
   useEffect(() => {
-    if (card?.name) {
-      setCardName(card.name);
-    } else if (card?.user?.name) {
-      const nameParts = card.user.name.split(" ");
-      const firstName = nameParts[0] || "";
-      const lastInitial =
-        nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
-      setCardName(
-        lastInitial
-          ? `${firstName} ${lastInitial}'s Card`
-          : `${firstName}'s Card`,
-      );
-    } else {
-      setCardName("Grant Card");
-    }
-  }, [card]);
-
-  useEffect(() => {
     navigation.setOptions({ title: cardName || "Grant Card" });
   }, [cardName, navigation]);
 
@@ -263,23 +248,6 @@ export default function Page() {
       setTransactionError(null);
     }
   }, [transactionsError, errorDisplayReady]);
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(skeletonAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(skeletonAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-      ]),
-    ).start();
-  }, [skeletonAnim]);
 
   useEffect(() => {
     const generateCardPattern = async () => {
@@ -315,24 +283,6 @@ export default function Page() {
     generateCardPattern();
   }, [card, isVirtualCard]);
 
-  const skeletonBackground = skeletonAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["rgba(0, 0, 0, 0.03)", "rgba(0, 0, 0, 0.12)"],
-  });
-
-  const createSkeletonStyle = (
-    width: number,
-    height: number,
-    extraStyles = {},
-  ) => ({
-    width,
-    height,
-    backgroundColor: skeletonBackground,
-    borderRadius: 8,
-    overflow: "hidden" as const,
-    ...extraStyles,
-  });
-
   const handleActivateGrant = async () => {
     setIsActivating(true);
     try {
@@ -344,13 +294,22 @@ export default function Page() {
         Alert.alert("Success", "Grant activated successfully!");
         maybeRequestReview();
       } else {
-        const data = (await response.json()) as { messages?: string[]; error?: string };
-        Alert.alert("Error", data.messages?.[0] || data.error || "Failed to activate grant");
+        const data = (await response.json()) as {
+          messages?: string[];
+          error?: string;
+        };
+        Alert.alert(
+          "Error",
+          data.messages?.[0] || data.error || "Failed to activate grant",
+        );
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     } catch (err) {
       console.error("Error activating grant", err, { grantId: fullGrantId });
-      Alert.alert("Error", await parseApiError(err, "Failed to activate grant. Please try again later."));
+      Alert.alert(
+        "Error",
+        await parseApiError(err, "Failed to activate grant. Please try again later."),
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsActivating(false);
@@ -394,10 +353,8 @@ export default function Page() {
     }
   }, [reloadGrant, mutateCard, mutateTransactions, fullGrantId]);
 
-  const canTopupCard = (card: Card | undefined) => {
-    if (!card || !card.status) return false;
-    return card.status !== "canceled" && card.status !== "expired";
-  };
+  const canTopupCard = (c: Card | undefined) =>
+    !!c && c.status !== "canceled" && c.status !== "expired";
 
   if (!grantCard) {
     return <CardSkeleton />;
@@ -419,7 +376,7 @@ export default function Page() {
   }
 
   function getGrantCardActionButtons() {
-    const buttons = [];
+    const buttons: ReactElement[] = [];
 
     if (
       (cardPolicy?.freeze() || cardPolicy?.defrost()) &&
@@ -573,27 +530,7 @@ export default function Page() {
       );
     }
 
-    if (buttons.length === 0) return null;
-
-    const rows = [];
-    for (let i = 0; i < buttons.length; i += 2) {
-      const rowButtons = buttons.slice(i, i + 2);
-      rows.push(rowButtons);
-    }
-
-    return (
-      <View style={{ marginBottom: 20, gap: 15 }}>
-        {rows.map((row, rowIndex) => (
-          <View key={rowIndex} style={{ flexDirection: "row", gap: 15 }}>
-            {row.map((button) =>
-              cloneElement(button, {
-                style: { ...button.props.style, flex: 1 },
-              }),
-            )}
-          </View>
-        ))}
-      </View>
-    );
+    return <ButtonGrid buttons={buttons} />;
   }
 
   return (

@@ -23,12 +23,11 @@ interface CheckDepositsResponse {
 export default function CheckDepositsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
-
   const { data, isLoading } = useOfflineSWR<CheckDepositsResponse>(
-    `organizations/${id}/check_deposits`,
+    `check_deposits?organization_id=${id}`,
   );
 
-  const deposits = data?.data ?? [];
+  const deposits = data
 
   return (
     <ScrollView

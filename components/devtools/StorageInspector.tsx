@@ -15,7 +15,7 @@ import {
 import {
   SECURE_STORE_KEYS,
   ASYNC_STORAGE_KEYS,
-} from "../../lib/devtools/storageKeys";
+} from "@/lib/devtools/storageKeys";
 
 interface Props {
   colors: {

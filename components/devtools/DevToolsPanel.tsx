@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal, Pressable, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useDevTools } from "../../lib/devtools/DevToolsContext";
+import { useDevTools } from "@/lib/devtools/DevToolsContext";
 
 import AuthStatePanel from "./AuthStatePanel";
 import ConsoleLogsPanel from "./ConsoleLogsPanel";

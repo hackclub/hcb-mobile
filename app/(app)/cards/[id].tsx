@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { generate } from "hcb-geo-pattern";
-import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import {
   Animated,
   Platform,
@@ -16,6 +16,7 @@ import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
 import AddToWalletSection from "@/components/cards/AddToWalletSection";
+import ButtonGrid from "@/components/cards/ButtonGrid";
 import CardDetails from "@/components/cards/CardDetails";
 import CardDisplay from "@/components/cards/CardDisplay";
 import CardError from "@/components/cards/CardError";
@@ -31,6 +32,7 @@ import User from "@/lib/types/User";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import useSkeletonAnimation from "@/lib/useSkeletonAnimation";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import {
@@ -39,6 +41,7 @@ import {
   toggleCardDetails,
   toggleCardFrozen,
 } from "@/utils/cardActions";
+import { getCardName } from "@/utils/cardHelpers";
 import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/format";
 
@@ -78,6 +81,7 @@ export default function CardPage() {
     loading: detailsLoading,
   } = useStripeCardDetails(card?.id || "");
 
+  const cardName = getCardName(card);
   const isCardholder = user?.id === card?.user?.id;
   const cardPolicy =
     card && organization
@@ -90,7 +94,7 @@ export default function CardPage() {
   const [cardExpanded, setCardExpanded] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const skeletonAnim = useRef(new Animated.Value(0)).current;
+  const createSkeletonStyle = useSkeletonAnimation();
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [last4, setLast4] = useState("");
@@ -100,7 +104,6 @@ export default function CardPage() {
     width: number;
     height: number;
   }>();
-  const [cardName, setCardName] = useState("");
   const [isBurningCard, setIsBurningCard] = useState(false);
   const isDark = useIsDark();
   const wallet = useAddToWallet(card?.id || "", {
@@ -141,24 +144,8 @@ export default function CardPage() {
   }, [fadeAnim]);
 
   useEffect(() => {
-    if (card?.name) {
-      setCardName(card.name);
-    } else if (card?.user?.name) {
-      const nameParts = card?.user?.name.split(" ");
-      const firstName = nameParts[0] || "";
-      const lastInitial =
-        nameParts.length > 1 ? `${nameParts[1]?.charAt(0) || ""}` : "";
-      setCardName(
-        lastInitial
-          ? `${firstName} ${lastInitial}'s Card`
-          : `${firstName}'s Card`,
-      );
-    }
-  }, [card]);
-
-  useEffect(() => {
     navigation.setOptions({ title: cardName });
-  }, [cardName, navigation, themeColors.text]);
+  }, [cardName, navigation]);
 
   useEffect(() => {
     if (
@@ -264,43 +251,6 @@ export default function CardPage() {
   }, [mutateCard, card?.id, mutateTransactions]);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(skeletonAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(skeletonAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: false,
-        }),
-      ]),
-    ).start();
-  }, [skeletonAnim]);
-
-  const skeletonBackground = skeletonAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["rgba(0, 0, 0, 0.03)", "rgba(0, 0, 0, 0.12)"],
-  });
-
-  const createSkeletonStyle = (
-    width: number,
-    height: number,
-    extraStyles = {},
-  ) => ({
-    width,
-    height,
-    backgroundColor: skeletonBackground,
-    borderRadius: 8,
-    overflow: "hidden" as const,
-    ...extraStyles,
-  });
-
-  const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
-
-  useEffect(() => {
     const generateCardPattern = async () => {
       if (!card || !isVirtualCard) return;
 
@@ -334,8 +284,10 @@ export default function CardPage() {
     generateCardPattern();
   }, [card, isVirtualCard]);
 
+  const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
+
   function getCardActionButtons() {
-    const buttons = [];
+    const buttons: ReactElement[] = [];
 
     if (!isVirtualCard && card?.status === "inactive") {
       buttons.push(
@@ -432,27 +384,7 @@ export default function CardPage() {
       );
     }
 
-    if (buttons.length === 0) return null;
-
-    const rows = [];
-    for (let i = 0; i < buttons.length; i += 2) {
-      const rowButtons = buttons.slice(i, i + 2);
-      rows.push(rowButtons);
-    }
-
-    return (
-      <View style={{ marginBottom: 20, gap: 15 }}>
-        {rows.map((row, rowIndex) => (
-          <View key={rowIndex} style={{ flexDirection: "row", gap: 15 }}>
-            {row.map((button) =>
-              cloneElement(button, {
-                style: { ...button.props.style, flex: 1 },
-              }),
-            )}
-          </View>
-        ))}
-      </View>
-    );
+    return <ButtonGrid buttons={buttons} />;
   }
 
   if (!card && !cardLoaded && !cardError) {

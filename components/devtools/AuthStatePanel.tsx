@@ -4,8 +4,8 @@ import { useContext } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import useSWR from "swr";
 
-import AuthContext from "../../auth/auth";
-import User from "../../lib/types/User";
+import AuthContext from "@/lib/auth/auth";
+import User from "@/lib/types/User";
 
 interface Props {
   colors: {

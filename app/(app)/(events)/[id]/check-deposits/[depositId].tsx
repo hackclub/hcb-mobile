@@ -3,7 +3,9 @@ import { useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import ImageView from "react-native-image-viewing";
 
 import Badge from "@/components/Badge";
 import UserMention from "@/components/UserMention";
@@ -75,6 +77,7 @@ export default function CheckDepositDetailPage() {
   const { data: deposit, isLoading } = useOfflineSWR<CheckDepositDetail>(
     `check_deposits/${depositId}`,
   );
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   if (isLoading || !deposit) {
     return (
@@ -148,16 +151,21 @@ export default function CheckDepositDetailPage() {
               >
                 Front
               </Text>
-              <Image
-                source={{ uri: deposit.front_url }}
-                style={{
-                  width: "100%",
-                  height: 160,
-                  borderRadius: 12,
-                  backgroundColor: themeColors.card,
-                }}
-                contentFit="cover"
-              />
+              <Pressable
+                onPress={() => setViewerIndex(0)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+              >
+                <Image
+                  source={{ uri: deposit.front_url }}
+                  style={{
+                    width: "100%",
+                    height: 160,
+                    borderRadius: 12,
+                    backgroundColor: themeColors.card,
+                  }}
+                  contentFit="cover"
+                />
+              </Pressable>
             </View>
           )}
           {deposit.back_url && (
@@ -173,16 +181,23 @@ export default function CheckDepositDetailPage() {
               >
                 Back
               </Text>
-              <Image
-                source={{ uri: deposit.back_url }}
-                style={{
-                  width: "100%",
-                  height: 160,
-                  borderRadius: 12,
-                  backgroundColor: themeColors.card,
-                }}
-                contentFit="cover"
-              />
+              <Pressable
+                onPress={() =>
+                  setViewerIndex(deposit.front_url ? 1 : 0)
+                }
+                style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+              >
+                <Image
+                  source={{ uri: deposit.back_url }}
+                  style={{
+                    width: "100%",
+                    height: 160,
+                    borderRadius: 12,
+                    backgroundColor: themeColors.card,
+                  }}
+                  contentFit="cover"
+                />
+              </Pressable>
             </View>
           )}
         </View>
@@ -218,31 +233,16 @@ export default function CheckDepositDetailPage() {
           </>
         )}
       </View>
-      <Pressable
-        onPress={() =>
-          router.push({
-            pathname: "/(events)/[id]/check-deposits",
-            params: { id },
-          })
-        }
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          backgroundColor: themeColors.card,
-          borderRadius: 14,
-          paddingVertical: 16,
-          opacity: pressed ? 0.6 : 1,
-        })}
-      >
-        <Ionicons name="list-outline" size={18} color={palette.muted} />
-        <Text
-          style={{ color: themeColors.text, fontSize: 15, fontWeight: "500" }}
-        >
-          View all deposits
-        </Text>
-      </Pressable>
+      <ImageView
+        images={[
+          ...(deposit.front_url ? [{ uri: deposit.front_url }] : []),
+          ...(deposit.back_url ? [{ uri: deposit.back_url }] : []),
+        ]}
+        imageIndex={viewerIndex ?? 0}
+        visible={viewerIndex !== null}
+        onRequestClose={() => setViewerIndex(null)}
+        presentationStyle="fullScreen"
+      />
     </ScrollView>
   );
 }
