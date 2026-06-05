@@ -3,8 +3,9 @@ import { useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import React, { ReactElement } from "react";
-import { TouchableHighlight, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import { useIsDark } from "@/lib/useColorScheme";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 
@@ -44,86 +45,121 @@ export default function TransactionDetails({
   title?: string;
 }) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
+  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
 
   return (
-    <View style={{ marginBottom: 30 }}>
+    <View style={{ marginBottom: 20 }}>
       {title && (
         <Text
           style={{
             color: palette.muted,
-            fontSize: 12,
+            fontSize: 13,
+            fontWeight: "600",
             textTransform: "uppercase",
-            marginBottom: 5,
-            marginLeft: 10,
+            letterSpacing: 0.5,
+            marginBottom: 8,
+            marginLeft: 2,
           }}
         >
           {title}
         </Text>
       )}
 
-      {details.map(
-        (
-          {
-            label,
-            value,
-            onPress,
-            pressIconName = "chevron-forward-outline",
-            fontFamily,
-          },
-          index,
-        ) => (
-          <TouchableHighlight
-            onPress={onPress}
-            underlayColor={themeColors.background}
-            activeOpacity={0.7}
-            key={label}
-          >
-            <View
-              style={{
-                backgroundColor: themeColors.card,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                padding: 10,
-                borderTopLeftRadius: index === 0 ? 8 : 0,
-                borderTopRightRadius: index === 0 ? 8 : 0,
-                borderBottomLeftRadius: index === details.length - 1 ? 8 : 0,
-                borderBottomRightRadius: index === details.length - 1 ? 8 : 0,
-                maxHeight: 70,
-              }}
-            >
-              <Text style={{ color: palette.muted, marginRight: 10 }}>
-                {label}
-              </Text>
-              {typeof value === "string" ? (
+      <View
+        style={{
+          backgroundColor: themeColors.card,
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor,
+          overflow: "hidden",
+        }}
+      >
+        {details.map(
+          (
+            {
+              label,
+              value,
+              onPress,
+              pressIconName = "chevron-forward-outline",
+              fontFamily,
+            },
+            index,
+          ) => {
+            const rowContent = (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingHorizontal: 14,
+                  paddingVertical: 12,
+                  gap: 12,
+                }}
+              >
                 <Text
-                  numberOfLines={2}
-                  style={{
-                    color: themeColors.text,
-                    overflow: "hidden",
-                    flex: 1,
-                    textAlign: "right",
-                    fontFamily,
-                  }}
-                  selectable
+                  style={{ color: subColor, fontSize: 14, flexShrink: 0 }}
                 >
-                  {value}
+                  {label}
                 </Text>
-              ) : (
-                value
-              )}
-              {onPress && (
-                <Ionicons
-                  name={pressIconName}
-                  size={18}
-                  color={palette.muted}
-                  style={{ marginLeft: 8 }}
-                />
-              )}
-            </View>
-          </TouchableHighlight>
-        ),
-      )}
+                {typeof value === "string" ? (
+                  <Text
+                    numberOfLines={3}
+                    style={{
+                      color: themeColors.text,
+                      flex: 1,
+                      textAlign: "right",
+                      fontFamily,
+                      fontSize: 14,
+                    }}
+                    selectable
+                  >
+                    {value}
+                  </Text>
+                ) : (
+                  <View style={{ flex: 1, alignItems: "flex-end" }}>
+                    {value}
+                  </View>
+                )}
+                {onPress && (
+                  <Ionicons
+                    name={pressIconName}
+                    size={16}
+                    color={palette.muted}
+                  />
+                )}
+              </View>
+            );
+
+            return (
+              <View key={label}>
+                {index > 0 && (
+                  <View
+                    style={{
+                      height: StyleSheet.hairlineWidth,
+                      backgroundColor: borderColor,
+                      marginHorizontal: 14,
+                    }}
+                  />
+                )}
+                {onPress ? (
+                  <Pressable
+                    onPress={onPress}
+                    style={({ pressed }) => ({
+                      opacity: pressed ? 0.6 : 1,
+                    })}
+                  >
+                    {rowContent}
+                  </Pressable>
+                ) : (
+                  rowContent
+                )}
+              </View>
+            );
+          },
+        )}
+      </View>
     </View>
   );
 }

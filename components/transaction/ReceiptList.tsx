@@ -7,7 +7,7 @@ import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated, { Easing, Layout, withTiming } from "react-native-reanimated";
 import useSWR from "swr";
@@ -203,9 +203,12 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
       <Text
         style={{
           color: palette.muted,
-          fontSize: 12,
+          fontSize: 13,
+          fontWeight: "600",
           textTransform: "uppercase",
+          letterSpacing: 0.5,
           marginBottom: 10,
+          marginLeft: 2,
         }}
       >
         Receipts
@@ -218,12 +221,13 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
         }}
       >
         {receipts?.map((receipt) => (
-          <TouchableOpacity
+          <Pressable
             key={receipt.id}
             onPress={() => {
               setSelectedReceipt(receipt);
               setIsImageViewerVisible(true);
             }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
           >
             <Animated.View key={receipt.id} entering={ZoomAndFadeIn}>
               <View style={{ position: "relative" }}>
@@ -234,7 +238,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                       width: 150,
                       height: 200,
                       backgroundColor: themeColors.card,
-                      borderRadius: 8,
+                      borderRadius: 14,
                     }}
                   />
                 ) : (
@@ -243,7 +247,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                       width: 150,
                       height: 200,
                       backgroundColor: themeColors.card,
-                      borderRadius: 8,
+                      borderRadius: 14,
                       justifyContent: "center",
                       alignItems: "center",
                     }}
@@ -251,16 +255,16 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                     <Icon glyph="photo" size={52} color={palette.muted} />
                   </View>
                 )}
-                <TouchableOpacity
-                  style={{
+                <Pressable
+                  style={({ pressed }) => ({
                     position: "absolute",
                     top: 6,
                     right: 6,
                     padding: 4,
                     borderRadius: 100,
                     backgroundColor: isDark ? "#26181F" : "#ECE0E2",
-                    opacity: 0.8,
-                  }}
+                    opacity: pressed ? 0.6 : 0.8,
+                  })}
                   onPress={() => handleDeleteReceipt(receipt)}
                   disabled={deletingReceiptId === receipt.id || !isOnline}
                 >
@@ -269,7 +273,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                   ) : (
                     <Icon glyph="view-close" size={20} color="red" />
                   )}
-                </TouchableOpacity>
+                </Pressable>
               </View>
               <Text
                 style={{ color: palette.muted, fontSize: 12, marginTop: 5 }}
@@ -278,7 +282,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
                 ago
               </Text>
             </Animated.View>
-          </TouchableOpacity>
+          </Pressable>
         ))}
 
         <FileViewerModal
@@ -291,17 +295,21 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           }}
         />
 
-        <TouchableOpacity
+        <Pressable
           ref={addReceiptButtonRef}
           onPress={() => handleActionSheet(addReceiptButtonRef)}
           disabled={!actionSheetIsOnline}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         >
           <Animated.View
             style={{
               width: 150,
               height: 200,
-              borderRadius: 8,
+              borderRadius: 14,
               backgroundColor: themeColors.card,
+              borderWidth: 1,
+              borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+              borderStyle: "dashed",
               alignItems: "center",
               justifyContent: "center",
               opacity: actionSheetIsOnline ? 1 : 0.7,
@@ -323,20 +331,20 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               </>
             )}
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {missingReceipt && !lostReceipt && (
-        <TouchableOpacity
+        <Pressable
           onPress={handleMarkLostReceipt}
           disabled={isMarkingLostReceipt || !isOnline}
-          style={{
+          style={({ pressed }) => ({
             flexDirection: "row",
             alignItems: "center",
             alignSelf: "flex-start",
             marginTop: 12,
-            opacity: isOnline ? 1 : 0.5,
-          }}
+            opacity: isOnline ? (pressed ? 0.6 : 1) : 0.5,
+          })}
         >
           {isMarkingLostReceipt ? (
             <ActivityIndicator
@@ -361,7 +369,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
           >
             No/lost receipt?
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
 
       {lostReceipt && receipts && receipts.length === 0 && (

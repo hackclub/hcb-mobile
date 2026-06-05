@@ -3,7 +3,7 @@ import { useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { Pressable, View } from "react-native";
 
 import FileViewerModal from "@/components/FileViewerModal";
 import UserMention from "@/components/UserMention";
@@ -51,7 +51,7 @@ export default function Comment({ comment }: { comment: IComment }) {
           backgroundColor: themeColors.card,
           borderWidth: 1,
           borderColor: isDark ? "#3B4858" : "rgba(51,142,218,.25)",
-          borderRadius: 8,
+          borderRadius: 14,
           padding: 16,
           ...(comment.admin_only && {
             borderColor: "#ff8c37",
@@ -77,8 +77,8 @@ export default function Comment({ comment }: { comment: IComment }) {
             margin: -16,
             paddingHorizontal: 16,
             paddingTop: 6,
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
+            borderTopLeftRadius: 14,
+            borderTopRightRadius: 14,
           }}
         >
           <View style={{ flex: 1 }}>
@@ -118,19 +118,19 @@ export default function Comment({ comment }: { comment: IComment }) {
         </Text>
 
         {comment.file && (
-          <TouchableOpacity
-            style={{
+          <Pressable
+            style={({ pressed }) => ({
               flexDirection: "row",
               alignItems: "center",
               backgroundColor: themeColors.background,
-              borderRadius: 8,
+              borderRadius: 10,
               padding: 12,
               borderWidth: 1,
               borderColor: themeColors.border,
               marginTop: 8,
-            }}
+              opacity: pressed ? 0.7 : 1,
+            })}
             onPress={() => setFileViewerVisible(true)}
-            activeOpacity={0.7}
           >
             <View
               style={{
@@ -173,7 +173,7 @@ export default function Comment({ comment }: { comment: IComment }) {
             </View>
 
             <Ionicons name="chevron-forward" size={16} color={palette.muted} />
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 

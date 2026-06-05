@@ -178,33 +178,30 @@ export default function CommentField({
       )}
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <TouchableOpacity
-          style={{
+        <Pressable
+          style={({ pressed }) => ({
             borderWidth: 1,
-            borderColor: "#348EDA",
+            borderColor: palette.info,
             borderStyle: "dashed",
             borderRadius: 8,
             paddingHorizontal: 12,
             paddingVertical: 6,
             alignItems: "center",
             backgroundColor: "transparent",
-          }}
+            opacity: pressed ? 0.6 : 1,
+          })}
           onPress={selectedFile ? removeFile : pickFile}
         >
-          <Text style={{ color: "#348EDA", fontSize: 14, fontWeight: "500" }}>
+          <Text style={{ color: palette.info, fontSize: 14, fontWeight: "500" }}>
             {selectedFile ? "Remove file" : "Choose file"}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={{ fontSize: 14, color: palette.muted }}>
           {selectedFile ? selectedFile.name : "No file chosen"}
         </Text>
       </View>
-      <Button
-        onPress={submitComment}
-        disabled={isSubmitting}
-        style={{ backgroundColor: "#3199EE", paddingVertical: 12 }}
-      >
+      <Button onPress={submitComment} disabled={isSubmitting}>
         Add Comment
       </Button>
     </View>

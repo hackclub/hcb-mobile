@@ -10,13 +10,13 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   TouchableOpacity,
   View,
 } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import FileViewerModal from "@/components/FileViewerModal";
 import UploadIcon from "@/components/icons/UploadIcon";
@@ -275,15 +275,16 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: themeColors.background }}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <ActivityIndicator size="large" />
-        </View>
-      </SafeAreaView>
+        <ActivityIndicator size="large" />
+      </View>
     );
   }
 
@@ -353,16 +354,16 @@ export default function Page() {
                           <Icon glyph="photo" size={52} color={palette.muted} />
                         </View>
                       )}
-                      <TouchableOpacity
-                        style={{
+                      <Pressable
+                        style={({ pressed }) => ({
                           position: "absolute",
                           top: 6,
                           right: 6,
                           padding: 4,
                           borderRadius: 100,
                           backgroundColor: isDark ? "#26181F" : "#ECE0E2",
-                          opacity: 0.8,
-                        }}
+                          opacity: pressed ? 0.6 : 0.8,
+                        })}
                         onPress={() => handleDeleteReceipt(receipt.id)}
                         disabled={deletingReceiptId === receipt.id}
                       >
@@ -371,7 +372,7 @@ export default function Page() {
                         ) : (
                           <Icon glyph="view-close" size={20} color="red" />
                         )}
-                      </TouchableOpacity>
+                      </Pressable>
                     </View>
                     <Text
                       style={{
@@ -405,10 +406,10 @@ export default function Page() {
               marginBottom: 32,
             }}
           >
-            <TouchableOpacity
+            <Pressable
               ref={uploadButtonRef}
-              style={{
-                backgroundColor: p.sky["500"],
+              style={({ pressed }) => ({
+                backgroundColor: palette.primary,
                 paddingHorizontal: 24,
                 paddingVertical: 12,
                 borderRadius: 12,
@@ -416,14 +417,15 @@ export default function Page() {
                 alignItems: "center",
                 gap: 8,
                 marginBottom: 12,
-              }}
+                opacity: pressed ? 0.8 : 1,
+              })}
               onPress={handleReceiptUpload}
             >
               <UploadIcon size={28} color="white" />
               <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
                 Upload Receipt
               </Text>
-            </TouchableOpacity>
+            </Pressable>
             <Text
               style={{
                 color: palette.muted,

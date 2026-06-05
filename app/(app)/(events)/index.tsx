@@ -7,6 +7,7 @@ import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Platform,
+  Pressable,
   RefreshControl,
   TouchableOpacity,
   View,
@@ -389,7 +390,7 @@ export default function App() {
       renderItem={renderItem}
       ListFooterComponent={() => (
         <>
-          <TouchableOpacity
+          <Pressable
             accessibilityLabel="Apply for new organization"
             accessibilityHint="Opens the HCB application form in browser"
             accessibilityRole="button"
@@ -404,25 +405,35 @@ export default function App() {
                 mutate("user/invitations");
               });
             }}
-            style={{
+            style={({ pressed }) => ({
               flexDirection: "row",
               alignItems: "center",
               gap: 8,
               marginTop: 15,
-              paddingHorizontal: 15,
-              paddingVertical: 12,
-              borderRadius: 8,
+              paddingHorizontal: 16,
+              paddingVertical: 14,
+              borderRadius: 14,
               justifyContent: "center",
-              backgroundColor: "rgba(200,200,200,0.3)",
-            }}
+              backgroundColor: themeColors.card,
+              borderWidth: 1,
+              borderColor:
+                scheme === "dark"
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.08)",
+              opacity: pressed ? 0.7 : 1,
+            })}
           >
             <Ionicons
               name="add-circle-outline"
-              size={24}
+              size={20}
               color={themeColors.text}
             />
-            <Text style={{ color: themeColors.text }}>Create</Text>
-          </TouchableOpacity>
+            <Text
+              style={{ color: themeColors.text, fontSize: 15, fontWeight: "600" }}
+            >
+              Start a new organization
+            </Text>
+          </Pressable>
 
           {organizations && organizations.length > 2 && (
             <Text

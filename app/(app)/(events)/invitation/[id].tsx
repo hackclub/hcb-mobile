@@ -4,8 +4,7 @@ import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
-  StatusBar,
-  TouchableHighlight,
+  Pressable,
   View,
 } from "react-native";
 import { useSWRConfig } from "swr";
@@ -103,15 +102,18 @@ export default function Page() {
         flex: 1,
       }}
     >
-      <StatusBar barStyle="light-content" />
-
-      <TouchableHighlight
+      <Pressable
         onPress={() => router.back()}
-        style={{ position: "absolute", top: 16, right: 16 }}
-        underlayColor={themeColors.background}
+        hitSlop={8}
+        style={({ pressed }) => ({
+          position: "absolute",
+          top: 16,
+          right: 16,
+          opacity: pressed ? 0.6 : 1,
+        })}
       >
         <Ionicons name="close-circle" color={themePalette.muted} size={30} />
-      </TouchableHighlight>
+      </Pressable>
 
       {invitation ? (
         <>

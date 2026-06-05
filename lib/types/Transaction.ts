@@ -1,6 +1,7 @@
 import Card from "./Card";
 import HcbApiObject from "./HcbApiObject";
 import Organization from "./Organization";
+import { TagColor } from "./Tag";
 import User from "./User";
 
 export enum TransactionType {
@@ -37,6 +38,7 @@ export interface TransactionBase
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;
+  tags?: Array<{ id: string; label: string; color: TagColor; emoji?: string | null }>;
   organization?: Organization;
   appearance?: "hackathon_grant" | string;
   _debug?: {

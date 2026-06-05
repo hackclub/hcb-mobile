@@ -1,20 +1,34 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Button as NativeButton,
   Platform,
+  Pressable,
   ScrollView,
   View,
 } from "react-native";
 
+import AchTransferScreen from "@/components/organizations/transfer/AchTransfer";
+import CheckTransferScreen from "@/components/organizations/transfer/CheckTransfer";
 import DisbursementScreen from "@/components/organizations/transfer/Disbursement";
+import { Text } from "@/components/Text";
 import { showAlert } from "@/lib/alertUtils";
 import { theme } from "@/styles/theme";
 
+type TransferType = "hcb" | "ach" | "check";
+
+const TRANSFER_TYPES: { key: TransferType; label: string }[] = [
+  { key: "hcb", label: "HCB Transfer" },
+  { key: "ach", label: "ACH" },
+  { key: "check", label: "Check" },
+];
+
 export default function Page() {
   const navigation = useNavigation();
+  const { colors: themeColors } = useTheme();
   const { organization: _organization } = useLocalSearchParams();
   const organization =
     typeof _organization === "string"
@@ -62,7 +76,7 @@ export default function Page() {
     });
   }, [navigation]);
 
-  const [transferType] = useState<"ach" | "check" | "hcb">("hcb");
+  const [transferType, setTransferType] = useState<TransferType>("hcb");
 
   return (
     <KeyboardAvoidingView
@@ -72,9 +86,53 @@ export default function Page() {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+        keyboardShouldPersistTaps="handled"
       >
-        {transferType === "hcb" && organization && (
+        <View
+          style={{
+            flexDirection: "row",
+            backgroundColor: themeColors.card,
+            borderRadius: 12,
+            padding: 3,
+            marginBottom: 4,
+          }}
+        >
+          {TRANSFER_TYPES.map(({ key, label }) => (
+            <Pressable
+              key={key}
+              onPress={() => setTransferType(key)}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                borderRadius: 10,
+                alignItems: "center",
+                backgroundColor:
+                  transferType === key
+                    ? themeColors.background
+                    : "transparent",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: transferType === key ? "600" : "400",
+                  color: transferType === key ? themeColors.text : "#999",
+                }}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {organization && transferType === "hcb" && (
           <DisbursementScreen organization={organization} />
+        )}
+        {organization && transferType === "ach" && (
+          <AchTransferScreen organization={organization} />
+        )}
+        {organization && transferType === "check" && (
+          <CheckTransferScreen organization={organization} />
         )}
       </ScrollView>
     </KeyboardAvoidingView>

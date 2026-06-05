@@ -7,10 +7,10 @@ import {
   KeyboardAvoidingView,
   Linking,
   Platform,
+  Pressable,
   RefreshControl,
   ScrollView,
   Share,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "@/components/AdminTools";
+import TagChip from "@/components/tags/TagChip";
 import Comment from "@/components/transaction/Comment";
 import CommentField from "@/components/transaction/comment/CommentField";
 import TransactionSkeleton from "@/components/transaction/TransactionSkeleton";
@@ -106,24 +107,22 @@ export default function TransactionPage({
       navigation.setOptions({
         title: transaction.memo,
         headerRight: () => (
-          <TouchableOpacity
+          <Pressable
             onPress={async () => {
               const hcbCode = transaction.id.slice(4);
               const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
               try {
-                await Share.share({
-                  url: url,
-                });
+                await Share.share({ url });
               } catch (error) {
                 console.error("Error sharing transaction:", error);
               }
             }}
-            style={{ padding: 8 }}
+            style={({ pressed }) => ({ padding: 8, opacity: pressed ? 0.6 : 1 })}
             accessibilityLabel="Share transaction"
             accessibilityRole="button"
           >
             <Ionicons name="share-outline" size={22} color={themeColors.text} />
-          </TouchableOpacity>
+          </Pressable>
         ),
       });
     }
@@ -250,18 +249,57 @@ export default function TransactionPage({
             />
           ))}
 
-        <View style={{ gap: 12 }}>
-          {comments && comments.length > 0 && (
-            <View style={{ flex: 1, gap: 12 }}>
-              {comments.map((comment) => (
-                <Comment comment={comment} key={comment.id} />
+        {transaction.tags && transaction.tags.length > 0 && (
+          <View style={{ marginBottom: 20 }}>
+            <Text
+              style={{
+                color: palette.muted,
+                fontSize: 13,
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginBottom: 8,
+                marginLeft: 2,
+              }}
+            >
+              Tags
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+              {transaction.tags.map((tag) => (
+                <TagChip key={tag.id} tag={tag} />
               ))}
             </View>
-          )}
-          {canComment && (
-            <CommentField orgId={currentOrgId} transactionId={txnId} />
-          )}
-        </View>
+          </View>
+        )}
+
+        {(comments && comments.length > 0 || canComment) && (
+          <View style={{ gap: 12 }}>
+            {comments && comments.length > 0 && (
+              <>
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 13,
+                    fontWeight: "600",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                    marginLeft: 2,
+                  }}
+                >
+                  Comments
+                </Text>
+                <View style={{ gap: 12 }}>
+                  {comments.map((comment) => (
+                    <Comment comment={comment} key={comment.id} />
+                  ))}
+                </View>
+              </>
+            )}
+            {canComment && (
+              <CommentField orgId={currentOrgId} transactionId={txnId} />
+            )}
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
