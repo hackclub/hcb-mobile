@@ -1,18 +1,20 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import ImageView from "react-native-image-viewing";
 
 import Badge from "@/components/Badge";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import UserMention from "@/components/UserMention";
+import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney, statusColor } from "@/utils/format";
+import { shareUrl } from "@/utils/shareUrl";
 
 interface CheckDepositDetail {
   id: string;
@@ -73,11 +75,27 @@ export default function CheckDepositDetailPage() {
     depositId: string;
   }>();
   const { colors: themeColors } = useTheme();
+  const navigation = useNavigation();
 
   const { data: deposit, isLoading } = useOfflineSWR<CheckDepositDetail>(
     `check_deposits/${depositId}`,
   );
+  const { data: organization } = useOfflineSWR<Organization>(
+    `organizations/${id}`,
+  );
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (organization && deposit) {
+      navigation.setOptions({
+        headerRight: () => (
+          <ShareHeaderButton
+            url={shareUrl.checkDeposit(organization.slug, depositId)}
+          />
+        ),
+      });
+    }
+  }, [organization, deposit, navigation, depositId]);
 
   if (isLoading || !deposit) {
     return (

@@ -44,6 +44,8 @@ import {
 import { getCardName } from "@/utils/cardHelpers";
 import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/format";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import { shareUrl } from "@/utils/shareUrl";
 
 export default function CardPage() {
   const { card: _card } = useLocalSearchParams();
@@ -148,27 +150,31 @@ export default function CardPage() {
   }, [cardName, navigation]);
 
   useEffect(() => {
+    if (!card) return;
     if (
       Platform.OS === "android" &&
-      (card?.status === "active" || card?.status === "frozen")
+      (card.status === "active" || card.status === "frozen")
     ) {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity
-            onPress={() => setShowWalletModal(true)}
-            style={{ padding: 8 }}
-          >
-            <Ionicons
-              name="wallet-outline"
-              size={24}
-              color={themeColors.text}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row" }}>
+            <ShareHeaderButton url={shareUrl.card(id)} />
+            <TouchableOpacity
+              onPress={() => setShowWalletModal(true)}
+              style={{ padding: 8 }}
+            >
+              <Ionicons
+                name="wallet-outline"
+                size={24}
+                color={themeColors.text}
+              />
+            </TouchableOpacity>
+          </View>
         ),
       });
     } else {
       navigation.setOptions({
-        headerRight: undefined,
+        headerRight: () => <ShareHeaderButton url={shareUrl.card(id)} />,
       });
     }
   }, [
@@ -178,7 +184,9 @@ export default function CardPage() {
     cardAddedToWallet,
     isDark,
     themeColors.text,
+    card,
     card?.status,
+    id,
   ]);
 
   useEffect(() => {

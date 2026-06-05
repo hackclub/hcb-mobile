@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -10,13 +9,13 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  Share,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import AdminTools from "@/components/AdminTools";
 import TagChip from "@/components/tags/TagChip";
 import Comment from "@/components/transaction/Comment";
@@ -33,6 +32,7 @@ import ExpensePayoutTransaction from "@/components/transaction/types/ExpensePayo
 import InvoiceTransaction from "@/components/transaction/types/InvoiceTransaction";
 import TransferTransaction from "@/components/transaction/types/TransferTransaction";
 import WiseTransaction from "@/components/transaction/types/WiseTransaction";
+import { shareUrl } from "@/utils/shareUrl";
 import { TransactionPolicy } from "@/lib/policies";
 import IComment from "@/lib/types/Comment";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
@@ -107,26 +107,11 @@ export default function TransactionPage({
       navigation.setOptions({
         title: transaction.memo,
         headerRight: () => (
-          <Pressable
-            onPress={async () => {
-              const hcbCode = transaction.id.slice(4);
-              const url = `https://hcb.hackclub.com/hcb/${hcbCode}`;
-              try {
-                await Share.share({ url });
-              } catch (error) {
-                console.error("Error sharing transaction:", error);
-              }
-            }}
-            style={({ pressed }) => ({ padding: 8, opacity: pressed ? 0.6 : 1 })}
-            accessibilityLabel="Share transaction"
-            accessibilityRole="button"
-          >
-            <Ionicons name="share-outline" size={22} color={themeColors.text} />
-          </Pressable>
+          <ShareHeaderButton url={shareUrl.transaction(transaction.id)} />
         ),
       });
     }
-  }, [transaction, navigation, themeColors.text]);
+  }, [transaction, navigation]);
 
   const onRefresh = async () => {
     setRefreshing(true);

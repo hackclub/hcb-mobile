@@ -51,6 +51,8 @@ import { getCardName } from "@/utils/cardHelpers";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
 import { normalizeSvg } from "@/utils/format";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import { shareUrl } from "@/utils/shareUrl";
 
 export default function Page() {
   const navigation = useNavigation();
@@ -149,6 +151,7 @@ export default function Page() {
   const { mutate } = useSWRConfig();
 
   useEffect(() => {
+    if (!grantCard) return;
     if (
       Platform.OS === "android" &&
       card &&
@@ -158,21 +161,26 @@ export default function Page() {
     ) {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity
-            onPress={() => setShowWalletModal(true)}
-            style={{ padding: 8 }}
-          >
-            <Ionicons
-              name="wallet-outline"
-              size={24}
-              color={themeColors.text}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row" }}>
+            <ShareHeaderButton url={shareUrl.cardGrant(fullGrantId)} />
+            <TouchableOpacity
+              onPress={() => setShowWalletModal(true)}
+              style={{ padding: 8 }}
+            >
+              <Ionicons
+                name="wallet-outline"
+                size={24}
+                color={themeColors.text}
+              />
+            </TouchableOpacity>
+          </View>
         ),
       });
     } else {
       navigation.setOptions({
-        headerRight: undefined,
+        headerRight: () => (
+          <ShareHeaderButton url={shareUrl.cardGrant(fullGrantId)} />
+        ),
       });
     }
   }, [
@@ -185,6 +193,8 @@ export default function Page() {
     card?.status,
     isVirtualCard,
     isCardholder,
+    grantCard,
+    fullGrantId,
   ]);
 
   useEffect(() => {

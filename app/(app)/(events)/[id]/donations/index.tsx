@@ -7,7 +7,7 @@ import {
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import { Text } from "@/components/Text";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Platform, View } from "react-native";
 import * as Progress from "react-native-progress";
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "@/components/Button";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { showAlert } from "@/lib/alertUtils";
 import Organization from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -23,15 +24,27 @@ import { useLocation } from "@/lib/useLocation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { palette } from "@/styles/theme";
+import { shareUrl } from "@/utils/shareUrl";
 
 export default function Page() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isDark = useIsDark();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   const { data: organization, isLoading: organizationLoading } =
     useOfflineSWR<Organization>(`organizations/${id}`);
+
+  useEffect(() => {
+    if (organization) {
+      navigation.setOptions({
+        headerRight: () => (
+          <ShareHeaderButton url={shareUrl.donations(organization.slug)} />
+        ),
+      });
+    }
+  }, [organization, navigation]);
   const { accessDenied } = useLocation();
 
   const {

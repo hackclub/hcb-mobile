@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import ActionChip from "@/components/organizations/ActionChip";
 import ActionTile from "@/components/organizations/ActionTile";
 import { EmptyState } from "@/components/organizations/EmptyState";
@@ -28,6 +29,7 @@ import User from "@/lib/types/User";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
+import { shareUrl } from "@/utils/shareUrl";
 import { addPendingFeeToTransactions } from "@/utils/org";
 
 export default function Page() {
@@ -84,7 +86,12 @@ export default function Page() {
     } else if (isOfflineNoData) {
       navigation.setOptions({ title: "Offline" });
     } else if (organization) {
-      navigation.setOptions({ title: organization.name || "Organization" });
+      navigation.setOptions({
+        title: organization.name || "Organization",
+        headerRight: () => (
+          <ShareHeaderButton url={shareUrl.org(organization.slug)} />
+        ),
+      });
     }
   }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
 
