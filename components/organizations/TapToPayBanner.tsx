@@ -52,7 +52,6 @@ export default function TapToPayBanner({
     <Pressable
       onPress={handlePress}
       style={({ pressed }) => ({
-        marginBottom: 20,
         borderRadius: 16,
         overflow: "hidden",
         shadowColor: palette.primary,

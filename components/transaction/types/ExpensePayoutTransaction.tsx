@@ -36,7 +36,7 @@ export default function ExpensePayoutTransaction({
               <TouchableHighlight
                 onPress={() =>
                   Linking.openURL(
-                    `https://hcb.hackclub.com/reimbursement/reports/${expense_payout.report_id.replace("rmr_", "")}`,
+                    `https://hcb.hackclub.com/reimbursement_reports/${expense_payout.report_id.replace("rmr_", "")}`,
                   )
                 }
               >

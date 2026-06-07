@@ -167,6 +167,50 @@ export default function Layout() {
           options={{ title: "Check Deposit" }}
         />
         <Stack.Screen
+          name="[id]/reimbursements/index"
+          options={{ title: "Reimbursements", headerLargeTitle: true }}
+        />
+        <Stack.Screen
+          name="[id]/reimbursements/[reportId]/index"
+          options={{ title: "Report" }}
+        />
+        <Stack.Screen
+          name="[id]/reimbursements/[reportId]/edit-report"
+          options={{
+            presentation: "formSheet",
+            title: "Edit report",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="[id]/reimbursements/[reportId]/new-expense"
+          options={{
+            presentation: "formSheet",
+            title: "Add Expense",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.85, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
           name="card-grants/[id]"
           options={{ title: "Grant Card" }}
         />

@@ -302,9 +302,7 @@ export default function Page() {
             <ActionTile
               icon="attachment"
               label="Reimburse"
-              onPress={() =>
-                showAlert("Coming Soon", "This feature is coming soon.")
-              }
+              onPress={() => navTo("/(events)/[id]/reimbursements")}
             />
           </View>
         </View>
