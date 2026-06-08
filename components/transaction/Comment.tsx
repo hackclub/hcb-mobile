@@ -51,7 +51,7 @@ export default function Comment({ comment }: { comment: IComment }) {
           backgroundColor: themeColors.card,
           borderWidth: 1,
           borderColor: isDark ? "#3B4858" : "rgba(51,142,218,.25)",
-          borderRadius: 14,
+          borderRadius: 8,
           padding: 16,
           ...(comment.admin_only && {
             borderColor: "#ff8c37",

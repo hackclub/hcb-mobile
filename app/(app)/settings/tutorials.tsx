@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
@@ -18,13 +18,13 @@ export default function Page() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20 }}
     >
-      <PageTitle title="Tutorials" />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "Tutorials" }} />
       <View style={{ width: "100%" }}>
         <TouchableOpacity
           onPress={handleTapToPayEducation}
           style={{
             backgroundColor: colors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             padding: 24,
             width: "100%",
             shadowColor: "#000",

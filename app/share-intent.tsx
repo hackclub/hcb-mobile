@@ -14,6 +14,7 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Button from "@/components/Button";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
@@ -379,28 +380,14 @@ export default function Page() {
             Assign Receipts
           </Text>
         </View>
-        <TouchableOpacity
+        <Button
           onPress={handleUpload}
           disabled={uploading}
-          style={{
-            backgroundColor: uploading ? palette.muted : palette.primary,
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-            borderRadius: 8,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          }}
+          loading={uploading}
+          style={{ paddingVertical: 8, paddingHorizontal: 14 }}
         >
-          {uploading ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Ionicons name="cloud-upload-outline" color="white" size={20} />
-          )}
-          {!uploading && (
-            <Text style={{ color: "white", fontWeight: "600" }}>Upload</Text>
-          )}
-        </TouchableOpacity>
+          Upload
+        </Button>
       </View>
 
       <ScrollView style={{ flex: 1, padding: 20 }}>
@@ -579,7 +566,7 @@ export default function Page() {
                 <View
                   style={{
                     backgroundColor: themeColors.card,
-                    borderRadius: 12,
+                    borderRadius: 8,
                     padding: 16,
                     marginBottom: 12,
                     borderWidth: 1,
@@ -709,7 +696,7 @@ export default function Page() {
                 <View
                   style={{
                     backgroundColor: themeColors.card,
-                    borderRadius: 12,
+                    borderRadius: 8,
                     padding: 16,
                     marginBottom: 12,
                     borderWidth: 1,

@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { mutate as globalMutate } from "swr";
 
+import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -24,7 +25,7 @@ import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { roleAtLeast } from "@/lib/policies";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
 export default function EditReportPage() {
@@ -236,11 +237,11 @@ export default function EditReportPage() {
     );
   };
 
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const borderColor = cardBorderColor(isDark);
+  const subColor = subTextColor(isDark);
   const cardStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor,
   } as const;
@@ -422,48 +423,25 @@ export default function EditReportPage() {
 
         {/* Action buttons */}
         <View style={{ flexDirection: "row", gap: 12, marginTop: 8 }}>
-          <Pressable
+          <Button
             onPress={handleSave}
             disabled={saving || !canUpdateName}
-            style={({ pressed }) => ({
-              flex: 1,
-              backgroundColor: palette.primary,
-              borderRadius: 12,
-              paddingVertical: 15,
-              alignItems: "center",
-              opacity: saving || !canUpdateName ? 0.5 : pressed ? 0.8 : 1,
-            })}
+            loading={saving}
+            style={{ flex: 1 }}
           >
-            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-              {saving ? "Saving…" : "Update report"}
-            </Text>
-          </Pressable>
+            Update report
+          </Button>
 
           {canDelete && (
-            <Pressable
+            <Button
+              variant="outline"
               onPress={handleDelete}
               disabled={deleting}
-              style={({ pressed }) => ({
-                flex: 1,
-                backgroundColor: `${palette.primary}15`,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: `${palette.primary}40`,
-                paddingVertical: 15,
-                alignItems: "center",
-                opacity: deleting ? 0.5 : pressed ? 0.8 : 1,
-              })}
+              loading={deleting}
+              style={{ flex: 1 }}
             >
-              <Text
-                style={{
-                  color: palette.primary,
-                  fontSize: 15,
-                  fontWeight: "600",
-                }}
-              >
-                {deleting ? "Deleting…" : "Delete report"}
-              </Text>
-            </Pressable>
+              Delete report
+            </Button>
           )}
         </View>
       </ScrollView>

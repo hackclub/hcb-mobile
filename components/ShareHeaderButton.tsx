@@ -18,7 +18,7 @@ export function ShareHeaderButton({ url }: { url: string }) {
       accessibilityLabel="Share"
       accessibilityRole="button"
     >
-      <Ionicons name="share-outline" size={22} color={themeColors.text} />
+      <Ionicons name="share-outline" size={24} color={themeColors.text} />
     </Pressable>
   );
 }

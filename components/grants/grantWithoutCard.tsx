@@ -40,7 +40,7 @@ export default function GrantWithoutCard({
             borderColor: palette.muted,
             paddingVertical: 30,
             paddingHorizontal: 40,
-            borderRadius: 10,
+            borderRadius: 8,
             marginBottom: 20,
             textAlign: "center",
           }}
@@ -75,15 +75,8 @@ export default function GrantWithoutCard({
       {grantCard.status === "active" && isGrantCardholder && (
         <View style={{ marginTop: 20 }}>
           <Button
-            style={{
-              backgroundColor: palette.primary,
-              borderTopWidth: 0,
-              borderRadius: 12,
-            }}
-            color="white"
-            iconColor="white"
-            iconSize={32}
             icon="rep"
+            iconSize={32}
             onPress={handleActivateGrant}
             loading={isActivating}
           >
@@ -95,7 +88,7 @@ export default function GrantWithoutCard({
         style={{
           marginTop: 24,
           padding: 20,
-          borderRadius: 15,
+          borderRadius: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.05,

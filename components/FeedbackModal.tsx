@@ -262,13 +262,7 @@ export default function FeedbackModal({
                   Cancel
                 </Button>
                 <Button
-                  style={{
-                    flex: 1,
-                    backgroundColor: palette.primary,
-                    borderRadius: 12,
-                    paddingVertical: 14,
-                  }}
-                  color="#fff"
+                  style={{ flex: 1 }}
                   onPress={handleSubmit}
                   loading={isSubmitting}
                   disabled={!feedbackText.trim() || isSubmitting}

@@ -23,7 +23,7 @@ import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { EXPENSE_CATEGORIES, ExpenseCategory } from "@/lib/types/Reimbursement";
 import { useIsDark } from "@/lib/useColorScheme";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 type ReceiptImage = {
   uri: string;
@@ -48,12 +48,12 @@ export default function NewExpensePage() {
   const [receipt, setReceipt] = useState<ReceiptImage>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const borderColor = cardBorderColor(isDark);
+  const subColor = subTextColor(isDark);
 
   const cardStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor,
   } as const;

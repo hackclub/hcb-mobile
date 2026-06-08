@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import { useFocusEffect, useNavigation, useTheme } from "expo-router/react-navigation";
 import { Text } from "@/components/Text";
 import { router } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
@@ -9,9 +9,9 @@ import {
   Platform,
   Pressable,
   RefreshControl,
+  StyleSheet,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -24,14 +24,14 @@ import Event from "@/components/organizations/Event";
 import GrantInvite from "@/components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
 import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
-import PromoBanner from "@/components/PromoBanner";
 import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
 import GrantCard from "@/lib/types/GrantCard";
 import Invitation from "@/lib/types/Invitation";
 import Organization from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { organizationOrderEqual } from "@/utils/org";
 
@@ -208,11 +208,23 @@ export default function App() {
 
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();
-  const scheme = useColorScheme();
+  const isDark = useIsDark();
+  const navigation = useNavigation();
   const panGesture = useMemo(
     () => Gesture.Pan().activateAfterLongPress(520),
     [],
   );
+
+  const openApply = useCallback(() => {
+    WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
+      presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+      controlsColor: palette.primary,
+      dismissButtonStyle: "cancel",
+    }).then(() => {
+      mutate("user/organizations");
+      mutate("user/invitations");
+    });
+  }, [mutate]);
 
   useEffect(() => {
     if (!organizations?.length) return;
@@ -311,8 +323,7 @@ export default function App() {
       ListEmptyComponent={() => <NoOrganizationsEmptyState />}
       ListHeaderComponent={() => (
         <>
-          <PromoBanner />
-          {(invitations && invitations.length > 0) ||
+{(invitations && invitations.length > 0) ||
           (grantInvites && grantInvites.length > 0) ? (
             <View
               style={{
@@ -340,7 +351,7 @@ export default function App() {
                       style={{
                         borderWidth: 2,
                         borderColor:
-                          scheme == "dark" ? palette.primary : palette.muted,
+                          isDark ? palette.primary : palette.muted,
                         marginBottom: 10,
                       }}
                       event={invitation.organization}
@@ -388,67 +399,50 @@ export default function App() {
         </>
       )}
       renderItem={renderItem}
-      ListFooterComponent={() => (
-        <>
-          <Pressable
-            accessibilityLabel="Apply for new organization"
-            accessibilityHint="Opens the HCB application form in browser"
-            accessibilityRole="button"
-            onPress={() => {
-              WebBrowser.openBrowserAsync("https://hackclub.com/hcb/apply", {
-                presentationStyle:
-                  WebBrowser.WebBrowserPresentationStyle.POPOVER,
-                controlsColor: palette.primary,
-                dismissButtonStyle: "cancel",
-              }).then(() => {
-                mutate("user/organizations");
-                mutate("user/invitations");
-              });
-            }}
-            style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 8,
-              marginTop: 15,
-              paddingHorizontal: 16,
-              paddingVertical: 14,
-              borderRadius: 14,
-              justifyContent: "center",
-              backgroundColor: themeColors.card,
-              borderWidth: 1,
-              borderColor:
-                scheme === "dark"
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.08)",
-              opacity: pressed ? 0.7 : 1,
-            })}
-          >
-            <Ionicons
-              name="add-circle-outline"
-              size={20}
-              color={themeColors.text}
-            />
-            <Text
-              style={{ color: themeColors.text, fontSize: 15, fontWeight: "600" }}
-            >
-              Start a new organization
-            </Text>
-          </Pressable>
-
-          {organizations && organizations.length > 2 && (
-            <Text
-              style={{
-                color: palette.muted,
-                textAlign: "center",
+      ListFooterComponent={() =>
+        organizations && organizations.length > 0 ? (
+          <>
+            <Pressable
+              accessibilityLabel="Apply for new organization"
+              accessibilityHint="Opens the HCB application form in browser"
+              accessibilityRole="button"
+              onPress={openApply}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
                 marginTop: 10,
-                marginBottom: 10,
-              }}
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderRadius: 8,
+                justifyContent: "center",
+                backgroundColor: themeColors.card,
+                borderWidth: 1,
+                borderColor: cardBorderColor(isDark),
+                opacity: pressed ? 0.7 : 1,
+              })}
             >
-              Drag to reorder organizations
-            </Text>
-          )}
-        </>
-      )}
+              <Ionicons name="add" size={20} color={palette.muted} />
+              <Text style={{ color: palette.muted, fontSize: 15, fontWeight: "500" }}>
+                Start a new organization
+              </Text>
+            </Pressable>
+
+            {organizations.length > 2 && (
+              <Text
+                style={{
+                  color: palette.muted,
+                  textAlign: "center",
+                  marginTop: 10,
+                  marginBottom: 10,
+                }}
+              >
+                Drag to reorder organizations
+              </Text>
+            )}
+          </>
+        ) : null
+      }
       ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
     />
   );

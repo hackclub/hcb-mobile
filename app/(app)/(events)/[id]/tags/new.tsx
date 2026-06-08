@@ -69,7 +69,7 @@ export default function NewTagPage() {
 
   const inputContainerStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
   };
@@ -92,7 +92,7 @@ export default function NewTagPage() {
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 14,
+            borderRadius: 8,
             padding: 20,
             alignItems: "center",
             gap: 8,

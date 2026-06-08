@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { getAppIconName, setAlternateAppIcon } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
@@ -166,8 +166,8 @@ export default function Page() {
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
     >
+      <Stack.Screen options={{ headerLargeTitle: true, title: "App icon" }} />
       <View style={{ gap: 12 }}>
-        <PageTitle title="App icon" />
         <View style={{ gap: 12 }}>
           {iconList.map(({ key, value }) => (
             <Pressable

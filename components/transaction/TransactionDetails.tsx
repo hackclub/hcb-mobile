@@ -7,7 +7,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { useIsDark } from "@/lib/useColorScheme";
 import Transaction from "@/lib/types/Transaction";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface Detail {
   label: string;
@@ -46,8 +46,8 @@ export default function TransactionDetails({
 }) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const borderColor = cardBorderColor(isDark);
+  const subColor = subTextColor(isDark);
 
   return (
     <View style={{ marginBottom: 20 }}>
@@ -70,7 +70,7 @@ export default function TransactionDetails({
       <View
         style={{
           backgroundColor: themeColors.card,
-          borderRadius: 14,
+          borderRadius: 8,
           borderWidth: 1,
           borderColor,
           overflow: "hidden",
@@ -82,7 +82,7 @@ export default function TransactionDetails({
               label,
               value,
               onPress,
-              pressIconName = "chevron-forward-outline",
+              pressIconName = "chevron-forward",
               fontFamily,
             },
             index,

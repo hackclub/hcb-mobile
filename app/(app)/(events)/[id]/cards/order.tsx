@@ -1,8 +1,7 @@
 import { useTheme } from "expo-router/react-navigation";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -132,7 +131,7 @@ export default function Page() {
           paddingHorizontal: 20,
         }}
       >
-        <PageTitle title="Order a Card" />
+        <Stack.Screen options={{ headerLargeTitle: true, title: "Order a Card" }} />
         <Text
           style={{
             color: themeColors.text,
@@ -154,7 +153,7 @@ export default function Page() {
           <TouchableOpacity
             style={{
               backgroundColor: isDark ? "#2A424E" : "#E7F2F9",
-              borderRadius: 12,
+              borderRadius: 8,
               padding: 20,
               width: "48%",
               alignItems: "center",
@@ -195,7 +194,7 @@ export default function Page() {
           <TouchableOpacity
             style={{
               backgroundColor: isDark ? "#2A424E" : "#E7F2F9",
-              borderRadius: 12,
+              borderRadius: 8,
               padding: 20,
               width: "48%",
               alignItems: "center",
@@ -254,7 +253,7 @@ export default function Page() {
               style={{
                 backgroundColor: themeColors.card,
                 color: themeColors.text,
-                borderRadius: 12,
+                borderRadius: 8,
                 padding: 12,
                 marginBottom: 16,
                 fontSize: 15,
@@ -268,7 +267,7 @@ export default function Page() {
               style={{
                 backgroundColor: themeColors.card,
                 color: themeColors.text,
-                borderRadius: 12,
+                borderRadius: 8,
                 padding: 12,
                 marginBottom: 16,
                 fontSize: 15,
@@ -282,7 +281,7 @@ export default function Page() {
               style={{
                 backgroundColor: themeColors.card,
                 color: themeColors.text,
-                borderRadius: 12,
+                borderRadius: 8,
                 padding: 12,
                 marginBottom: 16,
                 fontSize: 15,
@@ -304,7 +303,7 @@ export default function Page() {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 12,
+                  borderRadius: 8,
                   padding: 12,
                   width: "48%",
                   fontSize: 15,
@@ -318,7 +317,7 @@ export default function Page() {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 12,
+                  borderRadius: 8,
                   padding: 12,
                   width: "48%",
                   fontSize: 15,
@@ -341,7 +340,7 @@ export default function Page() {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 12,
+                  borderRadius: 8,
                   padding: 12,
                   width: "48%",
                   fontSize: 15,
@@ -353,7 +352,7 @@ export default function Page() {
                 style={{
                   backgroundColor: themeColors.card,
                   color: themeColors.text,
-                  borderRadius: 12,
+                  borderRadius: 8,
                   padding: 12,
                   width: "48%",
                   fontSize: 15,
@@ -393,7 +392,7 @@ export default function Page() {
                         : isDark
                           ? "#2A424E"
                           : "#E7F2F9",
-                      borderRadius: 12,
+                      borderRadius: 8,
                       width: "48%",
                       marginBottom: isSelected ? -4 : 0,
                       borderWidth: isSelected ? 2 : 0,
@@ -406,7 +405,7 @@ export default function Page() {
                       style={{
                         borderWidth: design.unlisted ? 1 : 0,
                         borderColor: "#ff8c37",
-                        borderRadius: 12,
+                        borderRadius: 8,
                         borderStyle: "dashed",
                         margin: isSelected ? -2 : 0,
                       }}
@@ -502,7 +501,7 @@ export default function Page() {
           style={{
             backgroundColor: "#007bff",
             padding: 16,
-            borderRadius: 12,
+            borderRadius: 8,
             alignItems: "center",
             marginBottom: 20,
             opacity: isLoading ? 0.7 : 1,

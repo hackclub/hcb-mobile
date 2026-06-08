@@ -21,8 +21,8 @@ import { renderMoney } from "@/utils/format";
 // Semantic colors for transaction states (dark / light pairs)
 const colors = {
   reversedBg: { dark: "#252429", light: "#EAEDF1" },
-  declinedBg: { dark: "#351921", light: "#F9E3E7" },
-  positiveBg: { dark: "#234740", light: "#d7f7ee" },
+  declinedBg: { dark: "rgba(236,55,80,0.18)", light: "rgba(236,55,80,0.10)" },
+  positiveBg: { dark: "rgba(51,214,166,0.22)", light: "rgba(51,214,166,0.12)" },
   reversedBadge: { dark: "#2A394C", light: "#D5E0EF" },
   declinedBadge: { dark: "#401A23", light: "#891A2A" },
   reversedBadgeText: { dark: palette.info, light: "#D5E0EF" },
@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     overflow: "hidden",
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   hackathonGradient: {
     position: "absolute",
@@ -47,14 +48,14 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   badgeBase: {
-    borderRadius: 10,
+    borderRadius: 9999,
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginRight: 4,
     borderWidth: 1,
   },
   pendingBadge: {
-    borderRadius: 10,
+    borderRadius: 9999,
     paddingHorizontal: 8,
     paddingVertical: 2,
     marginRight: 4,
@@ -64,11 +65,11 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
   pendingBadgeText: {
     fontSize: 12,
-    fontWeight: "bold",
+    fontWeight: "500",
     color: palette.muted,
   },
   memoText: {
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: palette.warning,
-    borderRadius: 20,
+    borderRadius: 9999,
     paddingHorizontal: 5,
     paddingVertical: 2,
     marginRight: 4,
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   missingReceiptText: {
     color: palette.warning,
     fontSize: 12,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
 });
 
@@ -164,6 +165,7 @@ function Transaction({
           styles.row,
           {
             backgroundColor,
+            borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
             borderTopLeftRadius: top ? 8 : 0,
             borderTopRightRadius: top ? 8 : 0,
             borderBottomLeftRadius: bottom ? 8 : 0,
@@ -237,10 +239,10 @@ function Transaction({
               ]}
             >
               {transaction.reversed
-                ? "Reversed"
+                ? "reversed"
                 : transaction.declined
-                  ? "Declined"
-                  : "Pending"}
+                  ? "declined"
+                  : "pending"}
             </Text>
           </View>
         )}

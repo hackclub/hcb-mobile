@@ -1,5 +1,5 @@
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { ActivityIndicator, Switch, View } from "react-native";
 
@@ -13,14 +13,14 @@ export default function Page() {
 
   return (
     <View style={{ backgroundColor: colors.background, paddingHorizontal: 20 }}>
-      <PageTitle title="Deep linking" />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "Deep linking" }} />
       <View style={{ width: "100%" }}>
         <View
           style={{
             width: "100%",
             backgroundColor: colors.card,
             padding: 20,
-            borderRadius: 16,
+            borderRadius: 8,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.18,

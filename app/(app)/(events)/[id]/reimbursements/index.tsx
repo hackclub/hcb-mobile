@@ -7,6 +7,7 @@ import {
   Alert,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   TextInput,
   View,
@@ -23,8 +24,9 @@ import {
 } from "@/lib/types/Reimbursement";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
+import UserAvatar from "@/components/UserAvatar";
 
 interface PaginatedReports {
   data: ReimbursementReport[];
@@ -37,9 +39,10 @@ export default function ReimbursementsPage() {
   const navigation = useNavigation();
   const hcb = useClient();
   const [search, setSearch] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const { data, isLoading, mutate } = useOfflineSWR<PaginatedReports>(
-    `reimbursement_reports?organization_id=${id}`,
+    `reimbursement_reports?organization_id=${id}&expand=user`,
   );
   const reports = data?.data ?? [];
 
@@ -65,7 +68,7 @@ export default function ReimbursementsPage() {
         const nameMatch = r.name.toLowerCase().includes(q);
         const userMatch =
           typeof r.user === "object" &&
-          r.user.full_name.toLowerCase().includes(q);
+          r.user.name.toLowerCase().includes(q);
         return nameMatch || userMatch;
       })
     : reports;
@@ -131,7 +134,16 @@ export default function ReimbursementsPage() {
     });
   }, [navigation, handleCreateReport, themeColors.text]);
 
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await mutate();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const subColor = subTextColor(isDark);
   const searchBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
 
   return (
@@ -140,6 +152,9 @@ export default function ReimbursementsPage() {
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       contentContainerStyle={{
         paddingHorizontal: 20,
         paddingTop: 16,
@@ -170,8 +185,10 @@ export default function ReimbursementsPage() {
           <View
             style={{
               backgroundColor: themeColors.card,
-              borderRadius: 16,
+              borderRadius: 8,
               overflow: "hidden",
+              borderWidth: 1,
+              borderColor: cardBorderColor(isDark),
             }}
           >
             <View style={{ flexDirection: "row", paddingVertical: 14 }}>
@@ -218,7 +235,6 @@ export default function ReimbursementsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: "#33a854",
                     fontSize: 17,
                     fontWeight: "700",
                   }}
@@ -247,7 +263,6 @@ export default function ReimbursementsPage() {
                 </Text>
                 <Text
                   style={{
-                    color: "#f5a623",
                     fontSize: 17,
                     fontWeight: "700",
                   }}
@@ -264,7 +279,9 @@ export default function ReimbursementsPage() {
               flexDirection: "row",
               alignItems: "center",
               backgroundColor: searchBg,
-              borderRadius: 12,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: cardBorderColor(isDark),
               paddingHorizontal: 12,
               paddingVertical: 9,
               gap: 8,
@@ -298,14 +315,16 @@ export default function ReimbursementsPage() {
             <View
               style={{
                 backgroundColor: themeColors.card,
-                borderRadius: 16,
+                borderRadius: 8,
                 overflow: "hidden",
+                borderWidth: 1,
+                borderColor: cardBorderColor(isDark),
               }}
             >
               {filtered.map((report, index) => {
                 const userName =
                   typeof report.user === "object"
-                    ? report.user.full_name
+                    ? report.user.name
                     : null;
                 const statusColor = reportStatusColor(report.status);
                 const dateStr = renderDate(
@@ -380,13 +399,30 @@ export default function ReimbursementsPage() {
                         <Badge color={statusColor}>
                           {reportStatusText(report.status)}
                         </Badge>
-                        {userName && (
-                          <Text
-                            style={{ color: palette.muted, fontSize: 13 }}
-                            numberOfLines={1}
-                          >
-                            · {userName}
-                          </Text>
+                        {typeof report.user === "object" && (
+                          <>
+                            <View
+                              style={{
+                                width: 3,
+                                height: 3,
+                                borderRadius: 9999,
+                                backgroundColor: subColor,
+                                marginHorizontal: -4,
+                              }}
+                            />
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 5,
+                              }}
+                            >
+                              <UserAvatar user={report.user} size={16} />
+                              <Text style={{ color: subColor, fontSize: 13 }}>
+                                {report.user.name}
+                              </Text>
+                            </View>
+                          </>
                         )}
                         <Text
                           style={{

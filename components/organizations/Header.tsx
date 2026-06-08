@@ -4,23 +4,18 @@ import { View, Platform } from "react-native";
 
 import BalanceChart from "./BalanceChart";
 
-import Button from "@/components/Button";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
 interface HeaderProps {
   organization: Organization | OrganizationExpanded;
-  showMockData: boolean;
-  setShowMockData: React.Dispatch<React.SetStateAction<boolean>>;
   showChart?: boolean;
 }
 
 export default function Header({
   organization,
-  showMockData,
-  setShowMockData,
   showChart = true,
 }: HeaderProps) {
   const { colors: themeColors } = useTheme();
@@ -34,18 +29,11 @@ export default function Header({
     <View
       style={{
         backgroundColor: themeColors.card,
-        borderRadius: 16,
+        borderRadius: 8,
         padding: 20,
         overflow: "hidden",
-        ...(Platform.OS === "ios" && {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: isDark ? 0.25 : 0.08,
-          shadowRadius: 8,
-        }),
-        ...(Platform.OS === "android" && {
-          elevation: isDark ? 4 : 2,
-        }),
+        borderWidth: 1,
+        borderColor: cardBorderColor(isDark),
       }}
     >
       <View
@@ -83,26 +71,6 @@ export default function Header({
           </Text>
         </View>
 
-        {organization?.playground_mode && (
-          <Button
-            variant="secondary"
-            style={{
-              backgroundColor: isDark
-                ? "rgba(56, 142, 218, 0.15)"
-                : "rgba(56, 142, 218, 0.1)",
-              borderColor: isDark
-                ? "rgba(56, 142, 218, 0.3)"
-                : "rgba(56, 142, 218, 0.2)",
-              paddingVertical: 10,
-              paddingHorizontal: 14,
-            }}
-            color="#338eda"
-            fontSize={14}
-            onPress={() => setShowMockData(!showMockData)}
-          >
-            {showMockData ? "Hide Mock" : "Show Mock"}
-          </Button>
-        )}
       </View>
       {showChart && <BalanceChart organizationId={organization.id} />}
     </View>

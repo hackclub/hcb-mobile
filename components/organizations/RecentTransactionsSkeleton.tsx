@@ -38,7 +38,7 @@ export default function RecentTransactionsSkeleton() {
     <View
       style={{
         backgroundColor: themeColors.card,
-        borderRadius: 16,
+        borderRadius: 8,
         overflow: "hidden",
       }}
     >

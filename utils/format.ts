@@ -23,12 +23,16 @@ export function renderDate(date: string) {
 }
 
 export function statusColor(status: string) {
-  if (status === "deposited" || status === "completed") {
+  if (status === "deposited" || status === "completed" || status === "reimbursement_approved" || status === "reimbursed") {
     return palette.success;
   } else if (status === "in_transit" || status === "issued") {
     return palette.info;
   } else if (status === "rejected") {
-    return palette.primary;
+    return palette.red;
+  } else if (status === "reimbursement_requested") {
+    return palette.purple;
+  } else if (status === "reversed") {
+    return palette.orange;
   } else {
     return palette.muted;
   }

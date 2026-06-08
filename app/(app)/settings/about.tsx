@@ -151,7 +151,7 @@ export default function About() {
               </Text>
               <View
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 8,
                   borderWidth: 1,
                   borderColor: colors.border,
                   backgroundColor: colors.card,
@@ -185,7 +185,7 @@ export default function About() {
             </Text>
             <View
               style={{
-                borderRadius: 14,
+                borderRadius: 8,
                 borderWidth: 1,
                 borderColor: colors.border,
                 backgroundColor: colors.card,

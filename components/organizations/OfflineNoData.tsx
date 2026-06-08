@@ -4,7 +4,8 @@ import { Text } from "@/components/Text";
 import { View } from "react-native";
 
 import Button from "@/components/Button";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 interface OfflineNoDataProps {
   onRetry: () => void;
@@ -16,6 +17,7 @@ export default function OfflineNoData({
   onGoBack,
 }: OfflineNoDataProps) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
 
   return (
     <View
@@ -30,12 +32,13 @@ export default function OfflineNoData({
       <View
         style={{
           backgroundColor: themeColors.card,
-          borderRadius: 20,
+          borderRadius: 16,
           padding: 32,
           width: "100%",
           maxWidth: 400,
           alignItems: "center",
-          elevation: 8,
+          borderWidth: 1,
+          borderColor: cardBorderColor(isDark),
         }}
       >
         <View

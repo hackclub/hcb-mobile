@@ -301,15 +301,8 @@ export default function CardPage() {
       buttons.push(
         <Button
           key="activate"
-          style={{
-            backgroundColor: palette.primary,
-            borderTopWidth: 0,
-            borderRadius: 12,
-          }}
-          color="white"
-          iconColor="white"
-          iconSize={32}
           icon="rep"
+          iconSize={32}
           onPress={() => setShowActivateModal(true)}
         >
           Activate Card
@@ -321,8 +314,7 @@ export default function CardPage() {
           key="freeze"
           style={{
             backgroundColor: "#71C5E7",
-            borderTopWidth: 0,
-            borderRadius: 12,
+            borderColor: "#5ab0d4",
           }}
           color="#186177"
           iconColor="#186177"
@@ -350,12 +342,6 @@ export default function CardPage() {
       buttons.push(
         <Button
           key={`details-${detailsRevealed}`}
-          style={{
-            borderRadius: 12,
-            backgroundColor: palette.primary,
-          }}
-          color="white"
-          iconColor="white"
           icon={detailsRevealed ? "private-fill" : "view"}
           onPress={() =>
             toggleCardDetails(

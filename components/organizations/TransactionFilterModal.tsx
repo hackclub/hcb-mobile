@@ -13,12 +13,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { TransactionFilters } from "@/lib/organization/useTransactions";
 import Tag from "@/lib/types/Tag";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface Props {
   visible: boolean;
@@ -41,12 +42,12 @@ export default function TransactionFilterModal({
   const { bottom } = useSafeAreaInsets();
   const isDark = useIsDark();
 
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const subColor = subTextColor(isDark);
+  const borderColor = cardBorderColor(isDark);
 
   const cardStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor,
   };
@@ -400,20 +401,7 @@ export default function TransactionFilterModal({
 
             {/* Apply button */}
             <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
-              <Pressable
-                onPress={handleApply}
-                style={({ pressed }) => ({
-                  backgroundColor: palette.primary,
-                  borderRadius: 12,
-                  paddingVertical: 14,
-                  alignItems: "center",
-                  opacity: pressed ? 0.85 : 1,
-                })}
-              >
-                <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-                  Apply filters
-                </Text>
-              </Pressable>
+              <Button onPress={handleApply}>Apply filters</Button>
             </View>
           </View>
         </KeyboardAvoidingView>

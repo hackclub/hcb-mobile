@@ -10,9 +10,11 @@ import User from "@/lib/types/User";
 export default function UserMention({
   user,
   scale = 1,
+  fontSize,
 }: {
   user: User;
   scale?: number;
+  fontSize?: number;
 }) {
   const { colors: themeColors } = useTheme();
 
@@ -39,6 +41,7 @@ export default function UserMention({
         style={{
           color: themeColors.text,
           marginLeft: user.auditor ? -5 : 0,
+          ...(fontSize !== undefined && { fontSize }),
         }}
       >
         {user.name}

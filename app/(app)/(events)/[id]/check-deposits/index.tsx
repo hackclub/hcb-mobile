@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
+import Button from "@/components/Button";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { renderDate, renderMoney, statusColor } from "@/utils/format";
@@ -23,11 +24,9 @@ interface CheckDepositsResponse {
 export default function CheckDepositsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
-  const { data, isLoading } = useOfflineSWR<CheckDepositsResponse>(
+  const { data: deposits, isLoading } = useOfflineSWR<CheckDepositsResponse>(
     `check_deposits?organization_id=${id}`,
   );
-
-  const deposits = data
 
   return (
     <ScrollView
@@ -40,35 +39,24 @@ export default function CheckDepositsPage() {
         gap: 16,
       }}
     >
-      <Pressable
+      <Button
         onPress={() =>
           router.push({
             pathname: "/(events)/[id]/check-deposits/new",
             params: { id },
           })
         }
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          backgroundColor: palette.primary,
-          borderRadius: 14,
-          paddingVertical: 16,
-          opacity: pressed ? 0.8 : 1,
-        })}
+        icon="plus"
+        iconSize={24}
       >
-        <Ionicons name="add" size={20} color="#fff" />
-        <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-          Deposit a check
-        </Text>
-      </Pressable>
+        Deposit a check
+      </Button>
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
           <ActivityIndicator />
         </View>
       )}
-      {!isLoading && deposits.length === 0 && (
+      {!isLoading && deposits && deposits?.length === 0 && (
         <View style={{ alignItems: "center", paddingTop: 40, gap: 8 }}>
           <Ionicons name="document-outline" size={40} color={palette.muted} />
           <Text style={{ color: palette.muted, fontSize: 15 }}>
@@ -76,11 +64,11 @@ export default function CheckDepositsPage() {
           </Text>
         </View>
       )}
-      {deposits.length > 0 && (
+      {deposits && deposits.length > 0 && (
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             overflow: "hidden",
           }}
         >

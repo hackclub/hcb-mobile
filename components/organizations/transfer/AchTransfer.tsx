@@ -2,8 +2,8 @@ import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { TextInput, View } from "react-native";
 
+import { Stack } from "expo-router";
 import Button from "@/components/Button";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -122,7 +122,7 @@ export default function AchTransferScreen({
 
   const inputContainerStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
   };
@@ -134,7 +134,7 @@ export default function AchTransferScreen({
 
   return (
     <>
-      <PageTitle title="New ACH transfer" />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "New ACH transfer" }} />
 
       <View style={{ gap: 14 }}>
         <View style={{ gap: 6 }}>

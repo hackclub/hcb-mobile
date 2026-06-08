@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
+import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert, showDestructiveAlert } from "@/lib/alertUtils";
@@ -57,29 +58,17 @@ export default function TagsPage() {
         gap: 16,
       }}
     >
-      <Pressable
+      <Button
         onPress={() =>
           router.push({
             pathname: "/(events)/[id]/tags/new",
             params: { id },
           })
         }
-        style={({ pressed }) => ({
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          backgroundColor: palette.primary,
-          borderRadius: 14,
-          paddingVertical: 16,
-          opacity: pressed ? 0.8 : 1,
-        })}
+        icon="plus"
       >
-        <Ionicons name="add" size={20} color="#fff" />
-        <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>
-          New tag
-        </Text>
-      </Pressable>
+        New tag
+      </Button>
 
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
@@ -107,7 +96,7 @@ export default function TagsPage() {
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             overflow: "hidden",
           }}
         >

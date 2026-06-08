@@ -25,13 +25,14 @@ export default function Badge({
   return (
     <View
       style={{
-        backgroundColor: `${color}40`,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        backgroundColor: `${color}26`,
+        paddingVertical: 3,
+        paddingHorizontal: 8,
+        borderRadius: 9999,
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        alignSelf: "flex-start",
+        gap: 4,
         ...style,
       }}
       accessible={true}
@@ -41,11 +42,13 @@ export default function Badge({
         (typeof children === "string" ? children : "Badge")
       }
     >
-      {icon && <Ionicons name={icon} color={color} size={20} />}
+      {icon && <Ionicons name={icon} color={color} size={16} />}
       <Text
         style={{
           color,
-          textTransform: "uppercase",
+          fontSize: 12,
+          fontWeight: "500",
+          letterSpacing: 0.1,
         }}
       >
         {children}

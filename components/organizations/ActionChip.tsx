@@ -3,7 +3,8 @@ import Icon from "@thedev132/hackclub-icons-rn";
 import { Pressable } from "react-native";
 
 import { Text } from "@/components/Text";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 interface ActionChipProps {
   icon: string;
@@ -13,6 +14,7 @@ interface ActionChipProps {
 
 export default function ActionChip({ icon, label, onPress }: ActionChipProps) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
   return (
     <Pressable
       onPress={onPress}
@@ -23,7 +25,9 @@ export default function ActionChip({ icon, label, onPress }: ActionChipProps) {
         backgroundColor: themeColors.card,
         paddingVertical: 10,
         paddingHorizontal: 14,
-        borderRadius: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: cardBorderColor(isDark),
         opacity: pressed ? 0.6 : 1,
       })}
     >

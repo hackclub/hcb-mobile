@@ -18,6 +18,7 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
 
+import Button from "@/components/Button";
 import FileViewerModal from "@/components/FileViewerModal";
 import UploadIcon from "@/components/icons/UploadIcon";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
@@ -400,32 +401,21 @@ export default function Page() {
           <View
             style={{
               backgroundColor: themeColors.card,
-              borderRadius: 12,
+              borderRadius: 8,
               padding: 20,
               alignItems: "center",
               marginBottom: 32,
             }}
           >
-            <Pressable
-              ref={uploadButtonRef}
-              style={({ pressed }) => ({
-                backgroundColor: palette.primary,
-                paddingHorizontal: 24,
-                paddingVertical: 12,
-                borderRadius: 12,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 12,
-                opacity: pressed ? 0.8 : 1,
-              })}
+            <Button
               onPress={handleReceiptUpload}
+              style={{ marginBottom: 12 }}
+              icon="upload"
+              iconSize={24}
+              iconPosition="left"
             >
-              <UploadIcon size={28} color="white" />
-              <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
-                Upload Receipt
-              </Text>
-            </Pressable>
+              Upload Receipt
+            </Button>
             <Text
               style={{
                 color: palette.muted,

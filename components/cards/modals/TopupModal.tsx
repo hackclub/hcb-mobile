@@ -42,7 +42,7 @@ export default function TopupModal({
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 15,
+            borderRadius: 8,
             padding: 20,
             width: "100%",
             maxWidth: 400,
@@ -89,7 +89,7 @@ export default function TopupModal({
             <Button
               style={{
                 flex: 1,
-                borderRadius: 15,
+                borderRadius: 8,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
               color={themeColors.text}
@@ -101,7 +101,7 @@ export default function TopupModal({
               style={{
                 flex: 1,
                 backgroundColor: "#3499EE",
-                borderRadius: 15,
+                borderRadius: 8,
                 paddingVertical: 14,
               }}
               color="white"

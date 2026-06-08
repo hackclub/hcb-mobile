@@ -58,7 +58,6 @@ export default function Page() {
   );
 
   const { data: user } = useOfflineSWR<User>("user");
-  const [showMockData, setShowMockData] = useState(false);
   const [showTapToPayBanner, setShowTapToPayBanner] = useState(false);
   const { supportsTapToPay } = useStripeTerminalInit({
     organizationId: organization?.id,
@@ -196,8 +195,6 @@ export default function Page() {
         {playgroundMode && <PlaygroundBanner />}
         <Header
           organization={organization}
-          showMockData={showMockData}
-          setShowMockData={setShowMockData}
         />
       </View>
 
@@ -264,7 +261,7 @@ export default function Page() {
             </View>
           </SectionCard>
         ) : (
-          !showMockData && <EmptyState isOnline={isOnline} />
+          <EmptyState isOnline={isOnline} />
         )}
 
         <View style={{ gap: 10 }}>

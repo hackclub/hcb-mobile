@@ -38,25 +38,27 @@ export interface ButtonProps {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   hapticFeedback?: boolean;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  iconPosition?: "left" | "right";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "info" | "success" | "error" | "green";
 }
 
 const styles = StyleSheet.create({
   button: {
     backgroundColor: palette.primary,
     borderColor: "#e85d6f",
+    borderWidth: 1,
     color: "white",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 6,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 10,
   },
   buttonText: {
     color: "white",
-    fontSize: 17,
+    fontSize: 16,
     textAlign: "center",
     fontWeight: "600",
   },
@@ -66,13 +68,10 @@ export default function Button(
   props: PropsWithChildren<ViewProps & ButtonProps>,
 ) {
   const theme = useTheme();
-  const { variant = "primary" } = props;
+  const { variant = "primary", iconPosition = "right" } = props;
 
   const variantBaseStyle = {
     ...styles.button,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
   };
 
   const getVariantStyles = () => {
@@ -98,6 +97,12 @@ export default function Button(
           borderWidth: 0,
           borderColor: "transparent",
         };
+      case "green":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "#33d6a0",
+          borderColor: "#33d6a0",
+        };
       case "primary":
       default:
         return variantBaseStyle;
@@ -114,6 +119,8 @@ export default function Button(
         return palette.primary;
       case "ghost":
         return theme.colors.text;
+      case "green":
+        return "#0d2b1f";
       case "primary":
       default:
         return "#FFFFFF";
@@ -160,28 +167,47 @@ export default function Button(
         busy: props.loading,
       }}
     >
-      {props.icon && (
+      {props.icon && iconPosition === "left" && (
         <View
           style={{
-            width: 24,
-            height: 24,
+            width: 26,
+            height: 26,
             alignItems: "center",
             justifyContent: "center",
-            overflow: "hidden",
             paddingBottom: props.iconOffset || 0,
           }}
         >
           <Icon
-            size={props.iconSize || 24}
+            size={props.iconSize || 16}
             glyph={props.icon}
             style={{
-              color: props.iconColor || props.color || styles.buttonText.color,
+              color: props.iconColor || props.color || getTextColor(),
               opacity: props.loading ? 0 : 1,
             }}
           />
         </View>
       )}
       <Text style={getTextStyles()}>{props.children}</Text>
+      {props.icon && iconPosition === "right" && (
+        <View
+          style={{
+            width: 26,
+            height: 26,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingBottom: props.iconOffset || 0,
+          }}
+        >
+          <Icon
+            size={props.iconSize || 16}
+            glyph={props.icon}
+            style={{
+              color: props.iconColor || props.color || getTextColor(),
+              opacity: props.loading ? 0 : 1,
+            }}
+          />
+        </View>
+      )}
       {props.loading && (
         <View
           style={{

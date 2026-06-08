@@ -19,6 +19,7 @@ import ImageView from "react-native-image-viewing";
 import { mutate as globalMutate } from "swr";
 
 import Badge from "@/components/Badge";
+import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -31,7 +32,7 @@ import {
 } from "@/lib/types/Reimbursement";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
 
 interface PaginatedExpenses {
@@ -42,6 +43,34 @@ interface ViewerState {
   receipts: Receipt[];
   index: number;
   expenseId: string;
+}
+
+function StatusBanner({
+  color,
+  icon,
+  children,
+}: {
+  color: string;
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  children: string;
+}) {
+  return (
+    <View
+      style={{
+        backgroundColor: `${color}20`,
+        borderRadius: 8,
+        padding: 14,
+        flexDirection: "row",
+        gap: 10,
+        alignItems: "flex-start",
+      }}
+    >
+      <Ionicons name={icon} size={18} color={color} />
+      <Text style={{ color, fontSize: 14, flex: 1, lineHeight: 20 }}>
+        {children}
+      </Text>
+    </View>
+  );
 }
 
 function Divider() {
@@ -384,6 +413,7 @@ export default function ReportDetailPage() {
   const { colors: themeColors } = useTheme();
   const navigation = useNavigation();
   const hcb = useClient();
+  const isDark = useIsDark();
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [viewerState, setViewerState] = useState<ViewerState | null>(null);
@@ -665,7 +695,7 @@ export default function ReportDetailPage() {
           <View
             style={{
               backgroundColor: `${palette.primary}15`,
-              borderRadius: 12,
+              borderRadius: 8,
               padding: 14,
               gap: 4,
             }}
@@ -690,115 +720,31 @@ export default function ReportDetailPage() {
 
         {/* Status banners */}
         {report.status === "submitted" && (
-          <View
-            style={{
-              backgroundColor: "#338eda20",
-              borderRadius: 12,
-              padding: 14,
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "flex-start",
-            }}
-          >
-            <Ionicons name="time-outline" size={18} color="#338eda" />
-            <Text
-              style={{
-                color: "#338eda",
-                fontSize: 14,
-                flex: 1,
-                lineHeight: 20,
-              }}
-            >
-              Your report has been submitted and is awaiting review.
-            </Text>
-          </View>
+          <StatusBanner color="#338eda" icon="time-outline">
+            Your report has been submitted and is awaiting review.
+          </StatusBanner>
         )}
 
         {report.status === "reimbursement_requested" && (
-          <View
-            style={{
-              backgroundColor: "#9a5fd420",
-              borderRadius: 12,
-              padding: 14,
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "flex-start",
-            }}
-          >
-            <Ionicons name="hourglass-outline" size={18} color="#9a5fd4" />
-            <Text
-              style={{
-                color: "#9a5fd4",
-                fontSize: 14,
-                flex: 1,
-                lineHeight: 20,
-              }}
-            >
-              The HCB team is processing your reimbursement. This typically
-              takes up to 2 business days.
-            </Text>
-          </View>
+          <StatusBanner color="#9a5fd4" icon="hourglass-outline">
+            The HCB team is processing your reimbursement. This typically takes
+            up to 2 business days.
+          </StatusBanner>
         )}
 
         {(report.status === "reimbursement_approved" ||
           report.status === "reimbursed") && (
-          <View
-            style={{
-              backgroundColor: "#33a85420",
-              borderRadius: 12,
-              padding: 14,
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "flex-start",
-            }}
-          >
-            <Ionicons
-              name="checkmark-circle-outline"
-              size={18}
-              color="#33a854"
-            />
-            <Text
-              style={{
-                color: "#33a854",
-                fontSize: 14,
-                flex: 1,
-                lineHeight: 20,
-              }}
-            >
-              {report.status === "reimbursed"
-                ? "Your reimbursement has been sent."
-                : "Approved! Your reimbursement is on its way."}
-            </Text>
-          </View>
+          <StatusBanner color="#33a854" icon="checkmark-circle-outline">
+            {report.status === "reimbursed"
+              ? "Your reimbursement has been sent."
+              : "Approved! Your reimbursement is on its way."}
+          </StatusBanner>
         )}
 
         {report.status === "rejected" && (
-          <View
-            style={{
-              backgroundColor: `${palette.primary}20`,
-              borderRadius: 12,
-              padding: 14,
-              flexDirection: "row",
-              gap: 10,
-              alignItems: "flex-start",
-            }}
-          >
-            <Ionicons
-              name="close-circle-outline"
-              size={18}
-              color={palette.primary}
-            />
-            <Text
-              style={{
-                color: palette.primary,
-                fontSize: 14,
-                flex: 1,
-                lineHeight: 20,
-              }}
-            >
-              This report was rejected.
-            </Text>
-          </View>
+          <StatusBanner color={palette.primary} icon="close-circle-outline">
+            This report was rejected.
+          </StatusBanner>
         )}
 
         {/* Expenses */}
@@ -826,10 +772,12 @@ export default function ReportDetailPage() {
             <View
               style={{
                 backgroundColor: themeColors.card,
-                borderRadius: 16,
+                borderRadius: 8,
                 padding: 24,
                 alignItems: "center",
                 gap: 8,
+                borderWidth: 1,
+                borderColor: cardBorderColor(isDark),
               }}
             >
               <Ionicons
@@ -849,8 +797,10 @@ export default function ReportDetailPage() {
             <View
               style={{
                 backgroundColor: themeColors.card,
-                borderRadius: 16,
+                borderRadius: 8,
                 overflow: "hidden",
+                borderWidth: 1,
+                borderColor: cardBorderColor(isDark),
               }}
             >
               {expenses.map((expense, index) => (
@@ -877,46 +827,18 @@ export default function ReportDetailPage() {
         {/* Draft actions */}
         {isDraft && (
           <View style={{ gap: 10 }}>
-            <Pressable
-              onPress={goToNewExpense}
-              style={({ pressed }) => ({
-                backgroundColor: palette.primary,
-                borderRadius: 14,
-                paddingVertical: 16,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                opacity: pressed ? 0.8 : 1,
-              })}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-                Add standard expense
-              </Text>
-            </Pressable>
+            <Button onPress={goToNewExpense} icon="plus" iconSize={24}>
+              Add standard expense
+            </Button>
 
-            <Pressable
+            <Button
+              variant="secondary"
               onPress={canSubmit ? handleSubmit : undefined}
               disabled={!canSubmit || submitting}
-              style={({ pressed }) => ({
-                backgroundColor: themeColors.card,
-                borderRadius: 14,
-                paddingVertical: 16,
-                alignItems: "center",
-                opacity: !canSubmit ? 0.45 : pressed ? 0.7 : 1,
-              })}
+              loading={submitting}
             >
-              <Text
-                style={{
-                  color: themeColors.text,
-                  fontSize: 16,
-                  fontWeight: "600",
-                }}
-              >
-                {submitting ? "Submitting…" : "Submit & request review"}
-              </Text>
-            </Pressable>
+              Submit & request review
+            </Button>
 
             {!canSubmit && (
               <Text
@@ -934,36 +856,14 @@ export default function ReportDetailPage() {
 
         {/* Return to draft */}
         {isLocked && (
-          <Pressable
+          <Button
+            variant="secondary"
             onPress={handleReturnToDraft}
             disabled={submitting}
-            style={({ pressed }) => ({
-              backgroundColor: themeColors.card,
-              borderRadius: 14,
-              paddingVertical: 16,
-              alignItems: "center",
-              opacity: pressed ? 0.6 : 1,
-            })}
+            loading={submitting}
           >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
-            >
-              <Ionicons
-                name="arrow-undo-outline"
-                size={18}
-                color={themeColors.text}
-              />
-              <Text
-                style={{
-                  color: themeColors.text,
-                  fontSize: 16,
-                  fontWeight: "600",
-                }}
-              >
-                {submitting ? "Returning to draft…" : "Return to Draft"}
-              </Text>
-            </View>
-          </Pressable>
+            Return to Draft
+          </Button>
         )}
 
         {/* Timeline */}
@@ -988,7 +888,7 @@ export default function ReportDetailPage() {
             <View
               style={{
                 backgroundColor: themeColors.card,
-                borderRadius: 16,
+                borderRadius: 8,
                 overflow: "hidden",
               }}
             >

@@ -18,11 +18,7 @@ import SectionHeader from "@/components/organizations/SectionHeader";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
-import MockTransaction, {
-  MockTransactionType,
-} from "@/components/transaction/MockTransaction";
 import { filterCallbackStore } from "@/lib/filterCallbackStore";
-import MockTransactionEngine from "@/lib/organization/useMockTransactionEngine";
 import useTransactions, {
   TransactionFilters,
 } from "@/lib/organization/useTransactions";
@@ -42,12 +38,6 @@ type ListItemType =
   | {
       type: "transaction";
       transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
-    }
-  | {
-      type: "mockTransaction";
-      transaction: MockTransactionType;
       isFirst: boolean;
       isLast: boolean;
     };
@@ -93,7 +83,6 @@ export default function Page() {
     `tags?organization_id=${params.id}`,
   );
 
-  const [showMockData, setShowMockData] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<TransactionFilters>({});
 
   const openFilterSheet = useCallback(() => {
@@ -154,51 +143,26 @@ export default function Page() {
     [transactions],
   );
 
-  const mockTransactions = useMemo(
-    () => new MockTransactionEngine().generateMockTransactionList(),
-    [],
-  );
-  const mockSections: { title: string; data: MockTransactionType[] }[] =
-    useMemo(() => {
-      return Object.entries(groupBy(mockTransactions, (t) => t.date))
-        .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
-        .map(([title, data]) => ({
-          title: renderDate(title),
-          data,
-        }));
-    }, [mockTransactions]);
-
   const { flatListData, stickyHeaderIndices } = useMemo(() => {
-    const sectionsToUse =
-      playgroundMode && showMockData ? mockSections : sections;
     const result: ListItemType[] = [];
     const headerIndices: number[] = [];
 
-    sectionsToUse.forEach((section) => {
+    sections.forEach((section) => {
       headerIndices.push(result.length);
       result.push({ type: "header", title: section.title });
 
       section.data.forEach((item, index) => {
-        if (playgroundMode && showMockData) {
-          result.push({
-            type: "mockTransaction",
-            transaction: item as MockTransactionType,
-            isFirst: index === 0,
-            isLast: index === section.data.length - 1,
-          });
-        } else {
-          result.push({
-            type: "transaction",
-            transaction: item as TransactionWithoutId,
-            isFirst: index === 0,
-            isLast: index === section.data.length - 1,
-          });
-        }
+        result.push({
+          type: "transaction",
+          transaction: item as TransactionWithoutId,
+          isFirst: index === 0,
+          isLast: index === section.data.length - 1,
+        });
       });
     });
 
     return { flatListData: result, stickyHeaderIndices: headerIndices };
-  }, [sections, mockSections, playgroundMode, showMockData]);
+  }, [sections]);
 
   const onRefresh = useCallback(
     async (showRefreshIndicator = true) => {
@@ -275,8 +239,6 @@ export default function Page() {
         <View style={{ paddingHorizontal: 20 }}>
           <Header
             organization={organization}
-            showMockData={showMockData}
-            setShowMockData={setShowMockData}
             showChart={false}
           />
         </View>
@@ -376,7 +338,7 @@ export default function Page() {
 
         <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
           {isLoading && <LoadingSkeleton />}
-          {!isLoading && sections.length === 0 && !showMockData && (
+          {!isLoading && sections.length === 0 && (
             <EmptyState isOnline={isOnline} />
           )}
         </View>
@@ -385,7 +347,6 @@ export default function Page() {
   }, [
     playgroundMode,
     organization,
-    showMockData,
     isLoading,
     sections.length,
     isOnline,
@@ -400,16 +361,6 @@ export default function Page() {
     ({ item }: { item: ListItemType }) => {
       if (item.type === "header") {
         return <SectionHeader title={item.title} />;
-      }
-
-      if (item.type === "mockTransaction") {
-        return (
-          <MockTransaction
-            transaction={item.transaction}
-            top={item.isFirst}
-            bottom={item.isLast}
-          />
-        );
       }
 
       return (
@@ -431,10 +382,6 @@ export default function Page() {
   const getItemType = useCallback((item: ListItemType) => {
     if (item.type === "header") {
       return "header";
-    }
-
-    if (item.type === "mockTransaction") {
-      return "mockTransaction";
     }
 
     const transaction = item.transaction as TransactionWithoutId;

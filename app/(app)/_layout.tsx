@@ -31,9 +31,7 @@ import AuthContext from "@/lib/auth/auth";
 import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
-import { DevToolsPanel } from "@/components/devtools";
 import useClient from "@/lib/client";
-import { DevToolsProvider } from "@/lib/devtools";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -606,7 +604,6 @@ export default function Layout() {
                   },
                 }}
               >
-                <DevToolsProvider>
                   <SentryUserBridge />
                   <UserChangeDetector />
                   <ActionSheetProvider>
@@ -616,8 +613,6 @@ export default function Layout() {
                       </ThemeProvider>
                     </AlertNotificationRoot>
                   </ActionSheetProvider>
-                  <DevToolsPanel />
-                </DevToolsProvider>
               </SWRConfig>
             </GestureHandlerRootView>
           </View>

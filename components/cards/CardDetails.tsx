@@ -17,13 +17,51 @@ import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
 import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import {
   redactedCardNumber,
   renderCardNumber,
   renderMoney,
 } from "@/utils/format";
 import { formatCategoryNames, formatMerchantNames } from "@/utils/org";
+
+function InfoRow({
+  label,
+  value,
+  wrap,
+}: {
+  label: string;
+  value: string;
+  wrap?: boolean;
+}) {
+  const { colors: themeColors } = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 12,
+        ...(wrap && { flexWrap: "wrap" }),
+      }}
+    >
+      <Text style={{ fontSize: 16, color: themeColors.text, flexShrink: 1 }}>
+        {label}
+      </Text>
+      <Text
+        style={{
+          color: palette.muted,
+          fontSize: 16,
+          fontWeight: "500",
+          fontFamily: "JetBrainsMono-Regular",
+          flexShrink: 1,
+        }}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
 
 interface CardDetailsProps {
   card: Card;
@@ -58,6 +96,7 @@ export default function CardDetails({
   user,
 }: CardDetailsProps) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
 
   useEffect(() => {
     if (detailsRevealed && details) {
@@ -87,13 +126,10 @@ export default function CardDetails({
       style={{
         marginBottom: 24,
         padding: 20,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 3,
-        elevation: 2,
+        borderRadius: 8,
         backgroundColor: themeColors.card,
+        borderWidth: 1,
+        borderColor: cardBorderColor(isDark),
       }}
     >
       <CardStatus card={card} />
@@ -356,13 +392,7 @@ export default function CardDetails({
                   marginBottom: 12,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
+                <Text style={{ fontSize: 16, color: themeColors.text, flexShrink: 1 }}>
                   Grant sent to
                 </Text>
                 <Text
@@ -380,147 +410,29 @@ export default function CardDetails({
                 </Text>
               </View>
             )}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 12,
-                flexWrap: "wrap",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: themeColors.text,
-                }}
-              >
-                Allowed Merchants
-              </Text>
-              <Text
-                style={{
-                  color: palette.muted,
-                  fontSize: 16,
-                  fontWeight: "500",
-                  fontFamily: "JetBrainsMono-Regular",
-                }}
-              >
-                {formatMerchantNames(grantCard?.allowed_merchants)}
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 12,
-                flexWrap: "wrap",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: themeColors.text,
-                  flexShrink: 1,
-                }}
-              >
-                Allowed Categories
-              </Text>
-              <Text
-                style={{
-                  color: palette.muted,
-                  fontSize: 16,
-                  fontWeight: "500",
-                  fontFamily: "JetBrainsMono-Regular",
-                }}
-              >
-                {formatCategoryNames(grantCard?.allowed_categories)}
-              </Text>
-            </View>
+            <InfoRow
+              label="Allowed Merchants"
+              value={formatMerchantNames(grantCard?.allowed_merchants)}
+              wrap
+            />
+            <InfoRow
+              label="Allowed Categories"
+              value={formatCategoryNames(grantCard?.allowed_categories)}
+              wrap
+            />
             {grantCard?.purpose && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 12,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: themeColors.text,
-                    flexShrink: 1,
-                  }}
-                >
-                  Purpose
-                </Text>
-                <Text
-                  style={{
-                    color: palette.muted,
-                    fontSize: 16,
-                    fontWeight: "500",
-                    fontFamily: "JetBrainsMono-Regular",
-                    flexShrink: 1,
-                  }}
-                >
-                  {grantCard?.purpose}
-                </Text>
-              </View>
+              <InfoRow label="Purpose" value={grantCard.purpose} />
             )}
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: themeColors.text,
-                flexShrink: 1,
-              }}
-            >
-              One time use?
-            </Text>
-            <Text
-              style={{
-                color: palette.muted,
-                fontSize: 16,
-                fontWeight: "500",
-                fontFamily: "JetBrainsMono-Regular",
-              }}
-            >
-              {grantCard?.one_time_use ? "Yes" : "No"}
-            </Text>
-          </View>
+          <InfoRow
+            label="One time use?"
+            value={grantCard?.one_time_use ? "Yes" : "No"}
+          />
           {grantCard?.expires_on && (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: themeColors.text,
-                  flexShrink: 1,
-                }}
-              >
-                Spend By
-              </Text>
-              <Text
-                style={{
-                  color: palette.muted,
-                  fontSize: 16,
-                  fontWeight: "500",
-                  fontFamily: "JetBrainsMono-Regular",
-                }}
-              >
-                {format(new Date(grantCard.expires_on), "MMM d, yyyy")}
-              </Text>
-            </View>
+            <InfoRow
+              label="Spend By"
+              value={format(new Date(grantCard.expires_on), "MMM d, yyyy")}
+            />
           )}
         </>
       )}

@@ -43,7 +43,7 @@ export default function ActivateCardModal({
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 15,
+            borderRadius: 8,
             padding: 20,
             width: "100%",
             maxWidth: 400,

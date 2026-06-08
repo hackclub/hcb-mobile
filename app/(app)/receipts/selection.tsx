@@ -15,6 +15,7 @@ import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { mutate } from "swr";
 
+import Button from "@/components/Button";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Receipt from "@/lib/types/Receipt";
@@ -184,20 +185,9 @@ export default function Page() {
             No receipts available in your receipt bin to upload to this
             transaction.
           </Text>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{
-              backgroundColor: palette.primary,
-              paddingHorizontal: 24,
-              paddingVertical: 12,
-              borderRadius: 8,
-              marginTop: 24,
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
-              Go Back
-            </Text>
-          </TouchableOpacity>
+          <Button onPress={() => router.back()} style={{ marginTop: 24 }}>
+            Go Back
+          </Button>
         </View>
       </SafeAreaView>
     );
@@ -242,33 +232,14 @@ export default function Page() {
             </Text>
           </View>
         </View>
-        <TouchableOpacity
+        <Button
           onPress={handleUpload}
           disabled={uploading || selectedReceipts.size === 0}
-          style={{
-            backgroundColor:
-              uploading || selectedReceipts.size === 0
-                ? palette.muted
-                : palette.primary,
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-            borderRadius: 8,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          }}
+          loading={uploading}
+          style={{ paddingVertical: 8, paddingHorizontal: 14 }}
         >
-          {uploading ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Ionicons name="cloud-upload-outline" color="white" size={20} />
-          )}
-          {!uploading && (
-            <Text style={{ color: "white", fontWeight: "600" }}>
-              Upload ({selectedReceipts.size})
-            </Text>
-          )}
-        </TouchableOpacity>
+          {`Upload (${selectedReceipts.size})`}
+        </Button>
       </View>
 
       <View

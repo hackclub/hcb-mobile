@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
-import { Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 
 import { Text } from "@/components/Text";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 interface SectionCardProps {
   title: string;
@@ -17,12 +18,15 @@ export default function SectionCard({
   children,
 }: SectionCardProps) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
   return (
     <View
       style={{
         backgroundColor: themeColors.card,
-        borderRadius: 16,
+        borderRadius: 8,
         overflow: "hidden",
+        borderWidth: 1,
+        borderColor: cardBorderColor(isDark),
       }}
     >
       <View

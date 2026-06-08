@@ -42,7 +42,7 @@ export default function SetPurposeModal({
         <View
           style={{
             backgroundColor: themeColors.card,
-            borderRadius: 15,
+            borderRadius: 8,
             padding: 20,
             width: "100%",
             maxWidth: 400,
@@ -92,7 +92,7 @@ export default function SetPurposeModal({
             <Button
               style={{
                 flex: 1,
-                borderRadius: 15,
+                borderRadius: 8,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
               color={themeColors.text}
@@ -104,7 +104,7 @@ export default function SetPurposeModal({
               style={{
                 flex: 1,
                 backgroundColor: "#50ECC0",
-                borderRadius: 15,
+                borderRadius: 8,
                 paddingVertical: 14,
               }}
               color="#114F3D"

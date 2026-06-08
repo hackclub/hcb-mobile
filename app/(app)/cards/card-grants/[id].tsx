@@ -397,8 +397,7 @@ export default function Page() {
           key="freeze"
           style={{
             backgroundColor: "#71C5E7",
-            borderTopWidth: 0,
-            borderRadius: 12,
+            borderColor: "#5ab0d4",
           }}
           color="#186177"
           iconColor="#186177"
@@ -426,12 +425,6 @@ export default function Page() {
       buttons.push(
         <Button
           key={`details-${detailsRevealed}`}
-          style={{
-            borderRadius: 12,
-            backgroundColor: palette.primary,
-          }}
-          color="white"
-          iconColor="white"
           icon={detailsRevealed ? "private-fill" : "view"}
           onPress={() =>
             toggleCardDetails(
@@ -453,8 +446,7 @@ export default function Page() {
           key="topup"
           style={{
             backgroundColor: "#3499EE",
-            borderTopWidth: 0,
-            borderRadius: 12,
+            borderColor: "#2280d0",
           }}
           color="white"
           iconColor="white"
@@ -516,8 +508,7 @@ export default function Page() {
           key="grant"
           style={{
             backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
-            borderTopWidth: 0,
-            borderRadius: 12,
+            borderColor: !isCardholder ? "#b01228" : "#2080cc",
           }}
           color="white"
           iconColor="white"

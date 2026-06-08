@@ -230,7 +230,7 @@ export default function Page() {
             themeVariant={scheme || undefined}
           >
             <Ionicons.Button
-              name="ellipsis-horizontal-circle-outline"
+              name="ellipsis-horizontal"
               backgroundColor="transparent"
               size={24}
               color={themeColors.text}
@@ -238,7 +238,7 @@ export default function Page() {
             />
           </MenuView>
           <Ionicons.Button
-            name="add-circle-outline"
+            name="add"
             backgroundColor="transparent"
             size={24}
             color={themeColors.text}

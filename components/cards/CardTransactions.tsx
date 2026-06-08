@@ -62,7 +62,7 @@ export default function CardTransactions({
           justifyContent: "center",
           height: 150,
           backgroundColor: "rgba(0, 0, 0, 0.02)",
-          borderRadius: 15,
+          borderRadius: 8,
         }}
       >
         <ActivityIndicator color={palette.primary} />
@@ -81,7 +81,7 @@ export default function CardTransactions({
           justifyContent: "center",
           paddingVertical: 60,
           backgroundColor: "rgba(0, 0, 0, 0.02)",
-          borderRadius: 15,
+          borderRadius: 8,
         }}
       >
         <Ionicons name="receipt-outline" size={50} color={palette.muted} />

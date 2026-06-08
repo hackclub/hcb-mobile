@@ -6,13 +6,19 @@ import { memo } from "react";
 import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
 import useSWR from "swr";
 
+function getInitials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
 import EventBalance from "./EventBalance";
 
 import Invitation from "@/lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { orgColor } from "@/utils/org";
 
@@ -54,44 +60,31 @@ const Event = memo(
           style={{ flexDirection: "row", alignItems: "center", padding: 16 }}
         >
           {event.icon ? (
-            <View
+            <Image
+              source={{ uri: event.icon }}
+              cachePolicy="memory-disk"
+              contentFit="cover"
               style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: isDark ? 0.4 : 0.15,
-                shadowRadius: 4,
-                elevation: 3,
+                width: 52,
+                height: 52,
+                borderRadius: 10,
+                marginRight: 14,
               }}
-            >
-              <Image
-                source={{ uri: event.icon }}
-                cachePolicy="memory-disk"
-                contentFit="cover"
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  marginRight: 14,
-                }}
-              />
-            </View>
+            />
           ) : (
             <View
               style={{
                 borderRadius: 10,
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 backgroundColor: color,
-                marginRight: 16,
+                marginRight: 14,
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            ></View>
+              />
           )}
-          <View
-            style={{
-              flexDirection: "column",
-              flex: 1,
-            }}
-          >
+          <View style={{ flexDirection: "column", flex: 1 }}>
             {invitation && invitation.sender && (
               <Text
                 style={{
@@ -105,61 +98,57 @@ const Event = memo(
                 invited you to
               </Text>
             )}
-            <Text
-              numberOfLines={2}
+            <View
               style={{
-                color: themeColors.text,
-                fontSize: 18,
-                fontWeight: "700",
-                letterSpacing: -0.3,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
               }}
-              bold
             >
-              {event.name}
-            </Text>
-            {data?.playground_mode && (
-              <View
+              <Text
+                numberOfLines={1}
                 style={{
-                  backgroundColor: isDark ? "#283140" : "#348EDA",
-                  paddingVertical: 4,
-                  paddingHorizontal: 12,
-                  borderRadius: 20,
-                  alignSelf: "flex-start",
-                  marginVertical: 4,
+                  color: themeColors.text,
+                  fontSize: 16,
+                  fontWeight: "600",
+                  flexShrink: 1,
                 }}
               >
-                <Text
+                {event.name}
+              </Text>
+              {data?.playground_mode && (
+                <View
                   style={{
-                    color: isDark ? "#248EDA" : "white",
-                    fontSize: 12,
-                    fontWeight: "bold",
+                    backgroundColor: isDark ? "#1a2d45" : "#dbeeff",
+                    paddingVertical: 3,
+                    paddingHorizontal: 10,
+                    borderRadius: 9999,
                   }}
                 >
-                  Playground Mode
-                </Text>
-              </View>
-            )}
+                  <Text
+                    style={{
+                      color: isDark ? "#6cb4f5" : "#1a6fbf",
+                      fontSize: 12,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Playground
+                  </Text>
+                </View>
+              )}
+            </View>
             {!hideBalance && (
               <View style={{ marginTop: 4 }}>
                 <EventBalance balance_cents={data?.balance_cents} />
               </View>
             )}
           </View>
-          <View
-            style={{
-              backgroundColor: isDark
-                ? "rgba(255, 255, 255, 0.08)"
-                : "rgba(0, 0, 0, 0.07)",
-              borderRadius: 20,
-              padding: 6,
-            }}
-          >
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={isDark ? palette.muted : palette.black}
-            />
-          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={isDark ? palette.muted : palette.slate}
+          />
         </View>
       </>
     );
@@ -182,6 +171,8 @@ const Event = memo(
               borderRadius: 10,
               overflow: "hidden",
               position: "relative",
+              borderWidth: 1,
+              borderColor: cardBorderColor(isDark),
             }}
           >
             <Image
@@ -222,8 +213,10 @@ const Event = memo(
             style={StyleSheet.compose(
               {
                 backgroundColor: themeColors.card,
-                borderRadius: 10,
+                borderRadius: 8,
                 overflow: "hidden",
+                borderWidth: 1,
+                borderColor: cardBorderColor(isDark),
               },
               style,
             )}

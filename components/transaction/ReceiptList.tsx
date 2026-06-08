@@ -20,7 +20,7 @@ import Receipt from "@/lib/types/Receipt";
 import Transaction from "@/lib/types/Transaction";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOffline } from "@/lib/useOffline";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 export function ZoomAndFadeIn() {
   "worklet";
@@ -305,10 +305,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             style={{
               width: 150,
               height: 200,
-              borderRadius: 14,
+              borderRadius: 8,
               backgroundColor: themeColors.card,
               borderWidth: 1,
-              borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+              borderColor: cardBorderColor(isDark),
               borderStyle: "dashed",
               alignItems: "center",
               justifyContent: "center",
@@ -321,7 +321,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
             ) : (
               <>
                 <Ionicons
-                  name="add-circle-outline"
+                  name="add-circle"
                   color={palette.muted}
                   size={36}
                 />

@@ -25,7 +25,7 @@ import { OrganizationExpanded } from "@/lib/types/Organization";
 import User, { OrgUser } from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface OrgInvitation {
   id: string;
@@ -52,24 +52,22 @@ function MemberCard({
   user,
   canManage,
   onRemove,
-  isDark,
-  themeColors,
 }: {
   user: OrgUser;
   canManage: boolean;
   onRemove: (user: OrgUser) => void;
-  isDark: boolean;
-  themeColors: ReturnType<typeof useTheme>["colors"];
 }) {
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
+  const borderColor = cardBorderColor(isDark);
+  const subColor = subTextColor(isDark);
   const actionBg = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)";
 
   return (
     <View
       style={{
         backgroundColor: themeColors.card,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor,
         padding: 14,
@@ -144,22 +142,20 @@ function MemberCard({
 function InvitationCard({
   invite,
   onCancel,
-  isDark,
-  themeColors,
 }: {
   invite: OrgInvitation;
   onCancel: (id: string) => void;
-  isDark: boolean;
-  themeColors: ReturnType<typeof useTheme>["colors"];
 }) {
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
+  const borderColor = cardBorderColor(isDark);
+  const subColor = subTextColor(isDark);
 
   return (
     <View
       style={{
         backgroundColor: themeColors.card,
-        borderRadius: 14,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor,
         padding: 14,
@@ -257,7 +253,6 @@ export default function Page() {
     canManage ? `organizations/${id}/invitations?organization_id=${id}` : null,
     );
 
-  console.log("invitations", invitations);
 
   useFocusEffect(
     useCallback(() => {
@@ -423,9 +418,10 @@ export default function Page() {
                 </View>
                 {canManage && (
                   <Button
+                    variant="green"
                     icon="member-add"
                     iconSize={28}
-                    iconOffset={2}
+                    iconOffset={4}
                     onPress={() =>
                       router.push({
                         pathname: "/(events)/[id]/invite",
@@ -512,8 +508,6 @@ export default function Page() {
               user={item.user}
               canManage={canManage}
               onRemove={removeUser}
-              isDark={isDark}
-              themeColors={themeColors}
             />
           );
         }
@@ -540,8 +534,6 @@ export default function Page() {
             <InvitationCard
               invite={item.invite}
               onCancel={cancelInvitation}
-              isDark={isDark}
-              themeColors={themeColors}
             />
           );
         }

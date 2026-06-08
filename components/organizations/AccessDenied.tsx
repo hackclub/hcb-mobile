@@ -5,7 +5,8 @@ import * as Linking from "expo-linking";
 import { View } from "react-native";
 
 import Button from "@/components/Button";
-import { palette } from "@/styles/theme";
+import { useIsDark } from "@/lib/useColorScheme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 interface AccessDeniedProps {
   orgId: string;
@@ -14,6 +15,7 @@ interface AccessDeniedProps {
 
 export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
 
   return (
     <View
@@ -28,12 +30,13 @@ export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
       <View
         style={{
           backgroundColor: themeColors.card,
-          borderRadius: 20,
+          borderRadius: 16,
           padding: 32,
           width: "100%",
           maxWidth: 400,
           alignItems: "center",
-          elevation: 8,
+          borderWidth: 1,
+          borderColor: cardBorderColor(isDark),
         }}
       >
         <View

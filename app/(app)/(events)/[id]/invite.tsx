@@ -329,7 +329,8 @@ export default function InvitePage() {
 
         <Button
           variant="primary"
-          icon="member-add"
+          icon="send"
+          iconSize={24}
           loading={isMutating}
           onPress={() => {
             if (validate()) sendInvite();

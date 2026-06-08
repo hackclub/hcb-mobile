@@ -42,27 +42,7 @@ export const NoOrganizationsEmptyState = () => {
           paddingTop: 60,
         }}
       >
-        <View
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: isDark
-              ? "rgba(236, 55, 80, 0.1)"
-              : "rgba(236, 55, 80, 0.08)",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 28,
-            ...(Platform.OS === "ios" && {
-              shadowColor: palette.primary,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 12,
-            }),
-          }}
-        >
-          <Ionicons name="rocket-outline" size={48} color={palette.primary} />
-        </View>
+ 
         <Text
           style={{
             color: themeColors.text,
@@ -87,8 +67,8 @@ export const NoOrganizationsEmptyState = () => {
         >
           You aren't a part of an organization yet.{"\n"}Looking to start one?
         </Text>
-        <Button variant="primary" icon="enter" onPress={handleApply}>
-          Apply to HCB
+        <Button variant="green" icon="plus" iconSize={24} iconPosition="left" onPress={handleApply}>
+          New Organization
         </Button>
       </View>
     </ScrollView>

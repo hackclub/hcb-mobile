@@ -31,12 +31,11 @@ import { mutate } from "swr";
 import AuthContext from "@/lib/auth/auth";
 import Button from "@/components/Button";
 import FeedbackModal from "@/components/FeedbackModal";
-import { useDevTools } from "@/lib/devtools/DevToolsContext";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 
 const PRIVACY_URL = "https://hack.club/hcb-privacy-policy";
@@ -86,6 +85,7 @@ export default function SettingsPage() {
   const animation = useRef(new Animated.Value(0)).current;
   const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
+  const borderColor = cardBorderColor(isDark);
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
@@ -256,9 +256,11 @@ export default function SettingsPage() {
             flexDirection: "row",
             alignItems: "center",
             backgroundColor: colors.card,
-            borderRadius: 18,
+            borderRadius: 8,
             padding: 18,
             marginBottom: 12,
+            borderWidth: 1,
+            borderColor,
           }}
         >
           <Animated.Image
@@ -312,18 +314,20 @@ export default function SettingsPage() {
         <View
           style={{
             backgroundColor: colors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             flexDirection: "row",
             alignItems: "center",
             padding: 18,
             marginBottom: 24,
+            borderWidth: 1,
+            borderColor,
           }}
         >
           <View
             style={{
               flexDirection: "row",
               backgroundColor: colors.card,
-              borderRadius: 16,
+              borderRadius: 8,
               overflow: "hidden",
               flex: 1,
               justifyContent: "space-between",
@@ -343,7 +347,7 @@ export default function SettingsPage() {
                   },
                   theme === opt.key && {
                     backgroundColor: colors.primary,
-                    borderRadius: 16,
+                    borderRadius: 6,
                   },
                   idx === 1 && { marginHorizontal: 2 },
                 ]}
@@ -387,8 +391,11 @@ export default function SettingsPage() {
         <View
           style={{
             backgroundColor: colors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             marginBottom: 24,
+            borderWidth: 1,
+            borderColor,
+            overflow: "hidden",
           }}
         >
           {biometricsAvailable && (
@@ -556,10 +563,13 @@ export default function SettingsPage() {
         <View
           style={{
             backgroundColor: colors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             paddingVertical: 0,
             paddingHorizontal: 0,
             marginBottom: 24,
+            borderWidth: 1,
+            borderColor,
+            overflow: "hidden",
           }}
         >
           <Pressable
@@ -704,9 +714,12 @@ export default function SettingsPage() {
         <View
           style={{
             backgroundColor: colors.card,
-            borderRadius: 16,
+            borderRadius: 8,
             paddingVertical: 0,
             paddingHorizontal: 0,
+            borderWidth: 1,
+            borderColor,
+            overflow: "hidden",
             marginBottom: 24,
           }}
         >
@@ -775,7 +788,7 @@ export default function SettingsPage() {
             marginTop: 12,
             marginBottom: 32,
             backgroundColor: colors.primary,
-            borderRadius: 16,
+            borderRadius: 8,
             paddingVertical: 16,
             alignItems: "center",
           }}
@@ -784,7 +797,6 @@ export default function SettingsPage() {
           Sign Out
         </Button>
 
-        {user?.auditor && <DevToolsButton colors={colors} />}
       </View>
 
       <FeedbackModal
@@ -821,36 +833,5 @@ export default function SettingsPage() {
         }}
       />
     </ScrollView>
-  );
-}
-
-function DevToolsButton({
-  colors,
-}: {
-  colors: { primary: string; card: string; text: string };
-}) {
-  const { open } = useDevTools();
-
-  return (
-    <Pressable
-      style={{
-        marginBottom: 40,
-        backgroundColor: colors.card,
-        borderRadius: 16,
-        paddingVertical: 16,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#ff8c37",
-        borderStyle: "dashed",
-      }}
-      onPress={open}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Ionicons name="bug" size={20} color="#ff8c37" />
-        <Text style={{ color: "#ff8c37", fontWeight: "600", fontSize: 16 }}>
-          Open Dev Tools
-        </Text>
-      </View>
-    </Pressable>
   );
 }

@@ -11,19 +11,20 @@ import { TransactionFilters } from "@/lib/organization/useTransactions";
 import Tag from "@/lib/types/Tag";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { palette } from "@/styles/theme";
+import Button from "@/components/Button";
+import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 export default function TransactionFilterScreen() {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const params = useLocalSearchParams<{ id: string; filters?: string }>();
 
-  const subColor = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
-  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
+  const subColor = subTextColor(isDark);
+  const borderColor = cardBorderColor(isDark);
 
   const cardStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor,
   } as const;
@@ -131,7 +132,7 @@ export default function TransactionFilterScreen() {
                 style={{
                   flex: 1,
                   paddingVertical: 8,
-                  borderRadius: 10,
+                  borderRadius: 6,
                   alignItems: "center",
                   backgroundColor: active
                     ? isDark
@@ -295,20 +296,7 @@ export default function TransactionFilterScreen() {
       </View>
 
       {/* Apply */}
-      <Pressable
-        onPress={handleApply}
-        style={({ pressed }) => ({
-          backgroundColor: palette.primary,
-          borderRadius: 12,
-          paddingVertical: 14,
-          alignItems: "center",
-          opacity: pressed ? 0.85 : 1,
-        })}
-      >
-        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-          Apply filters
-        </Text>
-      </Pressable>
+      <Button onPress={handleApply}>Apply filters</Button>
 
       {/* Clear */}
       <Pressable

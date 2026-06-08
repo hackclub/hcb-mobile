@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { Platform, Pressable, View } from "react-native";
 
 import { useIsDark } from "@/lib/useColorScheme";
-import { palette } from "@/styles/theme";
+import { cardBorderColor, palette } from "@/styles/theme";
 
 export default function TapToPayBanner({
   onDismiss,
@@ -52,7 +52,9 @@ export default function TapToPayBanner({
     <Pressable
       onPress={handlePress}
       style={({ pressed }) => ({
-        borderRadius: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: cardBorderColor(isDark),
         overflow: "hidden",
         shadowColor: palette.primary,
         shadowOffset: { width: 0, height: 8 },
@@ -74,7 +76,7 @@ export default function TapToPayBanner({
           overflow: "hidden",
           borderWidth: isDark ? 0 : 1,
           borderColor: "rgba(236, 55, 80, 0.2)",
-          borderRadius: 16,
+          borderRadius: 8,
         }}
       >
         {/* Decorative elements */}

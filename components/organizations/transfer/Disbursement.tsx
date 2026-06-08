@@ -1,5 +1,5 @@
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -124,7 +124,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
   return (
     <>
-      <PageTitle title="New HCB transfer" />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "New HCB transfer" }} />
       <View style={{ flex: 1, backgroundColor: themeColors.background }}>
         <Text
           style={{

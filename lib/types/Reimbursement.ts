@@ -1,3 +1,6 @@
+import Organization from "./Organization";
+import User from "./User";
+
 export interface ReimbursementReport {
   id: string;
   name: string;
@@ -18,9 +21,9 @@ export interface ReimbursementReport {
   reimbursement_approved_at: string | null;
   reimbursed_at: string | null;
   rejected_at: string | null;
-  user: { id: string; full_name: string; avatar?: string } | string;
-  reviewer: { id: string; full_name: string; avatar?: string } | string | null;
-  organization: { id: string; name: string; slug: string } | string;
+  user: User | string;
+  reviewer: User | string | null;
+  organization: Organization | string;
 }
 
 export interface Receipt {

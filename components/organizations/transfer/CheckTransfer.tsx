@@ -2,8 +2,8 @@ import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { TextInput, View } from "react-native";
 
+import { Stack } from "expo-router";
 import Button from "@/components/Button";
-import PageTitle from "@/components/PageTitle";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -143,7 +143,7 @@ export default function CheckTransferScreen({
 
   const inputContainerStyle = {
     backgroundColor: themeColors.card,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
   };
@@ -155,7 +155,7 @@ export default function CheckTransferScreen({
 
   return (
     <>
-      <PageTitle title="New check" />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "New check" }} />
 
       <View style={{ gap: 14 }}>
         <View style={{ gap: 6 }}>
