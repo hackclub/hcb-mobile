@@ -1,8 +1,7 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { format } from "date-fns";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
+import { useTheme } from "expo-router/react-navigation";
 import * as ScreenCapture from "expo-screen-capture";
 import { useEffect } from "react";
 import { View, Animated, Platform, TouchableOpacity } from "react-native";
@@ -12,12 +11,13 @@ import { CardStatus } from "./CardStatus";
 import CopyableRow from "./CopyableRow";
 
 import Divider from "@/components/Divider";
+import { Text } from "@/components/Text";
 import UserAvatar from "@/components/UserAvatar";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
-import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
 import { useIsDark } from "@/lib/useColorScheme";
+import { CardDetails as StripeCardDetails } from "@/lib/useStripeCardDetails";
 import { cardBorderColor, palette } from "@/styles/theme";
 import {
   redactedCardNumber,
@@ -80,7 +80,6 @@ interface CardDetailsProps {
   ) => Record<string, unknown>;
   user?: User;
 }
-
 
 export default function CardDetails({
   card,
@@ -392,7 +391,13 @@ export default function CardDetails({
                   marginBottom: 12,
                 }}
               >
-                <Text style={{ fontSize: 16, color: themeColors.text, flexShrink: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: themeColors.text,
+                    flexShrink: 1,
+                  }}
+                >
                   Grant sent to
                 </Text>
                 <Text

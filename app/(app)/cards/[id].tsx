@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import {
@@ -23,6 +23,7 @@ import CardError from "@/components/cards/CardError";
 import CardSkeleton from "@/components/cards/CardSkeleton";
 import CardTransactions from "@/components/cards/CardTransactions";
 import ActivateCardModal from "@/components/cards/modals/ActivateCardModal";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import useClient from "@/lib/client";
 import useTransactions from "@/lib/organization/useTransactions";
 import { CardPolicy } from "@/lib/policies";
@@ -42,9 +43,8 @@ import {
   toggleCardFrozen,
 } from "@/utils/cardActions";
 import { getCardName } from "@/utils/cardHelpers";
-import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/format";
-import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import * as Haptics from "@/utils/haptics";
 import { shareUrl } from "@/utils/shareUrl";
 
 export default function CardPage() {

@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "@/components/Text";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
@@ -13,6 +12,7 @@ import ImageView from "react-native-image-viewing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
+import { Text } from "@/components/Text";
 import { palette } from "@/styles/theme";
 
 interface FileViewerModalProps {

@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { TouchableOpacity, View, ActivityIndicator } from "react-native";
 
+import { Text } from "@/components/Text";
 import TransactionComponent from "@/components/transaction/Transaction";
 import { getTransactionTitle } from "@/lib/transactionTitle";
 import Card from "@/lib/types/Card";

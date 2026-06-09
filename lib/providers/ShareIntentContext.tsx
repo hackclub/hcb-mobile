@@ -7,8 +7,8 @@ import {
   ReactNode,
 } from "react";
 
-import Organization from "../lib/types/Organization";
-import Transaction from "../lib/types/Transaction";
+import Organization from "../types/Organization";
+import Transaction from "../types/Transaction";
 
 interface ShareIntentData {
   images: string[];

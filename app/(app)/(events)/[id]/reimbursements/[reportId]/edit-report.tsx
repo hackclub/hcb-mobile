@@ -1,7 +1,7 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,13 +19,13 @@ import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import { ReimbursementReport } from "@/lib/types/Reimbursement";
+import { roleAtLeast } from "@/lib/policies";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
+import { ReimbursementReport } from "@/lib/types/Reimbursement";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { roleAtLeast } from "@/lib/policies";
-import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
+import { cardBorderColor, subTextColor } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
 export default function EditReportPage() {
@@ -44,9 +44,8 @@ export default function EditReportPage() {
   const { data: org } = useOfflineSWR<Organization | OrganizationExpanded>(
     `organizations/${id}`,
   );
-  const { data: userOrgs } = useOfflineSWR<Organization[]>(
-    "user/organizations",
-  );
+  const { data: userOrgs } =
+    useOfflineSWR<Organization[]>("user/organizations");
 
   const [name, setName] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
@@ -67,7 +66,7 @@ export default function EditReportPage() {
     );
     if (report.reviewer && typeof report.reviewer === "object") {
       setReviewerId(report.reviewer.id);
-      setReviewerName(report.reviewer.full_name);
+      setReviewerName(report.reviewer.full_name ?? report.reviewer.name);
     }
     if (report.organization && typeof report.organization === "object") {
       setOrgId(report.organization.id);
@@ -91,9 +90,12 @@ export default function EditReportPage() {
 
   const isDraft = report?.status === "draft";
   const isOpen = report
-    ? !["reimbursement_approved", "reimbursed", "rejected", "reversed"].includes(
-        report.status,
-      )
+    ? ![
+        "reimbursement_approved",
+        "reimbursed",
+        "rejected",
+        "reversed",
+      ].includes(report.status)
     : false;
 
   const canUpdateName = isManager || (isCreator && isOpen);

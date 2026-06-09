@@ -1,8 +1,8 @@
-import { Text } from "@/components/Text";
 import { View } from "react-native";
 
 import { TransactionViewProps } from "./TransactionViewProps";
 
+import { Text } from "@/components/Text";
 import ReceiptList from "@/components/transaction/ReceiptList";
 import TransactionDetails, {
   descriptionDetail,

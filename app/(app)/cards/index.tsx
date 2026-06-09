@@ -1,12 +1,11 @@
+import { MenuView } from "@expo/ui/community/menu";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MenuView } from "@expo/ui/community/menu";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router, useNavigation } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, RefreshControl, useColorScheme, View } from "react-native";
+import { Pressable, RefreshControl, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
@@ -15,14 +14,15 @@ import ReorderableList, {
 import CardListSkeleton from "@/components/cards/CardListSkeleton";
 import { NoCardsEmptyState } from "@/components/cards/NoCardsEmptyState";
 import PaymentCard from "@/components/PaymentCard";
+import { Text } from "@/components/Text";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/format";
+import * as Haptics from "@/utils/haptics";
 
 type CardWithGrant = Card &
   Required<Pick<Card, "last4">> & { grant_id?: string };
@@ -81,7 +81,6 @@ export default function Page() {
   const { data: user } = useOfflineSWR<User>("user");
   const { data: organizations } =
     useOfflineSWR<Organization[]>("user/organizations");
-  const scheme = useColorScheme();
   const { colors: themeColors } = useTheme();
   const [patternCache, setPatternCache] = useState<
     Record<
@@ -113,9 +112,13 @@ export default function Page() {
     });
 
     return cards
-      .filter((card): card is Card & Required<Pick<Card, "last4">> => !!card.last4)
+      .filter(
+        (card): card is Card & Required<Pick<Card, "last4">> => !!card.last4,
+      )
       .map((card) => ({ ...card, grant_id: grantCardMap.get(card.id) }))
-      .sort((a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5));
+      .sort(
+        (a, b) => (STATUS_ORDER[a.status] ?? 5) - (STATUS_ORDER[b.status] ?? 5),
+      );
   }, [cards, grantCards]);
 
   useEffect(() => {
@@ -212,7 +215,6 @@ export default function Page() {
       headerRight: () => (
         <View style={{ flexDirection: "row" }}>
           <MenuView
-            isAnchoredToRight={true}
             actions={[
               {
                 id: "toggleCanceledCards",
@@ -239,7 +241,6 @@ export default function Page() {
                 });
               }
             }}
-            themeVariant={scheme || undefined}
           >
             <Ionicons.Button
               name="ellipsis-horizontal"
@@ -270,7 +271,6 @@ export default function Page() {
     navigation,
     canceledCardsShown,
     frozenCardsShown,
-    scheme,
     user,
     organizations,
     handleOrderCard,
@@ -279,7 +279,10 @@ export default function Page() {
   const filteredCards = useMemo(() => {
     if (!sortedCards) return [];
     return sortedCards.filter((c) => {
-      if (!canceledCardsShown && (c.status === "canceled" || c.status === "expired"))
+      if (
+        !canceledCardsShown &&
+        (c.status === "canceled" || c.status === "expired")
+      )
         return false;
       if (!frozenCardsShown && c.status === "frozen") return false;
       return true;
@@ -320,7 +323,11 @@ export default function Page() {
     if (card.grant_id) {
       router.push({
         pathname: "/cards/card-grants/[id]",
-        params: { card: JSON.stringify(card), id: card.grant_id, cardId: card.id },
+        params: {
+          card: JSON.stringify(card),
+          id: card.grant_id,
+          cardId: card.id,
+        },
       });
     } else {
       router.push({

@@ -1,14 +1,7 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Pressable,
-} from "react-native";
+import { View, TextInput, Alert, Pressable } from "react-native";
 import useSWR, { mutate, useSWRConfig } from "swr";
 
 import {
@@ -17,6 +10,7 @@ import {
 } from "./CommentFileActionSheet";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import UserMention from "@/components/UserMention";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -192,7 +186,9 @@ export default function CommentField({
           })}
           onPress={selectedFile ? removeFile : pickFile}
         >
-          <Text style={{ color: palette.info, fontSize: 14, fontWeight: "500" }}>
+          <Text
+            style={{ color: palette.info, fontSize: 14, fontWeight: "500" }}
+          >
             {selectedFile ? "Remove file" : "Choose file"}
           </Text>
         </Pressable>

@@ -1,7 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
 import { MenuAction, MenuView } from "@expo/ui/community/menu";
-import { useTheme } from "expo-router/react-navigation";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 
@@ -43,6 +43,15 @@ function getMenuActions(
       id: "transfer",
       title: "Transfer Money",
       image: "dollarsign.circle",
+      imageColor: iconColor,
+    });
+  }
+
+  if (policy?.invoices() && !organization.playground_mode) {
+    menuActions.push({
+      id: "invoices",
+      title: "Invoices",
+      image: "doc.text",
       imageColor: iconColor,
     });
   }
@@ -94,6 +103,12 @@ function handleMenuAction(
           ...baseParams,
           organization: JSON.stringify(organization),
         },
+      });
+      return;
+    case "invoices":
+      router.push({
+        pathname: "/(events)/[id]/invoices",
+        params: baseParams,
       });
       return;
     case "team":
@@ -150,7 +165,6 @@ export default function Menu({
   return (
     <MenuView
       actions={menuActions}
-      themeVariant={scheme || undefined}
       onPressAction={({ nativeEvent: { event } }) => {
         Haptics.selectionAsync();
         handleMenuAction(event, organization, supportsTapToPay);

@@ -1,11 +1,11 @@
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
+import { useTheme } from "expo-router/react-navigation";
 import { memo } from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";

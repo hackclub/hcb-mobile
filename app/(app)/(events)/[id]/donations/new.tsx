@@ -1,11 +1,10 @@
-import { useTheme } from "expo-router/react-navigation";
 import {
   PaymentIntent,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useRef, useState } from "react";
 import {
   Pressable,
@@ -19,6 +18,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { setPaymentData } from "@/lib/paymentStore";
@@ -335,7 +335,10 @@ export default function Page() {
                     action: "create_donation",
                   },
                 });
-                showAlert("Error creating donation", await parseApiError(error, "Please try again."));
+                showAlert(
+                  "Error creating donation",
+                  await parseApiError(error, "Please try again."),
+                );
               }
             }}
             style={{

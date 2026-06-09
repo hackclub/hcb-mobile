@@ -16,9 +16,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
-import { useIsDark } from "@/lib/useColorScheme";
 import { TransactionFilters } from "@/lib/organization/useTransactions";
 import Tag from "@/lib/types/Tag";
+import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface Props {
@@ -364,7 +364,9 @@ export default function TransactionFilterModal({
                             tagId: draft.tagId === tag.id ? undefined : tag.id,
                           })
                         }
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                        style={({ pressed }) => ({
+                          opacity: pressed ? 0.7 : 1,
+                        })}
                       >
                         <TagChip tag={tag} active={draft.tagId === tag.id} />
                       </Pressable>

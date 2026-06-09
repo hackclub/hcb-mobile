@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -98,11 +98,22 @@ export default function NewTagPage() {
             gap: 8,
           }}
         >
-          <Text style={{ color: palette.muted, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.4 }}>
+          <Text
+            style={{
+              color: palette.muted,
+              fontSize: 12,
+              textTransform: "uppercase",
+              letterSpacing: 0.4,
+            }}
+          >
             Preview
           </Text>
           <TagChip
-            tag={{ label: label.trim() || "Tag label", color, emoji: emoji.trim() || null }}
+            tag={{
+              label: label.trim() || "Tag label",
+              color,
+              emoji: emoji.trim() || null,
+            }}
           />
         </View>
 

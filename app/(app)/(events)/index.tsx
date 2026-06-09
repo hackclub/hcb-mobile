@@ -1,18 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useNavigation, useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useShareIntentContext } from "expo-share-intent";
 import * as WebBrowser from "expo-web-browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Platform, Pressable, RefreshControl, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import ReorderableList, {
@@ -24,13 +16,14 @@ import Event from "@/components/organizations/Event";
 import GrantInvite from "@/components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
 import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
+import { Text } from "@/components/Text";
 import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
 import GrantCard from "@/lib/types/GrantCard";
 import Invitation from "@/lib/types/Invitation";
 import Organization from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
-import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { organizationOrderEqual } from "@/utils/org";
@@ -209,7 +202,6 @@ export default function App() {
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
-  const navigation = useNavigation();
   const panGesture = useMemo(
     () => Gesture.Pan().activateAfterLongPress(520),
     [],
@@ -323,7 +315,7 @@ export default function App() {
       ListEmptyComponent={() => <NoOrganizationsEmptyState />}
       ListHeaderComponent={() => (
         <>
-{(invitations && invitations.length > 0) ||
+          {(invitations && invitations.length > 0) ||
           (grantInvites && grantInvites.length > 0) ? (
             <View
               style={{
@@ -350,8 +342,7 @@ export default function App() {
                       invitation={invitation}
                       style={{
                         borderWidth: 2,
-                        borderColor:
-                          isDark ? palette.primary : palette.muted,
+                        borderColor: isDark ? palette.primary : palette.muted,
                         marginBottom: 10,
                       }}
                       event={invitation.organization}
@@ -423,7 +414,13 @@ export default function App() {
               })}
             >
               <Ionicons name="add" size={20} color={palette.muted} />
-              <Text style={{ color: palette.muted, fontSize: 15, fontWeight: "500" }}>
+              <Text
+                style={{
+                  color: palette.muted,
+                  fontSize: 15,
+                  fontWeight: "500",
+                }}
+              >
                 Start a new organization
               </Text>
             </Pressable>

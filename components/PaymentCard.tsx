@@ -1,7 +1,6 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -15,6 +14,7 @@ import { SvgXml } from "react-native-svg";
 
 import CardChip from "./cards/CardChip";
 
+import { Text } from "@/components/Text";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails } from "@/lib/useStripeCardDetails";

@@ -1,12 +1,10 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
   Platform,
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -15,9 +13,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
-import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import AdminTools from "@/components/AdminTools";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import TagChip from "@/components/tags/TagChip";
+import { Text } from "@/components/Text";
 import Comment from "@/components/transaction/Comment";
 import CommentField from "@/components/transaction/comment/CommentField";
 import TransactionSkeleton from "@/components/transaction/TransactionSkeleton";
@@ -32,7 +31,6 @@ import ExpensePayoutTransaction from "@/components/transaction/types/ExpensePayo
 import InvoiceTransaction from "@/components/transaction/types/InvoiceTransaction";
 import TransferTransaction from "@/components/transaction/types/TransferTransaction";
 import WiseTransaction from "@/components/transaction/types/WiseTransaction";
-import { shareUrl } from "@/utils/shareUrl";
 import { TransactionPolicy } from "@/lib/policies";
 import IComment from "@/lib/types/Comment";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
@@ -40,6 +38,7 @@ import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
+import { shareUrl } from "@/utils/shareUrl";
 
 export default function TransactionPage({
   data,
@@ -257,7 +256,7 @@ export default function TransactionPage({
           </View>
         )}
 
-        {(comments && comments.length > 0 || canComment) && (
+        {((comments && comments.length > 0) || canComment) && (
           <View style={{ gap: 12 }}>
             {comments && comments.length > 0 && (
               <>

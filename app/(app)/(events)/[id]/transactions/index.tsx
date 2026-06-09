@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
@@ -143,7 +143,7 @@ export default function Page() {
     [transactions],
   );
 
-  const { flatListData, stickyHeaderIndices } = useMemo(() => {
+  const { flatListData } = useMemo(() => {
     const result: ListItemType[] = [];
     const headerIndices: number[] = [];
 
@@ -237,10 +237,7 @@ export default function Page() {
           </View>
         )}
         <View style={{ paddingHorizontal: 20 }}>
-          <Header
-            organization={organization}
-            showChart={false}
-          />
+          <Header organization={organization} showChart={false} />
         </View>
 
         {/* Filter bar */}
@@ -272,10 +269,7 @@ export default function Page() {
                   }
                   style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                 >
-                  <TagChip
-                    tag={tag}
-                    active={appliedFilters.tagId === tag.id}
-                  />
+                  <TagChip tag={tag} active={appliedFilters.tagId === tag.id} />
                 </Pressable>
               ))}
             </ScrollView>
@@ -292,9 +286,7 @@ export default function Page() {
               paddingVertical: 7,
               borderRadius: 20,
               backgroundColor:
-                activeFilterCount > 0
-                  ? palette.primary
-                  : themeColors.card,
+                activeFilterCount > 0 ? palette.primary : themeColors.card,
               opacity: pressed ? 0.7 : 1,
             })}
           >
@@ -310,7 +302,9 @@ export default function Page() {
                 color: activeFilterCount > 0 ? "#fff" : themeColors.text,
               }}
             >
-              {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : "Filters"}
+              {activeFilterCount > 0
+                ? `Filters (${activeFilterCount})`
+                : "Filters"}
             </Text>
           </Pressable>
         </View>
@@ -463,7 +457,6 @@ export default function Page() {
           <LoadingSkeleton />
         </View>
       )}
-
     </>
   );
 }

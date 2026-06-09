@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,9 +19,9 @@ import Animated from "react-native-reanimated";
 
 import Button from "@/components/Button";
 import FileViewerModal from "@/components/FileViewerModal";
-import UploadIcon from "@/components/icons/UploadIcon";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 import MissingReceiptTransaction from "@/components/receipts/MissingReceiptTransaction";
+import { Text } from "@/components/Text";
 import { ZoomAndFadeIn } from "@/components/transaction/ReceiptList";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -211,7 +210,10 @@ export default function Page() {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",
-                textBody: await parseApiError(error, "Failed to delete receipt. Please try again later."),
+                textBody: await parseApiError(
+                  error,
+                  "Failed to delete receipt. Please try again later.",
+                ),
               });
             } finally {
               setDeletingReceiptId(null);

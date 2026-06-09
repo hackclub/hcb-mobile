@@ -1,4 +1,3 @@
-import { Text } from "@/components/Text";
 import {
   DiscoveryDocument,
   exchangeCodeAsync,
@@ -15,8 +14,9 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AuthContext from "@/lib/auth/auth";
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
+import AuthContext from "@/lib/auth/auth";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 

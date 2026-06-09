@@ -1,11 +1,10 @@
 import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
@@ -14,6 +13,7 @@ import useSWR from "swr";
 
 import FileViewerModal from "@/components/FileViewerModal";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Receipt from "@/lib/types/Receipt";
@@ -143,7 +143,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Delete Failed",
-                textBody: await parseApiError(error, "Failed to delete receipt. Please try again later."),
+                textBody: await parseApiError(
+                  error,
+                  "Failed to delete receipt. Please try again later.",
+                ),
               });
             } finally {
               setDeletingReceiptId(null);
@@ -187,7 +190,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               Toast.show({
                 type: ALERT_TYPE.DANGER,
                 title: "Failed",
-                textBody: await parseApiError(error, "Failed to mark receipt as lost. Please try again later."),
+                textBody: await parseApiError(
+                  error,
+                  "Failed to mark receipt as lost. Please try again later.",
+                ),
               });
             } finally {
               setIsMarkingLostReceipt(false);
@@ -320,11 +326,7 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               <ActivityIndicator color={palette.muted} />
             ) : (
               <>
-                <Ionicons
-                  name="add-circle"
-                  color={palette.muted}
-                  size={36}
-                />
+                <Ionicons name="add-circle" color={palette.muted} size={36} />
                 <Text style={{ color: palette.muted, marginTop: 10 }}>
                   Add Receipt
                 </Text>

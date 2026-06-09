@@ -1,15 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import Constants from "expo-constants";
+import { useTheme } from "expo-router/react-navigation";
 import * as Updates from "expo-updates";
 import { useEffect, useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 
-import { useIsDark } from "@/lib/useColorScheme";
+import { Text } from "@/components/Text";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
+import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
 export default function About() {
@@ -116,7 +116,7 @@ export default function About() {
     >
       <View style={{ padding: 24 }}>
         <View style={{ alignItems: "center", marginBottom: 40 }}>
-          <Icon glyph="card" size={48} color={colors.primary} />
+          <Icon glyph="card" size={48} color={colors.primary as string} />
           <Text
             style={{
               color: colors.text,
@@ -155,7 +155,7 @@ export default function About() {
                   borderWidth: 1,
                   borderColor: colors.border,
                   backgroundColor: colors.card,
-                  shadowColor: colors.text + "22",
+                  shadowColor: (colors.text as string) + "22",
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.08,
                   shadowRadius: 6,
@@ -189,7 +189,7 @@ export default function About() {
                 borderWidth: 1,
                 borderColor: colors.border,
                 backgroundColor: colors.card,
-                shadowColor: colors.text + "22",
+                shadowColor: (colors.text as string) + "22",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.08,
                 shadowRadius: 6,

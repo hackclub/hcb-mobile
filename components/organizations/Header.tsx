@@ -1,9 +1,9 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
-import { View, Platform } from "react-native";
+import { View } from "react-native";
 
 import BalanceChart from "./BalanceChart";
 
+import { Text } from "@/components/Text";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette } from "@/styles/theme";
@@ -70,7 +70,6 @@ export default function Header({
             {formattedBalance}
           </Text>
         </View>
-
       </View>
       {showChart && <BalanceChart organizationId={organization.id} />}
     </View>

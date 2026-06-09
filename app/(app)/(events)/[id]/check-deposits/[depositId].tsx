@@ -1,13 +1,13 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import ImageView from "react-native-image-viewing";
 
 import Badge from "@/components/Badge";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import { Text } from "@/components/Text";
 import UserMention from "@/components/UserMention";
 import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
@@ -39,7 +39,6 @@ function DetailRow({
   label: string;
   children: React.ReactNode;
 }) {
-  const { colors: themeColors } = useTheme();
   return (
     <View
       style={{
@@ -200,9 +199,7 @@ export default function CheckDepositDetailPage() {
                 Back
               </Text>
               <Pressable
-                onPress={() =>
-                  setViewerIndex(deposit.front_url ? 1 : 0)
-                }
+                onPress={() => setViewerIndex(deposit.front_url ? 1 : 0)}
                 style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
               >
                 <Image

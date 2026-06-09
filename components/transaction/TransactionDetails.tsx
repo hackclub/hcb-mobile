@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import React, { ReactElement } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { useIsDark } from "@/lib/useColorScheme";
+import { Text } from "@/components/Text";
 import Transaction from "@/lib/types/Transaction";
+import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface Detail {
@@ -98,9 +98,7 @@ export default function TransactionDetails({
                   gap: 12,
                 }}
               >
-                <Text
-                  style={{ color: subColor, fontSize: 14, flexShrink: 0 }}
-                >
+                <Text style={{ color: subColor, fontSize: 14, flexShrink: 0 }}>
                   {label}
                 </Text>
                 {typeof value === "string" ? (

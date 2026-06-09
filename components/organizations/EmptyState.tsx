@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
+import { useTheme } from "expo-router/react-navigation";
 import { Platform, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 

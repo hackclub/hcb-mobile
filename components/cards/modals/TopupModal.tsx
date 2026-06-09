@@ -1,8 +1,8 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Modal, View, TextInput } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 
 interface TopupModalProps {
   visible: boolean;
@@ -79,7 +79,7 @@ export default function TopupModal({
               fontFamily: "JetBrainsMono-Regular",
             }}
             placeholder="500.00"
-            placeholderTextColor={themeColors.text + "80"}
+            placeholderTextColor={(themeColors.text as string) + "80"}
             keyboardType="decimal-pad"
             value={topupAmount}
             onChangeText={setTopupAmount}
@@ -92,7 +92,7 @@ export default function TopupModal({
                 borderRadius: 8,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
-              color={themeColors.text}
+              color={themeColors.text as string}
               onPress={onClose}
             >
               Cancel

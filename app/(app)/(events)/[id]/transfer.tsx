@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -107,9 +107,7 @@ export default function Page() {
                 borderRadius: 10,
                 alignItems: "center",
                 backgroundColor:
-                  transferType === key
-                    ? themeColors.background
-                    : "transparent",
+                  transferType === key ? themeColors.background : "transparent",
               }}
             >
               <Text

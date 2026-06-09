@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { ScrollView, View } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 

@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { useTheme } from "expo-router/react-navigation";
 import { PropsWithChildren } from "react";
 import {
   ActivityIndicator,
@@ -39,7 +39,15 @@ export interface ButtonProps {
   accessibilityHint?: string;
   hapticFeedback?: boolean;
   iconPosition?: "left" | "right";
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "info" | "success" | "error" | "green";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "info"
+    | "success"
+    | "error"
+    | "green";
 }
 
 const styles = StyleSheet.create({
@@ -114,11 +122,11 @@ export default function Button(
 
     switch (variant) {
       case "secondary":
-        return theme.colors.text;
+        return theme.colors.text as string;
       case "outline":
         return palette.primary;
       case "ghost":
-        return theme.colors.text;
+        return theme.colors.text as string;
       case "green":
         return "#0d2b1f";
       case "primary":

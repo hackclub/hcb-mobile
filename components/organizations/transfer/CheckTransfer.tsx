@@ -1,8 +1,8 @@
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { TextInput, View } from "react-native";
 
-import { Stack } from "expo-router";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
@@ -49,7 +49,10 @@ export default function CheckTransferScreen({
       return false;
     }
     if (state.trim().length !== 2) {
-      showAlert("Invalid state", "Please enter a 2-letter state code (e.g. CA).");
+      showAlert(
+        "Invalid state",
+        "Please enter a 2-letter state code (e.g. CA).",
+      );
       return false;
     }
     if (!/^\d{5}$/.test(zip.trim())) {
@@ -229,7 +232,12 @@ export default function CheckTransferScreen({
               <TextInput
                 value={state}
                 onChangeText={(t) =>
-                  setState(t.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))
+                  setState(
+                    t
+                      .toUpperCase()
+                      .replace(/[^A-Z]/g, "")
+                      .slice(0, 2),
+                  )
                 }
                 placeholder="CA"
                 placeholderTextColor={palette.muted}
@@ -246,9 +254,7 @@ export default function CheckTransferScreen({
           <View style={inputContainerStyle}>
             <TextInput
               value={zip}
-              onChangeText={(t) =>
-                setZip(t.replace(/\D/g, "").slice(0, 5))
-              }
+              onChangeText={(t) => setZip(t.replace(/\D/g, "").slice(0, 5))}
               placeholder="94107"
               placeholderTextColor={palette.muted}
               style={inputStyle}

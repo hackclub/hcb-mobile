@@ -20,19 +20,27 @@ export interface TransactionFilters {
 
 function buildFilterParams(filters: TransactionFilters): string {
   const parts: string[] = [];
-  if (filters.tagId) parts.push(`filters[tag_id]=${encodeURIComponent(filters.tagId)}`);
-  if (filters.search?.trim()) parts.push(`filters[search]=${encodeURIComponent(filters.search.trim())}`);
+  if (filters.tagId)
+    parts.push(`filters[tag_id]=${encodeURIComponent(filters.tagId)}`);
+  if (filters.search?.trim())
+    parts.push(`filters[search]=${encodeURIComponent(filters.search.trim())}`);
   if (filters.type === "expenses") parts.push("filters[expenses]=true");
   if (filters.type === "revenue") parts.push("filters[revenue]=true");
-  if (filters.minimumAmount) parts.push(`filters[minimum_amount]=${filters.minimumAmount}`);
-  if (filters.maximumAmount) parts.push(`filters[maximum_amount]=${filters.maximumAmount}`);
+  if (filters.minimumAmount)
+    parts.push(`filters[minimum_amount]=${filters.minimumAmount}`);
+  if (filters.maximumAmount)
+    parts.push(`filters[maximum_amount]=${filters.maximumAmount}`);
   if (filters.startDate) parts.push(`filters[start_date]=${filters.startDate}`);
   if (filters.endDate) parts.push(`filters[end_date]=${filters.endDate}`);
   if (filters.missingReceipts) parts.push("filters[missing_receipts]=true");
   return parts.length > 0 ? "&" + parts.join("&") : "";
 }
 
-export function getKey(orgId: string, prefix: string, filters?: TransactionFilters) {
+export function getKey(
+  orgId: string,
+  prefix: string,
+  filters?: TransactionFilters,
+) {
   return (
     index: number,
     previousPageData?: PaginatedResponse<Transaction> | undefined,

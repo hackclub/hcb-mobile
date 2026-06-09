@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

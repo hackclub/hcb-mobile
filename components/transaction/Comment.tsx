@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
 import FileViewerModal from "@/components/FileViewerModal";
+import { Text } from "@/components/Text";
 import UserMention from "@/components/UserMention";
 import IComment from "@/lib/types/Comment";
 import { useIsDark } from "@/lib/useColorScheme";

@@ -1,8 +1,8 @@
-import { Text } from "@/components/Text";
 import { View, Image, StyleSheet, Dimensions } from "react-native";
 import useSWR from "swr";
 import { ToWords } from "to-words";
 
+import { Text } from "@/components/Text";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import palette from "@/styles/palette";

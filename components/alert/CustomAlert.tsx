@@ -1,4 +1,3 @@
-import { Text } from "@/components/Text";
 import React from "react";
 import {
   Dimensions,
@@ -8,6 +7,7 @@ import {
   View,
 } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 
 interface AlertButton {

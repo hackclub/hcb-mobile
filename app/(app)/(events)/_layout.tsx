@@ -167,6 +167,32 @@ export default function Layout() {
           options={{ title: "Check Deposit" }}
         />
         <Stack.Screen
+          name="[id]/invoices/index"
+          options={{ title: "Invoices", headerLargeTitle: true }}
+        />
+        <Stack.Screen
+          name="[id]/invoices/[invoiceId]"
+          options={{ title: "Invoice" }}
+        />
+        <Stack.Screen
+          name="[id]/invoices/new"
+          options={{
+            presentation: "formSheet",
+            title: "New Invoice",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.85, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
           name="[id]/reimbursements/index"
           options={{ title: "Reimbursements", headerLargeTitle: true }}
         />
@@ -197,6 +223,24 @@ export default function Layout() {
           options={{
             presentation: "formSheet",
             title: "Add Expense",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.85, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="[id]/card-grants/new"
+          options={{
+            presentation: "formSheet",
+            title: "Send a Grant",
             headerShown: true,
             headerTransparent: false,
             headerBlurEffect: "systemMaterial",

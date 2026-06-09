@@ -1,6 +1,10 @@
 import Organization from "./Organization";
 import User from "./User";
 
+// The reimbursement API serializes embedded users with `full_name`
+// (see Receipt.uploader) while expand=user yields the standard `name`.
+export type ReimbursementUser = User & { full_name?: string };
+
 export interface ReimbursementReport {
   id: string;
   name: string;
@@ -21,8 +25,8 @@ export interface ReimbursementReport {
   reimbursement_approved_at: string | null;
   reimbursed_at: string | null;
   rejected_at: string | null;
-  user: User | string;
-  reviewer: User | string | null;
+  user: ReimbursementUser | string;
+  reviewer: ReimbursementUser | string | null;
   organization: Organization | string;
 }
 

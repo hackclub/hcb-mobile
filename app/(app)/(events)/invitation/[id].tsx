@@ -1,16 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  ActivityIndicator,
-  Pressable,
-  View,
-} from "react-native";
+import { useTheme } from "expo-router/react-navigation";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Invitation from "@/lib/types/Invitation";
@@ -31,10 +27,13 @@ export default function Page() {
     fallbackInvitation = undefined;
   }
 
-  const { data: invitation } = useOfflineSWR<Invitation>(
-    `user/invitations/${inviteId}`,
-    { fallbackData: fallbackInvitation },
-  );
+  const {
+    data: invitation,
+    error: invitationError,
+    mutate: retryInvitation,
+  } = useOfflineSWR<Invitation>(`user/invitations/${inviteId}`, {
+    fallbackData: fallbackInvitation,
+  });
 
   const { mutate } = useSWRConfig();
 
@@ -67,7 +66,10 @@ export default function Page() {
       onError: async (err) => {
         showAlert(
           "Failed to Accept Invitation",
-          await parseApiError(err, "You may have to sign the contract. Please contact HCB support if you believe this is an error."),
+          await parseApiError(
+            err,
+            "You may have to sign the contract. Please contact HCB support if you believe this is an error.",
+          ),
           [{ text: "OK" }],
         );
       },
@@ -89,6 +91,13 @@ export default function Page() {
       onSuccess: () => {
         mutate("user/invitations");
         router.back();
+      },
+      onError: async (err) => {
+        showAlert(
+          "Failed to Decline Invitation",
+          await parseApiError(err, "Please try again."),
+          [{ text: "OK" }],
+        );
       },
     },
   );
@@ -174,6 +183,24 @@ export default function Page() {
             </Button>
           </View>
         </>
+      ) : invitationError ? (
+        <View style={{ alignItems: "center", gap: 12 }}>
+          <Ionicons
+            name="cloud-offline-outline"
+            size={40}
+            color={themePalette.muted}
+          />
+          <Text
+            style={{
+              color: themePalette.muted,
+              fontSize: 15,
+              textAlign: "center",
+            }}
+          >
+            Couldn't load this invitation.
+          </Text>
+          <Button onPress={() => retryInvitation()}>Retry</Button>
+        </View>
       ) : (
         <ActivityIndicator />
       )}

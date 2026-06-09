@@ -1,8 +1,8 @@
+import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { TextInput, View } from "react-native";
 
-import { Stack } from "expo-router";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
@@ -134,7 +134,9 @@ export default function AchTransferScreen({
 
   return (
     <>
-      <Stack.Screen options={{ headerLargeTitle: true, title: "New ACH transfer" }} />
+      <Stack.Screen
+        options={{ headerLargeTitle: true, title: "New ACH transfer" }}
+      />
 
       <View style={{ gap: 14 }}>
         <View style={{ gap: 6 }}>

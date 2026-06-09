@@ -6,22 +6,16 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import Badge from "@/components/Badge";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
+import { OrgInvoice, invoiceStatusColor } from "@/lib/types/Invoice";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney, statusColor } from "@/utils/format";
+import { renderDate, renderMoney } from "@/utils/format";
 
-interface CheckDepositSummary {
-  id: string;
-  status: string;
-  amount_cents: number;
-  created_at: string;
-}
-
-export default function CheckDepositsPage() {
+export default function InvoicesPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
-  const { data: deposits, isLoading } = useOfflineSWR<CheckDepositSummary[]>(
-    `check_deposits?organization_id=${id}`,
+  const { data: invoices, isLoading } = useOfflineSWR<OrgInvoice[]>(
+    `organizations/${id}/invoices`,
   );
 
   return (
@@ -38,29 +32,40 @@ export default function CheckDepositsPage() {
       <Button
         onPress={() =>
           router.push({
-            pathname: "/(events)/[id]/check-deposits/new",
+            pathname: "/(events)/[id]/invoices/new",
             params: { id },
           })
         }
         icon="plus"
         iconSize={24}
       >
-        Deposit a check
+        New invoice
       </Button>
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
           <ActivityIndicator />
         </View>
       )}
-      {!isLoading && deposits && deposits?.length === 0 && (
-        <View style={{ alignItems: "center", paddingTop: 40, gap: 8 }}>
-          <Ionicons name="document-outline" size={40} color={palette.muted} />
-          <Text style={{ color: palette.muted, fontSize: 15 }}>
-            No check deposits yet
+      {!isLoading && invoices && invoices.length === 0 && (
+        <View style={{ alignItems: "center", paddingTop: 40, gap: 10 }}>
+          <Ionicons
+            name="document-text-outline"
+            size={40}
+            color={palette.muted}
+          />
+          <Text
+            style={{ color: palette.muted, fontSize: 15, fontWeight: "600" }}
+          >
+            No invoices yet
+          </Text>
+          <Text
+            style={{ color: palette.muted, fontSize: 13, textAlign: "center" }}
+          >
+            Invoice a sponsor and the money will land in your account.
           </Text>
         </View>
       )}
-      {deposits && deposits.length > 0 && (
+      {invoices && invoices.length > 0 && (
         <View
           style={{
             backgroundColor: themeColors.card,
@@ -68,8 +73,8 @@ export default function CheckDepositsPage() {
             overflow: "hidden",
           }}
         >
-          {deposits.map((deposit, index) => (
-            <View key={deposit.id}>
+          {invoices.map((invoice, index) => (
+            <View key={invoice.id}>
               {index > 0 && (
                 <View
                   style={{
@@ -82,8 +87,8 @@ export default function CheckDepositsPage() {
               <Pressable
                 onPress={() =>
                   router.push({
-                    pathname: "/(events)/[id]/check-deposits/[depositId]",
-                    params: { id, depositId: deposit.id },
+                    pathname: "/(events)/[id]/invoices/[invoiceId]",
+                    params: { id, invoiceId: invoice.id },
                   })
                 }
                 style={({ pressed }) => ({
@@ -95,25 +100,29 @@ export default function CheckDepositsPage() {
                   opacity: pressed ? 0.6 : 1,
                 })}
               >
-                <View style={{ gap: 4, flex: 1 }}>
+                <View style={{ gap: 4, flex: 1, marginRight: 12 }}>
                   <Text
+                    numberOfLines={1}
                     style={{
                       color: themeColors.text,
                       fontSize: 15,
                       fontWeight: "600",
                     }}
                   >
-                    {renderMoney(deposit.amount_cents)}
+                    {invoice.to}
                   </Text>
                   <Text style={{ color: palette.muted, fontSize: 13 }}>
-                    {renderDate(deposit.created_at)}
+                    {renderMoney(invoice.amount_due)}
+                    {invoice.due_date
+                      ? ` · due ${renderDate(invoice.due_date)}`
+                      : ""}
                   </Text>
                 </View>
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
                 >
-                  <Badge color={statusColor(deposit.status)}>
-                    {deposit.status.replace(/_/g, " ")}
+                  <Badge color={invoiceStatusColor(invoice.status)}>
+                    {invoice.status}
                   </Badge>
                   <Ionicons
                     name="chevron-forward"

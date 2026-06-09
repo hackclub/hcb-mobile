@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import * as Clipboard from "expo-clipboard";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Button, Linking, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";

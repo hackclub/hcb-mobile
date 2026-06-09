@@ -1,11 +1,10 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -17,6 +16,7 @@ import {
 } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -33,7 +33,6 @@ function ImagePickerZone({
   image: CheckImage;
   onPick: () => void;
 }) {
-  const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const borderColor = isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)";
 

@@ -1,6 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -14,6 +13,7 @@ import {
 import useSWRMutation from "swr/mutation";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -143,7 +143,10 @@ export default function InvitePage() {
     {
       onSuccess: () => router.back(),
       onError: async (err) => {
-        showAlert("Failed to send invite", await parseApiError(err, "Please try again."));
+        showAlert(
+          "Failed to send invite",
+          await parseApiError(err, "Please try again."),
+        );
       },
     },
   );

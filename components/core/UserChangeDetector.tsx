@@ -3,8 +3,8 @@ import { memo, useContext, useEffect, useRef } from "react";
 import useSWR from "swr";
 
 import AuthContext from "@/lib/auth/auth";
-import User from "@/lib/types/User";
 import { useCache } from "@/lib/providers/cacheProvider";
+import User from "@/lib/types/User";
 
 const THEME_KEY = "app_theme";
 const BIOMETRICS_KEY = "biometrics_required";

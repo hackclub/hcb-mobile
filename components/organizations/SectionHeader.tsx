@@ -1,7 +1,7 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { palette } from "@/styles/theme";
 
 export default function SectionHeader({ title }: { title: string }) {

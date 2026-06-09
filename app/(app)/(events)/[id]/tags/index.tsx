@@ -1,13 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
-import { parseApiError, showAlert, showDestructiveAlert } from "@/lib/alertUtils";
+import {
+  parseApiError,
+  showAlert,
+  showDestructiveAlert,
+} from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Tag from "@/lib/types/Tag";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";

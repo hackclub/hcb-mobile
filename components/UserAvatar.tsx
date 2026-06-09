@@ -1,4 +1,3 @@
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import {
   ImageStyle,
@@ -8,6 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 
+import { Text } from "@/components/Text";
 import User from "@/lib/types/User";
 import { userColor, userInitials } from "@/lib/userUtils";
 

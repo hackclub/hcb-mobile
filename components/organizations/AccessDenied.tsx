@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import * as Linking from "expo-linking";
+import { useTheme } from "expo-router/react-navigation";
 import { View } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette } from "@/styles/theme";
 

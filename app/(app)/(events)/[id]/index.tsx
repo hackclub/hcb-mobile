@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,7 +9,6 @@ import {
   View,
 } from "react-native";
 
-import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import ActionChip from "@/components/organizations/ActionChip";
 import ActionTile from "@/components/organizations/ActionTile";
 import { EmptyState } from "@/components/organizations/EmptyState";
@@ -17,9 +16,11 @@ import Header from "@/components/organizations/Header";
 import PlaygroundBanner from "@/components/organizations/PlaygroundBanner";
 import RecentTransactionsSkeleton from "@/components/organizations/RecentTransactionsSkeleton";
 import SectionCard from "@/components/organizations/SectionCard";
+import SubOrganizations from "@/components/organizations/SubOrganizations";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TeamAvatars from "@/components/organizations/TeamAvatars";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { showAlert } from "@/lib/alertUtils";
 import { OrgPolicy } from "@/lib/policies";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
@@ -29,8 +30,8 @@ import User from "@/lib/types/User";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { shareUrl } from "@/utils/shareUrl";
 import { addPendingFeeToTransactions } from "@/utils/org";
+import { shareUrl } from "@/utils/shareUrl";
 
 export default function Page() {
   const navigation = useNavigation();
@@ -217,6 +218,13 @@ export default function Page() {
           label="Account Numbers"
           onPress={() => navTo("/(events)/[id]/account-numbers")}
         />
+        {orgPolicy?.invoices() && !playgroundMode && (
+          <ActionChip
+            icon="payment-docs"
+            label="Invoices"
+            onPress={() => navTo("/(events)/[id]/invoices")}
+          />
+        )}
         {supportsTapToPay && orgPolicy?.donationPage() && orgPolicy?.show() && (
           <ActionChip
             icon="support"
@@ -303,6 +311,11 @@ export default function Page() {
             />
           </View>
         </View>
+
+        <SubOrganizations
+          organizationId={params.id}
+          enabled={orgPolicy?.subOrganizationsInV4() ?? false}
+        />
 
         {teamUsers.length > 0 && (
           <SectionCard

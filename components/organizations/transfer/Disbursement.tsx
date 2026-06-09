@@ -1,19 +1,20 @@
+import { Picker } from "@expo/ui/community/picker";
 import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   TextInput,
+  TextStyle,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Picker } from "@expo/ui/community/picker";
 import useSWR from "swr";
 
+import { Text } from "@/components/Text";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import AuthContext from "@/lib/auth/auth";
 import { getAccessToken } from "@/lib/auth/tokenUtils";
-import { parseApiError, showAlert } from "@/lib/alertUtils";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOffline } from "@/lib/useOffline";
 import { palette } from "@/styles/theme";
@@ -85,7 +86,8 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
         const errorData = await response.json();
         showAlert(
           "Error",
-          errorData.messages?.[0] || "Failed to complete the transfer. Please try again.",
+          errorData.messages?.[0] ||
+            "Failed to complete the transfer. Please try again.",
         );
       } else {
         showAlert("Success", "Transfer completed successfully!");
@@ -124,7 +126,9 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
 
   return (
     <>
-      <Stack.Screen options={{ headerLargeTitle: true, title: "New HCB transfer" }} />
+      <Stack.Screen
+        options={{ headerLargeTitle: true, title: "New HCB transfer" }}
+      />
       <View style={{ flex: 1, backgroundColor: themeColors.background }}>
         <Text
           style={{
@@ -169,7 +173,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           <Picker
             selectedValue={chosenOrg}
             onValueChange={(value) => setOrganization(value as string)}
-            style={{ color: themeColors.text, fontSize: 16 }}
+            style={{ color: themeColors.text, fontSize: 16 } as TextStyle}
           >
             <Picker.Item label="Select an organization" value="" />
             {organizations
@@ -251,7 +255,7 @@ const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
           style={{
             backgroundColor: isOnline
               ? themeColors.primary
-              : themeColors.primary + "80",
+              : (themeColors.primary as string) + "80",
             padding: 15,
             borderRadius: 8,
             alignItems: "center",

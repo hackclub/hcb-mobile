@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
 import { ReactElement, useCallback, useEffect, useState } from "react";
 import {
@@ -26,6 +26,7 @@ import CardTransactions from "@/components/cards/CardTransactions";
 import SetPurposeModal from "@/components/cards/modals/SetPurposeModal";
 import TopupModal from "@/components/cards/modals/TopupModal";
 import GrantWithoutCard from "@/components/grants/grantWithoutCard";
+import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import useTransactions from "@/lib/organization/useTransactions";
@@ -48,11 +49,10 @@ import {
   toggleCardFrozen,
 } from "@/utils/cardActions";
 import { getCardName } from "@/utils/cardHelpers";
-import * as Haptics from "@/utils/haptics";
-import { maybeRequestReview } from "@/utils/storeReview";
 import { normalizeSvg } from "@/utils/format";
-import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import * as Haptics from "@/utils/haptics";
 import { shareUrl } from "@/utils/shareUrl";
+import { maybeRequestReview } from "@/utils/storeReview";
 
 export default function Page() {
   const navigation = useNavigation();
@@ -318,7 +318,10 @@ export default function Page() {
       console.error("Error activating grant", err, { grantId: fullGrantId });
       Alert.alert(
         "Error",
-        await parseApiError(err, "Failed to activate grant. Please try again later."),
+        await parseApiError(
+          err,
+          "Failed to activate grant. Please try again later.",
+        ),
       );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {

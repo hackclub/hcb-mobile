@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import { Image } from "expo-image";
+import { useTheme } from "expo-router/react-navigation";
 import { View, Text } from "react-native";
 
 import Organization from "@/lib/types/Organization";

@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { mutate } from "swr";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Receipt from "@/lib/types/Receipt";
@@ -122,7 +122,10 @@ export default function Page() {
       Toast.show({
         type: ALERT_TYPE.DANGER,
         title: "Upload Failed",
-        textBody: await parseApiError(error, "Some receipts failed to upload. Please try again."),
+        textBody: await parseApiError(
+          error,
+          "Some receipts failed to upload. Please try again.",
+        ),
       });
     } finally {
       setUploading(false);

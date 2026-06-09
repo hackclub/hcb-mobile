@@ -1,16 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import * as Sentry from "@sentry/react-native";
 import { SendFeedbackParams } from "@sentry/react-native";
-import { Text } from "@/components/Text";
 import { supportsAlternateIcons } from "expo-alternate-app-icons";
 import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
 import { router } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import * as StoreReview from "expo-store-review";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -28,13 +27,14 @@ import {
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { mutate } from "swr";
 
-import AuthContext from "@/lib/auth/auth";
 import Button from "@/components/Button";
 import FeedbackModal from "@/components/FeedbackModal";
+import { Text } from "@/components/Text";
+import AuthContext from "@/lib/auth/auth";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 
@@ -796,7 +796,6 @@ export default function SettingsPage() {
         >
           Sign Out
         </Button>
-
       </View>
 
       <FeedbackModal

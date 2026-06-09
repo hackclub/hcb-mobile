@@ -23,7 +23,12 @@ export function renderDate(date: string) {
 }
 
 export function statusColor(status: string) {
-  if (status === "deposited" || status === "completed" || status === "reimbursement_approved" || status === "reimbursed") {
+  if (
+    status === "deposited" ||
+    status === "completed" ||
+    status === "reimbursement_approved" ||
+    status === "reimbursed"
+  ) {
     return palette.success;
   } else if (status === "in_transit" || status === "issued") {
     return palette.info;

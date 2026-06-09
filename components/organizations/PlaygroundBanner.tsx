@@ -1,6 +1,7 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { View } from "react-native";
+
+import { Text } from "@/components/Text";
 
 export default function PlaygroundBanner() {
   const { colors } = useTheme();

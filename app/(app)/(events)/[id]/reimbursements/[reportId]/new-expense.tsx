@@ -1,10 +1,10 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { Image } from "expo-image";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import {
   Alert,
@@ -32,7 +32,7 @@ type ReceiptImage = {
 } | null;
 
 export default function NewExpensePage() {
-  const { id, reportId } = useLocalSearchParams<{
+  const { reportId } = useLocalSearchParams<{
     id: string;
     reportId: string;
   }>();
@@ -134,7 +134,10 @@ export default function NewExpensePage() {
 
   const handleSubmit = async () => {
     if (!memo.trim()) {
-      showAlert("Memo required", "Please enter a description for this expense.");
+      showAlert(
+        "Memo required",
+        "Please enter a description for this expense.",
+      );
       return;
     }
     const parsedAmount = parseFloat(amount);
@@ -167,9 +170,7 @@ export default function NewExpensePage() {
         } as unknown as Blob);
       }
 
-      await hcb
-        .post(`reimbursement_expenses`, { body })
-        .json();
+      await hcb.post(`reimbursement_expenses`, { body }).json();
 
       await mutate(`reimbursement_expenses?report_id=${reportId}`);
       await mutate(`reimbursement_reports/${reportId}`);
@@ -312,9 +313,7 @@ export default function NewExpensePage() {
               gap: 6,
             }}
           >
-            <Text
-              style={{ color: subColor, fontSize: 17, fontWeight: "500" }}
-            >
+            <Text style={{ color: subColor, fontSize: 17, fontWeight: "500" }}>
               $
             </Text>
             <TextInput

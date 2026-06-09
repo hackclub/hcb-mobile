@@ -1,11 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import * as WebBrowser from "expo-web-browser";
-import { Platform, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
@@ -42,7 +41,6 @@ export const NoOrganizationsEmptyState = () => {
           paddingTop: 60,
         }}
       >
- 
         <Text
           style={{
             color: themeColors.text,
@@ -67,7 +65,13 @@ export const NoOrganizationsEmptyState = () => {
         >
           You aren't a part of an organization yet.{"\n"}Looking to start one?
         </Text>
-        <Button variant="green" icon="plus" iconSize={24} iconPosition="left" onPress={handleApply}>
+        <Button
+          variant="green"
+          icon="plus"
+          iconSize={24}
+          iconPosition="left"
+          onPress={handleApply}
+        >
           New Organization
         </Button>
       </View>

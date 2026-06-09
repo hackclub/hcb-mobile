@@ -1,8 +1,8 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Modal, TextInput, View } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 
 interface SetPurposeModalProps {
   visible: boolean;
@@ -81,7 +81,7 @@ export default function SetPurposeModal({
               textAlignVertical: "top",
             }}
             placeholder="Describe the purpose of this grant..."
-            placeholderTextColor={themeColors.text + "80"}
+            placeholderTextColor={(themeColors.text as string) + "80"}
             multiline
             numberOfLines={4}
             value={purposeText}
@@ -95,7 +95,7 @@ export default function SetPurposeModal({
                 borderRadius: 8,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
-              color={themeColors.text}
+              color={themeColors.text as string}
               onPress={onClose}
             >
               Cancel

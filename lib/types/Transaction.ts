@@ -38,7 +38,12 @@ export interface TransactionBase
   code: TransactionType;
   missing_receipt: boolean;
   lost_receipt: boolean;
-  tags?: Array<{ id: string; label: string; color: TagColor; emoji?: string | null }>;
+  tags?: Array<{
+    id: string;
+    label: string;
+    color: TagColor;
+    emoji?: string | null;
+  }>;
   organization?: Organization;
   appearance?: "hackathon_grant" | string;
   _debug?: {

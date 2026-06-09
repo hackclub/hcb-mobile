@@ -1,12 +1,12 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "expo-router/react-navigation";
 import { memo } from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { match } from "ts-pattern";
 
+import { Text } from "@/components/Text";
 import TransactionIcon from "@/components/transaction/TransactionIcon";
 import {
   TransactionCardCharge,
@@ -94,7 +94,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
 function Transaction({
   transaction,
   top = false,
@@ -165,7 +164,9 @@ function Transaction({
           styles.row,
           {
             backgroundColor,
-            borderBottomColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+            borderBottomColor: isDark
+              ? "rgba(255,255,255,0.08)"
+              : "rgba(0,0,0,0.08)",
             borderTopLeftRadius: top ? 8 : 0,
             borderTopRightRadius: top ? 8 : 0,
             borderBottomLeftRadius: bottom ? 8 : 0,
@@ -246,10 +247,7 @@ function Transaction({
             </Text>
           </View>
         )}
-      <Text
-        numberOfLines={1}
-        style={[styles.memoText, { color: textColor }]}
-      >
+      <Text numberOfLines={1} style={[styles.memoText, { color: textColor }]}>
         {match(transaction)
           .with(
             { appearance: "hackathon_grant", has_custom_memo: false },

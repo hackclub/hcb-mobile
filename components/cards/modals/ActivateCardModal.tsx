@@ -1,8 +1,8 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Modal, View, TextInput } from "react-native";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { palette } from "@/styles/theme";
 
 interface ActivateCardModalProps {
@@ -92,7 +92,7 @@ export default function ActivateCardModal({
                 flex: 1,
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
-              color={themeColors.text}
+              color={themeColors.text as string}
               onPress={onClose}
             >
               Cancel

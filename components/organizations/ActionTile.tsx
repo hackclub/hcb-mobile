@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { useTheme } from "expo-router/react-navigation";
 import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/Text";
@@ -7,7 +7,7 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor } from "@/styles/theme";
 
 interface ActionTileProps {
-  icon: string;
+  icon: React.ComponentProps<typeof Icon>["glyph"];
   label: string;
   onPress: () => void;
 }
@@ -42,7 +42,7 @@ export default function ActionTile({ icon, label, onPress }: ActionTileProps) {
           justifyContent: "center",
         }}
       >
-        <Icon glyph={icon} size={20} color={themeColors.text} />
+        <Icon glyph={icon} size={20} color={themeColors.text as string} />
       </View>
       <Text
         style={{

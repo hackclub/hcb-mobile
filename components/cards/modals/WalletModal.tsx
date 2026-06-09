@@ -1,9 +1,9 @@
-import { useTheme } from "expo-router/react-navigation";
 import {
   AddToWalletButton,
   GooglePayCardToken,
 } from "@stripe/stripe-react-native";
 import { Image } from "expo-image";
+import { useTheme } from "expo-router/react-navigation";
 import { Modal, View, Text } from "react-native";
 
 import Button from "@/components/Button";
@@ -141,7 +141,7 @@ export default function WalletModal({
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.05)",
             }}
-            color={themeColors.text}
+            color={themeColors.text as string}
             onPress={onClose}
           >
             Cancel

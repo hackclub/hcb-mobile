@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
-import { Platform, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";

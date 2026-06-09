@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
+import { useTheme } from "expo-router/react-navigation";
 import { Pressable } from "react-native";
 
 import { Text } from "@/components/Text";
@@ -7,7 +7,7 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette } from "@/styles/theme";
 
 interface ActionChipProps {
-  icon: string;
+  icon: React.ComponentProps<typeof Icon>["glyph"];
   label: string;
   onPress: () => void;
 }

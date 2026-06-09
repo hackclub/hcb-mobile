@@ -7,5 +7,6 @@ export const shareUrl = {
   cardGrant: (id: string) => `${BASE}/grants/${id.slice(4)}`,
   checkDeposit: (orgSlug: string, id: string) =>
     `${BASE}/${orgSlug}/check-deposits/${id.slice(4)}`,
+  invoice: (id: string) => `${BASE}/invoices/${id.slice(4)}`,
   donations: (orgSlug: string) => `${BASE}/donations/start/${orgSlug}`,
 };

@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -13,6 +12,7 @@ import {
 
 import Button from "./Button";
 
+import { Text } from "@/components/Text";
 import { palette } from "@/styles/theme";
 
 interface FeedbackModalProps {
@@ -255,7 +255,7 @@ export default function FeedbackModal({
                     backgroundColor: "rgba(0, 0, 0, 0.1)",
                     paddingVertical: 14,
                   }}
-                  color={colors.text}
+                  color={colors.text as string}
                   onPress={handleClose}
                   disabled={isSubmitting}
                 >

@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import { router, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { capitalize } from "lodash";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -17,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import UserAvatar from "@/components/UserAvatar";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -61,7 +61,6 @@ function MemberCard({
   const isDark = useIsDark();
   const borderColor = cardBorderColor(isDark);
   const subColor = subTextColor(isDark);
-  const actionBg = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)";
 
   return (
     <View
@@ -245,14 +244,9 @@ export default function Page() {
     ? new OrgPolicy(currentUser ?? null, organization).canInviteUser()
     : false;
 
-  const {
-    data: invitations,
-    mutate: reloadInvitations,
-    isLoading: invitationsLoading,
-  } = useOfflineSWR<OrgInvitation[]>(
-    canManage ? `organizations/${id}/invitations?organization_id=${id}` : null,
-    );
-
+  const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
+    OrgInvitation[]
+  >(canManage ? `organizations/${id}/invitations?organization_id=${id}` : null);
 
   useFocusEffect(
     useCallback(() => {
@@ -287,7 +281,10 @@ export default function Page() {
                 await hcb.delete(`organizations/${id}/users/${user.id}`);
                 reloadOrganization();
               } catch (error) {
-                showAlert("Failed to remove", await parseApiError(error, "Please try again."));
+                showAlert(
+                  "Failed to remove",
+                  await parseApiError(error, "Please try again."),
+                );
               }
             },
           },
@@ -312,7 +309,10 @@ export default function Page() {
                 await hcb.delete(`organizations/${id}/invitations/${inviteId}`);
                 reloadInvitations();
               } catch (error) {
-                showAlert("Failed to cancel", await parseApiError(error, "Please try again."));
+                showAlert(
+                  "Failed to cancel",
+                  await parseApiError(error, "Please try again."),
+                );
               }
             },
           },
@@ -531,10 +531,7 @@ export default function Page() {
 
         if (item.type === "invitation") {
           return (
-            <InvitationCard
-              invite={item.invite}
-              onCancel={cancelInvitation}
-            />
+            <InvitationCard invite={item.invite} onCancel={cancelInvitation} />
           );
         }
 

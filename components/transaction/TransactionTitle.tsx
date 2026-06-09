@@ -1,9 +1,9 @@
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { PropsWithChildren, ReactNode } from "react";
 import { View } from "react-native";
 
 import Badge from "@/components/Badge";
+import { Text } from "@/components/Text";
 import { TransactionBase } from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 

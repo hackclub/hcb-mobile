@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "expo-router/react-navigation";
 import {
   ConnectTapToPayParams,
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Platform, View } from "react-native";
 import * as Progress from "react-native-progress";
@@ -17,6 +16,7 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "@/components/Button";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import { Text } from "@/components/Text";
 import { showAlert } from "@/lib/alertUtils";
 import Organization from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -506,7 +506,7 @@ export default function Page() {
                 width={null}
                 height={6}
                 borderRadius={3}
-                unfilledColor={isDark ? colors.card : "#e2e8f0"}
+                unfilledColor={isDark ? (colors.card as string) : "#e2e8f0"}
                 borderWidth={0}
               />
             </View>

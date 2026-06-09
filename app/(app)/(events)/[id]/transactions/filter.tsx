@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { Pressable, ScrollView, Switch, TextInput, View } from "react-native";
 
+import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
 import { filterCallbackStore } from "@/lib/filterCallbackStore";
@@ -11,7 +12,6 @@ import { TransactionFilters } from "@/lib/organization/useTransactions";
 import Tag from "@/lib/types/Tag";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import Button from "@/components/Button";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 export default function TransactionFilterScreen() {
@@ -177,7 +177,11 @@ export default function TransactionFilterScreen() {
             />
           </View>
           <View
-            style={{ height: 1, backgroundColor: borderColor, marginHorizontal: 14 }}
+            style={{
+              height: 1,
+              backgroundColor: borderColor,
+              marginHorizontal: 14,
+            }}
           />
           <View
             style={{
@@ -222,7 +226,11 @@ export default function TransactionFilterScreen() {
             />
           </View>
           <View
-            style={{ height: 1, backgroundColor: borderColor, marginHorizontal: 14 }}
+            style={{
+              height: 1,
+              backgroundColor: borderColor,
+              marginHorizontal: 14,
+            }}
           />
           <View
             style={{

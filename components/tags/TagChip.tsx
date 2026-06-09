@@ -24,7 +24,11 @@ interface TagChipProps {
   active?: boolean;
 }
 
-export default function TagChip({ tag, small = false, active = false }: TagChipProps) {
+export default function TagChip({
+  tag,
+  small = false,
+  active = false,
+}: TagChipProps) {
   const hex = resolveTagColor(tag.color);
   const bg = active ? hex : hex + "26"; // solid when active, ~15% opacity otherwise
   const border = active ? hex : hex + "4D";
@@ -47,7 +51,9 @@ export default function TagChip({ tag, small = false, active = false }: TagChipP
       }}
     >
       {tag.emoji ? (
-        <Text style={{ fontSize: small ? 11 : 13, lineHeight: small ? 16 : 18 }}>
+        <Text
+          style={{ fontSize: small ? 11 : 13, lineHeight: small ? 16 : 18 }}
+        >
           {tag.emoji}
         </Text>
       ) : (

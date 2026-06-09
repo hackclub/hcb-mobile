@@ -1,27 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Button from "@/components/Button";
+import { Text } from "@/components/Text";
 import { showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
-import { maybeRequestReview } from "@/utils/storeReview";
 import { renderMoney } from "@/utils/format";
+import { maybeRequestReview } from "@/utils/storeReview";
 
 interface ImageAssignment {
   imageUri: string;

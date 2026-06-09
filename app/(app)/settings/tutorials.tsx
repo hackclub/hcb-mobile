@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
+
+import { Text } from "@/components/Text";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 export default function Page() {

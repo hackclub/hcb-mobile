@@ -1,18 +1,11 @@
+import { MenuView } from "@expo/ui/community/menu";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { MenuView } from "@expo/ui/community/menu";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
@@ -21,12 +14,13 @@ import ReorderableList, {
 import CardListSkeleton from "@/components/cards/CardListSkeleton";
 import { NoCardsEmptyState } from "@/components/cards/NoCardsEmptyState";
 import PaymentCard from "@/components/PaymentCard";
+import { Text } from "@/components/Text";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
 import { normalizeSvg } from "@/utils/format";
+import * as Haptics from "@/utils/haptics";
 
 type CardWithGrant = Card &
   Required<Pick<Card, "last4">> & { grant_id?: string };
@@ -80,7 +74,6 @@ export default function Page() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
-  const scheme = useColorScheme();
 
   const { data: cards, mutate: reloadCards } = useOfflineSWR<
     (Card & Required<Pick<Card, "last4">>)[]
@@ -200,7 +193,6 @@ export default function Page() {
       headerRight: () => (
         <View style={{ flexDirection: "row" }}>
           <MenuView
-            isAnchoredToRight={true}
             actions={[
               {
                 id: "toggleCanceledCards",
@@ -227,7 +219,6 @@ export default function Page() {
                 });
               }
             }}
-            themeVariant={scheme || undefined}
           >
             <Ionicons.Button
               name="ellipsis-horizontal"
@@ -237,20 +228,45 @@ export default function Page() {
               iconStyle={{ marginRight: 0 }}
             />
           </MenuView>
-          <Ionicons.Button
-            name="add"
-            backgroundColor="transparent"
-            size={24}
-            color={themeColors.text}
-            iconStyle={{ marginRight: 0 }}
-            onPress={() =>
-              router.push({
-                pathname: "/(events)/[id]/cards/order",
-                params: { id: params.id },
-              })
-            }
-            underlayColor="transparent"
-          />
+          <MenuView
+            actions={[
+              {
+                id: "orderCard",
+                title: "Order a Card",
+                image: "creditcard",
+                imageColor: themeColors.text,
+              },
+              {
+                id: "sendGrant",
+                title: "Send a Grant",
+                image: "paperplane",
+                imageColor: themeColors.text,
+              },
+            ]}
+            onPressAction={({ nativeEvent: { event } }) => {
+              if (event === "orderCard") {
+                router.push({
+                  pathname: "/(events)/[id]/cards/order",
+                  params: { id: params.id },
+                });
+              }
+              if (event === "sendGrant") {
+                router.push({
+                  pathname: "/(events)/[id]/card-grants/new",
+                  params: { id: params.id },
+                });
+              }
+            }}
+          >
+            <Ionicons.Button
+              name="add"
+              backgroundColor="transparent"
+              size={24}
+              color={themeColors.text}
+              iconStyle={{ marginRight: 0 }}
+              underlayColor="transparent"
+            />
+          </MenuView>
         </View>
       ),
     });
@@ -259,7 +275,6 @@ export default function Page() {
     navigation,
     canceledCardsShown,
     frozenCardsShown,
-    scheme,
     params.id,
   ]);
 

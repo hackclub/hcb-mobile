@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "@/components/Text";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Platform, Pressable, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette } from "@/styles/theme";
 

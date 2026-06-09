@@ -1,16 +1,16 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { Alert, TouchableHighlight, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import GrantCard from "@/lib/types/GrantCard";
 import { palette } from "@/styles/theme";
+import { renderMoney } from "@/utils/format";
 import * as Haptics from "@/utils/haptics";
 import { maybeRequestReview } from "@/utils/storeReview";
-import { renderMoney } from "@/utils/format";
 
 interface GrantInviteProps {
   grant: GrantCard;
@@ -36,10 +36,15 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
           params: { id: grant.id },
         });
       } else {
-        const errorData = (await response.json()) as { messages?: string[]; error?: string };
+        const errorData = (await response.json()) as {
+          messages?: string[];
+          error?: string;
+        };
         Alert.alert(
           "Error",
-          errorData.messages?.[0] || errorData.error || "Failed to create card for grant",
+          errorData.messages?.[0] ||
+            errorData.error ||
+            "Failed to create card for grant",
         );
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -47,7 +52,13 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
       console.error("Error creating card for grant", err, {
         grantId: grant.id,
       });
-      Alert.alert("Error", await parseApiError(err, "Failed to create card. Please try again later."));
+      Alert.alert(
+        "Error",
+        await parseApiError(
+          err,
+          "Failed to create card. Please try again later.",
+        ),
+      );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setIsCreatingCard(false);

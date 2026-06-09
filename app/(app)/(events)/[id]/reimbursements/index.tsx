@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useCallback, useEffect, useState } from "react";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +15,7 @@ import {
 
 import Badge from "@/components/Badge";
 import { Text } from "@/components/Text";
+import UserAvatar from "@/components/UserAvatar";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import {
@@ -26,7 +27,6 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
-import UserAvatar from "@/components/UserAvatar";
 
 interface PaginatedReports {
   data: ReimbursementReport[];
@@ -54,8 +54,7 @@ export default function ReimbursementsPage() {
   const totalCents = reports.reduce((s, r) => s + r.amount_cents, 0);
   const reimbursedCents = reports
     .filter(
-      (r) =>
-        r.status === "reimbursed" || r.status === "reimbursement_approved",
+      (r) => r.status === "reimbursed" || r.status === "reimbursement_approved",
     )
     .reduce((s, r) => s + r.amount_cents, 0);
   const pendingCents = reports
@@ -67,8 +66,7 @@ export default function ReimbursementsPage() {
         const q = search.toLowerCase();
         const nameMatch = r.name.toLowerCase().includes(q);
         const userMatch =
-          typeof r.user === "object" &&
-          r.user.name.toLowerCase().includes(q);
+          typeof r.user === "object" && r.user.name.toLowerCase().includes(q);
         return nameMatch || userMatch;
       })
     : reports;
@@ -322,10 +320,6 @@ export default function ReimbursementsPage() {
               }}
             >
               {filtered.map((report, index) => {
-                const userName =
-                  typeof report.user === "object"
-                    ? report.user.name
-                    : null;
                 const statusColor = reportStatusColor(report.status);
                 const dateStr = renderDate(
                   report.submitted_at ??
@@ -348,8 +342,7 @@ export default function ReimbursementsPage() {
                     <Pressable
                       onPress={() =>
                         router.push({
-                          pathname:
-                            "/(events)/[id]/reimbursements/[reportId]",
+                          pathname: "/(events)/[id]/reimbursements/[reportId]",
                           params: { id, reportId: report.id },
                         })
                       }

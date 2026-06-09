@@ -1,5 +1,5 @@
-import { useTheme } from "expo-router/react-navigation";
 import { router } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { memo } from "react";
 import { TouchableHighlight, View } from "react-native";
 

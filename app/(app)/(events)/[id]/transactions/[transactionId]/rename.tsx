@@ -1,12 +1,12 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
 import { ActivityIndicator, TextInput, View } from "react-native";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import useSWRMutation from "swr/mutation";
 
+import { Text } from "@/components/Text";
 import useClient from "@/lib/client";
 import { getKey } from "@/lib/organization/useTransactions";
 import Transaction from "@/lib/types/Transaction";
@@ -44,8 +44,8 @@ export default function Page() {
         })
         .json(),
     {
-      optimisticData(currentData: Transaction) {
-        return { ...currentData, memo };
+      optimisticData(currentData?: Transaction) {
+        return { ...(currentData ?? transaction), memo };
       },
       populateCache: true,
       onSuccess() {

@@ -1,7 +1,10 @@
 import "expo-dev-client";
 
 // Polyfill AbortSignal.throwIfAborted which is missing in Hermes
-if (typeof AbortSignal !== "undefined" && !AbortSignal.prototype.throwIfAborted) {
+if (
+  typeof AbortSignal !== "undefined" &&
+  !AbortSignal.prototype.throwIfAborted
+) {
   AbortSignal.prototype.throwIfAborted = function () {
     if (this.aborted) throw this.reason;
   };
@@ -19,9 +22,9 @@ import * as Updates from "expo-updates";
 import React, { createContext, useContext, useEffect } from "react";
 import { ColorSchemeName, useColorScheme } from "react-native";
 
+import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import AuthContext from "@/lib/auth/auth";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
-import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
 import { LinkingProvider } from "@/lib/providers/LinkingContext";
 import { ShareIntentProvider } from "@/lib/providers/ShareIntentContext";

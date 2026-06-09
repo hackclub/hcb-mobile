@@ -1,19 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
+import { useTheme } from "expo-router/react-navigation";
 import { memo } from "react";
 import { View, TouchableHighlight, StyleSheet, ViewProps } from "react-native";
 import useSWR from "swr";
 
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (words[0][0] + words[1][0]).toUpperCase();
-}
-
 import EventBalance from "./EventBalance";
 
+import { Text } from "@/components/Text";
 import Invitation from "@/lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -82,7 +76,7 @@ const Event = memo(
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              />
+            />
           )}
           <View style={{ flexDirection: "column", flex: 1 }}>
             {invitation && invitation.sender && (

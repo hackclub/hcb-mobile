@@ -1,18 +1,18 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import { formatDistanceToNow } from "date-fns";
+import { useTheme } from "expo-router/react-navigation";
 import { memo, useRef, useState } from "react";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 
 import UploadIcon from "@/components/icons/UploadIcon";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
+import { Text } from "@/components/Text";
 import Organization from "@/lib/types/Organization";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
 import p from "@/styles/palette";
 import { palette } from "@/styles/theme";
-import * as Haptics from "@/utils/haptics";
 import { renderMoney } from "@/utils/format";
+import * as Haptics from "@/utils/haptics";
 
 function MissingReceiptTransaction({
   transaction,

@@ -23,7 +23,7 @@ export function useOffline() {
     });
   };
 
-  const withOfflineCheck = <T extends (...args: unknown[]) => unknown>(
+  const withOfflineCheck = <T extends (...args: never[]) => unknown>(
     action: T,
     showAlert = true,
   ): T => {

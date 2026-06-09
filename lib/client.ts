@@ -12,7 +12,13 @@ let refreshInProgress = false;
 // before calling our custom fetch, making it inaccessible via standard APIs.
 const formDataBodies = new WeakMap<Request, FormData>();
 
-function xhrFetch(url: string, method: string, headers: Headers, body: FormData, signal?: AbortSignal | null): Promise<Response> {
+function xhrFetch(
+  url: string,
+  method: string,
+  headers: Headers,
+  body: FormData,
+  signal?: AbortSignal | null,
+): Promise<Response> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(method, url);
@@ -22,17 +28,26 @@ function xhrFetch(url: string, method: string, headers: Headers, body: FormData,
     }
     xhr.onload = () => {
       const responseHeaders = new Headers();
-      xhr.getAllResponseHeaders().trim().split("\n").forEach((line) => {
-        const idx = line.indexOf(":");
-        if (idx > 0) {
-          responseHeaders.set(line.slice(0, idx).trim(), line.slice(idx + 1).trim());
-        }
-      });
-      resolve(new Response(xhr.responseText, {
-        status: xhr.status,
-        statusText: xhr.statusText,
-        headers: responseHeaders,
-      }));
+      xhr
+        .getAllResponseHeaders()
+        .trim()
+        .split("\n")
+        .forEach((line) => {
+          const idx = line.indexOf(":");
+          if (idx > 0) {
+            responseHeaders.set(
+              line.slice(0, idx).trim(),
+              line.slice(idx + 1).trim(),
+            );
+          }
+        });
+      resolve(
+        new Response(xhr.responseText, {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: responseHeaders,
+        }),
+      );
     };
     xhr.onerror = () => reject(new TypeError("Network request failed"));
     xhr.ontimeout = () => reject(new TypeError("Network request timed out"));
@@ -59,7 +74,13 @@ export function getClient(): KyInstance {
           const formData = formDataBodies.get(input);
           formDataBodies.delete(input);
           if (formData) {
-            return xhrFetch(input.url, input.method, input.headers, formData, init?.signal ?? input.signal);
+            return xhrFetch(
+              input.url,
+              input.method,
+              input.headers,
+              formData,
+              init?.signal ?? input.signal,
+            );
           }
         }
         return globalThis.fetch(input, init);

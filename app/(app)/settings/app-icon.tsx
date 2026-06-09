@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { getAppIconName, setAlternateAppIcon } from "expo-alternate-app-icons";
 import Constants from "expo-constants";
+import { Stack } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
 const icons: { [key: string]: number | null } = {

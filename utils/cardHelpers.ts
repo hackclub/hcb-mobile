@@ -1,8 +1,8 @@
 import { Alert } from "react-native";
 
-import Card from "@/lib/types/Card";
-
 import * as Haptics from "./haptics";
+
+import Card from "@/lib/types/Card";
 
 export function getCardName(card: Card | undefined, fallback = ""): string {
   if (!card) return "";

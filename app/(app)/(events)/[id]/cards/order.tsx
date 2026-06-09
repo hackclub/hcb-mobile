@@ -1,7 +1,6 @@
-import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -16,6 +15,7 @@ import useSWR, { useSWRConfig } from "swr";
 
 import CardIcon from "@/components/cards/CardIcon";
 import RepIcon from "@/components/cards/RepIcon";
+import { Text } from "@/components/Text";
 import useClient from "@/lib/client";
 import CardDesign from "@/lib/types/CardDesign";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
@@ -50,7 +50,7 @@ export default function Page() {
   const [zipCode, setZipCode] = useState(
     user?.shipping_address?.postal_code || "",
   );
-  const [expandedOrganizations, setExpandedOrganizations] = useState<
+  const [, setExpandedOrganizations] = useState<
     Record<string, OrganizationExpanded>
   >({});
   const { data: cardDesigns } = useOfflineSWR<CardDesign[]>(
@@ -131,7 +131,9 @@ export default function Page() {
           paddingHorizontal: 20,
         }}
       >
-        <Stack.Screen options={{ headerLargeTitle: true, title: "Order a Card" }} />
+        <Stack.Screen
+          options={{ headerLargeTitle: true, title: "Order a Card" }}
+        />
         <Text
           style={{
             color: themeColors.text,
@@ -168,7 +170,9 @@ export default function Page() {
             }}
             onPress={() => setCardType("virtual")}
           >
-            <RepIcon color={isDark ? themeColors.text : "#338eda"} />
+            <RepIcon
+              color={isDark ? (themeColors.text as string) : "#338eda"}
+            />
             <Text
               style={{
                 color: isDark ? themeColors.text : "#338eda",
@@ -209,7 +213,9 @@ export default function Page() {
             }}
             onPress={() => setCardType("plastic")}
           >
-            <CardIcon color={isDark ? themeColors.text : "#338eda"} />
+            <CardIcon
+              color={isDark ? (themeColors.text as string) : "#338eda"}
+            />
             <Text
               style={{
                 color: isDark ? themeColors.text : "#338eda",

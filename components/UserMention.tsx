@@ -1,10 +1,10 @@
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
+import { useTheme } from "expo-router/react-navigation";
 import { View } from "react-native";
 
 import UserAvatar from "./UserAvatar";
 
+import { Text } from "@/components/Text";
 import User from "@/lib/types/User";
 
 export default function UserMention({

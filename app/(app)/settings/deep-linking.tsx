@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { Text } from "@/components/Text";
 import { ActivityIndicator, Switch, View } from "react-native";
 
+import { Text } from "@/components/Text";
 import { useLinkingPref } from "@/lib/providers/LinkingContext";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
@@ -13,7 +13,9 @@ export default function Page() {
 
   return (
     <View style={{ backgroundColor: colors.background, paddingHorizontal: 20 }}>
-      <Stack.Screen options={{ headerLargeTitle: true, title: "Deep linking" }} />
+      <Stack.Screen
+        options={{ headerLargeTitle: true, title: "Deep linking" }}
+      />
       <View style={{ width: "100%" }}>
         <View
           style={{

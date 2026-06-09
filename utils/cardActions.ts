@@ -8,8 +8,8 @@ import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
 
 import { validateFields } from "./cardHelpers";
-import * as Haptics from "./haptics";
 import { renderMoney } from "./format";
+import * as Haptics from "./haptics";
 
 export const toggleCardFrozen = (
   card: Card,
@@ -370,11 +370,15 @@ export const handleCreateCard = async (
       router.back();
     } else {
       const data = (await response.json()) as { error?: string };
+      console.log(data);
       showAlert("Error", data.error || "Failed to create card");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   } catch (err) {
-    console.error("Error creating card:", err);
+    console.error(
+      "Error creating card:",
+      (err as { response?: unknown })?.response ?? err,
+    );
     showAlert("Error", "Failed to create card. Please try again later.");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {

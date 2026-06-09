@@ -3,10 +3,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { useTheme } from "expo-router/react-navigation";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import { useEffect, useRef, useState } from "react";
+import { useTheme } from "expo-router/react-navigation";
+import { ComponentRef, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,13 +14,14 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import ImageView from "react-native-image-viewing";
 import { mutate as globalMutate } from "swr";
 
 import Badge from "@/components/Badge";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
-import { parseApiError } from "@/lib/alertUtils";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import {
   Receipt,
@@ -123,10 +123,9 @@ function ExpenseReceiptsSection({
   const { showActionSheetWithOptions } = useActionSheet();
   const [uploading, setUploading] = useState(false);
 
-  const {
-    data: receipts,
-    mutate: mutateReceipts,
-  } = useOfflineSWR<Receipt[]>(`receipts?expense_id=${expense.id}`);
+  const { data: receipts, mutate: mutateReceipts } = useOfflineSWR<Receipt[]>(
+    `receipts?expense_id=${expense.id}`,
+  );
   const receiptList = receipts ?? [];
 
   const uploadReceipt = async (uri: string) => {
@@ -142,9 +141,7 @@ function ExpenseReceiptsSection({
         name: "receipt.jpeg",
         type: "image/jpeg",
       } as unknown as Blob);
-      await hcb
-        .patch(`reimbursement_expenses/${expense.id}`, { body })
-        .json();
+      await hcb.patch(`reimbursement_expenses/${expense.id}`, { body }).json();
       await mutateReceipts();
     } catch (err) {
       Alert.alert(
@@ -165,8 +162,7 @@ function ExpenseReceiptsSection({
       },
       async (index) => {
         if (index === 0) {
-          const { status } =
-            await ImagePicker.requestCameraPermissionsAsync();
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
             showAlert("Permission needed", "Camera access is required.");
             return;
@@ -227,7 +223,9 @@ function ExpenseReceiptsSection({
           <Pressable
             key={receipt.id}
             onPress={() => onOpenViewer(receiptList, i)}
-            onLongPress={isDraft ? () => handleDeleteReceipt(receipt) : undefined}
+            onLongPress={
+              isDraft ? () => handleDeleteReceipt(receipt) : undefined
+            }
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           >
             <Image
@@ -283,7 +281,11 @@ function ExpenseReceiptsSection({
               <ActivityIndicator size="small" />
             ) : (
               <>
-                <Ionicons name="camera-outline" size={22} color={palette.muted} />
+                <Ionicons
+                  name="camera-outline"
+                  size={22}
+                  color={palette.muted}
+                />
                 <Text style={{ color: palette.muted, fontSize: 10 }}>Add</Text>
               </>
             )}
@@ -326,23 +328,19 @@ function ExpenseRow({
   onOpenViewer: (receipts: Receipt[], index: number) => void;
 }) {
   const { colors: themeColors } = useTheme();
-  const swipeableRef = useRef<ReanimatedSwipeable>(null);
+  const swipeableRef = useRef<ComponentRef<typeof ReanimatedSwipeable>>(null);
   const expenseColor =
     expense.status === "approved" ? "#33a854" : palette.muted;
 
   const handleDelete = () => {
-    Alert.alert(
-      "Delete expense?",
-      expense.memo ?? "This expense",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-          onPress: () => swipeableRef.current?.close(),
-        },
-        { text: "Delete", style: "destructive", onPress: onDelete },
-      ],
-    );
+    Alert.alert("Delete expense?", expense.memo ?? "This expense", [
+      {
+        text: "Cancel",
+        style: "cancel",
+        onPress: () => swipeableRef.current?.close(),
+      },
+      { text: "Delete", style: "destructive", onPress: onDelete },
+    ]);
   };
 
   const inner = (
@@ -607,9 +605,7 @@ export default function ReportDetailPage() {
           try {
             await hcb.delete(`receipts/${receipt.id}`);
             setViewerState(null);
-            await globalMutate(
-              `receipts?expense_id=${viewerState.expenseId}`,
-            );
+            await globalMutate(`receipts?expense_id=${viewerState.expenseId}`);
           } catch (err) {
             Alert.alert(
               "Delete failed",
@@ -641,7 +637,9 @@ export default function ReportDetailPage() {
   const statusColor = reportStatusColor(report.status);
   const canSubmit = isDraft && expenses.length > 0;
   const userName =
-    typeof report.user === "object" ? report.user.full_name : null;
+    typeof report.user === "object"
+      ? (report.user.full_name ?? report.user.name)
+      : null;
 
   return (
     <>
@@ -712,8 +710,8 @@ export default function ReportDetailPage() {
             <Text
               style={{ color: palette.primary, fontSize: 14, lineHeight: 20 }}
             >
-              Get reimbursed by uploading your receipts. Add an expense below
-              — each one needs a memo, amount, and receipt.
+              Get reimbursed by uploading your receipts. Add an expense below —
+              each one needs a memo, amount, and receipt.
             </Text>
           </View>
         )}
@@ -955,7 +953,11 @@ export default function ReportDetailPage() {
                   >
                     <Ionicons name="trash-outline" size={16} color="#ff3b30" />
                     <Text
-                      style={{ color: "#ff3b30", fontSize: 15, fontWeight: "600" }}
+                      style={{
+                        color: "#ff3b30",
+                        fontSize: 15,
+                        fontWeight: "600",
+                      }}
                     >
                       Delete Receipt
                     </Text>

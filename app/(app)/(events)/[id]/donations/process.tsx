@@ -1,10 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "expo-router/react-navigation";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Text } from "@/components/Text";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { router, useNavigation } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,7 +14,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-// @ts-expect-error no types
+// @ts-expect-error react-native-qrcode-styled has no TypeScript definitions
 import QRCodeStyled from "react-native-qrcode-styled";
 import {
   SafeAreaView,
@@ -23,6 +22,7 @@ import {
 } from "react-native-safe-area-context";
 
 import StyledButton from "@/components/Button";
+import { Text } from "@/components/Text";
 import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";

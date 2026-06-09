@@ -1,12 +1,12 @@
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import Intercom from "@intercom/intercom-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ThemeProvider } from "expo-router/react-navigation";
 import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
 import * as Linking from "expo-linking";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
 import { usePathname, useRouter } from "expo-router";
+import { ThemeProvider } from "expo-router/react-navigation";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -27,11 +27,14 @@ import useSWR, { SWRConfig } from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
-import AuthContext from "@/lib/auth/auth";
-import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
+import AuthContext from "@/lib/auth/auth";
+import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
 import useClient from "@/lib/client";
+import { useLinkingPref } from "@/lib/providers/LinkingContext";
+import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -41,9 +44,6 @@ import {
   useStripeTerminalInit,
 } from "@/lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
-import { useLinkingPref } from "@/lib/providers/LinkingContext";
-import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
-import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { lightTheme, theme } from "@/styles/theme";
 import { trackAppOpen } from "@/utils/storeReview";
 
@@ -290,7 +290,7 @@ export default function Layout() {
       await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
       // When themePref is "system", defer to the device's actual color scheme
       if (themePref === "system") {
-        Appearance.setColorScheme(null);
+        Appearance.setColorScheme("unspecified");
       } else {
         Appearance.setColorScheme(isDark ? "dark" : "light");
       }
@@ -604,15 +604,15 @@ export default function Layout() {
                   },
                 }}
               >
-                  <SentryUserBridge />
-                  <UserChangeDetector />
-                  <ActionSheetProvider>
-                    <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                      <ThemeProvider value={navTheme}>
-                        <Navigation />
-                      </ThemeProvider>
-                    </AlertNotificationRoot>
-                  </ActionSheetProvider>
+                <SentryUserBridge />
+                <UserChangeDetector />
+                <ActionSheetProvider>
+                  <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
+                    <ThemeProvider value={navTheme}>
+                      <Navigation />
+                    </ThemeProvider>
+                  </AlertNotificationRoot>
+                </ActionSheetProvider>
               </SWRConfig>
             </GestureHandlerRootView>
           </View>

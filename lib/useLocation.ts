@@ -2,8 +2,8 @@ import Geolocation, {
   GeolocationError,
   GeolocationResponse,
 } from "@react-native-community/geolocation";
-import { useFocusEffect } from "expo-router/react-navigation";
 import * as Location from "expo-location";
+import { useFocusEffect } from "expo-router/react-navigation";
 import { useCallback, useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 
