@@ -1,0 +1,384 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
+import { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { mutate } from "swr";
+
+import Button from "@/components/Button";
+import { Text } from "@/components/Text";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
+import useClient from "@/lib/client";
+import Receipt from "@/lib/types/Receipt";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
+import { maybeRequestReview } from "@/utils/storeReview";
+
+export default function Page() {
+  const { transaction: rawTransaction } = useLocalSearchParams();
+  const transaction = useMemo(() => {
+    if (typeof rawTransaction !== "string") return null;
+    try {
+      return JSON.parse(rawTransaction) as {
+        id?: string;
+        memo?: string;
+      } | null;
+    } catch {
+      return null;
+    }
+  }, [rawTransaction]);
+
+  const { colors: themeColors } = useTheme();
+  const hcb = useClient();
+
+  const { data: receipts } = useOfflineSWR<Receipt[]>("receipts");
+  const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(
+    new Set(),
+  );
+  const [uploading, setUploading] = useState(false);
+  const [deletingReceipts, setDeletingReceipts] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const uploadFile = async (receipt: Receipt) => {
+    const body = new FormData();
+    body.append("file", {
+      uri: receipt.url,
+      name: receipt.filename || "receipt.jpg",
+      type: "image/jpeg",
+    } as unknown as Blob);
+
+    if (transaction?.id) {
+      body.append("transaction_id", transaction.id);
+    }
+
+    await hcb.post(`receipts`, {
+      body,
+    });
+  };
+
+  const deleteReceipt = async (receiptId: string) => {
+    await hcb.delete(`receipts/${receiptId.replace("rct_", "")}`);
+  };
+
+  const handleUpload = async () => {
+    if (!transaction?.id) {
+      showAlert(
+        "Missing Transaction",
+        "We couldn't identify the transaction for this upload. Please go back and try again.",
+      );
+      return;
+    }
+
+    if (selectedReceipts.size === 0) {
+      showAlert(
+        "No Receipts Selected",
+        "Please select at least one receipt to upload.",
+      );
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const selectedReceiptList =
+        receipts?.filter((receipt) => selectedReceipts.has(receipt.id)) || [];
+
+      for (const receipt of selectedReceiptList) {
+        await uploadFile(receipt);
+      }
+
+      setDeletingReceipts(new Set(selectedReceipts));
+
+      for (const receiptId of selectedReceipts) {
+        await deleteReceipt(receiptId);
+      }
+
+      await mutate("receipts");
+      await mutate("user/transactions/missing_receipt");
+
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: "Receipts Uploaded!",
+        textBody: `Successfully uploaded ${selectedReceipts.size} receipt(s) and removed them from receipt bin.`,
+      });
+
+      maybeRequestReview();
+      router.back();
+    } catch (error) {
+      console.error("Upload error", error, {
+        transactionId: transaction?.id,
+        receiptCount: selectedReceipts.size,
+      });
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: "Upload Failed",
+        textBody: await parseApiError(
+          error,
+          "Some receipts failed to upload. Please try again.",
+        ),
+      });
+    } finally {
+      setUploading(false);
+      setDeletingReceipts(new Set());
+    }
+  };
+
+  const toggleReceiptSelection = (receiptId: string) => {
+    const newSelected = new Set(selectedReceipts);
+    if (newSelected.has(receiptId)) {
+      newSelected.delete(receiptId);
+    } else {
+      newSelected.add(receiptId);
+    }
+    setSelectedReceipts(newSelected);
+  };
+
+  const selectAllReceipts = () => {
+    if (receipts) {
+      setSelectedReceipts(new Set(receipts.map((receipt) => receipt.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedReceipts(new Set());
+  };
+
+  if (!receipts || receipts.length === 0) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: themeColors.background }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Ionicons name="receipt-outline" color={palette.muted} size={60} />
+          <Text
+            style={{
+              color: themeColors.text,
+              fontSize: 18,
+              fontWeight: "600",
+              marginTop: 16,
+              marginBottom: 8,
+            }}
+          >
+            Receipt Bin is Empty
+          </Text>
+          <Text
+            style={{
+              color: palette.muted,
+              textAlign: "center",
+              lineHeight: 20,
+            }}
+          >
+            No receipts available in your receipt bin to upload to this
+            transaction.
+          </Text>
+          <Button onPress={() => router.back()} style={{ marginTop: 24 }}>
+            Go Back
+          </Button>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: themeColors.background }}>
+      <View
+        style={{
+          padding: 20,
+          borderBottomWidth: 1,
+          borderBottomColor: themeColors.border,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          {Platform.OS === "android" && (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                marginRight: 16,
+                padding: 8,
+              }}
+            >
+              <Ionicons name="close" size={24} color={themeColors.text} />
+            </TouchableOpacity>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                color: themeColors.text,
+              }}
+            >
+              Select Receipts
+            </Text>
+            <Text style={{ color: palette.muted, fontSize: 14, marginTop: 2 }}>
+              {transaction?.memo}
+            </Text>
+          </View>
+        </View>
+        <Button
+          onPress={handleUpload}
+          disabled={uploading || selectedReceipts.size === 0}
+          loading={uploading}
+          style={{ paddingVertical: 8, paddingHorizontal: 14 }}
+        >
+          {`Upload (${selectedReceipts.size})`}
+        </Button>
+      </View>
+
+      <View
+        style={{
+          padding: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: themeColors.border,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: palette.muted, fontSize: 14 }}>
+          {selectedReceipts.size} of {receipts.length} selected
+        </Text>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity
+            onPress={selectAllReceipts}
+            style={{
+              backgroundColor: palette.info,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 6,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>
+              Select All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={clearSelection}
+            style={{
+              backgroundColor: palette.muted,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 6,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 12, fontWeight: "600" }}>
+              Clear
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView style={{ flex: 1, padding: 16 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          {receipts.map((receipt) => {
+            const isSelected = selectedReceipts.has(receipt.id);
+            const isDeleting = deletingReceipts.has(receipt.id);
+            const isUploading = uploading && isSelected;
+
+            return (
+              <TouchableOpacity
+                key={receipt.id}
+                onPress={() => toggleReceiptSelection(receipt.id)}
+                disabled={isUploading || isDeleting}
+                style={{
+                  width: "48%",
+                  opacity: isUploading || isDeleting ? 0.6 : 1,
+                }}
+              >
+                <View style={{ position: "relative" }}>
+                  <Image
+                    source={{ uri: receipt.preview_url || receipt.url }}
+                    style={{
+                      width: "100%",
+                      height: 200,
+                      borderRadius: 8,
+                      backgroundColor: themeColors.card,
+                      borderWidth: isSelected ? 3 : 0,
+                      borderColor: palette.primary,
+                    }}
+                    contentFit="cover"
+                  />
+
+                  {isSelected && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        backgroundColor: palette.primary,
+                        borderRadius: 12,
+                        width: 24,
+                        height: 24,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Ionicons name="checkmark" color="white" size={16} />
+                    </View>
+                  )}
+
+                  {(isUploading || isDeleting) && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        borderRadius: 8,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ActivityIndicator color="white" size="small" />
+                    </View>
+                  )}
+                </View>
+
+                <Text
+                  style={{
+                    color: palette.muted,
+                    fontSize: 12,
+                    marginTop: 4,
+                    textAlign: "center",
+                  }}
+                  numberOfLines={1}
+                >
+                  {receipt.filename}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

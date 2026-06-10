@@ -1,0 +1,205 @@
+import Icon from "@thedev132/hackclub-icons-rn";
+import { useTheme } from "expo-router/react-navigation";
+import { useState } from "react";
+import { View, TextInput, Alert, Pressable } from "react-native";
+import useSWR, { mutate, useSWRConfig } from "swr";
+
+import {
+  useCommentFileActionSheet,
+  SelectedFile,
+} from "./CommentFileActionSheet";
+
+import Button from "@/components/Button";
+import { Text } from "@/components/Text";
+import UserMention from "@/components/UserMention";
+import { parseApiError } from "@/lib/alertUtils";
+import useClient from "@/lib/client";
+import User from "@/lib/types/User";
+import { palette } from "@/styles/theme";
+import * as Haptics from "@/utils/haptics";
+import { maybeRequestReview } from "@/utils/storeReview";
+
+interface CommentFieldProps {
+  orgId: string;
+  transactionId: string;
+}
+
+export default function CommentField({
+  orgId,
+  transactionId,
+}: CommentFieldProps) {
+  const { colors: themeColors } = useTheme();
+  const { data: user } = useSWR<User>("user");
+  const [comment, setComment] = useState("");
+  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [adminOnly, setAdminOnly] = useState(false);
+  const hcb = useClient();
+  const { handleActionSheet } = useCommentFileActionSheet();
+  const { mutate: globalMutate } = useSWRConfig();
+
+  const pickFile = async () => {
+    try {
+      const result = await handleActionSheet();
+      if (result) {
+        setSelectedFile(result);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to pick file");
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+  };
+
+  const submitComment = async () => {
+    if (!comment.trim()) {
+      Alert.alert("Error", "Please enter a comment");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const body = new FormData();
+      body.append("content", comment.trim());
+
+      if (adminOnly) {
+        body.append("admin_only", "true");
+      }
+
+      if (selectedFile) {
+        body.append("file", {
+          uri: selectedFile.uri,
+          name: selectedFile.name,
+          type: selectedFile.mimeType,
+        } as unknown as Blob);
+
+        await hcb.post(
+          `organizations/${orgId}/transactions/${transactionId}/comments`,
+          {
+            body,
+          },
+        );
+
+        setComment("");
+        setSelectedFile(null);
+        setAdminOnly(false);
+
+        const commentKey = `organizations/${orgId}/transactions/${transactionId}/comments`;
+        await Promise.all([
+          mutate(commentKey),
+          globalMutate(commentKey),
+          globalMutate(
+            (key) =>
+              typeof key === "string" &&
+              key.includes(`/transactions/${transactionId}/comments`),
+          ),
+        ]);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        maybeRequestReview();
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      Alert.alert("Error", await parseApiError(error, "Failed to add comment"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <View style={{ paddingVertical: 16, gap: 12 }}>
+      <View>
+        <UserMention user={user} scale={1.1} />
+
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            minHeight: 80,
+            fontSize: 16,
+            borderColor: themeColors.border,
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+          }}
+          placeholder="Add a comment..."
+          placeholderTextColor={palette.muted}
+          value={comment}
+          onChangeText={setComment}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+      </View>
+
+      {(user?.admin || user?.auditor) && (
+        <Pressable
+          onPress={() => setAdminOnly(!adminOnly)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderWidth: 1,
+            borderColor: "#ff8c37",
+            borderStyle: "dashed",
+            borderRadius: 8,
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            backgroundColor: "#ff8c3710",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#ff8c37",
+              flex: 1,
+            }}
+          >
+            Admin only comment
+          </Text>
+          <Icon
+            glyph={adminOnly ? "checkmark" : "checkbox"}
+            color="#ff8c37"
+            size={32}
+          />
+        </Pressable>
+      )}
+
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <Pressable
+          style={({ pressed }) => ({
+            borderWidth: 1,
+            borderColor: palette.info,
+            borderStyle: "dashed",
+            borderRadius: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            alignItems: "center",
+            backgroundColor: "transparent",
+            opacity: pressed ? 0.6 : 1,
+          })}
+          onPress={selectedFile ? removeFile : pickFile}
+        >
+          <Text
+            style={{ color: palette.info, fontSize: 14, fontWeight: "500" }}
+          >
+            {selectedFile ? "Remove file" : "Choose file"}
+          </Text>
+        </Pressable>
+
+        <Text style={{ fontSize: 14, color: palette.muted }}>
+          {selectedFile ? selectedFile.name : "No file chosen"}
+        </Text>
+      </View>
+      <Button onPress={submitComment} disabled={isSubmitting}>
+        Add Comment
+      </Button>
+    </View>
+  );
+}

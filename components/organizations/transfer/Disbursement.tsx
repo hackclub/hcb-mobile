@@ -1,0 +1,278 @@
+import { Picker } from "@expo/ui/community/picker";
+import { Stack } from "expo-router";
+import { useTheme } from "expo-router/react-navigation";
+import { useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  TextInput,
+  TextStyle,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import useSWR from "swr";
+
+import { Text } from "@/components/Text";
+import { parseApiError, showAlert } from "@/lib/alertUtils";
+import AuthContext from "@/lib/auth/auth";
+import { getAccessToken } from "@/lib/auth/tokenUtils";
+import { OrganizationExpanded } from "@/lib/types/Organization";
+import { useOffline } from "@/lib/useOffline";
+import { palette } from "@/styles/theme";
+import { renderMoney } from "@/utils/format";
+
+type DisbursementScreenProps = {
+  organization: OrganizationExpanded;
+};
+
+const DisbursementScreen = ({ organization }: DisbursementScreenProps) => {
+  const [amount, setAmount] = useState("$0.00");
+  const [chosenOrg, setOrganization] = useState("");
+  const [reason, setReason] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { colors: themeColors } = useTheme();
+  const { data: organizations } =
+    useSWR<OrganizationExpanded[]>("user/organizations");
+  const { tokenResponse } = useContext(AuthContext);
+
+  const accessToken = getAccessToken(tokenResponse);
+  const { isOnline, withOfflineCheck } = useOffline();
+
+  const validateInputs = () => {
+    const numericAmount = Number(amount.replace("$", "").replace(",", ""));
+    if (!chosenOrg) {
+      showAlert("Error", "Please select an organization to transfer to.");
+      return false;
+    }
+    if (numericAmount <= 0 || isNaN(numericAmount)) {
+      showAlert("Error", "Please enter a valid amount greater than $0.");
+      return false;
+    }
+    if (numericAmount * 100 > organization.balance_cents) {
+      showAlert("Error", "Insufficient balance for this transfer.");
+      return false;
+    }
+    if (!reason.trim()) {
+      showAlert("Error", "Please provide a reason for the transfer.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleTransfer = withOfflineCheck(async () => {
+    if (!validateInputs()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        process.env.EXPO_PUBLIC_API_BASE +
+          `/organizations/${organization.id}/transfers`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            event_id: organization.id,
+            to_organization_id: chosenOrg,
+            amount_cents:
+              Number(amount.replace("$", "").replace(",", "")) * 100,
+            name: reason,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        showAlert(
+          "Error",
+          errorData.messages?.[0] ||
+            "Failed to complete the transfer. Please try again.",
+        );
+      } else {
+        showAlert("Success", "Transfer completed successfully!");
+        setOrganization("");
+        setAmount("$0.00");
+        setReason("");
+      }
+    } catch (error) {
+      console.error("Transfer operation failed", error, {
+        context: {
+          organizationId: organization.id,
+          targetOrgId: chosenOrg,
+          amount: amount,
+          action: "organization_transfer",
+        },
+      });
+      showAlert("Error", await parseApiError(error));
+    } finally {
+      setIsLoading(false);
+    }
+  });
+
+  useEffect(() => {
+    if (chosenOrg === "") {
+      setAmount("$0.00");
+    }
+  }, [chosenOrg]);
+
+  if (!organizations) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={themeColors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <Stack.Screen
+        options={{ headerLargeTitle: true, title: "New HCB transfer" }}
+      />
+      <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          From
+        </Text>
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 8,
+            padding: 15,
+            marginBottom: 15,
+          }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 16 }}>
+            {organization.name} ({renderMoney(organization.balance_cents)})
+          </Text>
+        </View>
+
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          To
+        </Text>
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: 8,
+            marginBottom: 15,
+          }}
+        >
+          <Picker
+            selectedValue={chosenOrg}
+            onValueChange={(value) => setOrganization(value as string)}
+            style={{ color: themeColors.text, fontSize: 16 } as TextStyle}
+          >
+            <Picker.Item label="Select an organization" value="" />
+            {organizations
+              .filter((org) => org.id !== organization.id)
+              .filter((org) => org.playground_mode === false)
+              .map((org) => (
+                <Picker.Item key={org.id} label={org.name} value={org.id} />
+              ))}
+          </Picker>
+        </View>
+        <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
+          You can transfer to any organization you're a part of.
+        </Text>
+
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          Amount
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            marginBottom: 15,
+          }}
+          value={amount}
+          onChangeText={(text) => {
+            const sanitizedText = text.replace(/[^\d.]/g, "");
+            if (sanitizedText.startsWith("0.00")) {
+              setAmount(text.replace("0.00", ""));
+              return;
+            }
+            setAmount(sanitizedText ? `$${sanitizedText}` : "$0.00");
+          }}
+          placeholder="$0.00"
+          placeholderTextColor={themeColors.text}
+          keyboardType="numeric"
+        />
+
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 18,
+            marginVertical: 12,
+            fontWeight: "bold",
+          }}
+        >
+          What is the transfer for?
+        </Text>
+        <TextInput
+          style={{
+            backgroundColor: themeColors.card,
+            color: themeColors.text,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 14,
+            marginBottom: 10,
+          }}
+          value={reason}
+          onChangeText={(text) => setReason(text)}
+          placeholder="Donating extra funds to another organization"
+          placeholderTextColor={palette.muted}
+        />
+        <Text style={{ color: palette.muted, fontSize: 14, marginBottom: 20 }}>
+          This is to help HCB keep record of our transactions.
+        </Text>
+
+        <TouchableOpacity
+          onPress={handleTransfer}
+          disabled={isLoading || !isOnline}
+          style={{
+            backgroundColor: isOnline
+              ? themeColors.primary
+              : (themeColors.primary as string) + "80",
+            padding: 15,
+            borderRadius: 8,
+            alignItems: "center",
+            marginVertical: 20,
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+              Submit Transfer
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+};
+
+export default DisbursementScreen;
