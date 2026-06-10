@@ -61,6 +61,7 @@ const CardItem = memo(function CardItem({
         drag();
       }}
       disabled={isActive}
+      style={{ borderRadius: 15, overflow: "hidden" }}
     >
       <PaymentCard
         card={item}
@@ -201,14 +202,8 @@ export default function Page() {
   );
 
   const handleOrderCard = useCallback(() => {
-    const firstOrganizationId = organizations?.[0]?.id;
-    if (!firstOrganizationId) return;
-
-    router.push({
-      pathname: "/cards/order/[id]",
-      params: { id: firstOrganizationId },
-    });
-  }, [organizations]);
+    router.push("/cards/order");
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({

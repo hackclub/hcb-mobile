@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
+import { useEffect } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
-import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
@@ -20,9 +20,30 @@ interface CheckDepositSummary {
 export default function CheckDepositsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const navigation = useNavigation();
   const { data: deposits, isLoading } = useOfflineSWR<CheckDepositSummary[]>(
     `check_deposits?organization_id=${id}`,
   );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/(events)/[id]/check-deposits/new",
+              params: { id },
+            })
+          }
+          style={({ pressed }) => ({ padding: 8, opacity: pressed ? 0.6 : 1 })}
+          accessibilityLabel="Deposit a check"
+          accessibilityRole="button"
+        >
+          <Ionicons name="add" size={26} color={themeColors.text} />
+        </Pressable>
+      ),
+    });
+  }, [navigation, id, themeColors.text]);
 
   return (
     <ScrollView
@@ -35,18 +56,6 @@ export default function CheckDepositsPage() {
         gap: 16,
       }}
     >
-      <Button
-        onPress={() =>
-          router.push({
-            pathname: "/(events)/[id]/check-deposits/new",
-            params: { id },
-          })
-        }
-        icon="plus"
-        iconSize={24}
-      >
-        Deposit a check
-      </Button>
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
           <ActivityIndicator />
@@ -56,7 +65,7 @@ export default function CheckDepositsPage() {
         <View style={{ alignItems: "center", paddingTop: 40, gap: 8 }}>
           <Ionicons name="document-outline" size={40} color={palette.muted} />
           <Text style={{ color: palette.muted, fontSize: 15 }}>
-            No check deposits yet
+            No check deposits yet. Tap + to deposit one.
           </Text>
         </View>
       )}

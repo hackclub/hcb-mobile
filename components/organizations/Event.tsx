@@ -8,7 +8,6 @@ import useSWR from "swr";
 import EventBalance from "./EventBalance";
 
 import { Text } from "@/components/Text";
-import Invitation from "@/lib/types/Invitation";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
@@ -24,12 +23,10 @@ const Event = memo(
     drag,
     isActive,
     style,
-    invitation,
   }: ViewProps & {
     event: Organization;
     hideBalance?: boolean;
     showTransactions?: boolean;
-    invitation?: Invitation;
     onPress?: () => void;
     isActive?: boolean;
     drag?: () => void;
@@ -79,19 +76,6 @@ const Event = memo(
             />
           )}
           <View style={{ flexDirection: "column", flex: 1 }}>
-            {invitation && invitation.sender && (
-              <Text
-                style={{
-                  color: isDark ? palette.muted : palette.slate,
-                  marginBottom: 3,
-                }}
-              >
-                <Text style={{ fontWeight: "600" }}>
-                  {invitation.sender.name}
-                </Text>{" "}
-                invited you to
-              </Text>
-            )}
             <View
               style={{
                 flexDirection: "row",
@@ -157,12 +141,13 @@ const Event = memo(
         disabled={isActive}
         underlayColor={isActive ? "transparent" : themeColors.background}
         activeOpacity={isActive ? 1 : 0.7}
+        style={{ borderRadius: 8, overflow: "hidden" }}
       >
         {event.background_image ? (
           <View
             style={{
               backgroundColor: themeColors.card,
-              borderRadius: 10,
+              borderRadius: 8,
               overflow: "hidden",
               position: "relative",
               borderWidth: 1,
@@ -186,6 +171,7 @@ const Event = memo(
                 width: "100%",
                 height: "100%",
                 backgroundColor: themeColors.card,
+                borderRadius: 8,
               }}
               contentFit="cover"
             />
@@ -194,7 +180,7 @@ const Event = memo(
                 backgroundColor: isDark
                   ? "rgba(37, 36, 41, 0.85)"
                   : "rgba(255, 255, 255, 0.88)",
-                borderRadius: 10,
+                borderRadius: 8,
                 position: "relative",
                 zIndex: 1,
               }}
@@ -228,8 +214,7 @@ const Event = memo(
       prevProps.event.icon === nextProps.event.icon &&
       prevProps.event.background_image === nextProps.event.background_image &&
       prevProps.hideBalance === nextProps.hideBalance &&
-      prevProps.isActive === nextProps.isActive &&
-      prevProps.invitation?.id === nextProps.invitation?.id
+      prevProps.isActive === nextProps.isActive
     );
   },
 );

@@ -1,13 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
+  RefreshControl,
   ScrollView,
   View,
 } from "react-native";
+import { useSWRConfig } from "swr";
 
 import ActionChip from "@/components/organizations/ActionChip";
 import ActionTile from "@/components/organizations/ActionTile";
@@ -74,9 +76,13 @@ export default function Page() {
     [organizationError],
   );
 
-  const { data: transactionsPage, isLoading } = useOfflineSWR<
-    PaginatedResponse<ITransaction>
-  >(`organizations/${params.id}/transactions?limit=35`);
+  const {
+    data: transactionsPage,
+    error: transactionsError,
+    isLoading,
+  } = useOfflineSWR<PaginatedResponse<ITransaction>>(
+    `organizations/${params.id}/transactions?limit=35`,
+  );
 
   useEffect(() => {
     const isOfflineNoData = organizationError && !isOnline && !organization;
@@ -141,6 +147,22 @@ export default function Page() {
   }, [organizationError, mutateOrganization]);
 
   const { colors: themeColors } = useTheme();
+  const { mutate } = useSWRConfig();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
+    try {
+      await mutate(
+        (k) =>
+          typeof k === "string" && k.startsWith(`organizations/${params.id}`),
+      );
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, mutate, params.id]);
 
   const recentTransactions = useMemo(
     () =>
@@ -185,6 +207,9 @@ export default function Page() {
       style={{ flex: 1, backgroundColor: themeColors.background }}
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 16 }}>
         {showTapToPayBanner && (
@@ -242,7 +267,7 @@ export default function Page() {
           paddingBottom: 40,
         }}
       >
-        {isLoading ? (
+        {isLoading || (transactionsError && !transactionsPage) ? (
           <RecentTransactionsSkeleton />
         ) : recentTransactions.length > 0 ? (
           <SectionCard
@@ -276,12 +301,8 @@ export default function Page() {
           <View style={{ flexDirection: "row", gap: 10 }}>
             <ActionTile
               icon="payment-transfer"
-              label="Transfer"
-              onPress={() =>
-                navTo("/(events)/[id]/transfer", {
-                  organization: JSON.stringify(organization),
-                })
-              }
+              label="Transfers"
+              onPress={() => navTo("/(events)/[id]/transfers")}
             />
             <ActionTile
               icon="card"

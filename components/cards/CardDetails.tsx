@@ -1,3 +1,4 @@
+import Icon from "@thedev132/hackclub-icons-rn";
 import { format } from "date-fns";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
@@ -79,6 +80,7 @@ interface CardDetailsProps {
     extraStyles?: Record<string, unknown>,
   ) => Record<string, unknown>;
   user?: User;
+  onToggleDetails?: () => void;
 }
 
 export default function CardDetails({
@@ -93,6 +95,7 @@ export default function CardDetails({
   cardDetailsLoading,
   createSkeletonStyle,
   user,
+  onToggleDetails,
 }: CardDetailsProps) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
@@ -199,8 +202,10 @@ export default function CardDetails({
         <View
           style={{
             flex: 1,
-            alignItems: "flex-end",
+            flexDirection: "row",
+            alignItems: "center",
             justifyContent: "flex-end",
+            gap: 10,
           }}
         >
           {detailsLoading ||
@@ -233,6 +238,19 @@ export default function CardDetails({
             >
               {redactedCardNumber(card?.last4 ?? grantCard?.last4)}
             </Text>
+          )}
+          {onToggleDetails && (
+            <TouchableOpacity
+              onPress={onToggleDetails}
+              disabled={detailsLoading || cardDetailsLoading}
+              hitSlop={8}
+            >
+              <Icon
+                glyph={detailsRevealed ? "private-fill" : "view"}
+                size={22}
+                color={palette.muted}
+              />
+            </TouchableOpacity>
           )}
         </View>
       </View>

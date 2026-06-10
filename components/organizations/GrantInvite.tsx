@@ -1,8 +1,15 @@
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
-import { Alert, TouchableHighlight, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  TouchableHighlight,
+  View,
+} from "react-native";
 
+import GrantTermsModal from "@/components/grants/GrantTermsModal";
 import { Text } from "@/components/Text";
 import { parseApiError } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -10,6 +17,7 @@ import GrantCard from "@/lib/types/GrantCard";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 import * as Haptics from "@/utils/haptics";
+import { orgColor } from "@/utils/org";
 import { maybeRequestReview } from "@/utils/storeReview";
 
 interface GrantInviteProps {
@@ -21,6 +29,7 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
   const [isCreatingCard, setIsCreatingCard] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const handleCreateCard = async () => {
     setIsCreatingCard(true);
@@ -31,6 +40,7 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         maybeRequestReview();
 
+        setShowTerms(false);
         router.push({
           pathname: "/(events)/card-grants/[id]",
           params: { id: grant.id },
@@ -66,71 +76,96 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
   };
 
   return (
-    <TouchableHighlight
-      style={[
-        {
-          backgroundColor: themeColors.card,
-          borderRadius: 10,
-          marginBottom: 10,
-          borderWidth: 2,
-          borderColor: palette.primary,
-        },
-        style,
-      ]}
-      underlayColor={themeColors.background}
-      activeOpacity={0.7}
-      onPress={handleCreateCard}
-      disabled={isCreatingCard}
-    >
-      <View style={{ padding: 16 }}>
+    <>
+      <GrantTermsModal
+        visible={showTerms}
+        onClose={() => setShowTerms(false)}
+        onAgree={handleCreateCard}
+        organizationName={grant.organization.name}
+        activating={isCreatingCard}
+      />
+      <TouchableHighlight
+        style={[
+          {
+            backgroundColor: themeColors.card,
+            borderRadius: 8,
+            overflow: "hidden",
+            borderWidth: 1,
+            borderColor: palette.primary,
+          },
+          style,
+        ]}
+        underlayColor={themeColors.background}
+        activeOpacity={0.7}
+        onPress={() => setShowTerms(true)}
+        disabled={isCreatingCard}
+      >
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 8,
+            padding: 12,
+            gap: 12,
           }}
         >
-          <Text
-            style={{
-              color: themeColors.text,
-              fontSize: 18,
-              fontWeight: "600",
-              flexShrink: 1,
-            }}
-          >
-            {grant.organization.name} sent you a grant
-          </Text>
-          <Text
-            style={{ color: palette.primary, fontSize: 16, fontWeight: "500" }}
-          >
-            {renderMoney(grant.amount_cents)}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: palette.muted, fontSize: 14 }}>
-            Tap to activate your grant
-          </Text>
-          {isCreatingCard && (
+          {grant.organization.icon ? (
+            <Image
+              source={{ uri: grant.organization.icon }}
+              cachePolicy="memory-disk"
+              contentFit="cover"
+              style={{ width: 40, height: 40, borderRadius: 8 }}
+            />
+          ) : (
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                backgroundColor: orgColor(grant.organization.id),
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 18, fontWeight: "600" }}>
+                {grant.organization.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text
+              numberOfLines={1}
+              style={{
+                color: themeColors.text,
+                fontSize: 15,
+                fontWeight: "600",
+              }}
+            >
+              {grant.organization.name}
+            </Text>
+            <Text
+              numberOfLines={1}
+              style={{ color: palette.muted, fontSize: 13, marginTop: 2 }}
+            >
+              {isCreatingCard
+                ? "Activating grant..."
+                : "Tap to activate your grant"}
+            </Text>
+          </View>
+          {isCreatingCard ? (
+            <ActivityIndicator />
+          ) : (
             <Text
               style={{
                 color: palette.primary,
-                fontSize: 14,
-                fontWeight: "500",
+                fontSize: 15,
+                fontWeight: "600",
               }}
             >
-              Activating grant...
+              {renderMoney(grant.amount_cents)}
             </Text>
           )}
         </View>
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
+    </>
   );
 }

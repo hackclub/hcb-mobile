@@ -1,18 +1,57 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
 
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
+import UserAvatar from "@/components/UserAvatar";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Invitation from "@/lib/types/Invitation";
+import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import palette from "@/styles/palette";
-import { palette as themePalette } from "@/styles/theme";
+import { cardBorderColor, palette, radii, subTextColor } from "@/styles/theme";
+import { renderDate } from "@/utils/format";
+import { orgColor } from "@/utils/org";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  hackathon: "Hackathon",
+  hack_club: "Hack Club",
+  nonprofit: "Nonprofit",
+  event: "Event",
+  high_school_hackathon: "High School Hackathon",
+  robotics_team: "Robotics Team",
+  hardware_grant: "Hardware Grant",
+  hack_club_hq: "Hack Club HQ",
+  outernet_guild: "Outernet Guild",
+  grant_recipient: "Grant Recipient",
+  salary: "Salary",
+};
+
+function DetailRow({
+  icon,
+  children,
+  isDark,
+}: {
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  children: React.ReactNode;
+  isDark: boolean;
+}) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+      <Ionicons name={icon} size={16} color={subTextColor(isDark)} />
+      <Text
+        style={{ color: subTextColor(isDark), fontSize: 14, flexShrink: 1 }}
+      >
+        {children}
+      </Text>
+    </View>
+  );
+}
 
 export default function Page() {
   const hcb = useClient();
@@ -38,6 +77,7 @@ export default function Page() {
   const { mutate } = useSWRConfig();
 
   const { colors: themeColors } = useTheme();
+  const isDark = useIsDark();
 
   const { trigger: accept, isMutating: acceptIsLoading } = useSWRMutation<
     unknown,
@@ -102,67 +142,194 @@ export default function Page() {
     },
   );
 
+  const org = invitation?.organization;
+  const categoryLabel = org?.category
+    ? CATEGORY_LABELS[org.category]
+    : undefined;
+
   return (
     <View
       style={{
         padding: 20,
-        alignItems: "center",
         justifyContent: "center",
         flex: 1,
       }}
     >
-      <Pressable
-        onPress={() => router.back()}
-        hitSlop={8}
-        style={({ pressed }) => ({
-          position: "absolute",
-          top: 16,
-          right: 16,
-          opacity: pressed ? 0.6 : 1,
-        })}
-      >
-        <Ionicons name="close-circle" color={themePalette.muted} size={30} />
-      </Pressable>
+      {invitation && org ? (
+        <View
+          style={{
+            backgroundColor: themeColors.card,
+            borderRadius: radii.xl,
+            borderWidth: 1,
+            borderColor: cardBorderColor(isDark),
+            padding: 24,
+            paddingTop: 32,
+          }}
+        >
+          <View style={{ alignItems: "center" }}>
+            <View style={{ marginBottom: 20 }}>
+              {org.icon ? (
+                <Image
+                  source={{ uri: org.icon }}
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                  style={{ width: 72, height: 72, borderRadius: 14 }}
+                />
+              ) : (
+                <View
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 14,
+                    backgroundColor: orgColor(org.id),
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text
+                    style={{ color: "white", fontSize: 30, fontWeight: "600" }}
+                  >
+                    {org.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+              {invitation.sender && (
+                <UserAvatar
+                  user={invitation.sender}
+                  size={28}
+                  style={{
+                    position: "absolute",
+                    bottom: -8,
+                    right: -8,
+                    borderWidth: 2,
+                    borderColor: themeColors.card,
+                  }}
+                />
+              )}
+            </View>
 
-      {invitation ? (
-        <>
-          <Text
-            style={{
-              color: themePalette.muted,
-              fontSize: 12,
-              textTransform: "uppercase",
-              marginBottom: 8,
-            }}
-          >
-            You've been invited to join
-          </Text>
-          <Text
-            style={{
-              color: themeColors.text,
-              textAlign: "center",
-              fontSize: 36,
-              fontWeight: "700",
-              marginBottom: 30,
-            }}
-          >
-            {invitation.organization.name}
-          </Text>
-
-          <View style={{ flexDirection: "row", gap: 20 }}>
-            <Button
-              onPress={() => accept()}
+            <Text
               style={{
-                backgroundColor: palette.emerald["400"],
-                borderTopColor: palette.emerald["300"],
-                minWidth: 100,
+                color: subTextColor(isDark),
+                fontSize: 12,
+                fontWeight: "600",
+                letterSpacing: 0.8,
+                textTransform: "uppercase",
+                marginBottom: 6,
               }}
-              color={palette.emerald["800"]}
-              loading={acceptIsLoading}
             >
-              Join
+              You've been invited to join
+            </Text>
+            <Text
+              style={{
+                color: themeColors.text,
+                textAlign: "center",
+                fontSize: 28,
+                fontWeight: "700",
+              }}
+            >
+              {org.name}
+            </Text>
+
+            {(categoryLabel || org.playground_mode) && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 8,
+                  marginTop: 12,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                }}
+              >
+                {categoryLabel && (
+                  <View
+                    style={{
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(0,0,0,0.05)",
+                      paddingVertical: 3,
+                      paddingHorizontal: 10,
+                      borderRadius: 9999,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: subTextColor(isDark),
+                        fontSize: 12,
+                        fontWeight: "500",
+                      }}
+                    >
+                      {categoryLabel}
+                    </Text>
+                  </View>
+                )}
+                {org.playground_mode && (
+                  <View
+                    style={{
+                      backgroundColor: isDark ? "#1a2d45" : "#dbeeff",
+                      paddingVertical: 3,
+                      paddingHorizontal: 10,
+                      borderRadius: 9999,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: isDark ? "#6cb4f5" : "#1a6fbf",
+                        fontSize: 12,
+                        fontWeight: "500",
+                      }}
+                    >
+                      Playground
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+
+          <View
+            style={{
+              height: 1,
+              backgroundColor: cardBorderColor(isDark),
+              marginVertical: 20,
+            }}
+          />
+
+          <View style={{ gap: 10 }}>
+            {invitation.sender && (
+              <DetailRow icon="person-outline" isDark={isDark}>
+                Invited by{" "}
+                <Text style={{ fontWeight: "600", color: themeColors.text }}>
+                  {invitation.sender.name}
+                </Text>
+              </DetailRow>
+            )}
+            {invitation.created_at && (
+              <DetailRow icon="calendar-outline" isDark={isDark}>
+                Sent {renderDate(invitation.created_at)}
+              </DetailRow>
+            )}
+            {org.transparent && (
+              <DetailRow icon="eye-outline" isDark={isDark}>
+                Transparent finances
+              </DetailRow>
+            )}
+          </View>
+
+          <View style={{ gap: 10, marginTop: 24 }}>
+            <Button
+              variant="success"
+              onPress={() => accept()}
+              loading={acceptIsLoading}
+              icon="member-add"
+              iconSize={24}
+              iconOffset={4}
+              iconPosition="left"
+            >
+              Join {org.name}
             </Button>
             <Button
-              style={{ minWidth: 100 }}
+              variant="secondary"
               onPress={() =>
                 showAlert(
                   "Are you sure you want to decline this invitation?",
@@ -182,17 +349,17 @@ export default function Page() {
               Decline
             </Button>
           </View>
-        </>
+        </View>
       ) : invitationError ? (
         <View style={{ alignItems: "center", gap: 12 }}>
           <Ionicons
             name="cloud-offline-outline"
             size={40}
-            color={themePalette.muted}
+            color={palette.muted}
           />
           <Text
             style={{
-              color: themePalette.muted,
+              color: palette.muted,
               fontSize: 15,
               textAlign: "center",
             }}

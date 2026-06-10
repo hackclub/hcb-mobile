@@ -1,7 +1,9 @@
 import { useTheme } from "expo-router/react-navigation";
-import { View, Text } from "react-native";
+import { useState } from "react";
+import { ScrollView, View, Text } from "react-native";
 
 import Button from "@/components/Button";
+import GrantTermsModal from "@/components/grants/GrantTermsModal";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
 import { palette } from "@/styles/theme";
@@ -21,13 +23,13 @@ export default function GrantWithoutCard({
 }) {
   const { colors: themeColors } = useTheme();
   const isGrantCardholder = grantCard?.user?.id === user?.id;
+  const [showTerms, setShowTerms] = useState(false);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-      }}
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 20 }}
+      showsVerticalScrollIndicator={false}
     >
       <View style={{ alignItems: "center", marginTop: 10 }}>
         <Text
@@ -74,10 +76,17 @@ export default function GrantWithoutCard({
 
       {grantCard.status === "active" && isGrantCardholder && (
         <View style={{ marginTop: 20 }}>
+          <GrantTermsModal
+            visible={showTerms}
+            onClose={() => setShowTerms(false)}
+            onAgree={handleActivateGrant}
+            organizationName={grantCard.organization.name}
+            activating={isActivating}
+          />
           <Button
             icon="rep"
             iconSize={32}
-            onPress={handleActivateGrant}
+            onPress={() => setShowTerms(true)}
             loading={isActivating}
           >
             Activate Grant
@@ -261,6 +270,6 @@ export default function GrantWithoutCard({
           </>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }

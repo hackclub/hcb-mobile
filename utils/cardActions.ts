@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { KyInstance } from "ky";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
-import { showAlert } from "../lib/alertUtils";
+import { parseApiError, showAlert } from "../lib/alertUtils";
 import Card from "../lib/types/Card";
 import GrantCard from "../lib/types/GrantCard";
 import User from "../lib/types/User";
@@ -10,6 +10,7 @@ import User from "../lib/types/User";
 import { validateFields } from "./cardHelpers";
 import { renderMoney } from "./format";
 import * as Haptics from "./haptics";
+import parse from "date-fns/esm/fp/parse/index.js";
 
 export const toggleCardFrozen = (
   card: Card,
@@ -106,6 +107,48 @@ export const handleTopup = async (
   }
 };
 
+export const handleWithdraw = async (
+  withdrawAmount: string,
+  card: Card,
+  grantId: string,
+  setIsWithdrawing: (isWithdrawing: boolean) => void,
+  setWithdrawAmount: (withdrawAmount: string) => void,
+  setShowWithdrawModal: (showWithdrawModal: boolean) => void,
+  mutate: (key: string) => Promise<unknown>,
+  hcb: KyInstance,
+) => {
+  if (!withdrawAmount || !card) return;
+
+  const amount = parseFloat(withdrawAmount);
+  if (isNaN(amount) || amount <= 0) {
+    showAlert("Invalid Amount", "Please enter a valid amount greater than 0.");
+    return;
+  }
+
+  setIsWithdrawing(true);
+  try {
+    await hcb.post(`card_grants/${grantId}/withdraw`, {
+      json: { amount_cents: Math.round(amount * 100) },
+    });
+
+    setWithdrawAmount("");
+    setShowWithdrawModal(false);
+    mutate(`cards/${card.id}`);
+    mutate(`card_grants/${grantId}`);
+    mutate("user/cards");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  } catch (error) {
+    console.error("Withdraw error", error, {
+      cardId: card.id,
+      amount: withdrawAmount,
+    });
+    showAlert("Error", "Failed to withdraw from grant. Please try again.");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  } finally {
+    setIsWithdrawing(false);
+  }
+};
+
 export const handleSetPurpose = async (
   card: Card,
   setIsSettingPurpose: (isSettingPurpose: boolean) => void,
@@ -166,7 +209,7 @@ export const handleOneTimeUse = async (
       type: ALERT_TYPE.SUCCESS,
     });
   } catch (error) {
-    console.error("One time use error", error, {
+    console.error("One time use error", await parseApiError(error), {
       cardId: card?.id || grantCard?.card_id,
     });
     showAlert("Error", "Failed to set one time use. Please try again.");

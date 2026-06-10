@@ -10,6 +10,7 @@ import {
   ViewProps,
 } from "react-native";
 
+import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 
@@ -47,7 +48,8 @@ export interface ButtonProps {
     | "info"
     | "success"
     | "error"
-    | "green";
+    | "green"
+    | "blue";
 }
 
 const styles = StyleSheet.create({
@@ -76,6 +78,7 @@ export default function Button(
   props: PropsWithChildren<ViewProps & ButtonProps>,
 ) {
   const theme = useTheme();
+  const isDark = useIsDark();
   const { variant = "primary", iconPosition = "right" } = props;
 
   const variantBaseStyle = {
@@ -111,6 +114,30 @@ export default function Button(
           backgroundColor: "#33d6a0",
           borderColor: "#33d6a0",
         };
+      case "success":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "#33d6a6",
+          borderColor: "#33d6a6",
+        };
+      case "info":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: palette.info,
+          borderColor: palette.info,
+        };
+      case "error":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: "rgba(236,55,80,0.15)",
+          borderColor: palette.primary,
+        };
+      case "blue":
+        return {
+          ...variantBaseStyle,
+          backgroundColor: isDark ? "#133E62" : "#74B2E6",
+          borderColor: isDark ? "#2D5F8A" : "#9CC8EF",
+        };
       case "primary":
       default:
         return variantBaseStyle;
@@ -128,7 +155,14 @@ export default function Button(
       case "ghost":
         return theme.colors.text as string;
       case "green":
+      case "success":
         return "#0d2b1f";
+      case "info":
+        return "#FFFFFF";
+      case "error":
+        return palette.primary;
+      case "blue":
+        return "white";
       case "primary":
       default:
         return "#FFFFFF";
@@ -228,7 +262,7 @@ export default function Button(
             justifyContent: "center",
           }}
         >
-          <ActivityIndicator color={props.color || "white"} />
+          <ActivityIndicator color={props.color || getTextColor()} />
         </View>
       )}
     </Pressable>

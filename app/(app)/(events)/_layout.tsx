@@ -36,8 +36,20 @@ export default function Layout() {
         <Stack.Screen name="[id]/index" options={{ title: "" }} />
         <Stack.Screen name="[id]/team" options={{ title: "Team" }} />
         <Stack.Screen
-          name="[id]/transfer"
-          options={{ title: "Transfer Money" }}
+          name="[id]/transfers/index"
+          options={{ title: "Transfers", headerLargeTitle: true }}
+        />
+        <Stack.Screen
+          name="[id]/transfers/ach"
+          options={{ title: "ACH Transfer" }}
+        />
+        <Stack.Screen
+          name="[id]/transfers/check"
+          options={{ title: "Mail a Check" }}
+        />
+        <Stack.Screen
+          name="[id]/transfers/hcb"
+          options={{ title: "HCB Transfer" }}
         />
         <Stack.Screen
           name="[id]/cards/index"
@@ -146,25 +158,15 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/check-deposits/index"
-          options={{
-            presentation: "formSheet",
-            title: "Check Deposits",
-            headerShown: true,
-            headerTransparent: false,
-            headerBlurEffect: "systemMaterial",
-            sheetAllowedDetents: [0.75, 1.0],
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 20,
-            headerRight: () => (
-              <Pressable onPress={() => router.back()} hitSlop={8}>
-                <Ionicons name="close" size={28} color="#8e8e93" />
-              </Pressable>
-            ),
-          }}
+          options={{ title: "Check Deposits", headerLargeTitle: true }}
         />
         <Stack.Screen
           name="[id]/check-deposits/[depositId]"
           options={{ title: "Check Deposit" }}
+        />
+        <Stack.Screen
+          name="[id]/sub-organizations"
+          options={{ title: "Sub-organizations" }}
         />
         <Stack.Screen
           name="[id]/invoices/index"

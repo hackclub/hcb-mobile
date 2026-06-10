@@ -1,4 +1,4 @@
-const BASE = "https://hcb.hackclub.com";
+const BASE = process.env.EXPO_PUBLIC_API_BASE.replace("/api/v4", "");
 
 export const shareUrl = {
   org: (slug: string) => `${BASE}/${slug}`,

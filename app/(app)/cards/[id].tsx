@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Animated,
   Platform,
@@ -14,9 +14,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
-import Button from "@/components/Button";
 import AddToWalletSection from "@/components/cards/AddToWalletSection";
-import ButtonGrid from "@/components/cards/ButtonGrid";
+import CardActionButton from "@/components/cards/CardActionButton";
 import CardDetails from "@/components/cards/CardDetails";
 import CardDisplay from "@/components/cards/CardDisplay";
 import CardError from "@/components/cards/CardError";
@@ -294,92 +293,15 @@ export default function CardPage() {
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
 
-  function getCardActionButtons() {
-    const buttons: ReactElement[] = [];
+  const canToggleDetails =
+    isVirtualCard &&
+    (card?.status as Card["status"]) !== "canceled" &&
+    cardPolicy?.ephemeralKeys();
 
-    if (!isVirtualCard && card?.status === "inactive") {
-      buttons.push(
-        <Button
-          key="activate"
-          icon="rep"
-          iconSize={32}
-          onPress={() => setShowActivateModal(true)}
-        >
-          Activate Card
-        </Button>,
-      );
-    } else if (cardPolicy?.freeze() || cardPolicy?.defrost()) {
-      buttons.push(
-        <Button
-          key="freeze"
-          style={{
-            backgroundColor: "#71C5E7",
-            borderColor: "#5ab0d4",
-          }}
-          color="#186177"
-          iconColor="#186177"
-          icon="freeze"
-          onPress={() =>
-            toggleCardFrozen(
-              card as Card,
-              setIsUpdatingStatus,
-              onSuccessfulStatusChange,
-              hcb,
-            )
-          }
-          loading={!!isUpdatingStatus}
-        >
-          {card?.status === "active" ? "Freeze Card" : "Defrost Card"}
-        </Button>,
-      );
-    }
-
-    if (
-      isVirtualCard &&
-      (card?.status as Card["status"]) !== "canceled" &&
-      cardPolicy?.ephemeralKeys()
-    ) {
-      buttons.push(
-        <Button
-          key={`details-${detailsRevealed}`}
-          icon={detailsRevealed ? "private-fill" : "view"}
-          onPress={() =>
-            toggleCardDetails(
-              detailsRevealed,
-              setCardDetailsLoading,
-              toggleDetailsRevealed,
-            )
-          }
-          loading={!!detailsLoading || !!cardDetailsLoading}
-        >
-          {detailsRevealed ? "Hide Details" : "Reveal Details"}
-        </Button>,
-      );
-    }
-
-    if (cardPolicy?.cancel()) {
-      buttons.push(
-        <Button
-          icon="fire"
-          key="fire"
-          style={{ backgroundColor: "#D0152D" }}
-          onPress={() =>
-            handleBurnCard(
-              card as Card,
-              setIsBurningCard,
-              () => mutateCard(),
-              hcb,
-            )
-          }
-          loading={isBurningCard}
-        >
-          Burn Card
-        </Button>,
-      );
-    }
-
-    return <ButtonGrid buttons={buttons} />;
-  }
+  const needsActivation = !isVirtualCard && card?.status === "inactive";
+  const canFreeze =
+    !needsActivation && (cardPolicy?.freeze() || cardPolicy?.defrost());
+  const canBurn = cardPolicy?.cancel();
 
   if (!card && !cardLoaded && !cardError) {
     return <CardSkeleton />;
@@ -433,7 +355,52 @@ export default function CardPage() {
           />
         )}
 
-        {card?.status != "canceled" && getCardActionButtons()}
+        {card?.status != "canceled" &&
+          (needsActivation || canFreeze || canBurn) && (
+            <View style={{ flexDirection: "row", gap: 12, marginBottom: 20 }}>
+              {needsActivation && (
+                <CardActionButton
+                  icon="rep"
+                  label="Activate Card"
+                  style={{ flex: 1 }}
+                  onPress={() => setShowActivateModal(true)}
+                />
+              )}
+              {canFreeze && (
+                <CardActionButton
+                  icon="freeze"
+                  label={card?.status === "active" ? "Freeze" : "Defrost"}
+                  loading={!!isUpdatingStatus}
+                  style={{ flex: 1 }}
+                  onPress={() =>
+                    toggleCardFrozen(
+                      card as Card,
+                      setIsUpdatingStatus,
+                      onSuccessfulStatusChange,
+                      hcb,
+                    )
+                  }
+                />
+              )}
+              {canBurn && (
+                <CardActionButton
+                  icon="fire"
+                  label="Burn Card"
+                  destructive
+                  loading={isBurningCard}
+                  style={{ flex: 1 }}
+                  onPress={() =>
+                    handleBurnCard(
+                      card as Card,
+                      setIsBurningCard,
+                      () => mutateCard(),
+                      hcb,
+                    )
+                  }
+                />
+              )}
+            </View>
+          )}
 
         {isVirtualCard && (
           <AddToWalletSection
@@ -455,6 +422,16 @@ export default function CardPage() {
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
             user={user}
+            onToggleDetails={
+              canToggleDetails
+                ? () =>
+                    toggleCardDetails(
+                      detailsRevealed,
+                      setCardDetailsLoading,
+                      toggleDetailsRevealed,
+                    )
+                : undefined
+            }
           />
         )}
 

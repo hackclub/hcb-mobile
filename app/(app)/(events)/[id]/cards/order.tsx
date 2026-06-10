@@ -1,3 +1,5 @@
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
@@ -6,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   Platform,
+  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -13,6 +16,7 @@ import {
 } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 
+import Button from "@/components/Button";
 import CardIcon from "@/components/cards/CardIcon";
 import RepIcon from "@/components/cards/RepIcon";
 import { Text } from "@/components/Text";
@@ -63,12 +67,26 @@ export default function Page() {
   const { fetcher } = useSWRConfig();
   const currentUserId = user?.id;
 
+  const { showActionSheetWithOptions } = useActionSheet();
+  const orgPreselected = Boolean(params?.id);
+  const selectableOrganizations =
+    organizations?.filter((org) => org.playground_mode === false) ?? [];
+  const selectedOrganization = selectableOrganizations.find(
+    (org) => org.id === organizationId,
+  );
+
   useEffect(() => {
     if (params?.id) {
       setOrganizationId(String(params.id));
       setCardDesign(null);
     }
   }, [params?.id]);
+
+  useEffect(() => {
+    if (orgPreselected || organizationId || !organizations) return;
+    const firstOrg = organizations.find((org) => org.playground_mode === false);
+    if (firstOrg) setOrganizationId(firstOrg.id);
+  }, [orgPreselected, organizationId, organizations]);
 
   useEffect(() => {
     if (!organizations || !fetcher || !currentUserId) return;
@@ -134,6 +152,69 @@ export default function Page() {
         <Stack.Screen
           options={{ headerLargeTitle: true, title: "Order a Card" }}
         />
+        {!orgPreselected && (
+          <>
+            <Text
+              style={{
+                color: themeColors.text,
+                fontSize: 16,
+                fontWeight: "500",
+                marginBottom: 12,
+              }}
+            >
+              Which organization?
+            </Text>
+            <Pressable
+              onPress={() => {
+                const options = [
+                  ...selectableOrganizations.map((org) => org.name),
+                  "Cancel",
+                ];
+                showActionSheetWithOptions(
+                  {
+                    title: "Which organization?",
+                    options,
+                    cancelButtonIndex: options.length - 1,
+                    userInterfaceStyle: isDark ? "dark" : "light",
+                  },
+                  (index) => {
+                    if (
+                      index === undefined ||
+                      index >= selectableOrganizations.length
+                    ) {
+                      return;
+                    }
+                    setOrganizationId(selectableOrganizations[index].id);
+                    setCardDesign(null);
+                  },
+                );
+              }}
+              style={{
+                backgroundColor: themeColors.card,
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 24,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text
+                style={{
+                  color: selectedOrganization
+                    ? themeColors.text
+                    : palette.muted,
+                  fontSize: 15,
+                  flex: 1,
+                }}
+                numberOfLines={1}
+              >
+                {selectedOrganization?.name ?? "Select an organization"}
+              </Text>
+              <Ionicons name="chevron-expand" size={16} color={palette.muted} />
+            </Pressable>
+          </>
+        )}
         <Text
           style={{
             color: themeColors.text,
@@ -503,28 +584,15 @@ export default function Page() {
           their banking partners.
         </Text>
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#007bff",
-            padding: 16,
-            borderRadius: 8,
-            alignItems: "center",
-            marginBottom: 20,
-            opacity: isLoading ? 0.7 : 1,
-          }}
+        <Button
+          variant="blue"
+          loading={isLoading}
+          disabled={!organizationId}
           onPress={handleOrderCard}
-          disabled={isLoading}
+          style={{ marginBottom: 20 }}
         >
-          <Text
-            style={{
-              color: "white",
-              fontWeight: "600",
-              fontSize: 16,
-            }}
-          >
-            {isLoading ? "Creating card..." : "Issue my card"}
-          </Text>
-        </TouchableOpacity>
+          Issue my card
+        </Button>
       </ScrollView>
     </KeyboardAvoidingView>
   );

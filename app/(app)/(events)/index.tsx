@@ -15,6 +15,7 @@ import { preload, useSWRConfig } from "swr";
 import Event from "@/components/organizations/Event";
 import GrantInvite from "@/components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkeleton";
+import InvitationCard from "@/components/organizations/InvitationCard";
 import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
 import { Text } from "@/components/Text";
 import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
@@ -336,28 +337,23 @@ export default function App() {
                   >
                     Pending invitations
                   </Text>
-                  {invitations.map((invitation) => (
-                    <Event
-                      key={invitation.id}
-                      invitation={invitation}
-                      style={{
-                        borderWidth: 2,
-                        borderColor: isDark ? palette.primary : palette.muted,
-                        marginBottom: 10,
-                      }}
-                      event={invitation.organization}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/invitation/[id]",
-                          params: {
-                            id: invitation.id,
-                            invitation: JSON.stringify(invitation),
-                          },
-                        })
-                      }
-                      hideBalance
-                    />
-                  ))}
+                  <View style={{ gap: 10 }}>
+                    {invitations.map((invitation) => (
+                      <InvitationCard
+                        key={invitation.id}
+                        invitation={invitation}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/invitation/[id]",
+                            params: {
+                              id: invitation.id,
+                              invitation: JSON.stringify(invitation),
+                            },
+                          })
+                        }
+                      />
+                    ))}
+                  </View>
                 </>
               )}
 
@@ -374,15 +370,11 @@ export default function App() {
                   >
                     Available grants
                   </Text>
-                  {grantInvites.map((grant) => (
-                    <GrantInvite
-                      key={grant.id}
-                      grant={grant}
-                      style={{
-                        marginBottom: 10,
-                      }}
-                    />
-                  ))}
+                  <View style={{ gap: 10 }}>
+                    {grantInvites.map((grant) => (
+                      <GrantInvite key={grant.id} grant={grant} />
+                    ))}
+                  </View>
                 </>
               )}
             </View>

@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { generate } from "hcb-geo-pattern";
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Animated,
@@ -15,16 +15,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 
-import Button from "@/components/Button";
 import AddToWalletSection from "@/components/cards/AddToWalletSection";
-import ButtonGrid from "@/components/cards/ButtonGrid";
+import CardActionButton from "@/components/cards/CardActionButton";
 import CardDetails from "@/components/cards/CardDetails";
 import CardDisplay from "@/components/cards/CardDisplay";
 import CardError from "@/components/cards/CardError";
 import CardSkeleton from "@/components/cards/CardSkeleton";
 import CardTransactions from "@/components/cards/CardTransactions";
-import SetPurposeModal from "@/components/cards/modals/SetPurposeModal";
-import TopupModal from "@/components/cards/modals/TopupModal";
 import GrantWithoutCard from "@/components/grants/grantWithoutCard";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { parseApiError } from "@/lib/alertUtils";
@@ -41,9 +38,6 @@ import useSkeletonAnimation from "@/lib/useSkeletonAnimation";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import {
-  handleOneTimeUse,
-  handleSetPurpose,
-  handleTopup,
   returnGrant,
   toggleCardDetails,
   toggleCardFrozen,
@@ -119,13 +113,6 @@ export default function Page() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const createSkeletonStyle = useSkeletonAnimation();
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
-  const [showTopupModal, setShowTopupModal] = useState(false);
-  const [showPurposeModal, setShowPurposeModal] = useState(false);
-  const [purposeText, setPurposeText] = useState("");
-  const [isSettingPurpose, setIsSettingPurpose] = useState(false);
-  const [isOneTimeUse, setIsOneTimeUse] = useState(false);
-  const [topupAmount, setTopupAmount] = useState("");
-  const [isToppingUp, setIsToppingUp] = useState(false);
   const [pattern, setPattern] = useState<string>();
   const [patternDimensions, setPatternDimensions] = useState<{
     width: number;
@@ -366,9 +353,6 @@ export default function Page() {
     }
   }, [reloadGrant, mutateCard, mutateTransactions, fullGrantId]);
 
-  const canTopupCard = (c: Card | undefined) =>
-    !!c && c.status !== "canceled" && c.status !== "expired";
-
   if (!grantCard) {
     return <CardSkeleton />;
   }
@@ -388,154 +372,21 @@ export default function Page() {
     return <CardSkeleton />;
   }
 
-  function getGrantCardActionButtons() {
-    const buttons: ReactElement[] = [];
+  const canToggleDetails =
+    isVirtualCard &&
+    (card?.status as Card["status"]) !== "canceled" &&
+    cardPolicy?.ephemeralKeys();
 
-    if (
-      (cardPolicy?.freeze() || cardPolicy?.defrost()) &&
-      card?.status !== "inactive"
-    ) {
-      buttons.push(
-        <Button
-          key="freeze"
-          style={{
-            backgroundColor: "#71C5E7",
-            borderColor: "#5ab0d4",
-          }}
-          color="#186177"
-          iconColor="#186177"
-          icon="freeze"
-          onPress={() =>
-            toggleCardFrozen(
-              card as Card,
-              setIsUpdatingStatus,
-              onSuccessfulStatusChange,
-              hcb,
-            )
-          }
-          loading={!!isUpdatingStatus}
-        >
-          {card?.status === "active" ? "Freeze Card" : "Defrost Card"}
-        </Button>,
-      );
-    }
+  const canFreeze =
+    (cardPolicy?.freeze() || cardPolicy?.defrost()) &&
+    card?.status !== "inactive";
+  const canCancelGrant = card?.status !== "canceled" && grantPolicy?.cancel();
 
-    if (
-      isVirtualCard &&
-      (card?.status as Card["status"]) !== "canceled" &&
-      cardPolicy?.ephemeralKeys()
-    ) {
-      buttons.push(
-        <Button
-          key={`details-${detailsRevealed}`}
-          icon={detailsRevealed ? "private-fill" : "view"}
-          onPress={() =>
-            toggleCardDetails(
-              detailsRevealed,
-              setCardDetailsLoading,
-              toggleDetailsRevealed,
-            )
-          }
-          loading={!!detailsLoading || !!cardDetailsLoading}
-        >
-          {detailsRevealed ? "Hide Details" : "Reveal Details"}
-        </Button>,
-      );
-    }
-
-    if (grantPolicy?.topup() && canTopupCard(card)) {
-      buttons.push(
-        <Button
-          key="topup"
-          style={{
-            backgroundColor: "#3499EE",
-            borderColor: "#2280d0",
-          }}
-          color="white"
-          iconColor="white"
-          icon="plus"
-          onPress={() => setShowTopupModal(true)}
-        >
-          Topup
-        </Button>,
-      );
-    }
-
-    if (grantPolicy?.toggleOneTimeUse()) {
-      buttons.push(
-        <Button
-          icon="private"
-          key="one-time"
-          style={{
-            backgroundColor: "#415E84",
-          }}
-          onPress={() =>
-            handleOneTimeUse(
-              card as Card,
-              setIsOneTimeUse,
-              mutate,
-              hcb,
-              fullGrantId,
-              grantCard as GrantCardType,
-            )
-          }
-          loading={isOneTimeUse}
-        >
-          One Time Use
-        </Button>,
-      );
-    }
-
-    if (grantPolicy?.editPurpose()) {
-      buttons.push(
-        <Button
-          icon="edit"
-          key="edit-purpose"
-          color="#114F3D"
-          style={{
-            backgroundColor: "#50ECC0",
-          }}
-          onPress={() => {
-            setPurposeText("");
-            setShowPurposeModal(true);
-          }}
-        >
-          Set Purpose
-        </Button>,
-      );
-    }
-
-    if (card?.status !== "canceled" && grantPolicy?.cancel()) {
-      buttons.push(
-        <Button
-          key="grant"
-          style={{
-            backgroundColor: !isCardholder ? "#db1530" : "#3097ed",
-            borderColor: !isCardholder ? "#b01228" : "#2080cc",
-          }}
-          color="white"
-          iconColor="white"
-          icon={!isCardholder ? "reply" : "support"}
-          onPress={() =>
-            returnGrant(
-              card as Card,
-              isCardholder,
-              grantCard as GrantCardType,
-              setIsReturningGrant,
-              mutate,
-              hcb,
-              fullGrantId,
-            )
-          }
-          loading={!!isReturningGrant}
-        >
-          {!isCardholder ? "Cancel Grant" : "Return Grant"}
-        </Button>,
-      );
-    }
-
-    return <ButtonGrid buttons={buttons} />;
-  }
+  const canManageGrant =
+    grantPolicy?.topup() ||
+    grantPolicy?.withdraw() ||
+    grantPolicy?.toggleOneTimeUse() ||
+    grantPolicy?.editPurpose();
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -586,7 +437,62 @@ export default function Page() {
           />
         )}
 
-        {card?.status !== "canceled" && getGrantCardActionButtons()}
+        {card?.status !== "canceled" && (
+          <View style={{ marginBottom: 20, gap: 12 }}>
+            {(canFreeze || canCancelGrant) && (
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                {canFreeze && (
+                  <CardActionButton
+                    icon="freeze"
+                    label={card?.status === "active" ? "Freeze" : "Defrost"}
+                    loading={!!isUpdatingStatus}
+                    style={{ flex: 1 }}
+                    onPress={() =>
+                      toggleCardFrozen(
+                        card as Card,
+                        setIsUpdatingStatus,
+                        onSuccessfulStatusChange,
+                        hcb,
+                      )
+                    }
+                  />
+                )}
+                {canCancelGrant && (
+                  <CardActionButton
+                    icon={!isCardholder ? "reply" : "support"}
+                    label={!isCardholder ? "Cancel Grant" : "Return Grant"}
+                    destructive
+                    loading={!!isReturningGrant}
+                    style={{ flex: 1 }}
+                    onPress={() =>
+                      returnGrant(
+                        card as Card,
+                        isCardholder,
+                        grantCard as GrantCardType,
+                        setIsReturningGrant,
+                        mutate,
+                        hcb,
+                        fullGrantId,
+                      )
+                    }
+                  />
+                )}
+              </View>
+            )}
+            {canManageGrant && (
+              <CardActionButton
+                icon="settings"
+                label="Manage Grant"
+                onPress={() =>
+                  router.push({
+                    pathname: "/cards/card-grants/[id]/manage",
+                    params: { id: fullGrantId },
+                  })
+                }
+              />
+            )}
+          </View>
+        )}
 
         {isVirtualCard && isCardholder && (
           <AddToWalletSection
@@ -610,6 +516,16 @@ export default function Page() {
             cardDetailsLoading={cardDetailsLoading}
             createSkeletonStyle={createSkeletonStyle}
             user={user}
+            onToggleDetails={
+              canToggleDetails
+                ? () =>
+                    toggleCardDetails(
+                      detailsRevealed,
+                      setCardDetailsLoading,
+                      toggleDetailsRevealed,
+                    )
+                : undefined
+            }
           />
         )}
 
@@ -624,52 +540,6 @@ export default function Page() {
           />
         )}
       </ScrollView>
-
-      <TopupModal
-        visible={showTopupModal}
-        onClose={() => {
-          setShowTopupModal(false);
-          setTopupAmount("");
-        }}
-        onTopup={() =>
-          handleTopup(
-            topupAmount,
-            card as Card,
-            fullGrantId,
-            setIsToppingUp,
-            setTopupAmount,
-            setShowTopupModal,
-            mutate,
-            hcb,
-          )
-        }
-        topupAmount={topupAmount}
-        setTopupAmount={setTopupAmount}
-        isToppingUp={isToppingUp}
-      />
-
-      <SetPurposeModal
-        visible={showPurposeModal}
-        onClose={() => {
-          setShowPurposeModal(false);
-          setPurposeText("");
-        }}
-        onSetPurpose={() =>
-          handleSetPurpose(
-            card as Card,
-            setIsSettingPurpose,
-            setPurposeText,
-            setShowPurposeModal,
-            mutate,
-            hcb,
-            fullGrantId,
-            purposeText,
-          )
-        }
-        purposeText={purposeText}
-        setPurposeText={setPurposeText}
-        isSettingPurpose={isSettingPurpose}
-      />
     </Animated.View>
   );
 }

@@ -297,7 +297,7 @@ export default function NewCheckDepositPage() {
           </View>
         </View>
 
-        <Button variant="info" loading={submitting} onPress={handleSubmit}>
+        <Button variant="blue" loading={submitting} onPress={handleSubmit}>
           Submit deposit
         </Button>
       </ScrollView>

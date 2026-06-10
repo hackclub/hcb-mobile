@@ -53,11 +53,12 @@ export const NoCardsEmptyState = ({
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
       style={{
         flex: 1,
-        padding: 24,
         backgroundColor: themeColors.background,
       }}
+      contentContainerStyle={{ padding: 24 }}
     >
       <View style={{ gap: 28, marginBottom: 36 }}>
         {FEATURE_ROWS.map((row) => (

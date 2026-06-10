@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
+import { useEffect } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
-import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { OrgInvoice, invoiceStatusColor } from "@/lib/types/Invoice";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -14,9 +14,30 @@ import { renderDate, renderMoney } from "@/utils/format";
 export default function InvoicesPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const navigation = useNavigation();
   const { data: invoices, isLoading } = useOfflineSWR<OrgInvoice[]>(
-    `organizations/${id}/invoices`,
+    `invoices?organization_id=${id}`,
   );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          onPress={() =>
+            router.push({
+              pathname: "/(events)/[id]/invoices/new",
+              params: { id },
+            })
+          }
+          style={({ pressed }) => ({ padding: 8, opacity: pressed ? 0.6 : 1 })}
+          accessibilityLabel="New invoice"
+          accessibilityRole="button"
+        >
+          <Ionicons name="add" size={26} color={themeColors.text} />
+        </Pressable>
+      ),
+    });
+  }, [navigation, id, themeColors.text]);
 
   return (
     <ScrollView
@@ -29,18 +50,6 @@ export default function InvoicesPage() {
         gap: 16,
       }}
     >
-      <Button
-        onPress={() =>
-          router.push({
-            pathname: "/(events)/[id]/invoices/new",
-            params: { id },
-          })
-        }
-        icon="plus"
-        iconSize={24}
-      >
-        New invoice
-      </Button>
       {isLoading && (
         <View style={{ alignItems: "center", paddingTop: 40 }}>
           <ActivityIndicator />
@@ -61,7 +70,7 @@ export default function InvoicesPage() {
           <Text
             style={{ color: palette.muted, fontSize: 13, textAlign: "center" }}
           >
-            Invoice a sponsor and the money will land in your account.
+            Tap + to invoice a sponsor — the money will land in your account.
           </Text>
         </View>
       )}

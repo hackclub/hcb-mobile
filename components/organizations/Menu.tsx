@@ -98,11 +98,8 @@ function handleMenuAction(
       return;
     case "transfer":
       router.push({
-        pathname: "/(events)/[id]/transfer",
-        params: {
-          ...baseParams,
-          organization: JSON.stringify(organization),
-        },
+        pathname: "/(events)/[id]/transfers",
+        params: baseParams,
       });
       return;
     case "invoices":

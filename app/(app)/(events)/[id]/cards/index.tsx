@@ -228,45 +228,20 @@ export default function Page() {
               iconStyle={{ marginRight: 0 }}
             />
           </MenuView>
-          <MenuView
-            actions={[
-              {
-                id: "orderCard",
-                title: "Order a Card",
-                image: "creditcard",
-                imageColor: themeColors.text,
-              },
-              {
-                id: "sendGrant",
-                title: "Send a Grant",
-                image: "paperplane",
-                imageColor: themeColors.text,
-              },
-            ]}
-            onPressAction={({ nativeEvent: { event } }) => {
-              if (event === "orderCard") {
-                router.push({
-                  pathname: "/(events)/[id]/cards/order",
-                  params: { id: params.id },
-                });
-              }
-              if (event === "sendGrant") {
-                router.push({
-                  pathname: "/(events)/[id]/card-grants/new",
-                  params: { id: params.id },
-                });
-              }
-            }}
-          >
-            <Ionicons.Button
-              name="add"
-              backgroundColor="transparent"
-              size={24}
-              color={themeColors.text}
-              iconStyle={{ marginRight: 0 }}
-              underlayColor="transparent"
-            />
-          </MenuView>
+          <Ionicons.Button
+            name="add"
+            backgroundColor="transparent"
+            size={24}
+            color={themeColors.text}
+            iconStyle={{ marginRight: 0 }}
+            onPress={() =>
+              router.push({
+                pathname: "/(events)/[id]/cards/order",
+                params: { id: params.id },
+              })
+            }
+            underlayColor="transparent"
+          />
         </View>
       ),
     });
