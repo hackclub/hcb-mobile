@@ -194,13 +194,11 @@ export function handleMenuActions(
     return [];
   }
   const menuActions: MenuAction[] = [];
-  const isManager =
-    "users" in organization &&
-    organization.users.some((u) => u.id === user?.id && u.role === "manager");
+  const members = "users" in organization ? organization.users : undefined;
+  const membership = members?.find((u) => u.id === user.id);
+  const isManager = membership?.role === "manager" || user.admin;
   const isAuditor = user.auditor;
-  const userinOrganization =
-    "users" in organization &&
-    organization.users.some((u) => u.id === user?.id);
+  const userinOrganization = !!membership || user.admin;
   const playgroundMode = organization.playground_mode;
   const donationPageAvailable = organization.donation_page_available;
 

@@ -31,7 +31,7 @@ import { StackParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
 import Invitation from "../lib/types/Invitation";
-import Organization from "../lib/types/Organization";
+import Organization, { OrganizationExpanded } from "../lib/types/Organization";
 import ITransaction from "../lib/types/Transaction";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
 import { palette } from "../styles/theme";
@@ -182,7 +182,7 @@ export default function App({ navigation }: Props) {
     error,
     mutate: reloadOrganizations,
     isLoading: organizationsLoading,
-  } = useOfflineSWR<Organization[]>("user/organizations", {
+  } = useOfflineSWR<OrganizationExpanded[]>("user/organizations?expand=users", {
     fallbackData: [],
   });
 
