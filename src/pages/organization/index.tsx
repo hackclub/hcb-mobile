@@ -69,7 +69,7 @@ export default function OrganizationPage({
     isLoading: organizationLoading,
     mutate: mutateOrganization,
   } = useOfflineSWR<Organization | OrganizationExpanded>(
-    `organizations/${orgId}`,
+    `organizations/${orgId}?expand=users`,
     {
       fallbackData: _organization,
       onError: (err) => {

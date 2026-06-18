@@ -223,7 +223,7 @@ export default function App({ navigation }: Props) {
     preload("user/cards", fetcher!);
 
     organizations.forEach((org) => {
-      const orgKey = `organizations/${org.id}`;
+      const orgKey = `organizations/${org.id}?expand=users`;
       const transactionsKey = `organizations/${org.id}/transactions?limit=35`;
 
       preload(orgKey, fetcher!);
