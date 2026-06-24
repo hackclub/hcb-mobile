@@ -68,7 +68,10 @@ export default function InvitationPage({
           orgId: invitation!.organization.id,
           organization: invitation!.organization,
         });
-        mutate(`user/organizations`);
+        mutate(
+          (key) =>
+            typeof key === "string" && key.startsWith("user/organizations"),
+        );
         mutate("user/invitations");
       },
       onError: () => {

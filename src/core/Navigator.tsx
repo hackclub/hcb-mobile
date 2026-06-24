@@ -217,7 +217,11 @@ export default function Navigator() {
                         controlsColor: palette.primary,
                         dismissButtonStyle: "cancel",
                       }).then(() => {
-                        mutate("user/organizations");
+                        mutate(
+                          (key) =>
+                            typeof key === "string" &&
+                            key.startsWith("user/organizations"),
+                        );
                         mutate("user/invitations");
                       });
                     }}

@@ -20,7 +20,10 @@ export const NoOrganizationsEmptyState = () => {
         controlsColor: palette.primary,
         dismissButtonStyle: "cancel",
       });
-      mutate("user/organizations");
+      mutate(
+        (key) =>
+          typeof key === "string" && key.startsWith("user/organizations"),
+      );
       mutate("user/invitations");
     } catch (error) {
       console.error("Error opening application form:", error);
