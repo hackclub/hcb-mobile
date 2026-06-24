@@ -74,6 +74,11 @@ export default function PaymentCard({
     card.type = "virtual";
   }
 
+  const cardTextColor =
+    card.type == "physical" && card.personalization?.color != "black"
+      ? "black"
+      : "white";
+
   if (!isCardDataValid) {
     return (
       <View
@@ -207,7 +212,7 @@ export default function PaymentCard({
       {card.type == "physical" && <CardChip />}
       <Text
         style={{
-          color: card.personalization?.color == "white" ? "black" : "white",
+          color: cardTextColor,
           fontSize: 18,
           marginBottom: 4,
           fontFamily: "Consolas-Bold",
@@ -221,7 +226,7 @@ export default function PaymentCard({
         <View>
           <Text
             style={{
-              color: card.personalization?.color == "white" ? "black" : "white",
+              color: cardTextColor,
               fontFamily: "Consolas-Bold",
               fontSize: 18,
               width: 180,
@@ -236,7 +241,7 @@ export default function PaymentCard({
         <View style={{ position: "absolute", right: 0 }}>
           <Text
             style={{
-              color: card.personalization?.color == "white" ? "black" : "white",
+              color: cardTextColor,
               fontSize: 14,
               fontFamily: "Consolas-Bold",
               fontWeight: 700,
