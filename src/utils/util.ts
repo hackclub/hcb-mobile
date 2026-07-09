@@ -294,9 +294,12 @@ export function handleMenuActionEvent(
       });
       break;
     case "sendGrant":
-      navigation.navigate("SendGrant", {
-        organization: organization,
-      });
+      // SendGrant requires OrganizationExpanded (needs balance_cents)
+      if ("balance_cents" in organization) {
+        navigation.navigate("SendGrant", {
+          organization: organization,
+        });
+      }
       break;
     default:
       break;

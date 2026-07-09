@@ -3,7 +3,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTheme } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Icon from "@thedev132/hackclub-icons-rn";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -18,12 +18,10 @@ import {
 } from "react-native";
 import { useSWRConfig } from "swr";
 
-import AuthContext from "../../auth/auth";
-import { getAccessToken } from "../../auth/tokenUtils";
 import Button from "../../components/Button";
 import { showAlert } from "../../lib/alertUtils";
+import useClient from "../../lib/client";
 import { StackParamList } from "../../lib/NavigatorParamList";
-import { OrganizationExpanded } from "../../lib/types/Organization";
 import { useIsDark } from "../../lib/useColorScheme";
 import { useOffline } from "../../lib/useOffline";
 import { palette } from "../../styles/theme";
@@ -33,9 +31,7 @@ import { renderMoney } from "../../utils/util";
 type Props = NativeStackScreenProps<StackParamList, "SendGrant">;
 
 export default function SendGrantPage({ navigation, route }: Props) {
-  const { organization } = route.params as {
-    organization: OrganizationExpanded;
-  };
+  const { organization } = route.params;
 
   const [amount, setAmount] = useState("");
   const [email, setEmail] = useState("");
@@ -51,8 +47,7 @@ export default function SendGrantPage({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { colors: themeColors } = useTheme();
-  const { tokenResponse } = useContext(AuthContext);
-  const accessToken = getAccessToken(tokenResponse);
+  const hcb = useClient();
   const { isOnline, withOfflineCheck } = useOffline();
   const isDark = useIsDark();
   const { mutate } = useSWRConfig();
@@ -60,6 +55,14 @@ export default function SendGrantPage({ navigation, route }: Props) {
   const emailRef = useRef<TextInput>(null);
   const purposeRef = useRef<TextInput>(null);
   const messageRef = useRef<TextInput>(null);
+
+  // Minimum date for picker is tomorrow to match validation
+  const getMinimumDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -91,13 +94,14 @@ export default function SendGrantPage({ navigation, route }: Props) {
     return emailRegex.test(emailValue);
   };
 
-  const parseAmount = (amountStr: string) => {
+  const parseAmountToCents = (amountStr: string): number => {
     const cleaned = amountStr.replace(/[^0-9.]/g, "");
-    return parseFloat(cleaned) || 0;
+    const dollars = parseFloat(cleaned) || 0;
+    return Math.round(dollars * 100);
   };
 
   const validateInputs = () => {
-    const numericAmount = parseAmount(amount);
+    const amountCents = parseAmountToCents(amount);
 
     if (!email.trim()) {
       showAlert("Missing Email", "Please enter the recipient's email address.");
@@ -111,13 +115,14 @@ export default function SendGrantPage({ navigation, route }: Props) {
       return false;
     }
 
-    if (numericAmount <= 0) {
+    if (amountCents <= 0) {
       showAlert("Invalid Amount", "Please enter an amount greater than $0.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return false;
     }
 
-    if (numericAmount * 100 > organization.balance_cents) {
+    // Compare cents to cents to avoid floating point issues
+    if (amountCents > organization.balance_cents) {
       showAlert(
         "Insufficient Balance",
         `Your organization only has ${renderMoney(organization.balance_cents)} available.`,
@@ -126,7 +131,9 @@ export default function SendGrantPage({ navigation, route }: Props) {
       return false;
     }
 
-    if (expirationDate <= new Date()) {
+    // Check if expiration is at least tomorrow
+    const tomorrow = getMinimumDate();
+    if (expirationDate < tomorrow) {
       showAlert("Invalid Date", "Expiration date must be in the future.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return false;
@@ -139,41 +146,42 @@ export default function SendGrantPage({ navigation, route }: Props) {
     if (!validateInputs()) return;
 
     setIsLoading(true);
-    try {
-      const amountCents = Math.round(parseAmount(amount) * 100);
+    const amountCents = parseAmountToCents(amount);
+    const trimmedEmail = email.trim();
 
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_API_BASE + `/card_grants`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            event_id: organization.id,
-            email: email.trim(),
-            amount_cents: amountCents,
-            expiration_at: expirationDate.toISOString(),
-            purpose: purpose.trim() || undefined,
-            invite_message: inviteMessage.trim() || undefined,
-            one_time_use: oneTimeUse,
-            sent_by_email: true,
-          }),
+    try {
+      const response = await hcb.post("card_grants", {
+        json: {
+          event_id: organization.id,
+          email: trimmedEmail,
+          amount_cents: amountCents,
+          expiration_at: expirationDate.toISOString(),
+          purpose: purpose.trim() || undefined,
+          invite_message: inviteMessage.trim() || undefined,
+          one_time_use: oneTimeUse,
+          sent_by_email: true,
         },
-      );
+        throwHttpErrors: false,
+      });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage =
-          errorData.message ||
-          errorData.error ||
-          "Failed to send grant. Please try again.";
+        // Defensive JSON parsing - read text first, then try to parse
+        let errorMessage = "Failed to send grant. Please try again.";
+        try {
+          const responseText = await response.text();
+          if (responseText) {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.message || errorData.error || errorMessage;
+          }
+        } catch {
+          // JSON parsing failed, use default message
+        }
 
         // Check for common error cases
         if (
           errorMessage.toLowerCase().includes("not enabled") ||
-          errorMessage.toLowerCase().includes("not available")
+          errorMessage.toLowerCase().includes("not available") ||
+          errorMessage.toLowerCase().includes("card_grants_enabled")
         ) {
           showAlert(
             "Grants Not Available",
@@ -187,7 +195,7 @@ export default function SendGrantPage({ navigation, route }: Props) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         showAlert(
           "Grant Sent!",
-          `A grant of ${renderMoney(Math.round(parseAmount(amount) * 100))} has been sent to ${email}. They'll receive an email to activate their grant card.`,
+          `A grant of ${renderMoney(amountCents)} has been sent to ${trimmedEmail}. They'll receive an email to activate their grant card.`,
         );
         // Refresh organization data
         mutate(`organizations/${organization.id}`);
@@ -196,11 +204,10 @@ export default function SendGrantPage({ navigation, route }: Props) {
         setTimeout(() => navigation.goBack(), 1500);
       }
     } catch (error) {
+      // Log without PII (email/amount) to avoid data exposure
       console.error("Send grant operation failed", error, {
         context: {
           organizationId: organization.id,
-          email: email,
-          amount: amount,
           action: "send_grant",
         },
       });
@@ -435,7 +442,7 @@ export default function SendGrantPage({ navigation, route }: Props) {
                 mode="date"
                 display="default"
                 onChange={onDateChange}
-                minimumDate={new Date()}
+                minimumDate={getMinimumDate()}
                 themeVariant={isDark ? "dark" : "light"}
               />
             )}

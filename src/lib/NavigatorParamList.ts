@@ -36,7 +36,7 @@ export type StackParamList = {
   };
   RenameTransaction: { orgId: string; transaction: Transaction };
   Transfer: { organization: Organization };
-  SendGrant: { organization: Organization };
+  SendGrant: { organization: OrganizationExpanded };
   GrantCard: { grantId: string; cardId?: string };
   ShareIntentModal: {
     images: string[];
