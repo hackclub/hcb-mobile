@@ -31,6 +31,7 @@ import AccountNumberPage from "../pages/organization/AccountNumber";
 import OrganizationDonationPage from "../pages/organization/Donation";
 import NewDonationPage from "../pages/organization/NewDonation";
 import ProcessDonationPage from "../pages/organization/ProcessDonation";
+import SendGrantPage from "../pages/organization/SendGrant";
 import OrganizationTeamPage from "../pages/organization/Team";
 import TransferPage from "../pages/organization/transfer";
 import ReceiptsPage from "../pages/Receipts";
@@ -302,6 +303,14 @@ export default function Navigator() {
               options={{
                 presentation: "modal",
                 title: "Send Transfer",
+              }}
+            />
+            <Stack.Screen
+              name="SendGrant"
+              component={SendGrantPage}
+              options={{
+                presentation: "modal",
+                title: "Send Grant",
               }}
             />
             <Stack.Screen

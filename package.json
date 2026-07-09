@@ -27,6 +27,7 @@
     "@fortawesome/react-native-fontawesome": "^0.3.2",
     "@intercom/intercom-react-native": "^9.5.0",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "^9.1.0",
     "@react-native-community/geolocation": "^3.3.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-menu/menu": "^2.0.0",

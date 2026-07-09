@@ -219,6 +219,13 @@ export function handleMenuActions(
         image: "dollarsign.circle",
         imageColor: scheme === "dark" ? "white" : "black",
       });
+
+      menuActions.push({
+        id: "sendGrant",
+        title: "Send Grant",
+        image: "giftcard",
+        imageColor: scheme === "dark" ? "white" : "black",
+      });
     }
 
     menuActions.push({
@@ -283,6 +290,11 @@ export function handleMenuActionEvent(
       break;
     case "transfer":
       navigation.navigate("Transfer", {
+        organization: organization,
+      });
+      break;
+    case "sendGrant":
+      navigation.navigate("SendGrant", {
         organization: organization,
       });
       break;
