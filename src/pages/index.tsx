@@ -22,6 +22,7 @@ import ReorderableList, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
+import CardLockBanner from "../components/CardLockBanner";
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "../components/organizations/HomeLoadingSkeleton";
@@ -323,6 +324,9 @@ export default function App({ navigation }: Props) {
         ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
+            <CardLockBanner
+              onPress={() => navigation.getParent()?.navigate("Receipts")}
+            />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
             (grantInvites && grantInvites.length > 0) ? (

@@ -18,6 +18,7 @@ import {
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
+import CardLockBanner from "../../components/CardLockBanner";
 import AddToWalletSection from "../../components/cards/AddToWalletSection";
 import CardDetails from "../../components/cards/CardDetails";
 import CardDisplay from "../../components/cards/CardDisplay";
@@ -502,6 +503,10 @@ export default function CardPage(
         scrollEventThrottle={400}
       >
         {cardError && <CardError error={cardError} onRetry={onRefresh} />}
+
+        <CardLockBanner
+          onPress={() => navigation.getParent()?.navigate("Receipts")}
+        />
 
         {card && (
           <CardDisplay
