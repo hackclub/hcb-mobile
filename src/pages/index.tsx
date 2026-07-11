@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import {
+  useBottomTabBarHeight,
+  BottomTabNavigationProp,
+} from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackScreenProps,
@@ -22,12 +25,13 @@ import ReorderableList, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { preload, useSWRConfig } from "swr";
 
+import CardLockBanner from "../components/CardLockBanner";
 import Event from "../components/organizations/Event";
 import GrantInvite from "../components/organizations/GrantInvite";
 import { HomeLoadingSkeleton } from "../components/organizations/HomeLoadingSkeleton";
 import { NoOrganizationsEmptyState } from "../components/organizations/NoOrganizationsEmptyState";
 import PromoBanner from "../components/PromoBanner";
-import { StackParamList } from "../lib/NavigatorParamList";
+import { StackParamList, TabParamList } from "../lib/NavigatorParamList";
 import useReorderedOrgs from "../lib/organization/useReorderedOrgs";
 import GrantCard from "../lib/types/GrantCard";
 import Invitation from "../lib/types/Invitation";
@@ -323,6 +327,13 @@ export default function App({ navigation }: Props) {
         ListEmptyComponent={() => <NoOrganizationsEmptyState />}
         ListHeaderComponent={() => (
           <>
+            <CardLockBanner
+              onPress={() =>
+                navigation
+                  .getParent<BottomTabNavigationProp<TabParamList>>()
+                  ?.navigate("Receipts", { screen: "MissingReceiptList" })
+              }
+            />
             <PromoBanner />
             {(invitations && invitations.length > 0) ||
             (grantInvites && grantInvites.length > 0) ? (

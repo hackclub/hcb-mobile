@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import {
+  useBottomTabBarHeight,
+  BottomTabNavigationProp,
+} from "@react-navigation/bottom-tabs";
 import { useTheme, useFocusEffect } from "@react-navigation/native";
 import {
   NativeStackNavigationProp,
@@ -18,6 +21,7 @@ import {
 import { useSWRConfig } from "swr";
 
 import Button from "../../components/Button";
+import CardLockBanner from "../../components/CardLockBanner";
 import AddToWalletSection from "../../components/cards/AddToWalletSection";
 import CardDetails from "../../components/cards/CardDetails";
 import CardDisplay from "../../components/cards/CardDisplay";
@@ -26,7 +30,10 @@ import CardSkeleton from "../../components/cards/CardSkeleton";
 import CardTransactions from "../../components/cards/CardTransactions";
 import ActivateCardModal from "../../components/cards/modals/ActivateCardModal";
 import useClient from "../../lib/client";
-import { CardsStackParamList } from "../../lib/NavigatorParamList";
+import {
+  CardsStackParamList,
+  TabParamList,
+} from "../../lib/NavigatorParamList";
 import useTransactions from "../../lib/organization/useTransactions";
 import Card from "../../lib/types/Card";
 import { OrganizationExpanded } from "../../lib/types/Organization";
@@ -502,6 +509,17 @@ export default function CardPage(
         scrollEventThrottle={400}
       >
         {cardError && <CardError error={cardError} onRetry={onRefresh} />}
+
+        {isCardholder && (
+          <CardLockBanner
+            user={user}
+            onPress={() =>
+              navigation
+                .getParent<BottomTabNavigationProp<TabParamList>>()
+                ?.navigate("Receipts", { screen: "MissingReceiptList" })
+            }
+          />
+        )}
 
         {card && (
           <CardDisplay

@@ -23,6 +23,13 @@ export default interface User extends Omit<HcbApiObject<"usr">, "created_at"> {
     postal_code: string;
     country: string;
   };
+  // Present only when the card-locking receipt-compliance feature is enabled
+  // for the user. `locked` is true when their cards are currently locked for
+  // overdue receipts; upload a receipt to unlock.
+  card_locking?: {
+    locked: boolean;
+    overdue_receipt_count: number;
+  };
 }
 
 export interface OrgUser extends User {
