@@ -1,22 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
-import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import User from "../lib/types/User";
 import { useOfflineSWR } from "../lib/useOfflineSWR";
-import { palette } from "../styles/theme";
 
 // A standing notice shown while the cardholder's cards are locked for overdue
 // receipts. It is not dismissible: the state is only cleared by uploading a
 // receipt, which unlocks the cards within seconds. Mirrors the web banner.
-const CardLockBanner = memo(function CardLockBanner({
+//
+// Pass `user` to reuse a user already loaded by the parent; otherwise it is
+// fetched. `card_locking` is present only when the feature is enabled for the
+// current user, so the banner renders nothing for everyone else.
+export default function CardLockBanner({
   onPress,
+  user: userProp,
 }: {
-  onPress?: () => void;
+  onPress: () => void;
+  user?: User;
 }) {
   const { colors } = useTheme();
-  const { data: user } = useOfflineSWR<User>("user");
+  const { data: fetchedUser } = useOfflineSWR<User>(userProp ? null : "user");
+  const user = userProp ?? fetchedUser;
 
   const cardLocking = user?.card_locking;
   if (!cardLocking?.locked) {
@@ -24,7 +29,7 @@ const CardLockBanner = memo(function CardLockBanner({
   }
 
   const count = cardLocking.overdue_receipt_count;
-  const subtitle =
+  const lead =
     count > 0
       ? `Upload your ${count} overdue ${count === 1 ? "receipt" : "receipts"} and your cards work again in seconds.`
       : "Upload your overdue receipts and your cards work again in seconds.";
@@ -35,27 +40,25 @@ const CardLockBanner = memo(function CardLockBanner({
       accessibilityRole="button"
       style={({ pressed }) => [
         styles.container,
-        { backgroundColor: colors.card, borderColor: palette.primary },
-        pressed && onPress ? styles.pressed : null,
+        { backgroundColor: colors.card, borderColor: colors.primary },
+        pressed ? styles.pressed : null,
       ]}
     >
       <View style={styles.content}>
-        <Ionicons name="lock-closed" size={22} color={palette.primary} />
+        <Ionicons name="lock-closed" size={22} color={colors.primary} />
         <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: palette.primary }]}>
+          <Text style={[styles.title, { color: colors.primary }]}>
             Your cards are locked
           </Text>
           <Text style={[styles.subtitle, { color: colors.text }]}>
-            {subtitle}
+            {lead} Recurring charges will keep failing until you upload.
           </Text>
         </View>
-        {onPress ? (
-          <Ionicons name="chevron-forward" size={18} color={colors.text} />
-        ) : null}
+        <Ionicons name="chevron-forward" size={18} color={colors.text} />
       </View>
     </Pressable>
   );
-});
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -94,5 +97,3 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 });
-
-export default CardLockBanner;
