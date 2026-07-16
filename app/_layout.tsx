@@ -20,7 +20,13 @@ import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-inten
 import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
 import React, { createContext, useContext, useEffect } from "react";
-import { ColorSchemeName, useColorScheme } from "react-native";
+import {
+  ColorSchemeName,
+  Pressable,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import AuthContext from "@/lib/auth/auth";
@@ -30,6 +36,7 @@ import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
 import { LinkingProvider } from "@/lib/providers/LinkingContext";
 import { ShareIntentProvider } from "@/lib/providers/ShareIntentContext";
 import { ThemeProvider } from "@/lib/providers/ThemeContext";
+import { openOnWebsite } from "@/utils/handoff";
 
 export const SWRCacheProvider = createContext<{
   scheme: ColorSchemeName;
@@ -168,6 +175,79 @@ function Layout() {
         </ThemeProvider>
       </ExpoShareIntentProvider>
     </StripeProvider>
+  );
+}
+
+export function ErrorBoundary({
+  error,
+  retry,
+}: {
+  error: Error;
+  retry: () => void;
+}) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
+  const isDark = useColorScheme() === "dark";
+  const background = isDark ? "#000" : "#fff";
+  const text = isDark ? "#fff" : "#000";
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: background,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+        gap: 16,
+      }}
+    >
+      <Text
+        style={{
+          color: text,
+          fontSize: 22,
+          fontWeight: "700",
+          textAlign: "center",
+        }}
+      >
+        Something went wrong
+      </Text>
+      <Text style={{ color: text, textAlign: "center", opacity: 0.6 }}>
+        {error.message || "The app hit an unexpected error."}
+      </Text>
+      <Pressable
+        onPress={retry}
+        style={{
+          width: "100%",
+          marginTop: 8,
+          backgroundColor: "#f47080",
+          borderRadius: 6,
+          paddingVertical: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#1f0008", fontWeight: "600", fontSize: 16 }}>
+          Try Again
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => openOnWebsite("/")}
+        style={{
+          width: "100%",
+          borderRadius: 6,
+          borderWidth: 1,
+          borderColor: text,
+          paddingVertical: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: text, fontWeight: "600", fontSize: 16 }}>
+          Continue on Website
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 

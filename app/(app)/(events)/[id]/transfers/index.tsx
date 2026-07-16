@@ -1,7 +1,7 @@
 import Icon from "@thedev132/hackclub-icons-rn";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { Linking, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 import WiseIcon from "@/components/icons/WiseIcon";
 import { Text } from "@/components/Text";
@@ -10,6 +10,7 @@ import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, radii } from "@/styles/theme";
+import { openOnWebsite } from "@/utils/handoff";
 import * as Haptics from "@/utils/haptics";
 import { shareUrl } from "@/utils/shareUrl";
 
@@ -38,7 +39,7 @@ export default function TransfersPage() {
       );
       return;
     }
-    Linking.openURL(shareUrl.wiseTransfer(organization.slug));
+    openOnWebsite(shareUrl.wiseTransfer(organization.slug));
   };
 
   const options: TransferOption[] = [

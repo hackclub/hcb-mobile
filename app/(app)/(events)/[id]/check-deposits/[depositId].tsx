@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import ImageView from "react-native-image-viewing";
 
 import Badge from "@/components/Badge";
+import ErrorHandoff from "@/components/ErrorHandoff";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { Text } from "@/components/Text";
 import UserMention from "@/components/UserMention";
@@ -81,9 +82,12 @@ export default function CheckDepositDetailPage() {
   const { colors: themeColors } = useTheme();
   const navigation = useNavigation();
 
-  const { data: deposit, isLoading } = useOfflineSWR<CheckDepositDetail>(
-    `check_deposits/${depositId}`,
-  );
+  const {
+    data: deposit,
+    error: depositError,
+    isLoading,
+    mutate: mutateDeposit,
+  } = useOfflineSWR<CheckDepositDetail>(`check_deposits/${depositId}`);
   const { data: organization } = useOfflineSWR<Organization>(
     `organizations/${id}`,
   );
@@ -100,6 +104,19 @@ export default function CheckDepositDetailPage() {
       });
     }
   }, [organization, deposit, navigation, depositId]);
+
+  if (depositError && !deposit) {
+    return (
+      <ErrorHandoff
+        message="We couldn't load this check deposit."
+        onRetry={() => mutateDeposit()}
+        websiteUrl={shareUrl.checkDeposit(
+          organization?.slug ?? id,
+          depositId,
+        )}
+      />
+    );
+  }
 
   if (isLoading || !deposit) {
     return (

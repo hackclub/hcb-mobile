@@ -46,6 +46,7 @@ import {
 } from "@/lib/useStripeTerminalInit";
 import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
 import { lightTheme, theme } from "@/styles/theme";
+import { openOnWebsite } from "@/utils/handoff";
 import { trackAppOpen } from "@/utils/storeReview";
 
 interface HTTPError extends Error {
@@ -484,13 +485,7 @@ export default function Layout() {
       try {
         const parsed = new URL(url);
         if (blockedPaths.some((p) => parsed.pathname.startsWith(p))) {
-          Linking.openURL(
-            new URL(parsed.pathname, "https://hcb.hackclub.com").toString(),
-          ).catch((err) =>
-            console.error("Failed to open URL in browser", err, {
-              context: { url },
-            }),
-          );
+          openOnWebsite(parsed.pathname);
           return;
         }
       } catch {

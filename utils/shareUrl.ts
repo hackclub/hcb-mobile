@@ -1,4 +1,4 @@
-const BASE = process.env.EXPO_PUBLIC_API_BASE.replace("/api/v4", "");
+export const BASE = process.env.EXPO_PUBLIC_API_BASE.replace("/api/v4", "");
 
 export const shareUrl = {
   org: (slug: string) => `${BASE}/${slug}`,
@@ -12,4 +12,6 @@ export const shareUrl = {
   invoice: (id: string) => `${BASE}/invoices/${id.slice(4)}`,
   donations: (orgSlug: string) => `${BASE}/donations/start/${orgSlug}`,
   wiseTransfer: (orgSlug: string) => `${BASE}/${orgSlug}/wise_transfers/new`,
+  reimbursement: (orgSlug: string, id: string) =>
+    `${BASE}/${orgSlug}/reimbursement/reports/${id.slice(4)}`,
 };

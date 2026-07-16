@@ -14,6 +14,7 @@ import { mutate, useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "@/components/AdminTools";
+import ErrorHandoff from "@/components/ErrorHandoff";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import TagChip from "@/components/tags/TagChip";
 import { Text } from "@/components/Text";
@@ -75,9 +76,12 @@ export default function TransactionPage({
   // filter in case of deeplink with #commentId
   const txnId = transactionId.split("#")[0];
 
-  const { data: transaction, isLoading } = useOfflineSWR<
-    Transaction & { organization?: Organization }
-  >(
+  const {
+    data: transaction,
+    error: transactionError,
+    isLoading,
+    mutate: mutateTransaction,
+  } = useOfflineSWR<Transaction & { organization?: Organization }>(
     orgId
       ? `organizations/${orgId}/transactions/${txnId}`
       : `transactions/${txnId}`,
@@ -142,6 +146,16 @@ export default function TransactionPage({
       setRefreshing(false);
     }
   };
+
+  if (transactionError && !transaction) {
+    return (
+      <ErrorHandoff
+        message="We couldn't load this transaction."
+        onRetry={() => mutateTransaction()}
+        websiteUrl={shareUrl.transaction(txnId)}
+      />
+    );
+  }
 
   if (!transaction || isLoading) {
     return <TransactionSkeleton />;

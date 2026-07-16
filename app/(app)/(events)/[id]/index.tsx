@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSWRConfig } from "swr";
 
+import AccessDenied from "@/components/organizations/AccessDenied";
 import ActionChip from "@/components/organizations/ActionChip";
 import ActionTile from "@/components/organizations/ActionTile";
 import { EmptyState } from "@/components/organizations/EmptyState";
@@ -22,6 +23,7 @@ import SubOrganizations from "@/components/organizations/SubOrganizations";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TeamAvatars from "@/components/organizations/TeamAvatars";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
+import ErrorHandoff from "@/components/ErrorHandoff";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { showAlert } from "@/lib/alertUtils";
 import { OrgPolicy } from "@/lib/policies";
@@ -75,6 +77,7 @@ export default function Page() {
     () => organizationError?.toString().includes("403"),
     [organizationError],
   );
+  const isOfflineNoData = !!(organizationError && !isOnline && !organization);
 
   const {
     data: transactionsPage,
@@ -85,8 +88,6 @@ export default function Page() {
   );
 
   useEffect(() => {
-    const isOfflineNoData = organizationError && !isOnline && !organization;
-
     if (isAccessDenied) {
       navigation.setOptions({ title: "Access Denied" });
     } else if (isOfflineNoData) {
@@ -99,7 +100,14 @@ export default function Page() {
         ),
       });
     }
-  }, [organizationError, organization, navigation, isOnline, isAccessDenied]);
+  }, [
+    organizationError,
+    organization,
+    navigation,
+    isOnline,
+    isAccessDenied,
+    isOfflineNoData,
+  ]);
 
   useEffect(() => {
     const checkTapToPayBanner = async () => {
@@ -186,6 +194,20 @@ export default function Page() {
       params: { id: params.id, ...extraParams },
     });
   };
+
+  if (isAccessDenied) {
+    return <AccessDenied orgId={params.id} onGoBack={() => router.back()} />;
+  }
+
+  if (organizationError && !organization && !isOfflineNoData) {
+    return (
+      <ErrorHandoff
+        message="We couldn't load this organization."
+        onRetry={() => mutateOrganization()}
+        websiteUrl={shareUrl.org(params.id)}
+      />
+    );
+  }
 
   if (!organization) {
     return (

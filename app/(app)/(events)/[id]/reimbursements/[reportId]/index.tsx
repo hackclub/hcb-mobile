@@ -20,6 +20,7 @@ import { mutate as globalMutate } from "swr";
 
 import Badge from "@/components/Badge";
 import Button from "@/components/Button";
+import ErrorHandoff from "@/components/ErrorHandoff";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -34,6 +35,7 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
+import { shareUrl } from "@/utils/shareUrl";
 
 interface PaginatedExpenses {
   data: ReimbursementExpense[];
@@ -418,6 +420,7 @@ export default function ReportDetailPage() {
 
   const {
     data: report,
+    error: reportError,
     isLoading: reportLoading,
     mutate: mutateReport,
   } = useOfflineSWR<ReimbursementReport>(`reimbursement_reports/${reportId}`);
@@ -616,6 +619,16 @@ export default function ReportDetailPage() {
       },
     ]);
   };
+
+  if (reportError && !report) {
+    return (
+      <ErrorHandoff
+        message="We couldn't load this reimbursement report."
+        onRetry={() => mutateReport()}
+        websiteUrl={shareUrl.reimbursement(id, reportId)}
+      />
+    );
+  }
 
   if (reportLoading && !report) {
     return (

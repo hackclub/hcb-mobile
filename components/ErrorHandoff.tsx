@@ -7,14 +7,20 @@ import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
 import { cardBorderColor, palette } from "@/styles/theme";
 import { openOnWebsite } from "@/utils/handoff";
-import { shareUrl } from "@/utils/shareUrl";
 
-interface AccessDeniedProps {
-  orgId: string;
-  onGoBack: () => void;
+interface ErrorHandoffProps {
+  title?: string;
+  message?: string;
+  onRetry?: () => void;
+  websiteUrl?: string;
 }
 
-export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
+export default function ErrorHandoff({
+  title = "Something went wrong",
+  message = "We couldn't load this. You can try again or continue on the website.",
+  onRetry,
+  websiteUrl,
+}: ErrorHandoffProps) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
 
@@ -51,7 +57,7 @@ export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
             marginBottom: 32,
           }}
         >
-          <Ionicons name="lock-closed" size={48} color={palette.primary} />
+          <Ionicons name="alert-circle" size={48} color={palette.primary} />
         </View>
         <Text
           style={{
@@ -63,7 +69,7 @@ export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
             letterSpacing: -0.5,
           }}
         >
-          Access Denied
+          {title}
         </Text>
         <Text
           style={{
@@ -75,34 +81,37 @@ export default function AccessDenied({ orgId, onGoBack }: AccessDeniedProps) {
             paddingHorizontal: 8,
           }}
         >
-          You don't have permission to view this organization. Please contact
-          the organization's manager for access.
+          {message}
         </Text>
-        <Button
-          style={{
-            width: "100%",
-            backgroundColor: themeColors.primary,
-            borderRadius: 12,
-            height: 50,
-            marginBottom: 16,
-          }}
-          color="#fff"
-          onPress={onGoBack}
-        >
-          Go Back
-        </Button>
-        <Button
-          style={{
-            width: "100%",
-            backgroundColor: palette.slate,
-            borderRadius: 12,
-            height: 50,
-          }}
-          color="#fff"
-          onPress={() => openOnWebsite(shareUrl.org(orgId))}
-        >
-          View on Website
-        </Button>
+        {onRetry && (
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: themeColors.primary,
+              borderRadius: 12,
+              height: 50,
+              marginBottom: websiteUrl ? 16 : 0,
+            }}
+            color="#fff"
+            onPress={onRetry}
+          >
+            Try Again
+          </Button>
+        )}
+        {websiteUrl && (
+          <Button
+            style={{
+              width: "100%",
+              backgroundColor: palette.slate,
+              borderRadius: 12,
+              height: 50,
+            }}
+            color="#fff"
+            onPress={() => openOnWebsite(websiteUrl)}
+          >
+            Continue on Website
+          </Button>
+        )}
       </View>
     </View>
   );

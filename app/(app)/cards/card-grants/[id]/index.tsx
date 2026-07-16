@@ -23,6 +23,7 @@ import CardDisplay from "@/components/cards/CardDisplay";
 import CardError from "@/components/cards/CardError";
 import CardSkeleton from "@/components/cards/CardSkeleton";
 import CardTransactions from "@/components/cards/CardTransactions";
+import ErrorHandoff from "@/components/ErrorHandoff";
 import GrantWithoutCard from "@/components/grants/grantWithoutCard";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
 import { parseApiError } from "@/lib/alertUtils";
@@ -58,7 +59,11 @@ export default function Page() {
   const fullGrantId = grantId.startsWith("cdg_") ? grantId : `cdg_${grantId}`;
   const { colors: themeColors } = useTheme();
 
-  const { data: grantCard, mutate: reloadGrant } = useOfflineSWR<GrantCardType>(
+  const {
+    data: grantCard,
+    error: grantError,
+    mutate: reloadGrant,
+  } = useOfflineSWR<GrantCardType>(
     `card_grants/${fullGrantId}?expand=balance_cents`,
   );
   const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
@@ -364,6 +369,16 @@ export default function Page() {
       setRefreshing(false);
     }
   }, [reloadGrant, mutateCard, mutateTransactions, fullGrantId]);
+
+  if (grantError && !grantCard) {
+    return (
+      <ErrorHandoff
+        message="We couldn't load this card grant."
+        onRetry={() => reloadGrant()}
+        websiteUrl={shareUrl.cardGrant(fullGrantId)}
+      />
+    );
+  }
 
   if (!grantCard) {
     return <CardSkeleton />;
