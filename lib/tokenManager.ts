@@ -18,9 +18,16 @@ const discovery: DiscoveryDocument = {
 
 let refreshPromise: Promise<TokenResponse | null> | null = null;
 
+// A single failed refresh must not end the session — transient failures
+// (flaky network, timeouts, 5xx from the token endpoint) are expected on
+// mobile. We only give up after this many *consecutive* failures, as a last
+// resort against being stuck with a token the server keeps rejecting.
+const MAX_CONSECUTIVE_REFRESH_FAILURES = 8;
+
 export class TokenManager {
   private tokenResponse: TokenResponse | null = null;
   private codeVerifier: string | undefined;
+  private consecutiveRefreshFailures = 0;
 
   async load(): Promise<void> {
     try {
@@ -52,6 +59,17 @@ export class TokenManager {
     tokenResponse: TokenResponse,
     codeVerifier?: string,
   ): Promise<void> {
+    // Commit to memory FIRST. Refresh tokens rotate (each use revokes the old
+    // one), so after a successful refresh the response holds the ONLY valid
+    // token. If we persisted first and the SecureStore write threw, we'd keep
+    // the old, now-revoked token in memory and discard the rotated one — the
+    // next request would then redeem a dead token and get logged out. Updating
+    // memory up front means the running session always uses the freshest token
+    // even if persistence fails; only a cold start could lose it.
+    this.tokenResponse = tokenResponse;
+    if (codeVerifier) {
+      this.codeVerifier = codeVerifier;
+    }
     try {
       const tokenData = {
         accessToken: tokenResponse.accessToken,
@@ -72,9 +90,7 @@ export class TokenManager {
         await SecureStore.setItemAsync(CODE_VERIFIER_KEY, codeVerifier, {
           keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
         });
-        this.codeVerifier = codeVerifier;
       }
-      this.tokenResponse = tokenResponse;
     } catch (error) {
       console.error("[TokenManager] Failed to save tokens", error);
       throw error;
@@ -87,6 +103,7 @@ export class TokenManager {
       await SecureStore.deleteItemAsync(CODE_VERIFIER_KEY);
       this.tokenResponse = null;
       this.codeVerifier = undefined;
+      this.consecutiveRefreshFailures = 0;
       refreshPromise = null;
     } catch (error) {
       console.error("[TokenManager] Failed to clear tokens", error);
@@ -160,7 +177,9 @@ export class TokenManager {
         );
 
         if (!result.accessToken || !result.refreshToken) {
-          console.error(
+          // A malformed/incomplete response is a server anomaly, not proof the
+          // refresh token is dead — treat it as transient and keep the session.
+          console.warn(
             "[TokenManager] Token refresh returned incomplete response",
             {
               hasAccessToken: !!result.accessToken,
@@ -168,13 +187,32 @@ export class TokenManager {
             },
           );
           Sentry.captureMessage("Token refresh returned incomplete response", {
-            level: "error",
+            level: "warning",
           });
-          await this.logout("incomplete_refresh_response");
-          return null;
+          return await this.handleTransientRefreshFailure(
+            "incomplete_response",
+          );
         }
 
-        await this.save(result, this.codeVerifier);
+        this.consecutiveRefreshFailures = 0;
+        try {
+          await this.save(result, this.codeVerifier);
+        } catch (saveError) {
+          // The network refresh succeeded and (with rotation) the server has
+          // already revoked the old refresh token — `result` is now the only
+          // valid token. save() has already committed it to memory, so the
+          // running session keeps working; persistence just failed (a cold
+          // start could lose it). This must NOT be treated as a refresh
+          // failure, or we'd log the user out despite a successful refresh.
+          console.error(
+            "[TokenManager] Failed to persist rotated tokens; keeping session",
+            saveError,
+          );
+          Sentry.captureException(saveError, {
+            level: "error",
+            tags: { issue_type: "token_persist_failed" },
+          });
+        }
         return result;
       } catch (error: unknown) {
         const errorObj = error as {
@@ -183,13 +221,15 @@ export class TokenManager {
         };
         const oauthError = errorObj.code || errorObj.params?.error;
 
+        // Terminal OAuth errors mean the refresh token can never be used again.
+        // Retrying is pointless, so end the session immediately.
         if (
           oauthError === "invalid_grant" ||
           oauthError === "invalid_client" ||
           oauthError === "unauthorized_client"
         ) {
           console.error(
-            "[TokenManager] Token refresh failed with OAuth error",
+            "[TokenManager] Token refresh failed with terminal OAuth error",
             {
               oauthError,
               error: error instanceof Error ? error.message : String(error),
@@ -203,25 +243,46 @@ export class TokenManager {
           return null;
         }
 
-        console.error(
-          "[TokenManager] Token refresh failed with unknown error",
+        // Everything else (network failure, timeout, 5xx, unknown) is transient.
+        // Keep the tokens so the next request can retry instead of forcing a
+        // logout on a temporary hiccup.
+        console.warn(
+          "[TokenManager] Token refresh failed transiently, keeping session",
           {
             error: error instanceof Error ? error.message : String(error),
             errorName: error instanceof Error ? error.name : "Unknown",
           },
         );
         Sentry.captureException(error, {
-          level: "error",
-          tags: { issue_type: "token_refresh_unknown_error" },
+          level: "warning",
+          tags: { issue_type: "token_refresh_transient_error" },
         });
-        await this.logout("refresh_failed");
-        return null;
+        return await this.handleTransientRefreshFailure("transient_error");
       } finally {
         refreshPromise = null;
       }
     })();
 
     return refreshPromise;
+  }
+
+  // Records a non-terminal refresh failure. Only logs out if refresh has failed
+  // repeatedly in a row, so a single blip never tears down the session.
+  private async handleTransientRefreshFailure(
+    reason: string,
+  ): Promise<TokenResponse | null> {
+    this.consecutiveRefreshFailures += 1;
+    if (this.consecutiveRefreshFailures >= MAX_CONSECUTIVE_REFRESH_FAILURES) {
+      console.error(
+        "[TokenManager] Token refresh failed repeatedly, logging out",
+        { reason, attempts: this.consecutiveRefreshFailures },
+      );
+      Sentry.captureMessage("Token refresh failed repeatedly", {
+        level: "error",
+      });
+      await this.logout(`repeated_refresh_failure_${reason}`);
+    }
+    return null;
   }
 
   async logout(reason?: string): Promise<void> {

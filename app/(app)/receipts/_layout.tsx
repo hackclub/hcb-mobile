@@ -17,15 +17,6 @@ export default function Layout() {
         options={{ title: "Receipts", headerLargeTitle: true }}
       />
       <Stack.Screen
-        name="selection"
-        options={{
-          presentation: "modal",
-          title: "Select Receipts",
-          headerShown: false,
-          animation: "slide_from_bottom",
-        }}
-      />
-      <Stack.Screen
         name="transactions/[transactionId]"
         options={{ title: "Transaction" }}
       />

@@ -47,15 +47,6 @@ function getMenuActions(
     });
   }
 
-  if (policy?.invoices() && !organization.playground_mode) {
-    menuActions.push({
-      id: "invoices",
-      title: "Invoices",
-      image: "doc.text",
-      imageColor: iconColor,
-    });
-  }
-
   if (policy ? policy.team() : fallbackAccess) {
     menuActions.push({
       id: "team",
@@ -99,12 +90,6 @@ function handleMenuAction(
     case "transfer":
       router.push({
         pathname: "/(events)/[id]/transfers",
-        params: baseParams,
-      });
-      return;
-    case "invoices":
-      router.push({
-        pathname: "/(events)/[id]/invoices",
         params: baseParams,
       });
       return;

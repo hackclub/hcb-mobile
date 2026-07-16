@@ -37,7 +37,7 @@ export default function Layout() {
         <Stack.Screen name="[id]/team" options={{ title: "Team" }} />
         <Stack.Screen
           name="[id]/transfers/index"
-          options={{ title: "Transfers", headerLargeTitle: true }}
+          options={{ title: "Transfer money" }}
         />
         <Stack.Screen
           name="[id]/transfers/ach"
@@ -50,6 +50,42 @@ export default function Layout() {
         <Stack.Screen
           name="[id]/transfers/hcb"
           options={{ title: "HCB Transfer" }}
+        />
+        <Stack.Screen
+          name="[id]/transfers/select-org"
+          options={{
+            presentation: "formSheet",
+            title: "Select organization",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="[id]/transfers/select-country"
+          options={{
+            presentation: "formSheet",
+            title: "Select a country",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
         />
         <Stack.Screen
           name="[id]/cards/index"
@@ -70,7 +106,21 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/transactions/[transactionId]/rename"
-          options={{ title: "Rename Transaction" }}
+          options={{
+            presentation: "formSheet",
+            title: "Rename Transaction",
+            headerShown: true,
+            headerTransparent: false,
+            headerBlurEffect: "systemMaterial",
+            sheetAllowedDetents: [0.5, 0.85],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+            headerRight: () => (
+              <Pressable onPress={() => router.back()} hitSlop={8}>
+                <Ionicons name="close" size={28} color="#8e8e93" />
+              </Pressable>
+            ),
+          }}
         />
         <Stack.Screen
           name="[id]/transactions/filter"
@@ -132,7 +182,7 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/donations/new"
-          options={{ title: "New Donation" }}
+          options={{ title: "New Donation", headerTransparent: false }}
         />
         <Stack.Screen
           name="[id]/donations/process"
@@ -167,32 +217,6 @@ export default function Layout() {
         <Stack.Screen
           name="[id]/sub-organizations"
           options={{ title: "Sub-organizations" }}
-        />
-        <Stack.Screen
-          name="[id]/invoices/index"
-          options={{ title: "Invoices", headerLargeTitle: true }}
-        />
-        <Stack.Screen
-          name="[id]/invoices/[invoiceId]"
-          options={{ title: "Invoice" }}
-        />
-        <Stack.Screen
-          name="[id]/invoices/new"
-          options={{
-            presentation: "formSheet",
-            title: "New Invoice",
-            headerShown: true,
-            headerTransparent: false,
-            headerBlurEffect: "systemMaterial",
-            sheetAllowedDetents: [0.85, 1.0],
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 20,
-            headerRight: () => (
-              <Pressable onPress={() => router.back()} hitSlop={8}>
-                <Ionicons name="close" size={28} color="#8e8e93" />
-              </Pressable>
-            ),
-          }}
         />
         <Stack.Screen
           name="[id]/reimbursements/index"
@@ -240,21 +264,7 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/card-grants/new"
-          options={{
-            presentation: "formSheet",
-            title: "Send a Grant",
-            headerShown: true,
-            headerTransparent: false,
-            headerBlurEffect: "systemMaterial",
-            sheetAllowedDetents: [0.85, 1.0],
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 20,
-            headerRight: () => (
-              <Pressable onPress={() => router.back()} hitSlop={8}>
-                <Ionicons name="close" size={28} color="#8e8e93" />
-              </Pressable>
-            ),
-          }}
+          options={{ title: "Card grant" }}
         />
         <Stack.Screen
           name="card-grants/[id]"

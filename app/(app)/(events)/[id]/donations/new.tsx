@@ -1,28 +1,59 @@
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
+  ConnectTapToPayParams,
   PaymentIntent,
+  PaymentMethodType,
+  Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
-import Icon from "@thedev132/hackclub-icons-rn";
-import { router, useLocalSearchParams } from "expo-router";
+import * as Device from "expo-device";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
+  Button as NativeButton,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
   Pressable,
-  Keyboard as RNKeyboard,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Animated, {
+  SlideInLeft,
+  SlideInRight,
+  SlideOutLeft,
+  SlideOutRight,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
+
 import Button from "@/components/Button";
+import {
+  FormField,
+  FormSection,
+  ReadOnlyField,
+  ToggleField,
+} from "@/components/organizations/transfer/TransferFormUI";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { setPaymentData } from "@/lib/paymentStore";
-import { palette } from "@/styles/theme";
+import Organization from "@/lib/types/Organization";
+import { useIsDark } from "@/lib/useColorScheme";
+import { useLocation } from "@/lib/useLocation";
+import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
+import { cardBorderColor, palette } from "@/styles/theme";
+import { selectionAsync } from "@/utils/haptics";
+
+const MAX_DONATION_AMOUNT = 9999.99;
+
+// TODO: fetch the actual Stripe Terminal location from the organization's
+// Stripe account instead of using this hardcoded value.
+const STRIPE_TERMINAL_LOCATION_ID = "tml_FWRkngENcVS5Pd";
 
 export default function Page() {
   const { id, orgSlug } = useLocalSearchParams<{
@@ -31,20 +62,282 @@ export default function Page() {
   }>();
   const { colors } = useTheme();
   const hcb = useClient();
+  const navigation = useNavigation();
+  const { bottom: bottomInset } = useSafeAreaInsets();
+  const isInitialRender = useRef(true);
+  useEffect(() => {
+    isInitialRender.current = false;
+  }, []);
 
+  const [step, setStep] = useState<"amount" | "details">("amount");
   const [amount, setAmount] = useState("$");
-  const value = parseFloat(amount.replace("$", "0"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isTaxDeductable, setIsTaxDeductable] = useState(false);
-  const emailRef = useRef<TextInput>(null);
+
+  const value = parseFloat(amount.replace("$", "0"));
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: step === "details" ? "Donor Details" : "New Donation",
+      headerLeft:
+        step === "details"
+          ? () =>
+              Platform.OS === "android" ? (
+                <View style={{ marginRight: 20 }}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={24}
+                    color={colors.text}
+                    onPress={() => setStep("amount")}
+                  />
+                </View>
+              ) : (
+                <NativeButton
+                  title="Back"
+                  color={colors.text}
+                  onPress={() => setStep("amount")}
+                />
+              )
+          : undefined,
+    });
+  }, [step, navigation, colors.text]);
+
+  const isDark = useIsDark();
+  const { accessDenied } = useLocation();
+  const { data: organization } = useOfflineSWR<Organization>(
+    `organizations/${id}`,
+  );
+
+  const { isInitialized: isStripeInitialized, discoveredReaders } =
+    useStripeTerminalInit({
+      organizationId: id,
+      enabled: true,
+      enableReaderPreConnection: true,
+      enableSoftwareUpdates: false,
+    });
+
+  const [reader, setReader] = useState<Reader.Type | undefined>(
+    discoveredReaders.length > 0 ? discoveredReaders[0] : undefined,
+  );
+  const readerRef = useRef<Reader.Type | undefined>(reader);
+  const [isConnectingReader, setIsConnectingReader] = useState(false);
+  const [isSubmittingDonation, setIsSubmittingDonation] = useState(false);
 
   const {
     createPaymentIntent,
     collectPaymentMethod,
     confirmPaymentIntent,
     connectedReader,
-  } = useStripeTerminal();
+    discoverReaders,
+    connectReader: connectReaderTapToPay,
+    disconnectReader,
+  } = useStripeTerminal({
+    onUpdateDiscoveredReaders: (readers: Reader.Type[]) => {
+      if (!reader && readers.length > 0) setReader(readers[0]);
+    },
+  });
+  const isSimulator = __DEV__ && !Device.isDevice;
+
+  useEffect(() => {
+    readerRef.current = reader;
+  }, [reader]);
+
+  useEffect(() => {
+    if (discoveredReaders.length > 0 && !reader) {
+      setReader(discoveredReaders[0]);
+    }
+  }, [discoveredReaders, reader]);
+
+  useEffect(() => {
+    (async () => {
+      const storedOrgId = await AsyncStorage.getItem("lastConnectedOrgId");
+      if (connectedReader && storedOrgId !== id) {
+        try {
+          await disconnectReader();
+        } catch (e) {
+          console.error("Error disconnecting reader on page load", e, {
+            context: { orgId: id, action: "disconnect_reader" },
+          });
+        }
+      }
+    })();
+  }, [connectedReader, disconnectReader, id]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (
+          discoverReaders &&
+          isStripeInitialized &&
+          discoveredReaders.length === 0
+        ) {
+          await discoverReaders({ discoveryMethod: "tapToPay" });
+        }
+      } catch (error) {
+        console.error("Error discovering readers", error, {
+          context: { orgId: id, action: "discover_readers" },
+        });
+      }
+    })();
+  }, [discoverReaders, id, isStripeInitialized, discoveredReaders.length]);
+
+  useEffect(() => {
+    const getDidOnboarding = async () => {
+      try {
+        const didOnboarding = await AsyncStorage.getItem("ttpDidOnboarding");
+        if (didOnboarding !== "true") {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          ExpoTtpEdu.showTapToPayEducation({
+            uiMode: isDark ? "dark" : "light",
+          });
+          await AsyncStorage.setItem("ttpDidOnboarding", "true");
+        }
+      } catch (error) {
+        console.error("Error in tap-to-pay onboarding", error, {
+          context: { action: "ttp_onboarding" },
+        });
+      }
+    };
+
+    if (Platform.OS === "ios") {
+      getDidOnboarding();
+    }
+  }, [isDark]);
+
+  async function handleRequestLocation() {
+    await Linking.openSettings();
+  }
+
+  useEffect(() => {
+    if (accessDenied) {
+      showAlert(
+        "Access to location",
+        "To use the app, you need to allow the use of your device location.",
+        [
+          {
+            text: "Activate",
+            onPress: handleRequestLocation,
+          },
+        ],
+      );
+    }
+  }, [accessDenied]);
+
+  async function connectReader(selectedReader: Reader.Type) {
+    if (!isStripeInitialized) {
+      showAlert(
+        "Payment System Error",
+        "Payment system is not ready. Please try again.",
+      );
+      return false;
+    }
+
+    try {
+      const { error } = await connectReaderTapToPay({
+        discoveryMethod: "tapToPay",
+        reader: selectedReader,
+        locationId: STRIPE_TERMINAL_LOCATION_ID,
+        merchantDisplayName: organization?.name || "HCB",
+      } as ConnectTapToPayParams);
+
+      if (error) {
+        if (
+          (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+          (error as { code?: string }).code ==
+            "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+        ) {
+          return true;
+        }
+        console.error("connectReader error", error, {
+          context: { orgId: id, action: "connect_reader" },
+        });
+        showAlert(
+          "Connection Error",
+          "Failed to connect to Tap to Pay reader. Please try again.",
+        );
+        return false;
+      }
+
+      await AsyncStorage.setItem("lastConnectedOrgId", id);
+      return true;
+    } catch (error) {
+      if (
+        (error as { code?: string }).code == "AlreadyConnectedToReader" ||
+        (error as { code?: string }).code ==
+          "INTEGRATION_ERROR.ALREADY_CONNECTED_TO_READER"
+      ) {
+        return true;
+      }
+      console.error("connectReader error", error, {
+        context: { orgId: id, action: "connect_reader" },
+      });
+      showAlert(
+        "Connection Error",
+        "Failed to connect to Tap to Pay reader. Please try again.",
+      );
+      return false;
+    }
+  }
+
+  async function ensureReaderConnected(): Promise<boolean> {
+    if (connectedReader) return true;
+
+    setIsConnectingReader(true);
+    try {
+      const waitForReader = async (timeoutMs = 10000, pollInterval = 300) => {
+        const maxAttempts = Math.ceil(timeoutMs / pollInterval);
+        let attempts = 0;
+        while (attempts < maxAttempts) {
+          await new Promise((res) => setTimeout(res, pollInterval));
+          if (readerRef.current) return true;
+          attempts++;
+        }
+        return false;
+      };
+
+      if (reader) {
+        return await connectReader(reader);
+      }
+
+      if (discoveredReaders.length > 0) {
+        return await connectReader(discoveredReaders[0]);
+      }
+
+      if (!isStripeInitialized) {
+        showAlert(
+          "Payment System Error",
+          "Payment system is not ready. Please try again.",
+        );
+        return false;
+      }
+
+      const readers = await discoverReaders({
+        discoveryMethod: "tapToPay",
+      });
+
+      if (
+        (readers.error as { code?: string } | undefined)?.code ===
+        "AlreadyConnectedToReader"
+      ) {
+        return true;
+      }
+
+      const found = await waitForReader();
+      if (found && readerRef.current) {
+        return await connectReader(readerRef.current);
+      }
+
+      console.error("No reader found", readers);
+      showAlert(
+        "No reader found",
+        "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
+      );
+      return false;
+    } finally {
+      setIsConnectingReader(false);
+    }
+  }
 
   const createDonation = async () => {
     try {
@@ -141,7 +434,7 @@ export default function Page() {
       const { error, paymentIntent } = await createPaymentIntent({
         amount: Number((value * 100).toFixed()),
         currency: "usd",
-        paymentMethodTypes: ["card_present"],
+        paymentMethodTypes: [PaymentMethodType.CardPresent],
         offlineBehavior: "prefer_online",
         captureMethod: "automatic",
         metadata: {
@@ -176,279 +469,168 @@ export default function Page() {
     }
   }
 
-  const isDevMode = __DEV__ && !connectedReader;
-  const { bottom: bottomTabBarHeight } = useSafeAreaInsets();
+  const submitDonation = async () => {
+    if (isSimulator) {
+      const mockPayment = {
+        amount: Math.round(value * 100),
+      } as PaymentIntent.Type;
+      setPaymentData({
+        paymentIntent: mockPayment,
+        collectPayment: async () => {
+          return new Promise<boolean>((resolve) =>
+            setTimeout(() => resolve(true), 2000),
+          );
+        },
+        name: name || "Dev Test User",
+        email: email || "dev@example.com",
+        slug: orgSlug || "test-org",
+      });
+      router.push({
+        pathname: "/[id]/donations/process",
+        params: { id },
+      });
+      return;
+    }
+    setIsSubmittingDonation(true);
+    try {
+      const connected = await ensureReaderConnected();
+      if (!connected) return;
+
+      const donation_id = await createDonation();
+      await paymentIntent({ donation_id });
+    } catch (error) {
+      console.error("createDonation error", error, {
+        context: {
+          orgId: id,
+          amount: value * 100,
+          action: "create_donation",
+        },
+      });
+      showAlert(
+        "Error creating donation",
+        await parseApiError(error, "Please try again."),
+      );
+    } finally {
+      setIsSubmittingDonation(false);
+    }
+  };
+
+  const goToDetails = () => {
+    if (value <= 0) {
+      showAlert("Error creating donation", "Amount must be greater than 0.");
+      return;
+    }
+    setStep("details");
+  };
+
+  if (step === "amount") {
+    return (
+      <Animated.View
+        key="amount"
+        style={{ flex: 1 }}
+        entering={
+          isInitialRender.current ? undefined : SlideInLeft.duration(220)
+        }
+        exiting={SlideOutLeft.duration(220)}
+      >
+        <AmountStep
+          amount={amount}
+          setAmount={setAmount}
+          bottomInset={bottomInset}
+          onContinue={goToDetails}
+        />
+      </Animated.View>
+    );
+  }
 
   return (
-    <TouchableWithoutFeedback onPress={() => RNKeyboard.dismiss()}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{
-          paddingBottom: bottomTabBarHeight + 16,
-          flexGrow: 1,
-        }}
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View
-          style={{
-            padding: 20,
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            flex: 1,
-            width: "100%",
-          }}
-        >
-          <View style={{ width: "100%", gap: 12, marginBottom: 12 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: colors.card,
-                borderRadius: 12,
-                paddingHorizontal: 14,
-              }}
-            >
-              <Icon glyph="person" size={26} color={palette.muted} />
-              <TextInput
-                style={{
-                  color: colors.text,
-                  paddingVertical: 14,
-                  paddingHorizontal: 12,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-                selectTextOnFocus
-                clearButtonMode="while-editing"
-                value={name}
-                autoCapitalize="words"
-                onChangeText={setName}
-                autoComplete="off"
-                autoCorrect={false}
-                placeholder="Donor name (optional)"
-                placeholderTextColor={palette.muted}
-                returnKeyType="next"
-                onSubmitEditing={() => {
-                  emailRef.current?.focus();
-                }}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: colors.card,
-                borderRadius: 12,
-                paddingHorizontal: 14,
-              }}
-            >
-              <Icon glyph="email" size={24} color={palette.muted} />
-              <TextInput
-                style={{
-                  color: colors.text,
-                  paddingVertical: 14,
-                  paddingHorizontal: 12,
-                  fontSize: 16,
-                  flex: 1,
-                }}
-                selectTextOnFocus
-                clearButtonMode="while-editing"
-                placeholder="Email for receipt (optional)"
-                placeholderTextColor={palette.muted}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-                ref={emailRef}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                width: "100%",
-                backgroundColor: colors.card,
-                paddingVertical: 14,
-                paddingHorizontal: 14,
-                borderRadius: 12,
-                gap: 12,
-              }}
-              onPress={() => setIsTaxDeductable(!isTaxDeductable)}
-              activeOpacity={0.7}
-            >
-              <Icon
-                glyph={isTaxDeductable ? "checkmark" : "checkbox"}
-                size={26}
-                color={isTaxDeductable ? palette.primary : palette.muted}
-              />
-              <Text style={{ color: colors.text, fontSize: 16, flex: 1 }}>
-                Receiving goods or services
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ flex: 1, width: "100%", marginTop: 8 }}>
-            <Keyboard amount={amount} setAmount={setAmount} />
-          </View>
-
-          <Button
-            onPress={async () => {
-              if (value <= 0) {
-                showAlert(
-                  "Error creating donation",
-                  "Amount must be greater than 0.",
-                );
-                return;
-              }
-              if (isDevMode) {
-                const mockPayment = {
-                  amount: Math.round(value * 100),
-                } as PaymentIntent.Type;
-                setPaymentData({
-                  paymentIntent: mockPayment,
-                  collectPayment: async () => {
-                    return new Promise<boolean>((resolve) =>
-                      setTimeout(() => resolve(true), 2000),
-                    );
-                  },
-                  name: name || "Dev Test User",
-                  email: email || "dev@example.com",
-                  slug: orgSlug || "test-org",
-                });
-                router.push({
-                  pathname: "/[id]/donations/process",
-                  params: { id },
-                });
-                return;
-              }
-              try {
-                const donation_id = await createDonation();
-                await paymentIntent({ donation_id });
-              } catch (error) {
-                console.error("createDonation error", error, {
-                  context: {
-                    orgId: id,
-                    amount: value * 100,
-                    action: "create_donation",
-                  },
-                });
-                showAlert(
-                  "Error creating donation",
-                  await parseApiError(error, "Please try again."),
-                );
-              }
-            }}
-            style={{
-              width: "100%",
-              marginTop: 12,
-              marginBottom: 0,
-              paddingVertical: 16,
-            }}
-            fontSize={17}
-          >
-            Create Donation
-          </Button>
-        </View>
-      </ScrollView>
-    </TouchableWithoutFeedback>
+    <Animated.View
+      key="details"
+      style={{ flex: 1 }}
+      entering={SlideInRight.duration(220)}
+      exiting={SlideOutRight.duration(220)}
+    >
+      <DetailsStep
+        amount={amount}
+        name={name}
+        setName={setName}
+        email={email}
+        setEmail={setEmail}
+        isTaxDeductable={isTaxDeductable}
+        setIsTaxDeductable={setIsTaxDeductable}
+        bottomInset={bottomInset}
+        onEditAmount={() => setStep("amount")}
+        onSubmit={submitDonation}
+        isSubmitting={isSubmittingDonation}
+        isConnectingReader={isConnectingReader}
+      />
+    </Animated.View>
   );
 }
 
-interface KeyboardProps {
+function AmountStep({
+  amount,
+  setAmount,
+  bottomInset,
+  onContinue,
+}: {
   amount: string;
-  setAmount: (value: string) => void;
-}
-
-interface NumberProps {
-  number?: number;
-  symbol?: string;
-  onPress?: () => void;
-}
-
-const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
+  setAmount: Dispatch<SetStateAction<string>>;
+  bottomInset: number;
+  onContinue: () => void;
+}) {
+  const { colors } = useTheme();
   const [error, setError] = useState(false);
-  const theme = useTheme();
 
-  function pressNumber(amount: string, number: number) {
+  const flashError = () => {
+    setError(true);
+    setTimeout(() => setError(false), 200);
+  };
+
+  const pressDigit = (digit: number) => {
     if (
-      parseFloat(amount.replace("$", "0") + number) > 9999.99 ||
-      (amount === "$" && number === 0) ||
+      parseFloat(amount.replace("$", "0") + digit) > MAX_DONATION_AMOUNT ||
+      (amount === "$" && digit === 0) ||
       amount[amount.length - 3] === "."
     ) {
-      setError(true);
-      setTimeout(() => setError(false), 200);
+      flashError();
     } else {
-      setAmount(amount + number);
+      setAmount(amount + digit);
     }
-  }
+  };
 
-  function pressDecimal(amount: string) {
+  const pressDecimal = () => {
     if (amount.includes(".") || amount === "$") {
-      setError(true);
-      setTimeout(() => setError(false), 200);
+      flashError();
     } else {
       setAmount(amount + ".");
     }
-  }
+  };
 
-  function pressBackspace(amount: string) {
+  const pressBackspace = () => {
     if (amount === "$") {
-      setError(true);
-      setTimeout(() => setError(false), 200);
+      flashError();
     } else {
-      setAmount(amount.slice(0, amount.length - 1));
+      setAmount(amount.slice(0, -1));
     }
-  }
-
-  const Number = ({ number, symbol, onPress }: NumberProps) => (
-    <Pressable
-      onPress={() => {
-        if (onPress) {
-          onPress();
-        } else if (number !== undefined) {
-          pressNumber(amount, number as number);
-        }
-      }}
-      style={() => ({
-        flexGrow: 1,
-        paddingVertical: 6,
-      })}
-    >
-      <Text
-        style={{
-          color: theme.colors.text,
-          fontSize: 26,
-          textAlign: "center",
-          fontFamily: "JetBrainsMono-Regular",
-        }}
-      >
-        {number}
-        {symbol}
-      </Text>
-    </Pressable>
-  );
+  };
 
   return (
     <View
       style={{
+        flex: 1,
         width: "100%",
-        flexGrow: 1,
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "space-around",
+        padding: 20,
+        paddingBottom: bottomInset + 16,
       }}
     >
       <Text
         style={{
-          color: error ? palette.primary : theme.colors.text,
-          paddingBottom: 10,
-          paddingHorizontal: 10,
+          color: error ? palette.primary : colors.text,
           fontSize: 72,
           textTransform: "uppercase",
           textAlign: "center",
+          marginTop: 16,
         }}
       >
         {amount}
@@ -460,34 +642,207 @@ const Keyboard = ({ amount, setAmount }: KeyboardProps) => {
           <Text style={{ color: palette.muted }}>0</Text>
         )}
       </Text>
-      <View>
-        <View style={{ flexDirection: "row", paddingBottom: 16 }}>
-          <Number number={1} />
-          <Number number={2} />
-          <Number number={3} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 12, paddingBottom: 12 }}
+
+      <View style={{ flex: 1, justifyContent: "center", marginTop: 24 }}>
+        <NumberPad
+          onPressDigit={pressDigit}
+          onPressDecimal={pressDecimal}
+          onPressBackspace={pressBackspace}
+        />
+      </View>
+
+      <Button
+        onPress={onContinue}
+        style={{ width: "100%", paddingVertical: 16 }}
+        fontSize={17}
+      >
+        Continue
+      </Button>
+    </View>
+  );
+}
+
+const KEY_DIAMETER = 84;
+
+function NumberPad({
+  onPressDigit,
+  onPressDecimal,
+  onPressBackspace,
+}: {
+  onPressDigit: (digit: number) => void;
+  onPressDecimal: () => void;
+  onPressBackspace: () => void;
+}) {
+  const { colors } = useTheme();
+  const isDark = useIsDark();
+
+  const Key = ({
+    label,
+    icon,
+    onPress,
+  }: {
+    label?: string;
+    icon?: React.ComponentProps<typeof Ionicons>["name"];
+    onPress: () => void;
+  }) => (
+    <Pressable
+      onPress={() => {
+        selectionAsync();
+        onPress();
+      }}
+      style={({ pressed }) => ({
+        width: KEY_DIAMETER,
+        height: KEY_DIAMETER,
+        borderRadius: KEY_DIAMETER / 2,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: pressed ? cardBorderColor(isDark) : "transparent",
+      })}
+    >
+      {icon ? (
+        <Ionicons name={icon} size={26} color={colors.text} />
+      ) : (
+        <Text
+          style={{
+            color: colors.text,
+            fontSize: 32,
+            textAlign: "center",
+            fontFamily: "JetBrainsMono-Regular",
+          }}
         >
-          <Number number={4} />
-          <Number number={5} />
-          <Number number={6} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 12, paddingBottom: 12 }}
-        >
-          <Number number={7} />
-          <Number number={8} />
-          <Number number={9} />
-        </View>
-        <View
-          style={{ flexDirection: "row", paddingTop: 12, paddingBottom: 12 }}
-        >
-          <Number symbol={"."} onPress={() => pressDecimal(amount)} />
-          <Number number={0} />
-          <Number symbol={"←"} onPress={() => pressBackspace(amount)} />
-        </View>
+          {label}
+        </Text>
+      )}
+    </Pressable>
+  );
+
+  return (
+    <View style={{ alignSelf: "center", width: 320, gap: 18 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Key label="1" onPress={() => onPressDigit(1)} />
+        <Key label="2" onPress={() => onPressDigit(2)} />
+        <Key label="3" onPress={() => onPressDigit(3)} />
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Key label="4" onPress={() => onPressDigit(4)} />
+        <Key label="5" onPress={() => onPressDigit(5)} />
+        <Key label="6" onPress={() => onPressDigit(6)} />
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Key label="7" onPress={() => onPressDigit(7)} />
+        <Key label="8" onPress={() => onPressDigit(8)} />
+        <Key label="9" onPress={() => onPressDigit(9)} />
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Key label="." onPress={onPressDecimal} />
+        <Key label="0" onPress={() => onPressDigit(0)} />
+        <Key icon="backspace-outline" onPress={onPressBackspace} />
       </View>
     </View>
   );
-};
+}
+
+function AmountSummary({
+  amount,
+  onPress,
+}: {
+  amount: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress}>
+      <ReadOnlyField
+        label="Donation amount"
+        value={amount === "$" ? "$0" : amount}
+        secondary="Edit"
+      />
+    </Pressable>
+  );
+}
+
+function DetailsStep({
+  amount,
+  name,
+  setName,
+  email,
+  setEmail,
+  isTaxDeductable,
+  setIsTaxDeductable,
+  bottomInset,
+  onEditAmount,
+  onSubmit,
+  isSubmitting,
+  isConnectingReader,
+}: {
+  amount: string;
+  name: string;
+  setName: Dispatch<SetStateAction<string>>;
+  email: string;
+  setEmail: Dispatch<SetStateAction<string>>;
+  isTaxDeductable: boolean;
+  setIsTaxDeductable: Dispatch<SetStateAction<boolean>>;
+  bottomInset: number;
+  onEditAmount: () => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  isConnectingReader: boolean;
+}) {
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: bottomInset + 24,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={{ gap: 24 }}>
+          <AmountSummary amount={amount} onPress={onEditAmount} />
+
+          <FormSection title="Donor information">
+            <FormField
+              label="Name"
+              optional
+              value={name}
+              onChangeText={setName}
+              placeholder="Anonymous"
+              autoCapitalize="words"
+              autoComplete="off"
+              autoCorrect={false}
+            />
+            <FormField
+              label="Email"
+              optional
+              description="A receipt will be sent here if provided."
+              value={email}
+              onChangeText={setEmail}
+              placeholder="donor@example.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <ToggleField
+              label="Receiving goods or services"
+              description="Check this if the donor received something of value in exchange for this donation."
+              value={isTaxDeductable}
+              onValueChange={setIsTaxDeductable}
+            />
+          </FormSection>
+
+          <Button
+            onPress={onSubmit}
+            style={{ width: "100%", paddingVertical: 16 }}
+            fontSize={17}
+            loading={isSubmitting}
+          >
+            {isConnectingReader ? "Connecting..." : "Create Donation"}
+          </Button>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}

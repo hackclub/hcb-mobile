@@ -10,16 +10,18 @@ import { cardBorderColor, palette } from "@/styles/theme";
 export default function TapToPayBanner({
   onDismiss,
   orgId,
+  orgSlug,
 }: {
   onDismiss: () => void;
   orgId: `org_${string}`;
+  orgSlug: string;
 }) {
   const isDark = useIsDark();
 
   const handlePress = () => {
     router.push({
-      pathname: "/(events)/[id]/donations",
-      params: { id: orgId },
+      pathname: "/(events)/[id]/donations/new",
+      params: { id: orgId, orgSlug },
     });
   };
 

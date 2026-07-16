@@ -3,7 +3,6 @@ import ky, { type KyInstance } from "ky";
 import { tokenManager } from "./tokenManager";
 
 let clientInstance: KyInstance | null = null;
-let refreshInProgress = false;
 
 // Expo SDK 56's winter fetch doesn't support RN's { uri, name, type } FormData file parts.
 // For FormData requests we use XHR directly (which goes through RN's native networking layer)
@@ -99,79 +98,67 @@ export function getClient(): KyInstance {
         ],
         afterResponse: [
           async (request, options, response) => {
-            if (response.status === 401) {
-              // Prevent multiple simultaneous refresh attempts
-              if (refreshInProgress) {
-                while (refreshInProgress) {
-                  await new Promise((resolve) => setTimeout(resolve, 100));
+            if (response.status !== 401) {
+              return response;
+            }
+
+            // If this request is itself a post-refresh retry that still 401'd,
+            // a fresh token didn't help — don't refresh/retry again, or we'd
+            // loop forever refreshing a token the server keeps rejecting.
+            if (request.headers.get("x-hcb-token-retry") === "1") {
+              return response;
+            }
+
+            // tokenManager.refresh() dedupes concurrent callers via a shared
+            // promise, so a burst of parallel 401s triggers a single network
+            // refresh. It also owns the decision of whether a failure is
+            // terminal (ends the session) or transient (keeps the session) —
+            // we never log out here.
+            const refreshed = await tokenManager.refresh();
+
+            if (!refreshed?.accessToken) {
+              // Refresh didn't yield a token. If this was transient, the
+              // session is still alive and SWR will retry the request; if it
+              // was terminal, tokenManager has already logged out. Either way,
+              // surface the 401 and let the retry layer decide.
+              return response;
+            }
+
+            let retryBody: BodyInit | null = null;
+            if (request.body) {
+              if (options.body instanceof FormData) {
+                retryBody = options.body;
+              } else if (request.body instanceof FormData) {
+                retryBody = options.body || null;
+              } else {
+                try {
+                  retryBody = await request.clone().body;
+                } catch {
+                  retryBody = options.body || null;
                 }
-                const token = await tokenManager.getValidAccessToken();
-                if (token) {
-                  return clientInstance!.extend({
-                    headers: { Authorization: `Bearer ${token}` },
-                  })(request.url, {
-                    method: request.method,
-                    body: options.body,
-                    headers: options.headers,
-                  });
-                }
-                return response;
-              }
-
-              refreshInProgress = true;
-              try {
-                const refreshed = await tokenManager.refresh();
-
-                if (refreshed?.accessToken) {
-                  let retryBody: BodyInit | null = null;
-                  if (request.body) {
-                    if (options.body instanceof FormData) {
-                      retryBody = options.body;
-                    } else if (request.body instanceof FormData) {
-                      retryBody = options.body || null;
-                    } else {
-                      try {
-                        retryBody = await request.clone().body;
-                      } catch {
-                        retryBody = options.body || null;
-                      }
-                    }
-                  }
-
-                  const retryClient = clientInstance!.extend({
-                    headers: {
-                      Authorization: `Bearer ${refreshed.accessToken}`,
-                    },
-                  });
-
-                  type HttpMethod =
-                    | "GET"
-                    | "POST"
-                    | "PUT"
-                    | "DELETE"
-                    | "PATCH"
-                    | "HEAD"
-                    | "OPTIONS";
-                  const retryResponse = await retryClient(request.url, {
-                    method: request.method as HttpMethod,
-                    body: retryBody || options.body,
-                    headers: options.headers,
-                  });
-
-                  return retryResponse;
-                } else {
-                  console.error(
-                    "[HTTP Client] Token refresh failed, logging out",
-                  );
-                  await tokenManager.logout("401_refresh_failed");
-                  return response;
-                }
-              } finally {
-                refreshInProgress = false;
               }
             }
 
-            return response;
+            const retryClient = clientInstance!.extend({
+              headers: {
+                Authorization: `Bearer ${refreshed.accessToken}`,
+                "x-hcb-token-retry": "1",
+              },
+            });
+
+            type HttpMethod =
+              | "GET"
+              | "POST"
+              | "PUT"
+              | "DELETE"
+              | "PATCH"
+              | "HEAD"
+              | "OPTIONS";
+            return retryClient(request.url, {
+              method: request.method as HttpMethod,
+              body: retryBody || options.body,
+              headers: options.headers,
+            });
           },
         ],
       },

@@ -8,11 +8,11 @@ import {
   View,
 } from "react-native";
 
-import CardGrantScreen from "@/components/organizations/transfer/CardGrant";
+import WireTransferScreen from "@/components/organizations/transfer/WireTransfer";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
-export default function NewCardGrantPage() {
+export default function WireTransferPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
@@ -44,7 +44,7 @@ export default function NewCardGrantPage() {
         contentContainerStyle={{ flexGrow: 1, padding: 20 }}
         keyboardShouldPersistTaps="handled"
       >
-        <CardGrantScreen organization={organization} />
+        <WireTransferScreen organization={organization} />
       </ScrollView>
     </KeyboardAvoidingView>
   );

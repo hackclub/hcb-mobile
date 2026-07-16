@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
+import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -18,6 +19,7 @@ import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 import * as Haptics from "@/utils/haptics";
 import { orgColor } from "@/utils/org";
+import { shareUrl } from "@/utils/shareUrl";
 import { maybeRequestReview } from "@/utils/storeReview";
 
 interface GrantInviteProps {
@@ -32,6 +34,18 @@ export default function GrantInvite({ grant, style }: GrantInviteProps) {
   const [showTerms, setShowTerms] = useState(false);
 
   const handleCreateCard = async () => {
+    if (grant.pre_authorization_required) {
+      setShowTerms(false);
+      await WebBrowser.openBrowserAsync(shareUrl.cardGrantPreAuth(grant.id), {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+      });
+      router.push({
+        pathname: "/(events)/card-grants/[id]",
+        params: { id: grant.id },
+      });
+      return;
+    }
+
     setIsCreatingCard(true);
     try {
       const response = await hcb.post(`card_grants/${grant.id}/activate`);

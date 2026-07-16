@@ -110,6 +110,7 @@ export default function Page() {
   }>("user/transactions/missing_receipt");
   const { data: receipts, mutate: refreshReceipts } =
     useOfflineSWR<Receipt[]>("receipts");
+  console.log(receipts);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -256,7 +257,7 @@ export default function Page() {
     transaction: TransactionCardCharge & { organization: Organization },
   ) => {
     router.push({
-      pathname: "/receipts/selection",
+      pathname: "/receipt-selection",
       params: {
         transaction: JSON.stringify(transaction),
       },
@@ -302,6 +303,8 @@ export default function Page() {
     if (item.type === "empty-state") return groupedTransactions.length === 0;
     return true;
   });
+
+  console.log(listData);
 
   const renderItem = ({
     item,

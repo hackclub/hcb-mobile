@@ -35,6 +35,7 @@ import useClient from "@/lib/client";
 import { useLinkingPref } from "@/lib/providers/LinkingContext";
 import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
+import { tokenManager } from "@/lib/tokenManager";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -574,11 +575,17 @@ export default function Layout() {
                       return;
                     }
 
+                    // Retry a 401 while a session token still exists: the token
+                    // refresh is likely still catching up after a transient
+                    // failure. Once logged out (no token), stop retrying.
+                    const isRecoverable401 =
+                      status === 401 && !!tokenManager.getToken();
                     if (
                       status &&
                       status >= 400 &&
                       status < 500 &&
-                      status !== 429
+                      status !== 429 &&
+                      !isRecoverable401
                     ) {
                       return;
                     }

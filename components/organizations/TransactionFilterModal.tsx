@@ -7,7 +7,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Switch,
   TextInput,
   View,
 } from "react-native";
@@ -374,31 +373,6 @@ export default function TransactionFilterModal({
                   </View>
                 </View>
               )}
-
-              {/* Missing receipts */}
-              <View>
-                <View
-                  style={{
-                    ...cardStyle,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                  }}
-                >
-                  <Text style={{ color: themeColors.text, fontSize: 15 }}>
-                    Missing receipts only
-                  </Text>
-                  <Switch
-                    value={!!draft.missingReceipts}
-                    onValueChange={(v) =>
-                      set({ missingReceipts: v || undefined })
-                    }
-                    trackColor={{ true: palette.primary }}
-                  />
-                </View>
-              </View>
             </ScrollView>
 
             {/* Apply button */}

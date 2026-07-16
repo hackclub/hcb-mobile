@@ -48,7 +48,6 @@ function countActiveFilters(filters: TransactionFilters): number {
   if (filters.type) n++;
   if (filters.startDate || filters.endDate) n++;
   if (filters.minimumAmount || filters.maximumAmount) n++;
-  if (filters.missingReceipts) n++;
   // tagId is shown separately as chips, not counted here
   return n;
 }

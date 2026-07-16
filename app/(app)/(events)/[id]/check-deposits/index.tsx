@@ -8,7 +8,12 @@ import Badge from "@/components/Badge";
 import { Text } from "@/components/Text";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney, statusColor } from "@/utils/format";
+import {
+  capitalize,
+  renderDate,
+  renderMoney,
+  statusColor,
+} from "@/utils/format";
 
 interface CheckDepositSummary {
   id: string;
@@ -122,7 +127,7 @@ export default function CheckDepositsPage() {
                   style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
                 >
                   <Badge color={statusColor(deposit.status)}>
-                    {deposit.status.replace(/_/g, " ")}
+                    {capitalize(deposit.status.replace(/_/g, " "))}
                   </Badge>
                   <Ionicons
                     name="chevron-forward"

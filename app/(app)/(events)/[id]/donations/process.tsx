@@ -6,7 +6,6 @@ import { router, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Button,
   Platform,
@@ -151,17 +150,23 @@ function ActionButton({
   children,
   style,
   variant = "primary",
+  loading,
+  disabled,
 }: {
   onPress: () => void;
   children: React.ReactNode;
   style?: ViewStyle;
   variant?: "primary" | "secondary" | "outline" | "ghost";
+  loading?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <StyledButton
       onPress={onPress}
       variant={variant}
       fontSize={17}
+      loading={loading}
+      disabled={disabled}
       style={{
         width: "100%",
         alignSelf: "center",
@@ -215,7 +220,7 @@ export default function Page() {
 
   useEffect(() => {
     navigation.setOptions({
-      title: showQR ? "Donation Link" : undefined,
+      title: showQR ? "Donation Link" : "Process Donation",
       headerLeft: () => (
         <>
           {Platform.OS === "android" ? (
@@ -247,42 +252,6 @@ export default function Page() {
 
   const renderContent = () => {
     switch (status) {
-      case "loading":
-        return (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <View
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-                backgroundColor: isDark
-                  ? "rgba(236, 55, 80, 0.12)"
-                  : "rgba(236, 55, 80, 0.08)",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: 24,
-              }}
-            >
-              <ActivityIndicator size="large" color={palette.primary} />
-            </View>
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "600",
-                marginBottom: 8,
-                color: theme.colors.text,
-              }}
-            >
-              Processing {donationAmount}
-            </Text>
-            <Text style={{ fontSize: 16, color: palette.muted }}>
-              Hold card near device...
-            </Text>
-          </View>
-        );
-
       case "success":
         return (
           <View
@@ -443,8 +412,11 @@ export default function Page() {
           </View>
         );
 
+      case "loading":
       case "ready":
-      default:
+      default: {
+        const isProcessing = status === "loading";
+
         if (showQR) {
           return (
             <View
@@ -517,7 +489,11 @@ export default function Page() {
               </Text>
             )}
             <ButtonGroup>
-              <ActionButton onPress={handlePayment} variant="primary">
+              <ActionButton
+                onPress={handlePayment}
+                variant="primary"
+                loading={isProcessing}
+              >
                 Tap to Pay{Platform.OS === "ios" ? " on iPhone" : ""}
               </ActionButton>
               <ActionButton
@@ -530,6 +506,7 @@ export default function Page() {
             </ButtonGroup>
           </View>
         );
+      }
     }
   };
 

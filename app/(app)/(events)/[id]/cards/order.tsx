@@ -1,14 +1,11 @@
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
-import { useTheme } from "expo-router/react-navigation";
-import { useEffect, useState } from "react";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import { useCallback, useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
   Platform,
-  Pressable,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -19,8 +16,10 @@ import useSWR, { useSWRConfig } from "swr";
 import Button from "@/components/Button";
 import CardIcon from "@/components/cards/CardIcon";
 import RepIcon from "@/components/cards/RepIcon";
+import { OrgSelectField } from "@/components/organizations/transfer/OrgSelectField";
 import { Text } from "@/components/Text";
 import useClient from "@/lib/client";
+import { consumePendingOrg } from "@/lib/orgPickerStore";
 import CardDesign from "@/lib/types/CardDesign";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
@@ -67,13 +66,30 @@ export default function Page() {
   const { fetcher } = useSWRConfig();
   const currentUserId = user?.id;
 
-  const { showActionSheetWithOptions } = useActionSheet();
   const orgPreselected = Boolean(params?.id);
   const selectableOrganizations =
     organizations?.filter((org) => org.playground_mode === false) ?? [];
   const selectedOrganization = selectableOrganizations.find(
     (org) => org.id === organizationId,
   );
+
+  // Apply the org chosen in the picker sheet when returning to this screen.
+  useFocusEffect(
+    useCallback(() => {
+      const pending = consumePendingOrg();
+      if (pending) {
+        setOrganizationId(pending);
+        setCardDesign(null);
+      }
+    }, []),
+  );
+
+  const openOrgPicker = () => {
+    router.push({
+      pathname: "/cards/select-org",
+      params: { selected: organizationId },
+    });
+  };
 
   useEffect(() => {
     if (params?.id) {
@@ -153,67 +169,13 @@ export default function Page() {
           options={{ headerLargeTitle: true, title: "Order a Card" }}
         />
         {!orgPreselected && (
-          <>
-            <Text
-              style={{
-                color: themeColors.text,
-                fontSize: 16,
-                fontWeight: "500",
-                marginBottom: 12,
-              }}
-            >
-              Which organization?
-            </Text>
-            <Pressable
-              onPress={() => {
-                const options = [
-                  ...selectableOrganizations.map((org) => org.name),
-                  "Cancel",
-                ];
-                showActionSheetWithOptions(
-                  {
-                    title: "Which organization?",
-                    options,
-                    cancelButtonIndex: options.length - 1,
-                    userInterfaceStyle: isDark ? "dark" : "light",
-                  },
-                  (index) => {
-                    if (
-                      index === undefined ||
-                      index >= selectableOrganizations.length
-                    ) {
-                      return;
-                    }
-                    setOrganizationId(selectableOrganizations[index].id);
-                    setCardDesign(null);
-                  },
-                );
-              }}
-              style={{
-                backgroundColor: themeColors.card,
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 24,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text
-                style={{
-                  color: selectedOrganization
-                    ? themeColors.text
-                    : palette.muted,
-                  fontSize: 15,
-                  flex: 1,
-                }}
-                numberOfLines={1}
-              >
-                {selectedOrganization?.name ?? "Select an organization"}
-              </Text>
-              <Ionicons name="chevron-expand" size={16} color={palette.muted} />
-            </Pressable>
-          </>
+          <View style={{ marginBottom: 24 }}>
+            <OrgSelectField
+              label="Which organization?"
+              selectedOrg={selectedOrganization}
+              onPress={openOrgPicker}
+            />
+          </View>
         )}
         <Text
           style={{

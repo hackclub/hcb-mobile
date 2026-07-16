@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
-import { Pressable, ScrollView, Switch, TextInput, View } from "react-native";
+import { Pressable, ScrollView, TextInput, View } from "react-native";
 
 import Button from "@/components/Button";
 import TagChip from "@/components/tags/TagChip";
@@ -12,7 +12,7 @@ import { TransactionFilters } from "@/lib/organization/useTransactions";
 import Tag from "@/lib/types/Tag";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
-import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
+import { cardBorderColor, subTextColor } from "@/styles/theme";
 
 export default function TransactionFilterScreen() {
   const { colors: themeColors } = useTheme();
@@ -281,27 +281,6 @@ export default function TransactionFilterScreen() {
           </View>
         </View>
       )}
-
-      {/* Missing receipts */}
-      <View
-        style={{
-          ...cardStyle,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-        }}
-      >
-        <Text style={{ color: themeColors.text, fontSize: 15 }}>
-          Missing receipts only
-        </Text>
-        <Switch
-          value={!!draft.missingReceipts}
-          onValueChange={(v) => set({ missingReceipts: v || undefined })}
-          trackColor={{ true: palette.primary }}
-        />
-      </View>
 
       {/* Apply */}
       <Button onPress={handleApply}>Apply filters</Button>

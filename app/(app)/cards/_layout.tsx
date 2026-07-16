@@ -47,6 +47,24 @@ export default function Layout() {
       />
       <Stack.Screen name="order/index" options={{ title: "Order a Card" }} />
       <Stack.Screen name="order/[id]" options={{ title: "Order a Card" }} />
+      <Stack.Screen
+        name="select-org"
+        options={{
+          presentation: "formSheet",
+          title: "Select organization",
+          headerShown: true,
+          headerTransparent: false,
+          headerBlurEffect: "systemMaterial",
+          sheetAllowedDetents: [0.75, 1.0],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 20,
+          headerRight: () => (
+            <Pressable onPress={() => router.back()} hitSlop={8}>
+              <Ionicons name="close" size={28} color="#8e8e93" />
+            </Pressable>
+          ),
+        }}
+      />
     </Stack>
   );
 }

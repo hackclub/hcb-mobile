@@ -10,7 +10,6 @@ import User from "../lib/types/User";
 import { validateFields } from "./cardHelpers";
 import { renderMoney } from "./format";
 import * as Haptics from "./haptics";
-import parse from "date-fns/esm/fp/parse/index.js";
 
 export const toggleCardFrozen = (
   card: Card,

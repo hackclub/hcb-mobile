@@ -13,7 +13,12 @@ import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { renderDate, renderMoney, statusColor } from "@/utils/format";
+import {
+  capitalize,
+  renderDate,
+  renderMoney,
+  statusColor,
+} from "@/utils/format";
 import { shareUrl } from "@/utils/shareUrl";
 
 interface CheckDepositDetail {
@@ -111,7 +116,7 @@ export default function CheckDepositDetailPage() {
     );
   }
 
-  const statusLabel = deposit.status.replace(/_/g, " ");
+  const statusLabel = capitalize(deposit.status.replace(/_/g, " "));
 
   return (
     <ScrollView

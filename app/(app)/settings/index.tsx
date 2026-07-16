@@ -448,7 +448,7 @@ export default function SettingsPage() {
                 style={{
                   height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 52,
+                  marginHorizontal: 18,
                 }}
               />
             </>
@@ -483,7 +483,7 @@ export default function SettingsPage() {
                 style={{
                   height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 52,
+                  marginHorizontal: 18,
                 }}
               />
             </>
@@ -516,7 +516,7 @@ export default function SettingsPage() {
                 style={{
                   height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 52,
+                  marginHorizontal: 18,
                 }}
               />
               <Pressable
@@ -620,10 +620,9 @@ export default function SettingsPage() {
           </Pressable>
           <View
             style={{
-              height: 1,
+              height: StyleSheet.hairlineWidth,
               backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
+              marginHorizontal: 18,
             }}
           />
           <Pressable
@@ -655,7 +654,7 @@ export default function SettingsPage() {
                 style={{
                   height: StyleSheet.hairlineWidth,
                   backgroundColor: dividerColor,
-                  marginLeft: 52,
+                  marginHorizontal: 18,
                 }}
               />
               <Pressable
@@ -750,10 +749,9 @@ export default function SettingsPage() {
           </Pressable>
           <View
             style={{
-              height: 1,
+              height: StyleSheet.hairlineWidth,
               backgroundColor: dividerColor,
-              marginLeft: 20,
-              marginRight: 20,
+              marginHorizontal: 18,
             }}
           />
           <Pressable

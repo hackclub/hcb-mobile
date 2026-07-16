@@ -93,6 +93,8 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
     useReceiptActionSheet({
       orgId,
       transactionId: transaction.id,
+      transactionMemo: transaction.memo,
+      enableBinSelection: true,
       onUploadComplete: mutate,
     });
 

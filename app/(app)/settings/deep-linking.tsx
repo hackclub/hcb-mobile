@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
-import { ActivityIndicator, Switch, View } from "react-native";
+import { ActivityIndicator, ScrollView, Switch, View } from "react-native";
 
 import { Text } from "@/components/Text";
 import { useLinkingPref } from "@/lib/providers/LinkingContext";
@@ -12,7 +12,11 @@ export default function Page() {
   const { colors } = useTheme();
 
   return (
-    <View style={{ backgroundColor: colors.background, paddingHorizontal: 20 }}>
+    <ScrollView
+      style={{ backgroundColor: colors.background }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ paddingHorizontal: 20 }}
+    >
       <Stack.Screen
         options={{ headerLargeTitle: true, title: "Deep linking" }}
       />
@@ -78,6 +82,6 @@ export default function Page() {
           </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }

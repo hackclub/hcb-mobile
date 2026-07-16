@@ -89,7 +89,9 @@ export default function GrantWithoutCard({
             onPress={() => setShowTerms(true)}
             loading={isActivating}
           >
-            Activate Grant
+            {grantCard.pre_authorization_required
+              ? "Activate on the web"
+              : "Activate Grant"}
           </Button>
         </View>
       )}

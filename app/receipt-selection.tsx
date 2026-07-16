@@ -5,7 +5,6 @@ import { useTheme } from "expo-router/react-navigation";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   ScrollView,
   TouchableOpacity,
   View,
@@ -31,6 +30,7 @@ export default function Page() {
       return JSON.parse(rawTransaction) as {
         id?: string;
         memo?: string;
+        organization?: { id?: string };
       } | null;
     } catch {
       return null;
@@ -105,6 +105,13 @@ export default function Page() {
 
       await mutate("receipts");
       await mutate("user/transactions/missing_receipt");
+
+      const orgId = transaction?.organization?.id;
+      if (orgId) {
+        await mutate(
+          `organizations/${orgId}/transactions/${transaction.id}/receipts`,
+        );
+      }
 
       Toast.show({
         type: ALERT_TYPE.SUCCESS,
@@ -209,17 +216,15 @@ export default function Page() {
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-          {Platform.OS === "android" && (
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={{
-                marginRight: 16,
-                padding: 8,
-              }}
-            >
-              <Ionicons name="close" size={24} color={themeColors.text} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{
+              marginRight: 16,
+              padding: 8,
+            }}
+          >
+            <Ionicons name="close" size={24} color={themeColors.text} />
+          </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text
               style={{

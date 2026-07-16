@@ -1,15 +1,20 @@
 import { Stack } from "expo-router";
-import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 
-import Button from "@/components/Button";
-import { Text } from "@/components/Text";
+import {
+  FooterNote,
+  FormField,
+  FormSection,
+  InfoCallout,
+  ReadOnlyField,
+  TransferSubmitButton,
+} from "./TransferFormUI";
+
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useOffline } from "@/lib/useOffline";
-import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
 type CheckTransferScreenProps = {
@@ -19,7 +24,6 @@ type CheckTransferScreenProps = {
 export default function CheckTransferScreen({
   organization,
 }: CheckTransferScreenProps) {
-  const { colors: themeColors } = useTheme();
   const { withOfflineCheck } = useOffline();
   const hcb = useClient();
 
@@ -136,100 +140,62 @@ export default function CheckTransferScreen({
     }
   });
 
-  const labelStyle = {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: palette.muted,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.4,
-  };
-
-  const inputContainerStyle = {
-    backgroundColor: themeColors.card,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  };
-
-  const inputStyle = {
-    color: themeColors.text,
-    fontSize: 16,
-  };
-
   return (
     <>
-      <Stack.Screen options={{ headerLargeTitle: true, title: "New check" }} />
+      <Stack.Screen options={{ headerLargeTitle: true, title: "Check" }} />
 
-      <View style={{ gap: 14 }}>
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>From</Text>
-          <View style={inputContainerStyle}>
-            <Text style={{ color: themeColors.text, fontSize: 16 }}>
-              {organization.name} ({renderMoney(organization.balance_cents)})
-            </Text>
-          </View>
-        </View>
+      <View style={{ gap: 24 }}>
+        <FormSection title="Recipient details">
+          <ReadOnlyField
+            label="From"
+            value={organization.name}
+            secondary={renderMoney(organization.balance_cents)}
+          />
+          <FormField
+            label="Recipient name"
+            value={recipientName}
+            onChangeText={setRecipientName}
+            placeholder="Jane Smith"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="Recipient email"
+            optional
+            value={recipientEmail}
+            onChangeText={setRecipientEmail}
+            placeholder="recipient@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </FormSection>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Recipient name</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={recipientName}
-              onChangeText={setRecipientName}
-              placeholder="Jane Smith"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              autoCapitalize="words"
-            />
-          </View>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Street address</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={addressLine1}
-              onChangeText={setAddressLine1}
-              placeholder="123 Main St"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              autoCapitalize="words"
-            />
-          </View>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Apt, suite, etc. (optional)</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={addressLine2}
-              onChangeText={setAddressLine2}
-              placeholder="Apt 4B"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              autoCapitalize="words"
-            />
-          </View>
-        </View>
-
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <View style={{ flex: 2, gap: 6 }}>
-            <Text style={labelStyle}>City</Text>
-            <View style={inputContainerStyle}>
-              <TextInput
-                value={city}
-                onChangeText={setCity}
-                placeholder="San Francisco"
-                placeholderTextColor={palette.muted}
-                style={inputStyle}
-                autoCapitalize="words"
-              />
-            </View>
-          </View>
-          <View style={{ flex: 1, gap: 6 }}>
-            <Text style={labelStyle}>State</Text>
-            <View style={inputContainerStyle}>
-              <TextInput
+        <FormSection title="Mailing address">
+          <FormField
+            label="Street address"
+            value={addressLine1}
+            onChangeText={setAddressLine1}
+            placeholder="123 Main St"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="Apt, suite, etc."
+            optional
+            value={addressLine2}
+            onChangeText={setAddressLine2}
+            placeholder="Apt 4B"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="City"
+            value={city}
+            onChangeText={setCity}
+            placeholder="San Francisco"
+            autoCapitalize="words"
+          />
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <View style={{ flex: 2 }}>
+              <FormField
+                label="State"
                 value={state}
                 onChangeText={(t) =>
                   setState(
@@ -240,108 +206,64 @@ export default function CheckTransferScreen({
                   )
                 }
                 placeholder="CA"
-                placeholderTextColor={palette.muted}
-                style={inputStyle}
                 autoCapitalize="characters"
                 maxLength={2}
               />
             </View>
+            <View style={{ flex: 3 }}>
+              <FormField
+                label="ZIP code"
+                value={zip}
+                onChangeText={(t) => setZip(t.replace(/\D/g, "").slice(0, 5))}
+                placeholder="94107"
+                keyboardType="number-pad"
+                maxLength={5}
+              />
+            </View>
           </View>
-        </View>
+        </FormSection>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>ZIP code</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={zip}
-              onChangeText={(t) => setZip(t.replace(/\D/g, "").slice(0, 5))}
-              placeholder="94107"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              keyboardType="number-pad"
-              maxLength={5}
-            />
-          </View>
-        </View>
+        <FormSection title="Payment details">
+          <FormField
+            label="Amount"
+            prefix="$"
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+          />
+          <FormField
+            label="Memo"
+            description="Printed on the check memo line."
+            value={memo}
+            onChangeText={setMemo}
+            placeholder="For services rendered"
+          />
+          <FormField
+            label="What's this payment for?"
+            description="This helps HCB keep a record of your transactions."
+            value={paymentFor}
+            onChangeText={setPaymentFor}
+            placeholder="Shipment of potions"
+          />
+        </FormSection>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Amount</Text>
-          <View
-            style={{
-              ...inputContainerStyle,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <Text
-              style={{ color: palette.muted, fontSize: 17, fontWeight: "500" }}
-            >
-              $
-            </Text>
-            <TextInput
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="0.00"
-              placeholderTextColor={palette.muted}
-              style={{ ...inputStyle, flex: 1 }}
-              keyboardType="decimal-pad"
-            />
-          </View>
-        </View>
+        <InfoCallout
+          title="About mailed checks"
+          points={[
+            "Checks are printed and mailed to the address above — double-check it.",
+            "Delivery typically takes 5–7 business days once approved.",
+            "The recipient must deposit or cash the check for it to clear.",
+          ]}
+        />
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Memo</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={memo}
-              onChangeText={setMemo}
-              placeholder="For services rendered"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-            />
-          </View>
-          <Text style={{ color: palette.muted, fontSize: 13 }}>
-            Printed on the check memo line.
-          </Text>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Payment for</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={paymentFor}
-              onChangeText={setPaymentFor}
-              placeholder="Brief description for HCB records"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-            />
-          </View>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Recipient email (optional)</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={recipientEmail}
-              onChangeText={setRecipientEmail}
-              placeholder="recipient@example.com"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-        </View>
-
-        <Button
-          variant="primary"
-          loading={submitting}
-          onPress={handleSubmit}
-          style={{ marginTop: 8, marginBottom: 24 }}
-        >
+        <TransferSubmitButton loading={submitting} onPress={handleSubmit}>
           Send check
-        </Button>
+        </TransferSubmitButton>
+
+        <FooterNote>
+          Your check will be reviewed on the next business day.
+        </FooterNote>
       </View>
     </>
   );

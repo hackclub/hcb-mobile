@@ -216,12 +216,11 @@ export default function Page() {
           <TapToPayBanner
             onDismiss={handleDismissTapToPayBanner}
             orgId={params.id as `org_${string}`}
+            orgSlug={organization.slug}
           />
         )}
         {playgroundMode && <PlaygroundBanner />}
-        <Header
-          organization={organization}
-        />
+        <Header organization={organization} />
       </View>
 
       <ScrollView
@@ -243,18 +242,15 @@ export default function Page() {
           label="Account Numbers"
           onPress={() => navTo("/(events)/[id]/account-numbers")}
         />
-        {orgPolicy?.invoices() && !playgroundMode && (
-          <ActionChip
-            icon="payment-docs"
-            label="Invoices"
-            onPress={() => navTo("/(events)/[id]/invoices")}
-          />
-        )}
         {supportsTapToPay && orgPolicy?.donationPage() && orgPolicy?.show() && (
           <ActionChip
             icon="support"
             label="Collect Donations"
-            onPress={() => navTo("/(events)/[id]/donations")}
+            onPress={() =>
+              navTo("/(events)/[id]/donations/new", {
+                orgSlug: organization.slug,
+              })
+            }
           />
         )}
       </ScrollView>
@@ -322,7 +318,9 @@ export default function Page() {
                   );
                   return;
                 }
-                navTo("/(events)/[id]/donations");
+                navTo("/(events)/[id]/donations/new", {
+                  orgSlug: organization.slug,
+                });
               }}
             />
             <ActionTile

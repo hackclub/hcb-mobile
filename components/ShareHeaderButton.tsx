@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "expo-router/react-navigation";
-import { Pressable, Share } from "react-native";
+import { Platform, Pressable, Share } from "react-native";
 
 export function ShareHeaderButton({ url }: { url: string }) {
   const { colors: themeColors } = useTheme();
@@ -9,7 +9,11 @@ export function ShareHeaderButton({ url }: { url: string }) {
     <Pressable
       onPress={async () => {
         try {
-          await Share.share({ url });
+          if (Platform.OS == "ios") {
+            await Share.share({ url });
+          } else {
+            await Share.share({ message: url });
+          }
         } catch (error) {
           console.error("Error sharing:", error);
         }

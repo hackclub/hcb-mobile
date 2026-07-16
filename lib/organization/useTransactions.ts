@@ -15,7 +15,6 @@ export interface TransactionFilters {
   maximumAmount?: string;
   startDate?: string;
   endDate?: string;
-  missingReceipts?: boolean;
 }
 
 function buildFilterParams(filters: TransactionFilters): string {
@@ -32,7 +31,6 @@ function buildFilterParams(filters: TransactionFilters): string {
     parts.push(`filters[maximum_amount]=${filters.maximumAmount}`);
   if (filters.startDate) parts.push(`filters[start_date]=${filters.startDate}`);
   if (filters.endDate) parts.push(`filters[end_date]=${filters.endDate}`);
-  if (filters.missingReceipts) parts.push("filters[missing_receipts]=true");
   return parts.length > 0 ? "&" + parts.join("&") : "";
 }
 

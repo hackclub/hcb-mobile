@@ -1,10 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "@thedev132/hackclub-icons-rn";
 import Constants from "expo-constants";
 import { useTheme } from "expo-router/react-navigation";
 import * as Updates from "expo-updates";
-import { useEffect, useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 
 import { Text } from "@/components/Text";
@@ -16,7 +13,6 @@ export default function About() {
   const { colors } = useTheme();
   const { theme } = useThemeContext();
   const isDark = useIsDark();
-  const [tapToPayEnabled, setTapToPayEnabled] = useState(false);
   const version = Constants.expoConfig?.version || "1.0.0";
   const buildNumber =
     Constants.expoConfig?.ios?.buildNumber ||
@@ -58,13 +54,6 @@ export default function About() {
       ],
     },
   ];
-
-  useEffect(() => {
-    (async () => {
-      const isTapToPayEnabled = await AsyncStorage.getItem("isTapToPayEnabled");
-      setTapToPayEnabled(isTapToPayEnabled === "true");
-    })();
-  }, []);
 
   const renderRow = (
     row: { label: string; value: string },
@@ -167,82 +156,6 @@ export default function About() {
               </View>
             </View>
           ))}
-
-          <View>
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: "600",
-                color: colors.text,
-                opacity: 0.6,
-                marginBottom: 8,
-                marginLeft: 4,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              Features
-            </Text>
-            <View
-              style={{
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: colors.border,
-                backgroundColor: colors.card,
-                shadowColor: (colors.text as string) + "22",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 6,
-                elevation: 2,
-                overflow: "hidden",
-              }}
-            >
-              <View
-                style={{
-                  paddingVertical: 16,
-                  paddingHorizontal: 18,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontWeight: "500",
-                    color: colors.text,
-                  }}
-                >
-                  Tap to Pay
-                </Text>
-                {tapToPayEnabled ? (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={18}
-                      color={colors.primary}
-                      style={{ marginRight: 6 }}
-                    />
-                    <Text
-                      style={{
-                        color: colors.primary,
-                        fontWeight: "600",
-                        fontSize: 15,
-                      }}
-                    >
-                      Enabled
-                    </Text>
-                  </View>
-                ) : (
-                  <Text
-                    style={{ color: colors.text, opacity: 0.6, fontSize: 15 }}
-                  >
-                    Not Available
-                  </Text>
-                )}
-              </View>
-            </View>
-          </View>
         </View>
 
         <Text

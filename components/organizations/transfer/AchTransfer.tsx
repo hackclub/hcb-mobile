@@ -1,9 +1,16 @@
 import { Stack } from "expo-router";
-import { useTheme } from "expo-router/react-navigation";
 import { useState } from "react";
-import { TextInput, View } from "react-native";
+import { View } from "react-native";
 
-import Button from "@/components/Button";
+import {
+  FooterNote,
+  FormField,
+  FormSection,
+  InfoCallout,
+  ReadOnlyField,
+  TransferSubmitButton,
+} from "./TransferFormUI";
+
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
@@ -19,7 +26,6 @@ type AchTransferScreenProps = {
 export default function AchTransferScreen({
   organization,
 }: AchTransferScreenProps) {
-  const { colors: themeColors } = useTheme();
   const { withOfflineCheck } = useOffline();
   const hcb = useClient();
 
@@ -112,171 +118,106 @@ export default function AchTransferScreen({
     }
   });
 
-  const labelStyle = {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: palette.muted,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.4,
-  };
-
-  const inputContainerStyle = {
-    backgroundColor: themeColors.card,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  };
-
-  const inputStyle = {
-    color: themeColors.text,
-    fontSize: 16,
-  };
-
   return (
     <>
       <Stack.Screen
-        options={{ headerLargeTitle: true, title: "New ACH transfer" }}
+        options={{ headerLargeTitle: true, title: "ACH transfer" }}
       />
 
-      <View style={{ gap: 14 }}>
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>From</Text>
-          <View style={inputContainerStyle}>
-            <Text style={{ color: themeColors.text, fontSize: 16 }}>
-              {organization.name} ({renderMoney(organization.balance_cents)})
-            </Text>
-          </View>
-        </View>
+      <View style={{ gap: 24 }}>
+        <FormSection title="Recipient details">
+          <ReadOnlyField
+            label="From"
+            value={organization.name}
+            secondary={renderMoney(organization.balance_cents)}
+          />
+          <FormField
+            label="Recipient name"
+            description="Match the name on the recipient's bank account."
+            value={recipientName}
+            onChangeText={setRecipientName}
+            placeholder="Jane Smith"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="Recipient email"
+            optional
+            description="A confirmation is sent here once the transfer is processed."
+            value={recipientEmail}
+            onChangeText={setRecipientEmail}
+            placeholder="recipient@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </FormSection>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Recipient name</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={recipientName}
-              onChangeText={setRecipientName}
-              placeholder="Jane Smith"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              autoCapitalize="words"
-            />
-          </View>
-        </View>
+        <FormSection title="Payment details">
+          <FormField
+            label="Routing number"
+            value={routingNumber}
+            onChangeText={(t) =>
+              setRoutingNumber(t.replace(/\D/g, "").slice(0, 9))
+            }
+            placeholder="123456789"
+            keyboardType="number-pad"
+            maxLength={9}
+          />
+          <FormField
+            label="Account number"
+            value={accountNumber}
+            onChangeText={setAccountNumber}
+            placeholder="Bank account number"
+            keyboardType="number-pad"
+            secureTextEntry
+          />
+          <FormField
+            label="Bank name"
+            optional
+            value={bankName}
+            onChangeText={setBankName}
+            placeholder="e.g. Chase, Bank of America"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="Amount"
+            prefix="$"
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+          />
+          <FormField
+            label="What's this payment for?"
+            description="This helps HCB keep a record of your transactions."
+            value={paymentFor}
+            onChangeText={setPaymentFor}
+            placeholder="Shipment of potions"
+          />
+        </FormSection>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Routing number</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={routingNumber}
-              onChangeText={(t) =>
-                setRoutingNumber(t.replace(/\D/g, "").slice(0, 9))
-              }
-              placeholder="9-digit routing number"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              keyboardType="number-pad"
-              maxLength={9}
-            />
-          </View>
-        </View>
+        <InfoCallout
+          title="Important info about ACH transfers"
+          points={[
+            "ACH transfers can only be sent to U.S. bank accounts.",
+            "If you enter the wrong destination, the money will permanently leave your account.",
+            "We have limited ability to fix mistakes due to U.S. banking system restrictions.",
+            <>
+              ACH transfers are{" "}
+              <Text style={{ fontWeight: "700", color: palette.info }}>
+                irreversible
+              </Text>{" "}
+              and can&apos;t be canceled.
+            </>,
+          ]}
+        />
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Account number</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              placeholder="Bank account number"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              keyboardType="number-pad"
-              secureTextEntry
-            />
-          </View>
-        </View>
+        <TransferSubmitButton loading={submitting} onPress={handleSubmit}>
+          Send transfer
+        </TransferSubmitButton>
 
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Bank name (optional)</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={bankName}
-              onChangeText={setBankName}
-              placeholder="e.g. Chase, Bank of America"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              autoCapitalize="words"
-            />
-          </View>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Amount</Text>
-          <View
-            style={{
-              ...inputContainerStyle,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 4,
-            }}
-          >
-            <Text
-              style={{ color: palette.muted, fontSize: 17, fontWeight: "500" }}
-            >
-              $
-            </Text>
-            <TextInput
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="0.00"
-              placeholderTextColor={palette.muted}
-              style={{ ...inputStyle, flex: 1 }}
-              keyboardType="decimal-pad"
-            />
-          </View>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Payment for</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={paymentFor}
-              onChangeText={setPaymentFor}
-              placeholder="Brief description of the payment"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-            />
-          </View>
-          <Text style={{ color: palette.muted, fontSize: 13 }}>
-            This description helps HCB track the purpose of the transfer.
-          </Text>
-        </View>
-
-        <View style={{ gap: 6 }}>
-          <Text style={labelStyle}>Recipient email (optional)</Text>
-          <View style={inputContainerStyle}>
-            <TextInput
-              value={recipientEmail}
-              onChangeText={setRecipientEmail}
-              placeholder="recipient@example.com"
-              placeholderTextColor={palette.muted}
-              style={inputStyle}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-          <Text style={{ color: palette.muted, fontSize: 13 }}>
-            A confirmation will be sent to this email when the transfer is
-            processed.
-          </Text>
-        </View>
-
-        <Button
-          variant="primary"
-          loading={submitting}
-          onPress={handleSubmit}
-          style={{ marginTop: 8, marginBottom: 24 }}
-        >
-          Submit transfer
-        </Button>
+        <FooterNote>
+          Your transfer will be reviewed on the next business day.
+        </FooterNote>
       </View>
     </>
   );

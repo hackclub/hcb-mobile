@@ -29,9 +29,12 @@ import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
 interface OrgInvitation {
   id: string;
-  email: string;
+  organization_id: string;
   role?: "member" | "manager";
+  accepted: boolean;
   created_at: string;
+  invitee: User;
+  sender: User;
 }
 
 type FilterTab = "all" | "reader" | "member" | "manager";
@@ -162,20 +165,7 @@ function InvitationCard({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-        <View
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: 26,
-            backgroundColor: isDark
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.06)",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="mail-outline" size={22} color={subColor} />
-        </View>
+        <UserAvatar user={invite.invitee} size={52} />
         <View style={{ flex: 1 }}>
           <Text
             style={{
@@ -185,10 +175,16 @@ function InvitationCard({
             }}
             numberOfLines={1}
           >
-            {invite.email}
+            {invite.invitee.name || invite.invitee.email}
+          </Text>
+          <Text
+            style={{ color: subColor, fontSize: 13, marginTop: 2 }}
+            numberOfLines={1}
+          >
+            {invite.invitee.email}
           </Text>
           <Text style={{ color: subColor, fontSize: 13, marginTop: 2 }}>
-            {invite.role ? capitalize(invite.role) : "Member"} · Pending
+            {invite.role ? capitalize(invite.role) : "Member"}
           </Text>
         </View>
         <Pressable
@@ -213,7 +209,7 @@ function InvitationCard({
         </Pressable>
       </View>
       <Text style={{ color: subColor, fontSize: 12 }}>
-        Invited{" "}
+        Invited by {invite.sender.name}{" "}
         {formatDistanceToNowStrict(parseISO(invite.created_at), {
           addSuffix: true,
         })}
@@ -246,7 +242,11 @@ export default function Page() {
 
   const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
     OrgInvitation[]
-  >(canManage ? `organizations/${id}/invitations?organization_id=${id}` : null);
+  >(
+    canManage
+      ? `organizations/${id}/invitations?organization_id=${id}&expand=sender,invitee`
+      : null,
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -352,9 +352,13 @@ export default function Page() {
     listData.push({ type: "member", user });
   }
 
-  if (canManage && invitations && invitations.length > 0) {
+  const pendingInvitations = (invitations ?? []).filter(
+    (invite) => !invite.accepted,
+  );
+
+  if (canManage && pendingInvitations.length > 0) {
     listData.push({ type: "invitations-header" });
-    for (const invite of invitations) {
+    for (const invite of pendingInvitations) {
       listData.push({ type: "invitation", invite });
     }
   }

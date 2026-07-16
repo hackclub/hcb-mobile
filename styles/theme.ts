@@ -48,7 +48,12 @@ export const typography = {
   h2: { fontSize: 22, fontWeight: "700" as const },
   body: { fontSize: 16, fontWeight: "400" as const },
   small: { fontSize: 13, fontWeight: "400" as const },
-  eyebrow: { fontSize: 12, fontWeight: "600" as const, letterSpacing: 0.8, textTransform: "uppercase" as const },
+  eyebrow: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    letterSpacing: 0.8,
+    textTransform: "uppercase" as const,
+  },
   mono: { fontFamily: "JetBrainsMono-Regular", fontSize: 14 },
 };
 

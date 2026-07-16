@@ -1,9 +1,11 @@
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import React from "react";
 import { findNodeHandle } from "react-native";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import { useSWRConfig } from "swr";
 
 import useClient from "@/lib/client";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -13,17 +15,36 @@ import { maybeRequestReview } from "@/utils/storeReview";
 interface ReceiptActionSheetProps {
   orgId: string;
   transactionId: string;
+  transactionMemo?: string;
+  enableBinSelection?: boolean;
   onUploadComplete?: () => void;
 }
 
 export function useReceiptActionSheet({
+  orgId = "",
   transactionId = "",
+  transactionMemo,
+  enableBinSelection = false,
   onUploadComplete,
 }: ReceiptActionSheetProps) {
   const { showActionSheetWithOptions } = useActionSheet();
   const { isOnline, withOfflineCheck } = useOffline();
   const hcb = useClient();
   const isDark = useIsDark();
+  const { mutate } = useSWRConfig();
+
+  const chooseFromBin = () => {
+    router.push({
+      pathname: "/receipt-selection",
+      params: {
+        transaction: JSON.stringify({
+          id: transactionId,
+          memo: transactionMemo,
+          organization: orgId ? { id: orgId } : undefined,
+        }),
+      },
+    });
+  };
 
   const uploadFile = withOfflineCheck(
     async (
@@ -48,6 +69,9 @@ export function useReceiptActionSheet({
         await hcb.post(`receipts`, {
           body,
         });
+        if (orgId && transactionId) {
+          mutate(`organizations/${orgId}/transactions/${transactionId}`);
+        }
         onUploadComplete?.();
         Toast.show({
           type: ALERT_TYPE.SUCCESS,
@@ -85,8 +109,16 @@ export function useReceiptActionSheet({
 
   const handleActionSheet = withOfflineCheck(
     (buttonRef?: React.RefObject<unknown>) => {
-      const options = ["Camera", "Photo Library", "Document", "Cancel"];
-      const cancelButtonIndex = 3;
+      const options = enableBinSelection
+        ? [
+            "Camera",
+            "Photo Library",
+            "Document",
+            "Choose from Receipt Bin",
+            "Cancel",
+          ]
+        : ["Camera", "Photo Library", "Document", "Cancel"];
+      const cancelButtonIndex = options.length - 1;
 
       showActionSheetWithOptions(
         {
@@ -136,6 +168,8 @@ export function useReceiptActionSheet({
             if (!result.canceled && result.assets.length > 0) {
               await uploadMultipleFiles(result.assets);
             }
+          } else if (buttonIndex === 3 && enableBinSelection) {
+            chooseFromBin();
           }
         },
       );

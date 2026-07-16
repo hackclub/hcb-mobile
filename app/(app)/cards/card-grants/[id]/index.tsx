@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import * as WebBrowser from "expo-web-browser";
 import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -281,6 +282,17 @@ export default function Page() {
   }, [card, isVirtualCard]);
 
   const handleActivateGrant = async () => {
+    if (grantCard?.pre_authorization_required) {
+      await WebBrowser.openBrowserAsync(
+        shareUrl.cardGrantPreAuth(fullGrantId),
+        {
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
+        },
+      );
+      await reloadGrant();
+      return;
+    }
+
     setIsActivating(true);
     try {
       const response = await hcb.post(`card_grants/${fullGrantId}/activate`);

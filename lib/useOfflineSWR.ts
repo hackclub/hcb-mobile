@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 
+import { tokenManager } from "./tokenManager";
 import { useOffline } from "./useOffline";
 
 interface HTTPError extends Error {
@@ -59,7 +60,18 @@ export function useOfflineSWR<Data, Error = unknown>(
       if (status === 404) {
         return;
       }
-      if (status && status >= 400 && status < 500 && status !== 429) {
+      // A 401 while we still hold a session token means a token refresh is
+      // still catching up (e.g. after a transient refresh failure) — retry
+      // with backoff so the request recovers. Once the session is actually
+      // gone, tokenManager.getToken() is null and we stop.
+      const isRecoverable401 = status === 401 && !!tokenManager.getToken();
+      if (
+        status &&
+        status >= 400 &&
+        status < 500 &&
+        status !== 429 &&
+        !isRecoverable401
+      ) {
         return;
       }
 

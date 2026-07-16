@@ -25,6 +25,7 @@ import { ColorSchemeName, useColorScheme } from "react-native";
 import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import AuthContext from "@/lib/auth/auth";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
+import { installNavigationGuard } from "@/lib/navigationGuard";
 import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
 import { LinkingProvider } from "@/lib/providers/LinkingContext";
 import { ShareIntentProvider } from "@/lib/providers/ShareIntentContext";
@@ -95,6 +96,9 @@ export const setupBackgroundUpdates = async () => {
 };
 
 setupBackgroundUpdates();
+
+// Swallow accidental double-taps that would otherwise stack duplicate screens.
+installNavigationGuard();
 
 function RootLayoutNav() {
   const { tokenResponse } = useContext(AuthContext);

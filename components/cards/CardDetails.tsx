@@ -191,10 +191,10 @@ export default function CardDetails({
         }}
       >
         <Text
+          numberOfLines={1}
           style={{
             fontSize: 16,
             color: themeColors.text,
-            flexShrink: 1,
           }}
         >
           Card Number
@@ -214,9 +214,12 @@ export default function CardDetails({
             <Animated.View style={createSkeletonStyle(120, 22)} />
           ) : detailsRevealed && details ? (
             <TouchableOpacity
+              style={{ flexShrink: 1 }}
               onPress={() => handleCopy(details.number, "Card number")}
             >
               <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
                 style={{
                   color: palette.muted,
                   fontSize: Platform.OS === "android" ? 15 : 16,
@@ -229,7 +232,10 @@ export default function CardDetails({
             </TouchableOpacity>
           ) : (
             <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
               style={{
+                flexShrink: 1,
                 color: palette.muted,
                 fontSize: Platform.OS === "android" ? 15 : 16,
                 fontWeight: "500",
@@ -246,7 +252,8 @@ export default function CardDetails({
               hitSlop={8}
             >
               <Icon
-                glyph={detailsRevealed ? "private-fill" : "view"}
+                key={detailsRevealed ? "private-fill" : "view-fill"}
+                glyph={detailsRevealed ? "private-fill" : "view-fill"}
                 size={22}
                 color={palette.muted}
               />
