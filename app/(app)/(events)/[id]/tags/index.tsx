@@ -14,6 +14,7 @@ import {
 } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import Tag from "@/lib/types/Tag";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
@@ -21,6 +22,7 @@ export default function TagsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+  const headerInset = useHeaderInset();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const {
@@ -57,7 +59,7 @@ export default function TagsPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
         gap: 16,
       }}

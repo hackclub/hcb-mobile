@@ -24,6 +24,7 @@ import Invitation from "@/lib/types/Invitation";
 import Organization from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
@@ -203,6 +204,7 @@ export default function App() {
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const panGesture = useMemo(
     () => Gesture.Pan().activateAfterLongPress(520),
     [],
@@ -300,6 +302,7 @@ export default function App() {
       contentContainerStyle={{
         paddingHorizontal: 20,
         paddingBottom: 20,
+        paddingTop: headerInset,
       }}
       contentInsetAdjustmentBehavior="automatic"
       data={sortedOrgs}

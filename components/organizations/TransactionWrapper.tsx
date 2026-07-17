@@ -69,7 +69,10 @@ function TransactionWrapper({
   };
 
   return (
-    <View style={{ overflow: "hidden" }}>
+    // Pull each row up onto the previous one so the opaque row background
+    // covers the sub-pixel gap Android leaves between stacked rows (which would
+    // otherwise show the card through as a faint line).
+    <View style={{ overflow: "hidden", marginTop: isFirst ? 0 : -1 }}>
       <TouchableHighlight
         onPress={canViewTransaction ? handlePress : undefined}
         underlayColor={themeColors.background}

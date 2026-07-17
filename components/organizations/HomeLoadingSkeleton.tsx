@@ -4,10 +4,12 @@ import { View, ScrollView, Animated, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 
 export const HomeLoadingSkeleton = () => {
   const { colors: themeColors } = useTheme();
   const { bottom: tabBarHeight } = useSafeAreaInsets();
+  const headerInset = useHeaderInset();
   const isDark = useIsDark();
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
@@ -45,6 +47,7 @@ export const HomeLoadingSkeleton = () => {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         padding: 20,
+        paddingTop: 20 + headerInset,
         paddingBottom: tabBarHeight + 20,
       }}
     >

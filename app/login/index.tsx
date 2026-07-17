@@ -10,7 +10,14 @@ import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Animated, Platform, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -28,6 +35,11 @@ export const discovery: DiscoveryDocument = {
 const clientId = process.env.EXPO_PUBLIC_CLIENT_ID!;
 
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
+
+// Required by expo-auth-session so the app finalizes the auth session when the
+// browser redirects back. Without it, on Android the browser can return but the
+// pending auth request never resolves to a "success" result.
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const scheme = useColorScheme();
@@ -98,46 +110,92 @@ export default function Login() {
   }, [request?.codeVerifier]);
 
   useEffect(() => {
-    if (response?.type !== "success") return;
+    console.log(
+      "[AUTHDBG] redirectUri =",
+      redirectUri,
+      "| request ready:",
+      !!request,
+    );
+  }, []);
 
+  useEffect(() => {
+    if (!response) return;
+    console.log(
+      "[AUTHDBG] auth response.type:",
+      response.type,
+      "| params:",
+      JSON.stringify((response as { params?: unknown }).params ?? {}).slice(
+        0,
+        200,
+      ),
+      "| error:",
+      (response as { error?: { message?: string } }).error?.message ?? "none",
+    );
+  }, [response]);
+
+  // Exchange the authorization code for tokens and persist them. Runs to
+  // completion inside the caller's async closure even if the React tree
+  // remounts on the OAuth redirect (which tears down effects but not a
+  // running promise chain). Guarded so the same code is never exchanged twice.
+  const exchangeAuthCode = useCallback(
+    async (authCode: string, codeVerifier: string) => {
+      if (isProcessingRef.current || processedCodesRef.current.has(authCode)) {
+        return;
+      }
+      isProcessingRef.current = true;
+      processedCodesRef.current.add(authCode);
+      setLoading(true);
+
+      try {
+        const tokenResponse = await exchangeCodeAsync(
+          {
+            clientId,
+            redirectUri,
+            code: authCode,
+            extraParams: { code_verifier: codeVerifier },
+          },
+          discovery,
+        );
+        console.log(
+          "[AUTHDBG] exchangeCodeAsync OK access:" +
+            !!tokenResponse.accessToken +
+            " refresh:" +
+            !!tokenResponse.refreshToken +
+            " expiresIn:" +
+            tokenResponse.expiresIn,
+        );
+        await setTokenResponse(tokenResponse, codeVerifier);
+        console.log("[AUTHDBG] setTokenResponse resolved");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (error) {
+        console.log(
+          "[AUTHDBG] exchangeCodeAsync FAILED:",
+          (error as { message?: string })?.message ?? error,
+        );
+        console.error("Error exchanging code for token:", error);
+        // Allow a retry of this code if the exchange failed.
+        processedCodesRef.current.delete(authCode);
+      } finally {
+        setLoading(false);
+        isProcessingRef.current = false;
+      }
+    },
+    [setTokenResponse],
+  );
+
+  // Fallback path: if the browser redirect resolves via the `response` state
+  // (component stayed mounted), exchange here. The primary path is doPrompt.
+  useEffect(() => {
+    if (response?.type !== "success") return;
     const authCode = response.params?.code;
     if (!authCode) return;
-
-    if (isProcessingRef.current || processedCodesRef.current.has(authCode)) {
-      return;
-    }
-
     const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
     if (!codeVerifier) {
       console.error("No code verifier available for token exchange");
       return;
     }
-
-    isProcessingRef.current = true;
-    processedCodesRef.current.add(authCode);
-    setLoading(true);
-
-    exchangeCodeAsync(
-      {
-        clientId,
-        redirectUri,
-        code: authCode,
-        extraParams: { code_verifier: codeVerifier },
-      },
-      discovery,
-    )
-      .then((tokenResponse) => {
-        setTokenResponse(tokenResponse, codeVerifier);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      })
-      .catch((error) => {
-        console.error("Error exchanging code for token:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-        isProcessingRef.current = false;
-      });
-  }, [response, request, setTokenResponse]);
+    exchangeAuthCode(authCode, codeVerifier);
+  }, [response, request, exchangeAuthCode]);
 
   const doPrompt = async () => {
     if (isPrompting) return;
@@ -146,7 +204,23 @@ export default function Login() {
     isProcessingRef.current = false;
 
     try {
-      await promptAsync({ createTask: false });
+      const _r = await promptAsync({ createTask: false });
+      console.log(
+        "[AUTHDBG] promptAsync returned type:",
+        _r?.type,
+        "| full:",
+        JSON.stringify(_r ?? {}).slice(0, 250),
+      );
+      // Primary path: exchange the code straight from the promptAsync result,
+      // so it does not depend on the `response` effect surviving a remount.
+      if (_r?.type === "success" && _r.params?.code) {
+        const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
+        if (codeVerifier) {
+          await exchangeAuthCode(_r.params.code, codeVerifier);
+        } else {
+          console.error("No code verifier available for token exchange");
+        }
+      }
     } finally {
       setIsPrompting(false);
       setPendingSignup(null);

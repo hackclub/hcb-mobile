@@ -32,7 +32,7 @@ export function statusColor(status: string) {
     return palette.success;
   } else if (status === "in_transit" || status === "issued") {
     return palette.info;
-  } else if (status === "rejected") {
+  } else if (status === "rejected" || status === "failed") {
     return palette.red;
   } else if (status === "reimbursement_requested") {
     return palette.purple;

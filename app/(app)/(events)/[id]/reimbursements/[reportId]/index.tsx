@@ -32,6 +32,7 @@ import {
   reportStatusText,
 } from "@/lib/types/Reimbursement";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
@@ -414,6 +415,7 @@ export default function ReportDetailPage() {
   const navigation = useNavigation();
   const hcb = useClient();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [viewerState, setViewerState] = useState<ViewerState | null>(null);
@@ -662,7 +664,7 @@ export default function ReportDetailPage() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingTop: 16,
+          paddingTop: 16 + headerInset,
           paddingBottom: 40,
           gap: 20,
         }}

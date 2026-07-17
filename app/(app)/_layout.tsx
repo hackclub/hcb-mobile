@@ -110,7 +110,13 @@ function Navigation() {
   ]);
 
   return (
-    <NativeTabs tintColor="#ec3750" hidden={!isAtRoot}>
+    <NativeTabs
+      tintColor="#ec3750"
+      indicatorColor="#ec375026"
+      rippleColor="#ec375033"
+      hidden={!isAtRoot}
+      labelVisibilityMode="labeled"
+    >
       <NativeTabs.Trigger name="(events)">
         <NativeTabs.Trigger.Icon
           src={require("../../assets/tab-icons/home.png")}
@@ -527,10 +533,7 @@ export default function Layout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView
-        edges={Platform.OS === "android" ? ["bottom"] : []}
-        style={{ flex: 1 }}
-      >
+      <SafeAreaView edges={[]} style={{ flex: 1 }}>
         <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
           <StripeTerminalInitializer
             enabled={!!tokens?.accessToken && isAuthenticated}

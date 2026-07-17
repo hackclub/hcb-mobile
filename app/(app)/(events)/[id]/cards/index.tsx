@@ -17,6 +17,7 @@ import PaymentCard from "@/components/PaymentCard";
 import { Text } from "@/components/Text";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { normalizeSvg } from "@/utils/format";
@@ -74,6 +75,7 @@ export default function Page() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
 
   const { data: cards, mutate: reloadCards } = useOfflineSWR<
     (Card & Required<Pick<Card, "last4">>)[]
@@ -299,6 +301,7 @@ export default function Page() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           flex: 1,
+          paddingTop: headerInset,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -328,7 +331,7 @@ export default function Page() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-      contentContainerStyle={{ paddingHorizontal: 20 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: headerInset }}
       panGesture={panGesture}
       renderItem={renderItem}
       ListFooterComponent={

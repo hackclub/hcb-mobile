@@ -6,12 +6,14 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 import { SubOrganizationRow } from "@/components/organizations/SubOrganizations";
 import { Text } from "@/components/Text";
 import Organization from "@/lib/types/Organization";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 
 export default function SubOrganizationsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const { data: subOrganizations, isLoading } = useOfflineSWR<Organization[]>(
     `organizations/${id}/sub_organizations`,
   );
@@ -22,7 +24,7 @@ export default function SubOrganizationsPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
       }}
     >

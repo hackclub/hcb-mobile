@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import Badge from "@/components/Badge";
 import { Text } from "@/components/Text";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import {
@@ -26,6 +27,7 @@ export default function CheckDepositsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
   const navigation = useNavigation();
+  const headerInset = useHeaderInset();
   const { data: deposits, isLoading } = useOfflineSWR<CheckDepositSummary[]>(
     `check_deposits?organization_id=${id}`,
   );
@@ -56,7 +58,7 @@ export default function CheckDepositsPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
         gap: 16,
       }}

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSWRConfig } from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -90,7 +90,25 @@ export default function useTransactions(
 
   const { data, size, setSize, isLoading, error, mutate } = useSWRInfinite<
     PaginatedResponse<Transaction>
-  >(keyFn, infiniteFetcher);
+  >(keyFn, infiniteFetcher, {
+    // Filter changes swap the SWR key. With keepPreviousData (set globally)
+    // the list would keep showing the previous filter's transactions while the
+    // new query loads, and any extra pages the user had scrolled would refetch
+    // one-by-one — both read as flicker between filtered/unfiltered results.
+    // Opt out so a filter change shows a clean loading state instead.
+    keepPreviousData: false,
+  });
+
+  // Reset pagination to the first page whenever the filters change so the new
+  // query fetches a single page rather than N stale pages.
+  const filterStr = filters ? buildFilterParams(filters) : "";
+  const prevFilterStr = useRef(filterStr);
+  useEffect(() => {
+    if (prevFilterStr.current !== filterStr) {
+      prevFilterStr.current = filterStr;
+      setSize(1);
+    }
+  }, [filterStr, setSize]);
 
   const transactions: Transaction[] = useMemo(
     () => data?.flatMap((d) => d?.data) || [],

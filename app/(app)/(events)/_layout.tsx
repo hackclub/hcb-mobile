@@ -178,7 +178,11 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/donations/index"
-          options={{ title: "Collect Donations" }}
+          options={{ title: "Donations" }}
+        />
+        <Stack.Screen
+          name="[id]/donations/[donationId]"
+          options={{ title: "Donation" }}
         />
         <Stack.Screen
           name="[id]/donations/new"

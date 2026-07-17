@@ -8,6 +8,7 @@ import { Text } from "@/components/Text";
 import { showAlert } from "@/lib/alertUtils";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, radii } from "@/styles/theme";
 import { openOnWebsite } from "@/utils/handoff";
@@ -27,6 +28,7 @@ export default function TransfersPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
@@ -121,7 +123,7 @@ export default function TransfersPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
       }}
     >

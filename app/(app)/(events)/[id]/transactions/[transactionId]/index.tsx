@@ -37,6 +37,7 @@ import IComment from "@/lib/types/Comment";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { shareUrl } from "@/utils/shareUrl";
@@ -103,6 +104,7 @@ export default function TransactionPage({
     ).show();
   }, [transaction, organization, user]);
   const { bottom: tabBarHeight } = useSafeAreaInsets();
+  const headerInset = useHeaderInset();
   const { colors: themeColors } = useTheme();
 
   useEffect(() => {
@@ -177,6 +179,7 @@ export default function TransactionPage({
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           padding: 20,
+          paddingTop: 20 + headerInset,
           paddingBottom: tabBarHeight + 20,
         }}
         scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}

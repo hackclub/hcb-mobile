@@ -7,12 +7,14 @@ import { Platform, ScrollView, View } from "react-native";
 import { Text } from "@/components/Text";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { palette } from "@/styles/theme";
 
 export default function About() {
   const { colors } = useTheme();
   const { theme } = useThemeContext();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const version = Constants.expoConfig?.version || "1.0.0";
   const buildNumber =
     Constants.expoConfig?.ios?.buildNumber ||
@@ -100,7 +102,7 @@ export default function About() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: 80 }}
+      contentContainerStyle={{ paddingBottom: 80, paddingTop: headerInset }}
       showsVerticalScrollIndicator={false}
     >
       <View style={{ padding: 24 }}>

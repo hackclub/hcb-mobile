@@ -31,6 +31,7 @@ import { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import useAddToWallet from "@/lib/useAddToWallet";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import useSkeletonAnimation from "@/lib/useSkeletonAnimation";
 import useStripeCardDetails from "@/lib/useStripeCardDetails";
@@ -119,6 +120,7 @@ export default function CardPage() {
     refreshDigitalWallet,
   } = wallet;
   const { bottom: tabBarHeight } = useSafeAreaInsets();
+  const headerInset = useHeaderInset();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -313,6 +315,7 @@ export default function CardPage() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           padding: 20,
+          paddingTop: 20 + headerInset,
           paddingBottom: tabBarHeight + 20,
         }}
         showsVerticalScrollIndicator={false}

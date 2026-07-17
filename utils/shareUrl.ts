@@ -11,6 +11,7 @@ export const shareUrl = {
     `${BASE}/${orgSlug}/check-deposits/${id.slice(4)}`,
   invoice: (id: string) => `${BASE}/invoices/${id.slice(4)}`,
   donations: (orgSlug: string) => `${BASE}/donations/start/${orgSlug}`,
+  donation: (id: string) => `${BASE}/donations/${id.slice(4)}`,
   wiseTransfer: (orgSlug: string) => `${BASE}/${orgSlug}/wise_transfers/new`,
   reimbursement: (orgSlug: string, id: string) =>
     `${BASE}/${orgSlug}/reimbursement/reports/${id.slice(4)}`,

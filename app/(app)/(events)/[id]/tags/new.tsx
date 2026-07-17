@@ -17,6 +17,7 @@ import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
 import { TagColor } from "@/lib/types/Tag";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { palette } from "@/styles/theme";
 
 const COLORS = Object.keys(TAG_COLORS) as TagColor[];
@@ -24,6 +25,7 @@ const COLORS = Object.keys(TAG_COLORS) as TagColor[];
 export default function NewTagPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const hcb = useClient();
 
   const [label, setLabel] = useState("");
@@ -80,9 +82,10 @@ export default function NewTagPage() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingTop: 16,
+          paddingTop: 16 + headerInset,
           paddingBottom: 32,
           gap: 16,
         }}

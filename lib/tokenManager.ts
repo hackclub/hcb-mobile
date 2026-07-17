@@ -44,6 +44,10 @@ export class TokenManager {
         },
       );
 
+      console.log(
+        "[AUTHDBG] load() read from SecureStore len:" +
+          (tokenResponseStr?.length ?? "null"),
+      );
       if (tokenResponseStr) {
         const tokenData = JSON.parse(tokenResponseStr);
         this.tokenResponse = new TokenResponse(tokenData);
@@ -79,13 +83,14 @@ export class TokenManager {
         tokenType: tokenResponse.tokenType,
         scope: tokenResponse.scope,
       };
-      await SecureStore.setItemAsync(
-        TOKEN_RESPONSE_KEY,
-        JSON.stringify(tokenData),
-        {
-          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-        },
+      const _serialized = JSON.stringify(tokenData);
+      console.log(
+        "[AUTHDBG] save() writing to SecureStore len:" + _serialized.length,
       );
+      await SecureStore.setItemAsync(TOKEN_RESPONSE_KEY, _serialized, {
+        keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+      });
+      console.log("[AUTHDBG] save() write OK");
       if (codeVerifier) {
         await SecureStore.setItemAsync(CODE_VERIFIER_KEY, codeVerifier, {
           keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
@@ -166,6 +171,10 @@ export class TokenManager {
       return refreshPromise;
     }
 
+    console.log(
+      "[AUTHDBG] refresh() START rt:" +
+        (this.tokenResponse.refreshToken?.slice(0, 6) ?? "?"),
+    );
     refreshPromise = (async () => {
       try {
         const result = await refreshAsync(
@@ -174,6 +183,12 @@ export class TokenManager {
             refreshToken: this.tokenResponse!.refreshToken!,
           },
           discovery,
+        );
+        console.log(
+          "[AUTHDBG] refresh() OK access:" +
+            !!result.accessToken +
+            " refresh:" +
+            !!result.refreshToken,
         );
 
         if (!result.accessToken || !result.refreshToken) {
@@ -220,6 +235,12 @@ export class TokenManager {
           params?: { error?: string };
         };
         const oauthError = errorObj.code || errorObj.params?.error;
+        console.log(
+          "[AUTHDBG] refresh() ERROR oauthError:" +
+            oauthError +
+            " msg:" +
+            (error instanceof Error ? error.message : String(error)),
+        );
 
         // Terminal OAuth errors mean the refresh token can never be used again.
         // Retrying is pointless, so end the session immediately.

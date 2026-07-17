@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSWRConfig } from "swr";
 
+import ErrorHandoff from "@/components/ErrorHandoff";
 import AccessDenied from "@/components/organizations/AccessDenied";
 import ActionChip from "@/components/organizations/ActionChip";
 import ActionTile from "@/components/organizations/ActionTile";
@@ -23,14 +24,13 @@ import SubOrganizations from "@/components/organizations/SubOrganizations";
 import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TeamAvatars from "@/components/organizations/TeamAvatars";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
-import ErrorHandoff from "@/components/ErrorHandoff";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
-import { showAlert } from "@/lib/alertUtils";
 import { OrgPolicy } from "@/lib/policies";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import ITransaction from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
@@ -41,6 +41,7 @@ export default function Page() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id: string; fallbackData?: string }>();
   const { isOnline } = useOffline();
+  const headerInset = useHeaderInset();
 
   const {
     data: organization,
@@ -233,7 +234,13 @@ export default function Page() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 16 }}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: 16 + headerInset,
+          gap: 16,
+        }}
+      >
         {showTapToPayBanner && (
           <TapToPayBanner
             onDismiss={handleDismissTapToPayBanner}
@@ -332,18 +339,11 @@ export default function Page() {
             <ActionTile
               icon="support"
               label="Donations"
-              onPress={() => {
-                if (!supportsTapToPay) {
-                  showAlert(
-                    "Unsupported Device",
-                    "Collecting donations is only supported on iOS 16.4 and later.",
-                  );
-                  return;
-                }
-                navTo("/(events)/[id]/donations/new", {
+              onPress={() =>
+                navTo("/(events)/[id]/donations", {
                   orgSlug: organization.slug,
-                });
-              }}
+                })
+              }
             />
             <ActionTile
               icon="attachment"

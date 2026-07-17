@@ -10,11 +10,13 @@ import {
 
 import CheckTransferScreen from "@/components/organizations/transfer/CheckTransfer";
 import { OrganizationExpanded } from "@/lib/types/Organization";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
 export default function CheckTransferPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
@@ -41,7 +43,7 @@ export default function CheckTransferPage() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 20 + headerInset }}
         keyboardShouldPersistTaps="handled"
       >
         <CheckTransferScreen organization={organization} />

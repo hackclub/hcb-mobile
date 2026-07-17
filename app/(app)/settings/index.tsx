@@ -34,6 +34,7 @@ import AuthContext from "@/lib/auth/auth";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
@@ -85,6 +86,7 @@ export default function SettingsPage() {
   const animation = useRef(new Animated.Value(0)).current;
   const deviceColorScheme = useSystemColorScheme();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const borderColor = cardBorderColor(isDark);
   const [biometricsRequired, setBiometricsRequired] = useState(false);
   const [biometricsAvailable, setBiometricsAvailable] = useState(false);
@@ -247,7 +249,7 @@ export default function SettingsPage() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40, paddingTop: headerInset }}
       style={{ backgroundColor: colors.background }}
     >
       <View style={{ padding: 20, paddingTop: 0 }}>

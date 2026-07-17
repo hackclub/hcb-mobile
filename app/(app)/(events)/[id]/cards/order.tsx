@@ -24,6 +24,7 @@ import CardDesign from "@/lib/types/CardDesign";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import useOfflineSWR from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { handleCreateCard } from "@/utils/cardActions";
@@ -31,6 +32,7 @@ import { handleCreateCard } from "@/utils/cardActions";
 export default function Page() {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const [isLoading, setIsLoading] = useState(false);
   const { data: user } = useOfflineSWR<User>(`user?expand=shipping_address`);
   const [cardType, setCardType] = useState("virtual");
@@ -163,6 +165,7 @@ export default function Page() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           paddingHorizontal: 20,
+          paddingTop: headerInset,
         }}
       >
         <Stack.Screen

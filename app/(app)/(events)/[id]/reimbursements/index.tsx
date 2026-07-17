@@ -24,6 +24,7 @@ import {
   reportStatusText,
 } from "@/lib/types/Reimbursement";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 import { renderDate, renderMoney } from "@/utils/format";
@@ -38,6 +39,7 @@ export default function ReimbursementsPage() {
   const isDark = useIsDark();
   const navigation = useNavigation();
   const hcb = useClient();
+  const headerInset = useHeaderInset();
   const [search, setSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -155,7 +157,7 @@ export default function ReimbursementsPage() {
       }
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
         gap: 16,
       }}

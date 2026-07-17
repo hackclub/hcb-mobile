@@ -12,6 +12,7 @@ import { Text } from "@/components/Text";
 import UserMention from "@/components/UserMention";
 import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import {
@@ -81,6 +82,7 @@ export default function CheckDepositDetailPage() {
   }>();
   const { colors: themeColors } = useTheme();
   const navigation = useNavigation();
+  const headerInset = useHeaderInset();
 
   const {
     data: deposit,
@@ -141,7 +143,7 @@ export default function CheckDepositDetailPage() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16 + headerInset,
         paddingBottom: 40,
         gap: 20,
       }}

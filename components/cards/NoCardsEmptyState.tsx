@@ -6,6 +6,7 @@ import { ScrollView, View } from "react-native";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { palette } from "@/styles/theme";
 
 const FEATURE_ROWS: {
@@ -40,6 +41,7 @@ export const NoCardsEmptyState = ({
 }) => {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
 
   const handleOrderCard = () => {
     if (onOrderCard) {
@@ -58,7 +60,7 @@ export const NoCardsEmptyState = ({
         flex: 1,
         backgroundColor: themeColors.background,
       }}
-      contentContainerStyle={{ padding: 24 }}
+      contentContainerStyle={{ padding: 24, paddingTop: 24 + headerInset }}
     >
       <View style={{ gap: 28, marginBottom: 36 }}>
         {FEATURE_ROWS.map((row) => (

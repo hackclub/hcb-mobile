@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 
 import { Text } from "@/components/Text";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
 const icons: { [key: string]: number | null } = {
@@ -76,6 +77,7 @@ const isChristmasSeason = () => {
 
 export default function Page() {
   const { colors } = useTheme();
+  const headerInset = useHeaderInset();
   const [currentIcon, setCurrentIcon] = useState<string>("default");
   const { data: availableIcons } = useOfflineSWR<Record<string, boolean>>(
     "user/available_icons",
@@ -164,7 +166,11 @@ export default function Page() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 100,
+        paddingTop: headerInset,
+      }}
     >
       <Stack.Screen options={{ headerLargeTitle: true, title: "App icon" }} />
       <View style={{ gap: 12 }}>

@@ -18,11 +18,14 @@ import { useMerchantIcon } from "@/lib/useMerchantIcon";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 
-// Semantic colors for transaction states (dark / light pairs)
+// Semantic colors for transaction states (dark / light pairs).
+// declinedBg/positiveBg are opaque (the translucent tints composited over the
+// card color) so adjacent rows can overlap slightly without the card showing
+// through the sub-pixel seam Android leaves between them.
 const colors = {
   reversedBg: { dark: "#252429", light: "#EAEDF1" },
-  declinedBg: { dark: "rgba(236,55,80,0.18)", light: "rgba(236,55,80,0.10)" },
-  positiveBg: { dark: "rgba(51,214,166,0.22)", light: "rgba(51,214,166,0.12)" },
+  declinedBg: { dark: "#492730", light: "#FDEBEE" },
+  positiveBg: { dark: "#284B45", light: "#E7FAF4" },
   reversedBadge: { dark: "#2A394C", light: "#D5E0EF" },
   declinedBadge: { dark: "#401A23", light: "#891A2A" },
   reversedBadgeText: { dark: palette.info, light: "#D5E0EF" },
@@ -38,7 +41,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     overflow: "hidden",
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   hackathonGradient: {
     position: "absolute",
@@ -164,9 +166,6 @@ function Transaction({
           styles.row,
           {
             backgroundColor,
-            borderBottomColor: isDark
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.08)",
             borderTopLeftRadius: top ? 8 : 0,
             borderTopRightRadius: top ? 8 : 0,
             borderBottomLeftRadius: bottom ? 8 : 0,

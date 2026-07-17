@@ -24,6 +24,7 @@ import { OrgPolicy } from "@/lib/policies";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import User, { OrgUser } from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, subTextColor } from "@/styles/theme";
 
@@ -225,6 +226,7 @@ export default function Page() {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const { bottom: tabBarHeight } = useSafeAreaInsets();
+  const headerInset = useHeaderInset();
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
@@ -370,6 +372,7 @@ export default function Page() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{
         paddingHorizontal: 16,
+        paddingTop: headerInset,
         paddingBottom: tabBarHeight + 20,
         gap: 10,
       }}

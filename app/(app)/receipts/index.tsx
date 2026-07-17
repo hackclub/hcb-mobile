@@ -29,6 +29,7 @@ import Organization from "@/lib/types/Organization";
 import Receipt from "@/lib/types/Receipt";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
 import { useIsDark } from "@/lib/useColorScheme";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import p from "@/styles/palette";
 import { palette } from "@/styles/theme";
@@ -118,6 +119,7 @@ export default function Page() {
     null,
   );
   const isDark = useIsDark();
+  const headerInset = useHeaderInset();
   const hcb = useClient();
   const uploadButtonRef = useRef(null);
 
@@ -550,7 +552,7 @@ export default function Page() {
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.type}-${index}`}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ padding: 20 }}
+        contentContainerStyle={{ padding: 20, paddingTop: 20 + headerInset }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

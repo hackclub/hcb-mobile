@@ -19,6 +19,7 @@ import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import Organization from "@/lib/types/Organization";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { normalizeSvg } from "@/utils/format";
@@ -83,6 +84,7 @@ export default function Page() {
   const { data: organizations } =
     useOfflineSWR<Organization[]>("user/organizations");
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const [patternCache, setPatternCache] = useState<
     Record<
       string,
@@ -347,7 +349,7 @@ export default function Page() {
 
   if (!sortedCards) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, paddingTop: headerInset }}>
         <CardListSkeleton />
       </View>
     );
@@ -373,7 +375,11 @@ export default function Page() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-      contentContainerStyle={{ paddingHorizontal: 20 }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: headerInset,
+      }}
       panGesture={panGesture}
       renderItem={renderItem}
       ListFooterComponent={

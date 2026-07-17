@@ -1,6 +1,5 @@
-import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 
-import { palette } from "@/styles/theme";
 import { BASE } from "@/utils/shareUrl";
 
 export async function openOnWebsite(pathOrUrl: string) {
@@ -9,11 +8,7 @@ export async function openOnWebsite(pathOrUrl: string) {
     : `${BASE}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
 
   try {
-    await WebBrowser.openBrowserAsync(url, {
-      presentationStyle: WebBrowser.WebBrowserPresentationStyle.POPOVER,
-      controlsColor: palette.primary,
-      dismissButtonStyle: "cancel",
-    });
+    await Linking.openURL(url);
   } catch (error) {
     console.error("Failed to open URL in browser", error, {
       context: { url },

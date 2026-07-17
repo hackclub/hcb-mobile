@@ -6,6 +6,7 @@ import Button from "@/components/Button";
 import GrantTermsModal from "@/components/grants/GrantTermsModal";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 import { formatCategoryNames, formatMerchantNames } from "@/utils/org";
@@ -22,13 +23,14 @@ export default function GrantWithoutCard({
   handleActivateGrant: () => void;
 }) {
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const isGrantCardholder = grantCard?.user?.id === user?.id;
   const [showTerms, setShowTerms] = useState(false);
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 20 }}
+      contentContainerStyle={{ padding: 20, paddingTop: 20 + headerInset }}
       showsVerticalScrollIndicator={false}
     >
       <View style={{ alignItems: "center", marginTop: 10 }}>

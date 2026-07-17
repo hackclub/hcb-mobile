@@ -4,18 +4,20 @@ import { ActivityIndicator, ScrollView, Switch, View } from "react-native";
 
 import { Text } from "@/components/Text";
 import { useLinkingPref } from "@/lib/providers/LinkingContext";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 
 export default function Page() {
   const { enabled, setEnabled } = useLinkingPref();
   const { colors } = useTheme();
+  const headerInset = useHeaderInset();
 
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingHorizontal: 20 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: headerInset }}
     >
       <Stack.Screen
         options={{ headerLargeTitle: true, title: "Deep linking" }}

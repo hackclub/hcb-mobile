@@ -4,10 +4,12 @@ import { useTheme } from "expo-router/react-navigation";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 
 import { Text } from "@/components/Text";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 export default function Page() {
   const { colors } = useTheme();
+  const headerInset = useHeaderInset();
 
   const handleTapToPayEducation = async () => {
     await ExpoTtpEdu.showTapToPayEducation();
@@ -17,7 +19,11 @@ export default function Page() {
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 20 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingHorizontal: 20,
+        paddingTop: headerInset,
+      }}
     >
       <Stack.Screen options={{ headerLargeTitle: true, title: "Tutorials" }} />
       <View style={{ width: "100%" }}>

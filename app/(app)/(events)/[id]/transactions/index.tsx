@@ -26,6 +26,7 @@ import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Tag from "@/lib/types/Tag";
 import ITransaction, { TransactionWithoutId } from "@/lib/types/Transaction";
 import User from "@/lib/types/User";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
@@ -36,10 +37,9 @@ import { addPendingFeeToTransactions } from "@/utils/org";
 type ListItemType =
   | { type: "header"; title: string }
   | {
-      type: "transaction";
-      transaction: TransactionWithoutId;
-      isFirst: boolean;
-      isLast: boolean;
+      type: "group";
+      title: string;
+      transactions: TransactionWithoutId[];
     };
 
 function countActiveFilters(filters: TransactionFilters): number {
@@ -122,6 +122,7 @@ export default function Page() {
   }, [organizationError, mutateOrganization]);
 
   const { bottom: tabBarSize } = useSafeAreaInsets();
+  const headerInset = useHeaderInset();
   const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
@@ -149,14 +150,13 @@ export default function Page() {
     sections.forEach((section) => {
       headerIndices.push(result.length);
       result.push({ type: "header", title: section.title });
-
-      section.data.forEach((item, index) => {
-        result.push({
-          type: "transaction",
-          transaction: item as TransactionWithoutId,
-          isFirst: index === 0,
-          isLast: index === section.data.length - 1,
-        });
+      // Render each date group as a single cell so its rows share one native
+      // view. Separate per-row cells leave a gap between them on Android that
+      // is wider than on iOS.
+      result.push({
+        type: "group",
+        title: section.title,
+        transactions: section.data,
       });
     });
 
@@ -358,41 +358,40 @@ export default function Page() {
 
       return (
         <View style={{ paddingHorizontal: 20 }}>
-          <TransactionWrapper
-            item={item.transaction as ITransaction}
-            user={user}
-            organization={organization}
-            orgId={params.id as `org_${string}`}
-            isFirst={item.isFirst}
-            isLast={item.isLast}
-          />
+          {/* Opaque card backing: transaction rows use translucent tints and
+              are designed to sit on themeColors.card. Backing them here keeps
+              row colors correct and makes the seams between rows render a
+              consistent card color instead of the page background (which on
+              Android rounds inconsistently and looks like varying gaps). */}
+          <View
+            style={{
+              borderRadius: 8,
+              overflow: "hidden",
+              backgroundColor: themeColors.card,
+            }}
+          >
+            {item.transactions.map((transaction, index) => (
+              <TransactionWrapper
+                key={(transaction as ITransaction).id || index}
+                item={transaction as ITransaction}
+                user={user}
+                organization={organization}
+                orgId={params.id as `org_${string}`}
+                isFirst={index === 0}
+                isLast={index === item.transactions.length - 1}
+              />
+            ))}
+          </View>
         </View>
       );
     },
-    [user, organization, params],
+    [user, organization, params, themeColors.card],
   );
 
-  const getItemType = useCallback((item: ListItemType) => {
-    if (item.type === "header") {
-      return "header";
-    }
+  const getItemType = useCallback((item: ListItemType) => item.type, []);
 
-    const transaction = item.transaction as TransactionWithoutId;
-    return `transaction-${transaction.code}`;
-  }, []);
-
-  const keyExtractor = useCallback((item: ListItemType, index: number) => {
-    if (item.type === "header") {
-      return `header-${item.title}`;
-    }
-    if (
-      "transaction" in item &&
-      "id" in item.transaction &&
-      item.transaction.id
-    ) {
-      return item.transaction.id;
-    }
-    return `item-${index}`;
+  const keyExtractor = useCallback((item: ListItemType) => {
+    return `${item.type}-${item.title}`;
   }, []);
 
   if (organizationLoading || userLoading) {
@@ -446,6 +445,7 @@ export default function Page() {
           onRefresh={onRefresh}
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{
+            paddingTop: headerInset,
             paddingBottom: tabBarSize + 20,
           }}
           showsVerticalScrollIndicator={true}

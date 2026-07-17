@@ -10,11 +10,13 @@ import {
 
 import AchTransferScreen from "@/components/organizations/transfer/AchTransfer";
 import { OrganizationExpanded } from "@/lib/types/Organization";
+import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
 export default function AchTransferPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
@@ -41,7 +43,7 @@ export default function AchTransferPage() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 20 + headerInset }}
         keyboardShouldPersistTaps="handled"
       >
         <AchTransferScreen organization={organization} />
