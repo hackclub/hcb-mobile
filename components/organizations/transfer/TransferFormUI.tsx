@@ -14,13 +14,12 @@ import {
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
-import { cardBorderColor, palette, radii } from "@/styles/theme";
-
-// Shared look for the primary "Send …" button across every transfer form:
-// a light-blue fill with dark navy label/icon.
-const TRANSFER_SUBMIT_BG = "#74B2E6";
-const TRANSFER_SUBMIT_BORDER = "#8FBEE8";
-const TRANSFER_SUBMIT_FG = "#12283F";
+import {
+  cardBorderColor,
+  palette,
+  placeholderColor,
+  radii,
+} from "@/styles/theme";
 
 /* -------------------------------------------------------------------------- */
 /*  Section — a plain bold title above a card that groups its fields.          */
@@ -119,7 +118,7 @@ export function FormField({
             setFocused(false);
             inputProps.onBlur?.(e);
           }}
-          placeholderTextColor={palette.muted}
+          placeholderTextColor={placeholderColor(isDark)}
           style={[
             { color: themeColors.text, fontSize: 16, flex: 1, padding: 0 },
             style,
@@ -491,21 +490,18 @@ export function TransferSubmitButton({
   children: string;
   icon?: React.ComponentProps<typeof Button>["icon"];
 }) {
+  // Primary HCB red, matching every other primary action in the app. Letting
+  // Button own the colors also means its disabled treatment (muted fill) isn't
+  // fighting a hardcoded foreground.
   return (
     <Button
-      variant="blue"
+      variant="primary"
       loading={loading}
       disabled={disabled}
       onPress={onPress}
       icon={icon}
       iconPosition="right"
       iconSize={24}
-      color={TRANSFER_SUBMIT_FG}
-      iconColor={TRANSFER_SUBMIT_FG}
-      style={{
-        backgroundColor: TRANSFER_SUBMIT_BG,
-        borderColor: TRANSFER_SUBMIT_BORDER,
-      }}
     >
       {children}
     </Button>

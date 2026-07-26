@@ -30,9 +30,18 @@ export function cardBorderColor(isDark: boolean): string {
   return isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)";
 }
 
-/** Secondary/muted text color for labels, placeholders, metadata */
+/** Secondary/muted text color for labels, metadata */
 export function subTextColor(isDark: boolean): string {
   return isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+}
+
+/**
+ * Input placeholder color. Deliberately dimmer than `subTextColor` so an
+ * example value never reads as data the user already entered — on a money form
+ * a placeholder routing number that looks filled in is a real hazard.
+ */
+export function placeholderColor(isDark: boolean): string {
+  return isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.24)";
 }
 
 export const radii = {

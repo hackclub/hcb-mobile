@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { mutate, useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import { match, P } from "ts-pattern";
 
 import AdminTools from "@/components/AdminTools";
@@ -33,6 +33,7 @@ import InvoiceTransaction from "@/components/transaction/types/InvoiceTransactio
 import TransferTransaction from "@/components/transaction/types/TransferTransaction";
 import WiseTransaction from "@/components/transaction/types/WiseTransaction";
 import { TransactionPolicy } from "@/lib/policies";
+import { invalidateReceiptCaches } from "@/lib/receipts";
 import IComment from "@/lib/types/Comment";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import Transaction, { TransactionType } from "@/lib/types/Transaction";
@@ -73,7 +74,7 @@ export default function TransactionPage({
   const orgId = _orgId as string | undefined;
 
   const [refreshing, setRefreshing] = useState(false);
-  const { mutate: globalMutate } = useSWRConfig();
+  const { mutate } = useSWRConfig();
   // filter in case of deeplink with #commentId
   const txnId = transactionId.split("#")[0];
 
@@ -121,28 +122,33 @@ export default function TransactionPage({
   const onRefresh = async () => {
     setRefreshing(true);
     try {
+      const scopeOrgId = transaction?.organization?.id || orgId;
       await Promise.all([
+        // All three of these previously used the *global* `mutate` imported from
+        // "swr", which is bound to SWR's built-in default cache — not the
+        // persistent provider this app installs — so they were silent no-ops.
+        mutate(`organizations/${scopeOrgId}/transactions/${txnId}`, undefined, {
+          revalidate: true,
+        }),
         mutate(
-          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}`,
+          `organizations/${scopeOrgId}/transactions/${txnId}/comments`,
           undefined,
           { revalidate: true },
         ),
+        // Was `mutate(key, { revalidate: true })` — that object landed in the
+        // `data` position and would have been written into the cache entry,
+        // leaving ReceiptList to call `.map()` on it.
         mutate(
-          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/comments`,
+          `organizations/${scopeOrgId}/transactions/${txnId}/receipts`,
           undefined,
           { revalidate: true },
         ),
-        mutate(
-          `organizations/${transaction?.organization?.id || orgId}/transactions/${txnId}/receipts`,
-          { revalidate: true },
-        ),
-        globalMutate(
-          (key) =>
-            typeof key === "string" &&
-            key.startsWith(
-              `organizations/${transaction?.organization?.id || orgId}/transactions`,
-            ),
-        ),
+        // Covers the paginated `$inf$…` list keys too, which an anchored
+        // startsWith predicate misses.
+        invalidateReceiptCaches(mutate, {
+          orgId: scopeOrgId,
+          transactionId: txnId,
+        }),
       ]);
     } finally {
       setRefreshing(false);

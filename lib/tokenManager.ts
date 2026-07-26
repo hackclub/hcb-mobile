@@ -24,10 +24,42 @@ let refreshPromise: Promise<TokenResponse | null> | null = null;
 // resort against being stuck with a token the server keeps rejecting.
 const MAX_CONSECUTIVE_REFRESH_FAILURES = 8;
 
+type TokenListener = (tokenResponse: TokenResponse | null) => void;
+
+// Thrown instead of sending a request we know the server will reject. A request
+// with no Authorization header is guaranteed to 401, so firing it just turns one
+// auth failure into a burst of 401s, SWR errors and retries.
+export class UnauthenticatedError extends Error {
+  constructor(message = "No valid access token; request not sent") {
+    super(message);
+    this.name = "UnauthenticatedError";
+  }
+}
+
 export class TokenManager {
   private tokenResponse: TokenResponse | null = null;
   private codeVerifier: string | undefined;
   private consecutiveRefreshFailures = 0;
+  private listeners = new Set<TokenListener>();
+
+  // Lets the UI react the moment the session changes — in particular a forced
+  // logout from inside refresh(), which no caller is awaiting.
+  subscribe(listener: TokenListener): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private emit(): void {
+    for (const listener of this.listeners) {
+      try {
+        listener(this.tokenResponse);
+      } catch (error) {
+        console.error("[TokenManager] Token listener threw", error);
+      }
+    }
+  }
 
   async load(): Promise<void> {
     try {
@@ -44,14 +76,11 @@ export class TokenManager {
         },
       );
 
-      console.log(
-        "[AUTHDBG] load() read from SecureStore len:" +
-          (tokenResponseStr?.length ?? "null"),
-      );
       if (tokenResponseStr) {
         const tokenData = JSON.parse(tokenResponseStr);
         this.tokenResponse = new TokenResponse(tokenData);
         this.codeVerifier = codeVerifierStr || undefined;
+        this.emit();
       }
     } catch (error) {
       console.error("[TokenManager] Failed to load tokens", error);
@@ -74,6 +103,7 @@ export class TokenManager {
     if (codeVerifier) {
       this.codeVerifier = codeVerifier;
     }
+    this.emit();
     try {
       const tokenData = {
         accessToken: tokenResponse.accessToken,
@@ -83,14 +113,13 @@ export class TokenManager {
         tokenType: tokenResponse.tokenType,
         scope: tokenResponse.scope,
       };
-      const _serialized = JSON.stringify(tokenData);
-      console.log(
-        "[AUTHDBG] save() writing to SecureStore len:" + _serialized.length,
+      await SecureStore.setItemAsync(
+        TOKEN_RESPONSE_KEY,
+        JSON.stringify(tokenData),
+        {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        },
       );
-      await SecureStore.setItemAsync(TOKEN_RESPONSE_KEY, _serialized, {
-        keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
-      });
-      console.log("[AUTHDBG] save() write OK");
       if (codeVerifier) {
         await SecureStore.setItemAsync(CODE_VERIFIER_KEY, codeVerifier, {
           keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
@@ -110,6 +139,7 @@ export class TokenManager {
       this.codeVerifier = undefined;
       this.consecutiveRefreshFailures = 0;
       refreshPromise = null;
+      this.emit();
     } catch (error) {
       console.error("[TokenManager] Failed to clear tokens", error);
     }
@@ -171,10 +201,6 @@ export class TokenManager {
       return refreshPromise;
     }
 
-    console.log(
-      "[AUTHDBG] refresh() START rt:" +
-        (this.tokenResponse.refreshToken?.slice(0, 6) ?? "?"),
-    );
     refreshPromise = (async () => {
       try {
         const result = await refreshAsync(
@@ -183,12 +209,6 @@ export class TokenManager {
             refreshToken: this.tokenResponse!.refreshToken!,
           },
           discovery,
-        );
-        console.log(
-          "[AUTHDBG] refresh() OK access:" +
-            !!result.accessToken +
-            " refresh:" +
-            !!result.refreshToken,
         );
 
         if (!result.accessToken || !result.refreshToken) {
@@ -235,12 +255,6 @@ export class TokenManager {
           params?: { error?: string };
         };
         const oauthError = errorObj.code || errorObj.params?.error;
-        console.log(
-          "[AUTHDBG] refresh() ERROR oauthError:" +
-            oauthError +
-            " msg:" +
-            (error instanceof Error ? error.message : String(error)),
-        );
 
         // Terminal OAuth errors mean the refresh token can never be used again.
         // Retrying is pointless, so end the session immediately.

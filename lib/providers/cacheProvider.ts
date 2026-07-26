@@ -29,6 +29,11 @@ export class CacheProvider implements Cache<CacheValue> {
         const data = await cacheFile.text();
         const entries = JSON.parse(data);
         entries.forEach(([key, value]: [string, State<CacheValue, Error>]) => {
+          // Never overwrite an entry written since startup. `initialize()` is a
+          // floating async call while get/set are synchronous, so a fetch that
+          // lands first (e.g. a receipt upload revalidating) would otherwise be
+          // clobbered by the stale value from the previous session's file.
+          if (this.map.has(key)) return;
           this.map.set(key, value);
         });
       }

@@ -27,8 +27,10 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
+import ToastHost from "@/components/toast/ToastHost";
 import AuthContext from "@/lib/auth/auth";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { installNavigationGuard } from "@/lib/navigationGuard";
@@ -116,7 +118,6 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (!isReady) return;
-    console.log(tokenResponse?.accessToken);
 
     // Avoid infinite redirects when auth state hasn't changed
     if (lastAuthState.current === hasToken) {
@@ -156,25 +157,30 @@ function Layout() {
   }
 
   return (
-    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_API_KEY}>
-      <ExpoShareIntentProvider>
-        <ThemeProvider>
-          <AuthProvider onAuthReady={() => setIsReady(true)}>
-            <ReadyContext.Provider value={[isReady, setIsReady]}>
-              <ShareIntentProvider>
-                <LinkingProvider>
-                  <CustomAlertProvider>
-                    <SWRCacheProvider.Provider value={{ scheme, cache }}>
-                      <RootLayoutNav />
-                    </SWRCacheProvider.Provider>
-                  </CustomAlertProvider>
-                </LinkingProvider>
-              </ShareIntentProvider>
-            </ReadyContext.Provider>
-          </AuthProvider>
-        </ThemeProvider>
-      </ExpoShareIntentProvider>
-    </StripeProvider>
+    <SafeAreaProvider>
+      <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_API_KEY}>
+        <ExpoShareIntentProvider>
+          <ThemeProvider>
+            <AuthProvider onAuthReady={() => setIsReady(true)}>
+              <ReadyContext.Provider value={[isReady, setIsReady]}>
+                <ShareIntentProvider>
+                  <LinkingProvider>
+                    <CustomAlertProvider>
+                      <SWRCacheProvider.Provider value={{ scheme, cache }}>
+                        <RootLayoutNav />
+                      </SWRCacheProvider.Provider>
+                    </CustomAlertProvider>
+                    {/* Mounted at the root, not in (app), so toasts raised from
+                        receipt-selection and share-intent are covered too. */}
+                    <ToastHost />
+                  </LinkingProvider>
+                </ShareIntentProvider>
+              </ReadyContext.Provider>
+            </AuthProvider>
+          </ThemeProvider>
+        </ExpoShareIntentProvider>
+      </StripeProvider>
+    </SafeAreaProvider>
   );
 }
 

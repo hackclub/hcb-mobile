@@ -31,18 +31,16 @@ export function AuthProvider({
     loadTokens();
   }, [onAuthReady]);
 
+  // TokenManager owns the session and can change it without a caller — a
+  // rotated token after a background refresh, or a forced logout when the
+  // refresh token is rejected. Subscribing propagates that immediately;
+  // polling left the app fetching with a dead session until the next tick.
   useEffect(() => {
-    const syncInterval = setInterval(() => {
-      const currentToken = tokenManager.getToken();
-      // Compare access tokens instead of whole objects to detect changes
-      if (currentToken?.accessToken !== tokenResponse?.accessToken) {
-        setTokenResponseState(currentToken);
-        setCodeVerifierState(tokenManager.getCodeVerifier());
-      }
-    }, 1000);
-
-    return () => clearInterval(syncInterval);
-  }, [tokenResponse?.accessToken]);
+    return tokenManager.subscribe((currentToken) => {
+      setTokenResponseState(currentToken);
+      setCodeVerifierState(tokenManager.getCodeVerifier());
+    });
+  }, []);
 
   const setTokenResponse = async (
     newTokenResponse: TokenResponse | null,

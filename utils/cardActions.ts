@@ -1,6 +1,5 @@
 import { router } from "expo-router";
 import { KyInstance } from "ky";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { parseApiError, showAlert } from "../lib/alertUtils";
 import Card from "../lib/types/Card";
@@ -10,6 +9,8 @@ import User from "../lib/types/User";
 import { validateFields } from "./cardHelpers";
 import { renderMoney } from "./format";
 import * as Haptics from "./haptics";
+
+import { toast } from "@/lib/toast";
 
 export const toggleCardFrozen = (
   card: Card,
@@ -201,11 +202,11 @@ export const handleOneTimeUse = async (
     mutate(`card_grants/${grantId}`);
     mutate("user/cards");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Toast.show({
+    toast.show({
       title: grantCard.one_time_use
         ? "One time use disabled"
         : "One time use enabled",
-      type: ALERT_TYPE.SUCCESS,
+      type: "success",
     });
   } catch (error) {
     console.error("One time use error", await parseApiError(error), {
@@ -298,9 +299,9 @@ export const handleBurnCard = async (
             mutate(`cards/${card.id}`);
             mutate("user/cards");
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Toast.show({
+            toast.show({
               title: "Card burned",
-              type: ALERT_TYPE.SUCCESS,
+              type: "success",
             });
           } catch (error) {
             console.error("Burn card error", error, { cardId: card.id });
@@ -404,10 +405,10 @@ export const handleCreateCard = async (
 
     if (response.ok) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
+      toast.show({
+        type: "success",
         title: "Card created!",
-        textBody: "Your card has been created successfully.",
+        message: "Your card has been created successfully.",
       });
       router.back();
     } else {

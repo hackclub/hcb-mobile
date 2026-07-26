@@ -88,6 +88,36 @@ export const showDestructiveAlert = (
 };
 
 /**
+ * Reports an action that was attempted and failed outright.
+ *
+ * The convention this encodes: **success is a toast, failure is a modal.** A
+ * success needs no decision, so it shouldn't block; a failure means the user's
+ * intent did not happen, and a toast that auto-dismisses in a few seconds can
+ * be missed entirely if they've looked away or navigated on. Pre-flight guards
+ * (the offline warning in `lib/useOffline`) stay toasts — nothing was attempted,
+ * so nothing failed.
+ *
+ * Pass `onRetry` only for work that is safe to repeat — re-running an upload or
+ * a delete is fine; creating a card or burning one is not.
+ */
+export const showFailureAlert = (
+  title: string,
+  message: string,
+  onRetry?: () => void,
+) => {
+  showAlert(
+    title,
+    message,
+    onRetry
+      ? [
+          { text: "Dismiss", style: "cancel" },
+          { text: "Retry", onPress: onRetry },
+        ]
+      : [{ text: "OK" }],
+  );
+};
+
+/**
  * Extracts the first error message from an API error response.
  * The v4 API returns errors as `{ messages: string[] }`.
  * Falls back to the provided fallback string if parsing fails.

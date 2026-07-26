@@ -20,7 +20,6 @@ import {
   useState,
 } from "react";
 import { ActivityIndicator, Appearance, Platform, View } from "react-native";
-import { AlertNotificationRoot } from "react-native-alert-notification";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { SWRConfig } from "swr";
@@ -564,6 +563,15 @@ export default function Layout() {
                     revalidate,
                     { retryCount },
                   ) => {
+                    // No session to retry with — the login redirect is already
+                    // in flight, so retrying just repeats a certain failure.
+                    if (
+                      error instanceof Error &&
+                      error.name === "UnauthenticatedError"
+                    ) {
+                      return;
+                    }
+
                     const errorWithStatus = error as HTTPError;
                     const status =
                       errorWithStatus?.status ||
@@ -602,7 +610,8 @@ export default function Layout() {
                     if (
                       error instanceof Error &&
                       error.name !== "AbortError" &&
-                      error.name !== "NetworkError"
+                      error.name !== "NetworkError" &&
+                      error.name !== "UnauthenticatedError"
                     ) {
                       console.error(`Global SWR error for ${key}:`, error);
                     }
@@ -612,11 +621,9 @@ export default function Layout() {
                 <SentryUserBridge />
                 <UserChangeDetector />
                 <ActionSheetProvider>
-                  <AlertNotificationRoot theme={isDark ? "dark" : "light"}>
-                    <ThemeProvider value={navTheme}>
-                      <Navigation />
-                    </ThemeProvider>
-                  </AlertNotificationRoot>
+                  <ThemeProvider value={navTheme}>
+                    <Navigation />
+                  </ThemeProvider>
                 </ActionSheetProvider>
               </SWRConfig>
             </GestureHandlerRootView>

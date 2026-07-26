@@ -24,7 +24,6 @@ import {
   useColorScheme as useSystemColorScheme,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { mutate } from "swr";
 
 import Button from "@/components/Button";
@@ -32,6 +31,7 @@ import FeedbackModal from "@/components/FeedbackModal";
 import { Text } from "@/components/Text";
 import AuthContext from "@/lib/auth/auth";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
+import { toast } from "@/lib/toast";
 import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useHeaderInset } from "@/lib/useHeaderInset";
@@ -595,10 +595,10 @@ export default function SettingsPage() {
                 }
                 await Intercom.present();
               } else {
-                Toast.show({
-                  type: ALERT_TYPE.WARNING,
+                toast.show({
+                  type: "warning",
                   title: "Unable to open support",
-                  textBody:
+                  message:
                     "User information is not available. Please try again later.",
                 });
               }
@@ -816,17 +816,17 @@ export default function SettingsPage() {
               },
             );
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Toast.show({
-              type: ALERT_TYPE.SUCCESS,
+            toast.show({
+              type: "success",
               title: "Feedback submitted!",
-              textBody: "Thank you for your feedback!",
+              message: "Thank you for your feedback!",
             });
           } catch (error) {
             console.error("Failed to submit feedback:", error);
-            Toast.show({
-              type: ALERT_TYPE.DANGER,
+            toast.show({
+              type: "error",
               title: "Failed to submit feedback",
-              textBody: "Please try again later.",
+              message: "Please try again later.",
             });
           }
         }}

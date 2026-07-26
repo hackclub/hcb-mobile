@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated from "react-native-reanimated";
 
 import Button from "@/components/Button";
@@ -23,8 +22,9 @@ import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 import MissingReceiptTransaction from "@/components/receipts/MissingReceiptTransaction";
 import { Text } from "@/components/Text";
 import { ZoomAndFadeIn } from "@/components/transaction/ReceiptList";
-import { parseApiError, showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import { toast } from "@/lib/toast";
 import Organization from "@/lib/types/Organization";
 import Receipt from "@/lib/types/Receipt";
 import { TransactionCardCharge } from "@/lib/types/Transaction";
@@ -111,7 +111,6 @@ export default function Page() {
   }>("user/transactions/missing_receipt");
   const { data: receipts, mutate: refreshReceipts } =
     useOfflineSWR<Receipt[]>("receipts");
-  console.log(receipts);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -201,23 +200,25 @@ export default function Page() {
               setDeletingReceiptId(receiptId);
               await hcb.delete(`receipts/${receiptId.replace("rct_", "")}`);
 
-              Toast.show({
-                type: ALERT_TYPE.SUCCESS,
+              toast.show({
+                type: "success",
                 title: "Receipt Deleted",
-                textBody: "The receipt has been successfully deleted.",
+                message: "The receipt has been successfully deleted.",
               });
 
               refreshReceipts();
             } catch (error) {
               console.error("Error deleting receipt", error, { receiptId });
-              Toast.show({
-                type: ALERT_TYPE.DANGER,
-                title: "Delete Failed",
-                textBody: await parseApiError(
+              // Modal, not a toast: the receipt is still in the bin and the
+              // user needs to decide whether to retry.
+              showFailureAlert(
+                "Delete failed",
+                await parseApiError(
                   error,
-                  "Failed to delete receipt. Please try again later.",
+                  "This receipt is still in your bin. Please try again.",
                 ),
-              });
+                () => handleDeleteReceipt(receiptId),
+              );
             } finally {
               setDeletingReceiptId(null);
             }
@@ -247,10 +248,16 @@ export default function Page() {
         });
       }
     } catch (error) {
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Upload Failed",
-        textBody: "Failed to select receipts from device",
+      console.error("Photo library picker failed", error, {
+        context: { transactionId: transaction.id },
+      });
+      // Stays a toast, not a modal: the picker failed to open, so nothing was
+      // ever attempted or uploaded. Titling it "Upload Failed" implied a write
+      // had been tried and lost.
+      toast.show({
+        type: "warning",
+        title: "Couldn't open your photo library",
+        message: "Check photo permissions and try again.",
       });
     }
   };
@@ -305,8 +312,6 @@ export default function Page() {
     if (item.type === "empty-state") return groupedTransactions.length === 0;
     return true;
   });
-
-  console.log(listData);
 
   const renderItem = ({
     item,
@@ -525,7 +530,7 @@ export default function Page() {
                 marginBottom: 8,
               }}
             >
-              Receipt Bin is empty
+              You&apos;re all caught up
             </Text>
             <Text
               style={{
@@ -534,7 +539,11 @@ export default function Page() {
                 lineHeight: 20,
               }}
             >
-              All your transactions have receipts attached.{"\n"}
+              {/* This is the "nothing is missing a receipt" state, not the
+                  receipt bin's. It used to read "Receipt Bin is empty", which
+                  directly contradicted the bin carousel rendered right above
+                  it whenever that bin had receipts in it. */}
+              No transactions are missing a receipt.{"\n"}
               Great job staying organized!
             </Text>
           </View>

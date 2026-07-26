@@ -1,6 +1,6 @@
 import { format, isValid, parse } from "date-fns";
 import { Stack, router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
 import { useSWRConfig } from "swr";
 
@@ -50,35 +50,30 @@ export default function CardGrantScreen({
     return isValid(parsed) ? parsed : null;
   };
 
-  const validate = (): boolean => {
-    if (!EMAIL_RE.test(email.trim())) {
-      showAlert("Invalid email", "Please enter the recipient's email address.");
-      return false;
-    }
+  // Single source of truth for "is this sendable" — drives both the button's
+  // enabled state and the reason shown under it, so they can't disagree.
+  const blockingReason = useMemo((): string | null => {
+    if (!EMAIL_RE.test(email.trim()))
+      return "Enter the recipient's email address.";
     const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || Math.round(parsed * 100) < 100) {
-      showAlert("Invalid amount", "Amount must be at least $1.");
-      return false;
-    }
-    if (Math.round(parsed * 100) > organization.balance_cents) {
-      showAlert(
-        "Insufficient balance",
-        `This grant exceeds your available balance of ${renderMoney(organization.balance_cents)}.`,
-      );
-      return false;
-    }
-    if (expiresOn.trim() && !parseExpiresOn()) {
-      showAlert(
-        "Invalid date",
-        "Enter the expiration date as MM/DD/YYYY (e.g. 07/15/2027).",
-      );
-      return false;
-    }
-    return true;
-  };
+    if (!amount || isNaN(parsed) || Math.round(parsed * 100) < 100)
+      return "The amount must be at least $1.";
+    if (Math.round(parsed * 100) > organization.balance_cents)
+      return `This exceeds your available balance of ${renderMoney(organization.balance_cents)}.`;
+    if (expiresOn.trim() && !parseExpiresOn())
+      return "Enter the expiration date as MM/DD/YYYY (e.g. 07/15/2027).";
+    return null;
+    // parseExpiresOn is derived from expiresOn, which is already a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email, amount, expiresOn, organization.balance_cents]);
+
+  const hasInput = Boolean(email || amount || expiresOn);
 
   const handleSubmit = withOfflineCheck(async () => {
-    if (!validate()) return;
+    if (blockingReason) {
+      showAlert("Can't send yet", blockingReason);
+      return;
+    }
     setSubmitting(true);
     try {
       const expiresDate = parseExpiresOn();
@@ -191,12 +186,18 @@ export default function CardGrantScreen({
           />
         </FormSection>
 
-        <TransferSubmitButton loading={submitting} onPress={handleSubmit}>
+        <TransferSubmitButton
+          loading={submitting}
+          disabled={!!blockingReason}
+          onPress={handleSubmit}
+        >
           Send grant
         </TransferSubmitButton>
 
         <FooterNote>
-          The recipient will be emailed once the grant is sent.
+          {blockingReason && hasInput
+            ? blockingReason
+            : "The recipient will be emailed once the grant is sent."}
         </FooterNote>
       </View>
     </>

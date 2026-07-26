@@ -109,30 +109,6 @@ export default function Login() {
     }
   }, [request?.codeVerifier]);
 
-  useEffect(() => {
-    console.log(
-      "[AUTHDBG] redirectUri =",
-      redirectUri,
-      "| request ready:",
-      !!request,
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!response) return;
-    console.log(
-      "[AUTHDBG] auth response.type:",
-      response.type,
-      "| params:",
-      JSON.stringify((response as { params?: unknown }).params ?? {}).slice(
-        0,
-        200,
-      ),
-      "| error:",
-      (response as { error?: { message?: string } }).error?.message ?? "none",
-    );
-  }, [response]);
-
   // Exchange the authorization code for tokens and persist them. Runs to
   // completion inside the caller's async closure even if the React tree
   // remounts on the OAuth redirect (which tears down effects but not a
@@ -156,22 +132,9 @@ export default function Login() {
           },
           discovery,
         );
-        console.log(
-          "[AUTHDBG] exchangeCodeAsync OK access:" +
-            !!tokenResponse.accessToken +
-            " refresh:" +
-            !!tokenResponse.refreshToken +
-            " expiresIn:" +
-            tokenResponse.expiresIn,
-        );
         await setTokenResponse(tokenResponse, codeVerifier);
-        console.log("[AUTHDBG] setTokenResponse resolved");
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (error) {
-        console.log(
-          "[AUTHDBG] exchangeCodeAsync FAILED:",
-          (error as { message?: string })?.message ?? error,
-        );
         console.error("Error exchanging code for token:", error);
         // Allow a retry of this code if the exchange failed.
         processedCodesRef.current.delete(authCode);
@@ -205,12 +168,6 @@ export default function Login() {
 
     try {
       const _r = await promptAsync({ createTask: false });
-      console.log(
-        "[AUTHDBG] promptAsync returned type:",
-        _r?.type,
-        "| full:",
-        JSON.stringify(_r ?? {}).slice(0, 250),
-      );
       // Primary path: exchange the code straight from the promptAsync result,
       // so it does not depend on the `response` effect surviving a remount.
       if (_r?.type === "success" && _r.params?.code) {

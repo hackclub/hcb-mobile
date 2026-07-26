@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
 
 import {
@@ -38,46 +38,46 @@ export default function AchTransferScreen({
   const [paymentFor, setPaymentFor] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = (): boolean => {
-    if (!recipientName.trim()) {
-      showAlert("Missing field", "Please enter the recipient's name.");
-      return false;
-    }
-    if (!/^\d{9}$/.test(routingNumber)) {
-      showAlert(
-        "Invalid routing number",
-        "Routing number must be exactly 9 digits.",
-      );
-      return false;
-    }
-    if (!accountNumber.trim()) {
-      showAlert("Missing field", "Please enter the account number.");
-      return false;
-    }
+  // A single source of truth for "is this form sendable", so the button's
+  // enabled state and the blocking reason can never disagree. An ACH transfer
+  // is irreversible, so the button must not look armed until this returns null.
+  const blockingReason = useMemo((): string | null => {
+    if (!recipientName.trim()) return "Enter the recipient's name to continue.";
+    if (!/^\d{9}$/.test(routingNumber))
+      return "The routing number must be exactly 9 digits.";
+    if (!accountNumber.trim()) return "Enter the recipient's account number.";
     const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) {
-      showAlert(
-        "Invalid amount",
-        "Please enter a valid amount greater than $0.",
-      );
-      return false;
-    }
-    if (Math.round(parsed * 100) > organization.balance_cents) {
-      showAlert(
-        "Insufficient balance",
-        `This transfer exceeds your available balance of ${renderMoney(organization.balance_cents)}.`,
-      );
-      return false;
-    }
-    if (!paymentFor.trim()) {
-      showAlert("Missing field", "Please describe what this transfer is for.");
-      return false;
-    }
-    return true;
-  };
+    if (!amount || isNaN(parsed) || parsed <= 0)
+      return "Enter an amount greater than $0.";
+    if (Math.round(parsed * 100) > organization.balance_cents)
+      return `This exceeds your available balance of ${renderMoney(organization.balance_cents)}.`;
+    if (!paymentFor.trim()) return "Describe what this transfer is for.";
+    return null;
+  }, [
+    recipientName,
+    routingNumber,
+    accountNumber,
+    amount,
+    paymentFor,
+    organization.balance_cents,
+  ]);
+
+  // Don't scold an untouched form — the reason only appears once they've begun.
+  const hasInput = Boolean(
+    recipientName ||
+      routingNumber ||
+      accountNumber ||
+      amount ||
+      paymentFor ||
+      bankName ||
+      recipientEmail,
+  );
 
   const handleSubmit = withOfflineCheck(async () => {
-    if (!validate()) return;
+    if (blockingReason) {
+      showAlert("Can't send yet", blockingReason);
+      return;
+    }
     setSubmitting(true);
     try {
       await hcb.post("ach_transfers", {
@@ -196,6 +196,8 @@ export default function AchTransferScreen({
         </FormSection>
 
         <InfoCallout
+          color={palette.warning}
+          icon="alert-circle"
           title="Important info about ACH transfers"
           points={[
             "ACH transfers can only be sent to U.S. bank accounts.",
@@ -203,7 +205,7 @@ export default function AchTransferScreen({
             "We have limited ability to fix mistakes due to U.S. banking system restrictions.",
             <>
               ACH transfers are{" "}
-              <Text style={{ fontWeight: "700", color: palette.info }}>
+              <Text style={{ fontWeight: "700", color: palette.warning }}>
                 irreversible
               </Text>{" "}
               and can&apos;t be canceled.
@@ -211,12 +213,18 @@ export default function AchTransferScreen({
           ]}
         />
 
-        <TransferSubmitButton loading={submitting} onPress={handleSubmit}>
+        <TransferSubmitButton
+          loading={submitting}
+          disabled={!!blockingReason}
+          onPress={handleSubmit}
+        >
           Send transfer
         </TransferSubmitButton>
 
         <FooterNote>
-          Your transfer will be reviewed on the next business day.
+          {blockingReason && hasInput
+            ? blockingReason
+            : "Your transfer will be reviewed on the next business day."}
         </FooterNote>
       </View>
     </>

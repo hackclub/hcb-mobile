@@ -1,6 +1,6 @@
 import ky, { type KyInstance } from "ky";
 
-import { tokenManager } from "./tokenManager";
+import { tokenManager, UnauthenticatedError } from "./tokenManager";
 
 let clientInstance: KyInstance | null = null;
 
@@ -91,20 +91,24 @@ export function getClient(): KyInstance {
               formDataBodies.set(request, options.body as FormData);
             }
             const token = await tokenManager.getValidAccessToken();
-            if (token) {
-              request.headers.set("Authorization", `Bearer ${token}`);
+            // Every v4 endpoint requires auth, so a request with no token is a
+            // guaranteed 401. Failing here keeps a single dead session from
+            // fanning out into dozens of 401s, SWR errors and retries.
+            if (!token) {
+              throw new UnauthenticatedError();
             }
-            // [AUTHDBG] remove after debugging
-            const _t = tokenManager.getToken();
-            console.log(
-              "[AUTHDBG] ->",
-              request.method,
-              request.url.replace(process.env.EXPO_PUBLIC_API_BASE || "", ""),
-              token ? `tok:${token.slice(0, 6)}…${token.slice(-4)}` : "NO-TOKEN",
-              "retry:" + (request.headers.get("x-hcb-token-retry") ?? "0"),
-              "expiresIn:" + (_t?.expiresIn ?? "?"),
-              "issuedAt:" + (_t?.issuedAt ?? "?"),
-            );
+            request.headers.set("Authorization", `Bearer ${token}`);
+          },
+        ],
+        beforeRetry: [
+          ({ error }) => {
+            // ky retries anything thrown from beforeRequest. Rethrowing ends the
+            // chain: with no session every attempt fails identically, and each
+            // one would kick off another refresh — enough to burn through
+            // TokenManager's consecutive-failure budget during a short outage.
+            if (error instanceof UnauthenticatedError) {
+              throw error;
+            }
           },
         ],
         afterResponse: [
@@ -112,21 +116,6 @@ export function getClient(): KyInstance {
             if (response.status !== 401) {
               return response;
             }
-
-            // [AUTHDBG] remove after debugging
-            let _body = "";
-            try {
-              _body = await response.clone().text();
-            } catch {
-              // ignore
-            }
-            console.log(
-              "[AUTHDBG] 401",
-              request.url.replace(process.env.EXPO_PUBLIC_API_BASE || "", ""),
-              "retry:" + (request.headers.get("x-hcb-token-retry") ?? "0"),
-              "body:",
-              _body.slice(0, 200),
-            );
 
             // If this request is itself a post-refresh retry that still 401'd,
             // a fresh token didn't help — don't refresh/retry again, or we'd

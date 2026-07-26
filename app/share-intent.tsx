@@ -4,18 +4,32 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
-import { showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import RootSWRConfig from "@/lib/providers/RootSWRConfig";
+import { invalidateReceiptCaches } from "@/lib/receipts";
+import { toast } from "@/lib/toast";
 import Organization from "@/lib/types/Organization";
 import Transaction from "@/lib/types/Transaction";
 import { palette } from "@/styles/theme";
 import { renderMoney } from "@/utils/format";
 import { maybeRequestReview } from "@/utils/storeReview";
+
+/** "3 to transactions, 1 to your bin" — omits whichever side is zero. */
+function describeDestinations(
+  toTransactions: number,
+  toBin: number,
+): string | undefined {
+  const parts: string[] = [];
+  if (toTransactions > 0) parts.push(`${toTransactions} to transactions`);
+  if (toBin > 0) parts.push(`${toBin} to your receipt bin`);
+  return parts.length > 1 ? parts.join(", ") : undefined;
+}
 
 interface ImageAssignment {
   imageUri: string;
@@ -67,7 +81,7 @@ const normalizeMissingTransactionsParam = (
   );
 };
 
-export default function Page() {
+function ShareIntent() {
   const { images: rawImages, missingTransactions: rawMissingTransactions } =
     useLocalSearchParams();
 
@@ -79,6 +93,9 @@ export default function Page() {
 
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+  // Scoped mutate: the global one from "swr" targets SWR's default cache, which
+  // nothing in this app reads.
+  const { mutate } = useSWRConfig();
 
   const validImages = useMemo(
     () =>
@@ -239,64 +256,97 @@ export default function Page() {
 
     setUploading(true);
 
+    const queue = [
+      ...transactionAssignments.filter((a) => a.transactionId && a.orgId),
+      ...receiptBinAssignments,
+    ];
+    const total = queue.length;
+    const toastId = toast.loading(
+      total === 1 ? "Uploading receipt…" : `Uploading ${total} receipts…`,
+    );
+
+    // Per-item tolerance: one bad image used to abort the whole batch and
+    // report everything as failed, including receipts already on the server.
+    const touched: { orgId?: string; transactionId?: string }[] = [];
+    let lastError: unknown = null;
+
     try {
-      for (const assignment of transactionAssignments) {
-        if (!assignment.transactionId || !assignment.orgId) continue;
+      for (let i = 0; i < total; i++) {
+        const assignment = queue[i];
+        const toTransaction = !assignment.isReceiptBin;
 
-        await uploadFile(
-          {
-            uri: assignment.imageUri,
-            fileName: `receipt_${Date.now()}.jpg`,
-            mimeType: "image/jpeg",
-          },
-          assignment.orgId,
-          assignment.transactionId,
+        if (total > 1) {
+          toast.update(toastId, {
+            type: "loading",
+            title: `Uploading ${total} receipts…`,
+            message: `${i + 1} of ${total}`,
+          });
+        }
+
+        try {
+          await uploadFile(
+            {
+              uri: assignment.imageUri,
+              fileName: `receipt_${Date.now()}.jpg`,
+              mimeType: "image/jpeg",
+            },
+            toTransaction ? assignment.orgId! : "",
+            toTransaction ? assignment.transactionId! : "",
+          );
+          touched.push(
+            toTransaction
+              ? {
+                  orgId: assignment.orgId ?? undefined,
+                  transactionId: assignment.transactionId ?? undefined,
+                }
+              : {},
+          );
+        } catch (error) {
+          lastError = error;
+          console.error("Share-intent receipt upload failed", error, {
+            context: { index: i, toTransaction },
+          });
+        }
+      }
+
+      // This screen previously invalidated nothing at all — it imported no SWR
+      // — so a successful share-sheet upload never updated the bin, the badge,
+      // or the transaction it attached to.
+      for (const scope of touched.length ? touched : [{}]) {
+        await invalidateReceiptCaches(mutate, scope);
+      }
+
+      if (touched.length === total) {
+        toast.update(toastId, {
+          type: "success",
+          title:
+            total === 1 ? "Receipt uploaded" : `${total} receipts uploaded`,
+          message: describeDestinations(
+            transactionAssignments.length,
+            receiptBinAssignments.length,
+          ),
+        });
+        maybeRequestReview();
+        router.back();
+      } else if (touched.length > 0) {
+        toast.update(toastId, {
+          type: "warning",
+          title: `Uploaded ${touched.length} of ${total}`,
+          message: await parseApiError(lastError, "Some receipts failed."),
+        });
+      } else {
+        // Nothing landed — modal so it can't be missed, with a retry since
+        // re-uploading is safe and the assignments are still on screen.
+        toast.dismiss(toastId);
+        showFailureAlert(
+          "Upload failed",
+          await parseApiError(
+            lastError,
+            "Please check your connection and try again.",
+          ),
+          handleUpload,
         );
       }
-
-      for (const assignment of receiptBinAssignments) {
-        await uploadFile(
-          {
-            uri: assignment.imageUri,
-            fileName: `receipt_${Date.now()}.jpg`,
-            mimeType: "image/jpeg",
-          },
-          "",
-          "",
-        );
-      }
-
-      const totalUploaded =
-        transactionAssignments.length + receiptBinAssignments.length;
-      const transactionCount = transactionAssignments.length;
-      const receiptBinCount = receiptBinAssignments.length;
-
-      let message = `Successfully uploaded ${totalUploaded} receipt(s).`;
-      if (transactionCount > 0 && receiptBinCount > 0) {
-        message = `Successfully uploaded ${transactionCount} receipt(s) to transactions and ${receiptBinCount} receipt(s) to receipt bin.`;
-      } else if (transactionCount > 0) {
-        message = `Successfully uploaded ${transactionCount} receipt(s) to transactions.`;
-      } else if (receiptBinCount > 0) {
-        message = `Successfully uploaded ${receiptBinCount} receipt(s) to receipt bin.`;
-      }
-
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: "Receipts Uploaded!",
-        textBody: message,
-      });
-
-      maybeRequestReview();
-      router.back();
-    } catch (error) {
-      console.error("Upload error", error, {
-        action: "share_intent_upload",
-      });
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Upload Failed",
-        textBody: "Some receipts failed to upload. Please try again.",
-      });
     } finally {
       setUploading(false);
     }
@@ -800,5 +850,15 @@ export default function Page() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// Root-level route: rendered outside `(app)`, so it must supply its own SWR
+// fetcher and cache or every invalidation here is a no-op.
+export default function Page() {
+  return (
+    <RootSWRConfig>
+      <ShareIntent />
+    </RootSWRConfig>
   );
 }

@@ -1,6 +1,7 @@
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+
+import { toast } from "./toast";
 
 export function useOffline() {
   const [isOnline, setIsOnline] = useState(true);
@@ -16,10 +17,10 @@ export function useOffline() {
   }, []);
 
   const showOfflineAlert = () => {
-    Toast.show({
-      type: ALERT_TYPE.WARNING,
+    toast.show({
+      type: "warning",
       title: "Offline Mode",
-      textBody: "This action requires an internet connection.",
+      message: "This action requires an internet connection.",
     });
   };
 

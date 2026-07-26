@@ -6,7 +6,6 @@ import { useTheme } from "expo-router/react-navigation";
 import * as ScreenCapture from "expo-screen-capture";
 import { useEffect } from "react";
 import { View, Animated, Platform, TouchableOpacity } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 import { CardStatus } from "./CardStatus";
 import CopyableRow from "./CopyableRow";
@@ -14,6 +13,7 @@ import CopyableRow from "./CopyableRow";
 import Divider from "@/components/Divider";
 import { Text } from "@/components/Text";
 import UserAvatar from "@/components/UserAvatar";
+import { toast } from "@/lib/toast";
 import Card from "@/lib/types/Card";
 import GrantCard from "@/lib/types/GrantCard";
 import User from "@/lib/types/User";
@@ -114,10 +114,10 @@ export default function CardDetails({
 
   const handleCopy = async (value: string, label: string) => {
     await Clipboard.setStringAsync(value);
-    Toast.show({
-      type: ALERT_TYPE.SUCCESS,
+    toast.show({
+      type: "success",
       title: "Copied",
-      textBody: `${label} copied to clipboard`,
+      message: `${label} copied to clipboard`,
     });
   };
 

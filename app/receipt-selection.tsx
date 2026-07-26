@@ -9,20 +9,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
-import { parseApiError, showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import RootSWRConfig from "@/lib/providers/RootSWRConfig";
+import { invalidateReceiptCaches } from "@/lib/receipts";
+import { toast } from "@/lib/toast";
 import Receipt from "@/lib/types/Receipt";
+import { useOffline } from "@/lib/useOffline";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
 import { maybeRequestReview } from "@/utils/storeReview";
 
-export default function Page() {
+function ReceiptSelection() {
   const { transaction: rawTransaction } = useLocalSearchParams();
   const transaction = useMemo(() => {
     if (typeof rawTransaction !== "string") return null;
@@ -39,8 +42,17 @@ export default function Page() {
 
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
+  const { isOnline } = useOffline();
+  // Scoped, not the global `mutate` from "swr": that one targets SWR's default
+  // cache, so revalidations never reached the tree holding the real data.
+  const { mutate } = useSWRConfig();
 
-  const { data: receipts } = useOfflineSWR<Receipt[]>("receipts");
+  const {
+    data: receipts,
+    error: receiptsError,
+    isLoading: receiptsLoading,
+    mutate: reloadReceipts,
+  } = useOfflineSWR<Receipt[]>("receipts");
   const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(
     new Set(),
   );
@@ -89,51 +101,91 @@ export default function Page() {
 
     setUploading(true);
 
+    const chosen =
+      receipts?.filter((receipt) => selectedReceipts.has(receipt.id)) || [];
+    const total = chosen.length;
+    const noun = total === 1 ? "receipt" : `${total} receipts`;
+    const toastId = toast.loading(`Attaching ${noun}…`);
+
+    // Track successes individually: a partial failure used to abort the loop,
+    // leaving already-uploaded receipts sitting in the bin and reporting the
+    // whole batch as failed.
+    const attached: string[] = [];
+    let lastError: unknown = null;
+
     try {
-      const selectedReceiptList =
-        receipts?.filter((receipt) => selectedReceipts.has(receipt.id)) || [];
-
-      for (const receipt of selectedReceiptList) {
-        await uploadFile(receipt);
+      for (let i = 0; i < total; i++) {
+        if (total > 1) {
+          toast.update(toastId, {
+            type: "loading",
+            title: `Attaching ${noun}…`,
+            message: `${i + 1} of ${total}`,
+          });
+        }
+        try {
+          await uploadFile(chosen[i]);
+          attached.push(chosen[i].id);
+        } catch (error) {
+          lastError = error;
+          console.error("Receipt attach failed", error, {
+            context: {
+              transactionId: transaction?.id,
+              receiptId: chosen[i].id,
+            },
+          });
+        }
       }
 
-      setDeletingReceipts(new Set(selectedReceipts));
-
-      for (const receiptId of selectedReceipts) {
-        await deleteReceipt(receiptId);
+      // Only remove from the bin what actually made it onto the transaction.
+      if (attached.length) {
+        setDeletingReceipts(new Set(attached));
+        for (const receiptId of attached) {
+          try {
+            await deleteReceipt(receiptId);
+          } catch (error) {
+            console.error("Receipt bin cleanup failed", error, {
+              context: { receiptId },
+            });
+          }
+        }
       }
 
-      await mutate("receipts");
-      await mutate("user/transactions/missing_receipt");
+      await invalidateReceiptCaches(mutate, {
+        orgId: transaction?.organization?.id,
+        transactionId: transaction?.id,
+      });
 
-      const orgId = transaction?.organization?.id;
-      if (orgId) {
-        await mutate(
-          `organizations/${orgId}/transactions/${transaction.id}/receipts`,
+      if (attached.length === total) {
+        toast.update(toastId, {
+          type: "success",
+          title:
+            total === 1 ? "Receipt attached" : `${total} receipts attached`,
+        });
+        maybeRequestReview();
+        router.back();
+      } else if (attached.length > 0) {
+        toast.update(toastId, {
+          type: "warning",
+          title: `Attached ${attached.length} of ${total}`,
+          message: await parseApiError(
+            lastError,
+            "The rest are still in your receipt bin.",
+          ),
+        });
+      } else {
+        // Nothing attached — modal, not a toast, since the user needs to decide
+        // whether to retry. Re-attaching is safe: nothing was removed from the
+        // bin, because only successful uploads get deleted above.
+        toast.dismiss(toastId);
+        showFailureAlert(
+          "Attach failed",
+          await parseApiError(
+            lastError,
+            "Nothing was uploaded. Your receipts are still in the bin.",
+          ),
+          handleUpload,
         );
       }
-
-      Toast.show({
-        type: ALERT_TYPE.SUCCESS,
-        title: "Receipts Uploaded!",
-        textBody: `Successfully uploaded ${selectedReceipts.size} receipt(s) and removed them from receipt bin.`,
-      });
-
-      maybeRequestReview();
-      router.back();
-    } catch (error) {
-      console.error("Upload error", error, {
-        transactionId: transaction?.id,
-        receiptCount: selectedReceipts.size,
-      });
-      Toast.show({
-        type: ALERT_TYPE.DANGER,
-        title: "Upload Failed",
-        textBody: await parseApiError(
-          error,
-          "Some receipts failed to upload. Please try again.",
-        ),
-      });
     } finally {
       setUploading(false);
       setDeletingReceipts(new Set());
@@ -160,7 +212,36 @@ export default function Page() {
     setSelectedReceipts(new Set());
   };
 
-  if (!receipts || receipts.length === 0) {
+  // "No receipts" used to also mean "still loading", "request failed" and
+  // "offline" — which is how a bin holding three receipts reported itself empty.
+  if (!receipts?.length) {
+    const state = receiptsLoading
+      ? ("loading" as const)
+      : !isOnline
+        ? ("offline" as const)
+        : receiptsError
+          ? ("error" as const)
+          : ("empty" as const);
+
+    const copy = {
+      loading: { icon: null, title: "", body: "" },
+      offline: {
+        icon: "cloud-offline-outline" as const,
+        title: "You're offline",
+        body: "Reconnect to load the receipts in your bin.",
+      },
+      error: {
+        icon: "alert-circle-outline" as const,
+        title: "Couldn't load your receipt bin",
+        body: "Something went wrong fetching your receipts. Your bin may not be empty.",
+      },
+      empty: {
+        icon: "receipt-outline" as const,
+        title: "Receipt Bin is Empty",
+        body: "No receipts available in your receipt bin to upload to this transaction.",
+      },
+    }[state];
+
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: themeColors.background }}
@@ -173,31 +254,51 @@ export default function Page() {
             padding: 20,
           }}
         >
-          <Ionicons name="receipt-outline" color={palette.muted} size={60} />
-          <Text
-            style={{
-              color: themeColors.text,
-              fontSize: 18,
-              fontWeight: "600",
-              marginTop: 16,
-              marginBottom: 8,
-            }}
-          >
-            Receipt Bin is Empty
-          </Text>
-          <Text
-            style={{
-              color: palette.muted,
-              textAlign: "center",
-              lineHeight: 20,
-            }}
-          >
-            No receipts available in your receipt bin to upload to this
-            transaction.
-          </Text>
-          <Button onPress={() => router.back()} style={{ marginTop: 24 }}>
-            Go Back
-          </Button>
+          {state === "loading" ? (
+            <ActivityIndicator color={themeColors.primary} />
+          ) : (
+            <>
+              <Ionicons name={copy.icon!} color={palette.muted} size={60} />
+              <Text
+                style={{
+                  color: themeColors.text,
+                  fontSize: 18,
+                  fontWeight: "600",
+                  marginTop: 16,
+                  marginBottom: 8,
+                }}
+              >
+                {copy.title}
+              </Text>
+              <Text
+                style={{
+                  color: palette.muted,
+                  textAlign: "center",
+                  lineHeight: 20,
+                }}
+              >
+                {copy.body}
+              </Text>
+              {state === "empty" ? (
+                <Button onPress={() => router.back()} style={{ marginTop: 24 }}>
+                  Go Back
+                </Button>
+              ) : (
+                <View style={{ marginTop: 24, gap: 10, alignSelf: "stretch" }}>
+                  <Button
+                    variant="primary"
+                    onPress={() => reloadReceipts()}
+                    loading={receiptsLoading}
+                  >
+                    Try again
+                  </Button>
+                  <Button variant="ghost" onPress={() => router.back()}>
+                    Go Back
+                  </Button>
+                </View>
+              )}
+            </>
+          )}
         </View>
       </SafeAreaView>
     );
@@ -385,5 +486,16 @@ export default function Page() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// Root-level route: it renders outside `(app)`, so it must bring its own SWR
+// fetcher and cache. Without this the "receipts" key resolved to undefined and
+// the bin reported itself empty.
+export default function Page() {
+  return (
+    <RootSWRConfig>
+      <ReceiptSelection />
+    </RootSWRConfig>
   );
 }

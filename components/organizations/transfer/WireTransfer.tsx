@@ -182,117 +182,82 @@ export default function WireTransferScreen({
     );
   };
 
-  const validate = (): boolean => {
-    if (!recipientName.trim()) {
-      showAlert("Missing field", "Please enter the recipient's name.");
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.trim())) {
-      showAlert(
-        "Invalid email",
-        "Please enter a valid recipient email address.",
-      );
-      return false;
-    }
-    if (countryCode.length !== 2) {
-      showAlert("Missing field", "Please select the recipient's bank country.");
-      return false;
-    }
-    if (isUS) {
-      showAlert(
-        "Use ACH for domestic US transfers",
-        "Domestic wires are not supported for transfers within the United States. Please send an ACH transfer instead.",
-      );
-      return false;
-    }
-    if (!accountNumber.trim()) {
-      showAlert(
-        "Missing field",
-        "Please enter the recipient's account number or IBAN.",
-      );
-      return false;
-    }
+  // Single source of truth for "is this sendable" — drives both the button's
+  // enabled state and the reason shown under it, so they can't disagree.
+  const blockingReason = useMemo((): string | null => {
+    if (!recipientName.trim()) return "Enter the recipient's name to continue.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.trim()))
+      return "Enter a valid recipient email address.";
+    if (countryCode.length !== 2) return "Select the recipient's bank country.";
+    if (isUS)
+      return "Domestic US wires aren't supported — send an ACH transfer instead.";
+    if (!accountNumber.trim())
+      return "Enter the recipient's account number or IBAN.";
     if (
       IBAN_FORMATS[countryCode] &&
       !IBAN_FORMATS[countryCode].test(accountNumber.trim())
-    ) {
-      showAlert(
-        "Invalid account number",
-        "The account number / IBAN doesn't meet the required format for this country.",
-      );
-      return false;
-    }
-    if (!bicCode.trim()) {
-      showAlert("Missing field", "Please enter the BIC / SWIFT code.");
-      return false;
-    }
-    if (!BIC_REGEX.test(bicCode.trim().toUpperCase())) {
-      showAlert(
-        "Invalid BIC / SWIFT code",
-        "Please enter a valid BIC / SWIFT code.",
-      );
-      return false;
-    }
-    if (!addressLine1.trim()) {
-      showAlert("Missing field", "Please enter the recipient's address.");
-      return false;
-    }
-    if (!city.trim()) {
-      showAlert("Missing field", "Please enter the city.");
-      return false;
-    }
+    )
+      return "The account number / IBAN doesn't match the format for this country.";
+    if (!bicCode.trim()) return "Enter the BIC / SWIFT code.";
+    if (!BIC_REGEX.test(bicCode.trim().toUpperCase()))
+      return "Enter a valid BIC / SWIFT code.";
+    if (!addressLine1.trim()) return "Enter the recipient's address.";
+    if (!city.trim()) return "Enter the city.";
     if (
       POSTAL_CODE_FORMATS[countryCode] &&
       !POSTAL_CODE_FORMATS[countryCode].test(postalCode.trim())
-    ) {
-      showAlert(
-        "Invalid postal code",
-        "The postal code doesn't meet the required format for this country.",
-      );
-      return false;
-    }
+    )
+      return "The postal code doesn't match the format for this country.";
     for (const field of countryFields) {
-      if (!recipientInformation[field.key]?.trim()) {
-        showAlert("Missing field", `Please fill in "${field.label}".`);
-        return false;
-      }
+      if (!recipientInformation[field.key]?.trim())
+        return `Fill in "${field.label}".`;
     }
     const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) {
-      showAlert(
-        "Invalid amount",
-        "Please enter a valid amount greater than 0.",
-      );
-      return false;
-    }
+    if (!amount || isNaN(parsed) || parsed <= 0)
+      return "Enter an amount greater than 0.";
     const amountCents = Math.round(parsed * 100);
-    if (currency === "USD" && amountCents < WIRE_MINIMUM_CENTS) {
-      showAlert(
-        "Below minimum",
-        `Wire transfers have a ${renderMoney(WIRE_MINIMUM_CENTS)} minimum.`,
-      );
-      return false;
-    }
-    if (currency === "USD" && amountCents > organization.balance_cents) {
-      showAlert(
-        "Insufficient balance",
-        `This wire exceeds your available balance of ${renderMoney(organization.balance_cents)}.`,
-      );
-      return false;
-    }
-    if (!memo.trim()) {
-      showAlert("Missing field", "Please enter a memo for the wire.");
-      return false;
-    }
-    if (!paymentFor.trim()) {
-      showAlert("Missing field", "Please describe what this wire is for.");
-      return false;
-    }
-    return true;
-  };
+    if (currency === "USD" && amountCents < WIRE_MINIMUM_CENTS)
+      return `Wires have a ${renderMoney(WIRE_MINIMUM_CENTS)} minimum.`;
+    if (currency === "USD" && amountCents > organization.balance_cents)
+      return `This exceeds your available balance of ${renderMoney(organization.balance_cents)}.`;
+    if (!memo.trim()) return "Enter a memo for the wire.";
+    if (!paymentFor.trim()) return "Describe what this wire is for.";
+    return null;
+  }, [
+    recipientName,
+    recipientEmail,
+    countryCode,
+    isUS,
+    accountNumber,
+    bicCode,
+    addressLine1,
+    city,
+    postalCode,
+    countryFields,
+    recipientInformation,
+    amount,
+    currency,
+    memo,
+    paymentFor,
+    organization.balance_cents,
+  ]);
+
+  const hasInput = Boolean(
+    recipientName ||
+      recipientEmail ||
+      accountNumber ||
+      bicCode ||
+      addressLine1 ||
+      city ||
+      amount ||
+      memo,
+  );
 
   const handleSubmit = withOfflineCheck(async () => {
-    if (!validate()) return;
+    if (blockingReason) {
+      showAlert("Can't send yet", blockingReason);
+      return;
+    }
     setSubmitting(true);
     try {
       const body = new FormData();
@@ -586,14 +551,16 @@ export default function WireTransferScreen({
 
         <TransferSubmitButton
           loading={submitting}
-          disabled={isUS}
+          disabled={!!blockingReason}
           onPress={handleSubmit}
         >
           Send wire
         </TransferSubmitButton>
 
         <FooterNote>
-          Your wire will be reviewed on the next business day.
+          {blockingReason && hasInput
+            ? blockingReason
+            : "Your wire will be reviewed on the next business day."}
         </FooterNote>
       </View>
     </>

@@ -7,15 +7,15 @@ import { useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
-import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import Animated, { Easing, Layout, withTiming } from "react-native-reanimated";
 import useSWR from "swr";
 
 import FileViewerModal from "@/components/FileViewerModal";
 import { useReceiptActionSheet } from "@/components/ReceiptActionSheet";
 import { Text } from "@/components/Text";
-import { parseApiError, showAlert } from "@/lib/alertUtils";
+import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
+import { toast } from "@/lib/toast";
 import Receipt from "@/lib/types/Receipt";
 import Transaction from "@/lib/types/Transaction";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -126,10 +126,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               setDeletingReceiptId(receipt.id);
               await hcb.delete(`receipts/${receipt.id.replace("rct_", "")}`);
 
-              Toast.show({
-                type: ALERT_TYPE.SUCCESS,
+              toast.show({
+                type: "success",
                 title: "Receipt Deleted",
-                textBody: "The receipt has been successfully deleted.",
+                message: "The receipt has been successfully deleted.",
               });
 
               mutate();
@@ -142,14 +142,16 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               console.error("Error deleting receipt", error, {
                 receiptId: receipt.id,
               });
-              Toast.show({
-                type: ALERT_TYPE.DANGER,
-                title: "Delete Failed",
-                textBody: await parseApiError(
+              // Modal, not a toast: the delete didn't happen and the user
+              // needs to decide whether to retry. Re-deleting is safe.
+              showFailureAlert(
+                "Delete failed",
+                await parseApiError(
                   error,
-                  "Failed to delete receipt. Please try again later.",
+                  "This receipt is still attached. Please try again.",
                 ),
-              });
+                () => handleDeleteReceipt(receipt),
+              );
             } finally {
               setDeletingReceiptId(null);
             }
@@ -176,10 +178,10 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               setIsMarkingLostReceipt(true);
               await hcb.post(`transactions/${transaction.id}/mark_no_receipt`);
 
-              Toast.show({
-                type: ALERT_TYPE.SUCCESS,
+              toast.show({
+                type: "success",
                 title: "Receipt Marked as Lost",
-                textBody:
+                message:
                   "This transaction has been marked as having a lost receipt.",
               });
 
@@ -189,14 +191,14 @@ function ReceiptList({ transaction }: { transaction: Transaction }) {
               console.error("Error marking receipt as lost", error, {
                 transactionId: transaction.id,
               });
-              Toast.show({
-                type: ALERT_TYPE.DANGER,
-                title: "Failed",
-                textBody: await parseApiError(
+              showFailureAlert(
+                "Couldn't mark as lost",
+                await parseApiError(
                   error,
-                  "Failed to mark receipt as lost. Please try again later.",
+                  "This transaction is unchanged. Please try again.",
                 ),
-              });
+                handleMarkLostReceipt,
+              );
             } finally {
               setIsMarkingLostReceipt(false);
             }

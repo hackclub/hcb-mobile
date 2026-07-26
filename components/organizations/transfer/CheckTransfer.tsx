@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
 
 import {
@@ -39,58 +39,44 @@ export default function CheckTransferScreen({
   const [paymentFor, setPaymentFor] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = (): boolean => {
-    if (!recipientName.trim()) {
-      showAlert("Missing field", "Please enter the recipient's name.");
-      return false;
-    }
-    if (!addressLine1.trim()) {
-      showAlert("Missing field", "Please enter a street address.");
-      return false;
-    }
-    if (!city.trim()) {
-      showAlert("Missing field", "Please enter the city.");
-      return false;
-    }
-    if (state.trim().length !== 2) {
-      showAlert(
-        "Invalid state",
-        "Please enter a 2-letter state code (e.g. CA).",
-      );
-      return false;
-    }
-    if (!/^\d{5}$/.test(zip.trim())) {
-      showAlert("Invalid ZIP code", "Please enter a valid 5-digit ZIP code.");
-      return false;
-    }
+  // Single source of truth for "is this sendable" — drives both the button's
+  // enabled state and the reason shown under it, so they can't disagree.
+  const blockingReason = useMemo((): string | null => {
+    if (!recipientName.trim()) return "Enter the recipient's name to continue.";
+    if (!addressLine1.trim()) return "Enter a street address.";
+    if (!city.trim()) return "Enter the city.";
+    if (state.trim().length !== 2)
+      return "Enter a 2-letter state code (e.g. CA).";
+    if (!/^\d{5}$/.test(zip.trim())) return "Enter a valid 5-digit ZIP code.";
     const parsed = parseFloat(amount);
-    if (!amount || isNaN(parsed) || parsed <= 0) {
-      showAlert(
-        "Invalid amount",
-        "Please enter a valid amount greater than $0.",
-      );
-      return false;
-    }
-    if (Math.round(parsed * 100) > organization.balance_cents) {
-      showAlert(
-        "Insufficient balance",
-        `This check exceeds your available balance of ${renderMoney(organization.balance_cents)}.`,
-      );
-      return false;
-    }
-    if (!memo.trim()) {
-      showAlert("Missing field", "Please enter a memo for the check.");
-      return false;
-    }
-    if (!paymentFor.trim()) {
-      showAlert("Missing field", "Please describe what this check is for.");
-      return false;
-    }
-    return true;
-  };
+    if (!amount || isNaN(parsed) || parsed <= 0)
+      return "Enter an amount greater than $0.";
+    if (Math.round(parsed * 100) > organization.balance_cents)
+      return `This exceeds your available balance of ${renderMoney(organization.balance_cents)}.`;
+    if (!memo.trim()) return "Enter a memo for the check.";
+    if (!paymentFor.trim()) return "Describe what this check is for.";
+    return null;
+  }, [
+    recipientName,
+    addressLine1,
+    city,
+    state,
+    zip,
+    amount,
+    memo,
+    paymentFor,
+    organization.balance_cents,
+  ]);
+
+  const hasInput = Boolean(
+    recipientName || addressLine1 || city || state || zip || amount || memo,
+  );
 
   const handleSubmit = withOfflineCheck(async () => {
-    if (!validate()) return;
+    if (blockingReason) {
+      showAlert("Can't send yet", blockingReason);
+      return;
+    }
     setSubmitting(true);
     try {
       await hcb.post("checks", {
@@ -257,12 +243,18 @@ export default function CheckTransferScreen({
           ]}
         />
 
-        <TransferSubmitButton loading={submitting} onPress={handleSubmit}>
+        <TransferSubmitButton
+          loading={submitting}
+          disabled={!!blockingReason}
+          onPress={handleSubmit}
+        >
           Send check
         </TransferSubmitButton>
 
         <FooterNote>
-          Your check will be reviewed on the next business day.
+          {blockingReason && hasInput
+            ? blockingReason
+            : "Your check will be reviewed on the next business day."}
         </FooterNote>
       </View>
     </>

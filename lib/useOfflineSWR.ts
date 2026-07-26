@@ -38,7 +38,8 @@ export function useOfflineSWR<Data, Error = unknown>(
         isOnline &&
         err instanceof Error &&
         err.name !== "AbortError" &&
-        err.name !== "NetworkError"
+        err.name !== "NetworkError" &&
+        err.name !== "UnauthenticatedError"
       ) {
         const context = { key, isOnline };
         if (swrOptions?.onError) {
@@ -50,6 +51,12 @@ export function useOfflineSWR<Data, Error = unknown>(
     },
     onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
       if (!isOnline) {
+        return;
+      }
+
+      // There is no session to retry with; the login redirect is already in
+      // flight. Retrying would just re-run the same guaranteed failure.
+      if (error instanceof Error && error.name === "UnauthenticatedError") {
         return;
       }
 
