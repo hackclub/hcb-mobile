@@ -445,7 +445,13 @@ export default function Page() {
 
         return (
           <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              // Leaves room for the absolutely-positioned button group below.
+              paddingBottom: 140,
+            }}
           >
             <View
               style={{

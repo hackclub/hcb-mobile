@@ -6,7 +6,7 @@ export default {
     name: IS_DEV ? "HCB (dev)" : "HCB",
     slug: "hcb-mobile",
     owner: "hackclub",
-    version: "1.0.3",
+    version: "1.0.4",
     platforms: ["ios", "android"],
     scheme: "hcb",
     orientation: "portrait",

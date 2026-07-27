@@ -345,9 +345,12 @@ export default function Page() {
                 })
               }
             />
+            {/* Reimbursements aren't shipped yet — re-enable by dropping
+                `comingSoon` and restoring the navTo below. */}
             <ActionTile
               icon="attachment"
               label="Reimburse"
+              comingSoon
               onPress={() => navTo("/(events)/[id]/reimbursements")}
             />
           </View>

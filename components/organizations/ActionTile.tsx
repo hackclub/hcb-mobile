@@ -1,23 +1,35 @@
 import Icon from "@thedev132/hackclub-icons-rn";
 import { useTheme } from "expo-router/react-navigation";
-import { Pressable, View } from "react-native";
+import { ColorValue, Pressable, View } from "react-native";
 
 import { Text } from "@/components/Text";
 import { useIsDark } from "@/lib/useColorScheme";
-import { cardBorderColor } from "@/styles/theme";
+import { cardBorderColor, subTextColor } from "@/styles/theme";
 
 interface ActionTileProps {
   icon: React.ComponentProps<typeof Icon>["glyph"];
   label: string;
   onPress: () => void;
+  /** Greys the tile out, makes it non-interactive, and replaces the label
+   *  with "Coming soon". */
+  comingSoon?: boolean;
 }
 
-export default function ActionTile({ icon, label, onPress }: ActionTileProps) {
+export default function ActionTile({
+  icon,
+  label,
+  onPress,
+  comingSoon = false,
+}: ActionTileProps) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  const contentColor = comingSoon
+    ? subTextColor(isDark)
+    : (themeColors.text as ColorValue);
   return (
     <Pressable
       onPress={onPress}
+      disabled={comingSoon}
       style={({ pressed }) => ({
         flex: 1,
         backgroundColor: themeColors.card,
@@ -42,16 +54,16 @@ export default function ActionTile({ icon, label, onPress }: ActionTileProps) {
           justifyContent: "center",
         }}
       >
-        <Icon glyph={icon} size={20} color={themeColors.text as string} />
+        <Icon glyph={icon} size={20} color={contentColor as string} />
       </View>
       <Text
         style={{
-          color: themeColors.text,
+          color: contentColor,
           fontSize: 15,
           fontWeight: "600",
         }}
       >
-        {label}
+        {comingSoon ? "Coming soon" : label}
       </Text>
     </Pressable>
   );

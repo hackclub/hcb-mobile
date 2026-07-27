@@ -52,14 +52,15 @@ function roleColor(role?: OrgUser["role"]) {
   return palette.info;
 }
 
+// Member removal is disabled until the feature is ready. The `canManage` /
+// `onRemove` props and the remove button below are commented out rather than
+// deleted so this is a straight revert when we ship it.
 function MemberCard({
   user,
-  canManage,
-  onRemove,
 }: {
   user: OrgUser;
-  canManage: boolean;
-  onRemove: (user: OrgUser) => void;
+  // canManage: boolean;
+  // onRemove: (user: OrgUser) => void;
 }) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
@@ -96,7 +97,7 @@ function MemberCard({
             {capitalize(user.role ?? "member")}
           </Text>
         </View>
-        {canManage && (
+        {/* {canManage && (
           <Pressable
             onPress={() => onRemove(user)}
             hitSlop={8}
@@ -119,7 +120,7 @@ function MemberCard({
           >
             <Ionicons name="person-remove-outline" size={15} color="#e85d5d" />
           </Pressable>
-        )}
+        )} */}
       </View>
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -268,33 +269,35 @@ export default function Page() {
     }
   }, [reloadOrganization, reloadInvitations, canManage]);
 
-  const removeUser = useCallback(
-    (user: OrgUser) => {
-      Alert.alert(
-        `Remove ${user.name}?`,
-        "They will lose access to this organization.",
-        [
-          { text: "Cancel" },
-          {
-            text: "Remove",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await hcb.delete(`organizations/${id}/users/${user.id}`);
-                reloadOrganization();
-              } catch (error) {
-                showAlert(
-                  "Failed to remove",
-                  await parseApiError(error, "Please try again."),
-                );
-              }
-            },
-          },
-        ],
-      );
-    },
-    [hcb, id, reloadOrganization],
-  );
+  // Removing an existing member is disabled until the feature is ready.
+  // Invitation cancellation below stays live.
+  // const removeUser = useCallback(
+  //   (user: OrgUser) => {
+  //     Alert.alert(
+  //       `Remove ${user.name}?`,
+  //       "They will lose access to this organization.",
+  //       [
+  //         { text: "Cancel" },
+  //         {
+  //           text: "Remove",
+  //           style: "destructive",
+  //           onPress: async () => {
+  //             try {
+  //               await hcb.delete(`organizations/${id}/users/${user.id}`);
+  //               reloadOrganization();
+  //             } catch (error) {
+  //               showAlert(
+  //                 "Failed to remove",
+  //                 await parseApiError(error, "Please try again."),
+  //               );
+  //             }
+  //           },
+  //         },
+  //       ],
+  //     );
+  //   },
+  //   [hcb, id, reloadOrganization],
+  // );
 
   const cancelInvitation = useCallback(
     (inviteId: string) => {
@@ -510,13 +513,8 @@ export default function Page() {
         }
 
         if (item.type === "member") {
-          return (
-            <MemberCard
-              user={item.user}
-              canManage={canManage}
-              onRemove={removeUser}
-            />
-          );
+          // canManage / onRemove omitted while member removal is disabled.
+          return <MemberCard user={item.user} />;
         }
 
         if (item.type === "invitations-header") {

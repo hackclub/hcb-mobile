@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 import Badge from "@/components/Badge";
+import ComingSoon from "@/components/ComingSoon";
 import { Text } from "@/components/Text";
 import UserAvatar from "@/components/UserAvatar";
 import { parseApiError } from "@/lib/alertUtils";
@@ -33,7 +34,21 @@ interface PaginatedReports {
   data: ReimbursementReport[];
 }
 
+// Reimbursements are gated off until the feature is ready. The real screen is
+// kept below (`_ReimbursementsPage`) so re-enabling is a one-line swap of the
+// default export, along with dropping `comingSoon` from the dashboard tile.
 export default function ReimbursementsPage() {
+  return (
+    <ComingSoon
+      title="Reimbursements"
+      description={
+        "Reimbursements aren't available in the app yet.\nUse hcb.hackclub.com in the meantime."
+      }
+    />
+  );
+}
+
+function _ReimbursementsPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();

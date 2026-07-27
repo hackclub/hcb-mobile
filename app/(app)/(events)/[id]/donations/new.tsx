@@ -18,6 +18,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Animated, {
@@ -32,6 +33,7 @@ const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
 
 import Button from "@/components/Button";
 import {
+  FooterNote,
   FormField,
   FormSection,
   ReadOnlyField,
@@ -46,7 +48,8 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useLocation } from "@/lib/useLocation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
-import { cardBorderColor, palette } from "@/styles/theme";
+import { cardBorderColor, palette, radii } from "@/styles/theme";
+import { renderMoney } from "@/utils/format";
 import { selectionAsync } from "@/utils/haptics";
 
 const MAX_DONATION_AMOUNT = 9999.99;
@@ -536,6 +539,7 @@ export default function Page() {
         <AmountStep
           amount={amount}
           setAmount={setAmount}
+          organization={organization}
           bottomInset={bottomInset}
           onContinue={goToDetails}
         />
@@ -551,7 +555,8 @@ export default function Page() {
       exiting={SlideOutRight.duration(220)}
     >
       <DetailsStep
-        amount={amount}
+        amount={renderMoney(Math.round(value * 100))}
+        organization={organization}
         name={name}
         setName={setName}
         email={email}
@@ -571,16 +576,22 @@ export default function Page() {
 function AmountStep({
   amount,
   setAmount,
+  organization,
   bottomInset,
   onContinue,
 }: {
   amount: string;
   setAmount: Dispatch<SetStateAction<string>>;
+  organization?: Organization;
   bottomInset: number;
   onContinue: () => void;
 }) {
-  const { colors } = useTheme();
   const [error, setError] = useState(false);
+  // The amount card, keypad and Continue button all have to coexist without
+  // scrolling, so short screens get a tighter card and smaller keys.
+  const { height: windowHeight } = useWindowDimensions();
+  const compact = windowHeight < 740;
+  const keySize = compact ? 66 : KEY_DIAMETER;
 
   const flashError = () => {
     setError(true);
@@ -622,38 +633,26 @@ function AmountStep({
         width: "100%",
         padding: 20,
         paddingBottom: bottomInset + 16,
+        gap: compact ? 12 : 16,
       }}
     >
-      <Text
-        style={{
-          color: error ? palette.primary : colors.text,
-          fontSize: 72,
-          textTransform: "uppercase",
-          textAlign: "center",
-          marginTop: 16,
-        }}
-      >
-        {amount}
-        {amount === "$" && <Text style={{ fontSize: 72 }}>0</Text>}
-        {amount[amount.length - 1] === "." && (
-          <Text style={{ color: palette.muted }}>00</Text>
-        )}
-        {amount[amount.length - 2] === "." && (
-          <Text style={{ color: palette.muted }}>0</Text>
-        )}
-      </Text>
+      <AmountDisplay
+        amount={amount}
+        error={error}
+        organization={organization}
+        compact={compact}
+      />
 
-      <View style={{ flex: 1, justifyContent: "center", marginTop: 24 }}>
-        <NumberPad
-          onPressDigit={pressDigit}
-          onPressDecimal={pressDecimal}
-          onPressBackspace={pressBackspace}
-        />
-      </View>
+      <NumberPad
+        keySize={keySize}
+        onPressDigit={pressDigit}
+        onPressDecimal={pressDecimal}
+        onPressBackspace={pressBackspace}
+      />
 
       <Button
         onPress={onContinue}
-        style={{ width: "100%", paddingVertical: 16 }}
+        style={{ width: "100%", paddingVertical: compact ? 13 : 16 }}
         fontSize={17}
       >
         Continue
@@ -662,13 +661,83 @@ function AmountStep({
   );
 }
 
-const KEY_DIAMETER = 84;
+/**
+ * The keypad's readout. `amount` is the raw entry state ("$", "$12", "$12.5"),
+ * so any cents the donor hasn't typed yet are shown as muted zeros.
+ */
+function AmountDisplay({
+  amount,
+  error,
+  organization,
+  compact,
+}: {
+  amount: string;
+  error?: boolean;
+  organization?: Organization;
+  compact?: boolean;
+}) {
+  const { colors } = useTheme();
+  const isDark = useIsDark();
+
+  const fontSize = compact ? 44 : 56;
+  const amountStyle = {
+    fontSize,
+    fontWeight: "300" as const,
+    letterSpacing: -2,
+  };
+
+  return (
+    <View
+      style={{
+        backgroundColor: colors.card,
+        borderRadius: radii.lg,
+        borderWidth: 1,
+        borderColor: error ? palette.primary : cardBorderColor(isDark),
+        paddingVertical: compact ? 16 : 20,
+        paddingHorizontal: 16,
+        alignItems: "center",
+        gap: 4,
+      }}
+    >
+      <Text style={{ color: palette.muted, fontSize: 13 }}>
+        Donation amount
+      </Text>
+      <Text
+        numberOfLines={1}
+        style={{
+          ...amountStyle,
+          color: error ? palette.primary : colors.text,
+        }}
+      >
+        {amount}
+        {amount === "$" && (
+          <Text style={{ ...amountStyle, color: palette.muted }}>0</Text>
+        )}
+        {amount[amount.length - 1] === "." && (
+          <Text style={{ ...amountStyle, color: palette.muted }}>00</Text>
+        )}
+        {amount[amount.length - 2] === "." && (
+          <Text style={{ ...amountStyle, color: palette.muted }}>0</Text>
+        )}
+      </Text>
+      {organization ? (
+        <Text numberOfLines={1} style={{ color: palette.muted, fontSize: 13 }}>
+          for {organization.name}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+const KEY_DIAMETER = 80;
 
 function NumberPad({
+  keySize = KEY_DIAMETER,
   onPressDigit,
   onPressDecimal,
   onPressBackspace,
 }: {
+  keySize?: number;
   onPressDigit: (digit: number) => void;
   onPressDecimal: () => void;
   onPressBackspace: () => void;
@@ -691,21 +760,27 @@ function NumberPad({
         onPress();
       }}
       style={({ pressed }) => ({
-        width: KEY_DIAMETER,
-        height: KEY_DIAMETER,
-        borderRadius: KEY_DIAMETER / 2,
+        width: keySize,
+        height: keySize,
+        borderRadius: keySize / 2,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: pressed ? cardBorderColor(isDark) : "transparent",
+        borderWidth: 1,
+        borderColor: pressed ? palette.primary : cardBorderColor(isDark),
+        backgroundColor: pressed
+          ? isDark
+            ? "rgba(236, 55, 80, 0.18)"
+            : "rgba(236, 55, 80, 0.1)"
+          : colors.card,
       })}
     >
       {icon ? (
-        <Ionicons name={icon} size={26} color={colors.text} />
+        <Ionicons name={icon} size={keySize * 0.32} color={palette.muted} />
       ) : (
         <Text
           style={{
             color: colors.text,
-            fontSize: 32,
+            fontSize: keySize * 0.37,
             textAlign: "center",
             fontFamily: "JetBrainsMono-Regular",
           }}
@@ -716,8 +791,18 @@ function NumberPad({
     </Pressable>
   );
 
+  // The rows spread across whatever height is left between the amount card and
+  // the Continue button, so the pad never leaves a dead band above itself.
   return (
-    <View style={{ alignSelf: "center", width: 320, gap: 18 }}>
+    <View
+      style={{
+        flex: 1,
+        width: "100%",
+        maxWidth: 330,
+        alignSelf: "center",
+        justifyContent: "space-evenly",
+      }}
+    >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Key label="1" onPress={() => onPressDigit(1)} />
         <Key label="2" onPress={() => onPressDigit(2)} />
@@ -742,26 +827,9 @@ function NumberPad({
   );
 }
 
-function AmountSummary({
-  amount,
-  onPress,
-}: {
-  amount: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress}>
-      <ReadOnlyField
-        label="Donation amount"
-        value={amount === "$" ? "$0" : amount}
-        secondary="Edit"
-      />
-    </Pressable>
-  );
-}
-
 function DetailsStep({
   amount,
+  organization,
   name,
   setName,
   email,
@@ -775,6 +843,7 @@ function DetailsStep({
   isConnectingReader,
 }: {
   amount: string;
+  organization?: Organization;
   name: string;
   setName: Dispatch<SetStateAction<string>>;
   email: string;
@@ -801,7 +870,14 @@ function DetailsStep({
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 24 }}>
-          <AmountSummary amount={amount} onPress={onEditAmount} />
+          <FormSection title="Donation details">
+            {organization ? (
+              <ReadOnlyField label="To" value={organization.name} />
+            ) : null}
+            <Pressable onPress={onEditAmount}>
+              <ReadOnlyField label="Amount" value={amount} secondary="Edit" />
+            </Pressable>
+          </FormSection>
 
           <FormSection title="Donor information">
             <FormField
@@ -839,8 +915,12 @@ function DetailsStep({
             fontSize={17}
             loading={isSubmitting}
           >
-            {isConnectingReader ? "Connecting..." : "Create Donation"}
+            {isConnectingReader ? "Connecting..." : "Create donation"}
           </Button>
+
+          <FooterNote>
+            Nothing is charged until the donor pays on the next screen.
+          </FooterNote>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
