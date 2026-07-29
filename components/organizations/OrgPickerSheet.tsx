@@ -40,7 +40,6 @@ export default function OrgPickerSheet() {
       <View
         style={{
           flex: 1,
-          backgroundColor: themeColors.background,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -51,8 +50,10 @@ export default function OrgPickerSheet() {
   }
 
   return (
+    // No backgroundColor: the formSheet's own material shows through, matching
+    // the translucent native header above it.
     <ScrollView
-      style={{ flex: 1, backgroundColor: themeColors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={{
         paddingHorizontal: 16,
         paddingTop: 8,

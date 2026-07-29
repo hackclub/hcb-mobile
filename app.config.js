@@ -65,6 +65,7 @@ export default {
       ],
     },
     extra: {
+      message: "test 2",
       eas: {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
       },
@@ -144,6 +145,12 @@ export default {
           url: "https://sentry.io/",
           project: "hcb-mobile",
           organization: "hack-club-hcb",
+          experimental_android: {
+            enableAndroidGradlePlugin: true,
+            uploadNativeSymbols: true,
+            includeNativeSources: true,
+            autoUploadProguardMapping: false,
+          },
         },
       ],
       [

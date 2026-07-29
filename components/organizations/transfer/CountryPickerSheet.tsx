@@ -32,13 +32,20 @@ export default function CountryPickerSheet() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: themeColors.background }}>
+    // No backgroundColor: the formSheet's own material shows through, matching
+    // the translucent native header above it.
+    <View style={{ flex: 1 }}>
       <FlatList
         style={{ flex: 1 }}
         data={results}
         keyExtractor={(item) => item.code}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 8,
+          paddingBottom: 24,
+        }}
         ItemSeparatorComponent={() => (
           <View
             style={{ height: 1, backgroundColor: cardBorderColor(isDark) }}

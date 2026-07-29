@@ -116,7 +116,22 @@ export default function TransactionDetails({
                     {value}
                   </Text>
                 ) : (
-                  <View style={{ flex: 1, alignItems: "flex-end" }}>
+                  // A row with `justifyContent`, not a column with
+                  // `alignItems`: element values are usually Badges, and Badge
+                  // sets `alignSelf: "flex-start"`, which overrides a parent's
+                  // `alignItems` and left-aligned them in the value column.
+                  // On a row, horizontal placement is the main axis, so
+                  // `justifyContent` wins and the child's `alignSelf` only
+                  // affects vertical alignment.
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      justifyContent: "flex-end",
+                      flexWrap: "wrap",
+                      gap: 6,
+                    }}
+                  >
                     {value}
                   </View>
                 )}

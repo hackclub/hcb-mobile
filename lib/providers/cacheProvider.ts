@@ -27,15 +27,36 @@ export class CacheProvider implements Cache<CacheValue> {
       const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
       if (await cacheFile.exists) {
         const data = await cacheFile.text();
-        const entries = JSON.parse(data);
-        entries.forEach(([key, value]: [string, State<CacheValue, Error>]) => {
-          // Never overwrite an entry written since startup. `initialize()` is a
-          // floating async call while get/set are synchronous, so a fetch that
-          // lands first (e.g. a receipt upload revalidating) would otherwise be
-          // clobbered by the stale value from the previous session's file.
-          if (this.map.has(key)) return;
-          this.map.set(key, value);
-        });
+        let entries: unknown;
+        try {
+          entries = JSON.parse(data);
+        } catch (parseError) {
+          try {
+            cacheFile.delete();
+          } catch {
+            // the next save() overwrites it anyway
+          }
+          throw parseError;
+        }
+
+        if (Array.isArray(entries)) {
+          entries.forEach((entry) => {
+            if (!Array.isArray(entry) || entry.length < 2) return;
+            const [key, value] = entry as [unknown, State<CacheValue, Error>];
+            if (
+              typeof key !== "string" ||
+              value === null ||
+              value === undefined
+            )
+              return;
+            // Never overwrite an entry written since startup. `initialize()` is a
+            // floating async call while get/set are synchronous, so a fetch that
+            // lands first (e.g. a receipt upload revalidating) would otherwise be
+            // clobbered by the stale value from the previous session's file.
+            if (this.map.has(key)) return;
+            this.map.set(key, value);
+          });
+        }
       }
       this.isInitialized = true;
     } catch (error) {
@@ -64,8 +85,14 @@ export class CacheProvider implements Cache<CacheValue> {
 
     try {
       await this.ensureCacheDirectory();
-      const cacheFile = new File(Paths.cache, "app-cache", "cache.json");
-      await cacheFile.write(JSON.stringify(Array.from(this.map.entries())));
+      const cacheDir = new Directory(Paths.cache, "app-cache");
+      const cacheFile = new File(cacheDir, "cache.json");
+      const tempFile = new File(cacheDir, "cache.json.tmp");
+      if (await tempFile.exists) {
+        tempFile.delete();
+      }
+      await tempFile.write(JSON.stringify(Array.from(this.map.entries())));
+      await tempFile.move(cacheFile, { overwrite: true });
     } catch (error) {
       console.error("Error saving cache", error, {
         context: { cacheSize: this.map.size },

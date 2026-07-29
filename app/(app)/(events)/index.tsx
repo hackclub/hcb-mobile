@@ -181,7 +181,7 @@ export default function App() {
 
   const [sortedOrgs, setSortedOrgs] = useReorderedOrgs(organizations);
 
-  const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
+  const { data: rawInvitations, mutate: reloadInvitations } = useOfflineSWR<
     Invitation[]
   >("user/invitations", {
     fallbackData: [],
@@ -193,13 +193,18 @@ export default function App() {
     fallbackData: [],
   });
 
-  const grantInvites = useMemo(() => {
-    return (
-      grantCards?.filter(
-        (grant) => grant.status === "active" && !grant.card_id,
-      ) || []
-    );
-  }, [grantCards]);
+  const invitations = useMemo(
+    () => (rawInvitations ?? []).filter(Boolean),
+    [rawInvitations],
+  );
+
+  const grantInvites = useMemo(
+    () =>
+      (grantCards ?? []).filter(
+        (grant) => grant && grant.status === "active" && !grant.card_id,
+      ),
+    [grantCards],
+  );
 
   const { fetcher, mutate } = useSWRConfig();
   const { colors: themeColors } = useTheme();

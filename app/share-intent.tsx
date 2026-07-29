@@ -11,7 +11,6 @@ import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import RootSWRConfig from "@/lib/providers/RootSWRConfig";
 import { invalidateReceiptCaches } from "@/lib/receipts";
 import { toast } from "@/lib/toast";
 import Organization from "@/lib/types/Organization";
@@ -853,12 +852,6 @@ function ShareIntent() {
   );
 }
 
-// Root-level route: rendered outside `(app)`, so it must supply its own SWR
-// fetcher and cache or every invalidation here is a no-op.
-export default function Page() {
-  return (
-    <RootSWRConfig>
-      <ShareIntent />
-    </RootSWRConfig>
-  );
-}
+// Root-level route: rendered outside `(app)`, but the single `AppSWRConfig` in
+// `app/_layout.tsx` sits above both, so invalidations here hit the same cache.
+export default ShareIntent;

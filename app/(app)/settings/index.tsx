@@ -30,6 +30,7 @@ import Button from "@/components/Button";
 import FeedbackModal from "@/components/FeedbackModal";
 import { Text } from "@/components/Text";
 import AuthContext from "@/lib/auth/auth";
+import { tryIntercom } from "@/lib/intercom";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
 import { toast } from "@/lib/toast";
 import User from "@/lib/types/User";
@@ -583,17 +584,22 @@ export default function SettingsPage() {
             }}
             onPress={async () => {
               if (user && intercomToken) {
-                try {
+                const identified = await tryIntercom("login", async () => {
                   await Intercom.logout();
                   await Intercom.setUserJwt(intercomToken.token);
                   await Intercom.loginUserWithUserAttributes({
                     email: user.email,
                   });
-                } catch (error) {
-                  await Intercom.loginUnidentifiedUser();
-                  console.error("Error logging in to Intercom", error);
+                  return true;
+                });
+
+                if (!identified) {
+                  await tryIntercom("loginUnidentifiedUser", () =>
+                    Intercom.loginUnidentifiedUser(),
+                  );
                 }
-                await Intercom.present();
+
+                await tryIntercom("present", () => Intercom.present());
               } else {
                 toast.show({
                   type: "warning",

@@ -22,7 +22,7 @@ import {
 import { ActivityIndicator, Appearance, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import useSWR, { SWRConfig } from "swr";
+import useSWR from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
@@ -31,10 +31,11 @@ import UserChangeDetector from "@/components/core/UserChangeDetector";
 import AuthContext from "@/lib/auth/auth";
 import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
 import useClient from "@/lib/client";
+import { tryIntercom } from "@/lib/intercom";
+import log from "@/lib/log";
 import { useLinkingPref } from "@/lib/providers/LinkingContext";
 import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
 import { useThemeContext } from "@/lib/providers/ThemeContext";
-import { tokenManager } from "@/lib/tokenManager";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Invitation from "@/lib/types/Invitation";
 import { useIsDark } from "@/lib/useColorScheme";
@@ -47,13 +48,6 @@ import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
 import { lightTheme, theme } from "@/styles/theme";
 import { openOnWebsite } from "@/utils/handoff";
 import { trackAppOpen } from "@/utils/storeReview";
-
-interface HTTPError extends Error {
-  status?: number;
-  response?: {
-    status?: number;
-  };
-}
 
 function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
   useStripeTerminalInit({
@@ -159,7 +153,7 @@ function Navigation() {
 }
 
 export default function Layout() {
-  const { scheme, cache } = useContext(SWRCacheProvider)!;
+  const { scheme } = useContext(SWRCacheProvider)!;
   const { tokenResponse, codeVerifier, setTokenResponse } =
     useContext(AuthContext);
 
@@ -190,23 +184,13 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    const initializeIntercom = async () => {
-      try {
-        const apiKey = Platform.select({
-          ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
-          android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
-        });
-        await Intercom.initialize(
-          apiKey,
-          process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
-        );
-      } catch (error) {
-        console.error("Error initializing Intercom", error);
-      }
-    };
-    initializeIntercom().catch((error) => {
-      console.error("Error initializing Intercom", error);
+    const apiKey = Platform.select({
+      ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+      android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
     });
+    void tryIntercom("initialize", () =>
+      Intercom.initialize(apiKey, process.env.EXPO_PUBLIC_INTERCOM_APP_ID),
+    );
   }, []);
 
   const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
@@ -423,11 +407,19 @@ export default function Layout() {
       !pushNotificationsRegistered.current
     ) {
       pushNotificationsRegistered.current = true;
-      registerPushNotifications().then((result) => {
-        if (result.nativePushToken) {
-          Intercom.sendTokenToIntercom(result.nativePushToken);
-        }
-      });
+      registerPushNotifications()
+        .then((result) => {
+          if (result.nativePushToken) {
+            return tryIntercom("sendTokenToIntercom", () =>
+              Intercom.sendTokenToIntercom(result.nativePushToken!),
+            );
+          }
+        })
+        .catch((error) => {
+          log.warn("Push notification registration failed", {
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        });
     }
   }, [
     tokens?.accessToken,
@@ -509,10 +501,6 @@ export default function Layout() {
     return () => subscription.remove();
   }, [isUniversalLinkingEnabled]);
 
-  const fetcher = (url: string, options?: RequestInit) => {
-    return hcb(url, options).json();
-  };
-
   let navTheme = lightTheme;
   if (themePref === "dark") navTheme = theme;
   else if (themePref === "system")
@@ -541,91 +529,13 @@ export default function Layout() {
             <GestureHandlerRootView>
               <StatusBar style={isDark ? "light" : "dark"} />
 
-              <SWRConfig
-                value={{
-                  provider: () => cache,
-                  fetcher,
-                  revalidateOnFocus: false,
-                  revalidateOnReconnect: true,
-                  revalidateIfStale: true,
-                  dedupingInterval: 1000,
-                  shouldRetryOnError: true,
-                  keepPreviousData: true,
-                  errorRetryCount: 5,
-                  errorRetryInterval: 500,
-                  refreshInterval: 0,
-                  loadingTimeout: 3000,
-                  focusThrottleInterval: 10000,
-                  onErrorRetry: (
-                    error,
-                    key,
-                    config,
-                    revalidate,
-                    { retryCount },
-                  ) => {
-                    // No session to retry with — the login redirect is already
-                    // in flight, so retrying just repeats a certain failure.
-                    if (
-                      error instanceof Error &&
-                      error.name === "UnauthenticatedError"
-                    ) {
-                      return;
-                    }
-
-                    const errorWithStatus = error as HTTPError;
-                    const status =
-                      errorWithStatus?.status ||
-                      errorWithStatus?.response?.status;
-
-                    if (status === 404) {
-                      return;
-                    }
-
-                    // Retry a 401 while a session token still exists: the token
-                    // refresh is likely still catching up after a transient
-                    // failure. Once logged out (no token), stop retrying.
-                    const isRecoverable401 =
-                      status === 401 && !!tokenManager.getToken();
-                    if (
-                      status &&
-                      status >= 400 &&
-                      status < 500 &&
-                      status !== 429 &&
-                      !isRecoverable401
-                    ) {
-                      return;
-                    }
-
-                    if (retryCount >= 5) return;
-
-                    const baseTimeout = 500 * Math.pow(1.5, retryCount);
-                    const jitter = Math.random() * 200;
-                    const timeout = Math.min(baseTimeout + jitter, 5000);
-
-                    setTimeout(() => {
-                      revalidate({ retryCount });
-                    }, timeout);
-                  },
-                  onError: (error, key) => {
-                    if (
-                      error instanceof Error &&
-                      error.name !== "AbortError" &&
-                      error.name !== "NetworkError" &&
-                      error.name !== "UnauthenticatedError"
-                    ) {
-                      console.error(`Global SWR error for ${key}:`, error);
-                    }
-                  },
-                }}
-              >
-                <SentryUserBridge />
-                <UserChangeDetector />
-                <ActionSheetProvider>
-                  <ThemeProvider value={navTheme}>
-                    <Navigation />
-                  </ThemeProvider>
-                </ActionSheetProvider>
-              </SWRConfig>
+              <SentryUserBridge />
+              <UserChangeDetector />
+              <ActionSheetProvider>
+                <ThemeProvider value={navTheme}>
+                  <Navigation />
+                </ThemeProvider>
+              </ActionSheetProvider>
             </GestureHandlerRootView>
           </View>
         </StripeTerminalProvider>

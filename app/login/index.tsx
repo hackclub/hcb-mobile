@@ -62,7 +62,7 @@ export default function Login() {
     () => ({
       clientId,
       redirectUri,
-      scopes: ["read", "write"],
+      scopes: ["read", "write", "admin:read", "admin:write"],
       usePKCE: true,
       responseType: "code",
       extraParams: {

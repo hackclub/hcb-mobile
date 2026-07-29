@@ -16,7 +16,6 @@ import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert, showFailureAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import RootSWRConfig from "@/lib/providers/RootSWRConfig";
 import { invalidateReceiptCaches } from "@/lib/receipts";
 import { toast } from "@/lib/toast";
 import Receipt from "@/lib/types/Receipt";
@@ -489,13 +488,6 @@ function ReceiptSelection() {
   );
 }
 
-// Root-level route: it renders outside `(app)`, so it must bring its own SWR
-// fetcher and cache. Without this the "receipts" key resolved to undefined and
-// the bin reported itself empty.
-export default function Page() {
-  return (
-    <RootSWRConfig>
-      <ReceiptSelection />
-    </RootSWRConfig>
-  );
-}
+// Root-level route: it renders outside `(app)`, but the single `AppSWRConfig`
+// in `app/_layout.tsx` sits above both, so the fetcher and cache are inherited.
+export default ReceiptSelection;

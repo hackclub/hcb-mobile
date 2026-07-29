@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 
+import log from "./log";
+import { describeApiError } from "./sentry/apiErrors";
 import { tokenManager } from "./tokenManager";
 import { useOffline } from "./useOffline";
 
@@ -41,12 +43,15 @@ export function useOfflineSWR<Data, Error = unknown>(
         err.name !== "NetworkError" &&
         err.name !== "UnauthenticatedError"
       ) {
-        const context = { key, isOnline };
         if (swrOptions?.onError) {
           swrOptions.onError(err, key, config);
-        } else {
-          console.error("SWR fetch error:", err, { context });
+          return;
         }
+        if (describeApiError(err)) return;
+        log.exception(err, {
+          context: "SWR fetcher (offline-aware)",
+          attributes: { "swr.key": String(key) },
+        });
       }
     },
     onErrorRetry: (error, key, config, revalidate, { retryCount }) => {

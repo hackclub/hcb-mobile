@@ -10,12 +10,12 @@ if (
   };
 }
 
-import * as SentryReact from "@sentry/react";
 import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as BackgroundTask from "expo-background-task";
 import { useFonts } from "expo-font";
-import { router, Slot } from "expo-router";
+import { router, Stack } from "expo-router";
+import { ThemeProvider as NavThemeProvider } from "expo-router/react-navigation";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import * as TaskManager from "expo-task-manager";
 import * as Updates from "expo-updates";
@@ -33,11 +33,15 @@ import { CustomAlertProvider } from "@/components/alert/CustomAlertProvider";
 import ToastHost from "@/components/toast/ToastHost";
 import AuthContext from "@/lib/auth/auth";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
+import log from "@/lib/log";
 import { installNavigationGuard } from "@/lib/navigationGuard";
+import AppSWRConfig from "@/lib/providers/AppSWRConfig";
 import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
 import { LinkingProvider } from "@/lib/providers/LinkingContext";
 import { ShareIntentProvider } from "@/lib/providers/ShareIntentContext";
 import { ThemeProvider } from "@/lib/providers/ThemeContext";
+import { initSentry, routingInstrumentation } from "@/lib/sentry";
+import { useNavTheme } from "@/lib/useNavTheme";
 import { openOnWebsite } from "@/utils/handoff";
 
 export const SWRCacheProvider = createContext<{
@@ -49,41 +53,7 @@ export const ReadyContext = createContext<
   [boolean, (ready: boolean) => void] | null
 >(null);
 
-const routingInstrumentation = Sentry.reactNavigationIntegration({
-  enableTimeToInitialDisplay: true,
-});
-
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  debug: false,
-  enableLogs: true,
-  attachScreenshot: true,
-  integrations: [
-    routingInstrumentation,
-    Sentry.reactNativeTracingIntegration(),
-    Sentry.reactNativeErrorHandlersIntegration(),
-    Sentry.consoleLoggingIntegration({
-      levels: ["log", "warn", "error"],
-    }),
-    SentryReact.captureConsoleIntegration({
-      levels: ["error"],
-    }),
-    Sentry.breadcrumbsIntegration({
-      console: true,
-      dom: true,
-      sentry: true,
-    }),
-    Sentry.reactNativeInfoIntegration(),
-    Sentry.viewHierarchyIntegration(),
-    Sentry.mobileReplayIntegration({ maskAllVectors: false }),
-    Sentry.feedbackIntegration(),
-  ],
-  sendDefaultPii: true,
-  tracesSampleRate: 1.0,
-  profilesSampleRate: 0.5,
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
-});
+initSentry();
 
 export { routingInstrumentation };
 
@@ -91,10 +61,16 @@ const BACKGROUND_TASK_NAME = "task-run-expo-update";
 
 export const setupBackgroundUpdates = async () => {
   TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
-    const update = await Updates.checkForUpdateAsync();
-    if (update.isAvailable) {
-      await Updates.fetchUpdateAsync();
-      await Updates.reloadAsync();
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        await Updates.reloadAsync();
+      }
+    } catch (error) {
+      log.warn("Background update check failed", {
+        reason: error instanceof Error ? error.message : String(error),
+      });
     }
     return Promise.resolve();
   });
@@ -104,7 +80,11 @@ export const setupBackgroundUpdates = async () => {
   });
 };
 
-setupBackgroundUpdates();
+setupBackgroundUpdates().catch((error) => {
+  log.warn("Background update task registration failed", {
+    reason: error instanceof Error ? error.message : String(error),
+  });
+});
 
 // Swallow accidental double-taps that would otherwise stack duplicate screens.
 installNavigationGuard();
@@ -115,6 +95,7 @@ function RootLayoutNav() {
   const isReady = readyContext?.[0] ?? false;
   const hasToken = !!tokenResponse?.accessToken;
   const lastAuthState = React.useRef<boolean | null>(null);
+  const navTheme = useNavTheme();
 
   useEffect(() => {
     if (!isReady) return;
@@ -137,7 +118,29 @@ function RootLayoutNav() {
     return null;
   }
 
-  return <Slot />;
+  // A Stack, not a Slot: Slot renders the matched route with no navigator, so
+  // root-level routes had no presentation at all and receipt-selection came up
+  // as a bare full-screen page instead of a sheet.
+  return (
+    <NavThemeProvider value={navTheme}>
+      {/* No sheetGrabberVisible/sheetCornerRadius/sheetAllowedDetents here:
+          react-native-screens only honors those for `formSheet`, so on
+          `pageSheet` they are silent no-ops. iOS supplies the standard
+          page-sheet chrome instead. */}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(app)" />
+        <Stack.Screen name="login" />
+        <Stack.Screen
+          name="receipt-selection"
+          options={{ presentation: "pageSheet" }}
+        />
+        <Stack.Screen
+          name="share-intent"
+          options={{ presentation: "pageSheet" }}
+        />
+      </Stack>
+    </NavThemeProvider>
+  );
 }
 
 function Layout() {
@@ -167,7 +170,13 @@ function Layout() {
                   <LinkingProvider>
                     <CustomAlertProvider>
                       <SWRCacheProvider.Provider value={{ scheme, cache }}>
-                        <RootLayoutNav />
+                        {/* Above RootLayoutNav so `(app)` and its siblings
+                            (receipt-selection, share-intent) share one config.
+                            This is the only SWRConfig that owns the provider —
+                            see AppSWRConfig for why a second one crashed. */}
+                        <AppSWRConfig cache={cache}>
+                          <RootLayoutNav />
+                        </AppSWRConfig>
                       </SWRCacheProvider.Provider>
                     </CustomAlertProvider>
                     {/* Mounted at the root, not in (app), so toasts raised from
@@ -192,7 +201,7 @@ export function ErrorBoundary({
   retry: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    log.exception(error, { context: "Root error boundary" });
   }, [error]);
 
   const isDark = useColorScheme() === "dark";

@@ -109,8 +109,11 @@ export default function Page() {
   const { data, mutate, isLoading } = useOfflineSWR<{
     data: (TransactionCardCharge & { organization: Organization })[];
   }>("user/transactions/missing_receipt");
-  const { data: receipts, mutate: refreshReceipts } =
-    useOfflineSWR<Receipt[]>("receipts");
+  const {
+    data: receipts,
+    mutate: refreshReceipts,
+    isLoading: receiptsLoading,
+  } = useOfflineSWR<Receipt[]>("receipts");
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -286,7 +289,7 @@ export default function Page() {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || receiptsLoading) {
     return (
       <View
         style={{
@@ -560,6 +563,7 @@ export default function Page() {
         data={listData}
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.type}-${index}`}
+        getItemType={(item) => item.type}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: 20, paddingTop: 20 + headerInset }}
         refreshControl={

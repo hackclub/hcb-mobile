@@ -1,5 +1,6 @@
 import ky, { type KyInstance } from "ky";
 
+import { recordApiFailure } from "./sentry/apiTelemetry";
 import { tokenManager, UnauthenticatedError } from "./tokenManager";
 
 let clientInstance: KyInstance | null = null;
@@ -98,6 +99,12 @@ export function getClient(): KyInstance {
               throw new UnauthenticatedError();
             }
             request.headers.set("Authorization", `Bearer ${token}`);
+          },
+        ],
+        beforeError: [
+          (error) => {
+            recordApiFailure(error);
+            return error;
           },
         ],
         beforeRetry: [
