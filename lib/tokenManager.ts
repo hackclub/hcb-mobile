@@ -24,16 +24,16 @@ let refreshPromise: Promise<TokenResponse | null> | null = null;
 // resort against being stuck with a token the server keeps rejecting.
 const MAX_CONSECUTIVE_REFRESH_FAILURES = 8;
 
-const TERMINAL_OAUTH_ERRORS = [
+const TERMINAL_REFRESH_CODES = [
   "invalid_grant",
   "invalid_client",
   "unauthorized_client",
 ] as const;
 
-type TerminalOAuthError = (typeof TERMINAL_OAUTH_ERRORS)[number];
+type TerminalRefreshCode = (typeof TERMINAL_REFRESH_CODES)[number];
 
-function asTerminalOAuthError(value: unknown): TerminalOAuthError | null {
-  return TERMINAL_OAUTH_ERRORS.find((known) => known === value) ?? null;
+function toTerminalRefreshCode(value: unknown): TerminalRefreshCode | null {
+  return TERMINAL_REFRESH_CODES.find((known) => known === value) ?? null;
 }
 
 type TokenListener = (tokenResponse: TokenResponse | null) => void;
@@ -266,25 +266,22 @@ export class TokenManager {
           code?: string;
           params?: { error?: string };
         };
-        const terminalOAuthError = asTerminalOAuthError(
+        const terminalRefreshCode = toTerminalRefreshCode(
           errorObj.code || errorObj.params?.error,
         );
 
         // Terminal OAuth errors mean the refresh token can never be used again.
         // Retrying is pointless, so end the session immediately.
-        if (terminalOAuthError) {
+        if (terminalRefreshCode) {
           console.error(
-            "[TokenManager] Token refresh failed with terminal OAuth error",
-            {
-              oauthError: terminalOAuthError,
-              errorName: error instanceof Error ? error.name : "Unknown",
-            },
+            "[TokenManager] Token refresh failed terminally, ending session",
+            { errorName: error instanceof Error ? error.name : "Unknown" },
           );
           Sentry.captureException(error, {
             level: "error",
-            tags: { oauth_error: terminalOAuthError },
+            tags: { refresh_failure_code: terminalRefreshCode },
           });
-          await this.logout(`oauth_error_${terminalOAuthError}`);
+          await this.logout("terminal_refresh_failure");
           return null;
         }
 
