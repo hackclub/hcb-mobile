@@ -24,6 +24,18 @@ let refreshPromise: Promise<TokenResponse | null> | null = null;
 // resort against being stuck with a token the server keeps rejecting.
 const MAX_CONSECUTIVE_REFRESH_FAILURES = 8;
 
+const TERMINAL_OAUTH_ERRORS = [
+  "invalid_grant",
+  "invalid_client",
+  "unauthorized_client",
+] as const;
+
+type TerminalOAuthError = (typeof TERMINAL_OAUTH_ERRORS)[number];
+
+function asTerminalOAuthError(value: unknown): TerminalOAuthError | null {
+  return TERMINAL_OAUTH_ERRORS.find((known) => known === value) ?? null;
+}
+
 type TokenListener = (tokenResponse: TokenResponse | null) => void;
 
 // Thrown instead of sending a request we know the server will reject. A request
@@ -254,27 +266,25 @@ export class TokenManager {
           code?: string;
           params?: { error?: string };
         };
-        const oauthError = errorObj.code || errorObj.params?.error;
+        const terminalOAuthError = asTerminalOAuthError(
+          errorObj.code || errorObj.params?.error,
+        );
 
         // Terminal OAuth errors mean the refresh token can never be used again.
         // Retrying is pointless, so end the session immediately.
-        if (
-          oauthError === "invalid_grant" ||
-          oauthError === "invalid_client" ||
-          oauthError === "unauthorized_client"
-        ) {
+        if (terminalOAuthError) {
           console.error(
             "[TokenManager] Token refresh failed with terminal OAuth error",
             {
-              oauthError,
-              error: error instanceof Error ? error.message : String(error),
+              oauthError: terminalOAuthError,
+              errorName: error instanceof Error ? error.name : "Unknown",
             },
           );
           Sentry.captureException(error, {
             level: "error",
-            tags: { oauth_error: oauthError },
+            tags: { oauth_error: terminalOAuthError },
           });
-          await this.logout(`oauth_error_${oauthError}`);
+          await this.logout(`oauth_error_${terminalOAuthError}`);
           return null;
         }
 

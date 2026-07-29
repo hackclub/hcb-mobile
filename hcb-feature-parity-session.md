@@ -153,6 +153,7 @@ The plan is written. Here's a summary of what it covers:
 **Structure** — a phased roadmap. It opens with the **repeatable two-sided pattern** (Rails v4 endpoint: route in the `api/v4` block → controller inheriting `Api::V4::ApplicationController` with mandatory `authorize` → Jbuilder view → `_in_v4?` policy; Mobile: `useOfflineSWR` read → `useClient()` mutation → `lib/types` → `lib/policies` gating → screen registered in `_layout.tsx`), so every wave is mechanical.
 
 **Wave 1 (execution-ready)** — the three domains you selected:
+
 1. **Transfers parity** — Wire/Wise/PayPal controllers, saved payees + payment-recipient picker, dynamic per-country/currency requirements endpoints, and a real transfers-list endpoint to replace the current `MOCK_TRANSFERS`.
 2. **Transaction & money actions** — categorize/tag/pin/dispute on transactions, tag-suggestion accept/reject, and invoice void/refund/mark-paid/archive + check/ACH cancel, all surfaced via action sheets on the detail screens.
 3. **Settings & team** — org settings editing (tabbed), user profile/address/payout methods, organizer role changes + spending controls — and this **fixes a live bug**: mobile's member-removal call hits a v4 route that doesn't exist today.

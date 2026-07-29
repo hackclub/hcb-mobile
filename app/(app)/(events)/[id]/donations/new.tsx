@@ -54,6 +54,11 @@ import { selectionAsync } from "@/utils/haptics";
 
 const MAX_DONATION_AMOUNT = 9999.99;
 
+function amountToNumber(formatted: string): number {
+  const digits = formatted.replace(/\$/g, "");
+  return digits === "" ? 0 : parseFloat(digits);
+}
+
 // TODO: fetch the actual Stripe Terminal location from the organization's
 // Stripe account instead of using this hardcoded value.
 const STRIPE_TERMINAL_LOCATION_ID = "tml_FWRkngENcVS5Pd";
@@ -78,7 +83,7 @@ export default function Page() {
   const [email, setEmail] = useState("");
   const [isTaxDeductable, setIsTaxDeductable] = useState(false);
 
-  const value = parseFloat(amount.replace("$", "0"));
+  const value = amountToNumber(amount);
 
   useEffect(() => {
     navigation.setOptions({
@@ -600,7 +605,7 @@ function AmountStep({
 
   const pressDigit = (digit: number) => {
     if (
-      parseFloat(amount.replace("$", "0") + digit) > MAX_DONATION_AMOUNT ||
+      amountToNumber(amount + digit) > MAX_DONATION_AMOUNT ||
       (amount === "$" && digit === 0) ||
       amount[amount.length - 3] === "."
     ) {

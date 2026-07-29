@@ -112,10 +112,7 @@ export default function CheckDepositDetailPage() {
       <ErrorHandoff
         message="We couldn't load this check deposit."
         onRetry={() => mutateDeposit()}
-        websiteUrl={shareUrl.checkDeposit(
-          organization?.slug ?? id,
-          depositId,
-        )}
+        websiteUrl={shareUrl.checkDeposit(organization?.slug ?? id, depositId)}
       />
     );
   }

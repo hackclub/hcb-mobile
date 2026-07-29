@@ -43,7 +43,11 @@ export default function AchTransferPage() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ flexGrow: 1, padding: 20, paddingTop: 20 + headerInset }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 20,
+          paddingTop: 20 + headerInset,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         <AchTransferScreen organization={organization} />

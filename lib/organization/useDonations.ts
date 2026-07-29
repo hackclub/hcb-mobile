@@ -21,7 +21,7 @@ export function getKey(orgId: string, filters?: DonationFilters) {
   return (index: number, previousPageData?: DonationsPage) => {
     if (previousPageData && previousPageData.has_more === false) return null;
 
-    const parts = [`organization_id=${orgId}`,`limit=${PAGE_SIZE}`];
+    const parts = [`organization_id=${orgId}`, `limit=${PAGE_SIZE}`];
     // Stats are aggregate (unaffected by pagination) — request them once.
     if (index === 0) parts.push("expand=stats");
     if (filters?.status) parts.push(`status=${filters.status}`);
