@@ -14,7 +14,7 @@ import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as BackgroundTask from "expo-background-task";
 import { useFonts } from "expo-font";
-import { router, Stack } from "expo-router";
+import { router, Stack, useSegments } from "expo-router";
 import { ThemeProvider as NavThemeProvider } from "expo-router/react-navigation";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
 import * as TaskManager from "expo-task-manager";
@@ -94,25 +94,25 @@ function RootLayoutNav() {
   const readyContext = useContext(ReadyContext);
   const isReady = readyContext?.[0] ?? false;
   const hasToken = !!tokenResponse?.accessToken;
-  const lastAuthState = React.useRef<boolean | null>(null);
   const navTheme = useNavTheme();
+  const segments = useSegments();
+  const inAuthGroup = segments[0] === "login";
 
+  // Redirect only when the current location contradicts the auth state, never
+  // unconditionally. The previous version compared against a ref seeded to
+  // `null`, so on a COLD start `null !== hasToken` always held and it ran
+  // `router.replace("/(app)/(events)/")` — throwing away whatever destination a
+  // deep link had just resolved to. Warm starts were fine because the ref
+  // already matched, which is exactly why links only broke from a killed app.
   useEffect(() => {
     if (!isReady) return;
 
-    // Avoid infinite redirects when auth state hasn't changed
-    if (lastAuthState.current === hasToken) {
-      return;
-    }
-
-    lastAuthState.current = hasToken;
-
-    if (hasToken) {
-      router.replace("/(app)/(events)/");
-    } else {
+    if (!hasToken && !inAuthGroup) {
       router.replace("/login");
+    } else if (hasToken && inAuthGroup) {
+      router.replace("/(app)/(events)/");
     }
-  }, [hasToken, isReady]);
+  }, [hasToken, isReady, inAuthGroup]);
 
   if (!isReady) {
     return null;

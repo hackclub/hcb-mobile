@@ -5,6 +5,16 @@ import { Pressable } from "react-native";
 
 import AuthContext from "@/lib/auth/auth";
 
+// Anchor the stack to the org list so a deep link isn't the bottom of the
+// history. Without it, opening /hcb/<id> from outside the app made the
+// transaction the first route, `canGoBack()` was false, and the header rendered
+// with no back button and no way out. Expo Router resolves the default anchor by
+// looking for a child named after the group — there is no `events` route, so it
+// has to be set explicitly.
+export const unstable_settings = {
+  anchor: "index",
+};
+
 function AuthRedirect() {
   const { tokenResponse } = useContext(AuthContext);
 
@@ -102,6 +112,11 @@ export default function Layout() {
         />
         <Stack.Screen
           name="[id]/transactions/[transactionId]/index"
+          options={{ title: "Transaction" }}
+        />
+        {/* Deep-link target for shared /hcb/<id> transaction permalinks. */}
+        <Stack.Screen
+          name="hcb/[transactionId]"
           options={{ title: "Transaction" }}
         />
         <Stack.Screen

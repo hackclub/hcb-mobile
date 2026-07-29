@@ -65,6 +65,7 @@ export default {
       ],
     },
     extra: {
+      message: "fix donation badge",
       message: "test 2",
       eas: {
         projectId: "dfc97c77-31b1-4267-896f-9472c87f166c",
