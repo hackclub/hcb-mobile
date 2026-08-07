@@ -21,12 +21,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import Animated, {
-  SlideInLeft,
-  SlideInRight,
-  SlideOutLeft,
-  SlideOutRight,
-} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ExpoTtpEdu = Platform.OS === "ios" ? require("expo-ttp-edu") : null;
@@ -54,6 +48,10 @@ import { selectionAsync } from "@/utils/haptics";
 
 const MAX_DONATION_AMOUNT = 9999.99;
 
+// Comfortably longer than the 10s `waitForReader` poll below, so a slow-but-
+// working discovery still succeeds and only a genuinely wedged SDK trips this.
+const READER_DISCOVERY_TIMEOUT_MS = 20000;
+
 function amountToNumber(formatted: string): number {
   const digits = formatted.replace(/\$/g, "");
   return digits === "" ? 0 : parseFloat(digits);
@@ -72,11 +70,6 @@ export default function Page() {
   const hcb = useClient();
   const navigation = useNavigation();
   const { bottom: bottomInset } = useSafeAreaInsets();
-  const isInitialRender = useRef(true);
-  useEffect(() => {
-    isInitialRender.current = false;
-  }, []);
-
   const [step, setStep] = useState<"amount" | "details">("amount");
   const [amount, setAmount] = useState("$");
   const [name, setName] = useState("");
@@ -320,9 +313,28 @@ export default function Page() {
         return false;
       }
 
-      const readers = await discoverReaders({
-        discoveryMethod: "tapToPay",
-      });
+      // Cap discovery. This await had no bound, so if the Terminal SDK never
+      // settled the promise, `submitDonation`'s `finally` never ran and the
+      // button span forever with no alert and no way forward.
+      const readers = await Promise.race([
+        discoverReaders({ discoveryMethod: "tapToPay" }),
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), READER_DISCOVERY_TIMEOUT_MS),
+        ),
+      ]);
+
+      if (!readers) {
+        console.error(
+          "discoverReaders timed out",
+          new Error("Reader discovery exceeded timeout"),
+          { context: { orgId: id, action: "discover_readers" } },
+        );
+        showAlert(
+          "Tap to Pay unavailable",
+          "Setting up Tap to Pay took too long. Please try again.",
+        );
+        return false;
+      }
 
       if (
         (readers.error as { code?: string } | undefined)?.code ===
@@ -456,6 +468,12 @@ export default function Page() {
         console.error("createPaymentIntent error", error, {
           context: { orgId: id, donation_id, action: "payment_intent" },
         });
+        // Used to return silently: the spinner stopped, nothing navigated, and
+        // the screen just sat there looking untouched.
+        showAlert(
+          "Couldn't start the payment",
+          error.message || "Please try again.",
+        );
         return false;
       }
       setPaymentData({
@@ -472,8 +490,13 @@ export default function Page() {
       return paymentIntent;
     } catch (error) {
       console.error("paymentIntent error", error, {
-        context: { orgId: id, donation_id: "", action: "payment_intent" },
+        context: { orgId: id, donation_id, action: "payment_intent" },
       });
+      showAlert(
+        "Couldn't start the payment",
+        await parseApiError(error, "Please try again."),
+      );
+      return false;
     }
   }
 
@@ -505,6 +528,10 @@ export default function Page() {
       if (!connected) return;
 
       const donation_id = await createDonation();
+      // createDonation resolves to "" on the invalid-amount path (it alerts on
+      // its own). Continuing would open a Stripe PaymentIntent tagged with an
+      // empty donation_id.
+      if (!donation_id) return;
       await paymentIntent({ donation_id });
     } catch (error) {
       console.error("createDonation error", error, {
@@ -533,14 +560,7 @@ export default function Page() {
 
   if (step === "amount") {
     return (
-      <Animated.View
-        key="amount"
-        style={{ flex: 1 }}
-        entering={
-          isInitialRender.current ? undefined : SlideInLeft.duration(220)
-        }
-        exiting={SlideOutLeft.duration(220)}
-      >
+      <View key="amount" style={{ flex: 1 }}>
         <AmountStep
           amount={amount}
           setAmount={setAmount}
@@ -548,17 +568,12 @@ export default function Page() {
           bottomInset={bottomInset}
           onContinue={goToDetails}
         />
-      </Animated.View>
+      </View>
     );
   }
 
   return (
-    <Animated.View
-      key="details"
-      style={{ flex: 1 }}
-      entering={SlideInRight.duration(220)}
-      exiting={SlideOutRight.duration(220)}
-    >
+    <View key="details" style={{ flex: 1 }}>
       <DetailsStep
         amount={renderMoney(Math.round(value * 100))}
         organization={organization}
@@ -574,7 +589,7 @@ export default function Page() {
         isSubmitting={isSubmittingDonation}
         isConnectingReader={isConnectingReader}
       />
-    </Animated.View>
+    </View>
   );
 }
 
@@ -875,7 +890,7 @@ function DetailsStep({
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: 24 }}>
-          <FormSection title="Donation details">
+          <FormSection title="Donation">
             {organization ? (
               <ReadOnlyField label="To" value={organization.name} />
             ) : null}

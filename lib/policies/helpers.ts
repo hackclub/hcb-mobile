@@ -15,7 +15,7 @@ export function roleAtLeast(
   minRole: Role,
 ): boolean {
   if (!user || !org) return false;
-  const orgUser = org.users.find((u) => u.id === user.id);
+  const orgUser = org.users?.find((u) => u.id === user.id);
   if (!orgUser?.role) return false;
   return ROLE_LEVELS[orgUser.role] >= ROLE_LEVELS[minRole];
 }
@@ -25,5 +25,5 @@ export function isTeamMember(
   org: OrganizationExpanded | null,
 ): boolean {
   if (!user || !org) return false;
-  return org.users.some((u) => u.id === user.id);
+  return org.users?.some((u) => u.id === user.id) ?? false;
 }

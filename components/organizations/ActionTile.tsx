@@ -10,8 +10,8 @@ interface ActionTileProps {
   icon: React.ComponentProps<typeof Icon>["glyph"];
   label: string;
   onPress: () => void;
-  /** Greys the tile out, makes it non-interactive, and replaces the label
-   *  with "Coming soon". */
+  /** Greys the tile out, makes it non-interactive, and adds a "Coming soon"
+   *  caption under the label. */
   comingSoon?: boolean;
 }
 
@@ -56,15 +56,22 @@ export default function ActionTile({
       >
         <Icon glyph={icon} size={20} color={contentColor as string} />
       </View>
-      <Text
-        style={{
-          color: contentColor,
-          fontSize: 15,
-          fontWeight: "600",
-        }}
-      >
-        {comingSoon ? "Coming soon" : label}
-      </Text>
+      <View style={{ gap: 2 }}>
+        <Text
+          style={{
+            color: contentColor,
+            fontSize: 15,
+            fontWeight: "600",
+          }}
+        >
+          {label}
+        </Text>
+        {comingSoon && (
+          <Text style={{ color: subTextColor(isDark), fontSize: 12 }}>
+            Coming soon
+          </Text>
+        )}
+      </View>
     </Pressable>
   );
 }

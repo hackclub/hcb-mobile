@@ -183,7 +183,7 @@ export default function App() {
 
   const { data: rawInvitations, mutate: reloadInvitations } = useOfflineSWR<
     Invitation[]
-  >("user/invitations", {
+  >("user/invitations?expand=organization,sender", {
     fallbackData: [],
   });
 

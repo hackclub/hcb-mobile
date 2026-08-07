@@ -5,6 +5,8 @@ import { useTheme } from "expo-router/react-navigation";
 import { ComponentProps, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Switch,
@@ -299,218 +301,158 @@ export default function ManageGrantPage() {
   };
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 20, gap: 16 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View
-        style={[
-          sectionStyle,
-          { flexDirection: "row", paddingVertical: 20, paddingHorizontal: 16 },
-        ]}
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <AmountStat label="Initial amount" value={grantCard.amount_cents} />
-        <AmountStat label="Balance remaining" value={grantCard.balance_cents} />
-      </View>
-
-      {expanded === "topup" ? (
-        <InlineForm
-          value={topupAmount}
-          onChangeText={setTopupAmount}
-          placeholder="500.00"
-          amount
-          confirmLabel="Topup"
-          confirmColor="#50ECC0"
-          confirmTextColor="#114F3D"
-          confirmDisabled={!isValidAmount(topupAmount)}
-          loading={isToppingUp}
-          onCancel={() => {
-            setTopupAmount("");
-            setExpanded(null);
-          }}
-          onConfirm={() =>
-            handleTopup(
-              topupAmount,
-              card as Card,
-              fullGrantId,
-              setIsToppingUp,
-              setTopupAmount,
-              collapse,
-              mutate,
-              hcb,
-            ).then(reloadGrant)
-          }
-        />
-      ) : expanded === "withdraw" ? (
-        <InlineForm
-          value={withdrawAmount}
-          onChangeText={setWithdrawAmount}
-          placeholder="500.00"
-          amount
-          confirmLabel="Withdraw"
-          confirmColor="#f47080"
-          confirmTextColor="#1f0008"
-          confirmDisabled={!isValidAmount(withdrawAmount)}
-          loading={isWithdrawing}
-          onCancel={() => {
-            setWithdrawAmount("");
-            setExpanded(null);
-          }}
-          onConfirm={() =>
-            handleWithdraw(
-              withdrawAmount,
-              card as Card,
-              fullGrantId,
-              setIsWithdrawing,
-              setWithdrawAmount,
-              collapse,
-              mutate,
-              hcb,
-            ).then(reloadGrant)
-          }
-        />
-      ) : (
-        (canTopup || canWithdraw) && (
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            {canTopup && (
-              <TintButton
-                icon="plus"
-                label="Topup"
-                backgroundColor="#50ECC0"
-                color="#114F3D"
-                onPress={() => setExpanded("topup")}
-              />
-            )}
-            {canWithdraw && (
-              <TintButton
-                icon="minus"
-                label="Withdraw"
-                backgroundColor="#f47080"
-                color="#1f0008"
-                onPress={() => setExpanded("withdraw")}
-              />
-            )}
-          </View>
-        )
-      )}
-
-      <View
-        style={[sectionStyle, { paddingHorizontal: 16, paddingVertical: 8 }]}
-      >
-        {grantCard.user?.email && (
-          <InfoRow label="Grant sent to" value={grantCard.user.email} />
-        )}
-        {grantCard.expires_on && (
-          <InfoRow
-            label="Expires on"
-            value={format(new Date(grantCard.expires_on), "MMM d, yyyy")}
-          />
-        )}
-        <InfoRow
-          label="One time use?"
-          value={grantCard.one_time_use ? "Yes" : "No"}
-        />
-        <InfoRow
-          label="Allowed merchants"
-          value={formatMerchantNames(grantCard.allowed_merchants)}
-        />
-        <InfoRow
-          label="Allowed categories"
-          value={formatCategoryNames(grantCard.allowed_categories)}
-        />
-        {grantCard.purpose && (
-          <InfoRow label="Purpose" value={grantCard.purpose} />
-        )}
-      </View>
-
-      {(grantPolicy?.toggleOneTimeUse() || grantPolicy?.editPurpose()) && (
         <View
-          style={[sectionStyle, { paddingHorizontal: 16, paddingVertical: 4 }]}
+          style={[
+            sectionStyle,
+            {
+              flexDirection: "row",
+              paddingVertical: 20,
+              paddingHorizontal: 16,
+            },
+          ]}
         >
-          {grantPolicy?.toggleOneTimeUse() && (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingVertical: 10,
-              }}
-            >
-              <View style={{ flex: 1, paddingRight: 12 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: themeColors.text,
-                  }}
-                >
-                  One time use
-                </Text>
-                <Text style={{ fontSize: 13, color: subTextColor(isDark) }}>
-                  Cancel this grant after its next purchase
-                </Text>
-              </View>
-              <Switch
-                value={grantCard.one_time_use}
-                disabled={isOneTimeUse}
-                onValueChange={() =>
-                  handleOneTimeUse(
-                    card as Card,
-                    setIsOneTimeUse,
-                    mutate,
-                    hcb,
-                    fullGrantId,
-                    grantCard,
-                  ).then(reloadGrant)
-                }
-              />
-            </View>
-          )}
-          {grantPolicy?.editPurpose() &&
-            (expanded === "purpose" ? (
-              <View style={{ paddingVertical: 12 }}>
-                <InlineForm
-                  value={purposeText}
-                  onChangeText={setPurposeText}
-                  placeholder="What should this grant be spent on?"
-                  confirmLabel="Save"
-                  confirmColor={palette.info}
-                  confirmTextColor="white"
-                  confirmDisabled={!purposeText.trim()}
-                  loading={isSettingPurpose}
-                  onCancel={() => {
-                    setPurposeText("");
-                    setExpanded(null);
-                  }}
-                  onConfirm={() =>
-                    handleSetPurpose(
-                      card as Card,
-                      setIsSettingPurpose,
-                      setPurposeText,
-                      collapse,
-                      mutate,
-                      hcb,
-                      fullGrantId,
-                      purposeText,
-                    ).then(reloadGrant)
-                  }
+          <AmountStat label="Initial amount" value={grantCard.amount_cents} />
+          <AmountStat
+            label="Balance remaining"
+            value={grantCard.balance_cents}
+          />
+        </View>
+
+        {expanded === "topup" ? (
+          <InlineForm
+            value={topupAmount}
+            onChangeText={setTopupAmount}
+            placeholder="500.00"
+            amount
+            confirmLabel="Topup"
+            confirmColor="#50ECC0"
+            confirmTextColor="#114F3D"
+            confirmDisabled={!isValidAmount(topupAmount)}
+            loading={isToppingUp}
+            onCancel={() => {
+              setTopupAmount("");
+              setExpanded(null);
+            }}
+            onConfirm={() =>
+              handleTopup(
+                topupAmount,
+                card as Card,
+                fullGrantId,
+                setIsToppingUp,
+                setTopupAmount,
+                collapse,
+                mutate,
+                hcb,
+              ).then(reloadGrant)
+            }
+          />
+        ) : expanded === "withdraw" ? (
+          <InlineForm
+            value={withdrawAmount}
+            onChangeText={setWithdrawAmount}
+            placeholder="500.00"
+            amount
+            confirmLabel="Withdraw"
+            confirmColor="#f47080"
+            confirmTextColor="#1f0008"
+            confirmDisabled={!isValidAmount(withdrawAmount)}
+            loading={isWithdrawing}
+            onCancel={() => {
+              setWithdrawAmount("");
+              setExpanded(null);
+            }}
+            onConfirm={() =>
+              handleWithdraw(
+                withdrawAmount,
+                card as Card,
+                fullGrantId,
+                setIsWithdrawing,
+                setWithdrawAmount,
+                collapse,
+                mutate,
+                hcb,
+              ).then(reloadGrant)
+            }
+          />
+        ) : (
+          (canTopup || canWithdraw) && (
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              {canTopup && (
+                <TintButton
+                  icon="plus"
+                  label="Topup"
+                  backgroundColor="#50ECC0"
+                  color="#114F3D"
+                  onPress={() => setExpanded("topup")}
                 />
-              </View>
-            ) : (
-              <Pressable
-                onPress={() => {
-                  setPurposeText(grantCard.purpose ?? "");
-                  setExpanded("purpose");
-                }}
-                style={({ pressed }) => ({
+              )}
+              {canWithdraw && (
+                <TintButton
+                  icon="minus"
+                  label="Withdraw"
+                  backgroundColor="#f47080"
+                  color="#1f0008"
+                  onPress={() => setExpanded("withdraw")}
+                />
+              )}
+            </View>
+          )
+        )}
+
+        <View
+          style={[sectionStyle, { paddingHorizontal: 16, paddingVertical: 8 }]}
+        >
+          {grantCard.user?.email && (
+            <InfoRow label="Grant sent to" value={grantCard.user.email} />
+          )}
+          {grantCard.expires_on && (
+            <InfoRow
+              label="Expires on"
+              value={format(new Date(grantCard.expires_on), "MMM d, yyyy")}
+            />
+          )}
+          <InfoRow
+            label="One time use?"
+            value={grantCard.one_time_use ? "Yes" : "No"}
+          />
+          <InfoRow
+            label="Allowed merchants"
+            value={formatMerchantNames(grantCard.allowed_merchants)}
+          />
+          <InfoRow
+            label="Allowed categories"
+            value={formatCategoryNames(grantCard.allowed_categories)}
+          />
+          {grantCard.purpose && (
+            <InfoRow label="Purpose" value={grantCard.purpose} />
+          )}
+        </View>
+
+        {(grantPolicy?.toggleOneTimeUse() || grantPolicy?.editPurpose()) && (
+          <View
+            style={[
+              sectionStyle,
+              { paddingHorizontal: 16, paddingVertical: 4 },
+            ]}
+          >
+            {grantPolicy?.toggleOneTimeUse() && (
+              <View
+                style={{
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  paddingVertical: 12,
-                  opacity: pressed ? 0.6 : 1,
-                })}
+                  paddingVertical: 10,
+                }}
               >
                 <View style={{ flex: 1, paddingRight: 12 }}>
                   <Text
@@ -520,17 +462,92 @@ export default function ManageGrantPage() {
                       color: themeColors.text,
                     }}
                   >
-                    Set purpose
+                    One time use
                   </Text>
                   <Text style={{ fontSize: 13, color: subTextColor(isDark) }}>
-                    Describe what this grant should be spent on
+                    Cancel this grant after its next purchase
                   </Text>
                 </View>
-                <Icon glyph="edit" size={20} color={palette.muted} />
-              </Pressable>
-            ))}
-        </View>
-      )}
-    </ScrollView>
+                <Switch
+                  value={grantCard.one_time_use}
+                  disabled={isOneTimeUse}
+                  onValueChange={() =>
+                    handleOneTimeUse(
+                      card as Card,
+                      setIsOneTimeUse,
+                      mutate,
+                      hcb,
+                      fullGrantId,
+                      grantCard,
+                    ).then(reloadGrant)
+                  }
+                />
+              </View>
+            )}
+            {grantPolicy?.editPurpose() &&
+              (expanded === "purpose" ? (
+                <View style={{ paddingVertical: 12 }}>
+                  <InlineForm
+                    value={purposeText}
+                    onChangeText={setPurposeText}
+                    placeholder="What should this grant be spent on?"
+                    confirmLabel="Save"
+                    confirmColor={palette.info}
+                    confirmTextColor="white"
+                    confirmDisabled={!purposeText.trim()}
+                    loading={isSettingPurpose}
+                    onCancel={() => {
+                      setPurposeText("");
+                      setExpanded(null);
+                    }}
+                    onConfirm={() =>
+                      handleSetPurpose(
+                        card as Card,
+                        setIsSettingPurpose,
+                        setPurposeText,
+                        collapse,
+                        mutate,
+                        hcb,
+                        fullGrantId,
+                        purposeText,
+                      ).then(reloadGrant)
+                    }
+                  />
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    setPurposeText(grantCard.purpose ?? "");
+                    setExpanded("purpose");
+                  }}
+                  style={({ pressed }) => ({
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingVertical: 12,
+                    opacity: pressed ? 0.6 : 1,
+                  })}
+                >
+                  <View style={{ flex: 1, paddingRight: 12 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "600",
+                        color: themeColors.text,
+                      }}
+                    >
+                      Set purpose
+                    </Text>
+                    <Text style={{ fontSize: 13, color: subTextColor(isDark) }}>
+                      Describe what this grant should be spent on
+                    </Text>
+                  </View>
+                  <Icon glyph="edit" size={20} color={palette.muted} />
+                </Pressable>
+              ))}
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

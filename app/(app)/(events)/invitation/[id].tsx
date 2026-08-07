@@ -70,9 +70,12 @@ export default function Page() {
     data: invitation,
     error: invitationError,
     mutate: retryInvitation,
-  } = useOfflineSWR<Invitation>(`user/invitations/${inviteId}`, {
-    fallbackData: fallbackInvitation,
-  });
+  } = useOfflineSWR<Invitation>(
+    `user/invitations/${inviteId}?expand=organization,sender`,
+    {
+      fallbackData: fallbackInvitation,
+    },
+  );
 
   const { mutate } = useSWRConfig();
 
@@ -94,10 +97,13 @@ export default function Page() {
       onSuccess: () => {
         mutate(`user/organizations`);
         mutate("user/invitations");
-        if (invitation) {
+        // Needs the organization id to land on the org — without it (an
+        // unexpanded response) just go back rather than crash on accept.
+        const acceptedOrgId = invitation?.organization?.id;
+        if (acceptedOrgId) {
           router.replace({
             pathname: "/(events)/[id]",
-            params: { id: invitation.organization.id },
+            params: { id: acceptedOrgId },
           });
         } else {
           router.back();

@@ -20,9 +20,11 @@ import { Text } from "@/components/Text";
 import UserAvatar from "@/components/UserAvatar";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import { OrgPolicy } from "@/lib/policies";
+import { OrganizerPositionPolicy, OrgPolicy } from "@/lib/policies";
+import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import { OrganizationExpanded } from "@/lib/types/Organization";
-import User, { OrgUser } from "@/lib/types/User";
+import OrganizerPosition from "@/lib/types/OrganizerPosition";
+import User from "@/lib/types/User";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
@@ -47,21 +49,21 @@ const TABS: { key: FilterTab; label: string }[] = [
   { key: "manager", label: "Managers" },
 ];
 
-function roleColor(role?: OrgUser["role"]) {
+function roleColor(role?: OrganizerPosition["role"]) {
   if (role === "manager") return palette.warning;
   return palette.info;
 }
 
-// Member removal is disabled until the feature is ready. The `canManage` /
-// `onRemove` props and the remove button below are commented out rather than
-// deleted so this is a straight revert when we ship it.
 function MemberCard({
-  user,
+  position,
+  canRemove,
+  onRemove,
 }: {
-  user: OrgUser;
-  // canManage: boolean;
-  // onRemove: (user: OrgUser) => void;
+  position: OrganizerPosition;
+  canRemove: boolean;
+  onRemove: (position: OrganizerPosition) => void;
 }) {
+  const user = position.user;
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
   const borderColor = cardBorderColor(isDark);
@@ -92,14 +94,19 @@ function MemberCard({
             {user.name}
           </Text>
           <Text
-            style={{ color: roleColor(user.role), fontSize: 13, marginTop: 2 }}
+            style={{
+              color: roleColor(position.role),
+              fontSize: 13,
+              marginTop: 2,
+            }}
           >
-            {capitalize(user.role ?? "member")}
+            {capitalize(position.role ?? "member")}
+            {position.signee ? " · Signee" : ""}
           </Text>
         </View>
-        {/* {canManage && (
+        {canRemove && (
           <Pressable
-            onPress={() => onRemove(user)}
+            onPress={() => onRemove(position)}
             hitSlop={8}
             style={({ pressed }) => ({
               width: 30,
@@ -120,22 +127,24 @@ function MemberCard({
           >
             <Ionicons name="person-remove-outline" size={15} color="#e85d5d" />
           </Pressable>
-        )} */}
+        )}
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <Ionicons name="mail-outline" size={13} color={subColor} />
-        <Text
-          style={{ color: subColor, fontSize: 12, flex: 1 }}
-          numberOfLines={1}
-        >
-          {user.email}
-        </Text>
-      </View>
+      {user.email && (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="mail-outline" size={13} color={subColor} />
+          <Text
+            style={{ color: subColor, fontSize: 12, flex: 1 }}
+            numberOfLines={1}
+          >
+            {user.email}
+          </Text>
+        </View>
+      )}
 
       <Text style={{ color: subColor, fontSize: 12 }}>
         Joined{" "}
-        {formatDistanceToNowStrict(parseISO(user.joined_at), {
+        {formatDistanceToNowStrict(parseISO(position.created_at), {
           addSuffix: true,
         })}
       </Text>
@@ -239,8 +248,29 @@ export default function Page() {
 
   const { data: currentUser } = useOfflineSWR<User>("user");
 
-  const canManage = organization
-    ? new OrgPolicy(currentUser ?? null, organization).canInviteUser()
+  const { data: positionsPage, mutate: reloadPositions } = useOfflineSWR<
+    PaginatedResponse<OrganizerPosition>
+  >(
+    `organizer_positions?organization_id=${id}&expand=user&avatar_size=50&limit=100`,
+  );
+
+  const positions = positionsPage?.data;
+
+  const policyOrg = useMemo(() => {
+    if (!organization) return null;
+    if (!positions) return organization;
+    return {
+      ...organization,
+      users: positions.map((p) => ({
+        ...p.user,
+        role: p.role,
+        joined_at: p.created_at,
+      })),
+    };
+  }, [organization, positions]);
+
+  const canManage = policyOrg
+    ? new OrgPolicy(currentUser ?? null, policyOrg).canInviteUser()
     : false;
 
   const { data: invitations, mutate: reloadInvitations } = useOfflineSWR<
@@ -253,8 +283,9 @@ export default function Page() {
 
   useFocusEffect(
     useCallback(() => {
+      reloadPositions();
       if (canManage) reloadInvitations();
-    }, [canManage, reloadInvitations]),
+    }, [canManage, reloadPositions, reloadInvitations]),
   );
 
   const onRefresh = useCallback(async () => {
@@ -262,42 +293,28 @@ export default function Page() {
     try {
       await Promise.all([
         reloadOrganization(),
+        reloadPositions(),
         canManage ? reloadInvitations() : Promise.resolve(),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [reloadOrganization, reloadInvitations, canManage]);
+  }, [reloadOrganization, reloadPositions, reloadInvitations, canManage]);
 
-  // Removing an existing member is disabled until the feature is ready.
-  // Invitation cancellation below stays live.
-  // const removeUser = useCallback(
-  //   (user: OrgUser) => {
-  //     Alert.alert(
-  //       `Remove ${user.name}?`,
-  //       "They will lose access to this organization.",
-  //       [
-  //         { text: "Cancel" },
-  //         {
-  //           text: "Remove",
-  //           style: "destructive",
-  //           onPress: async () => {
-  //             try {
-  //               await hcb.delete(`organizations/${id}/users/${user.id}`);
-  //               reloadOrganization();
-  //             } catch (error) {
-  //               showAlert(
-  //                 "Failed to remove",
-  //                 await parseApiError(error, "Please try again."),
-  //               );
-  //             }
-  //           },
-  //         },
-  //       ],
-  //     );
-  //   },
-  //   [hcb, id, reloadOrganization],
-  // );
+  const requestRemoval = useCallback(
+    (position: OrganizerPosition) => {
+      router.push({
+        pathname: "/(events)/[id]/remove-member",
+        params: {
+          id,
+          positionId: position.id,
+          name: position.user.name,
+          self: position.user.id === currentUser?.id ? "1" : "0",
+        },
+      });
+    },
+    [id, currentUser],
+  );
 
   const cancelInvitation = useCallback(
     (inviteId: string) => {
@@ -327,18 +344,17 @@ export default function Page() {
     [hcb, id, reloadInvitations],
   );
 
-  const filteredUsers = useMemo(() => {
-    if (!organization) return [];
-    let users = organization.users;
+  const filteredPositions = useMemo(() => {
+    let result = positions ?? [];
     if (activeTab !== "all") {
-      users = users.filter((u) => u.role === activeTab);
+      result = result.filter((p) => p.role === activeTab);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      users = users.filter((u) => u.name.toLowerCase().includes(q));
+      result = result.filter((p) => p.user.name.toLowerCase().includes(q));
     }
-    return users;
-  }, [organization, activeTab, search]);
+    return result;
+  }, [positions, activeTab, search]);
 
   const inputBg = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)";
   const tabActiveBg = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
@@ -347,14 +363,14 @@ export default function Page() {
 
   type ListItem =
     | { type: "header" }
-    | { type: "member"; user: OrgUser }
+    | { type: "member"; position: OrganizerPosition }
     | { type: "invitations-header" }
     | { type: "invitation"; invite: OrgInvitation };
 
   const listData: ListItem[] = [{ type: "header" }];
 
-  for (const user of filteredUsers) {
-    listData.push({ type: "member", user });
+  for (const position of filteredPositions) {
+    listData.push({ type: "member", position });
   }
 
   const pendingInvitations = (invitations ?? []).filter(
@@ -422,7 +438,7 @@ export default function Page() {
                         fontWeight: "600",
                       }}
                     >
-                      {organization.users.length}
+                      {positionsPage?.total_count ?? positions?.length ?? 0}
                     </Text>
                   </View>
                 </View>
@@ -513,8 +529,17 @@ export default function Page() {
         }
 
         if (item.type === "member") {
-          // canManage / onRemove omitted while member removal is disabled.
-          return <MemberCard user={item.user} />;
+          return (
+            <MemberCard
+              position={item.position}
+              canRemove={new OrganizerPositionPolicy(
+                currentUser ?? null,
+                item.position,
+                policyOrg,
+              ).canRequestRemoval()}
+              onRemove={requestRemoval}
+            />
+          );
         }
 
         if (item.type === "invitations-header") {

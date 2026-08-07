@@ -18,7 +18,12 @@ export default function InvitationCard({
 }) {
   const { colors: themeColors } = useTheme();
   const isDark = useIsDark();
+  // `organization` is only embedded when the request expands it, and a
+  // response that omitted it used to crash this card on `org.icon`. Render the
+  // invitation anyway — it's real and actionable, and the detail screen
+  // re-fetches it — just without org-specific branding.
   const org = invitation.organization;
+  const orgName = org?.name?.trim() || "An organization";
 
   return (
     <TouchableHighlight
@@ -41,7 +46,7 @@ export default function InvitationCard({
           gap: 12,
         }}
       >
-        {org.icon ? (
+        {org?.icon ? (
           <Image
             source={{ uri: org.icon }}
             cachePolicy="memory-disk"
@@ -54,13 +59,15 @@ export default function InvitationCard({
               width: 40,
               height: 40,
               borderRadius: 8,
-              backgroundColor: orgColor(org.id),
+              // Falls back to the invitation's own id so the colour stays
+              // stable per-invite even with no organization to key off.
+              backgroundColor: orgColor(org?.id ?? invitation.id),
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <Text style={{ color: "white", fontSize: 18, fontWeight: "600" }}>
-              {org.name.charAt(0).toUpperCase()}
+              {orgName.charAt(0).toUpperCase()}
             </Text>
           </View>
         )}
@@ -73,7 +80,7 @@ export default function InvitationCard({
               fontWeight: "600",
             }}
           >
-            {org.name}
+            {orgName}
           </Text>
           <Text
             numberOfLines={1}

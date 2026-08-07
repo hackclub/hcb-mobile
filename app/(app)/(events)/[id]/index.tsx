@@ -349,7 +349,7 @@ export default function Page() {
                 `comingSoon` and restoring the navTo below. */}
             <ActionTile
               icon="attachment"
-              label="Reimburse"
+              label="Reimbursements"
               comingSoon
               onPress={() => navTo("/(events)/[id]/reimbursements")}
             />

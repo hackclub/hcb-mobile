@@ -1,15 +1,8 @@
-import User from "../types/User";
+import OrganizerPosition from "../types/OrganizerPosition";
 
-import { Role } from "./helpers";
 import { OrgScopedPolicy } from "./OrgScopedPolicy";
 
-/** Minimal OrganizerPosition shape used for policy checks. */
-export interface OrganizerPosition {
-  id: string;
-  user: User;
-  role: Role;
-  is_signee: boolean;
-}
+export type { OrganizerPosition };
 
 export class OrganizerPositionPolicy extends OrgScopedPolicy<OrganizerPosition> {
   override destroy(): boolean {
@@ -26,7 +19,7 @@ export class OrganizerPositionPolicy extends OrgScopedPolicy<OrganizerPosition> 
   changePositionRole(): boolean {
     if (!this.user) return false;
     if (this.isSelf) return false;
-    if (this.record.is_signee) return false;
+    if (this.record.signee) return false;
     return this.adminOrManager;
   }
 
@@ -44,6 +37,6 @@ export class OrganizerPositionPolicy extends OrgScopedPolicy<OrganizerPosition> 
 
   private get isSignee(): boolean {
     // The current user is the signee for this position's org
-    return this.record.is_signee && this.isSelf;
+    return this.record.signee && this.isSelf;
   }
 }

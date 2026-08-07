@@ -217,12 +217,12 @@ export default function TransfersPage() {
           showAlert(
             "Which method should I use?",
             [
-              "ACH transfer — sends money to a U.S. bank account.",
-              "Mailed check — sends a physical check (U.S. only).",
-              "Wise — sends money internationally, usually the cheapest option.",
-              "Wire transfer — sends money internationally; use when Wise doesn't support the destination.",
-              "HCB transfer — moves money to another HCB organization.",
-              "Card grant — lets someone spend directly from a virtual card.",
+              "ACH transfer: sends money to a U.S. bank account.",
+              "Mailed check: sends a physical check (U.S. only).",
+              "Wise: sends money internationally, usually the cheapest option.",
+              "Wire transfer: sends money internationally; use when Wise doesn't support the destination.",
+              "HCB transfer: moves money to another HCB organization.",
+              "Card grant: lets someone spend directly from a virtual card.",
             ].join("\n\n"),
           )
         }
