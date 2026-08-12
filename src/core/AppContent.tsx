@@ -43,6 +43,7 @@ import useClient from "../lib/client";
 import { DevToolsProvider } from "../lib/devtools";
 import { TabParamList } from "../lib/NavigatorParamList";
 import { useIsDark } from "../lib/useColorScheme";
+import { useForceUpdate } from "../lib/useForceUpdate";
 import { usePushNotifications } from "../lib/usePushNotifications";
 import {
   resetStripeTerminalInitialization,
@@ -113,6 +114,7 @@ export default function AppContent({
   const pushNotificationsRegistered = useRef(false);
 
   useUpdateMonitor();
+  useForceUpdate();
 
   useEffect(() => {
     resetStripeTerminalInitialization();
