@@ -179,7 +179,7 @@ export default function TransactionPage({
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "position" : "height"}
+      behavior={Platform.OS === "ios" ? "position" : undefined}
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"

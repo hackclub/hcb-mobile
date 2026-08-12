@@ -179,7 +179,7 @@ export default function Button(
 
   return (
     <Pressable
-      style={{
+      style={({ pressed }) => ({
         ...getVariantStyles(),
         ...(props.style as object),
         ...(props.disabled
@@ -188,8 +188,10 @@ export default function Button(
               borderColor: palette.muted,
               opacity: 0.6,
             }
-          : {}),
-      }}
+          : pressed && !props.loading
+            ? { opacity: 0.6 }
+            : {}),
+      })}
       onPress={() => {
         if (props.hapticFeedback !== false) {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
