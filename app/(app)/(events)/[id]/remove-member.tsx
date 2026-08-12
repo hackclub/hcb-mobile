@@ -4,7 +4,6 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { mutate as globalMutate } from "swr";
 
 import {
-  FooterNote,
   FormField,
   FormSection,
   NoticeCallout,
