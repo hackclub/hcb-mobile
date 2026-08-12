@@ -362,10 +362,19 @@ export default function Page() {
   return (
     <ReorderableList
       data={filteredCards}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => item?.id ?? `card-${index}`}
       onReorder={({ from, to }) => {
-        Haptics.selectionAsync();
         const newCards = [...sortedCards];
+        if (
+          from === to ||
+          from < 0 ||
+          to < 0 ||
+          from >= newCards.length ||
+          to >= newCards.length
+        ) {
+          return;
+        }
+        Haptics.selectionAsync();
         const [removed] = newCards.splice(from, 1);
         newCards.splice(to, 0, removed);
         setSortedCards(newCards);

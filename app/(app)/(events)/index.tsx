@@ -409,7 +409,7 @@ export default function App() {
 
   return (
     <ReorderableList
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => item?.id ?? `org-${index}`}
       onReorder={({ from, to }) => {
         if (moveOrg(from, to)) {
           Haptics.selectionAsync();
