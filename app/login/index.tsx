@@ -24,6 +24,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "@/components/Button";
 import { Text } from "@/components/Text";
 import AuthContext from "@/lib/auth/auth";
+import log from "@/lib/log";
+import toast from "@/lib/toast";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
@@ -36,10 +38,22 @@ const clientId = process.env.EXPO_PUBLIC_CLIENT_ID!;
 
 const redirectUri = makeRedirectUri({ scheme: "hcb" });
 
-// Required by expo-auth-session so the app finalizes the auth session when the
-// browser redirects back. Without it, on Android the browser can return but the
-// pending auth request never resolves to a "success" result.
 WebBrowser.maybeCompleteAuthSession();
+
+const browserOptions = {
+  controlsColor: palette.primary,
+  showTitle: true,
+  enableBarCollapsing: false,
+};
+
+function isMissingBrowserError(error: unknown): boolean {
+  const code = (error as { code?: string } | null)?.code;
+  return (
+    code === "ERR_NO_MATCHING_ACTIVITY" ||
+    code === "ERR_PACKAGE_MANAGER_NOT_FOUND" ||
+    code === "PREFERRED_PACKAGE_NOT_FOUND"
+  );
+}
 
 export default function Login() {
   const scheme = useColorScheme();
@@ -48,9 +62,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [isPrompting, setIsPrompting] = useState(false);
   const [pendingSignup, setPendingSignup] = useState<boolean | null>(null);
+  const [busyButton, setBusyButton] = useState<"login" | "signup" | null>(null);
 
   // Prevent duplicate token exchanges
   const isProcessingRef = useRef(false);
+  // Read synchronously so a re-render mid-prompt can't start a second session.
+  const isPromptingRef = useRef(false);
   const processedCodesRef = useRef<Set<string>>(new Set());
   const codeVerifierRef = useRef<string | null>(null);
 
@@ -82,15 +99,14 @@ export default function Login() {
   const openInAppBrowser = async (url: string) => {
     try {
       await WebBrowser.openBrowserAsync(url, {
+        ...browserOptions,
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FORM_SHEET,
-        controlsColor: palette.primary,
-        showTitle: true,
-        enableBarCollapsing: false,
-        showInRecents: false,
-        createTask: false,
       });
     } catch (error) {
-      console.error("Error opening browser:", error);
+      log.exception(error, {
+        context: "login.openInAppBrowser",
+        feature: "auth",
+      });
       // Fallback to external browser if in-app browser fails
       Linking.openURL(url);
     }
@@ -135,7 +151,14 @@ export default function Login() {
         await setTokenResponse(tokenResponse, codeVerifier);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (error) {
-        console.error("Error exchanging code for token:", error);
+        log.exception(error, {
+          context: "login.exchangeCode",
+          feature: "auth",
+        });
+        toast.error(
+          "Couldn't finish signing in",
+          "Something went wrong exchanging your login. Please try again.",
+        );
         // Allow a retry of this code if the exchange failed.
         processedCodesRef.current.delete(authCode);
       } finally {
@@ -154,20 +177,23 @@ export default function Login() {
     if (!authCode) return;
     const codeVerifier = codeVerifierRef.current || request?.codeVerifier;
     if (!codeVerifier) {
-      console.error("No code verifier available for token exchange");
+      log.error("No code verifier available for token exchange", {
+        feature: "auth",
+      });
       return;
     }
     exchangeAuthCode(authCode, codeVerifier);
   }, [response, request, exchangeAuthCode]);
 
-  const doPrompt = async () => {
-    if (isPrompting) return;
+  const doPrompt = useCallback(async () => {
+    if (isPromptingRef.current) return;
 
+    isPromptingRef.current = true;
     setIsPrompting(true);
     isProcessingRef.current = false;
 
     try {
-      const _r = await promptAsync({ createTask: false });
+      const _r = await promptAsync(browserOptions);
       // Primary path: exchange the code straight from the promptAsync result,
       // so it does not depend on the `response` effect surviving a remount.
       if (_r?.type === "success" && _r.params?.code) {
@@ -175,14 +201,44 @@ export default function Login() {
         if (codeVerifier) {
           await exchangeAuthCode(_r.params.code, codeVerifier);
         } else {
-          console.error("No code verifier available for token exchange");
+          log.error("No code verifier available for token exchange", {
+            feature: "auth",
+          });
+          toast.error(
+            "Couldn't finish signing in",
+            "Please try signing in again.",
+          );
         }
+      } else if (_r?.type === "error") {
+        log.exception(_r.error ?? new Error("Auth session returned an error"), {
+          context: "login.promptAsync",
+          feature: "auth",
+          attributes: { authError: _r.error?.code },
+        });
+        toast.error(
+          "Sign in failed",
+          _r.error?.description ?? "Please try again.",
+        );
+      } else if (_r?.type === "locked") {
+        toast.info("Sign in already in progress");
       }
+      // `cancel` and `dismiss` mean the user closed the browser themselves —
+      // returning to this screen is the correct outcome, so stay quiet.
+    } catch (error) {
+      log.exception(error, { context: "login.promptAsync", feature: "auth" });
+      toast.error(
+        "Couldn't open the sign in page",
+        isMissingBrowserError(error)
+          ? "No web browser is available on this device. Enable Chrome or another browser and try again."
+          : "Something went wrong opening the browser. Please try again.",
+      );
     } finally {
+      isPromptingRef.current = false;
       setIsPrompting(false);
       setPendingSignup(null);
+      setBusyButton(null);
     }
-  };
+  }, [promptAsync, request, exchangeAuthCode]);
 
   useEffect(() => {
     if (
@@ -192,6 +248,29 @@ export default function Login() {
       doPrompt();
     }
   }, [pendingSignup, request, doPrompt]);
+
+  // `useAuthRequest` swallows a rejected `makeAuthUrlAsync`, leaving `request`
+  // null forever — the gate above then never fires and the button spins with no
+  // error anywhere. Give up after a few seconds and say so.
+  useEffect(() => {
+    if (!busyButton || isPrompting) return;
+
+    const timer = setTimeout(() => {
+      log.error("Auth request never became ready", {
+        feature: "auth",
+        hasRequest: !!request,
+        hasAuthUrl: !!request?.url,
+      });
+      toast.error(
+        "Couldn't start sign in",
+        "Please check your connection and try again.",
+      );
+      setBusyButton(null);
+      setPendingSignup(null);
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, [busyButton, isPrompting, request]);
 
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -327,13 +406,23 @@ export default function Login() {
           </Button>
 
           <View style={{ gap: 12, marginTop: 8 }}>
-            <Button variant="primary" onPress={() => setPendingSignup(true)}>
+            <Button
+              variant="primary"
+              onPress={() => {
+                setBusyButton("signup");
+                setPendingSignup(true);
+              }}
+              loading={busyButton === "signup"}
+            >
               Get Started
             </Button>
             <Button
               variant="outline"
-              onPress={() => setPendingSignup(false)}
-              loading={loading}
+              onPress={() => {
+                setBusyButton("login");
+                setPendingSignup(false);
+              }}
+              loading={loading || busyButton === "login"}
             >
               Log In
             </Button>

@@ -18,11 +18,6 @@ export function orgColor(orgId: string) {
   return colors[Math.floor(orgId.charCodeAt(4) % colors.length)];
 }
 
-export function organizationOrderEqual(a: Organization[], b: Organization[]) {
-  if (a.length !== b.length) return false;
-  return a.every((org, i) => org.id === b[i].id);
-}
-
 function formatEntityNames(
   ids: string[] | undefined,
   lookup: (id: string) => {

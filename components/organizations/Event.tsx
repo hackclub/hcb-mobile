@@ -10,7 +10,6 @@ import EventBalance from "./EventBalance";
 import { Text } from "@/components/Text";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
-import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { cardBorderColor, palette } from "@/styles/theme";
 import * as Haptics from "@/utils/haptics";
 import { orgColor } from "@/utils/org";
@@ -37,10 +36,6 @@ const Event = memo(
     );
 
     const { colors: themeColors } = useTheme();
-    useStripeTerminalInit({
-      organizationId: event?.id,
-      enabled: !!(event && !event.playground_mode),
-    });
 
     const color = orgColor(event.id);
     const isDark = useIsDark();
