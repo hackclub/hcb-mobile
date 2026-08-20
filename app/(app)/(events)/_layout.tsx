@@ -311,6 +311,9 @@ export default function Layout() {
           name="invitation/[id]"
           options={{ title: "Invitation" }}
         />
+        <Stack.Screen name="invites/[id]" options={{ title: "Invitation" }} />
+        <Stack.Screen name="grants/[id]" options={{ title: "Grant Card" }} />
+        <Stack.Screen name="stripe_cards/[id]" options={{ title: "" }} />
       </Stack>
     </>
   );

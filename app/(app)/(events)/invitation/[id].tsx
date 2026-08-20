@@ -16,7 +16,9 @@ import { useIsDark } from "@/lib/useColorScheme";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { cardBorderColor, palette, radii, subTextColor } from "@/styles/theme";
 import { renderDate } from "@/utils/format";
+import { openOnWebsite } from "@/utils/handoff";
 import { orgColor } from "@/utils/org";
+import { shareUrl } from "@/utils/shareUrl";
 
 const CATEGORY_LABELS: Record<string, string> = {
   hackathon: "Hackathon",
@@ -373,6 +375,12 @@ export default function Page() {
             Couldn't load this invitation.
           </Text>
           <Button onPress={() => retryInvitation()}>Retry</Button>
+          <Button
+            variant="ghost"
+            onPress={() => openOnWebsite(shareUrl.invite(String(inviteId)))}
+          >
+            Continue on Website
+          </Button>
         </View>
       ) : (
         <ActivityIndicator />

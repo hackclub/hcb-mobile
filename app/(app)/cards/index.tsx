@@ -3,9 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
-import { generate } from "hcb-geo-pattern";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, RefreshControl, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import ReorderableList, {
   useReorderableDrag,
@@ -22,7 +26,7 @@ import User from "@/lib/types/User";
 import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { palette } from "@/styles/theme";
-import { normalizeSvg } from "@/utils/format";
+import { useCardPattern } from "@/utils/cardPattern";
 import * as Haptics from "@/utils/haptics";
 
 type CardWithGrant = Card &
@@ -32,8 +36,6 @@ type CardItemProps = {
   item: CardWithGrant;
   isActive: boolean;
   onPress: (card: CardWithGrant) => void;
-  pattern?: string;
-  patternDimensions?: { width: number; height: number };
 };
 
 const STATUS_ORDER: Record<string, number> = {
@@ -50,10 +52,9 @@ const CardItem = memo(function CardItem({
   item,
   isActive,
   onPress,
-  pattern,
-  patternDimensions,
 }: CardItemProps) {
   const drag = useReorderableDrag();
+  const cardPattern = useCardPattern(item, item.type === "virtual");
   return (
     <Pressable
       onPress={() => onPress(item)}
@@ -67,8 +68,8 @@ const CardItem = memo(function CardItem({
       <PaymentCard
         card={item}
         style={{ marginBottom: 10 }}
-        pattern={pattern}
-        patternDimensions={patternDimensions}
+        pattern={cardPattern?.pattern}
+        patternDimensions={cardPattern?.dimensions}
       />
     </Pressable>
   );
@@ -85,16 +86,11 @@ export default function Page() {
     useOfflineSWR<Organization[]>("user/organizations");
   const { colors: themeColors } = useTheme();
   const headerInset = useHeaderInset();
-  const [patternCache, setPatternCache] = useState<
-    Record<
-      string,
-      { pattern: string; dimensions: { width: number; height: number } }
-    >
-  >({});
+  const { width } = useWindowDimensions();
 
   const [canceledCardsShown, setCanceledCardsShown] = useState(true);
   const [frozenCardsShown, setFrozenCardsShown] = useState(true);
-  const [sortedCards, setSortedCards] = useState<CardWithGrant[]>();
+  const [orderMap, setOrderMap] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -125,76 +121,25 @@ export default function Page() {
   }, [cards, grantCards]);
 
   useEffect(() => {
-    if (!allCards) return;
-
     AsyncStorage.getItem("cardOrder")
       .then((savedOrder) => {
-        if (savedOrder) {
-          const orderMap: Record<string, number> = JSON.parse(savedOrder);
-          setSortedCards(
-            [...allCards].sort(
-              (a, b) =>
-                (orderMap[a.id] ?? Number.MAX_SAFE_INTEGER) -
-                (orderMap[b.id] ?? Number.MAX_SAFE_INTEGER),
-            ),
-          );
-        } else {
-          setSortedCards(allCards);
-        }
+        if (savedOrder) setOrderMap(JSON.parse(savedOrder));
       })
       .catch((error) => {
         console.error("Error loading saved card order", error, {
           context: { action: "load_card_order" },
         });
-        setSortedCards(allCards);
       });
-  }, [allCards]);
+  }, []);
 
-  useEffect(() => {
-    if (!cards) return;
-
-    const virtualCards = cards.filter((c) => c.type === "virtual" && c.last4);
-    if (virtualCards.length === 0) return;
-
-    Promise.all(
-      virtualCards.map(async (card) => {
-        try {
-          const patternData = await generate({
-            input: card.id,
-            grayScale:
-              card.status !== "active"
-                ? card.status === "frozen"
-                  ? 0.23
-                  : 1
-                : 0,
-          });
-          return {
-            id: card.id,
-            pattern: normalizeSvg(
-              patternData.toSVG(),
-              patternData.width,
-              patternData.height,
-            ),
-            dimensions: {
-              width: patternData.width,
-              height: patternData.height,
-            },
-          };
-        } catch (error) {
-          console.error("Error generating pattern for card", error, {
-            context: { cardId: card.id },
-          });
-          return null;
-        }
-      }),
-    ).then((results) => {
-      const cache: typeof patternCache = {};
-      for (const r of results) {
-        if (r) cache[r.id] = { pattern: r.pattern, dimensions: r.dimensions };
-      }
-      setPatternCache(cache);
-    });
-  }, [cards]);
+  const sortedCards = useMemo<CardWithGrant[] | undefined>(() => {
+    if (!allCards) return undefined;
+    return [...allCards].sort(
+      (a, b) =>
+        (orderMap[a.id] ?? Number.MAX_SAFE_INTEGER) -
+        (orderMap[b.id] ?? Number.MAX_SAFE_INTEGER),
+    );
+  }, [allCards, orderMap]);
 
   useFocusEffect(
     useCallback(() => {
@@ -299,16 +244,9 @@ export default function Page() {
     }
   }, [reloadCards, reloadGrantCards]);
 
-  const saveCardOrder = useCallback(async (newOrder: CardWithGrant[]) => {
+  const saveCardOrder = useCallback(async (order: Record<string, number>) => {
     try {
-      const orderMap = newOrder.reduce(
-        (acc, card, index) => {
-          acc[card.id] = index;
-          return acc;
-        },
-        {} as Record<string, number>,
-      );
-      await AsyncStorage.setItem("cardOrder", JSON.stringify(orderMap));
+      await AsyncStorage.setItem("cardOrder", JSON.stringify(order));
     } catch (error) {
       console.error("Error saving card order", error, {
         context: { action: "save_card_order" },
@@ -336,15 +274,54 @@ export default function Page() {
 
   const renderItem = useCallback(
     ({ item }: { item: CardWithGrant }) => (
-      <CardItem
-        item={item}
-        isActive={false}
-        onPress={handleCardPress}
-        pattern={patternCache[item.id]?.pattern}
-        patternDimensions={patternCache[item.id]?.dimensions}
-      />
+      <CardItem item={item} isActive={false} onPress={handleCardPress} />
     ),
-    [handleCardPress, patternCache],
+    [handleCardPress],
+  );
+
+  const itemHeight = (width - 40) / 1.588 + 10;
+
+  const getItemLayout = useCallback(
+    (_: ArrayLike<CardWithGrant> | null | undefined, index: number) => ({
+      length: itemHeight,
+      offset: itemHeight * index,
+      index,
+    }),
+    [itemHeight],
+  );
+
+  const handleReorder = useCallback(
+    ({ from, to }: { from: number; to: number }) => {
+      if (!sortedCards || from === to) return;
+      if (
+        from < 0 ||
+        to < 0 ||
+        from >= filteredCards.length ||
+        to >= filteredCards.length
+      ) {
+        return;
+      }
+
+      const moved = [...filteredCards];
+      const [removed] = moved.splice(from, 1);
+      moved.splice(to, 0, removed);
+
+      const visibleIds = new Set(filteredCards.map((c) => c.id));
+      let cursor = 0;
+      const merged = sortedCards.map((card) =>
+        visibleIds.has(card.id) ? moved[cursor++] : card,
+      );
+
+      Haptics.selectionAsync();
+
+      const nextOrder: Record<string, number> = {};
+      merged.forEach((card, index) => {
+        nextOrder[card.id] = index;
+      });
+      setOrderMap(nextOrder);
+      saveCardOrder(nextOrder);
+    },
+    [filteredCards, sortedCards, saveCardOrder],
   );
 
   if (!sortedCards) {
@@ -363,23 +340,10 @@ export default function Page() {
     <ReorderableList
       data={filteredCards}
       keyExtractor={(item, index) => item?.id ?? `card-${index}`}
-      onReorder={({ from, to }) => {
-        const newCards = [...sortedCards];
-        if (
-          from === to ||
-          from < 0 ||
-          to < 0 ||
-          from >= newCards.length ||
-          to >= newCards.length
-        ) {
-          return;
-        }
-        Haptics.selectionAsync();
-        const [removed] = newCards.splice(from, 1);
-        newCards.splice(to, 0, removed);
-        setSortedCards(newCards);
-        saveCardOrder(newCards);
-      }}
+      onReorder={handleReorder}
+      getItemLayout={getItemLayout}
+      initialNumToRender={3}
+      maxToRenderPerBatch={4}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

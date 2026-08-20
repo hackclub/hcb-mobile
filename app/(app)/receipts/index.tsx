@@ -342,7 +342,6 @@ export default function Page() {
                     setSelectedReceipt(receipt);
                     setIsImageViewerVisible(true);
                   }}
-                  style={{ marginRight: 20 }}
                 >
                   <View key={receipt.id}>
                     <View style={{ position: "relative" }}>
@@ -407,6 +406,7 @@ export default function Page() {
             )}
             keyExtractor={(receipt) => receipt.id}
             showsHorizontalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={{ width: 20 }} />}
             style={{ marginBottom: 20 }}
           />
         );

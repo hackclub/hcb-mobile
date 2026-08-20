@@ -27,6 +27,16 @@ import {
 } from "@/utils/format";
 import { formatCategoryNames, formatMerchantNames } from "@/utils/org";
 
+const CARD_NUMBER_MIN_GAP = 16;
+
+const cardNumberTextStyle = {
+  color: palette.muted,
+  fontSize: Platform.OS === "android" ? 15 : 16,
+  fontWeight: "500" as const,
+  fontFamily: "JetBrainsMono-Regular",
+  flexShrink: 1,
+};
+
 function InfoRow({
   label,
   value,
@@ -187,6 +197,8 @@ export default function CardDetails({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
+          alignItems: "center",
+          gap: CARD_NUMBER_MIN_GAP,
           marginBottom: 12,
         }}
       >
@@ -202,10 +214,11 @@ export default function CardDetails({
         <View
           style={{
             flex: 1,
+            flexShrink: 1,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: 10,
+            gap: 8,
           }}
         >
           {detailsLoading ||
@@ -220,12 +233,8 @@ export default function CardDetails({
               <Text
                 numberOfLines={1}
                 adjustsFontSizeToFit
-                style={{
-                  color: palette.muted,
-                  fontSize: Platform.OS === "android" ? 15 : 16,
-                  fontWeight: "500",
-                  fontFamily: "JetBrainsMono-Regular",
-                }}
+                minimumFontScale={0.75}
+                style={cardNumberTextStyle}
               >
                 {renderCardNumber(details.number)}
               </Text>
@@ -234,13 +243,8 @@ export default function CardDetails({
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
-              style={{
-                flexShrink: 1,
-                color: palette.muted,
-                fontSize: Platform.OS === "android" ? 15 : 16,
-                fontWeight: "500",
-                fontFamily: "JetBrainsMono-Regular",
-              }}
+              minimumFontScale={0.75}
+              style={cardNumberTextStyle}
             >
               {redactedCardNumber(card?.last4 ?? grantCard?.last4)}
             </Text>

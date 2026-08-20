@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { View, ScrollView, Animated, StyleProp, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useHeaderInset } from "@/lib/useHeaderInset";
+
 function SkeletonBox({ style }: { style?: StyleProp<ViewStyle> }) {
   const { colors: themeColors } = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
@@ -43,10 +45,16 @@ function SkeletonBox({ style }: { style?: StyleProp<ViewStyle> }) {
 export default function TransactionSkeleton() {
   const { bottom: tabBarHeight } = useSafeAreaInsets();
   const { colors: themeColors } = useTheme();
+  const headerInset = useHeaderInset();
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: 20, paddingBottom: tabBarHeight + 20 }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{
+        padding: 20,
+        paddingTop: 20 + headerInset,
+        paddingBottom: tabBarHeight + 20,
+      }}
       scrollIndicatorInsets={{ bottom: tabBarHeight - 20 }}
     >
       <View style={{ marginBottom: 20 }}>

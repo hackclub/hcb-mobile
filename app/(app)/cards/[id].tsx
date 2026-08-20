@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
-import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useState } from "react";
 import {
   Animated,
@@ -43,12 +42,15 @@ import {
   toggleCardFrozen,
 } from "@/utils/cardActions";
 import { getCardName } from "@/utils/cardHelpers";
-import { normalizeSvg } from "@/utils/format";
+import { useCardPattern } from "@/utils/cardPattern";
 import * as Haptics from "@/utils/haptics";
 import { shareUrl } from "@/utils/shareUrl";
 
 export default function CardPage() {
-  const { card: _card } = useLocalSearchParams();
+  const { id: routeId, card: _card } = useLocalSearchParams<{
+    id: string;
+    card?: string;
+  }>();
   const navigation = useNavigation();
 
   const paramCard = _card
@@ -60,7 +62,8 @@ export default function CardPage() {
   const { colors: themeColors } = useTheme();
   const hcb = useClient();
 
-  const id = paramCard?.id ?? `crd_${paramCard.id}`;
+  const id =
+    paramCard?.id ?? (routeId.startsWith("crd_") ? routeId : `crd_${routeId}`);
   const {
     data: card,
     error: cardFetchError,
@@ -101,11 +104,6 @@ export default function CardPage() {
   const [showActivateModal, setShowActivateModal] = useState(false);
   const [last4, setLast4] = useState("");
   const [activating, setActivating] = useState(false);
-  const [pattern, setPattern] = useState<string>();
-  const [patternDimensions, setPatternDimensions] = useState<{
-    width: number;
-    height: number;
-  }>();
   const [isBurningCard, setIsBurningCard] = useState(false);
   const isDark = useIsDark();
   const wallet = useAddToWallet(card?.id || "", {
@@ -259,39 +257,9 @@ export default function CardPage() {
     }
   }, [mutateCard, card?.id, mutateTransactions]);
 
-  useEffect(() => {
-    const generateCardPattern = async () => {
-      if (!card || !isVirtualCard) return;
-
-      try {
-        const patternData = await generate({
-          input: card.id,
-          grayScale:
-            card.status !== "active"
-              ? card.status === "frozen"
-                ? 0.23
-                : 1
-              : 0,
-        });
-        const normalizedPattern = normalizeSvg(
-          patternData.toSVG(),
-          patternData.width,
-          patternData.height,
-        );
-        setPattern(normalizedPattern);
-        setPatternDimensions({
-          width: patternData.width,
-          height: patternData.height,
-        });
-      } catch (error) {
-        console.error("Error generating pattern for card", error, {
-          context: { cardId: card.id },
-        });
-      }
-    };
-
-    generateCardPattern();
-  }, [card, isVirtualCard]);
+  const cardPattern = useCardPattern(card, !!isVirtualCard);
+  const pattern = cardPattern?.pattern;
+  const patternDimensions = cardPattern?.dimensions;
 
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
 

@@ -56,10 +56,24 @@ export default {
         {
           action: "VIEW",
           autoVerify: true,
-          data: {
-            scheme: "https",
-            host: "hcb.hackclub.com",
-          },
+          data: [
+            { scheme: "https", host: "hcb.hackclub.com", pathPrefix: "/hcb/" },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/invites/",
+            },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/grants/",
+            },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/stripe_cards/",
+            },
+          ],
           category: ["BROWSABLE", "DEFAULT"],
         },
       ],

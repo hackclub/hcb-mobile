@@ -1,6 +1,10 @@
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";
-import { useFocusEffect, useTheme } from "expo-router/react-navigation";
+import {
+  useFocusEffect,
+  useHeaderHeight,
+  useTheme,
+} from "expo-router/react-navigation";
 import groupBy from "lodash/groupBy";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -89,6 +93,7 @@ export default function Page() {
 
   const { bottom: tabBarSize } = useSafeAreaInsets();
   const headerInset = useHeaderInset();
+  const headerHeight = useHeaderHeight();
   const { colors: themeColors } = useTheme();
 
   const transactions = useMemo(
@@ -261,7 +266,7 @@ export default function Page() {
           flex: 1,
           backgroundColor: themeColors.background,
           padding: 20,
-          marginTop: 20,
+          paddingTop: headerHeight + 20,
         }}
       >
         <LoadingSkeleton />
@@ -312,7 +317,7 @@ export default function Page() {
           drawDistance={400}
         />
       ) : (
-        <View style={{ flex: 1, marginTop: 20 }}>
+        <View style={{ flex: 1, padding: 20, paddingTop: headerHeight + 20 }}>
           <LoadingSkeleton />
         </View>
       )}

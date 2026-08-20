@@ -1,14 +1,13 @@
 import Icon from "@thedev132/hackclub-icons-rn";
-import { Image } from "expo-image";
+import { Image, type ImageLoadEventData } from "expo-image";
 import { useTheme } from "expo-router/react-navigation";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   AppState,
-  Image as RNImage,
+  InteractionManager,
   useWindowDimensions,
   View,
   ViewProps,
-  type AppStateStatus,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -20,6 +19,43 @@ import GrantCard from "@/lib/types/GrantCard";
 import { CardDetails } from "@/lib/useStripeCardDetails";
 import { palette } from "@/styles/theme";
 import { redactedCardNumber, renderCardNumber } from "@/utils/format";
+
+const CardPatternLayer = memo(function CardPatternLayer({
+  pattern,
+  width,
+  height,
+}: {
+  pattern: string;
+  width: number;
+  height: number;
+}) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => setReady(true));
+    const fallback = setTimeout(() => setReady(true), 300);
+    return () => {
+      task.cancel();
+      clearTimeout(fallback);
+    };
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <View
+      style={{
+        position: "absolute",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        width,
+        height,
+      }}
+    >
+      <SvgXml xml={pattern} width="100%" height="100%" />
+    </View>
+  );
+});
 
 export default function PaymentCard({
   card,
@@ -39,11 +75,11 @@ export default function PaymentCard({
   patternDimensions?: { width: number; height: number };
 }) {
   const { colors: themeColors, dark } = useTheme();
-  const appState = useRef(AppState.currentState);
-  const [isAppInBackground, setIsAppInBackground] = useState(appState.current);
+  const [isAppActive, setIsAppActive] = useState(
+    () => AppState.currentState === "active",
+  );
   const { width } = useWindowDimensions();
-  const [logoWidth, setLogoWidth] = useState(80);
-  const [logoHeight, setLogoHeight] = useState(40);
+  const [logoAspect, setLogoAspect] = useState(2);
   const isCardDataValid = card && card.id;
 
   useEffect(() => {
@@ -53,29 +89,18 @@ export default function PaymentCard({
   }, [card?.id, onCardLoad, patternDimensions, isCardDataValid]);
 
   useEffect(() => {
-    if (card.personalization?.logo_url) {
-      RNImage.getSize(card.personalization.logo_url, (width, height) => {
-        setLogoWidth(width);
-        setLogoHeight(height);
-      });
-    }
-    const subscription = AppState.addEventListener(
-      "change",
-      (nextAppState: AppStateStatus) => {
-        appState.current = nextAppState;
-        setIsAppInBackground(appState.current);
-      },
-    );
+    if (!details) return;
+
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      setIsAppActive(nextAppState === "active");
+    });
 
     return () => subscription.remove();
-  }, [card.personalization?.logo_url]);
+  }, [details]);
 
-  if ((card as GrantCard)?.amount_cents) {
-    card.type = "virtual";
-  }
-
-  const isPhysical = card.type === "physical";
-  const isVirtual = card.type === "virtual";
+  const cardType = (card as GrantCard)?.amount_cents ? "virtual" : card.type;
+  const isPhysical = cardType === "physical";
+  const isVirtual = cardType === "virtual";
   const isBlackCard = card.personalization?.color === "black";
   const cardTextColor = isBlackCard || isVirtual ? "white" : "black";
   const cardIconColor = isBlackCard ? "white" : "black";
@@ -122,17 +147,11 @@ export default function PaymentCard({
       }}
     >
       {isVirtual && pattern && (
-        <View
-          style={{
-            position: "absolute",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            width: width - 40,
-            height: (width - 40) / 1.5,
-          }}
-        >
-          <SvgXml xml={pattern} width="100%" height="100%" />
-        </View>
+        <CardPatternLayer
+          pattern={pattern}
+          width={width - 40}
+          height={(width - 40) / 1.5}
+        />
       )}
 
       {isPhysical && !card.personalization?.logo_url && (
@@ -168,11 +187,16 @@ export default function PaymentCard({
             contentFit="contain"
             cachePolicy="memory-disk"
             source={{ uri: card.personalization.logo_url }}
+            onLoad={({ source }: ImageLoadEventData) => {
+              if (source?.width && source?.height) {
+                setLogoAspect(source.width / source.height);
+              }
+            }}
             style={{
               width: "auto",
               height: 40,
               tintColor: cardIconColor,
-              aspectRatio: logoWidth / logoHeight,
+              aspectRatio: logoAspect,
             }}
           />
         </View>
@@ -206,6 +230,9 @@ export default function PaymentCard({
 
       {isPhysical && <CardChip />}
       <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.75}
         style={{
           color: cardTextColor,
           fontSize: 18,
@@ -213,18 +240,17 @@ export default function PaymentCard({
           fontFamily: "Consolas-Bold",
         }}
       >
-        {details && isAppInBackground === "active"
+        {details && isAppActive
           ? renderCardNumber(details.number)
           : redactedCardNumber(card.last4)}
       </Text>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <View>
+        <View style={{ flex: 1, flexShrink: 1 }}>
           <Text
             style={{
               color: cardTextColor,
               fontFamily: "Consolas-Bold",
               fontSize: 18,
-              width: 180,
               textTransform: "uppercase",
             }}
             numberOfLines={1}
@@ -233,7 +259,7 @@ export default function PaymentCard({
             {card.user?.name || card.organization?.name || "Card Holder"}
           </Text>
         </View>
-        <View style={{ position: "absolute", right: 0 }}>
+        <View>
           <Text
             style={{
               color: cardTextColor,

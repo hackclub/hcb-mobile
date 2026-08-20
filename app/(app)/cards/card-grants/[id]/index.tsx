@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import * as WebBrowser from "expo-web-browser";
-import { generate } from "hcb-geo-pattern";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -46,7 +45,7 @@ import {
   toggleCardFrozen,
 } from "@/utils/cardActions";
 import { getCardName } from "@/utils/cardHelpers";
-import { normalizeSvg } from "@/utils/format";
+import { useCardPattern } from "@/utils/cardPattern";
 import * as Haptics from "@/utils/haptics";
 import { shareUrl } from "@/utils/shareUrl";
 import { maybeRequestReview } from "@/utils/storeReview";
@@ -120,11 +119,6 @@ export default function Page() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const createSkeletonStyle = useSkeletonAnimation();
   const [errorDisplayReady, setErrorDisplayReady] = useState(false);
-  const [pattern, setPattern] = useState<string>();
-  const [patternDimensions, setPatternDimensions] = useState<{
-    width: number;
-    height: number;
-  }>();
   const [cardLoaded, setCardLoaded] = useState(false);
   const [cardDetailsLoading, setCardDetailsLoading] = useState(false);
   const [isReturningGrant, setIsReturningGrant] = useState(false);
@@ -254,39 +248,9 @@ export default function Page() {
     }
   }, [transactionsError, errorDisplayReady]);
 
-  useEffect(() => {
-    const generateCardPattern = async () => {
-      if (!card || !isVirtualCard) return;
-
-      try {
-        const patternData = await generate({
-          input: card.id,
-          grayScale:
-            card.status !== "active"
-              ? card.status === "frozen"
-                ? 0.23
-                : 1
-              : 0,
-        });
-        const normalizedPattern = normalizeSvg(
-          patternData.toSVG(),
-          patternData.width,
-          patternData.height,
-        );
-        setPattern(normalizedPattern);
-        setPatternDimensions({
-          width: patternData.width,
-          height: patternData.height,
-        });
-      } catch (error) {
-        console.error("Error generating pattern for card", error, {
-          context: { cardId: card.id },
-        });
-      }
-    };
-
-    generateCardPattern();
-  }, [card, isVirtualCard]);
+  const cardPattern = useCardPattern(card, !!isVirtualCard);
+  const pattern = cardPattern?.pattern;
+  const patternDimensions = cardPattern?.dimensions;
 
   const handleActivateGrant = async () => {
     if (grantCard?.pre_authorization_required) {
