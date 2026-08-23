@@ -88,7 +88,9 @@ export default function Page() {
   );
 
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    card?.organization.id ? `organizations/${card.organization.id}` : null,
+    card?.organization?.id
+      ? `organizations/${card.organization.id}?expand=users`
+      : null,
   );
 
   const {
@@ -100,14 +102,12 @@ export default function Page() {
 
   const cardName = getCardName(card, "Grant Card");
   const isCardholder = user?.id === card?.user?.id;
-  const grantPolicy =
-    grantCard && organization
-      ? new CardGrantPolicy(user ?? null, grantCard, organization)
-      : null;
-  const cardPolicy =
-    card && organization
-      ? new CardPolicy(user ?? null, card, organization)
-      : null;
+  const grantPolicy = grantCard
+    ? new CardGrantPolicy(user ?? null, grantCard, organization ?? null)
+    : null;
+  const cardPolicy = card
+    ? new CardPolicy(user ?? null, card, organization ?? null)
+    : null;
   const isVirtualCard = card?.type === "virtual";
 
   const [isActivating, setIsActivating] = useState(false);

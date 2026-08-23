@@ -248,13 +248,14 @@ export default function ManageGrantPage() {
     grantCard?.card_id ? `cards/${grantCard.card_id}` : null,
   );
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    card?.organization.id ? `organizations/${card.organization.id}` : null,
+    card?.organization?.id
+      ? `organizations/${card.organization.id}?expand=users`
+      : null,
   );
 
-  const grantPolicy =
-    grantCard && organization
-      ? new CardGrantPolicy(user ?? null, grantCard, organization)
-      : null;
+  const grantPolicy = grantCard
+    ? new CardGrantPolicy(user ?? null, grantCard, organization ?? null)
+    : null;
 
   const [expanded, setExpanded] = useState<
     "topup" | "withdraw" | "purpose" | null

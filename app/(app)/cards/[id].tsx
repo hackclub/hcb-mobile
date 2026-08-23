@@ -75,8 +75,10 @@ export default function CardPage() {
     },
   });
   const { data: user } = useOfflineSWR<User>(`user?expand=billing_address`);
+  const organizationId =
+    paramCard?.organization?.id || card?.organization?.id || null;
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
-    `organizations/${paramCard?.organization?.id || card?.organization?.id}`,
+    organizationId ? `organizations/${organizationId}?expand=users` : null,
   );
 
   const {
@@ -88,10 +90,9 @@ export default function CardPage() {
 
   const cardName = getCardName(card);
   const isCardholder = user?.id === card?.user?.id;
-  const cardPolicy =
-    card && organization
-      ? new CardPolicy(user ?? null, card, organization)
-      : null;
+  const cardPolicy = card
+    ? new CardPolicy(user ?? null, card, organization ?? null)
+    : null;
   const isVirtualCard = card?.type === "virtual";
   const [refreshing, setRefreshing] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
