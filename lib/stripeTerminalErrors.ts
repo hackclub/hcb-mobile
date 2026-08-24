@@ -17,8 +17,8 @@ const tapToPay = Platform.OS === "ios" ? "Tap to Pay on iPhone" : "Tap to Pay";
 
 const COPY: Record<string, TerminalErrorCopy> = {
   [ErrorCode.TAP_TO_PAY_INSECURE_ENVIRONMENT]: {
-    title: "Turn off Developer options",
-    message: `${tapToPay} can't run while Developer options, USB debugging, or wireless debugging are enabled. Turn them off in Settings → System → Developer options, then try again.`,
+    title: "Device isn't secure right now",
+    message: `${tapToPay} can't run while Developer options, USB or wireless debugging, screen recording, or overlay apps are active. Turn those off, then try again.`,
   },
   [ErrorCode.TAP_TO_PAY_DEBUG_NOT_SUPPORTED]: {
     title: "Debug build not supported",
@@ -26,7 +26,7 @@ const COPY: Record<string, TerminalErrorCopy> = {
   },
   [ErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE]: {
     title: "Device not supported",
-    message: `This device can't accept ${tapToPay} payments. It needs an NFC sensor, Google Mobile Services, and a recent security update.`,
+    message: `This device can't accept ${tapToPay} payments. It needs a working NFC sensor and Google Mobile Services with the Play Store installed.`,
   },
   [ErrorCode.TAP_TO_PAY_UNSUPPORTED_ANDROID_VERSION]: {
     title: "Android version too old",
@@ -37,8 +37,8 @@ const COPY: Record<string, TerminalErrorCopy> = {
     message: `${tapToPay} isn't supported on this device's processor.`,
   },
   [ErrorCode.TAP_TO_PAY_DEVICE_TAMPERED]: {
-    title: "Device not secure",
-    message: `${tapToPay} can't run on a rooted device or one with an unlocked bootloader.`,
+    title: "Device couldn't be verified",
+    message: `Stripe couldn't verify this device's security, so ${tapToPay} is unavailable. The usual causes are a security update older than 12 months, a device that isn't Google Mobile Services certified, or an unlocked bootloader.`,
   },
   [ErrorCode.TAP_TO_PAY_NFC_DISABLED]: {
     title: "Turn on NFC",
@@ -86,7 +86,12 @@ const COPY: Record<string, TerminalErrorCopy> = {
   [ErrorCode.CONNECTION_TOKEN_PROVIDER_ERROR]: {
     title: "Couldn't authenticate",
     message:
-      "HCB couldn't get permission from Stripe to take this payment. Check your connection, or sign out and back in.",
+      "HCB couldn't get permission from Stripe to take this payment. Check your internet connection and try again.",
+  },
+  [ErrorCode.STRIPE_API_ERROR]: {
+    title: "Stripe rejected the request",
+    message:
+      "Stripe couldn't start this payment. Go back and start the donation again.",
   },
   [ErrorCode.SESSION_EXPIRED]: {
     title: "Session expired",

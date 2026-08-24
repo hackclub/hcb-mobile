@@ -177,10 +177,6 @@ export default function Layout() {
 
   useEffect(() => {
     resetStripeTerminalInitialization();
-    setTokenFetchAttempts(0);
-    setLastTokenFetch(0);
-    setCachedToken(null);
-    setTokenExpiry(0);
   }, []);
 
   useEffect(() => {
@@ -193,87 +189,69 @@ export default function Layout() {
     );
   }, []);
 
-  const [lastTokenFetch, setLastTokenFetch] = useState<number>(0);
-  const [tokenFetchAttempts, setTokenFetchAttempts] = useState<number>(0);
-  const [cachedToken, setCachedToken] = useState<string | null>(null);
-  const [tokenExpiry, setTokenExpiry] = useState<number>(0);
-  const TOKEN_FETCH_COOLDOWN = 5000;
-  const MAX_TOKEN_FETCH_ATTEMPTS = 3;
-  const TOKEN_CACHE_DURATION = 10 * 60 * 1000;
+  const inFlightTokenRequest = useRef<Promise<string> | null>(null);
+  const recentTokenFetches = useRef<number[]>([]);
+  const TOKEN_FETCH_WINDOW = 60 * 1000;
+  const MAX_TOKEN_FETCHES_PER_WINDOW = 20;
 
   const fetchTokenProvider = async (): Promise<string> => {
-    const now = Date.now();
-
-    if (cachedToken && now < tokenExpiry) {
-      return cachedToken;
-    }
-
     if (!tokens?.accessToken) {
       return "";
     }
 
-    if (now - lastTokenFetch < TOKEN_FETCH_COOLDOWN) {
-      const waitTime = Math.ceil(
-        (TOKEN_FETCH_COOLDOWN - (now - lastTokenFetch)) / 1000,
-      );
+    if (inFlightTokenRequest.current) {
+      return await inFlightTokenRequest.current;
+    }
+
+    const now = Date.now();
+    recentTokenFetches.current = recentTokenFetches.current.filter(
+      (at) => now - at < TOKEN_FETCH_WINDOW,
+    );
+
+    if (recentTokenFetches.current.length >= MAX_TOKEN_FETCHES_PER_WINDOW) {
+      console.error("Stripe Terminal connection token request loop detected", {
+        context: { fetches: recentTokenFetches.current.length },
+      });
       throw new Error(
-        `Rate limited: Please wait ${waitTime} seconds before retrying`,
+        "Too many connection token requests. Please wait a moment and try again.",
       );
     }
 
-    if (tokenFetchAttempts >= MAX_TOKEN_FETCH_ATTEMPTS) {
-      console.error(
-        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded`,
-      );
-      setTimeout(() => {
-        setTokenFetchAttempts(0);
-        setLastTokenFetch(0);
-      }, 60000);
-      throw new Error(
-        `Maximum token fetch attempts (${MAX_TOKEN_FETCH_ATTEMPTS}) exceeded. Please wait before retrying.`,
-      );
-    }
+    recentTokenFetches.current.push(now);
 
-    try {
-      setLastTokenFetch(now);
-      setTokenFetchAttempts((prev) => prev + 1);
-
-      const token = (await hcb
-        .get("stripe_terminal_connection_token")
-        .json()) as {
-        terminal_connection_token: {
-          secret: string;
+    const request = (async () => {
+      try {
+        const token = (await hcb
+          .get("stripe_terminal_connection_token")
+          .json()) as {
+          terminal_connection_token: {
+            secret: string;
+          };
         };
-      };
 
-      const newToken = token.terminal_connection_token.secret;
-      const newExpiry = now + TOKEN_CACHE_DURATION;
+        return token.terminal_connection_token.secret;
+      } catch (error) {
+        console.error("Stripe Terminal connection token fetch failed", error);
 
-      setCachedToken(newToken);
-      setTokenExpiry(newExpiry);
-      setTokenFetchAttempts(0);
+        if (
+          error &&
+          typeof error === "object" &&
+          "status" in error &&
+          error.status === 429
+        ) {
+          throw new Error(
+            "HCB is rate limiting connection token requests. Please wait a moment and try again.",
+          );
+        }
 
-      return newToken;
-    } catch (error) {
-      console.error("Token fetch failed:", error);
-
-      if (
-        error &&
-        typeof error === "object" &&
-        "status" in error &&
-        error.status === 429
-      ) {
-        const backoffTime = Math.min(
-          TOKEN_FETCH_COOLDOWN * Math.pow(2, tokenFetchAttempts),
-          30000,
-        );
-        throw new Error(
-          `Rate limited (429). Please wait ${Math.ceil(backoffTime / 1000)} seconds before retrying.`,
-        );
+        throw error;
+      } finally {
+        inFlightTokenRequest.current = null;
       }
+    })();
 
-      throw error;
-    }
+    inFlightTokenRequest.current = request;
+    return await request;
   };
 
   useEffect(() => {
