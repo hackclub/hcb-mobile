@@ -23,6 +23,7 @@ import {
 import StyledButton from "@/components/Button";
 import { Text } from "@/components/Text";
 import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
+import { TerminalErrorCopy } from "@/lib/stripeTerminalErrors";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
 
@@ -194,6 +195,7 @@ export default function Page() {
     "ready" | "loading" | "success" | "error"
   >("ready");
   const [showQR, setShowQR] = useState(false);
+  const [failure, setFailure] = useState<TerminalErrorCopy | null>(null);
   const theme = useTheme();
   const isDark = useIsDark();
   const navigation = useNavigation();
@@ -204,10 +206,11 @@ export default function Page() {
   const handlePayment = async () => {
     if (!collectPayment) return;
     setStatus("loading");
-    const success = await collectPayment();
-    setStatus(success ? "success" : "error");
+    const result = await collectPayment();
+    setFailure(result.success ? null : (result.error ?? null));
+    setStatus(result.success ? "success" : "error");
     Haptics.notificationAsync(
-      success
+      result.success
         ? Haptics.NotificationFeedbackType.Success
         : Haptics.NotificationFeedbackType.Error,
     );
@@ -357,9 +360,10 @@ export default function Page() {
                       color: theme.colors.text,
                       marginBottom: 8,
                       textAlign: "center",
+                      paddingHorizontal: 24,
                     }}
                   >
-                    Payment Failed
+                    {failure?.title || "Payment Failed"}
                   </Text>
                   <Text
                     style={{
@@ -371,8 +375,8 @@ export default function Page() {
                       lineHeight: 22,
                     }}
                   >
-                    The payment couldn't be processed. Please try again or use
-                    the QR code instead.
+                    {failure?.message ||
+                      "The payment couldn't be processed. Please try again or use the QR code instead."}
                   </Text>
                 </>
               )}

@@ -36,7 +36,11 @@ import {
 import { Text } from "@/components/Text";
 import { parseApiError, showAlert } from "@/lib/alertUtils";
 import useClient from "@/lib/client";
-import { setPaymentData } from "@/lib/paymentStore";
+import { CollectPaymentResult, setPaymentData } from "@/lib/paymentStore";
+import {
+  describeTerminalError,
+  TerminalErrorLike,
+} from "@/lib/stripeTerminalErrors";
 import Organization from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useLocation } from "@/lib/useLocation";
@@ -251,12 +255,17 @@ export default function Page() {
           return true;
         }
         console.error("connectReader error", error, {
-          context: { orgId: id, action: "connect_reader" },
+          context: {
+            orgId: id,
+            action: "connect_reader",
+            errorCode: (error as TerminalErrorLike).code,
+          },
         });
-        showAlert(
-          "Connection Error",
-          "Failed to connect to Tap to Pay reader. Please try again.",
-        );
+        const copy = describeTerminalError(error as TerminalErrorLike, {
+          title: "Connection Error",
+          message: "Failed to connect to Tap to Pay reader. Please try again.",
+        });
+        showAlert(copy.title, copy.message);
         return false;
       }
 
@@ -271,12 +280,17 @@ export default function Page() {
         return true;
       }
       console.error("connectReader error", error, {
-        context: { orgId: id, action: "connect_reader" },
+        context: {
+          orgId: id,
+          action: "connect_reader",
+          errorCode: (error as TerminalErrorLike).code,
+        },
       });
-      showAlert(
-        "Connection Error",
-        "Failed to connect to Tap to Pay reader. Please try again.",
-      );
+      const copy = describeTerminalError(error as TerminalErrorLike, {
+        title: "Connection Error",
+        message: "Failed to connect to Tap to Pay reader. Please try again.",
+      });
+      showAlert(copy.title, copy.message);
       return false;
     }
   }
@@ -336,10 +350,9 @@ export default function Page() {
         return false;
       }
 
-      if (
-        (readers.error as { code?: string } | undefined)?.code ===
-        "AlreadyConnectedToReader"
-      ) {
+      const discoveryError = readers.error as TerminalErrorLike | undefined;
+
+      if (discoveryError?.code === "AlreadyConnectedToReader") {
         return true;
       }
 
@@ -348,11 +361,19 @@ export default function Page() {
         return await connectReader(readerRef.current);
       }
 
-      console.error("No reader found", readers);
-      showAlert(
-        "No reader found",
-        "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
-      );
+      console.error("No reader found", readers, {
+        context: {
+          orgId: id,
+          action: "discover_readers",
+          errorCode: discoveryError?.code,
+        },
+      });
+      const copy = describeTerminalError(discoveryError, {
+        title: "No reader found",
+        message:
+          "No Tap to Pay reader was found. Please make sure your device supports Tap to Pay and try again.",
+      });
+      showAlert(copy.title, copy.message);
       return false;
     } finally {
       setIsConnectingReader(false);
@@ -384,10 +405,22 @@ export default function Page() {
     }
   };
 
+  function paymentFailure(
+    error: unknown,
+    fallbackMessage: string,
+  ): CollectPaymentResult {
+    return {
+      success: false,
+      error: describeTerminalError(error as TerminalErrorLike, {
+        title: "Payment Failed",
+        message: fallbackMessage,
+      }),
+    };
+  }
+
   async function collectPayment(
     localPayment: PaymentIntent.Type,
-  ): Promise<boolean> {
-    let output: boolean;
+  ): Promise<CollectPaymentResult> {
     try {
       if (!collectPaymentMethod) {
         console.error(
@@ -397,7 +430,10 @@ export default function Page() {
             context: { orgId: id, action: "collect_payment" },
           },
         );
-        return false;
+        return paymentFailure(
+          null,
+          "The payment system isn't ready. Go back and start the donation again.",
+        );
       }
 
       const { error } = await collectPaymentMethod({
@@ -405,22 +441,36 @@ export default function Page() {
       });
       if (error) {
         console.error("collectPaymentMethod error", error, {
-          context: { orgId: id, action: "collect_payment" },
+          context: {
+            orgId: id,
+            action: "collect_payment",
+            errorCode: (error as TerminalErrorLike).code,
+          },
         });
-        return false;
+        return paymentFailure(
+          error,
+          "The card couldn't be read. Please try again or use the QR code instead.",
+        );
       }
-      output = (await confirmPayment(localPayment)) ?? false;
+      return await confirmPayment(localPayment);
     } catch (error) {
       console.error("collectPayment error", error, {
-        context: { orgId: id, action: "collect_payment" },
+        context: {
+          orgId: id,
+          action: "collect_payment",
+          errorCode: (error as TerminalErrorLike).code,
+        },
       });
-      output = false;
+      return paymentFailure(
+        error,
+        "The payment couldn't be processed. Please try again or use the QR code instead.",
+      );
     }
-    return output;
   }
 
-  async function confirmPayment(localPayment: PaymentIntent.Type) {
-    let success;
+  async function confirmPayment(
+    localPayment: PaymentIntent.Type,
+  ): Promise<CollectPaymentResult> {
     try {
       if (!confirmPaymentIntent) {
         console.error(
@@ -430,23 +480,42 @@ export default function Page() {
             context: { orgId: id, action: "confirm_payment" },
           },
         );
-        return false;
+        return paymentFailure(
+          null,
+          "The payment system isn't ready. Go back and start the donation again.",
+        );
       }
 
       const { error } = await confirmPaymentIntent({
         paymentIntent: localPayment,
       });
       if (error) {
-        return;
+        console.error("confirmPaymentIntent error", error, {
+          context: {
+            orgId: id,
+            action: "confirm_payment",
+            errorCode: (error as TerminalErrorLike).code,
+          },
+        });
+        return paymentFailure(
+          error,
+          "The payment couldn't be completed. Please try again or use the QR code instead.",
+        );
       }
-      success = true;
+      return { success: true };
     } catch (error) {
       console.error("confirmPayment error", error, {
-        context: { orgId: id, action: "confirm_payment" },
+        context: {
+          orgId: id,
+          action: "confirm_payment",
+          errorCode: (error as TerminalErrorLike).code,
+        },
       });
-      success = false;
+      return paymentFailure(
+        error,
+        "The payment couldn't be completed. Please try again or use the QR code instead.",
+      );
     }
-    return success;
   }
 
   async function paymentIntent({ donation_id }: { donation_id: string }) {
@@ -508,8 +577,8 @@ export default function Page() {
       setPaymentData({
         paymentIntent: mockPayment,
         collectPayment: async () => {
-          return new Promise<boolean>((resolve) =>
-            setTimeout(() => resolve(true), 2000),
+          return new Promise<CollectPaymentResult>((resolve) =>
+            setTimeout(() => resolve({ success: true }), 2000),
           );
         },
         name: name || "Dev Test User",
