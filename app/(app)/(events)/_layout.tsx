@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
-import { useContext, useEffect } from "react";
+import { ComponentProps, useContext, useEffect } from "react";
 import { Pressable } from "react-native";
 
 import AuthContext from "@/lib/auth/auth";
@@ -13,6 +13,22 @@ import AuthContext from "@/lib/auth/auth";
 // has to be set explicitly.
 export const unstable_settings = {
   anchor: "index",
+};
+
+const MANAGE_GRANT_OPTIONS: ComponentProps<typeof Stack.Screen>["options"] = {
+  presentation: "formSheet",
+  title: "Manage Grant",
+  headerShown: true,
+  headerTransparent: false,
+  headerBlurEffect: "systemMaterial",
+  sheetAllowedDetents: [0.75, 1.0],
+  sheetGrabberVisible: true,
+  sheetCornerRadius: 20,
+  headerRight: () => (
+    <Pressable onPress={() => router.back()} hitSlop={8}>
+      <Ionicons name="close" size={28} color="#8e8e93" />
+    </Pressable>
+  ),
 };
 
 function AuthRedirect() {
@@ -304,15 +320,26 @@ export default function Layout() {
           options={{ title: "Card grant" }}
         />
         <Stack.Screen
-          name="card-grants/[id]"
+          name="card-grants/[id]/index"
           options={{ title: "Grant Card" }}
+        />
+        <Stack.Screen
+          name="card-grants/[id]/manage"
+          options={MANAGE_GRANT_OPTIONS}
         />
         <Stack.Screen
           name="invitation/[id]"
           options={{ title: "Invitation" }}
         />
         <Stack.Screen name="invites/[id]" options={{ title: "Invitation" }} />
-        <Stack.Screen name="grants/[id]" options={{ title: "Grant Card" }} />
+        <Stack.Screen
+          name="grants/[id]/index"
+          options={{ title: "Grant Card" }}
+        />
+        <Stack.Screen
+          name="grants/[id]/manage"
+          options={MANAGE_GRANT_OPTIONS}
+        />
         <Stack.Screen name="stripe_cards/[id]" options={{ title: "" }} />
       </Stack>
     </>
