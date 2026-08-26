@@ -73,6 +73,11 @@ export default {
               host: "hcb.hackclub.com",
               pathPrefix: "/stripe_cards/",
             },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/donations/start/",
+            },
           ],
           category: ["BROWSABLE", "DEFAULT"],
         },

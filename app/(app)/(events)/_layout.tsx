@@ -237,6 +237,11 @@ export default function Layout() {
           name="[id]/donations/new"
           options={{ title: "New Donation", headerTransparent: false }}
         />
+        {/* Deep-link target for public /donations/start/<slug> links. */}
+        <Stack.Screen
+          name="donations/start/[slug]"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="[id]/donations/process"
           options={{ presentation: "modal", title: "Process Donation" }}

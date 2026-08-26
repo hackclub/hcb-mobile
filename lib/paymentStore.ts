@@ -13,6 +13,8 @@ export type PaymentData = {
   name: string;
   email: string;
   slug: string;
+  message?: string;
+  receivingGoods?: boolean;
 };
 
 let pendingPayment: PaymentData | null = null;
