@@ -7,6 +7,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { Image, ImageBackground } from "expo-image";
 import * as Linking from "expo-linking";
+import { ObserveInteractiveMarker } from "expo-observe";
 import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import * as WebBrowser from "expo-web-browser";
@@ -295,6 +296,7 @@ export default function Login() {
       }
       style={{ flex: 1 }}
     >
+      <ObserveInteractiveMarker />
       <SafeAreaView style={{ flex: 1, flexDirection: "column" }}>
         <View
           style={{

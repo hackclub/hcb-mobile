@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ObserveInteractiveMarker } from "expo-observe";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -234,6 +235,7 @@ export default function Page() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      <ObserveInteractiveMarker params={{ offline: !isOnline }} />
       <View
         style={{
           paddingHorizontal: 20,

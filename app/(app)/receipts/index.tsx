@@ -3,6 +3,7 @@ import { FlashList } from "@shopify/flash-list";
 import Icon from "@thedev132/hackclub-icons-rn";
 import { formatDistanceToNowStrict, parseISO } from "date-fns";
 import * as ImagePicker from "expo-image-picker";
+import { ObserveInteractiveMarker } from "expo-observe";
 import { router } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -559,6 +560,12 @@ export default function Page() {
 
   return (
     <>
+      <ObserveInteractiveMarker
+        params={{
+          receiptCount: receipts?.length ?? 0,
+          missingReceiptCount: groupedTransactions.length,
+        }}
+      />
       <FlashList
         data={listData}
         renderItem={renderItem}

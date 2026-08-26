@@ -1,6 +1,7 @@
 import { MenuView } from "@expo/ui/community/menu";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ObserveInteractiveMarker } from "expo-observe";
 import { router, useNavigation } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
@@ -333,42 +334,50 @@ export default function Page() {
   }
 
   if (filteredCards.length === 0) {
-    return <NoCardsEmptyState onOrderCard={handleOrderCard} />;
+    return (
+      <>
+        <ObserveInteractiveMarker params={{ cardCount: 0 }} />
+        <NoCardsEmptyState onOrderCard={handleOrderCard} />
+      </>
+    );
   }
 
   return (
-    <ReorderableList
-      data={filteredCards}
-      keyExtractor={(item, index) => item?.id ?? `card-${index}`}
-      onReorder={handleReorder}
-      getItemLayout={getItemLayout}
-      initialNumToRender={3}
-      maxToRenderPerBatch={4}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingTop: headerInset,
-      }}
-      panGesture={panGesture}
-      renderItem={renderItem}
-      ListFooterComponent={
-        sortedCards.length > 2 ? (
-          <Text
-            style={{
-              color: palette.muted,
-              textAlign: "center",
-              marginTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            Drag to reorder cards
-          </Text>
-        ) : null
-      }
-    />
+    <>
+      <ObserveInteractiveMarker params={{ cardCount: filteredCards.length }} />
+      <ReorderableList
+        data={filteredCards}
+        keyExtractor={(item, index) => item?.id ?? `card-${index}`}
+        onReorder={handleReorder}
+        getItemLayout={getItemLayout}
+        initialNumToRender={3}
+        maxToRenderPerBatch={4}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: headerInset,
+        }}
+        panGesture={panGesture}
+        renderItem={renderItem}
+        ListFooterComponent={
+          sortedCards.length > 2 ? (
+            <Text
+              style={{
+                color: palette.muted,
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              Drag to reorder cards
+            </Text>
+          ) : null
+        }
+      />
+    </>
   );
 }

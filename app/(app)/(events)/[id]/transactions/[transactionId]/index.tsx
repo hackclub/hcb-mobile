@@ -1,3 +1,4 @@
+import { ObserveInteractiveMarker } from "expo-observe";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -181,6 +182,9 @@ export default function TransactionPage({
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "position" : undefined}
     >
+      <ObserveInteractiveMarker
+        params={{ transactionType: transaction.code }}
+      />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{

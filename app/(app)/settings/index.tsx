@@ -8,6 +8,7 @@ import { revokeAsync, type DiscoveryDocument } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as LocalAuthentication from "expo-local-authentication";
+import { ObserveInteractiveMarker } from "expo-observe";
 import { router } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import * as StoreReview from "expo-store-review";
@@ -253,6 +254,7 @@ export default function SettingsPage() {
       contentContainerStyle={{ paddingBottom: 40, paddingTop: headerInset }}
       style={{ backgroundColor: colors.background }}
     >
+      <ObserveInteractiveMarker />
       <View style={{ padding: 20, paddingTop: 0 }}>
         <View
           style={{

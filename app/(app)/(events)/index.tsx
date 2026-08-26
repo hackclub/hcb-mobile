@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { ObserveInteractiveMarker } from "expo-observe";
 import { router } from "expo-router";
 import { useFocusEffect, useTheme } from "expo-router/react-navigation";
 import { useShareIntentContext } from "expo-share-intent";
@@ -390,6 +391,7 @@ export default function App() {
   if (error && !organizations?.length) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ObserveInteractiveMarker params={{ offline: true }} />
         <Ionicons
           name="cloud-offline-outline"
           color={palette.muted}
@@ -408,35 +410,38 @@ export default function App() {
   }
 
   return (
-    <ReorderableList
-      keyExtractor={(item, index) => item?.id ?? `org-${index}`}
-      onReorder={({ from, to }) => {
-        if (moveOrg(from, to)) {
-          Haptics.selectionAsync();
+    <>
+      <ObserveInteractiveMarker params={{ orgCount }} />
+      <ReorderableList
+        keyExtractor={(item, index) => item?.id ?? `org-${index}`}
+        onReorder={({ from, to }) => {
+          if (moveOrg(from, to)) {
+            Haptics.selectionAsync();
+          }
+        }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 20,
+          paddingTop: headerInset,
+        }}
+        contentInsetAdjustmentBehavior="automatic"
+        data={sortedOrgs}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            enabled={refreshEnabled}
+          />
         }
-      }}
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-        paddingTop: headerInset,
-      }}
-      contentInsetAdjustmentBehavior="automatic"
-      data={sortedOrgs}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          enabled={refreshEnabled}
-        />
-      }
-      panGesture={panGesture}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      ListEmptyComponent={NoOrganizationsEmptyState}
-      ListHeaderComponent={listHeader}
-      renderItem={renderItem}
-      ListFooterComponent={listFooter}
-      ItemSeparatorComponent={ItemSeparator}
-    />
+        panGesture={panGesture}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        ListEmptyComponent={NoOrganizationsEmptyState}
+        ListHeaderComponent={listHeader}
+        renderItem={renderItem}
+        ListFooterComponent={listFooter}
+        ItemSeparatorComponent={ItemSeparator}
+      />
+    </>
   );
 }

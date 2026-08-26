@@ -14,6 +14,7 @@ import * as Sentry from "@sentry/react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as BackgroundTask from "expo-background-task";
 import { useFonts } from "expo-font";
+import { ObserveRoot } from "expo-observe";
 import { router, Stack, useSegments } from "expo-router";
 import { ThemeProvider as NavThemeProvider } from "expo-router/react-navigation";
 import { ShareIntentProvider as ExpoShareIntentProvider } from "expo-share-intent";
@@ -35,6 +36,7 @@ import AuthContext from "@/lib/auth/auth";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import log from "@/lib/log";
 import { installNavigationGuard } from "@/lib/navigationGuard";
+import { initObserve } from "@/lib/observe";
 import AppSWRConfig from "@/lib/providers/AppSWRConfig";
 import { CacheProvider, useCache } from "@/lib/providers/cacheProvider";
 import { LinkingProvider } from "@/lib/providers/LinkingContext";
@@ -54,6 +56,7 @@ export const ReadyContext = createContext<
 >(null);
 
 initSentry();
+initObserve();
 
 export { routingInstrumentation };
 
@@ -266,4 +269,4 @@ export function ErrorBoundary({
   );
 }
 
-export default Sentry.wrap(Layout);
+export default ObserveRoot.wrap(Sentry.wrap(Layout));

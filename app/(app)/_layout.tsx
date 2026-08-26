@@ -26,6 +26,7 @@ import useSWR from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
+import ObserveUserBridge from "@/components/core/ObserveUserBridge";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
 import AuthContext from "@/lib/auth/auth";
@@ -508,6 +509,7 @@ export default function Layout() {
               <StatusBar style={isDark ? "light" : "dark"} />
 
               <SentryUserBridge />
+              <ObserveUserBridge />
               <UserChangeDetector />
               <ActionSheetProvider>
                 <ThemeProvider value={navTheme}>

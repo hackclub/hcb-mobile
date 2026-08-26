@@ -7,5 +7,7 @@ declare namespace NodeJS {
     EXPO_PUBLIC_SENTRY_DSN: string;
     /** Set to "1" to send events from a dev build. Off by default. */
     EXPO_PUBLIC_SENTRY_DEBUG?: string;
+    /** Set to "1" to dispatch EAS Observe metrics from a debug build. Off by default. */
+    EXPO_PUBLIC_OBSERVE_DEBUG?: string;
   }
 }
