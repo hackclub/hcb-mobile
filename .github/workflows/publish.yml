@@ -6,6 +6,9 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
       - name: 🏗 Setup repo
         uses: actions/checkout@v4

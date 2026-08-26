@@ -1,0 +1,24 @@
+diff --git a/node_modules/expo-alternate-app-icons/ios/ExpoAlternateAppIcons.podspec b/node_modules/expo-alternate-app-icons/ios/ExpoAlternateAppIcons.podspec
+index 329b656..d708a93 100644
+--- a/node_modules/expo-alternate-app-icons/ios/ExpoAlternateAppIcons.podspec
++++ b/node_modules/expo-alternate-app-icons/ios/ExpoAlternateAppIcons.podspec
+@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
+   s.license        = package['license']
+   s.author         = package['author']
+   s.homepage       = package['homepage']
+-  s.platform       = :ios, '13.0'
++  s.platform       = :ios, '16.4'
+   s.swift_version  = '5.4'
+   s.source         = { git: 'https://github.com/pchalupa/expo-alternate-app-icons' }
+   s.static_framework = true
+diff --git a/node_modules/expo-alternate-app-icons/src/AlternateAppIconsType.ts b/node_modules/expo-alternate-app-icons/src/AlternateAppIconsType.ts
+index f92e708..1219327 100644
+--- a/node_modules/expo-alternate-app-icons/src/AlternateAppIconsType.ts
++++ b/node_modules/expo-alternate-app-icons/src/AlternateAppIconsType.ts
+@@ -1 +1,4 @@
+-export type AlternateAppIcons = string;
++/**
++ * Auto-generated file. Do not edit manually.
++ */
++export type AlternateAppIcons = 'Default' | 'Cashmoney' | 'Hacknight' | 'Testflight' | 'Admin' | 'AdminDark' | 'Platinum' | 'Hackathongrant' | 'Christmas' | 'FRC' | 'Premium';
+\ No newline at end of file

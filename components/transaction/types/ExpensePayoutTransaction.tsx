@@ -1,0 +1,63 @@
+import { Linking, TouchableHighlight, View, Text } from "react-native";
+
+import { TransactionViewProps } from "./TransactionViewProps";
+
+import ReceiptList from "@/components/transaction/ReceiptList";
+import TransactionDetails, {
+  descriptionDetail,
+} from "@/components/transaction/TransactionDetails";
+import TransactionTitle, {
+  Muted,
+} from "@/components/transaction/TransactionTitle";
+import { TransactionExpensePayout } from "@/lib/types/Transaction";
+import { palette } from "@/styles/theme";
+import { renderDate, renderMoney } from "@/utils/format";
+
+export default function ExpensePayoutTransaction({
+  transaction: { expense_payout, ...transaction },
+  navigation: _navigation,
+  ...props
+}: TransactionViewProps<TransactionExpensePayout>) {
+  return (
+    <View>
+      <TransactionTitle>
+        <Muted>
+          {transaction.memo ? transaction.memo : "Reimbursement expense payout"}{" "}
+          for
+        </Muted>{" "}
+        {renderMoney(Math.abs(transaction.amount_cents))}
+      </TransactionTitle>
+
+      <TransactionDetails
+        details={[
+          {
+            label: "Associated Report",
+            value: (
+              <TouchableHighlight
+                onPress={() =>
+                  Linking.openURL(
+                    `https://hcb.hackclub.com/reimbursement_reports/${expense_payout.report_id.replace("rmr_", "")}`,
+                  )
+                }
+              >
+                <Text
+                  style={{
+                    color: palette.muted,
+                    textAlign: "right",
+                    flex: 1,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  View Report
+                </Text>
+              </TouchableHighlight>
+            ),
+          },
+          descriptionDetail(props.orgId, transaction),
+          { label: "Transaction date", value: renderDate(transaction.date) },
+        ]}
+      />
+      <ReceiptList transaction={transaction} />
+    </View>
+  );
+}

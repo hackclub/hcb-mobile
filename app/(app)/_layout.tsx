@@ -1,0 +1,525 @@
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import Intercom from "@intercom/intercom-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StripeTerminalProvider } from "@stripe/stripe-terminal-react-native";
+import * as Linking from "expo-linking";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as Notifications from "expo-notifications";
+import { usePathname, useRouter } from "expo-router";
+import { ThemeProvider } from "expo-router/react-navigation";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ActivityIndicator, Appearance, Platform, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import useSWR from "swr";
+
+import { SWRCacheProvider } from "../_layout";
+
+import ObserveUserBridge from "@/components/core/ObserveUserBridge";
+import SentryUserBridge from "@/components/core/SentryUserBridge";
+import UserChangeDetector from "@/components/core/UserChangeDetector";
+import AuthContext from "@/lib/auth/auth";
+import { tokenResponseToLegacyTokens } from "@/lib/auth/tokenUtils";
+import useClient from "@/lib/client";
+import { tryIntercom } from "@/lib/intercom";
+import log from "@/lib/log";
+import { useLinkingPref } from "@/lib/providers/LinkingContext";
+import { useShareIntentContext } from "@/lib/providers/ShareIntentContext";
+import { useThemeContext } from "@/lib/providers/ThemeContext";
+import { PaginatedResponse } from "@/lib/types/HcbApiObject";
+import Invitation from "@/lib/types/Invitation";
+import { useIsDark } from "@/lib/useColorScheme";
+import { usePushNotifications } from "@/lib/usePushNotifications";
+import {
+  resetStripeTerminalInitialization,
+  useStripeTerminalInit,
+} from "@/lib/useStripeTerminalInit";
+import { useUpdateMonitor } from "@/lib/useUpdateMonitor";
+import { lightTheme, theme } from "@/styles/theme";
+import { openOnWebsite } from "@/utils/handoff";
+import { trackAppOpen } from "@/utils/storeReview";
+
+function StripeTerminalInitializer({ enabled }: { enabled: boolean }) {
+  useStripeTerminalInit({
+    enabled,
+    enableReaderPreConnection: true,
+    enableSoftwareUpdates: true,
+  });
+
+  return null;
+}
+
+SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+  duration: 500,
+  fade: true,
+});
+
+const ROOT_TABS = ["/", "/cards", "/receipts", "/settings"];
+
+function Navigation() {
+  const { data: missingReceiptData } = useSWR<PaginatedResponse<never>>(
+    "user/transactions/missing_receipt",
+  );
+  const { data: invitations } = useSWR<Invitation[]>(`user/invitations`);
+
+  const { pendingShareIntent, clearPendingShareIntent, hasPendingShareIntent } =
+    useShareIntentContext();
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const isAtRoot = ROOT_TABS.includes(pathname);
+
+  useEffect(() => {
+    if (hasPendingShareIntent && pendingShareIntent) {
+      router.navigate({
+        pathname: "/share-intent",
+        params: {
+          images: JSON.stringify(pendingShareIntent.images),
+          missingTransactions: JSON.stringify(
+            pendingShareIntent.missingTransactions,
+          ),
+        },
+      });
+      clearPendingShareIntent();
+    }
+  }, [
+    hasPendingShareIntent,
+    pendingShareIntent,
+    clearPendingShareIntent,
+    router,
+  ]);
+
+  return (
+    <NativeTabs
+      tintColor="#ec3750"
+      indicatorColor="#ec375026"
+      rippleColor="#ec375033"
+      hidden={!isAtRoot}
+      labelVisibilityMode="labeled"
+    >
+      <NativeTabs.Trigger name="(events)">
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/home.png")}
+          renderingMode="template"
+        />
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        {!!invitations?.length && (
+          <NativeTabs.Trigger.Badge>
+            {invitations.length.toString()}
+          </NativeTabs.Trigger.Badge>
+        )}
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="cards">
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/card.png")}
+          renderingMode="template"
+        />
+        <NativeTabs.Trigger.Label>Cards</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="receipts">
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/payment-docs.png")}
+          renderingMode="template"
+        />
+        <NativeTabs.Trigger.Label>Receipts</NativeTabs.Trigger.Label>
+        {!!missingReceiptData?.total_count && (
+          <NativeTabs.Trigger.Badge>
+            {missingReceiptData.total_count.toString()}
+          </NativeTabs.Trigger.Badge>
+        )}
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon
+          src={require("../../assets/tab-icons/settings.png")}
+          renderingMode="template"
+        />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
+}
+
+export default function Layout() {
+  const { scheme } = useContext(SWRCacheProvider)!;
+  const { tokenResponse, codeVerifier, setTokenResponse } =
+    useContext(AuthContext);
+
+  const tokens = useMemo(
+    () => tokenResponseToLegacyTokens(tokenResponse, codeVerifier),
+    [tokenResponse, codeVerifier],
+  );
+  const { theme: themePref } = useThemeContext();
+  const { enabled: isUniversalLinkingEnabled } = useLinkingPref();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [appIsReady, setAppIsReady] = useState(false);
+  const isDark = useIsDark();
+  const isBiometricAuthInProgress = useRef(false);
+  const lastAuthenticatedToken = useRef<string | null>(null);
+  const hasPassedBiometrics = useRef(false);
+  const hcb = useClient();
+  const { register: registerPushNotifications } = usePushNotifications();
+  const pushNotificationsRegistered = useRef(false);
+
+  useUpdateMonitor();
+
+  useEffect(() => {
+    resetStripeTerminalInitialization();
+  }, []);
+
+  useEffect(() => {
+    const apiKey = Platform.select({
+      ios: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
+      android: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
+    });
+    void tryIntercom("initialize", () =>
+      Intercom.initialize(apiKey, process.env.EXPO_PUBLIC_INTERCOM_APP_ID),
+    );
+  }, []);
+
+  const inFlightTokenRequest = useRef<Promise<string> | null>(null);
+  const recentTokenFetches = useRef<number[]>([]);
+  const TOKEN_FETCH_WINDOW = 60 * 1000;
+  const MAX_TOKEN_FETCHES_PER_WINDOW = 20;
+
+  const fetchTokenProvider = async (): Promise<string> => {
+    if (!tokens?.accessToken) {
+      return "";
+    }
+
+    if (inFlightTokenRequest.current) {
+      return await inFlightTokenRequest.current;
+    }
+
+    const now = Date.now();
+    recentTokenFetches.current = recentTokenFetches.current.filter(
+      (at) => now - at < TOKEN_FETCH_WINDOW,
+    );
+
+    if (recentTokenFetches.current.length >= MAX_TOKEN_FETCHES_PER_WINDOW) {
+      console.error("Stripe Terminal connection token request loop detected", {
+        context: { fetches: recentTokenFetches.current.length },
+      });
+      throw new Error(
+        "Too many connection token requests. Please wait a moment and try again.",
+      );
+    }
+
+    recentTokenFetches.current.push(now);
+
+    const request = (async () => {
+      try {
+        const token = (await hcb
+          .get("stripe_terminal_connection_token")
+          .json()) as {
+          terminal_connection_token: {
+            secret: string;
+          };
+        };
+
+        return token.terminal_connection_token.secret;
+      } catch (error) {
+        console.error("Stripe Terminal connection token fetch failed", error);
+
+        if (
+          error &&
+          typeof error === "object" &&
+          "status" in error &&
+          error.status === 429
+        ) {
+          throw new Error(
+            "HCB is rate limiting connection token requests. Please wait a moment and try again.",
+          );
+        }
+
+        throw error;
+      } finally {
+        inFlightTokenRequest.current = null;
+      }
+    })();
+
+    inFlightTokenRequest.current = request;
+    return await request;
+  };
+
+  useEffect(() => {
+    const setStatusBar = async () => {
+      await SystemUI.setBackgroundColorAsync(isDark ? "#252429" : "#fff");
+      // When themePref is "system", defer to the device's actual color scheme
+      if (themePref === "system") {
+        Appearance.setColorScheme("unspecified");
+      } else {
+        Appearance.setColorScheme(isDark ? "dark" : "light");
+      }
+    };
+    setStatusBar();
+  }, [isDark, themePref]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (tokens?.accessToken) {
+        if (
+          lastAuthenticatedToken.current === tokens.accessToken &&
+          hasPassedBiometrics.current
+        ) {
+          return;
+        }
+
+        // On token refresh, update the reference without re-prompting for biometrics
+        if (
+          lastAuthenticatedToken.current !== null &&
+          hasPassedBiometrics.current
+        ) {
+          lastAuthenticatedToken.current = tokens.accessToken;
+          return;
+        }
+
+        if (__DEV__) {
+          lastAuthenticatedToken.current = tokens.accessToken;
+          setIsAuthenticated(true);
+          setAppIsReady(true);
+          return;
+        }
+        try {
+          const biometricsRequired = await AsyncStorage.getItem(
+            "biometrics_required",
+          );
+
+          if (biometricsRequired !== "true") {
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
+            setIsAuthenticated(true);
+            setAppIsReady(true);
+            return;
+          }
+
+          const hasHardware = await LocalAuthentication.hasHardwareAsync();
+          const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+          if (!hasHardware || !isEnrolled) {
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
+            setIsAuthenticated(true);
+            setAppIsReady(true);
+            return;
+          }
+
+          if (isBiometricAuthInProgress.current) {
+            return;
+          }
+
+          isBiometricAuthInProgress.current = true;
+
+          const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Authenticate to access HCB",
+            cancelLabel: "Cancel",
+            fallbackLabel: "Use passcode",
+            disableDeviceFallback: false,
+          });
+
+          if (result.success) {
+            lastAuthenticatedToken.current = tokens.accessToken;
+            hasPassedBiometrics.current = true;
+            setIsAuthenticated(true);
+          } else {
+            hasPassedBiometrics.current = false;
+            lastAuthenticatedToken.current = null;
+            setIsAuthenticated(false);
+            void setTokenResponse(null);
+          }
+          setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
+        } catch (error) {
+          console.error("Biometric authentication error", error, {
+            context: { action: "biometric_auth" },
+          });
+          hasPassedBiometrics.current = false;
+          lastAuthenticatedToken.current = null;
+          setIsAuthenticated(false);
+          void setTokenResponse(null);
+          setAppIsReady(true);
+          isBiometricAuthInProgress.current = false;
+        }
+      } else {
+        lastAuthenticatedToken.current = null;
+        hasPassedBiometrics.current = false;
+        setIsAuthenticated(true);
+        setAppIsReady(true);
+      }
+    };
+
+    let cancelled = false;
+
+    checkAuth().catch((error) => {
+      if (!cancelled) {
+        console.error("Unexpected error in checkAuth", error);
+        setIsAuthenticated(false);
+        void setTokenResponse(null);
+        setAppIsReady(true);
+        isBiometricAuthInProgress.current = false;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tokenResponse?.accessToken, setTokenResponse, tokens]);
+
+  useEffect(() => {
+    if (
+      tokens?.accessToken &&
+      isAuthenticated &&
+      appIsReady &&
+      !pushNotificationsRegistered.current
+    ) {
+      pushNotificationsRegistered.current = true;
+      registerPushNotifications()
+        .then((result) => {
+          if (result.nativePushToken) {
+            return tryIntercom("sendTokenToIntercom", () =>
+              Intercom.sendTokenToIntercom(result.nativePushToken!),
+            );
+          }
+        })
+        .catch((error) => {
+          log.warn("Push notification registration failed", {
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        });
+    }
+  }, [
+    tokens?.accessToken,
+    isAuthenticated,
+    appIsReady,
+    registerPushNotifications,
+  ]);
+
+  useEffect(() => {
+    if (appIsReady) {
+      trackAppOpen();
+    }
+  }, [appIsReady]);
+
+  useEffect(() => {
+    Intercom.setInAppMessageVisibility("GONE");
+
+    const notifSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const contentData = response.notification.request.content.data as
+          | Record<string, unknown>
+          | undefined;
+        const trigger = response.notification.request.trigger as {
+          payload?: Record<string, unknown>;
+        } | null;
+        const data = contentData || trigger?.payload;
+        if (data?.intercom_push_type) {
+          Intercom.present();
+        }
+      });
+
+    return () => {
+      notifSubscription.remove();
+    };
+  }, []);
+
+  const onLayoutRootView = useCallback(() => {
+    if (appIsReady) {
+      SplashScreen.hide();
+    }
+  }, [appIsReady]);
+
+  // Redirect blocked paths to the browser and honour the universal linking toggle.
+  // Cold-start deep links are handled by Expo Router via app.json linking config.
+  useEffect(() => {
+    if (isUniversalLinkingEnabled === null) return;
+
+    const blockedPaths = [
+      "/branding",
+      "/security",
+      "/roles",
+      "/wrapped",
+      "/mobile",
+      "/applications",
+    ];
+
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      if (!url || url.includes("dataUrl=hcbShareKey")) return;
+
+      try {
+        const parsed = new URL(url);
+        if (blockedPaths.some((p) => parsed.pathname.startsWith(p))) {
+          openOnWebsite(parsed.pathname);
+          return;
+        }
+      } catch {
+        // Ignore URL parse errors
+      }
+
+      if (!isUniversalLinkingEnabled) {
+        Linking.openURL(url).catch((err) =>
+          console.error("Failed to open URL in browser", err, {
+            context: { url },
+          }),
+        );
+      }
+    });
+
+    return () => subscription.remove();
+  }, [isUniversalLinkingEnabled]);
+
+  let navTheme = lightTheme;
+  if (themePref === "dark") navTheme = theme;
+  else if (themePref === "system")
+    navTheme = scheme === "dark" ? theme : lightTheme;
+
+  if (isUniversalLinkingEnabled === null) {
+    return <ActivityIndicator color="white" />;
+  }
+
+  if (tokens?.accessToken && !isAuthenticated) {
+    return <ActivityIndicator color={isDark ? "white" : "black"} />;
+  }
+
+  if (!appIsReady) {
+    return null;
+  }
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView edges={[]} style={{ flex: 1 }}>
+        <StripeTerminalProvider tokenProvider={fetchTokenProvider}>
+          <StripeTerminalInitializer
+            enabled={!!tokens?.accessToken && isAuthenticated}
+          />
+          <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+            <GestureHandlerRootView>
+              <StatusBar style={isDark ? "light" : "dark"} />
+
+              <SentryUserBridge />
+              <ObserveUserBridge />
+              <UserChangeDetector />
+              <ActionSheetProvider>
+                <ThemeProvider value={navTheme}>
+                  <Navigation />
+                </ThemeProvider>
+              </ActionSheetProvider>
+            </GestureHandlerRootView>
+          </View>
+        </StripeTerminalProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}

@@ -1,0 +1,47 @@
+import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
+import { useEffect, useState } from "react";
+
+import { toast } from "./toast";
+
+export function useOffline() {
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      setIsOnline(state.isConnected ?? false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const showOfflineAlert = () => {
+    toast.show({
+      type: "warning",
+      title: "Offline Mode",
+      message: "This action requires an internet connection.",
+    });
+  };
+
+  const withOfflineCheck = <T extends (...args: never[]) => unknown>(
+    action: T,
+    showAlert = true,
+  ): T => {
+    return ((...args: Parameters<T>) => {
+      if (!isOnline) {
+        if (showAlert) {
+          showOfflineAlert();
+        }
+        return;
+      }
+      return action(...args);
+    }) as T;
+  };
+
+  return {
+    isOnline,
+    showOfflineAlert,
+    withOfflineCheck,
+  };
+}
