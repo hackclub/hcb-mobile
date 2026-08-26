@@ -1,0 +1,18 @@
+diff --git a/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift b/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
+index 00ed407..3b6eb97 100644
+--- a/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
++++ b/node_modules/expo-modules-core/ios/Core/SharedObjects/SharedObjectRegistry.swift
+@@ -15,11 +15,11 @@ let sharedObjectIdPropertyName = "__expo_shared_object_id__"
+ /**
+  The registry of shared objects.
+  */
+-public final class SharedObjectRegistry: Sendable {
++public final class SharedObjectRegistry: @unchecked Sendable {
+   /**
+    Weak reference to the app context for the registry.
+    */
+-  private weak let appContext: AppContext?
++  private weak var appContext: AppContext?
+ 
+   // `@unchecked` because `SharedObjectNativeState` isn't `Sendable` (its JSI base class isn't), yet a
+   // value escapes `withLock` whenever `get`/the lookups return it. Access is always serialized through

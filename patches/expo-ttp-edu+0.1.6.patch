@@ -1,0 +1,15 @@
+diff --git a/node_modules/expo-ttp-edu/ios/ExpoTtpEdu.podspec b/node_modules/expo-ttp-edu/ios/ExpoTtpEdu.podspec
+index 0753cee..b866f26 100644
+--- a/node_modules/expo-ttp-edu/ios/ExpoTtpEdu.podspec
++++ b/node_modules/expo-ttp-edu/ios/ExpoTtpEdu.podspec
+@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
+   s.author         = package['author']
+   s.homepage       = package['homepage']
+   s.platforms      = {
+-    :ios => '15.1',
+-    :tvos => '15.1'
++    :ios => '16.4',
++    :tvos => '16.4'
+   }
+   s.swift_version  = '5.4'
+   s.source         = { git: 'https://github.com/thedev132/expo-ttp-edu', tag: "#{s.version}" }

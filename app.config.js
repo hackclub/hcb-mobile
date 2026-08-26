@@ -1,4 +1,4 @@
-import appIcons from "./src/lib/AppIconList";
+import appIcons from "./lib/AppIconList";
 const IS_DEV = false;
 
 export default {
@@ -6,14 +6,13 @@ export default {
     name: IS_DEV ? "HCB (dev)" : "HCB",
     slug: "hcb-mobile",
     owner: "hackclub",
-    version: "1.0.3",
+    version: "1.0.4",
     platforms: ["ios", "android"],
     scheme: "hcb",
     orientation: "portrait",
     icon: "./assets/app-icon.png",
     userInterfaceStyle: "automatic",
     assetBundlePatterns: ["**/*"],
-    newArchEnabled: true,
     ios: {
       icon: "./assets/icons/default.icon",
       supportsTablet: false,
@@ -57,10 +56,24 @@ export default {
         {
           action: "VIEW",
           autoVerify: true,
-          data: {
-            scheme: "https",
-            host: "hcb.hackclub.com",
-          },
+          data: [
+            { scheme: "https", host: "hcb.hackclub.com", pathPrefix: "/hcb/" },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/invites/",
+            },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/grants/",
+            },
+            {
+              scheme: "https",
+              host: "hcb.hackclub.com",
+              pathPrefix: "/stripe_cards/",
+            },
+          ],
           category: ["BROWSABLE", "DEFAULT"],
         },
       ],
@@ -82,6 +95,9 @@ export default {
       url: "https://u.expo.dev/dfc97c77-31b1-4267-896f-9472c87f166c",
     },
     plugins: [
+      "expo-router",
+      ["@stripe/stripe-react-native", {}],
+      "expo-image",
       [
         "expo-image-picker",
         {
@@ -142,6 +158,12 @@ export default {
           url: "https://sentry.io/",
           project: "hcb-mobile",
           organization: "hack-club-hcb",
+          experimental_android: {
+            enableAndroidGradlePlugin: true,
+            uploadNativeSymbols: true,
+            includeNativeSources: true,
+            autoUploadProguardMapping: false,
+          },
         },
       ],
       [
@@ -182,19 +204,13 @@ export default {
             "Allow HCB to use your location for payments.",
         },
       ],
-      [
-        "expo-web-browser",
-        {
-          experimentalLauncherActivity: true,
-        },
-      ],
+      "expo-font",
+      "expo-status-bar",
+      "expo-web-browser",
       "expo-background-task",
       [
         "@intercom/intercom-react-native",
         {
-          // appId: process.env.EXPO_PUBLIC_INTERCOM_APP_ID,
-          // androidApiKey: process.env.EXPO_PUBLIC_INTERCOM_ANDROID_API_KEY,
-          // iosApiKey: process.env.EXPO_PUBLIC_INTERCOM_IOS_API_KEY,
           useManualInit: true,
         },
       ],
