@@ -47,6 +47,11 @@ import { useLocation } from "@/lib/useLocation";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 import { useStripeTerminalInit } from "@/lib/useStripeTerminalInit";
 import { cardBorderColor, palette, radii } from "@/styles/theme";
+import {
+  centsToAmountEntry,
+  DonationPrefill,
+  parseDonationPrefill,
+} from "@/utils/donationLink";
 import { renderMoney } from "@/utils/format";
 import { selectionAsync } from "@/utils/haptics";
 
@@ -55,6 +60,16 @@ const MAX_DONATION_AMOUNT = 9999.99;
 // Comfortably longer than the 10s `waitForReader` poll below, so a slow-but-
 // working discovery still succeeds and only a genuinely wedged SDK trips this.
 const READER_DISCOVERY_TIMEOUT_MS = 20000;
+
+function sanitizePrefill(prefill: DonationPrefill): DonationPrefill {
+  if (
+    prefill.amountCents !== undefined &&
+    prefill.amountCents > MAX_DONATION_AMOUNT * 100
+  ) {
+    return { ...prefill, amountCents: undefined };
+  }
+  return prefill;
+}
 
 function amountToNumber(formatted: string): number {
   const digits = formatted.replace(/\$/g, "");
@@ -66,19 +81,36 @@ function amountToNumber(formatted: string): number {
 const STRIPE_TERMINAL_LOCATION_ID = "tml_FWRkngENcVS5Pd";
 
 export default function Page() {
-  const { id, orgSlug } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     id: string;
-    orgSlug: string;
+    orgSlug?: string;
+    amount?: string;
+    name?: string;
+    email?: string;
+    message?: string;
+    goods?: string;
   }>();
+  const { id, orgSlug } = params;
+  const prefillRef = useRef<DonationPrefill | null>(null);
+  if (prefillRef.current === null) {
+    prefillRef.current = sanitizePrefill(parseDonationPrefill(params));
+  }
+  const prefill = prefillRef.current;
+
   const { colors } = useTheme();
   const hcb = useClient();
   const navigation = useNavigation();
   const { bottom: bottomInset } = useSafeAreaInsets();
-  const [step, setStep] = useState<"amount" | "details">("amount");
-  const [amount, setAmount] = useState("$");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isTaxDeductable, setIsTaxDeductable] = useState(false);
+  const [step, setStep] = useState<"amount" | "details">(
+    prefill.amountCents === undefined ? "amount" : "details",
+  );
+  const [amount, setAmount] = useState(centsToAmountEntry(prefill.amountCents));
+  const [name, setName] = useState(prefill.name ?? "");
+  const [email, setEmail] = useState(prefill.email ?? "");
+  const [message, setMessage] = useState(prefill.message ?? "");
+  const [isReceivingGoods, setIsReceivingGoods] = useState(
+    prefill.receivingGoods ?? false,
+  );
 
   const value = amountToNumber(amount);
 
@@ -388,10 +420,11 @@ export default function Page() {
       }
       const response = await hcb.post(`organizations/${id}/donations`, {
         json: {
-          amount_cents: value * 100,
+          amount_cents: Math.round(value * 100),
           name,
           email,
-          tax_deductable: isTaxDeductable,
+          message,
+          tax_deductible: !isReceivingGoods,
         },
       });
       const data = (await response.json()) as { id: string };
@@ -550,7 +583,9 @@ export default function Page() {
         collectPayment: async () => collectPayment(paymentIntent),
         name,
         email,
-        slug: orgSlug || "",
+        slug: orgSlug || organization?.slug || "",
+        message,
+        receivingGoods: isReceivingGoods,
       });
       router.push({
         pathname: "/[id]/donations/process",
@@ -583,7 +618,9 @@ export default function Page() {
         },
         name: name || "Dev Test User",
         email: email || "dev@example.com",
-        slug: orgSlug || "test-org",
+        slug: orgSlug || organization?.slug || "test-org",
+        message,
+        receivingGoods: isReceivingGoods,
       });
       router.push({
         pathname: "/[id]/donations/process",
@@ -627,6 +664,29 @@ export default function Page() {
     setStep("details");
   };
 
+  // A `/donations/start` link that carries every field is a fully specified
+  // donation, so it collects payment without making the organizer re-tap
+  // through screens they have nothing left to fill in. Anything less than a
+  // complete prefill falls back to the normal flow.
+  const canAutoSubmit =
+    prefill.amountCents !== undefined &&
+    !!prefill.name &&
+    !!prefill.email &&
+    !!prefill.message;
+  const submitDonationRef = useRef(submitDonation);
+  const autoSubmittedRef = useRef(false);
+
+  useEffect(() => {
+    submitDonationRef.current = submitDonation;
+  });
+
+  useEffect(() => {
+    if (!canAutoSubmit || autoSubmittedRef.current) return;
+    if (!isSimulator && (!isStripeInitialized || !organization)) return;
+    autoSubmittedRef.current = true;
+    submitDonationRef.current();
+  }, [canAutoSubmit, isSimulator, isStripeInitialized, organization]);
+
   if (step === "amount") {
     return (
       <View key="amount" style={{ flex: 1 }}>
@@ -650,8 +710,10 @@ export default function Page() {
         setName={setName}
         email={email}
         setEmail={setEmail}
-        isTaxDeductable={isTaxDeductable}
-        setIsTaxDeductable={setIsTaxDeductable}
+        message={message}
+        setMessage={setMessage}
+        isReceivingGoods={isReceivingGoods}
+        setIsReceivingGoods={setIsReceivingGoods}
         bottomInset={bottomInset}
         onEditAmount={() => setStep("amount")}
         onSubmit={submitDonation}
@@ -923,8 +985,10 @@ function DetailsStep({
   setName,
   email,
   setEmail,
-  isTaxDeductable,
-  setIsTaxDeductable,
+  message,
+  setMessage,
+  isReceivingGoods,
+  setIsReceivingGoods,
   bottomInset,
   onEditAmount,
   onSubmit,
@@ -937,8 +1001,10 @@ function DetailsStep({
   setName: Dispatch<SetStateAction<string>>;
   email: string;
   setEmail: Dispatch<SetStateAction<string>>;
-  isTaxDeductable: boolean;
-  setIsTaxDeductable: Dispatch<SetStateAction<boolean>>;
+  message: string;
+  setMessage: Dispatch<SetStateAction<string>>;
+  isReceivingGoods: boolean;
+  setIsReceivingGoods: Dispatch<SetStateAction<boolean>>;
   bottomInset: number;
   onEditAmount: () => void;
   onSubmit: () => void;
@@ -990,11 +1056,21 @@ function DetailsStep({
               autoCapitalize="none"
               autoCorrect={false}
             />
+            <FormField
+              label="Message"
+              optional
+              description="Shown to the organization alongside the donation."
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Two coffees and a bagel"
+              autoCapitalize="sentences"
+              multiline
+            />
             <ToggleField
               label="Receiving goods or services"
               description="Check this if the donor received something of value in exchange for this donation."
-              value={isTaxDeductable}
-              onValueChange={setIsTaxDeductable}
+              value={isReceivingGoods}
+              onValueChange={setIsReceivingGoods}
             />
           </FormSection>
 

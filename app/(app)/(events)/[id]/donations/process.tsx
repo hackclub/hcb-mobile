@@ -26,6 +26,7 @@ import { clearPaymentData, getPaymentData } from "@/lib/paymentStore";
 import { TerminalErrorCopy } from "@/lib/stripeTerminalErrors";
 import { useIsDark } from "@/lib/useColorScheme";
 import { palette } from "@/styles/theme";
+import { buildDonationStartUrl } from "@/utils/donationLink";
 
 function QRCodeCard({
   donationUrl,
@@ -183,12 +184,22 @@ function ActionButton({
 
 export default function Page() {
   const paymentData = getPaymentData();
-  const { payment, collectPayment, name, email, slug } = {
+  const {
+    payment,
+    collectPayment,
+    name,
+    email,
+    slug,
+    message,
+    receivingGoods,
+  } = {
     payment: paymentData?.paymentIntent,
     collectPayment: paymentData?.collectPayment,
     name: paymentData?.name ?? "",
     email: paymentData?.email ?? "",
     slug: paymentData?.slug ?? "",
+    message: paymentData?.message ?? "",
+    receivingGoods: paymentData?.receivingGoods ?? false,
   };
 
   const [status, setStatus] = useState<
@@ -200,7 +211,13 @@ export default function Page() {
   const isDark = useIsDark();
   const navigation = useNavigation();
 
-  const donationUrl = `https://hcb.hackclub.com/donations/start/${slug}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&amount=${payment?.amount}`;
+  const donationUrl = buildDonationStartUrl(slug, {
+    name,
+    email,
+    amountCents: payment?.amount,
+    message,
+    receivingGoods,
+  });
   const donationAmount = `$${((payment?.amount ?? 0) / 100).toFixed(2)}`;
 
   const handlePayment = async () => {
