@@ -1,11 +1,60 @@
+import { Asset } from "expo-asset";
 import {
   useUpdates,
   checkForUpdateAsync,
   fetchUpdateAsync,
   reloadAsync,
+  type ReloadScreenOptions,
 } from "expo-updates";
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, AppStateStatus, Platform } from "react-native";
+
+import { splashBackgroundColor } from "@/styles/theme";
+
+const CRITICAL_RELOAD_DELAY_MS = 2000;
+const ANDROID_SPLASH_LOGO_DP = 288;
+
+const splashModule =
+  Platform.OS === "ios"
+    ? require("../assets/splash-ios.png")
+    : require("../assets/splash-android.png");
+
+let splashUri: Promise<string | undefined> | null = null;
+
+function getSplashUri(): Promise<string | undefined> {
+  splashUri ??= Asset.fromModule(splashModule)
+    .downloadAsync()
+    .then((asset) => asset.localUri ?? asset.uri)
+    .catch(() => undefined);
+  return splashUri;
+}
+
+function reloadScreenOptions(uri: string | undefined): ReloadScreenOptions {
+  if (!uri) {
+    return {
+      backgroundColor: splashBackgroundColor,
+      fade: true,
+      spinner: { enabled: true, color: "#ffffff" },
+    };
+  }
+
+  return {
+    backgroundColor: splashBackgroundColor,
+    fade: true,
+    spinner: { enabled: false },
+    imageFullScreen: false,
+    imageResizeMode: "contain",
+    image:
+      Platform.OS === "ios"
+        ? uri
+        : {
+            url: uri,
+            width: ANDROID_SPLASH_LOGO_DP,
+            height: ANDROID_SPLASH_LOGO_DP,
+            scale: 1,
+          },
+  };
+}
 
 const isUpdateCritical = (
   updatesSystem: ReturnType<typeof useUpdates>,
@@ -24,6 +73,7 @@ export function useUpdateMonitor() {
   const updatesSystem = useUpdates();
   const appState = useRef(AppState.currentState);
   const hasAutoDownloaded = useRef(false);
+  const hasScheduledReload = useRef(false);
 
   const {
     isUpdateAvailable,
@@ -66,21 +116,15 @@ export function useUpdateMonitor() {
 
   const applyUpdate = useCallback(async (): Promise<void> => {
     try {
-      await reloadAsync({
-        reloadScreenOptions: {
-          backgroundColor: "#ec3750",
-          image:
-            Platform.OS === "ios"
-              ? require("../../assets/splash-ios.png")
-              : require("../../assets/splash-android.png"),
-          imageFullScreen: Platform.OS === "ios" ? true : false,
-          imageResizeMode: Platform.OS === "ios" ? "contain" : "cover",
-          spinner: { enabled: false },
-        },
-      });
+      const uri = await getSplashUri();
+      await reloadAsync({ reloadScreenOptions: reloadScreenOptions(uri) });
     } catch (error) {
       console.error("Error applying update:", error);
     }
+  }, []);
+
+  useEffect(() => {
+    getSplashUri();
   }, []);
 
   useEffect(() => {
@@ -113,34 +157,22 @@ export function useUpdateMonitor() {
   }, [checkForUpdate]);
 
   useEffect(() => {
-    if (
-      isCritical &&
-      hasUpdate &&
-      !hasPendingUpdate &&
-      !hasAutoDownloaded.current
-    ) {
-      hasAutoDownloaded.current = true;
-      downloadUpdate();
+    if (!hasUpdate || hasPendingUpdate || hasAutoDownloaded.current) {
+      return;
     }
-  }, [isCritical, hasUpdate, hasPendingUpdate, downloadUpdate]);
+
+    hasAutoDownloaded.current = true;
+    downloadUpdate();
+  }, [hasUpdate, hasPendingUpdate, downloadUpdate]);
 
   useEffect(() => {
-    if (isCritical && hasPendingUpdate) {
-      setTimeout(() => {
-        applyUpdate();
-      }, 2000);
+    if (!isCritical || !hasPendingUpdate || hasScheduledReload.current) {
+      return;
     }
+
+    hasScheduledReload.current = true;
+    const timer = setTimeout(applyUpdate, CRITICAL_RELOAD_DELAY_MS);
+
+    return () => clearTimeout(timer);
   }, [isCritical, hasPendingUpdate, applyUpdate]);
-
-  useEffect(() => {
-    if (
-      hasUpdate &&
-      !isCritical &&
-      !hasPendingUpdate &&
-      !hasAutoDownloaded.current
-    ) {
-      hasAutoDownloaded.current = true;
-      downloadUpdate();
-    }
-  }, [hasUpdate, isCritical, hasPendingUpdate, downloadUpdate]);
 }

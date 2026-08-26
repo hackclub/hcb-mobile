@@ -19,13 +19,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Appearance, Platform, View } from "react-native";
+import { Appearance, Platform, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 
 import { SWRCacheProvider } from "../_layout";
 
+import AppSplash from "@/components/core/AppSplash";
 import ObserveUserBridge from "@/components/core/ObserveUserBridge";
 import SentryUserBridge from "@/components/core/SentryUserBridge";
 import UserChangeDetector from "@/components/core/UserChangeDetector";
@@ -485,16 +486,12 @@ export default function Layout() {
   else if (themePref === "system")
     navTheme = scheme === "dark" ? theme : lightTheme;
 
-  if (isUniversalLinkingEnabled === null) {
-    return <ActivityIndicator color="white" />;
-  }
-
-  if (tokens?.accessToken && !isAuthenticated) {
-    return <ActivityIndicator color={isDark ? "white" : "black"} />;
-  }
-
-  if (!appIsReady) {
-    return null;
+  if (
+    isUniversalLinkingEnabled === null ||
+    (tokens?.accessToken && !isAuthenticated) ||
+    !appIsReady
+  ) {
+    return <AppSplash />;
   }
 
   return (

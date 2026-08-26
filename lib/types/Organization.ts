@@ -1,6 +1,27 @@
 import HcbApiObject from "./HcbApiObject";
 import { OrgUser } from "./User";
 
+export type PlanFeature =
+  | "cards"
+  | "card_grants"
+  | "invoices"
+  | "donations"
+  | "account_number"
+  | "check_deposits"
+  | "transfers"
+  | "promotions"
+  | "google_workspace"
+  | "documentation"
+  | "reimbursements"
+  | "unrestricted_disbursements"
+  | "front_disbursements";
+
+export interface Plan {
+  name: string;
+  fee_percentage: number;
+  features: PlanFeature[];
+}
+
 export default interface Organization extends HcbApiObject<"org"> {
   name: string;
   country: string;
@@ -24,6 +45,7 @@ export default interface Organization extends HcbApiObject<"org"> {
     | "outernet_guild"
     | "grant_recipient"
     | "salary";
+  plan?: Plan;
 }
 
 export interface OrganizationExpanded extends Organization {

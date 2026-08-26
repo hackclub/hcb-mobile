@@ -6,6 +6,7 @@ import { Pressable, ScrollView, View } from "react-native";
 import WiseIcon from "@/components/icons/WiseIcon";
 import { Text } from "@/components/Text";
 import { showAlert } from "@/lib/alertUtils";
+import { useOrganizationPlan } from "@/lib/organization/useOrganizationPlan";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useIsDark } from "@/lib/useColorScheme";
 import { useHeaderInset } from "@/lib/useHeaderInset";
@@ -32,6 +33,8 @@ export default function TransfersPage() {
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
+  const { plan, isLoading: planLoading, hasFeature } = useOrganizationPlan(id);
+  const cardGrantsEnabled = plan ? hasFeature("card_grants") : !planLoading;
 
   const openWiseTransfer = () => {
     if (!organization?.slug) {
@@ -44,7 +47,7 @@ export default function TransfersPage() {
     openOnWebsite(shareUrl.wiseTransfer(organization.slug));
   };
 
-  const options: TransferOption[] = [
+  const allOptions: TransferOption[] = [
     {
       id: "ach",
       title: "ACH transfer",
@@ -114,6 +117,10 @@ export default function TransfersPage() {
         }),
     },
   ];
+
+  const options = allOptions.filter(
+    (option) => option.id !== "grant" || cardGrantsEnabled,
+  );
 
   const iconColor = isDark ? "white" : (themeColors.text as string);
 
@@ -222,7 +229,11 @@ export default function TransfersPage() {
               "Wise: sends money internationally, usually the cheapest option.",
               "Wire transfer: sends money internationally; use when Wise doesn't support the destination.",
               "HCB transfer: moves money to another HCB organization.",
-              "Card grant: lets someone spend directly from a virtual card.",
+              ...(cardGrantsEnabled
+                ? [
+                    "Card grant: lets someone spend directly from a virtual card.",
+                  ]
+                : []),
             ].join("\n\n"),
           )
         }

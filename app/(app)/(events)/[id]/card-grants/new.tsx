@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTheme } from "expo-router/react-navigation";
 import {
   ActivityIndicator,
@@ -8,10 +8,14 @@ import {
   View,
 } from "react-native";
 
+import Button from "@/components/Button";
 import CardGrantScreen from "@/components/organizations/transfer/CardGrant";
+import { Text } from "@/components/Text";
+import { useOrganizationPlan } from "@/lib/organization/useOrganizationPlan";
 import { OrganizationExpanded } from "@/lib/types/Organization";
 import { useHeaderInset } from "@/lib/useHeaderInset";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
+import { palette } from "@/styles/theme";
 
 export default function NewCardGrantPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,8 +24,9 @@ export default function NewCardGrantPage() {
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
+  const { hasFeature, isLoading: planLoading } = useOrganizationPlan(id);
 
-  if (!organization) {
+  if (!organization || planLoading) {
     return (
       <View
         style={{
@@ -32,6 +37,46 @@ export default function NewCardGrantPage() {
         }}
       >
         <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (!hasFeature("card_grants")) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: themeColors.background,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+          gap: 16,
+        }}
+      >
+        <Text
+          style={{
+            color: themeColors.text,
+            fontSize: 20,
+            fontWeight: "700",
+            textAlign: "center",
+          }}
+        >
+          Card grants aren't available
+        </Text>
+        <Text
+          style={{
+            color: palette.muted,
+            fontSize: 15,
+            lineHeight: 22,
+            textAlign: "center",
+          }}
+        >
+          {organization.name}'s plan doesn't include card grants. Contact HCB if
+          you think this is a mistake.
+        </Text>
+        <Button style={{ marginTop: 8 }} onPress={() => router.back()}>
+          Go back
+        </Button>
       </View>
     );
   }

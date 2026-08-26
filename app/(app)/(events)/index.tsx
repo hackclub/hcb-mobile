@@ -19,6 +19,7 @@ import { HomeLoadingSkeleton } from "@/components/organizations/HomeLoadingSkele
 import InvitationCard from "@/components/organizations/InvitationCard";
 import { NoOrganizationsEmptyState } from "@/components/organizations/NoOrganizationsEmptyState";
 import { Text } from "@/components/Text";
+import { organizationPlanKey } from "@/lib/organization/useOrganizationPlan";
 import useReorderedOrgs from "@/lib/organization/useReorderedOrgs";
 import GrantCard from "@/lib/types/GrantCard";
 import Invitation from "@/lib/types/Invitation";
@@ -236,6 +237,7 @@ export default function App() {
 
     organizations.forEach((org) => {
       preload(`organizations/${org.id}`, fetcher!);
+      preload(organizationPlanKey(org.id), fetcher!);
       preload(`organizations/${org.id}/transactions?limit=35`, fetcher!);
       preload(`organizations/${org.id}/balance_by_date`, fetcher!);
     });

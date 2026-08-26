@@ -1,5 +1,7 @@
 import { DarkTheme, DefaultTheme, Theme } from "expo-router/react-navigation";
 
+export const splashBackgroundColor = "#EC3750";
+
 export const palette = {
   primary: "#ec3750",
   background: "#17171d",
