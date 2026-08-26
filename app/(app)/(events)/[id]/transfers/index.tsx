@@ -33,8 +33,8 @@ export default function TransfersPage() {
   const { data: organization } = useOfflineSWR<OrganizationExpanded>(
     `organizations/${id}`,
   );
-  const { hasFeature } = useOrganizationPlan(id);
-  const cardGrantsEnabled = hasFeature("card_grants");
+  const { plan, isLoading: planLoading, hasFeature } = useOrganizationPlan(id);
+  const cardGrantsEnabled = plan ? hasFeature("card_grants") : !planLoading;
 
   const openWiseTransfer = () => {
     if (!organization?.slug) {

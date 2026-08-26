@@ -10,7 +10,7 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { useSWRConfig } from "swr";
+import { preload, useSWRConfig } from "swr";
 
 import ErrorHandoff from "@/components/ErrorHandoff";
 import AccessDenied from "@/components/organizations/AccessDenied";
@@ -26,6 +26,7 @@ import TapToPayBanner from "@/components/organizations/TapToPayBanner";
 import TeamAvatars from "@/components/organizations/TeamAvatars";
 import TransactionWrapper from "@/components/organizations/TransactionWrapper";
 import { ShareHeaderButton } from "@/components/ShareHeaderButton";
+import { organizationPlanKey } from "@/lib/organization/useOrganizationPlan";
 import { OrgPolicy } from "@/lib/policies";
 import { PaginatedResponse } from "@/lib/types/HcbApiObject";
 import Organization, { OrganizationExpanded } from "@/lib/types/Organization";
@@ -157,8 +158,13 @@ export default function Page() {
   }, [organizationError, mutateOrganization]);
 
   const { colors: themeColors } = useTheme();
-  const { mutate } = useSWRConfig();
+  const { mutate, fetcher } = useSWRConfig();
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (!params.id || !fetcher) return;
+    preload(organizationPlanKey(params.id), fetcher);
+  }, [params.id, fetcher]);
 
   const onRefresh = useCallback(async () => {
     if (refreshing) return;

@@ -5,8 +5,8 @@ import {
 } from "@/lib/types/Organization";
 import { useOfflineSWR } from "@/lib/useOfflineSWR";
 
-export function organizationPlanKey(id: string | undefined) {
-  return id ? `organizations/${id}?expand=plan` : null;
+export function organizationPlanKey(id: string) {
+  return `organizations/${id}?expand=plan`;
 }
 
 export function planHasFeature(
@@ -19,7 +19,7 @@ export function planHasFeature(
 
 export function useOrganizationPlan(id: string | undefined) {
   const { data, isLoading, error } = useOfflineSWR<OrganizationExpanded>(
-    organizationPlanKey(id),
+    id ? organizationPlanKey(id) : null,
   );
 
   const plan = data?.plan;
