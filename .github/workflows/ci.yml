@@ -16,9 +16,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.x
       - run: npm install
       - name: Run ESLint
         run: npm run lint
@@ -29,9 +29,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.x
       - run: npm install
       - name: Run Prettier
         run: npm run format:check
@@ -42,9 +42,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22.x
       - run: npm install
       - name: Run TSC
         run: npm run ts:check
