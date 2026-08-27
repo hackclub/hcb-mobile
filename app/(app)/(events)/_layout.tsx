@@ -132,7 +132,11 @@ export default function Layout() {
         />
         {/* Deep-link target for shared /hcb/<id> transaction permalinks. */}
         <Stack.Screen
-          name="hcb/[transactionId]"
+          name="hcb/[transactionId]/index"
+          options={{ title: "Transaction" }}
+        />
+        <Stack.Screen
+          name="hcb/[transactionId]/attach_receipt"
           options={{ title: "Transaction" }}
         />
         <Stack.Screen
