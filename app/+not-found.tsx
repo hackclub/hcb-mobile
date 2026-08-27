@@ -1,16 +1,16 @@
-import { router, usePathname } from "expo-router";
+import { router, useUnstableGlobalHref } from "expo-router";
 import { useEffect } from "react";
 
 import { openOnWebsite } from "@/utils/handoff";
 
 export default function NotFound() {
-  const pathname = usePathname();
+  const href = useUnstableGlobalHref();
 
   useEffect(() => {
-    openOnWebsite(pathname);
+    openOnWebsite(href);
     if (router.canGoBack()) router.back();
     else router.replace("/");
-  }, [pathname]);
+  }, [href]);
 
   return null;
 }
