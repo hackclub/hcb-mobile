@@ -1,9 +1,13 @@
+import Constants from "expo-constants";
 import ky, { type KyInstance } from "ky";
+import { Platform } from "react-native";
 
 import { recordApiFailure } from "./sentry/apiTelemetry";
 import { tokenManager, UnauthenticatedError } from "./tokenManager";
 
 let clientInstance: KyInstance | null = null;
+
+const userAgent = `HCB-Mobile/${Constants.expoConfig?.version ?? "unknown"} (${Platform.OS})`;
 
 // Expo SDK 56's winter fetch doesn't support RN's { uri, name, type } FormData file parts.
 // For FormData requests we use XHR directly (which goes through RN's native networking layer)
@@ -66,7 +70,7 @@ export function getClient(): KyInstance {
         statusCodes: [408, 413, 429, 500, 502, 503, 504],
       },
       headers: {
-        "User-Agent": "HCB-Mobile",
+        "User-Agent": userAgent,
       },
       timeout: 30000,
       fetch: (input, init) => {
