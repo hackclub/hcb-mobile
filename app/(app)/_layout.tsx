@@ -462,7 +462,7 @@ export default function Layout() {
       try {
         const parsed = new URL(url);
         if (blockedPaths.some((p) => parsed.pathname.startsWith(p))) {
-          openOnWebsite(parsed.pathname);
+          openOnWebsite(parsed.pathname + parsed.search + parsed.hash);
           return;
         }
       } catch {
