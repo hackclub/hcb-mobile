@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   ConnectTapToPayParams,
   PaymentIntent,
-  PaymentMethodType,
   Reader,
   useStripeTerminal,
 } from "@stripe/stripe-terminal-react-native";
@@ -162,7 +161,7 @@ export default function Page() {
   const [isSubmittingDonation, setIsSubmittingDonation] = useState(false);
 
   const {
-    createPaymentIntent,
+    retrievePaymentIntent,
     collectPaymentMethod,
     confirmPaymentIntent,
     connectedReader,
@@ -553,21 +552,14 @@ export default function Page() {
 
   async function paymentIntent({ donation_id }: { donation_id: string }) {
     try {
-      const { error, paymentIntent } = await createPaymentIntent({
-        amount: Number((value * 100).toFixed()),
-        currency: "usd",
-        paymentMethodTypes: [PaymentMethodType.CardPresent],
-        offlineBehavior: "prefer_online",
-        captureMethod: "automatic",
-        metadata: {
-          donation_id,
-          donation: "true",
-          event_id: id,
-        },
-        statementDescriptor: `HCB DONATION`.substring(0, 22),
-      });
+      const intent = (await hcb
+        .post(`organizations/${id}/donations/${donation_id}/payment_intent`)
+        .json()) as { client_secret: string };
+      const { error, paymentIntent } = await retrievePaymentIntent(
+        intent.client_secret,
+      );
       if (error) {
-        console.error("createPaymentIntent error", error, {
+        console.error("retrievePaymentIntent error", error, {
           context: { orgId: id, donation_id, action: "payment_intent" },
         });
         // Used to return silently: the spinner stopped, nothing navigated, and
