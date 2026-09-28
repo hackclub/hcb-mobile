@@ -422,7 +422,13 @@ export const handleCreateCard = async (
       "Error creating card:",
       (err as { response?: unknown })?.response ?? err,
     );
-    showAlert("Error", "Failed to create card. Please try again later.");
+    showAlert(
+      "Error",
+      await parseApiError(
+        err,
+        "Failed to create card. Please try again later.",
+      ),
+    );
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   } finally {
     setIsLoading(false);
