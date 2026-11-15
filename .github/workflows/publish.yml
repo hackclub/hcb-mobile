@@ -32,8 +32,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get the commit message
-          MESSAGE=$(git log -1 --pretty=%B)
+          # Get the commit subject. Not the full body: squash merges put the
+          # whole PR description there, and the app treats any update whose
+          # message contains "critical" as a forced reload.
+          MESSAGE=$(git log -1 --pretty=%s)
 
           # Get the PR number from the merge commit message
           PR_NUMBER=$(echo "$MESSAGE" | sed -n 's/.*#\([0-9]*\).*/\1/p' | head -1)
