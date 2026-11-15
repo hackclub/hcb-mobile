@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { execSync, execFileSync } = require("child_process");
 
 const args = process.argv.slice(2);
 const messageIndex = args.indexOf("--message");
@@ -45,12 +45,27 @@ try {
   console.log("✅ Added message to app.config.js extra section");
   console.log("\n🚀 Running eas update...\n");
 
-  const easCommand = `npx eas-cli update --channel ${channel} --environment ${environment} --non-interactive --message "${message}"`;
-
-  execSync(easCommand, {
-    stdio: "inherit",
-    env: { ...process.env },
-  });
+  // Pass arguments as an array so no shell parses them. The message comes
+  // from the commit, and backticks or $(...) in it would otherwise run as
+  // commands.
+  execFileSync(
+    "npx",
+    [
+      "eas-cli",
+      "update",
+      "--channel",
+      channel,
+      "--environment",
+      environment,
+      "--non-interactive",
+      "--message",
+      message,
+    ],
+    {
+      stdio: "inherit",
+      env: { ...process.env },
+    },
+  );
 
   console.log("\n✅ Update published successfully!");
 } catch (error) {
