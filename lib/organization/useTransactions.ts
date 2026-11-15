@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSWRConfig } from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -120,21 +120,40 @@ export default function useTransactions(
   const isReachingEnd =
     isEmpty || (data && data[data.length - 1]?.has_more === false);
 
-  return {
-    transactions,
-    isLoading,
-    isLoadingMore,
-    isReachingEnd,
-    error,
-    loadMore() {
-      if (isLoadingMore || isReachingEnd) return;
-      setSize((s) => s + 1);
-    },
-    mutate: async () => {
-      setSize(1);
-      await mutate();
-    },
-  };
+  // Return stable callbacks: consumers put these in effect/callback deps
+  // (e.g. useFocusEffect on the transactions screen). Recreating them every
+  // render re-triggered refreshes on every render and drove FlashList into a
+  // "Maximum update depth exceeded" loop.
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || isReachingEnd) return;
+    setSize((s) => s + 1);
+  }, [isLoadingMore, isReachingEnd, setSize]);
+
+  const refresh = useCallback(async () => {
+    setSize(1);
+    await mutate();
+  }, [setSize, mutate]);
+
+  return useMemo(
+    () => ({
+      transactions,
+      isLoading,
+      isLoadingMore,
+      isReachingEnd,
+      error,
+      loadMore,
+      mutate: refresh,
+    }),
+    [
+      transactions,
+      isLoading,
+      isLoadingMore,
+      isReachingEnd,
+      error,
+      loadMore,
+      refresh,
+    ],
+  );
 }
 
 export function useMissingReceiptTransactions() {

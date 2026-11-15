@@ -164,7 +164,7 @@ export default function Page() {
     },
     [
       isOnline,
-      params,
+      params.id,
       mutate,
       mutateTransactions,
       mutateOrganization,
@@ -172,13 +172,31 @@ export default function Page() {
     ],
   );
 
+  // Keep the latest values in refs so the focus effect only re-runs when the
+  // screen gains focus, not on every render. Previously its deps changed on
+  // each render, re-triggering a refresh (setSize(1) + refetch) in a loop that
+  // crashed FlashList with "Maximum update depth exceeded".
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
+  const focusStateRef = useRef({ isLoading, isAccessDenied });
+  focusStateRef.current = { isLoading, isAccessDenied };
+
   useFocusEffect(
     useCallback(() => {
-      if (!isLoading && !isRefreshingRef.current && !isAccessDenied) {
-        onRefresh(false);
+      const { isLoading: loading, isAccessDenied: denied } =
+        focusStateRef.current;
+      if (!loading && !isRefreshingRef.current && !denied) {
+        onRefreshRef.current(false);
       }
-    }, [onRefresh, isLoading, isAccessDenied]),
+    }, []),
   );
+
+  // Don't paginate while a refresh is resetting the list to page 1; otherwise
+  // loadMore (setSize + 1) and the refresh (setSize(1)) fight each other.
+  const onEndReached = useCallback(() => {
+    if (isRefreshingRef.current) return;
+    loadMore();
+  }, [loadMore]);
 
   const renderListFooter = useCallback(() => {
     if (isLoadingMore && !isLoading && !playgroundMode) {
@@ -250,7 +268,7 @@ export default function Page() {
         </View>
       );
     },
-    [user, organization, params, themeColors.card],
+    [user, organization, params.id, themeColors.card],
   );
 
   const getItemType = useCallback((item: ListItemType) => item.type, []);
@@ -304,7 +322,7 @@ export default function Page() {
           // stickyHeaderIndices disabled — transparent nav bar causes headers to stick behind it
           ListHeaderComponent={renderListHeader}
           ListFooterComponent={renderListFooter}
-          onEndReached={loadMore}
+          onEndReached={onEndReached}
           onEndReachedThreshold={0.2}
           refreshing={refreshing}
           onRefresh={onRefresh}
