@@ -29,15 +29,18 @@ try {
   fs.writeFileSync(backupPath, appConfigContent);
   console.log("✅ Backed up app.config.js");
   let modifiedContent = appConfigContent;
+  // Use replacer functions: a replacement string would expand $&, $' and $$
+  // in the message.
   if (modifiedContent.includes("extra: {")) {
     modifiedContent = modifiedContent.replace(
       /extra: \{/,
-      `extra: {\n      message: ${JSON.stringify(message)},`,
+      () => `extra: {\n      message: ${JSON.stringify(message)},`,
     );
   } else {
     modifiedContent = modifiedContent.replace(
       /expo: \{/,
-      `expo: {\n    extra: {\n      message: ${JSON.stringify(message)},\n    },`,
+      () =>
+        `expo: {\n    extra: {\n      message: ${JSON.stringify(message)},\n    },`,
     );
   }
 
