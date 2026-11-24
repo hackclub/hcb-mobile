@@ -239,10 +239,10 @@ function Transaction({
               ]}
             >
               {transaction.reversed
-                ? "reversed"
+                ? "Reversed"
                 : transaction.declined
-                  ? "declined"
-                  : "pending"}
+                  ? "Declined"
+                  : "Pending"}
             </Text>
           </View>
         )}
